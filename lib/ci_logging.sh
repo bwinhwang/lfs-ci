@@ -3,9 +3,9 @@
 isInteractiveShell() {
     fd=0
     if [[ -t "${fd}" ]] ; then
-        echo 1
+        return 1
     else
-        echo 0
+        return 0
     fi
 }
 
@@ -51,7 +51,9 @@ message() {
     local logType=$1
     local logMessage=$2
 
-    if [[ ${CI_LOGGING_ENABLE_COLORS} ]] && isInteractiveShell ; then
+    local isInteractiveShell=$(isInteractiveShell)
+
+    if [[ ${CI_LOGGING_ENABLE_COLORS} ]] && ${isInteractiveShell} ; then
         YELLOW="\033[33m"
         WHITE="\033[37m"
         RED="\033[31m"
