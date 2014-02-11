@@ -41,11 +41,11 @@ message() {
     local type=$1
     local message=$2
 
-    printf -v date "%20s" "`date`"
+    printf -v date "%-20s" "`date`"
 
-    printf "%s%10s %s\n", \
+    printf "%s%10s %s\n"  \
            "${date-}"     \
-           "[${type}]",   \
+           "[${type}]"    \
            "${message}"
 }
 
