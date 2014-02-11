@@ -130,6 +130,8 @@ testLoggingConfigurationColors() {
                  "`message DEBUG 'foobar'`" 
 }
 
+
+
 source lib/shunit2
 
 exit 0

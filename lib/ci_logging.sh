@@ -1,5 +1,14 @@
 #!/bin/bash
 
+isInteractiveShell() {
+    fd=0
+    if [[ -t "${fd}" ]] ; then
+        echo 1
+    else
+        echo 0
+    fi
+}
+
 ## @fn      debug( message )
 #  @brief   shows a debug message
 #  @param   {message}    a text message
@@ -32,10 +41,11 @@ warning() {
     message "WARNING" "$@"
 }
 
-## @fn      warning( message )
+## @fn      message( logType, logMessage )
 #  @brief   shows a warning message
-#  @param   {type}    type of the message
-#  @param   {message} a text message
+#  @detail  
+#  @param   {logType}    type of the message
+#  @param   {logMessage} a text message
 #  @return  <none>
 message() {
     local logType=$1
