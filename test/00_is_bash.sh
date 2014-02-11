@@ -1,4 +1,4 @@
 #!/bin/sh
 
-${SHELL} --version || exit 1
+${SHELL} --version >/dev/null || exit 1
 
