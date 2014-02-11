@@ -5,7 +5,7 @@
 #  @param   {message}    a text message
 #  @return  <none>
 debug() {
-    message "debug" "$@"
+    message "DEBUG" "$@"
 }
 
 ## @fn      info( message )
@@ -13,7 +13,7 @@ debug() {
 #  @param   {message}    a text message
 #  @return  <none>
 info() {
-    message "info" "$@"
+    message "INFO" "$@"
 }
 
 ## @fn      error( message )
@@ -21,7 +21,7 @@ info() {
 #  @param   {message}    a text message
 #  @return  <none>
 error() {
-    message "error" "$@"
+    message "ERROR" "$@"
 }
 
 ## @fn      warning( message )
@@ -29,7 +29,7 @@ error() {
 #  @param   {message}  a text message
 #  @return  <none>
 warning() {
-    message "warning" "$@"
+    message "WARNING" "$@"
 }
 
 ## @fn      warning( message )
@@ -41,36 +41,42 @@ message() {
     local logType=$1
     local logMessage=$2
 
+    if [[ ${CI_LOGGING_ENABLE_COLORS} ]] ; then
+        YELLOW="\033[33m"
+        WHITE="\033[37m"
+        RED="\033[31m"
+        GREEN="\033[32m"
+        CYAN="\033[36m"
+    fi
+
     local config=${CI_LOGGING_CONFIG-"DATE SPACE TYPE SPACE MESSAGE NEWLINE"}
-    local prefix=${CI_LOGGING_PREFIX}
+    local prefix=${CI_LOGGING_PREFIX-${CI_LOGGING_PREFIX_HASH["$logType"]}}
+    local color=${CI_LOGGING_COLOR-${CI_LOGGING_COLOR_HASH["$logType"]}}
 
     printf -v date "%-20s" "`date`"
+
+    if [[ "${CI_LOGGING_ENABLE_COLORS}" && "${color}" ]] ; then
+        echo -en ${!color}
+    fi
 
     for template in ${config}
     do
         case "${template}" in 
-            SPACE)   printf " "  ;;
-            NEWLINE) printf "\n" ;;
-            TAB)     printf "\t" ;;
-            PREFIX)
-                printf "%s" "${prefix}"
-            ;;
-            DATE)
-                printf "%s" "${date}"
-            ;;
-            TYPE)
-                printf "%10s" "[${logType}]"
-            ;;
-            MESSAGE)
-                printf "%s" "${logMessage}"
-            ;;
-            LINE)
-                printf -- "-----------------------------------------------------------------"
+            LINE)    printf -- "-----------------------------------------------------------------" ;;
+            SPACE)   printf " "                    ;;
+            NEWLINE) printf "\n"                   ;;
+            TAB)     printf "\t"                   ;;
+            PREFIX)  printf "%s"   "${prefix}"     ;;
+            DATE)    printf "%s"   "${date}"       ;;
+            TYPE)    printf "%10s" "[${logType}]"  ;;
+            NONE)    :                             ;;
+            MESSAGE) 
+                printf "%s" "${logMessage}" 
             ;;
             CALLER)
                 printf "called from Method '%s' in File %s, Line %s"    \
                     "${FUNCNAME[2]}"                                    \
-                    "${BASH_SOURCE[2]}"                               \
+                    "${BASH_SOURCE[2]}"                                 \
                     "${BASH_LINENO[1]}"                               
             ;;
             STACKTRACE)
@@ -79,6 +85,10 @@ message() {
         esac
 
     done
+
+    if [[ "${CI_LOGGING_ENABLE_COLORS}" && "${color}" ]] ; then
+        echo -en ${WHITE}
+    fi
 
 }
 ## @fn      _stackTrace()
