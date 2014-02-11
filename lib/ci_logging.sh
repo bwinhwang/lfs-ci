@@ -38,10 +38,11 @@ warning() {
 #  @param   {message} a text message
 #  @return  <none>
 message() {
-    local type=$1
-    local message=$2
+    local logType=$1
+    local logMessage=$2
 
-    local config=${3-"DATE SPACE TYPE SPACE MESSAGE NEWLINE"}
+    local config=${CI_LOGGING_CONFIG-"DATE SPACE TYPE SPACE MESSAGE NEWLINE"}
+    local prefix=${CI_LOGGING_PREFIX}
 
     printf -v date "%-20s" "`date`"
 
@@ -51,14 +52,17 @@ message() {
             SPACE)   printf " "  ;;
             NEWLINE) printf "\n" ;;
             TAB)     printf "\t" ;;
+            PREFIX)
+                printf "%s" "${prefix}"
+            ;;
             DATE)
                 printf "%s" "${date}"
             ;;
             TYPE)
-                printf "%10s" "[${type}]"
+                printf "%10s" "[${logType}]"
             ;;
             MESSAGE)
-                printf "%s" "${message}"
+                printf "%s" "${logMessage}"
             ;;
             LINE)
                 printf -- "-----------------------------------------------------------------"
