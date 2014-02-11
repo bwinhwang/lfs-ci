@@ -1,6 +1,6 @@
 #!/bin/bash
 
-set -o exitError
+set -o errExit
 
 for file in test/*.sh ; do
     
