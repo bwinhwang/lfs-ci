@@ -1,14 +1,5 @@
 #!/bin/bash
 
-isInteractiveShell() {
-    fd=0
-    if [[ -t "${fd}" ]] ; then
-        return 1
-    else
-        return 0
-    fi
-}
-
 ## @fn      debug( message )
 #  @brief   shows a debug message
 #  @param   {message}    a text message
@@ -51,9 +42,7 @@ message() {
     local logType=$1
     local logMessage=$2
 
-    local isInteractiveShell=$(isInteractiveShell)
-
-    if [[ ${CI_LOGGING_ENABLE_COLORS} ]] && ${isInteractiveShell} ; then
+    if [[ ${CI_LOGGING_ENABLE_COLORS} ]] ; then
         YELLOW="\033[33m"
         WHITE="\033[37m"
         RED="\033[31m"
