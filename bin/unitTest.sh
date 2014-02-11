@@ -2,6 +2,8 @@
 
 set -o errexit
 
+source lib/ci_logging.sh
+
 for file in test/*.sh ; do
     
     debug "executing unit test ${file}"
