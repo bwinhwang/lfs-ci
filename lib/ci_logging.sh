@@ -110,19 +110,17 @@ _loggingLine() {
     local prefix=${CI_LOGGING_PREFIX-${CI_LOGGING_PREFIX_HASH["$logType"]}}
     local dateFormat=${CI_LOGGING_DATEFORMAT-"+%s"}
 
-    printf -v date "%-20s" "$(date ${dateFormat})"
-
     for template in ${config}
     do
         case "${template}" in 
             LINE)    printf -- "-----------------------------------------------------------------" ;;
-            SPACE)   printf " "                    ;;
-            NEWLINE) printf "\n"                   ;;
-            TAB)     printf "\t"                   ;;
-            PREFIX)  printf "%s"   "${prefix}"     ;;
-            DATE)    printf "%s"   "${date}"       ;;
-            TYPE)    printf "%10s" "[${logType}]"  ;;
-            NONE)    :                             ;;
+            SPACE)   printf " "                            ;;
+            NEWLINE) printf "\n"                           ;;
+            TAB)     printf "\t"                           ;;
+            PREFIX)  printf "%s"   "${prefix}"             ;;
+            DATE)    printf "%s" "$(date "${dateFormat}")" ;;
+            TYPE)    printf "%10s" "[${logType}]"          ;;
+            NONE)    :                                     ;;
             MESSAGE) 
                 printf "%s" "${logMessage}" 
             ;;
@@ -168,7 +166,7 @@ logCommand() {
     local command=$1
     local output=$(${command})
 
-    debug "logging command ${command}"
+    debug "logging output of command \"${command}\""
 
     CI_LOGGING_CONFIG="PREFIX SPACE MESSAGE"
     CI_LOGGING_PREFIX=">"
