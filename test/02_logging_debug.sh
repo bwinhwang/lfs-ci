@@ -109,7 +109,7 @@ testLoggingConfiguration() {
 
 testLoggingConfigurationColors() {
 
-    export CI_LOGGING_ENABLE_COLORS=1
+#    export CI_LOGGING_ENABLE_COLORS=1
     declare -A CI_LOGGING_COLOR_HASH=( ["INFO"]="CYAN"  \
                                        ['ERROR']='RED' )
 
@@ -117,13 +117,13 @@ testLoggingConfigurationColors() {
     WHITE="\033[37m"
     CYAN="\033[36m"
     RED="\033[31m"
-    assertEquals "" \
-                 "$(echo -ne ${CYAN}'    '[INFO] foobar${WHITE})" \
+    assertEquals "123" \
+                 "    [INFO] foobar" \
                  "`message INFO 'foobar'`" 
 
     assertEquals "no output without config"  \
-                 "$(echo -ne ${RED}'   '[ERROR] foobar${WHITE})" \
-                 "`message ERROR 'foobar'`" 
+                 "`message ERROR 'foobar'`"  \
+                 "   [ERROR] foobar" \
 
     assertEquals "no output without config"  \
                  "   [DEBUG] foobar"         \

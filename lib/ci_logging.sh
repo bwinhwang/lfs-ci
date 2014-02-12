@@ -21,6 +21,14 @@ stopLogfile() {
     unset CI_LOGGING_LOGFILENAME
 }
 
+## @fn      trace( message )
+#  @brief   shows a trace message
+#  @param   {message}    a text message
+#  @return  <none>
+trace() {
+    message "TRACE" "$@"
+}
+
 ## @fn      debug( message )
 #  @brief   shows a debug message
 #  @param   {message}    a text message
