@@ -1,5 +1,26 @@
 #!/bin/bash
 
+startLogfile() {
+
+    if [[ ! -w ${CI_LOGGING_LOGFILENAME} ]] ; then
+        export CI_LOGGING_LOGFILENAME=logfile
+        printf -- "------------------------------------------------------------------\n" >  ${CI_LOGGING_LOGFILENAME}
+        printf -- "starting logfile\n"                                                   >> ${CI_LOGGING_LOGFILENAME}
+        printf -- "------------------------------------------------------------------\n" >> ${CI_LOGGING_LOGFILENAME}
+    fi
+}
+
+stopLogfile() {
+
+    if [[ -w ${CI_LOGGING_LOGFILENAME} ]] ; then
+        printf -- "-------------------------------------------------------------------\n" >  ${CI_LOGGING_LOGFILENAME}
+        printf -- "ending logfile\n"                                                      >> ${CI_LOGGING_LOGFILENAME}
+        printf -- "-------------------------------------------------------------------\n" >> ${CI_LOGGING_LOGFILENAME}
+    fi
+    
+    unset CI_LOGGING_LOGFILENAME
+}
+
 ## @fn      debug( message )
 #  @brief   shows a debug message
 #  @param   {message}    a text message
@@ -50,15 +71,38 @@ message() {
         CYAN="\033[36m"
     fi
 
-    local config=${CI_LOGGING_CONFIG-"DATE SPACE TYPE SPACE MESSAGE NEWLINE"}
-    local prefix=${CI_LOGGING_PREFIX-${CI_LOGGING_PREFIX_HASH["$logType"]}}
     local color=${CI_LOGGING_COLOR-${CI_LOGGING_COLOR_HASH["$logType"]}}
 
-    printf -v date "%-20s" "`date`"
 
     if [[ "${CI_LOGGING_ENABLE_COLORS}" && "${color}" ]] ; then
         echo -en ${!color}
     fi
+
+    startLogfile
+
+    logLine=$(_loggingLine ${logType} "${logMessage}")
+    echo -e "${logLine}"
+    echo -e "${logLine}" >> logfile
+
+    if [[ "${CI_LOGGING_ENABLE_COLORS}" && "${color}" ]] ; then
+        echo -en ${WHITE}
+    fi
+}
+
+## @fn      _loggingLine( logType, logMessage )
+#  @brief   format a log line
+#  @param   {logType}    type of the message
+#  @param   {logMessage} a text message
+#  @return  <none>
+_loggingLine() {
+    local logType=$1
+    local logMessage=$2
+
+    local config=${CI_LOGGING_CONFIG-"DATE SPACE TYPE SPACE MESSAGE NEWLINE"}
+    local prefix=${CI_LOGGING_PREFIX-${CI_LOGGING_PREFIX_HASH["$logType"]}}
+    local dateFormat=${CI_LOGGING_DATEFORMAT-"+%s"}
+
+    printf -v date "%-20s" "$(date ${dateFormat})"
 
     for template in ${config}
     do
@@ -86,12 +130,8 @@ message() {
         esac
 
     done
-
-    if [[ "${CI_LOGGING_ENABLE_COLORS}" && "${color}" ]] ; then
-        echo -en ${WHITE}
-    fi
-
 }
+
 ## @fn      _stackTrace()
 #  @brief   shows the strack trace of this method call
 #  @detail  based on http://blog.yjl.im/2012/01/printing-out-call-stack-in-bash.html
@@ -116,5 +156,23 @@ _stackTrace() {
     done 
 }
 
+logCommand() {
+    local command=$1
+    local output=$(${command})
+
+    debug "logging command ${command}"
+
+    CI_LOGGING_CONFIG="PREFIX SPACE MESSAGE"
+    CI_LOGGING_PREFIX=">"
+
+    while read A
+    do
+        debug "${A}"
+    done <<<"${output}"
+
+    unset CI_LOGGING_CONFIG
+    unset CI_LOGGING_CONFIG
+
+}
 
 

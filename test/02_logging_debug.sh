@@ -71,7 +71,7 @@ testLoggingConfiguration() {
 
     export CI_LOGGING_CONFIG="CALLER"
     assertEquals "simple message with configuration"  \
-                 "called from Method '_shunit_execSuite' in File lib/shunit2, Line 786" \
+                 "called from Method 'testLoggingConfiguration' in File test/02_logging_debug.sh, Line 73" \
                  "`message INFO 'foobar'`" 
 
     export CI_LOGGING_PREFIX="global prefix"
