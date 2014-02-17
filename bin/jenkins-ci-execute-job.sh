@@ -3,11 +3,16 @@
 # start skript for jenkins.
 #
 
-source lib/ci_logging.sh
-source lib/commands.sh
-source lib/build.sh
+
+export CI_LIB_PATH="$(dirname $0)/.."
+
+source ${CI_LIB_PATH}/lib/ci_logging.sh
+source ${CI_LIB_PATH}/lib/commands.sh
+source ${CI_LIB_PATH}/lib/build.sh
 
 cleanupEnvironmentVariables
+
+export PS4='+(${BASH_SOURCE}:${LINENO}): ${FUNCNAME[0]:+${FUNCNAME[0]}(): }'
 
 JENKINS_JOB_NAME="$1"
 export JENKINS_JOB_NAME
@@ -21,7 +26,7 @@ exit_add stopLogfile
 
 # first dispatcher, calling the correct script
 case "${JENKINS_JOB_NAME}" in
-    *Build*)
+    *build*)
         ci_job_build \
             || exit 1
     ;;
@@ -35,7 +40,7 @@ case "${JENKINS_JOB_NAME}" in
             call ${JENKINS_JOB_NAME} \
                 || exit 1
         else
-            error "don't know what I shall do for job ${JENKINS_JOB_NAME}" 
+            error "don't know what I shall do for job \"${JENKINS_JOB_NAME}\"" 
             exit 1
         fi
 

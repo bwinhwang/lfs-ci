@@ -1,6 +1,6 @@
 #!/bin/bash
 
-source lib/exit_handling.sh
+source ${CI_LIB_PATH}/lib/exit_handling.sh
 
 ## @fn      startLogfile()
 #  @brief   creates a new logfile and adds an header

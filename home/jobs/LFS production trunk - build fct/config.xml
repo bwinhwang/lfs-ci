@@ -13,8 +13,7 @@
   <concurrentBuild>false</concurrentBuild>
   <builders>
     <hudson.tasks.Shell>
-      <command>echo ${JENKINS_ROOT}
-</command>
+      <command>${JENKINS_ROOT}/../bin/jenkins-ci-execute-job.sh &quot;${JOB_NAME}&quot; || exit 1</command>
     </hudson.tasks.Shell>
   </builders>
   <publishers/>

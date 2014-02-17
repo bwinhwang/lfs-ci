@@ -18,8 +18,7 @@ ci_job_build() {
 
 
 _createWorkspace() {
-
-
+    echo ok
 }
 
 return 0

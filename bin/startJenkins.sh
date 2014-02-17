@@ -1,10 +1,10 @@
 #!/bin/bash
 
-ROOT=/var/fpwork/demx2fk3/ci/
+ROOT=/var/fpwork/demx2fk3/ci
 JENKINS_VERSION=1.532.2
 JENKINS_WAR=${ROOT}/lib/java/jenkins/jenkins-${JENKINS_VERSION}.war
-JENKINS_HOME=${ROOT}/home/
-JENKINS_ROOT=${ROOT}/root/
+JENKINS_HOME=${ROOT}/home
+JENKINS_ROOT=${ROOT}/root
 JENKINS_ARGS=" --httpPort=1234
 -httpListenAddress=
 "

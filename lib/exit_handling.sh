@@ -16,22 +16,25 @@ exit_add() {
 #   $2: != 0 => print stacktrace
 #   $3: exit code
 exit_handler() {
+    local rc=$?
     trace "now calling exit methods: $1"
     trace "disabling signal handler for ERR, EXIT, SIGTERM and SIGINT"
 
+
 	trap - ERR EXIT SIGTERM SIGINT
 
-	[ $2 -ne 0 ] && trace "$(_stackTrace)"
+	[ $2    -ne 0 ] && trace "$(_stackTrace)"
+	[ ${rc} -ne 0 ] && trace "$(_stackTrace)"
 
 	for m in ${CI_EXIT_HANDLER_METHODS}; do
 		$m
 	done
 
-	exit $3
+	exit ${rc-3}
 } 
 
-trap "exit_handler 'normal exit' 0 0" EXIT
+trap "exit_handler 'normal exit $?'   0 0" EXIT
 trap "exit_handler 'error occured' 1 1" ERR
-trap "exit_handler 'terminated' 1 2" SIGTERM
-trap "exit_handler 'interrupted' 1 3" SIGINT
+trap "exit_handler 'terminated'    1 2" SIGTERM
+trap "exit_handler 'interrupted'   1 3" SIGINT
 
