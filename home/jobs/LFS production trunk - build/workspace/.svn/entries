@@ -1,15 +1,15 @@
 8
 
 dir
-64326
+64359
 https://ulscmi.inside.nsn.com/isource/svnroot/BTS_SC_LFS/os/trunk/fsmr3
 https://ulscmi.inside.nsn.com/isource/svnroot/BTS_SC_LFS
 
 
 
-2014-02-17T12:53:44.256066Z
-64326
-mmolnar
+2014-02-17T14:49:43.118046Z
+64359
+dems17e7
 has-props
 
 svn:special svn:externals svn:needs-lock

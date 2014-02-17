@@ -11,6 +11,8 @@ ci_job_build() {
 
     info "building targets..."
 
+    execute build -C src-fsmddal qemu_x86_64
+
     info "build done."
 
     info "upload results to artifakts share."
@@ -18,7 +20,6 @@ ci_job_build() {
     info "build job finished."
 
     return 0
-
 }
 
 
@@ -30,19 +31,24 @@ _createWorkspace() {
     local workspace=$(getWorkspaceName)
     mustHaveWorkspaceName
 
-    debug "workspace is \"${workspace}\""
+    local build="build -W \"${workspace}\""
 
+    debug "workspace is \"${workspace}\""
 
     mustHaveCleanWorkspace
     mustHaveWritableWorkspace
 
-    execute cd "${workspace}"
-    echo ${PWD}
+    setupNewWorkspace
 
-    execute build setup
+    switchSvnServerInLocations
 
-    # execute build newlocation ${location}
+    switchToNewLocation
 
+    mustHaveValidWorkspace
+
+    checkoutSubprojectDirectories src-fsmddal
+
+    return 0
 }
 
 return 0

@@ -1,63 +1,39 @@
 Running from: /var/fpwork/demx2fk3/ci/lib/java/jenkins/jenkins-1.532.2.war
 webroot: EnvVars.masterEnvVars.get("JENKINS_HOME")
-Feb 17, 2014 1:27:44 PM winstone.Logger logInternal
+Feb 17, 2014 3:54:58 PM winstone.Logger logInternal
 INFO: Beginning extraction from war file
 Jenkins home directory: /var/fpwork/demx2fk3/ci/home found at: EnvVars.masterEnvVars.get("JENKINS_HOME")
-Feb 17, 2014 1:27:44 PM winstone.Logger logInternal
+Feb 17, 2014 3:54:58 PM winstone.Logger logInternal
 INFO: HTTP Listener started: port=1280
-Feb 17, 2014 1:27:44 PM winstone.Logger logInternal
+Feb 17, 2014 3:54:58 PM winstone.Logger logInternal
 INFO: AJP13 Listener started: port=12800
-Feb 17, 2014 1:27:45 PM winstone.Logger logInternal
+Feb 17, 2014 3:54:59 PM winstone.Logger logInternal
 INFO: HTTPS Listener started: port=12443
-Feb 17, 2014 1:27:45 PM winstone.Logger logInternal
+Feb 17, 2014 3:54:59 PM winstone.Logger logInternal
 INFO: Winstone Servlet Engine v0.9.10 running: controlPort=disabled
-Feb 17, 2014 1:27:45 PM jenkins.InitReactorRunner$1 onAttained
+Feb 17, 2014 3:54:59 PM jenkins.InitReactorRunner$1 onAttained
 INFO: Started initialization
-Feb 17, 2014 1:27:45 PM jenkins.InitReactorRunner$1 onAttained
+Feb 17, 2014 3:54:59 PM jenkins.InitReactorRunner$1 onAttained
 INFO: Listed all plugins
-Feb 17, 2014 1:27:45 PM jenkins.InitReactorRunner$1 onAttained
+Feb 17, 2014 3:54:59 PM jenkins.InitReactorRunner$1 onAttained
 INFO: Prepared all plugins
-Feb 17, 2014 1:27:45 PM jenkins.InitReactorRunner$1 onAttained
+Feb 17, 2014 3:54:59 PM jenkins.InitReactorRunner$1 onAttained
 INFO: Started all plugins
-Feb 17, 2014 1:27:45 PM jenkins.InitReactorRunner$1 onAttained
+Feb 17, 2014 3:54:59 PM jenkins.InitReactorRunner$1 onAttained
 INFO: Augmented all extensions
-Feb 17, 2014 1:27:47 PM jenkins.InitReactorRunner$1 onAttained
+Feb 17, 2014 3:55:01 PM jenkins.InitReactorRunner$1 onAttained
 INFO: Loaded all jobs
-Feb 17, 2014 1:27:47 PM org.jenkinsci.main.modules.sshd.SSHD start
-INFO: Started SSHD at port 35760
-Feb 17, 2014 1:27:47 PM jenkins.InitReactorRunner$1 onAttained
+Feb 17, 2014 3:55:02 PM org.jenkinsci.main.modules.sshd.SSHD start
+INFO: Started SSHD at port 44560
+Feb 17, 2014 3:55:02 PM jenkins.InitReactorRunner$1 onAttained
 INFO: Completed initialization
-Feb 17, 2014 1:27:47 PM hudson.TcpSlaveAgentListener <init>
-INFO: JNLP slave agent listener started on TCP port 35643
-Feb 17, 2014 1:27:47 PM hudson.WebAppMain$3 run
+Feb 17, 2014 3:55:02 PM hudson.TcpSlaveAgentListener <init>
+INFO: JNLP slave agent listener started on TCP port 43800
+Feb 17, 2014 3:55:02 PM hudson.WebAppMain$3 run
 INFO: Jenkins is fully up and running
-Feb 17, 2014 1:30:27 PM hudson.model.Run execute
-INFO: LFS production trunk - build fct #5 main build action completed: FAILURE
-Feb 17, 2014 1:31:44 PM hudson.model.Run execute
-INFO: LFS production trunk - build fct #6 main build action completed: FAILURE
-Feb 17, 2014 1:32:25 PM hudson.model.Run execute
-INFO: LFS production trunk - build fct #7 main build action completed: SUCCESS
-Feb 17, 2014 1:33:32 PM hudson.model.Run execute
-INFO: LFS production trunk - build fct #8 main build action completed: SUCCESS
-Feb 17, 2014 1:34:02 PM hudson.model.Run execute
-INFO: LFS production trunk - build fct #9 main build action completed: SUCCESS
-Feb 17, 2014 1:41:46 PM hudson.triggers.SCMTrigger$Runner run
-INFO: SCM changes detected in LFS production trunk - build. Triggering  #3
-Feb 17, 2014 1:41:53 PM hudson.model.Run execute
-INFO: LFS production trunk - build #3 main build action completed: SUCCESS
-Feb 17, 2014 1:53:46 PM hudson.triggers.SCMTrigger$Runner run
-INFO: SCM changes detected in LFS production trunk - build. Triggering  #4
-Feb 17, 2014 1:53:53 PM hudson.model.Run execute
-INFO: LFS production trunk - build #4 main build action completed: SUCCESS
-Feb 17, 2014 1:56:37 PM hudson.model.Run execute
-INFO: LFS production trunk - build fct #10 main build action completed: FAILURE
-Feb 17, 2014 1:57:49 PM hudson.model.Run execute
-INFO: LFS production trunk - build fct #11 main build action completed: SUCCESS
-Feb 17, 2014 1:59:23 PM hudson.model.Run execute
-INFO: LFS production trunk - build fct #12 main build action completed: SUCCESS
-Feb 17, 2014 2:06:04 PM hudson.model.Run execute
-INFO: LFS production trunk - build fct #13 main build action completed: FAILURE
-Feb 17, 2014 2:18:51 PM hudson.model.AsyncPeriodicWork$1 run
-INFO: Started Workspace clean-up
-Feb 17, 2014 2:18:51 PM hudson.model.AsyncPeriodicWork$1 run
-INFO: Finished Workspace clean-up. 2 ms
+Feb 17, 2014 3:55:14 PM hudson.model.Run execute
+INFO: LFS production trunk - build #8 main build action completed: SUCCESS
+Feb 17, 2014 3:57:53 PM hudson.model.Run execute
+INFO: LFS production trunk - build fct #15 main build action completed: SUCCESS
+Feb 17, 2014 3:57:53 PM hudson.model.Run execute
+INFO: LFS production trunk - build » promotion » build successful #1 main build action completed: SUCCESS

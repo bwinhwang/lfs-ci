@@ -108,7 +108,7 @@ message() {
     if [[ "${logType}" != "TRACE" ]] ; then
         echo -e "${logLine}"
     fi
-    echo -e "${logLine}" >> logfile
+    echo -e "${logLine}" >> ${CI_LOGGING_LOGFILENAME}
 
     if [[ "${CI_LOGGING_ENABLE_COLORS}" && "${color}" ]] ; then
         echo -en ${WHITE}

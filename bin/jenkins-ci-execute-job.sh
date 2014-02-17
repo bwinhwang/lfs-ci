@@ -3,8 +3,8 @@
 # start skript for jenkins.
 #
 
-
-export CI_LIB_PATH="$(readlink -f $(dirname $0)/..)"
+TMP=$(dirname $0)
+export CI_LIB_PATH="$(readlink -f ${TMP}/..)"
 PATH=$PATH:$CI_LIB_PATH/bin
 
 source ${CI_LIB_PATH}/lib/ci_logging.sh

@@ -64,8 +64,56 @@ mustHaveCleanWorkspace() {
     mustHaveWorkspaceName
 
     if [[ -d ${workspace} ]] ; then
-        execute rm -rf  ${workspace}
+        removeWorkspace "${workspace}"
         execute mkdir -p "${workspace}"
     fi
 }
+
+removeWorkspace() {
+    local workspace=$1
+
+    execute chmod -R o+w "${workspace}"
+    execute rm -rf "${workspace}"
+}
+
+switchToNewLocation() {
+    local location=$1
+
+    trace "check, if user can use this location"
+    # 2014-02-17 demx2fk3 fixme
+    # if id -ng ${USER} | grep pronb ; then
+    #     error "${USER} has wrong group id. correct is pronb"
+    #     exit 1
+    # fi
+
+    trace "switching to new location \"${location}\""
+    execute build newlocations ${location}
+}
+
+# side effect: change directory
+setupNewWorkspace() {
+    local workspace=$(getWorkspaceName) 
+    execute cd "${workspace}"
+    execute build setup                                                                                                
+}
+
+mustHaveValidWorkspace() {
+
+    return
+
+}
+
+switchSvnServerInLocations() {
+    local workspace=$(getWorkspaceName) 
+
+    # todo
+
+}
+
+checkoutSubprojectDirectories() {
+    local workspace=$(getWorkspaceName) 
+    local project=$1
+    execute build adddir "${project}"
+}
+
 
