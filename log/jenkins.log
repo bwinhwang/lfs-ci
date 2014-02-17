@@ -151,3 +151,5 @@ Feb 17, 2014 1:16:18 PM hudson.triggers.SCMTrigger$Runner run
 INFO: SCM changes detected in LFS production trunk - build trigger. Triggering  #1
 Feb 17, 2014 1:16:25 PM hudson.model.Run execute
 INFO: LFS production trunk - build trigger #1 main build action completed: SUCCESS
+Feb 17, 2014 1:21:28 PM hudson.model.Run execute
+INFO: LFS production trunk - build fct #1 main build action completed: SUCCESS
