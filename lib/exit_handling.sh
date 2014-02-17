@@ -27,9 +27,6 @@ exit_handler() {
 		$m
 	done
 
-    # hardcoded closing the logfile gracefully
-    stopLogfile
-
 	exit $3
 } 
 

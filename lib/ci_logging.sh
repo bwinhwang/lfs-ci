@@ -1,19 +1,35 @@
 #!/bin/bash
 
+source lib/exit_handling.sh
+
+## @fn      startLogfile()
+#  @brief   creates a new logfile and adds an header
+#  @param   <none>
+#  @return  <none>
 startLogfile() {
 
     if [[ ! -w ${CI_LOGGING_LOGFILENAME} ]] ; then
+        # export CI_LOGGING_LOGFILENAME=logfile.`date +%s`.log
         export CI_LOGGING_LOGFILENAME=logfile
         printf -- "------------------------------------------------------------------\n" >  ${CI_LOGGING_LOGFILENAME}
         printf -- "starting logfile\n"                                                   >> ${CI_LOGGING_LOGFILENAME}
+        printf -- "  script: $0\n"                                                       >> ${CI_LOGGING_LOGFILENAME}
+        printf -- "  arguments: $@\n"                                                    >> ${CI_LOGGING_LOGFILENAME}
         printf -- "------------------------------------------------------------------\n" >> ${CI_LOGGING_LOGFILENAME}
+        printf -- "{{{\n"                                                                >> ${CI_LOGGING_LOGFILENAME}
     fi
 }
 
+## @fn      stopLogfile()
+#  @brief   stop a logfile - if exists
+#  @param   <none>
+#  @return  <none>
 stopLogfile() {
 
     if [[ -w ${CI_LOGGING_LOGFILENAME} ]] ; then
-        printf -- "-------------------------------------------------------------------\n" >  ${CI_LOGGING_LOGFILENAME}
+        printf -- "}}}\n"                                                                 >> ${CI_LOGGING_LOGFILENAME}
+        printf -- "-------------------------------------------------------------------\n" >> ${CI_LOGGING_LOGFILENAME}
+        printf -- "script: $0\n"                                                          >> ${CI_LOGGING_LOGFILENAME}
         printf -- "ending logfile\n"                                                      >> ${CI_LOGGING_LOGFILENAME}
         printf -- "-------------------------------------------------------------------\n" >> ${CI_LOGGING_LOGFILENAME}
     fi
@@ -89,7 +105,9 @@ message() {
     startLogfile
 
     logLine=$(_loggingLine ${logType} "${logMessage}")
-    echo -e "${logLine}"
+    if [[ "${logType}" != "TRACE" ]] ; then
+        echo -e "${logLine}"
+    fi
     echo -e "${logLine}" >> logfile
 
     if [[ "${CI_LOGGING_ENABLE_COLORS}" && "${color}" ]] ; then
@@ -108,7 +126,7 @@ _loggingLine() {
 
     local config=${CI_LOGGING_CONFIG-"DATE SPACE TYPE SPACE MESSAGE NEWLINE"}
     local prefix=${CI_LOGGING_PREFIX-${CI_LOGGING_PREFIX_HASH["$logType"]}}
-    local dateFormat=${CI_LOGGING_DATEFORMAT-"+%s"}
+    local dateFormat=${CI_LOGGING_DATEFORMAT-"+%Y-%m-%d-%H:%M:%S.%N"}
 
     for template in ${config}
     do
@@ -162,6 +180,10 @@ _stackTrace() {
     done 
 }
 
+## @fn      logCommand()
+#  @brief   execute a command and put the output into the logfile
+#  @param   <command>    command, which should be logged
+#  @return  <none>
 logCommand() {
     local command=$1
     local output=$(${command})
@@ -180,5 +202,4 @@ logCommand() {
     unset CI_LOGGING_CONFIG
 
 }
-
 
