@@ -1,8 +1,13 @@
 #!/bin/bash
 
+
+
 ci_job_build() {
 
     info "creating the workspace..."
+
+
+    _createWorkspace
 
     info "building targets..."
 
@@ -18,7 +23,26 @@ ci_job_build() {
 
 
 _createWorkspace() {
-    echo ok
+
+    local location=$(getLocationName) 
+    mustHaveLocationName
+
+    local workspace=$(getWorkspaceName)
+    mustHaveWorkspaceName
+
+    debug "workspace is \"${workspace}\""
+
+
+    mustHaveCleanWorkspace
+    mustHaveWritableWorkspace
+
+    execute cd "${workspace}"
+    echo ${PWD}
+
+    execute build setup
+
+    # execute build newlocation ${location}
+
 }
 
 return 0

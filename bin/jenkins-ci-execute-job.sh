@@ -4,11 +4,13 @@
 #
 
 
-export CI_LIB_PATH="$(dirname $0)/.."
+export CI_LIB_PATH="$(readlink -f $(dirname $0)/..)"
+PATH=$PATH:$CI_LIB_PATH/bin
 
 source ${CI_LIB_PATH}/lib/ci_logging.sh
 source ${CI_LIB_PATH}/lib/commands.sh
 source ${CI_LIB_PATH}/lib/build.sh
+source ${CI_LIB_PATH}/lib/common.sh
 
 cleanupEnvironmentVariables
 
@@ -16,6 +18,8 @@ export PS4='+(${BASH_SOURCE}:${LINENO}): ${FUNCNAME[0]:+${FUNCNAME[0]}(): }'
 
 JENKINS_JOB_NAME="$1"
 export JENKINS_JOB_NAME
+
+showAllEnvironmentVariables
 
 info "starting jenkins job \"${JENKINS_JOB_NAME}\" on ${HOSTNAME} as ${USER}"
 

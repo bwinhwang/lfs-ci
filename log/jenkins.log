@@ -55,3 +55,9 @@ Feb 17, 2014 1:57:49 PM hudson.model.Run execute
 INFO: LFS production trunk - build fct #11 main build action completed: SUCCESS
 Feb 17, 2014 1:59:23 PM hudson.model.Run execute
 INFO: LFS production trunk - build fct #12 main build action completed: SUCCESS
+Feb 17, 2014 2:06:04 PM hudson.model.Run execute
+INFO: LFS production trunk - build fct #13 main build action completed: FAILURE
+Feb 17, 2014 2:18:51 PM hudson.model.AsyncPeriodicWork$1 run
+INFO: Started Workspace clean-up
+Feb 17, 2014 2:18:51 PM hudson.model.AsyncPeriodicWork$1 run
+INFO: Finished Workspace clean-up. 2 ms

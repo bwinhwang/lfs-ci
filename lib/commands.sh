@@ -1,26 +1,40 @@
 #!/bin/bash
 
-call() {
+execute() {
     local command=$@
 
-    trace "calling command ${command}"
+    trace "execute command: \"${command}\""
 
     ${command}
 
     exitCode=$?
-    trace "exit code of ${command} was ${exitCode}"
+    trace "exit code of \"${command}\" was ${exitCode}"
 
-    #exit ${exitCode}
-    exit 1
+    if [[ ${exitCode} -gt 0 ]] ; then
+        error "error occoured in \"${command}\""
+        exit ${exitCode}
+    fi
 
+}
+
+showAllEnvironmentVariables() {
+    local key=""
+    for key in `perl -e 'print map { "$_\n" } sort keys %ENV'` ; do
+        trace "environment variable: ${key} = \"${!key}\"" 
+    done
 }
 
 cleanupEnvironmentVariables() {
     local key=""
-    for key in `perl -e 'print map { "$_\n" } keys %ENV'` ; do
+    for key in `perl -e 'print map { "$_\n" } sort keys %ENV'` ; do
         case ${key} in
             PATH|HOME|USER|HOSTNAME) : ;;
-            *) unset ${key} ;;
+            CI_LIB_PATH) : ;;
+            *) 
+                trace "unsetting environment variable \"${key}\" with value \"${!key}\"" 
+                unset ${key} 
+            ;;
         esac
     done
 }
+

@@ -10,7 +10,7 @@ startLogfile() {
 
     if [[ ! -w ${CI_LOGGING_LOGFILENAME} ]] ; then
         # export CI_LOGGING_LOGFILENAME=logfile.`date +%s`.log
-        export CI_LOGGING_LOGFILENAME=logfile
+        export CI_LOGGING_LOGFILENAME=${CI_LIB_PATH}/logfile
         printf -- "------------------------------------------------------------------\n" >  ${CI_LOGGING_LOGFILENAME}
         printf -- "starting logfile\n"                                                   >> ${CI_LOGGING_LOGFILENAME}
         printf -- "  script: $0\n"                                                       >> ${CI_LOGGING_LOGFILENAME}
@@ -99,7 +99,7 @@ message() {
 
 
     if [[ "${CI_LOGGING_ENABLE_COLORS}" && "${color}" ]] ; then
-        echo -en ${!color}
+        echo -en ${!color} 
     fi
 
     startLogfile
