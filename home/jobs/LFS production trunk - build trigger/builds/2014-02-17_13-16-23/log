@@ -1,0 +1,8 @@
+Started by an SCM change
+Building in workspace /var/fpwork/demx2fk3/ci/home/jobs/LFS production trunk - build trigger/workspace
+Checking out a fresh workspace because there's no workspace at /var/fpwork/demx2fk3/ci/home/jobs/LFS production trunk - build trigger/workspace
+Cleaning local Directory .
+Checking out https://ulscmi.inside.nsn.com/isource/svnroot/BTS_SC_LFS/os/trunk/fsmr3 at revision '2014-02-17T13:16:23.849 +0100'
+ U        .
+At revision 64277
+Finished: SUCCESS

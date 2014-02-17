@@ -147,3 +147,7 @@ Feb 17, 2014 1:03:58 PM hudson.TcpSlaveAgentListener <init>
 INFO: JNLP slave agent listener started on TCP port 44853
 Feb 17, 2014 1:03:58 PM hudson.WebAppMain$3 run
 INFO: Jenkins is fully up and running
+Feb 17, 2014 1:16:18 PM hudson.triggers.SCMTrigger$Runner run
+INFO: SCM changes detected in LFS production trunk - build trigger. Triggering  #1
+Feb 17, 2014 1:16:25 PM hudson.model.Run execute
+INFO: LFS production trunk - build trigger #1 main build action completed: SUCCESS
