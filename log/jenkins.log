@@ -1,0 +1,35 @@
+Running from: /var/fpwork/demx2fk3/ci/lib/java/jenkins/jenkins-1.532.1.war
+webroot: EnvVars.masterEnvVars.get("JENKINS_HOME")
+Feb 17, 2014 12:19:44 PM winstone.Logger logInternal
+INFO: Beginning extraction from war file
+Jenkins home directory: /var/fpwork/demx2fk3/ci/home found at: EnvVars.masterEnvVars.get("JENKINS_HOME")
+Feb 17, 2014 12:19:45 PM winstone.Logger logInternal
+INFO: HTTP Listener started: port=1280
+Feb 17, 2014 12:19:45 PM winstone.Logger logInternal
+INFO: AJP13 Listener started: port=12800
+Feb 17, 2014 12:19:45 PM winstone.Logger logInternal
+INFO: HTTPS Listener started: port=12443
+Feb 17, 2014 12:19:45 PM winstone.Logger logInternal
+INFO: Winstone Servlet Engine v0.9.10 running: controlPort=disabled
+Feb 17, 2014 12:19:45 PM jenkins.InitReactorRunner$1 onAttained
+INFO: Started initialization
+Feb 17, 2014 12:19:56 PM jenkins.InitReactorRunner$1 onAttained
+INFO: Listed all plugins
+Feb 17, 2014 12:19:56 PM jenkins.InitReactorRunner$1 onAttained
+INFO: Prepared all plugins
+Feb 17, 2014 12:19:56 PM jenkins.InitReactorRunner$1 onAttained
+INFO: Started all plugins
+Feb 17, 2014 12:19:56 PM jenkins.InitReactorRunner$1 onAttained
+INFO: Augmented all extensions
+Feb 17, 2014 12:19:56 PM jenkins.InitReactorRunner$1 onAttained
+INFO: Loaded all jobs
+Feb 17, 2014 12:20:00 PM org.jenkinsci.main.modules.sshd.SSHD start
+INFO: Started SSHD at port 53705
+Feb 17, 2014 12:20:00 PM jenkins.InitReactorRunner$1 onAttained
+INFO: Completed initialization
+Feb 17, 2014 12:20:00 PM hudson.TcpSlaveAgentListener <init>
+INFO: JNLP slave agent listener started on TCP port 34916
+Feb 17, 2014 12:20:00 PM hudson.WebAppMain$3 run
+INFO: Jenkins is fully up and running
+Feb 17, 2014 12:20:05 PM hudson.model.UpdateSite updateData
+INFO: Obtained the latest update center data file for UpdateSource default
