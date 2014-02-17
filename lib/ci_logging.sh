@@ -200,6 +200,5 @@ logCommand() {
 
     unset CI_LOGGING_CONFIG
     unset CI_LOGGING_CONFIG
-
 }
 

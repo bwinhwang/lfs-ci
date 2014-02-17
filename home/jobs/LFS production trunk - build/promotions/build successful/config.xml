@@ -1,0 +1,20 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<hudson.plugins.promoted__builds.PromotionProcess plugin="promoted-builds@2.15">
+  <keepDependencies>false</keepDependencies>
+  <properties/>
+  <scm class="hudson.scm.NullSCM"/>
+  <canRoam>false</canRoam>
+  <disabled>false</disabled>
+  <blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding>
+  <blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding>
+  <triggers/>
+  <concurrentBuild>false</concurrentBuild>
+  <conditions>
+    <hudson.plugins.promoted__builds.conditions.DownstreamPassCondition>
+      <jobs>LFS production trunk - build fct, </jobs>
+      <evenIfUnstable>true</evenIfUnstable>
+    </hudson.plugins.promoted__builds.conditions.DownstreamPassCondition>
+  </conditions>
+  <icon>star-green</icon>
+  <buildSteps/>
+</hudson.plugins.promoted__builds.PromotionProcess>

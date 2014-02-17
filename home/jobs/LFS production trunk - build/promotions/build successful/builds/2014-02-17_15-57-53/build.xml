@@ -1,0 +1,30 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<hudson.plugins.promoted__builds.Promotion plugin="promoted-builds@2.15">
+  <actions>
+    <hudson.model.ParametersAction>
+      <parameters/>
+    </hudson.model.ParametersAction>
+    <hudson.plugins.promoted__builds.PromotionTargetAction>
+      <jobName>LFS production trunk - build</jobName>
+      <number>8</number>
+    </hudson.plugins.promoted__builds.PromotionTargetAction>
+    <hudson.model.CauseAction>
+      <causes>
+        <hudson.model.Cause_-UserCause>
+          <authenticationName>SYSTEM</authenticationName>
+        </hudson.model.Cause_-UserCause>
+      </causes>
+    </hudson.model.CauseAction>
+  </actions>
+  <number>1</number>
+  <startTime>1392649073155</startTime>
+  <result>SUCCESS</result>
+  <duration>53</duration>
+  <charset>ISO-8859-1</charset>
+  <keepLog>false</keepLog>
+  <builtOn></builtOn>
+  <workspace>/var/fpwork/demx2fk3/ci/home/jobs/LFS production trunk - build/workspace</workspace>
+  <hudsonVersion>1.532.2</hudsonVersion>
+  <scm class="hudson.scm.NullChangeLogParser"/>
+  <culprits class="com.google.common.collect.EmptyImmutableSortedSet"/>
+</hudson.plugins.promoted__builds.Promotion>

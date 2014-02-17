@@ -1,5 +1,10 @@
 #!/bin/bash
 
+executeAndLogOutput() {
+
+    logCommand
+
+}
 execute() {
     local command=$@
 

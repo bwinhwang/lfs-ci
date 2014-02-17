@@ -37,3 +37,11 @@ Feb 17, 2014 3:57:53 PM hudson.model.Run execute
 INFO: LFS production trunk - build fct #15 main build action completed: SUCCESS
 Feb 17, 2014 3:57:53 PM hudson.model.Run execute
 INFO: LFS production trunk - build » promotion » build successful #1 main build action completed: SUCCESS
+Feb 17, 2014 4:04:36 PM hudson.triggers.SCMTrigger$Runner run
+INFO: SCM changes detected in LFS production trunk - build. Triggering  #9
+Feb 17, 2014 4:04:43 PM hudson.model.Run execute
+INFO: LFS production trunk - build #9 main build action completed: SUCCESS
+Feb 17, 2014 4:07:46 PM hudson.model.Run execute
+INFO: LFS production trunk - build fct #16 main build action completed: SUCCESS
+Feb 17, 2014 4:07:46 PM hudson.model.Run execute
+INFO: LFS production trunk - build » promotion » build successful #2 main build action completed: SUCCESS
