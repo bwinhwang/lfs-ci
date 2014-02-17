@@ -1,0 +1,17 @@
+Manifest-Version: 1.0
+Archiver-Version: Plexus Archiver
+Created-By: Apache Maven
+Built-By: demxxqg1
+Build-Jdk: 1.6.0
+Extension-Name: customSCM
+Implementation-Title: customSCM
+Implementation-Version: 0.7.6
+Group-Id: org.jvnet.hudson.plugins
+Short-Name: customSCM
+Long-Name: Hudson plugin for customized SCM functionality for LTE
+Url: 
+Plugin-Version: 0.7.6
+Hudson-Version: 1.390
+Plugin-Dependencies: subversion:1.11
+Plugin-Developers: Oliver Korpilla:demsuw61:
+
