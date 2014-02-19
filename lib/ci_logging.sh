@@ -203,3 +203,13 @@ logCommand() {
     unset CI_LOGGING_CONFIG
 }
 
+rawDebug() {
+    local fileToLog=$1
+
+    debug "adding content of file ${fileToLog} to logfile"
+    trace "----------------------------------------------"
+    cat ${fileToLog} >> ${CI_LOGGING_LOGFILENAME}
+    trace "----------------------------------------------"
+
+    return
+}

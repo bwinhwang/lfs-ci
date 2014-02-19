@@ -116,4 +116,19 @@ checkoutSubprojectDirectories() {
     execute build adddir "${project}"
 }
 
+createTempFile() {
+    local tempfile=$(mktemp)
+    GLOBAL_tempfiles=("${GLOBAL_tempfiles[@]}" "${tempfile}")
+    echo ${tempfile}
+}
 
+cleanupTempFiles() {
+    debug "cleaning up temp files"
+    for file in ${GLOBAL_tempfiles[@]}
+    do
+        rm -rf ${file}            
+    done
+}
+
+declare -a GLOBAL_tempfiles 
+exit_add cleanupTempFiles

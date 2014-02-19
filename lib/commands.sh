@@ -1,26 +1,24 @@
 #!/bin/bash
 
-executeAndLogOutput() {
-
-    
-
-}
-
 execute() {
     local command=$@
+    local output=$(createTempFile)
 
     trace "execute command: \"${command}\""
 
-    ${command}
+    ${command} >${output} 2>&1
 
     exitCode=$?
     trace "exit code of \"${command}\" was ${exitCode}"
+
+    rawDebug ${output}
 
     if [[ ${exitCode} -gt 0 ]] ; then
         error "error occoured in \"${command}\""
         exit ${exitCode}
     fi
 
+    return
 }
 
 showAllEnvironmentVariables() {
