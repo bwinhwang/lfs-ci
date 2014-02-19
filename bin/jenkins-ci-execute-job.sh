@@ -5,7 +5,7 @@
 
 TMP=$(dirname $0)
 export CI_LIB_PATH="$(readlink -f ${TMP}/..)"
-PATH=$PATH:$CI_LIB_PATH/bin
+# PATH=$PATH:$CI_LIB_PATH/bin
 
 source ${CI_LIB_PATH}/lib/ci_logging.sh
 source ${CI_LIB_PATH}/lib/commands.sh
@@ -14,10 +14,9 @@ source ${CI_LIB_PATH}/lib/common.sh
 
 cleanupEnvironmentVariables
 
-export PS4='+(${BASH_SOURCE}:${LINENO}): ${FUNCNAME[0]:+${FUNCNAME[0]}(): }'
-
+PS4='+(${BASH_SOURCE}:${LINENO}): ${FUNCNAME[0]:+${FUNCNAME[0]}(): }'
 JENKINS_JOB_NAME="$1"
-export JENKINS_JOB_NAME
+export JENKINS_JOB_NAME PS4
 
 showAllEnvironmentVariables
 

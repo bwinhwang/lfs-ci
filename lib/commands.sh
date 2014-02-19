@@ -2,9 +2,10 @@
 
 executeAndLogOutput() {
 
-    logCommand
+    
 
 }
+
 execute() {
     local command=$@
 

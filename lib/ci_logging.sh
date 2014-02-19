@@ -1,6 +1,6 @@
 #!/bin/bash
 
-source ${CI_LIB_PATH}/lib/exit_handling.sh
+source ${CI_PATH}/lib/exit_handling.sh
 
 ## @fn      startLogfile()
 #  @brief   creates a new logfile and adds an header
@@ -10,7 +10,7 @@ startLogfile() {
 
     if [[ ! -w ${CI_LOGGING_LOGFILENAME} ]] ; then
         # export CI_LOGGING_LOGFILENAME=logfile.`date +%s`.log
-        export CI_LOGGING_LOGFILENAME=${CI_LIB_PATH}/logfile
+        export CI_LOGGING_LOGFILENAME=${CI_PATH}/logfile
         printf -- "------------------------------------------------------------------\n" >  ${CI_LOGGING_LOGFILENAME}
         printf -- "starting logfile\n"                                                   >> ${CI_LOGGING_LOGFILENAME}
         printf -- "  script: $0\n"                                                       >> ${CI_LOGGING_LOGFILENAME}
@@ -185,20 +185,21 @@ _stackTrace() {
 #  @param   <command>    command, which should be logged
 #  @return  <none>
 logCommand() {
-    local command=$1
-    local output=$(${command})
+    local command=$@
+    local outputFile=$(mktemp)
+
+    ${command} 1>${outputFile} 2>&1 
 
     debug "logging output of command \"${command}\""
 
     CI_LOGGING_CONFIG="PREFIX SPACE MESSAGE"
     CI_LOGGING_PREFIX=">"
 
-    while read A
+    while read LINE
     do
-        debug "${A}"
-    done <<<"${output}"
+        debug "${LINE}"
+    done <${outputFile}
 
-    unset CI_LOGGING_CONFIG
     unset CI_LOGGING_CONFIG
 }
 

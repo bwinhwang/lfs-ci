@@ -16,39 +16,39 @@ oneTimeSetUp() {
 testLogging() {
 
     assertEquals "simple debug message"                  \
-                 "mocked date command     [DEBUG] foobar" \
+                 "mocked date command    [DEBUG] foobar" \
                  "`debug 'foobar'`" 
 
     local veryLongDebugMessage="this is a very long info message for the logging function in the logging method. this should work without any problem"
     assertEquals "longer debug message"                                   \
-                 "mocked date command     [DEBUG] ${veryLongDebugMessage}" \
+                 "mocked date command    [DEBUG] ${veryLongDebugMessage}" \
                  "`debug \"${veryLongDebugMessage}\"`" 
 
 
     assertEquals "simple info message"                   \
-                 "mocked date command      [INFO] foobar" \
+                 "mocked date command     [INFO] foobar" \
                  "`info 'foobar'`" 
 
     assertEquals "longer info message"                                    \
-                 "mocked date command      [INFO] ${veryLongDebugMessage}" \
+                 "mocked date command     [INFO] ${veryLongDebugMessage}" \
                  "`info \"${veryLongDebugMessage}\"`" 
 
 
     assertEquals "simple warning message"                \
-                 "mocked date command   [WARNING] foobar" \
+                 "mocked date command  [WARNING] foobar" \
                  "`warning 'foobar'`" 
 
     assertEquals "longer warning message"                                 \
-                 "mocked date command   [WARNING] ${veryLongDebugMessage}" \
+                 "mocked date command  [WARNING] ${veryLongDebugMessage}" \
                  "`warning \"${veryLongDebugMessage}\"`" 
 
 
     assertEquals "simple error message"                  \
-                 "mocked date command     [ERROR] foobar" \
+                 "mocked date command    [ERROR] foobar" \
                  "`error 'foobar'`" 
 
     assertEquals "longer error message"                                   \
-                 "mocked date command     [ERROR] ${veryLongDebugMessage}" \
+                 "mocked date command    [ERROR] ${veryLongDebugMessage}" \
                  "`error \"${veryLongDebugMessage}\"`" 
 }
 
@@ -59,7 +59,7 @@ testLoggingConfiguration() {
                  "foobar"                             \
                  "`message INFO 'foobar'`" 
 
-    export CI_LOGGING_CONFIG="DATE MESSAGE"
+    export CI_LOGGING_CONFIG="DATE SPACE MESSAGE"
     assertEquals "simple message with configuration"  \
                  "mocked date command foobar"         \
                  "`message INFO 'foobar'`" 

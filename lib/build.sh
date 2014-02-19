@@ -1,11 +1,13 @@
 #!/bin/bash
 
 
-
+## @fn      ci_job_build()
+#  @brief   create a build
+#  @param   <none>
+#  @return  <none>
 ci_job_build() {
 
     info "creating the workspace..."
-
 
     _createWorkspace
 
@@ -22,7 +24,10 @@ ci_job_build() {
     return 0
 }
 
-
+## @fn      _createWorkspace()
+#  @brief   create a workspace
+#  @param   <none>
+#  @return  <none>
 _createWorkspace() {
 
     local location=$(getLocationName) 
@@ -32,21 +37,24 @@ _createWorkspace() {
     mustHaveWorkspaceName
 
     local build="build -W \"${workspace}\""
-
-    debug "workspace is \"${workspace}\""
-
     mustHaveCleanWorkspace
     mustHaveWritableWorkspace
 
+    debug "ceating a new workspace in \"${workspace}\""
     setupNewWorkspace
 
+    # change from svne1 to ulmscmi
     switchSvnServerInLocations
 
     switchToNewLocation
 
     mustHaveValidWorkspace
 
-    checkoutSubprojectDirectories src-fsmddal
+    for src in $(getConfig buildTargets_${location}_${target}) ; do
+
+        checkoutSubprojectDirectories ${src}
+
+    done
 
     return 0
 }

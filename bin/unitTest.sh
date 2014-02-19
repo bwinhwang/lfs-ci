@@ -2,7 +2,10 @@
 
 set -o errexit
 
-source lib/ci_logging.sh
+export CI_PATH=$PWD
+
+source ${CI_PATH}/lib/ci_logging.sh
+
 
 for file in test/*.sh ; do
     
