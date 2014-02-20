@@ -128,6 +128,7 @@ _loggingLine() {
     local prefix=${CI_LOGGING_PREFIX-${CI_LOGGING_PREFIX_HASH["$logType"]}}
     local dateFormat=${CI_LOGGING_DATEFORMAT-"+%Y-%m-%d-%H:%M:%S.%N"}
 
+
     for template in ${config}
     do
         case "${template}" in 

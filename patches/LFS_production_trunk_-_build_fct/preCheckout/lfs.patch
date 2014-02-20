@@ -1,0 +1,15 @@
+Index: locations/locations-pronb-developer/Dependencies
+===================================================================
+--- locations/locations-pronb-developer/Dependencies	(revision 63380)
++++ locations/locations-pronb-developer/Dependencies	(working copy)
+@@ -59,8 +59,8 @@
+ 
+ local-directory @LOCAL_LINUXKERNELS /build/home/SC_LFS/linuxkernels
+ 
+-svn-repository @BTS_SC_LFS          https://svne1.access.nokiasiemensnetworks.com/isource/svnroot/BTS_SC_LFS
+-svn-repository @BTS_SC_LFS_ULM      https://ulisop10.emea.nsn-net.net/isource/svnroot/BTS_SC_LFS 
++# svn-repository @BTS_SC_LFS          https://svne1.access.nokiasiemensnetworks.com/isource/svnroot/BTS_SC_LFS
++svn-repository @BTS_SC_LFS      https://ulisop10.emea.nsn-net.net/isource/svnroot/BTS_SC_LFS 
+ svn-repository @BTS_SC_LFS_RELEASES https://svne1.access.nokiasiemensnetworks.com/isource/svnroot/BTS_SC_LFS --needsbranch
+ svn-repository @BTS_SC_LFS_RELEASES_ULM https://ulisop10.emea.nsn-net.net/isource/svnroot/BTS_SC_LFS --needsbranch
+ 

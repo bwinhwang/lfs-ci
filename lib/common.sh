@@ -59,7 +59,7 @@ getWorkspaceName() {
     local location=$(getLocationName)
     mustHaveLocationName
 
-    echo "${WORKSPACE}/workspace/"
+    echo "${WORKSPACE}/workspace"
 }
 
 mustHaveWorkspaceName() {
@@ -98,7 +98,7 @@ mustHaveCleanWorkspace() {
 removeWorkspace() {
     local workspace=$1
 
-    execute chmod -R o+w "${workspace}"
+    execute chmod -R u+w "${workspace}"
     execute rm -rf "${workspace}"
 }
 
