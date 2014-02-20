@@ -33,12 +33,17 @@ _createWorkspace() {
     local location=$(getLocationName) 
     mustHaveLocationName
 
+    local target=$(getTargetBoardName) 
+    # mustHaveLocationName
+
     local workspace=$(getWorkspaceName)
     mustHaveWorkspaceName
-
-    local build="build -W \"${workspace}\""
     mustHaveCleanWorkspace
     mustHaveWritableWorkspace
+
+    debug "create workspace for ${location} / ${target} in ${workspace}"
+
+    local build="build -W \"${workspace}\""
 
     debug "ceating a new workspace in \"${workspace}\""
     setupNewWorkspace
@@ -50,13 +55,54 @@ _createWorkspace() {
 
     mustHaveValidWorkspace
 
-    for src in $(getConfig buildTargets_${location}_${target}) ; do
+    buildTargets=$(getConfig "buildTargets_${location}_${target}")
+    if [[ ! "${buildTargets}" ]] ; then
+        error "no build targets configured"
+        exit 1;
+    fi
 
-        checkoutSubprojectDirectories ${src}
+            
+    for src in $(getConfig "buildTargets_${location}_${target}") ; do
+
+        info "checking out sources for ${src}"
+        checkoutSubprojectDirectories "${src}"
 
     done
 
     return 0
+}
+
+preCheckoutPatchWorkspace() {
+    if [[ -d "${CI_PATH}/patches/${JENKINS_JOB_NAME}/preCheckout/" ]] ; then
+        for patch in "${CI_PATH}/patches/${JENKINS_JOB_NAME}/preCheckout/"* ; do
+            [[ ! -f "${patch}" ]] && continue
+            info "applying pre checkout patch $(basename \"${patch}\")"
+            patch -p0 < "${patch}" || exit 1
+        done
+    fi
+}
+
+postCheckoutPatchWorkspace() {
+    if [[ -d "${CI_PATH}/patches/${JENKINS_JOB_NAME}/preCheckout/" ]] ; then
+        for patch in "${CI_PATH}/patches/${JENKINS_JOB_NAME}/preCheckout/"* ; do
+            [[ ! -f "${patch}" ]] && continue
+            info "applying post checkout patch $(basename \"${patch}\")"
+            patch -p0 < "${patch}" || exit 1
+        done
+    fi
+}
+
+
+getConfig() {
+    local key=$1
+
+    trace "get config value for ${key}"
+    case "${key}" in 
+        buildTargets_pronb-developer_fct) echo src-cvmxsources src-kernelsources src-fsmbrm src-fsmbos src-fsmddg src-fsmdtg src-fsmifdd src-fsmddal src-fsmfmon src-fsmrfs src-fsmpsl src-fsmwbit ;;
+        buildTargets_pronb-developer_qemu) echo src-cvmxsources src-kernelsources src-fsmbrm src-fsmbos src-fsmddg src-fsmdtg src-fsmifdd src-fsmddal src-fsmfmon src-fsmrfs src-fsmpsl src-fsmwbit ;;
+        *) : ;;
+    esac
+
 }
 
 return 0

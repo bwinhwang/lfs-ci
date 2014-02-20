@@ -4,19 +4,22 @@
 #
 
 TMP=$(dirname $0)
-export CI_LIB_PATH="$(readlink -f ${TMP}/..)"
+export CI_PATH="$(readlink -f ${TMP}/..)"
 # PATH=$PATH:$CI_LIB_PATH/bin
 
-source ${CI_LIB_PATH}/lib/ci_logging.sh
-source ${CI_LIB_PATH}/lib/commands.sh
-source ${CI_LIB_PATH}/lib/build.sh
-source ${CI_LIB_PATH}/lib/common.sh
+source ${CI_PATH}/lib/ci_logging.sh
+source ${CI_PATH}/lib/commands.sh
+source ${CI_PATH}/lib/build.sh
+source ${CI_PATH}/lib/common.sh
 
 cleanupEnvironmentVariables
 
+# for better debugging
 PS4='+(${BASH_SOURCE}:${LINENO}): ${FUNCNAME[0]:+${FUNCNAME[0]}(): }'
+export PS4
+
 JENKINS_JOB_NAME="$1"
-export JENKINS_JOB_NAME PS4
+export JENKINS_JOB_NAME 
 
 showAllEnvironmentVariables
 

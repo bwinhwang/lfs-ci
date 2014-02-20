@@ -1,8 +1,31 @@
 #!/bin/bash
+getTargetBoardName() {
+
+    local regex='LFS_production_([[:alpha:]]*)_-_([[:alpha:]]*)_([[:alpha:]]*).*'
+
+    trace "JENKINS_JOB_NAME = ${JENKINS_JOB_NAME}"
+
+    if [[ ${JENKINS_JOB_NAME} =~ ${regex} ]] ; then
+        case ${BASH_REMATCH[3]} in
+            *) echo ${BASH_REMATCH[3]} ;;
+        esac
+    fi
+    
+}
+
+mustHaveTargetBoardName() {
+
+    local location=$(getTargetBoardName) 
+    if [[ ! ${location} ]] ; then
+        error "can not get the correction target board name from JENKINS_JOB_NAME \"${JENKINS_JOB_NAME}\""
+        exit 1
+    fi
+
+}
 
 getLocationName() {
 
-    local regex='LFS production ([[:alpha:]]*) - ([[:alpha:]]*) .*'
+    local regex='LFS_production_([[:alpha:]]*)_-_([[:alpha:]]*)_([[:alpha:]]*).*'
 
     trace "JENKINS_JOB_NAME = ${JENKINS_JOB_NAME}"
 
@@ -36,13 +59,13 @@ getWorkspaceName() {
     local location=$(getLocationName)
     mustHaveLocationName
 
-    echo /var/fpwork/demx2fk3/workspaces/${location}
+    echo "${WORKSPACE}/workspace/"
 }
 
 mustHaveWorkspaceName() {
 
     local workspace=$(getWorkspaceName) 
-    if [[ ! ${workspace} ]] ; then
+    if [[ ! "${workspace}" ]] ; then
         error "can not get the correction workspace name from JENKINS_JOB_NAME \"${JENKINS_JOB_NAME}\""
         exit 1
     fi
@@ -63,10 +86,13 @@ mustHaveCleanWorkspace() {
     local workspace=$(getWorkspaceName) 
     mustHaveWorkspaceName
 
-    if [[ -d ${workspace} ]] ; then
+    if [[ -d "${workspace}" ]] ; then
+        trace "creating new workspace directory \"${workspace}\""
         removeWorkspace "${workspace}"
-        execute mkdir -p "${workspace}"
     fi
+
+    trace "creating new workspace directory \"${workspace}\""
+    execute mkdir -p "${workspace}"
 }
 
 removeWorkspace() {
@@ -118,12 +144,11 @@ checkoutSubprojectDirectories() {
 
 createTempFile() {
     local tempfile=$(mktemp)
-    GLOBAL_tempfiles=("${GLOBAL_tempfiles[@]}" "${tempfile}")
+    GLOBAL_tempfiles=("${tempfile}" "${GLOBAL_tempfiles[@]}")
     echo ${tempfile}
 }
 
 cleanupTempFiles() {
-    debug "cleaning up temp files"
     for file in ${GLOBAL_tempfiles[@]}
     do
         rm -rf ${file}            

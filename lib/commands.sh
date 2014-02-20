@@ -33,7 +33,8 @@ cleanupEnvironmentVariables() {
     for key in `perl -e 'print map { "$_\n" } sort keys %ENV'` ; do
         case ${key} in
             PATH|HOME|USER|HOSTNAME) : ;;
-            CI_LIB_PATH) : ;;
+            CI_PATH) : ;;
+            WORKSPACE) : ;;
             *) 
                 trace "unsetting environment variable \"${key}\" with value \"${!key}\"" 
                 unset ${key} 

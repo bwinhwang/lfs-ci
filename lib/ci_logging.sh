@@ -67,6 +67,7 @@ info() {
 #  @return  <none>
 error() {
     message "ERROR" "$@"
+    _stackTrace
 }
 
 ## @fn      warning( message )
@@ -206,7 +207,10 @@ logCommand() {
 rawDebug() {
     local fileToLog=$1
 
-    debug "adding content of file ${fileToLog} to logfile"
+    # file is empty
+    [[ ! -s ${fileToLog} ]] && return
+
+    trace "adding content of file ${fileToLog} to logfile"
     trace "----------------------------------------------"
     cat ${fileToLog} >> ${CI_LOGGING_LOGFILENAME}
     trace "----------------------------------------------"
