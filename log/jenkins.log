@@ -132,3 +132,499 @@ Feb 20, 2014 12:48:38 PM hudson.model.Run execute
 INFO: LFS production trunk - build fct #82 main build action completed: SUCCESS
 Feb 20, 2014 12:48:38 PM hudson.model.Run execute
 INFO: LFS production trunk - build » promotion » build successful #22 main build action completed: SUCCESS
+Feb 20, 2014 1:03:24 PM hudson.model.Run execute
+INFO: LFS production trunk - build #39 main build action completed: SUCCESS
+Feb 20, 2014 1:04:29 PM hudson.model.Run execute
+INFO: LFS production trunk - build fct #83 aborted
+java.lang.InterruptedException
+	at java.lang.Object.wait(Native Method)
+	at java.lang.Object.wait(Object.java:502)
+	at java.lang.UNIXProcess.waitFor(UNIXProcess.java:181)
+	at hudson.Proc$LocalProc.join(Proc.java:319)
+	at hudson.Launcher$ProcStarter.join(Launcher.java:360)
+	at hudson.tasks.CommandInterpreter.perform(CommandInterpreter.java:91)
+	at hudson.tasks.CommandInterpreter.perform(CommandInterpreter.java:60)
+	at hudson.tasks.BuildStepMonitor$1.perform(BuildStepMonitor.java:20)
+	at hudson.model.AbstractBuild$AbstractBuildExecution.perform(AbstractBuild.java:785)
+	at hudson.model.Build$BuildExecution.build(Build.java:199)
+	at hudson.model.Build$BuildExecution.doRun(Build.java:160)
+	at hudson.model.AbstractBuild$AbstractBuildExecution.run(AbstractBuild.java:566)
+	at hudson.model.Run.execute(Run.java:1665)
+	at hudson.model.FreeStyleBuild.run(FreeStyleBuild.java:46)
+	at hudson.model.ResourceController.execute(ResourceController.java:88)
+	at hudson.model.Executor.run(Executor.java:246)
+Feb 20, 2014 1:04:31 PM hudson.model.Run execute
+INFO: LFS production trunk - build qemu_x86 #4 aborted
+java.lang.InterruptedException
+	at java.lang.Object.wait(Native Method)
+	at java.lang.Object.wait(Object.java:502)
+	at java.lang.UNIXProcess.waitFor(UNIXProcess.java:181)
+	at hudson.Proc$LocalProc.join(Proc.java:319)
+	at hudson.Launcher$ProcStarter.join(Launcher.java:360)
+	at hudson.tasks.CommandInterpreter.perform(CommandInterpreter.java:91)
+	at hudson.tasks.CommandInterpreter.perform(CommandInterpreter.java:60)
+	at hudson.tasks.BuildStepMonitor$1.perform(BuildStepMonitor.java:20)
+	at hudson.model.AbstractBuild$AbstractBuildExecution.perform(AbstractBuild.java:785)
+	at hudson.model.Build$BuildExecution.build(Build.java:199)
+	at hudson.model.Build$BuildExecution.doRun(Build.java:160)
+	at hudson.model.AbstractBuild$AbstractBuildExecution.run(AbstractBuild.java:566)
+	at hudson.model.Run.execute(Run.java:1665)
+	at hudson.model.FreeStyleBuild.run(FreeStyleBuild.java:46)
+	at hudson.model.ResourceController.execute(ResourceController.java:88)
+	at hudson.model.Executor.run(Executor.java:246)
+Feb 20, 2014 1:04:33 PM hudson.model.Run execute
+INFO: LFS production trunk - build #40 main build action completed: SUCCESS
+Feb 20, 2014 1:05:05 PM hudson.model.Run execute
+INFO: LFS production trunk - build fct #84 aborted
+java.lang.InterruptedException
+	at java.lang.Object.wait(Native Method)
+	at java.lang.Object.wait(Object.java:502)
+	at java.lang.UNIXProcess.waitFor(UNIXProcess.java:181)
+	at hudson.Proc$LocalProc.join(Proc.java:319)
+	at hudson.Launcher$ProcStarter.join(Launcher.java:360)
+	at hudson.tasks.CommandInterpreter.perform(CommandInterpreter.java:91)
+	at hudson.tasks.CommandInterpreter.perform(CommandInterpreter.java:60)
+	at hudson.tasks.BuildStepMonitor$1.perform(BuildStepMonitor.java:20)
+	at hudson.model.AbstractBuild$AbstractBuildExecution.perform(AbstractBuild.java:785)
+	at hudson.model.Build$BuildExecution.build(Build.java:199)
+	at hudson.model.Build$BuildExecution.doRun(Build.java:160)
+	at hudson.model.AbstractBuild$AbstractBuildExecution.run(AbstractBuild.java:566)
+	at hudson.model.Run.execute(Run.java:1665)
+	at hudson.model.FreeStyleBuild.run(FreeStyleBuild.java:46)
+	at hudson.model.ResourceController.execute(ResourceController.java:88)
+	at hudson.model.Executor.run(Executor.java:246)
+Feb 20, 2014 1:05:06 PM hudson.model.Run execute
+INFO: LFS production trunk - build qemu_x86 #5 aborted
+java.lang.InterruptedException
+	at java.lang.Object.wait(Native Method)
+	at java.lang.Object.wait(Object.java:502)
+	at java.lang.UNIXProcess.waitFor(UNIXProcess.java:181)
+	at hudson.Proc$LocalProc.join(Proc.java:319)
+	at hudson.Launcher$ProcStarter.join(Launcher.java:360)
+	at hudson.tasks.CommandInterpreter.perform(CommandInterpreter.java:91)
+	at hudson.tasks.CommandInterpreter.perform(CommandInterpreter.java:60)
+	at hudson.tasks.BuildStepMonitor$1.perform(BuildStepMonitor.java:20)
+	at hudson.model.AbstractBuild$AbstractBuildExecution.perform(AbstractBuild.java:785)
+	at hudson.model.Build$BuildExecution.build(Build.java:199)
+	at hudson.model.Build$BuildExecution.doRun(Build.java:160)
+	at hudson.model.AbstractBuild$AbstractBuildExecution.run(AbstractBuild.java:566)
+	at hudson.model.Run.execute(Run.java:1665)
+	at hudson.model.FreeStyleBuild.run(FreeStyleBuild.java:46)
+	at hudson.model.ResourceController.execute(ResourceController.java:88)
+	at hudson.model.Executor.run(Executor.java:246)
+Feb 20, 2014 1:05:10 PM hudson.model.Run execute
+INFO: LFS production trunk - build fct #85 aborted
+java.lang.InterruptedException
+	at java.lang.Object.wait(Native Method)
+	at java.lang.Object.wait(Object.java:502)
+	at java.lang.UNIXProcess.waitFor(UNIXProcess.java:181)
+	at hudson.Proc$LocalProc.join(Proc.java:319)
+	at hudson.Launcher$ProcStarter.join(Launcher.java:360)
+	at hudson.tasks.CommandInterpreter.perform(CommandInterpreter.java:91)
+	at hudson.tasks.CommandInterpreter.perform(CommandInterpreter.java:60)
+	at hudson.tasks.BuildStepMonitor$1.perform(BuildStepMonitor.java:20)
+	at hudson.model.AbstractBuild$AbstractBuildExecution.perform(AbstractBuild.java:785)
+	at hudson.model.Build$BuildExecution.build(Build.java:199)
+	at hudson.model.Build$BuildExecution.doRun(Build.java:160)
+	at hudson.model.AbstractBuild$AbstractBuildExecution.run(AbstractBuild.java:566)
+	at hudson.model.Run.execute(Run.java:1665)
+	at hudson.model.FreeStyleBuild.run(FreeStyleBuild.java:46)
+	at hudson.model.ResourceController.execute(ResourceController.java:88)
+	at hudson.model.Executor.run(Executor.java:246)
+Feb 20, 2014 1:05:25 PM hudson.model.Run execute
+INFO: LFS production trunk - build #41 main build action completed: SUCCESS
+Feb 20, 2014 1:06:09 PM hudson.model.Run execute
+INFO: LFS production trunk - build fct #86 aborted
+java.lang.InterruptedException
+	at java.lang.Object.wait(Native Method)
+	at java.lang.Object.wait(Object.java:502)
+	at java.lang.UNIXProcess.waitFor(UNIXProcess.java:181)
+	at hudson.Proc$LocalProc.join(Proc.java:319)
+	at hudson.Launcher$ProcStarter.join(Launcher.java:360)
+	at hudson.tasks.CommandInterpreter.perform(CommandInterpreter.java:91)
+	at hudson.tasks.CommandInterpreter.perform(CommandInterpreter.java:60)
+	at hudson.tasks.BuildStepMonitor$1.perform(BuildStepMonitor.java:20)
+	at hudson.model.AbstractBuild$AbstractBuildExecution.perform(AbstractBuild.java:785)
+	at hudson.model.Build$BuildExecution.build(Build.java:199)
+	at hudson.model.Build$BuildExecution.doRun(Build.java:160)
+	at hudson.model.AbstractBuild$AbstractBuildExecution.run(AbstractBuild.java:566)
+	at hudson.model.Run.execute(Run.java:1665)
+	at hudson.model.FreeStyleBuild.run(FreeStyleBuild.java:46)
+	at hudson.model.ResourceController.execute(ResourceController.java:88)
+	at hudson.model.Executor.run(Executor.java:246)
+Feb 20, 2014 1:06:10 PM hudson.model.Run execute
+INFO: LFS production trunk - build qemu_x86 #6 aborted
+java.lang.InterruptedException
+	at java.lang.Object.wait(Native Method)
+	at java.lang.Object.wait(Object.java:502)
+	at java.lang.UNIXProcess.waitFor(UNIXProcess.java:181)
+	at hudson.Proc$LocalProc.join(Proc.java:319)
+	at hudson.Launcher$ProcStarter.join(Launcher.java:360)
+	at hudson.tasks.CommandInterpreter.perform(CommandInterpreter.java:91)
+	at hudson.tasks.CommandInterpreter.perform(CommandInterpreter.java:60)
+	at hudson.tasks.BuildStepMonitor$1.perform(BuildStepMonitor.java:20)
+	at hudson.model.AbstractBuild$AbstractBuildExecution.perform(AbstractBuild.java:785)
+	at hudson.model.Build$BuildExecution.build(Build.java:199)
+	at hudson.model.Build$BuildExecution.doRun(Build.java:160)
+	at hudson.model.AbstractBuild$AbstractBuildExecution.run(AbstractBuild.java:566)
+	at hudson.model.Run.execute(Run.java:1665)
+	at hudson.model.FreeStyleBuild.run(FreeStyleBuild.java:46)
+	at hudson.model.ResourceController.execute(ResourceController.java:88)
+	at hudson.model.Executor.run(Executor.java:246)
+Feb 20, 2014 1:06:15 PM hudson.model.Run execute
+INFO: LFS production trunk - build #42 main build action completed: SUCCESS
+Feb 20, 2014 1:07:57 PM hudson.model.Run execute
+INFO: LFS production trunk - build fct #87 main build action completed: FAILURE
+Feb 20, 2014 1:09:00 PM hudson.model.Run execute
+INFO: LFS production trunk - build qemu_x86 #7 aborted
+java.lang.InterruptedException
+	at java.lang.Object.wait(Native Method)
+	at java.lang.Object.wait(Object.java:502)
+	at java.lang.UNIXProcess.waitFor(UNIXProcess.java:181)
+	at hudson.Proc$LocalProc.join(Proc.java:319)
+	at hudson.Launcher$ProcStarter.join(Launcher.java:360)
+	at hudson.tasks.CommandInterpreter.perform(CommandInterpreter.java:91)
+	at hudson.tasks.CommandInterpreter.perform(CommandInterpreter.java:60)
+	at hudson.tasks.BuildStepMonitor$1.perform(BuildStepMonitor.java:20)
+	at hudson.model.AbstractBuild$AbstractBuildExecution.perform(AbstractBuild.java:785)
+	at hudson.model.Build$BuildExecution.build(Build.java:199)
+	at hudson.model.Build$BuildExecution.doRun(Build.java:160)
+	at hudson.model.AbstractBuild$AbstractBuildExecution.run(AbstractBuild.java:566)
+	at hudson.model.Run.execute(Run.java:1665)
+	at hudson.model.FreeStyleBuild.run(FreeStyleBuild.java:46)
+	at hudson.model.ResourceController.execute(ResourceController.java:88)
+	at hudson.model.Executor.run(Executor.java:246)
+Feb 20, 2014 1:09:27 PM hudson.model.Run execute
+INFO: LFS production trunk - build #43 main build action completed: SUCCESS
+Feb 20, 2014 1:11:41 PM hudson.model.Run execute
+INFO: LFS production trunk - build fct #88 main build action completed: FAILURE
+Feb 20, 2014 1:12:26 PM hudson.slaves.SlaveComputer tryReconnect
+INFO: Attempting to reconnect 10.46.209.120
+Feb 20, 2014 1:12:36 PM hudson.slaves.SlaveComputer tryReconnect
+INFO: Attempting to reconnect 10.46.209.120
+Feb 20, 2014 1:14:36 PM hudson.slaves.SlaveComputer tryReconnect
+INFO: Attempting to reconnect 10.46.209.120
+Feb 20, 2014 1:14:45 PM hudson.slaves.SlaveComputer tryReconnect
+INFO: Attempting to reconnect 10.46.209.120
+Feb 20, 2014 1:15:30 PM hudson.slaves.SlaveComputer tryReconnect
+INFO: Attempting to reconnect 10.46.209.105
+Feb 20, 2014 1:16:09 PM hudson.model.Run execute
+INFO: LFS production trunk - build fct #89 main build action completed: FAILURE
+Feb 20, 2014 1:19:30 PM hudson.triggers.SCMTrigger$Runner run
+INFO: SCM changes detected in LFS_production_trunk_-_build. Triggering  #44
+Feb 20, 2014 1:20:40 PM hudson.model.UpdateSite$Plugin getNeededDependencies
+WARNING: Could not find dependency cloudbees-credentials of bees-sdk-plugin
+Feb 20, 2014 1:20:40 PM hudson.model.UpdateSite$Plugin getNeededDependencies
+WARNING: Could not find dependency cloudbees-credentials of bees-sdk-plugin
+Feb 20, 2014 1:21:06 PM hudson.model.UpdateSite$Plugin deploy
+WARNING: Adding dependent install of ssh-credentials for plugin git-client
+Feb 20, 2014 1:21:06 PM hudson.model.UpdateSite$Plugin deploy
+WARNING: Adding dependent install of credentials for plugin ssh-credentials
+Feb 20, 2014 1:21:07 PM hudson.model.UpdateCenter$DownloadJob run
+INFO: Starting the installation of Credentials Plugin on behalf of anonymous
+Feb 20, 2014 1:21:08 PM hudson.model.UpdateCenter$UpdateCenterConfiguration download
+INFO: Downloading Credentials Plugin
+Feb 20, 2014 1:21:08 PM hudson.model.UpdateCenter$DownloadJob run
+INFO: Starting the installation of SSH Credentials Plugin on behalf of anonymous
+Feb 20, 2014 1:21:08 PM hudson.model.UpdateCenter$UpdateCenterConfiguration download
+INFO: Downloading SSH Credentials Plugin
+Feb 20, 2014 1:21:08 PM hudson.model.UpdateCenter$DownloadJob run
+INFO: Starting the installation of Git Client Plugin on behalf of anonymous
+Feb 20, 2014 1:21:09 PM hudson.model.UpdateCenter$UpdateCenterConfiguration download
+INFO: Downloading Git Client Plugin
+Feb 20, 2014 1:21:15 PM hudson.model.UpdateCenter doSafeRestart
+INFO: Scheduling Jenkins reboot
+Feb 20, 2014 1:21:33 PM hudson.model.Run execute
+INFO: LFS production trunk - build qemu_x86 #8 main build action completed: SUCCESS
+Feb 20, 2014 1:21:33 PM jenkins.model.Jenkins$23 run
+INFO: Restart in 10 seconds
+Feb 20, 2014 1:21:43 PM jenkins.model.Jenkins$23 run
+SEVERE: Restarting VM as requested by anonymous
+Running from: /var/fpwork/demx2fk3/ci/lib/java/jenkins/jenkins-1.532.2.war
+webroot: EnvVars.masterEnvVars.get("JENKINS_HOME")
+Feb 20, 2014 1:21:46 PM winstone.Logger logInternal
+INFO: Beginning extraction from war file
+Jenkins home directory: /var/fpwork/demx2fk3/ci/home found at: EnvVars.masterEnvVars.get("JENKINS_HOME")
+Feb 20, 2014 1:21:48 PM winstone.Logger logInternal
+INFO: HTTP Listener started: port=1280
+Feb 20, 2014 1:21:48 PM winstone.Logger logInternal
+INFO: HTTPS Listener started: port=12443
+Feb 20, 2014 1:21:48 PM winstone.Logger logInternal
+INFO: Winstone Servlet Engine v0.9.10 running: controlPort=disabled
+Feb 20, 2014 1:21:48 PM jenkins.InitReactorRunner$1 onAttained
+INFO: Started initialization
+Feb 20, 2014 1:21:51 PM jenkins.InitReactorRunner$1 onAttained
+INFO: Listed all plugins
+Feb 20, 2014 1:21:51 PM jenkins.InitReactorRunner$1 onAttained
+INFO: Prepared all plugins
+Feb 20, 2014 1:21:51 PM jenkins.InitReactorRunner$1 onAttained
+INFO: Started all plugins
+Feb 20, 2014 1:21:51 PM jenkins.InitReactorRunner$1 onAttained
+INFO: Augmented all extensions
+Feb 20, 2014 1:21:53 PM jenkins.InitReactorRunner$1 onAttained
+INFO: Loaded all jobs
+Feb 20, 2014 1:21:54 PM org.jenkinsci.main.modules.sshd.SSHD start
+INFO: Started SSHD at port 33481
+Feb 20, 2014 1:21:54 PM jenkins.InitReactorRunner$1 onAttained
+INFO: Completed initialization
+Feb 20, 2014 1:21:54 PM hudson.TcpSlaveAgentListener <init>
+INFO: JNLP slave agent listener started on TCP port 34991
+Feb 20, 2014 1:21:54 PM hudson.slaves.SlaveComputer tryReconnect
+INFO: Attempting to reconnect 10.46.209.120
+Feb 20, 2014 1:21:54 PM hudson.slaves.SlaveComputer tryReconnect
+INFO: Attempting to reconnect 10.46.209.105
+Feb 20, 2014 1:21:54 PM hudson.WebAppMain$3 run
+INFO: Jenkins is fully up and running
+Feb 20, 2014 1:22:01 PM hudson.node_monitors.AbstractNodeMonitorDescriptor$Record <init>
+WARNING: Previous Architecture monitoring activity still in progress. Interrupting
+Feb 20, 2014 1:22:01 PM hudson.node_monitors.AbstractNodeMonitorDescriptor$Record <init>
+WARNING: Previous Clock Difference monitoring activity still in progress. Interrupting
+Feb 20, 2014 1:22:01 PM hudson.node_monitors.AbstractNodeMonitorDescriptor$Record <init>
+WARNING: Previous Free Disk Space monitoring activity still in progress. Interrupting
+Feb 20, 2014 1:22:01 PM hudson.node_monitors.AbstractNodeMonitorDescriptor$Record <init>
+WARNING: Previous Free Swap Space monitoring activity still in progress. Interrupting
+Feb 20, 2014 1:22:01 PM hudson.node_monitors.AbstractNodeMonitorDescriptor$Record <init>
+WARNING: Previous Free Temp Space monitoring activity still in progress. Interrupting
+Feb 20, 2014 1:22:01 PM hudson.node_monitors.AbstractNodeMonitorDescriptor$Record run
+WARNING: Unexpected node monitoring termination: Architecture
+java.lang.InterruptedException
+	at java.lang.Object.wait(Native Method)
+	at hudson.remoting.Request$1.get(Request.java:272)
+	at hudson.remoting.Request$1.get(Request.java:210)
+	at hudson.remoting.FutureAdapter.get(FutureAdapter.java:59)
+	at hudson.node_monitors.AbstractAsyncNodeMonitorDescriptor.monitor(AbstractAsyncNodeMonitorDescriptor.java:97)
+	at hudson.node_monitors.AbstractNodeMonitorDescriptor$Record.run(AbstractNodeMonitorDescriptor.java:280)
+Feb 20, 2014 1:22:01 PM hudson.node_monitors.AbstractNodeMonitorDescriptor$Record <init>
+WARNING: Previous Response Time monitoring activity still in progress. Interrupting
+Feb 20, 2014 1:22:01 PM hudson.node_monitors.AbstractNodeMonitorDescriptor$Record run
+WARNING: Unexpected node monitoring termination: Free Swap Space
+java.lang.InterruptedException
+	at java.lang.Object.wait(Native Method)
+	at hudson.remoting.Request$1.get(Request.java:272)
+	at hudson.remoting.Request$1.get(Request.java:210)
+	at hudson.remoting.FutureAdapter.get(FutureAdapter.java:59)
+	at hudson.node_monitors.AbstractAsyncNodeMonitorDescriptor.monitor(AbstractAsyncNodeMonitorDescriptor.java:97)
+	at hudson.node_monitors.AbstractNodeMonitorDescriptor$Record.run(AbstractNodeMonitorDescriptor.java:280)
+Feb 20, 2014 1:22:01 PM hudson.node_monitors.AbstractNodeMonitorDescriptor$Record run
+WARNING: Unexpected node monitoring termination: Free Disk Space
+java.lang.InterruptedException
+	at java.lang.Object.wait(Native Method)
+	at hudson.remoting.Request$1.get(Request.java:272)
+	at hudson.remoting.Request$1.get(Request.java:210)
+	at hudson.remoting.FutureAdapter.get(FutureAdapter.java:59)
+	at hudson.node_monitors.AbstractAsyncNodeMonitorDescriptor.monitor(AbstractAsyncNodeMonitorDescriptor.java:97)
+	at hudson.node_monitors.AbstractNodeMonitorDescriptor$Record.run(AbstractNodeMonitorDescriptor.java:280)
+Feb 20, 2014 1:22:01 PM hudson.node_monitors.AbstractNodeMonitorDescriptor$Record run
+WARNING: Unexpected node monitoring termination: Free Temp Space
+java.lang.InterruptedException
+	at java.lang.Object.wait(Native Method)
+	at hudson.remoting.Request$1.get(Request.java:272)
+	at hudson.remoting.Request$1.get(Request.java:210)
+	at hudson.remoting.FutureAdapter.get(FutureAdapter.java:59)
+	at hudson.node_monitors.AbstractAsyncNodeMonitorDescriptor.monitor(AbstractAsyncNodeMonitorDescriptor.java:97)
+	at hudson.node_monitors.AbstractNodeMonitorDescriptor$Record.run(AbstractNodeMonitorDescriptor.java:280)
+Feb 20, 2014 1:22:01 PM hudson.node_monitors.AbstractNodeMonitorDescriptor$Record run
+WARNING: Unexpected node monitoring termination: Response Time
+java.lang.InterruptedException
+	at java.lang.Object.wait(Native Method)
+	at hudson.remoting.Request$1.get(Request.java:272)
+	at hudson.remoting.Request$1.get(Request.java:210)
+	at hudson.remoting.FutureAdapter.get(FutureAdapter.java:59)
+	at hudson.node_monitors.AbstractAsyncNodeMonitorDescriptor.monitor(AbstractAsyncNodeMonitorDescriptor.java:97)
+	at hudson.node_monitors.ResponseTimeMonitor$1.monitor(ResponseTimeMonitor.java:64)
+	at hudson.node_monitors.AbstractNodeMonitorDescriptor$Record.run(AbstractNodeMonitorDescriptor.java:280)
+Feb 20, 2014 1:22:01 PM hudson.node_monitors.AbstractNodeMonitorDescriptor$Record run
+WARNING: Unexpected node monitoring termination: Clock Difference
+java.lang.InterruptedException
+	at java.lang.Object.wait(Native Method)
+	at hudson.remoting.Request$1.get(Request.java:272)
+	at hudson.remoting.Request$1.get(Request.java:210)
+	at hudson.remoting.FutureAdapter.get(FutureAdapter.java:59)
+	at hudson.node_monitors.AbstractAsyncNodeMonitorDescriptor.monitor(AbstractAsyncNodeMonitorDescriptor.java:97)
+	at hudson.node_monitors.AbstractNodeMonitorDescriptor$Record.run(AbstractNodeMonitorDescriptor.java:280)
+Feb 20, 2014 1:23:24 PM hudson.model.UpdateSite$Plugin getNeededDependencies
+WARNING: Could not find dependency cloudbees-credentials of bees-sdk-plugin
+Feb 20, 2014 1:23:24 PM hudson.model.UpdateSite$Plugin getNeededDependencies
+WARNING: Could not find dependency cloudbees-credentials of bees-sdk-plugin
+Feb 20, 2014 1:23:46 PM hudson.model.UpdateSite$Plugin deploy
+WARNING: Adding dependent install of git for plugin git-server
+Feb 20, 2014 1:23:46 PM hudson.model.UpdateSite$Plugin deploy
+WARNING: Adding dependent install of scm-api for plugin git
+Feb 20, 2014 1:23:48 PM hudson.model.UpdateCenter$DownloadJob run
+INFO: Starting the installation of SCM API Plugin on behalf of anonymous
+Feb 20, 2014 1:23:48 PM hudson.model.UpdateCenter$UpdateCenterConfiguration download
+INFO: Downloading SCM API Plugin
+Feb 20, 2014 1:23:48 PM hudson.model.UpdateCenter$DownloadJob run
+INFO: Starting the installation of Git Plugin on behalf of anonymous
+Feb 20, 2014 1:23:49 PM hudson.model.UpdateCenter$UpdateCenterConfiguration download
+INFO: Downloading Git Plugin
+Feb 20, 2014 1:23:50 PM hudson.model.UpdateCenter$DownloadJob run
+INFO: Starting the installation of Git Server Plugin on behalf of anonymous
+Feb 20, 2014 1:23:51 PM hudson.model.UpdateCenter$UpdateCenterConfiguration download
+INFO: Downloading Git Server Plugin
+Feb 20, 2014 1:23:55 PM hudson.model.UpdateCenter doSafeRestart
+INFO: Scheduling Jenkins reboot
+Feb 20, 2014 1:23:55 PM jenkins.model.Jenkins$23 run
+INFO: Restart in 10 seconds
+Feb 20, 2014 1:24:05 PM jenkins.model.Jenkins$23 run
+SEVERE: Restarting VM as requested by anonymous
+Running from: /var/fpwork/demx2fk3/ci/lib/java/jenkins/jenkins-1.532.2.war
+webroot: EnvVars.masterEnvVars.get("JENKINS_HOME")
+Feb 20, 2014 1:24:06 PM winstone.Logger logInternal
+INFO: Beginning extraction from war file
+Jenkins home directory: /var/fpwork/demx2fk3/ci/home found at: EnvVars.masterEnvVars.get("JENKINS_HOME")
+Feb 20, 2014 1:24:07 PM winstone.Logger logInternal
+INFO: HTTP Listener started: port=1280
+Feb 20, 2014 1:24:07 PM winstone.Logger logInternal
+INFO: HTTPS Listener started: port=12443
+Feb 20, 2014 1:24:07 PM winstone.Logger logInternal
+INFO: Winstone Servlet Engine v0.9.10 running: controlPort=disabled
+Feb 20, 2014 1:24:07 PM jenkins.InitReactorRunner$1 onAttained
+INFO: Started initialization
+Feb 20, 2014 1:24:10 PM jenkins.InitReactorRunner$1 onAttained
+INFO: Listed all plugins
+Feb 20, 2014 1:24:10 PM jenkins.InitReactorRunner$1 onAttained
+INFO: Prepared all plugins
+Feb 20, 2014 1:24:10 PM jenkins.InitReactorRunner$1 onAttained
+INFO: Started all plugins
+Feb 20, 2014 1:24:10 PM jenkins.InitReactorRunner$1 onAttained
+INFO: Augmented all extensions
+Feb 20, 2014 1:24:13 PM jenkins.InitReactorRunner$1 onAttained
+INFO: Loaded all jobs
+Feb 20, 2014 1:24:13 PM org.jenkinsci.main.modules.sshd.SSHD start
+INFO: Started SSHD at port 46780
+Feb 20, 2014 1:24:13 PM jenkins.InitReactorRunner$1 onAttained
+INFO: Completed initialization
+Feb 20, 2014 1:24:13 PM hudson.TcpSlaveAgentListener <init>
+INFO: JNLP slave agent listener started on TCP port 56396
+Feb 20, 2014 1:24:13 PM hudson.slaves.SlaveComputer tryReconnect
+INFO: Attempting to reconnect 10.46.209.120
+Feb 20, 2014 1:24:13 PM hudson.slaves.SlaveComputer tryReconnect
+INFO: Attempting to reconnect 10.46.209.105
+Feb 20, 2014 1:24:13 PM hudson.WebAppMain$3 run
+INFO: Jenkins is fully up and running
+Feb 20, 2014 1:24:20 PM hudson.node_monitors.AbstractNodeMonitorDescriptor$Record <init>
+WARNING: Previous Architecture monitoring activity still in progress. Interrupting
+Feb 20, 2014 1:24:20 PM hudson.node_monitors.AbstractNodeMonitorDescriptor$Record <init>
+WARNING: Previous Clock Difference monitoring activity still in progress. Interrupting
+Feb 20, 2014 1:24:20 PM hudson.node_monitors.AbstractNodeMonitorDescriptor$Record run
+WARNING: Unexpected node monitoring termination: Architecture
+java.lang.InterruptedException
+	at java.lang.Object.wait(Native Method)
+	at hudson.remoting.Request$1.get(Request.java:272)
+	at hudson.remoting.Request$1.get(Request.java:210)
+	at hudson.remoting.FutureAdapter.get(FutureAdapter.java:59)
+	at hudson.node_monitors.AbstractAsyncNodeMonitorDescriptor.monitor(AbstractAsyncNodeMonitorDescriptor.java:97)
+	at hudson.node_monitors.AbstractNodeMonitorDescriptor$Record.run(AbstractNodeMonitorDescriptor.java:280)
+Feb 20, 2014 1:24:20 PM hudson.node_monitors.AbstractNodeMonitorDescriptor$Record run
+WARNING: Unexpected node monitoring termination: Clock Difference
+java.lang.InterruptedException
+	at java.lang.Object.wait(Native Method)
+	at hudson.remoting.Request$1.get(Request.java:272)
+	at hudson.remoting.Request$1.get(Request.java:210)
+	at hudson.remoting.FutureAdapter.get(FutureAdapter.java:59)
+	at hudson.node_monitors.AbstractAsyncNodeMonitorDescriptor.monitor(AbstractAsyncNodeMonitorDescriptor.java:97)
+	at hudson.node_monitors.AbstractNodeMonitorDescriptor$Record.run(AbstractNodeMonitorDescriptor.java:280)
+Feb 20, 2014 1:24:20 PM hudson.node_monitors.AbstractNodeMonitorDescriptor$Record <init>
+WARNING: Previous Free Disk Space monitoring activity still in progress. Interrupting
+Feb 20, 2014 1:24:20 PM hudson.node_monitors.AbstractNodeMonitorDescriptor$Record run
+WARNING: Unexpected node monitoring termination: Free Disk Space
+java.lang.InterruptedException
+	at java.lang.Object.wait(Native Method)
+	at hudson.remoting.Request$1.get(Request.java:272)
+	at hudson.remoting.Request$1.get(Request.java:210)
+	at hudson.remoting.FutureAdapter.get(FutureAdapter.java:59)
+	at hudson.node_monitors.AbstractAsyncNodeMonitorDescriptor.monitor(AbstractAsyncNodeMonitorDescriptor.java:97)
+	at hudson.node_monitors.AbstractNodeMonitorDescriptor$Record.run(AbstractNodeMonitorDescriptor.java:280)
+Feb 20, 2014 1:24:20 PM hudson.node_monitors.AbstractNodeMonitorDescriptor$Record <init>
+WARNING: Previous Free Swap Space monitoring activity still in progress. Interrupting
+Feb 20, 2014 1:24:20 PM hudson.node_monitors.AbstractNodeMonitorDescriptor$Record run
+WARNING: Unexpected node monitoring termination: Free Swap Space
+java.lang.InterruptedException
+	at java.lang.Object.wait(Native Method)
+	at hudson.remoting.Request$1.get(Request.java:272)
+	at hudson.remoting.Request$1.get(Request.java:210)
+	at hudson.remoting.FutureAdapter.get(FutureAdapter.java:59)
+	at hudson.node_monitors.AbstractAsyncNodeMonitorDescriptor.monitor(AbstractAsyncNodeMonitorDescriptor.java:97)
+	at hudson.node_monitors.AbstractNodeMonitorDescriptor$Record.run(AbstractNodeMonitorDescriptor.java:280)
+Feb 20, 2014 1:24:20 PM hudson.node_monitors.AbstractNodeMonitorDescriptor$Record <init>
+WARNING: Previous Free Temp Space monitoring activity still in progress. Interrupting
+Feb 20, 2014 1:24:20 PM hudson.node_monitors.AbstractNodeMonitorDescriptor$Record run
+WARNING: Unexpected node monitoring termination: Free Temp Space
+java.lang.InterruptedException
+	at java.lang.Object.wait(Native Method)
+	at hudson.remoting.Request$1.get(Request.java:272)
+	at hudson.remoting.Request$1.get(Request.java:210)
+	at hudson.remoting.FutureAdapter.get(FutureAdapter.java:59)
+	at hudson.node_monitors.AbstractAsyncNodeMonitorDescriptor.monitor(AbstractAsyncNodeMonitorDescriptor.java:97)
+	at hudson.node_monitors.AbstractNodeMonitorDescriptor$Record.run(AbstractNodeMonitorDescriptor.java:280)
+Feb 20, 2014 1:24:20 PM hudson.node_monitors.AbstractNodeMonitorDescriptor$Record <init>
+WARNING: Previous Response Time monitoring activity still in progress. Interrupting
+Feb 20, 2014 1:24:20 PM hudson.node_monitors.AbstractNodeMonitorDescriptor$Record run
+WARNING: Unexpected node monitoring termination: Response Time
+java.lang.InterruptedException
+	at java.lang.Object.wait(Native Method)
+	at hudson.remoting.Request$1.get(Request.java:272)
+	at hudson.remoting.Request$1.get(Request.java:210)
+	at hudson.remoting.FutureAdapter.get(FutureAdapter.java:59)
+	at hudson.node_monitors.AbstractAsyncNodeMonitorDescriptor.monitor(AbstractAsyncNodeMonitorDescriptor.java:97)
+	at hudson.node_monitors.ResponseTimeMonitor$1.monitor(ResponseTimeMonitor.java:64)
+	at hudson.node_monitors.AbstractNodeMonitorDescriptor$Record.run(AbstractNodeMonitorDescriptor.java:280)
+Feb 20, 2014 1:28:46 PM hudson.model.Run execute
+INFO: LFS production trunk - build fct #90 main build action completed: FAILURE
+Feb 20, 2014 1:34:00 PM hudson.remoting.SynchronousCommandTransport$ReaderThread run
+SEVERE: I/O error in channel 10.46.209.105
+java.io.IOException: Unexpected termination of the channel
+	at hudson.remoting.SynchronousCommandTransport$ReaderThread.run(SynchronousCommandTransport.java:50)
+Caused by: java.io.EOFException
+	at java.io.ObjectInputStream$BlockDataInputStream.peekByte(ObjectInputStream.java:2570)
+	at java.io.ObjectInputStream.readObject0(ObjectInputStream.java:1314)
+	at java.io.ObjectInputStream.readObject(ObjectInputStream.java:368)
+	at hudson.remoting.Command.readFrom(Command.java:92)
+	at hudson.remoting.ClassicCommandTransport.read(ClassicCommandTransport.java:71)
+	at hudson.remoting.SynchronousCommandTransport$ReaderThread.run(SynchronousCommandTransport.java:48)
+Feb 20, 2014 1:34:00 PM hudson.remoting.SynchronousCommandTransport$ReaderThread run
+SEVERE: I/O error in channel 10.46.209.120
+java.io.IOException: Unexpected termination of the channel
+	at hudson.remoting.SynchronousCommandTransport$ReaderThread.run(SynchronousCommandTransport.java:50)
+Caused by: java.io.EOFException
+	at java.io.ObjectInputStream$BlockDataInputStream.peekByte(ObjectInputStream.java:2570)
+	at java.io.ObjectInputStream.readObject0(ObjectInputStream.java:1314)
+	at java.io.ObjectInputStream.readObject(ObjectInputStream.java:368)
+	at hudson.remoting.Command.readFrom(Command.java:92)
+	at hudson.remoting.ClassicCommandTransport.read(ClassicCommandTransport.java:71)
+	at hudson.remoting.SynchronousCommandTransport$ReaderThread.run(SynchronousCommandTransport.java:48)
+Feb 20, 2014 1:34:13 PM hudson.slaves.SlaveComputer tryReconnect
+INFO: Attempting to reconnect 10.46.209.120
+Feb 20, 2014 1:34:13 PM hudson.slaves.SlaveComputer tryReconnect
+INFO: Attempting to reconnect 10.46.209.105
+Feb 20, 2014 1:36:27 PM hudson.remoting.SynchronousCommandTransport$ReaderThread run
+SEVERE: I/O error in channel 10.46.209.105
+java.io.IOException: Unexpected termination of the channel
+	at hudson.remoting.SynchronousCommandTransport$ReaderThread.run(SynchronousCommandTransport.java:50)
+Caused by: java.io.EOFException
+	at java.io.ObjectInputStream$BlockDataInputStream.peekByte(ObjectInputStream.java:2570)
+	at java.io.ObjectInputStream.readObject0(ObjectInputStream.java:1314)
+	at java.io.ObjectInputStream.readObject(ObjectInputStream.java:368)
+	at hudson.remoting.Command.readFrom(Command.java:92)
+	at hudson.remoting.ClassicCommandTransport.read(ClassicCommandTransport.java:71)
+	at hudson.remoting.SynchronousCommandTransport$ReaderThread.run(SynchronousCommandTransport.java:48)
+Feb 20, 2014 1:36:32 PM hudson.remoting.SynchronousCommandTransport$ReaderThread run
+SEVERE: I/O error in channel 10.46.209.120
+java.io.IOException: Unexpected termination of the channel
+	at hudson.remoting.SynchronousCommandTransport$ReaderThread.run(SynchronousCommandTransport.java:50)
+Caused by: java.io.EOFException
+	at java.io.ObjectInputStream$BlockDataInputStream.peekByte(ObjectInputStream.java:2570)
+	at java.io.ObjectInputStream.readObject0(ObjectInputStream.java:1314)
+	at java.io.ObjectInputStream.readObject(ObjectInputStream.java:368)
+	at hudson.remoting.Command.readFrom(Command.java:92)
+	at hudson.remoting.ClassicCommandTransport.read(ClassicCommandTransport.java:71)
+	at hudson.remoting.SynchronousCommandTransport$ReaderThread.run(SynchronousCommandTransport.java:48)
+Feb 20, 2014 1:36:41 PM hudson.model.Run execute
+INFO: LFS production trunk - build #50 main build action completed: SUCCESS
+Feb 20, 2014 1:38:42 PM hudson.model.Run execute
+INFO: LFS production trunk - build fct #91 main build action completed: SUCCESS
+Feb 20, 2014 1:45:23 PM hudson.triggers.SCMTrigger$Runner run
+INFO: SCM changes detected in LFS_production_trunk_-_build. Triggering  #51
+Feb 20, 2014 1:45:29 PM hudson.model.Run execute
+INFO: LFS production trunk - build #51 main build action completed: SUCCESS

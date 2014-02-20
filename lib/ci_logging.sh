@@ -9,8 +9,7 @@ source ${CI_PATH}/lib/exit_handling.sh
 startLogfile() {
 
     if [[ ! -w ${CI_LOGGING_LOGFILENAME} ]] ; then
-        # export CI_LOGGING_LOGFILENAME=logfile.`date +%s`.log
-        export CI_LOGGING_LOGFILENAME=${CI_PATH}/logfile
+        export CI_LOGGING_LOGFILENAME=${CI_PATH}/log/ci.$$.`date +%s`.log
         printf -- "------------------------------------------------------------------\n" >  ${CI_LOGGING_LOGFILENAME}
         printf -- "starting logfile\n"                                                   >> ${CI_LOGGING_LOGFILENAME}
         printf -- "  script: $0\n"                                                       >> ${CI_LOGGING_LOGFILENAME}

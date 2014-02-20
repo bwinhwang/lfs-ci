@@ -61,6 +61,7 @@ _createWorkspace() {
         exit 1;
     fi
 
+    preCheckoutPatchWorkspace
             
     for src in $(getConfig "buildTargets_${location}_${target}") ; do
 
@@ -68,6 +69,8 @@ _createWorkspace() {
         checkoutSubprojectDirectories "${src}"
 
     done
+
+    postCheckoutPatchWorkspace
 
     return 0
 }
@@ -83,8 +86,8 @@ preCheckoutPatchWorkspace() {
 }
 
 postCheckoutPatchWorkspace() {
-    if [[ -d "${CI_PATH}/patches/${JENKINS_JOB_NAME}/preCheckout/" ]] ; then
-        for patch in "${CI_PATH}/patches/${JENKINS_JOB_NAME}/preCheckout/"* ; do
+    if [[ -d "${CI_PATH}/patches/${JENKINS_JOB_NAME}/postCheckout/" ]] ; then
+        for patch in "${CI_PATH}/patches/${JENKINS_JOB_NAME}/postCheckout/"* ; do
             [[ ! -f "${patch}" ]] && continue
             info "applying post checkout patch $(basename \"${patch}\")"
             patch -p0 < "${patch}" || exit 1
