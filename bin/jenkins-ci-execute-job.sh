@@ -5,7 +5,7 @@
 
 TMP=$(dirname $0)
 export CI_PATH="$(readlink -f ${TMP}/..)"
-# PATH=$PATH:$CI_LIB_PATH/bin
+export PATH=${PATH}:${CI_PATH}/bin
 
 source ${CI_PATH}/lib/ci_logging.sh
 source ${CI_PATH}/lib/commands.sh
@@ -13,6 +13,7 @@ source ${CI_PATH}/lib/build.sh
 source ${CI_PATH}/lib/common.sh
 
 cleanupEnvironmentVariables
+export CI_LOGGING_DURATION_OLD_DATE=0
 
 # for better debugging
 PS4='+(${BASH_SOURCE}:${LINENO}): ${FUNCNAME[0]:+${FUNCNAME[0]}(): }'
@@ -20,6 +21,9 @@ export PS4
 
 JENKINS_JOB_NAME="$1"
 export JENKINS_JOB_NAME 
+
+JENKINS_SVN_REVISION=${SVN_REVISION}
+export JENKINS_SVN_REVISION
 
 showAllEnvironmentVariables
 
@@ -32,7 +36,7 @@ exit_add stopLogfile
 
 # first dispatcher, calling the correct script
 case "${JENKINS_JOB_NAME}" in
-    *build*)
+    LFS_CI_trunk_-_Building*)
         ci_job_build \
             || exit 1
     ;;

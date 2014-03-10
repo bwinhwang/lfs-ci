@@ -1,7 +1,7 @@
 #!/bin/bash
 getTargetBoardName() {
 
-    local regex='LFS_production_([[:alpha:]]*)_-_([[:alpha:]]*)_([[:alpha:]]*).*'
+    local regex='LFS_[[:alpha:]]*_([[:alpha:]]*)_-_([[:alpha:]]*)_-_([[:alpha:]]*.*)'
 
     trace "JENKINS_JOB_NAME = ${JENKINS_JOB_NAME}"
 
@@ -25,7 +25,7 @@ mustHaveTargetBoardName() {
 
 getLocationName() {
 
-    local regex='LFS_production_([[:alpha:]]*)_-_([[:alpha:]]*)_([[:alpha:]]*).*'
+    local regex='LFS_[[:alpha:]]*_([[:alpha:]]*)_-_([[:alpha:]]*)_-_([[:alpha:]]*).*'
 
     trace "JENKINS_JOB_NAME = ${JENKINS_JOB_NAME}"
 
@@ -139,7 +139,11 @@ switchSvnServerInLocations() {
 checkoutSubprojectDirectories() {
     local workspace=$(getWorkspaceName) 
     local project=$1
-    execute build adddir "${project}"
+    local revision=$2
+    if [[ ${revision} ]] ; then
+        optRev="--revision=${revision}"
+    fi
+    execute build adddir "${project}" ${optRev}
 }
 
 createTempFile() {

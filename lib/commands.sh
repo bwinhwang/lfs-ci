@@ -14,6 +14,7 @@ execute() {
     rawDebug ${output}
 
     if [[ ${exitCode} -gt 0 ]] ; then
+        rawOutput ${output}
         error "error occoured in \"${command}\""
         exit ${exitCode}
     fi
@@ -35,6 +36,7 @@ cleanupEnvironmentVariables() {
             PATH|HOME|USER|HOSTNAME) : ;;
             CI_PATH) : ;;
             WORKSPACE) : ;;
+            SVN_REVISION) : ;;
             *) 
                 trace "unsetting environment variable \"${key}\" with value \"${!key}\"" 
                 unset ${key} 

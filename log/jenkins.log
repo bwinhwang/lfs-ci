@@ -1,35 +1,157 @@
 Running from: /var/fpwork/demx2fk3/ci/lib/java/jenkins/jenkins-1.532.2.war
 webroot: EnvVars.masterEnvVars.get("JENKINS_HOME")
-Feb 20, 2014 3:58:24 PM winstone.Logger logInternal
+Mar 6, 2014 9:57:25 AM winstone.Logger logInternal
 INFO: Beginning extraction from war file
 Jenkins home directory: /var/fpwork/demx2fk3/ci/home found at: EnvVars.masterEnvVars.get("JENKINS_HOME")
-Feb 20, 2014 3:58:24 PM winstone.Logger logInternal
+Mar 6, 2014 9:57:27 AM winstone.Logger logInternal
 INFO: HTTP Listener started: port=1280
-Feb 20, 2014 3:58:25 PM winstone.Logger logInternal
+Mar 6, 2014 9:57:27 AM winstone.Logger logInternal
 INFO: HTTPS Listener started: port=12443
-Feb 20, 2014 3:58:25 PM winstone.Logger logInternal
+Mar 6, 2014 9:57:27 AM winstone.Logger logInternal
 INFO: Winstone Servlet Engine v0.9.10 running: controlPort=disabled
-Feb 20, 2014 3:58:25 PM jenkins.InitReactorRunner$1 onAttained
+Mar 6, 2014 9:57:27 AM jenkins.InitReactorRunner$1 onAttained
 INFO: Started initialization
-Feb 20, 2014 3:58:25 PM jenkins.InitReactorRunner$1 onAttained
+Mar 6, 2014 9:57:28 AM jenkins.InitReactorRunner$1 onAttained
 INFO: Listed all plugins
-Feb 20, 2014 3:58:25 PM jenkins.InitReactorRunner$1 onAttained
+Mar 6, 2014 9:57:28 AM jenkins.InitReactorRunner$1 onAttained
 INFO: Prepared all plugins
-Feb 20, 2014 3:58:25 PM jenkins.InitReactorRunner$1 onAttained
+Mar 6, 2014 9:57:29 AM jenkins.InitReactorRunner$1 onAttained
 INFO: Started all plugins
-Feb 20, 2014 3:58:25 PM jenkins.InitReactorRunner$1 onAttained
+Mar 6, 2014 9:57:29 AM jenkins.InitReactorRunner$1 onAttained
 INFO: Augmented all extensions
-Feb 20, 2014 3:58:28 PM jenkins.InitReactorRunner$1 onAttained
+Mar 6, 2014 9:57:32 AM jenkins.InitReactorRunner$1 onAttained
 INFO: Loaded all jobs
-Feb 20, 2014 3:58:28 PM org.jenkinsci.main.modules.sshd.SSHD start
-INFO: Started SSHD at port 34178
-Feb 20, 2014 3:58:28 PM jenkins.InitReactorRunner$1 onAttained
+Mar 6, 2014 9:57:32 AM org.jenkinsci.main.modules.sshd.SSHD start
+INFO: Started SSHD at port 55822
+Mar 6, 2014 9:57:32 AM jenkins.InitReactorRunner$1 onAttained
 INFO: Completed initialization
-Feb 20, 2014 3:58:28 PM hudson.TcpSlaveAgentListener <init>
-INFO: JNLP slave agent listener started on TCP port 49864
-Feb 20, 2014 3:58:28 PM hudson.WebAppMain$3 run
+Mar 6, 2014 9:57:32 AM hudson.TcpSlaveAgentListener <init>
+INFO: JNLP slave agent listener started on TCP port 42117
+Mar 6, 2014 9:57:33 AM hudson.WebAppMain$3 run
 INFO: Jenkins is fully up and running
-Feb 20, 2014 3:58:40 PM hudson.model.Run execute
-INFO: LFS production trunk - build #61 main build action completed: SUCCESS
-Feb 20, 2014 4:00:21 PM hudson.model.Run execute
-INFO: LFS production trunk - build fspc #5 main build action completed: SUCCESS
+Mar 6, 2014 9:57:36 AM hudson.model.DownloadService$Downloadable doPostBack
+INFO: Obtained the updated data file for hudson.tasks.Maven.MavenInstaller
+Mar 6, 2014 9:57:36 AM hudson.model.DownloadService$Downloadable doPostBack
+INFO: Obtained the updated data file for hudson.tasks.Ant.AntInstaller
+Mar 6, 2014 9:57:37 AM hudson.model.DownloadService$Downloadable doPostBack
+INFO: Obtained the updated data file for hudson.tools.JDKInstaller
+Mar 6, 2014 9:58:22 AM winstone.Logger logInternal
+SEVERE: Error while serving http://maxi.emea.nsn-net.net:1280/updateCenter/byId/default/postBack
+java.lang.reflect.InvocationTargetException
+	at sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+	at sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:57)
+	at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+	at java.lang.reflect.Method.invoke(Method.java:616)
+	at org.kohsuke.stapler.Function$InstanceFunction.invoke(Function.java:298)
+	at org.kohsuke.stapler.Function.bindAndInvoke(Function.java:161)
+	at org.kohsuke.stapler.Function.bindAndInvokeAndServeResponse(Function.java:96)
+	at org.kohsuke.stapler.MetaClass$1.doDispatch(MetaClass.java:120)
+	at org.kohsuke.stapler.NameBasedDispatcher.dispatch(NameBasedDispatcher.java:53)
+	at org.kohsuke.stapler.Stapler.tryInvoke(Stapler.java:728)
+	at org.kohsuke.stapler.Stapler.invoke(Stapler.java:858)
+	at org.kohsuke.stapler.MetaClass$6.doDispatch(MetaClass.java:248)
+	at org.kohsuke.stapler.NameBasedDispatcher.dispatch(NameBasedDispatcher.java:53)
+	at org.kohsuke.stapler.Stapler.tryInvoke(Stapler.java:728)
+	at org.kohsuke.stapler.Stapler.invoke(Stapler.java:858)
+	at org.kohsuke.stapler.MetaClass$4.doDispatch(MetaClass.java:210)
+	at org.kohsuke.stapler.NameBasedDispatcher.dispatch(NameBasedDispatcher.java:53)
+	at org.kohsuke.stapler.Stapler.tryInvoke(Stapler.java:728)
+	at org.kohsuke.stapler.Stapler.invoke(Stapler.java:858)
+	at org.kohsuke.stapler.Stapler.invoke(Stapler.java:631)
+	at org.kohsuke.stapler.Stapler.service(Stapler.java:225)
+	at javax.servlet.http.HttpServlet.service(HttpServlet.java:45)
+	at winstone.ServletConfiguration.execute(ServletConfiguration.java:248)
+	at winstone.RequestDispatcher.forward(RequestDispatcher.java:333)
+	at winstone.RequestDispatcher.doFilter(RequestDispatcher.java:376)
+	at hudson.util.PluginServletFilter$1.doFilter(PluginServletFilter.java:96)
+	at hudson.util.PluginServletFilter.doFilter(PluginServletFilter.java:88)
+	at winstone.FilterConfiguration.execute(FilterConfiguration.java:194)
+	at winstone.RequestDispatcher.doFilter(RequestDispatcher.java:366)
+	at hudson.security.csrf.CrumbFilter.doFilter(CrumbFilter.java:48)
+	at winstone.FilterConfiguration.execute(FilterConfiguration.java:194)
+	at winstone.RequestDispatcher.doFilter(RequestDispatcher.java:366)
+	at hudson.security.ChainedServletFilter$1.doFilter(ChainedServletFilter.java:84)
+	at hudson.security.ChainedServletFilter.doFilter(ChainedServletFilter.java:76)
+	at hudson.security.HudsonFilter.doFilter(HudsonFilter.java:164)
+	at winstone.FilterConfiguration.execute(FilterConfiguration.java:194)
+	at winstone.RequestDispatcher.doFilter(RequestDispatcher.java:366)
+	at org.kohsuke.stapler.compression.CompressionFilter.doFilter(CompressionFilter.java:46)
+	at winstone.FilterConfiguration.execute(FilterConfiguration.java:194)
+	at winstone.RequestDispatcher.doFilter(RequestDispatcher.java:366)
+	at hudson.util.CharacterEncodingFilter.doFilter(CharacterEncodingFilter.java:81)
+	at winstone.FilterConfiguration.execute(FilterConfiguration.java:194)
+	at winstone.RequestDispatcher.doFilter(RequestDispatcher.java:366)
+	at winstone.RequestDispatcher.forward(RequestDispatcher.java:331)
+	at winstone.RequestHandlerThread.processRequest(RequestHandlerThread.java:227)
+	at winstone.RequestHandlerThread.run(RequestHandlerThread.java:150)
+	at java.util.concurrent.Executors$RunnableAdapter.call(Executors.java:471)
+	at java.util.concurrent.FutureTask$Sync.innerRun(FutureTask.java:334)
+	at java.util.concurrent.FutureTask.run(FutureTask.java:166)
+	at winstone.BoundedExecutorService$1.run(BoundedExecutorService.java:77)
+	at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1110)
+	at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:603)
+	at java.lang.Thread.run(Thread.java:679)
+Caused by: net.sf.json.JSONException: Found starting '{' but missing '}' at the end. at character 0 of null
+	at net.sf.json.util.JSONTokener.syntaxError(JSONTokener.java:499)
+	at net.sf.json.util.JSONTokener.<init>(JSONTokener.java:85)
+	at net.sf.json.JSONObject._fromString(JSONObject.java:1145)
+	at net.sf.json.JSONObject.fromObject(JSONObject.java:162)
+	at net.sf.json.JSONObject.fromObject(JSONObject.java:132)
+	at hudson.model.UpdateSite.updateData(UpdateSite.java:203)
+	at hudson.model.UpdateSite.doPostBack(UpdateSite.java:195)
+	... 53 more
+skipping symbolic link /var/fpwork/demx2fk3/ci/home/jobs/LFS_production_trunk_-_build_fspc/workspace/workspace/src-mddg/src/build/fspc/linux/extra/build/fspc/linux/extra/build/fspc/linux/extra/build/fspc/linux/extra/build/fspc/linux/extra/build/fspc/linux/extra -- too many levels of symbolic links.
+Mar 6, 2014 9:59:32 AM hudson.model.Run execute
+INFO: LFS production trunk - build #230 main build action completed: SUCCESS
+Mar 6, 2014 10:03:36 AM hudson.model.Run execute
+INFO: LFS production trunk - build fspc #172 main build action completed: FAILURE
+Mar 6, 2014 10:08:32 AM hudson.model.Run execute
+INFO: LFS production trunk - build fcmd #146 main build action completed: SUCCESS
+Mar 6, 2014 10:09:55 AM hudson.triggers.SCMTrigger$Runner run
+INFO: SCM changes detected in LFS_production_trunk_-_build. Triggering  #231
+Mar 6, 2014 10:10:02 AM hudson.model.Run execute
+INFO: LFS production trunk - build #231 main build action completed: SUCCESS
+Mar 6, 2014 10:10:48 AM hudson.model.Run execute
+INFO: LFS production trunk - build fcmd #147 aborted
+java.lang.InterruptedException
+	at java.lang.Object.wait(Native Method)
+	at java.lang.Object.wait(Object.java:502)
+	at java.lang.UNIXProcess.waitFor(UNIXProcess.java:181)
+	at hudson.Proc$LocalProc.join(Proc.java:319)
+	at hudson.Launcher$ProcStarter.join(Launcher.java:360)
+	at hudson.tasks.CommandInterpreter.perform(CommandInterpreter.java:91)
+	at hudson.tasks.CommandInterpreter.perform(CommandInterpreter.java:60)
+	at hudson.tasks.BuildStepMonitor$1.perform(BuildStepMonitor.java:20)
+	at hudson.model.AbstractBuild$AbstractBuildExecution.perform(AbstractBuild.java:785)
+	at hudson.model.Build$BuildExecution.build(Build.java:199)
+	at hudson.model.Build$BuildExecution.doRun(Build.java:160)
+	at hudson.model.AbstractBuild$AbstractBuildExecution.run(AbstractBuild.java:566)
+	at hudson.model.Run.execute(Run.java:1665)
+	at hudson.model.FreeStyleBuild.run(FreeStyleBuild.java:46)
+	at hudson.model.ResourceController.execute(ResourceController.java:88)
+	at hudson.model.Executor.run(Executor.java:246)
+Mar 6, 2014 10:10:49 AM hudson.model.Run execute
+INFO: LFS production trunk - build fspc #173 aborted
+java.lang.InterruptedException
+	at java.lang.Object.wait(Native Method)
+	at java.lang.Object.wait(Object.java:502)
+	at java.lang.UNIXProcess.waitFor(UNIXProcess.java:181)
+	at hudson.Proc$LocalProc.join(Proc.java:319)
+	at hudson.Launcher$ProcStarter.join(Launcher.java:360)
+	at hudson.tasks.CommandInterpreter.perform(CommandInterpreter.java:91)
+	at hudson.tasks.CommandInterpreter.perform(CommandInterpreter.java:60)
+	at hudson.tasks.BuildStepMonitor$1.perform(BuildStepMonitor.java:20)
+	at hudson.model.AbstractBuild$AbstractBuildExecution.perform(AbstractBuild.java:785)
+	at hudson.model.Build$BuildExecution.build(Build.java:199)
+	at hudson.model.Build$BuildExecution.doRun(Build.java:160)
+	at hudson.model.AbstractBuild$AbstractBuildExecution.run(AbstractBuild.java:566)
+	at hudson.model.Run.execute(Run.java:1665)
+	at hudson.model.FreeStyleBuild.run(FreeStyleBuild.java:46)
+	at hudson.model.ResourceController.execute(ResourceController.java:88)
+	at hudson.model.Executor.run(Executor.java:246)
+Mar 6, 2014 10:15:14 AM hudson.model.Run execute
+INFO: LFS production trunk - build qemu_x86 #185 main build action completed: SUCCESS
+Mar 6, 2014 10:20:37 AM hudson.model.Run execute
+INFO: LFS production trunk - build fct #274 main build action completed: SUCCESS
+Mar 6, 2014 10:24:55 AM winstone.Logger logInternal
+INFO: JVM is terminating. Shutting down Winstone

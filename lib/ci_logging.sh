@@ -128,7 +128,6 @@ _loggingLine() {
     local prefix=${CI_LOGGING_PREFIX-${CI_LOGGING_PREFIX_HASH["$logType"]}}
     local dateFormat=${CI_LOGGING_DATEFORMAT-"+%Y-%m-%d-%H:%M:%S.%N"}
 
-
     for template in ${config}
     do
         case "${template}" in 
@@ -139,6 +138,16 @@ _loggingLine() {
             PREFIX)  printf "%s"   "${prefix}"             ;;
             DATE)    printf "%s" "$(date "${dateFormat}")" ;;
             TYPE)    printf "%10s" "[${logType}]"          ;;
+            DURATION) 
+                     if [[ "${logType}" != "TRACE" ]] ; then
+                        cur=$(date +%s.%N)
+                        dur=`echo ${cur} - ${CI_LOGGING_DURATION_OLD_DATE} | bc`
+                        printf "[%7.3f]" ${dur}
+                        export CI_LOGGING_DURATION_OLD_DATE=${cur}
+                     else
+                        printf "        "
+                     fi
+                     ;;
             NONE)    :                                     ;;
             MESSAGE) 
                 printf "%s" "${logMessage}" 
@@ -214,6 +223,20 @@ rawDebug() {
     trace "----------------------------------------------"
     cat ${fileToLog} >> ${CI_LOGGING_LOGFILENAME}
     trace "----------------------------------------------"
+
+    return
+}
+
+rawOutput() {
+    local fileToLog=$1
+
+    # file is empty
+    [[ ! -s ${fileToLog} ]] && return
+
+    trace "content of file ${fileToLog}"
+    trace "----------------------------"
+    cat ${fileToLog} 
+    trace "----------------------------"
 
     return
 }
