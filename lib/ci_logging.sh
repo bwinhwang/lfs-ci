@@ -9,11 +9,18 @@ source ${CI_PATH}/lib/exit_handling.sh
 startLogfile() {
 
     if [[ ! -w ${CI_LOGGING_LOGFILENAME} ]] ; then
-        export CI_LOGGING_LOGFILENAME=${CI_PATH}/log/ci.$$.`date +%s`.log
+
+        local jobName=${JOB_NAME:-unknownJobs}
+        local dateString=$(date +%Y%m%d%H%M%S)
+        local hostName=$(hostname -s)
+        local userName=${USER}
+
+        export CI_LOGGING_LOGFILENAME=${CI_PATH}/log/ci.${dateString}.${hostName}.${userName}.${jobName}.log
         printf -- "------------------------------------------------------------------\n" >  ${CI_LOGGING_LOGFILENAME}
         printf -- "starting logfile\n"                                                   >> ${CI_LOGGING_LOGFILENAME}
         printf -- "  script: $0\n"                                                       >> ${CI_LOGGING_LOGFILENAME}
         printf -- "  arguments: $@\n"                                                    >> ${CI_LOGGING_LOGFILENAME}
+        printf -- "  jobName: $jobName\n"                                                >> ${CI_LOGGING_LOGFILENAME}
         printf -- "------------------------------------------------------------------\n" >> ${CI_LOGGING_LOGFILENAME}
         printf -- "{{{\n"                                                                >> ${CI_LOGGING_LOGFILENAME}
     fi
@@ -124,7 +131,7 @@ _loggingLine() {
     local logType=$1
     local logMessage=$2
 
-    local config=${CI_LOGGING_CONFIG-"DATE SPACE TYPE SPACE MESSAGE NEWLINE"}
+    local config=${CI_LOGGING_CONFIG-"TYPE SPACE MESSAGE NEWLINE"}
     local prefix=${CI_LOGGING_PREFIX-${CI_LOGGING_PREFIX_HASH["$logType"]}}
     local dateFormat=${CI_LOGGING_DATEFORMAT-"+%Y-%m-%d-%H:%M:%S.%N"}
 
@@ -137,7 +144,7 @@ _loggingLine() {
             TAB)     printf "\t"                           ;;
             PREFIX)  printf "%s"   "${prefix}"             ;;
             DATE)    printf "%s" "$(date "${dateFormat}")" ;;
-            TYPE)    printf "%10s" "[${logType}]"          ;;
+            TYPE)    printf "%-10s" "[${logType}]"         ;;
             DURATION) 
                      if [[ "${logType}" != "TRACE" ]] ; then
                         cur=$(date +%s.%N)

@@ -100,7 +100,7 @@ _createWorkspace() {
     preCheckoutPatchWorkspace
 
     info "getting dependencies for ${srcDirectory}"
-    local buildTargets=$(/var/fpwork/demx2fk3/ci/bin/getDependencies ${srcDirectory} 2>/dev/null )
+    local buildTargets=$(${CI_PATH}/bin/getDependencies ${srcDirectory} 2>/dev/null )
     if [[ ! "${buildTargets}" ]] ; then
         error "no build targets configured"
         exit 1;
