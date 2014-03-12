@@ -1,0 +1,138 @@
+#!/usr/bin/env perl
+
+use strict;
+use warnings;
+use Data::Dumper;
+
+my $debug = 0;
+
+# my $SUBDIR=".";
+# $SUBDIR=shift(@ARGV) if $#ARGV>=0;
+
+my $GOAL = shift( @ARGV );
+my @CFGS = @ARGV;
+
+# chdir($SUBDIR) or die "$SUBDIR: $!, stopped";
+
+my @SRCS    = <src-*>;
+my %SRCDEPS = ();
+my %SRCCFGS = ();
+my %TARGETS = ();
+
+sub readdependencies {
+    my ( $src ) = shift;
+
+    my $dependencies = "$src/Dependencies";
+    return unless -f "$dependencies";
+    print STDERR "$0: reading $dependencies\n" if $debug;
+
+    open( D, "$dependencies" ) or die "$0: $dependencies: $!, stopped";
+    while( <D> ) {
+        if( /^\s*(use|use-readonly)\s+(\S+)\s+(\S+)\s*(.*)/ ) {
+            my ( $bld, $label, $rest ) = ( $2, $3, $4 );
+            if( -d $bld ) {
+                print STDERR "$0: DEBUG $dependencies: $bld exists\n" if $debug;
+            }
+            else {
+                print STDERR "$0: DEBUG need to make $bld\n" if $debug;
+                die "$0: $dependencies: illegal format $bld, stopped"
+                  unless $bld =~ /^bld\/bld-([^-]+)-(.*)/;
+                my ( $subsys, $cfg ) = ( $1, $2 );
+                my ( $depsrc ) = "src-$subsys";
+                if( $rest =~ /--source=(\S+)/ ) {
+                    $depsrc = $1;
+                    next if( $depsrc =~ /toolset/ );
+                    print STDERR "$0: DEBUG $dependencies: getting depsrc from rest: $depsrc\n" if $debug;
+                }
+                die "$0: $dependencies: $depsrc needed by $src not found, stopped"
+                  unless( -d $depsrc );
+
+                print STDERR "$0: DEBUG SRCDEPS($src) is $depsrc/$cfg\n" if $debug;
+                if( not $SRCDEPS{$depsrc}->{$cfg} ) {
+                    $SRCDEPS{$src}->{$depsrc}->{$cfg} = 1;
+                }
+
+                print STDERR "$0: DEBUG SRCCFGS($depsrc) is $cfg\n" if $debug;
+                if( not $SRCCFGS{$depsrc}->{$cfg} ) {
+                    $SRCCFGS{$depsrc}->{$cfg} = 1;
+                }
+            }
+        }
+        elsif( /^\s*target\s+(\S+)\s*(\S*)/ ) {
+            my ( $bld, $targets ) = ( $1, $2 );
+
+
+            #			if (-d $bld) {
+            #				die "$0: $dependencies: target $bld exists\n";
+            #			}
+            die "$0: $dependencies: illegal format $bld, stopped"
+              unless $bld =~ /^bld\/bld-([^-]+)-(.*)/;
+            my ( $subsys, $cfg ) = ( $1, $2 );
+            my ( $src ) = "src-$subsys";
+
+            print STDERR "$0: DEBUG SRCCFGS($src) is $cfg (target $bld)\n" if $debug;
+            if( $targets =~ /--targets=(.+)/ ) {
+                $TARGETS{$src}{$cfg} = [ split( ",", $1 ) ];
+            } else {
+                $TARGETS{$src}{$cfg} = [ map { s/.*-//; $_; } 
+                           ( $bld ) ];
+            }
+            $SRCCFGS{$src}->{$cfg} = 1;
+        }
+    }
+}
+
+foreach my $src ( sort @SRCS ) {
+    readdependencies( $src );
+}
+
+if( $debug ) {
+    print STDERR "SRCCFGS:\n" . Dumper( \%SRCCFGS );
+    print STDERR "SRCDEPS:\n" . Dumper( \%SRCDEPS );
+    print STDERR "TARGETS:\n" . Dumper( \%TARGETS );
+    print STDERR "---\n";
+}
+
+# topological sort
+my %SRCLIST = ();
+my @SRCLIST = ( sort @SRCS );
+
+SRC:
+while( $#SRCLIST >= 0 ) {
+    my $src     = shift( @SRCLIST );
+    my @depsrcs = sort keys %{ $SRCDEPS{$src} };
+
+    if( $#depsrcs >= 0 ) {
+        for my $depsrc ( @depsrcs ) {
+            if( !defined( $SRCLIST{$depsrc} ) ) {
+                print STDERR "$0: DEBUG: postponing $src since $depsrc must come first\n" if $debug;
+                push @SRCLIST, $src;
+                next SRC;
+            }
+        }
+    }
+    my @cfgs = sort keys %{ $SRCCFGS{$src} };
+    if( $GOAL ) {
+        # filter the list
+        print STDERR "filter active $src:\n" . Dumper( \@cfgs ) if $debug;
+        my @newCfgs = ();
+        foreach my $cfg ( @cfgs ) {
+            foreach my $target ( @{ $TARGETS{$src}{$cfg} } ) {
+                push @newCfgs, "$cfg" if $target eq $GOAL or $target eq "all";
+            }
+        }
+
+        @cfgs = @newCfgs;
+    }
+
+    my $cfgs = join( ",", @cfgs );
+    if( $#cfgs < 0 ) {
+        print STDERR "$0: DEBUG: $src has no cfgs\n" if $debug;
+    }
+    else {
+        for my $cfg ( @cfgs ) {
+            print "$src $cfg\n";
+        }
+    }
+    ++$SRCLIST{$src};
+}
