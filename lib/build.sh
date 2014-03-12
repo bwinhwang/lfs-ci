@@ -213,7 +213,7 @@ syncroniceToLocalPath() {
         else
             info "waiting for ${tag} on local filesystem"
             sleep 300
-            syncroniceToLocalPath ${subsystem}
+            syncroniceToLocalPath ${localPath}
         fi
     fi
 
