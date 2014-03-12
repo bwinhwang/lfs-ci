@@ -114,10 +114,10 @@ _createWorkspace() {
 
     info "using src-dirs: ${buildTargets}"
             
-    local amountOfTargets=$(echo ${buildTargets} ${srcDirectory} | wc -w)
+    local amountOfTargets=$(echo ${buildTargets} | wc -w)
     local counter=0
 
-    for src in ${buildTargets} ${srcDirectory} ; do
+    for src in ${buildTargets} ; do
 
         counter=$( expr ${counter} + 1 )
         info "(${counter}/${amountOfTargets}) checking out sources for ${src}"

@@ -16,6 +16,8 @@ startLogfile() {
         local userName=${USER}
 
         export CI_LOGGING_LOGFILENAME=${CI_PATH}/log/ci.${dateString}.${hostName}.${userName}.${jobName}.log
+
+        printf -- "logfile is ${CI_LOGGING_LOGFILENAME}\n"
         printf -- "------------------------------------------------------------------\n" >  ${CI_LOGGING_LOGFILENAME}
         printf -- "starting logfile\n"                                                   >> ${CI_LOGGING_LOGFILENAME}
         printf -- "  script: $0\n"                                                       >> ${CI_LOGGING_LOGFILENAME}
