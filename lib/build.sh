@@ -184,32 +184,35 @@ getConfig() {
 
 }
 
-syncroniceSdkToLocalPath() {
-    local sdk=$1
-    local tag=$(basename ${sdk})
+syncroniceToLocalPath() {
+    local subsystem=$1
+    local remotePath=$(readlink ${subsystem})
+    local tag=$(basename ${remotePath})
 
-    export LOCAL_SDK_PATH=/var/fpwork/${USER}/lfs-local-sdks/
-    if [[ ! -e ${LOCAL_SDK_PATH}/${tag} ]] ; then
-        progressFile=${LOCAL_SDK_PATH}/data/${tag}.in_progress
+    # 2014-03-12 demx2fk3 TODO not hardcoded here
+    export LOCAL_CACHE_DIR=/var/fpwork/${USER}/lfs-ci-local/${subsystem}
+
+    if [[ ! -e ${LOCAL_CACHE_DIR}/${tag} ]] ; then
+        progressFile=${LOCAL_CACHE_DIR}/data/${tag}.in_progress
 
         if [[ ! -e ${progressFile} ]] ; then
 
-            info "synchronice sdk ${tag} to local filesystem"
+            info "synchronice ${subsystem}/${tag} to local filesystem"
 
-            mkdir -p ${LOCAL_SDK_PATH}/data
+            mkdir -p ${LOCAL_CACHE_DIR}/data
             touch ${progressFile}
 
             rsync -a --numeric-ids --delete-excluded --ignore-errors -H -S \
                         --exclude=.svn                                     \
-                        ${sdk}/.                                           \
-                        ${LOCAL_SDK_PATH}/data/${tag}/                     || exit 1
+                        ${remotePath}                                      \
+                        ${LOCAL_CACHE_DIR}/data/${tag}/                    || exit 1
 
-            ln -sf ${LOCAL_SDK_PATH}/data/${tag} ${LOCAL_SDK_PATH}/${tag}
+            ln -sf ${LOCAL_CACHE_DIR}/data/${tag} ${LOCAL_SDK_PATH}/${tag}
             rm -f ${progressFile}
         else
             info "waiting for ${tag} on local filesystem"
             sleep 300
-            syncroniceSdkToLocalPath ${sdk}
+            syncroniceToLocalPath ${subsystem}
         fi
     fi
 
@@ -220,18 +223,21 @@ mustHaveLocalSdks() {
     local workspace=$(getWorkspaceName)
     mustHaveWorkspaceName
 
-    export LOCAL_SDK_PATH=/var/fpwork/${USER}/lfs-local-sdks/
-    for sdk in ${workspace}/bld/sdk* 
+    # 2014-03-12 demx2fk3 TODO not hardcoded here
+    export LOCAL_CACHE_DIR=/var/fpwork/${USER}/lfs-ci-local/${subsystem}
+
+    for bld in ${workspace}/bld/*
     do
         local pathToSdk=$(readlink ${sdk})
         local tag=$(basename ${pathToSdk})
+        local basename=$(basename ${bld})
         
-        if [[ ! -d ${LOCAL_SDK_PATH}/${tag} ]] ; then
-            syncroniceSdkToLocalPath ${pathToSdk}
+        if [[ ! -d ${LOCAL_CACHE_DIR}/${tag} ]] ; then
+            syncroniceToLocalPath ${bld}
         fi
 
-        rm -rf ${sdk} 
-        ln -sf ${LOCAL_SDK_PATH}/${tag} ${sdk}
+        rm -rf ${bld} 
+        ln -sf ${LOCAL_CACHE_DIR}/${tag} ${bld}
     done
 
 }
