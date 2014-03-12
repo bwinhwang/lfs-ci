@@ -100,8 +100,12 @@ _createWorkspace() {
     preCheckoutPatchWorkspace
 
     info "getting dependencies for ${srcDirectory}"
+<<<<<<< HEAD
     # 2014-03-11 demx2fk3 remove hardcoded path
     local buildTargets=$(/ps/lfs/ci/bin/getDependencies ${srcDirectory} 2>/dev/null )
+=======
+    local buildTargets=$(${CI_PATH}/bin/getDependencies ${srcDirectory} 2>/dev/null )
+>>>>>>> home/master
     if [[ ! "${buildTargets}" ]] ; then
         error "no build targets configured"
         exit 1;

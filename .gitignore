@@ -1,0 +1,7 @@
+log/ci*.log
+*.a
+*.o
+*.orig
+*.sw?
+tags
+TAGS
