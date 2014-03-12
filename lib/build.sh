@@ -205,7 +205,7 @@ syncroniceToLocalPath() {
 
             rsync -a --numeric-ids --delete-excluded --ignore-errors -H -S \
                         --exclude=.svn                                     \
-                        ${remotePath}                                      \
+                        ${remotePath}/                                     \
                         ${LOCAL_CACHE_DIR}/data/${tag}/                    || exit 1
 
             ln -sf ${LOCAL_CACHE_DIR}/data/${tag} ${LOCAL_CACHE_DIR}/${tag}
