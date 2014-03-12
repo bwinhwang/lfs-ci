@@ -860,9 +860,9 @@ sub execute {
                                  tag      => $tag,
                                  revision => $revision );
     $dir->loadDependencyTree();
-    printf "%s %s",
-           $subDir,
-           join( " ", $dir->getSourceDirectoriesFromDependencies() );
+    printf( "%s %s", join( " ", $dir->getSourceDirectoriesFromDependencies() ),
+                     $subDir,
+          );
 
     return;
 }
