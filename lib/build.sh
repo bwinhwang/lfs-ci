@@ -203,16 +203,17 @@ syncroniceToLocalPath() {
             mkdir -p ${LOCAL_CACHE_DIR}/data
             touch ${progressFile}
 
-            rsync -a --numeric-ids --delete-excluded --ignore-errors -H -S \
+            execute rsync -a --numeric-ids --delete-excluded --ignore-errors -H -S \
                         --exclude=.svn                                     \
                         ${remotePath}/                                     \
-                        ${LOCAL_CACHE_DIR}/data/${tag}/                    || exit 1
+                        ${LOCAL_CACHE_DIR}/data/${tag}/                    
 
             ln -sf ${LOCAL_CACHE_DIR}/data/${tag} ${LOCAL_CACHE_DIR}/${tag}
             rm -f ${progressFile}
         else
             info "waiting for ${tag} on local filesystem"
-            sleep 300
+            # 2014-03-12 demx2fk3 TODO make this configurable
+            sleep 60
             syncroniceToLocalPath ${localPath}
         fi
     fi
@@ -224,23 +225,23 @@ mustHaveLocalSdks() {
     local workspace=$(getWorkspaceName)
     mustHaveWorkspaceName
 
-    # 2014-03-12 demx2fk3 TODO not hardcoded here
-    export LOCAL_CACHE_DIR=/var/fpwork/${USER}/lfs-ci-local/${subsystem}
 
     for bld in ${workspace}/bld/*
     do
         local pathToSdk=$(readlink ${bld})
         local tag=$(basename ${pathToSdk})
-        local basename=$(basename ${bld})
+        local subsystem=$(basename ${bld})
+        # 2014-03-12 demx2fk3 TODO not hardcoded here
+        local localDir=/var/fpwork/${USER}/lfs-ci-local/${subsystem}/${tag}
 
-        info "checking for ${basename} on local disk"
+        info "checking for ${subsystem} on local disk"
         
-        if [[ ! -d ${LOCAL_CACHE_DIR}/${tag} ]] ; then
+        if [[ ! -d ${localDir} ]] ; then
             syncroniceToLocalPath ${bld}
         fi
 
-        rm -rf ${bld} 
-        ln -sf ${LOCAL_CACHE_DIR}/${tag} ${bld}
+        execute rm -rf ${bld} 
+        execute ln -sf ${localDir} ${bld}
     done
 
 }
