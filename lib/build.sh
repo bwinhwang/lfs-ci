@@ -185,8 +185,9 @@ getConfig() {
 }
 
 syncroniceToLocalPath() {
-    local subsystem=$1
-    local remotePath=$(readlink ${subsystem})
+    local localPath=$1
+    local remotePath=$(readlink ${localPath})
+    local subsystem=$(basename ${localPath})
     local tag=$(basename ${remotePath})
 
     # 2014-03-12 demx2fk3 TODO not hardcoded here
@@ -207,7 +208,7 @@ syncroniceToLocalPath() {
                         ${remotePath}                                      \
                         ${LOCAL_CACHE_DIR}/data/${tag}/                    || exit 1
 
-            ln -sf ${LOCAL_CACHE_DIR}/data/${tag} ${LOCAL_SDK_PATH}/${tag}
+            ln -sf ${LOCAL_CACHE_DIR}/data/${tag} ${LOCAL_CACHE_DIR}/${tag}
             rm -f ${progressFile}
         else
             info "waiting for ${tag} on local filesystem"
@@ -228,9 +229,11 @@ mustHaveLocalSdks() {
 
     for bld in ${workspace}/bld/*
     do
-        local pathToSdk=$(readlink ${sdk})
+        local pathToSdk=$(readlink ${bld})
         local tag=$(basename ${pathToSdk})
         local basename=$(basename ${bld})
+
+        info "checking for ${basename} on local disk"
         
         if [[ ! -d ${LOCAL_CACHE_DIR}/${tag} ]] ; then
             syncroniceToLocalPath ${bld}
