@@ -1,9 +1,11 @@
 #!/bin/bash
 
 getTaskNameFromJobName() {
+    return
 }
 
 getSubTaskNameFromJobName() {
+    return
 }
 
 getTargetBoardName() {
@@ -34,7 +36,7 @@ mustHaveTargetBoardName() {
 getLocationName() {
 
     #             LFS  CI | Prod      branch      Build      FSM-r3/r2         target
-    local regex='^LFS_[[:alpha:]]*_[[:alpha:]]*_[[:alpha:]]*(_[[:graph:]]*)?_-_(.*)$'
+    local regex='^LFS_[[:alpha:]]*_([[:alpha:]]*)_[[:alpha:]]*(_[[:graph:]]*)?_-_.*$'
 
     trace "JENKINS_JOB_NAME = ${JENKINS_JOB_NAME}"
 
