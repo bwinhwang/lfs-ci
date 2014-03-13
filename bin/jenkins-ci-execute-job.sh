@@ -36,7 +36,7 @@ exit_add stopLogfile
 
 # first dispatcher, calling the correct script
 case "${JENKINS_JOB_NAME}" in
-    LFS_CI_*_-_Building*)
+    LFS_CI_*_Build*)
         ci_job_build \
             || exit 1
     ;;
