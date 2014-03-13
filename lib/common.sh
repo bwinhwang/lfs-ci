@@ -1,13 +1,23 @@
 #!/bin/bash
+
+getTaskNameFromJobName() {
+    return
+}
+
+getSubTaskNameFromJobName() {
+    return
+}
+
 getTargetBoardName() {
 
-    local regex='LFS_[[:alpha:]]*_([[:alpha:]]*)_-_([[:alpha:]]*)_-_([[:alpha:]]*.*)'
+    #             LFS  CI | Prod      branch      Build      FSM-r3/r2         target
+    local regex='^LFS_[[:alpha:]]*_[[:alpha:]]*_[[:alpha:]]*(_[[:graph:]]*)?_-_(.*)$'
 
     trace "JENKINS_JOB_NAME = ${JENKINS_JOB_NAME}"
 
     if [[ ${JENKINS_JOB_NAME} =~ ${regex} ]] ; then
         case ${BASH_REMATCH[3]} in
-            *) echo ${BASH_REMATCH[3]} ;;
+            *) echo ${BASH_REMATCH[@]:(-1)} ;; # get the last element of the array
         esac
     fi
     
@@ -25,7 +35,8 @@ mustHaveTargetBoardName() {
 
 getLocationName() {
 
-    local regex='LFS_[[:alpha:]]*_([[:alpha:]]*)_-_([[:alpha:]]*)_-_([[:alpha:]]*).*'
+    #             LFS  CI | Prod      branch      Build      FSM-r3/r2         target
+    local regex='^LFS_[[:alpha:]]*_[[:alpha:]]*_[[:alpha:]]*(_[[:graph:]]*)?_-_(.*)$'
 
     trace "JENKINS_JOB_NAME = ${JENKINS_JOB_NAME}"
 

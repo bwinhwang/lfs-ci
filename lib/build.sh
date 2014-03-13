@@ -182,6 +182,7 @@ getConfig() {
         platformTargets_pronb-developer_qemu_x86)    echo "-e octeon -e qemu_x86_64 -e ftlb              -e _x86 -e fcmd -e fspc -e fct" ;;
         platformTargets_pronb-developer_qemu_x86_64) echo "-e octeon                -e ftlb -e qemu_i386         -e fcmd -e fspc -e fct" ;;
         platformTargets_pronb-developer_octeon2)     echo "          -e qemu_x86_64 -e ftlb -e qemu_i386 -e _x86 -e fcmd -e fspc -e fct" ;;
+        platformTargets_nightly_UBOOT) : ;;
         *) : ;;
     esac
 
