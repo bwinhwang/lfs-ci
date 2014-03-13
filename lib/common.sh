@@ -1,10 +1,21 @@
 #!/bin/bash
 
 getTaskNameFromJobName() {
+    #             LFS  CI | Prod      branch      Build         FSM-r3/r2      target
+    local regex='^LFS_[[:alpha:]]*_[[:alpha:]]*_([[:alpha:]]*)(_[[:graph:]]*)?_-_.*$'
+    if [[ ${JENKINS_JOB_NAME} =~ ${regex} ]] ; then
+        echo ${BASH_REMATCH[1]} 
+    fi
+
     return
 }
 
 getSubTaskNameFromJobName() {
+    #             LFS  CI | Prod      branch      Build         FSM-r3/r2      target
+    local regex='^LFS_[[:alpha:]]*_[[:alpha:]]*_[[:alpha:]]*(_([[:graph:]]*))?_-_.*$'
+    if [[ ${JENKINS_JOB_NAME} =~ ${regex} ]] ; then
+        echo ${BASH_REMATCH[2]} 
+    fi
     return
 }
 
@@ -13,14 +24,11 @@ getTargetBoardName() {
     #             LFS  CI | Prod      branch      Build      FSM-r3/r2         target
     local regex='^LFS_[[:alpha:]]*_[[:alpha:]]*_[[:alpha:]]*(_[[:graph:]]*)?_-_(.*)$'
 
-    trace "JENKINS_JOB_NAME = ${JENKINS_JOB_NAME}"
-
     if [[ ${JENKINS_JOB_NAME} =~ ${regex} ]] ; then
-        case ${BASH_REMATCH[3]} in
-            *) echo ${BASH_REMATCH[@]:(-1)} ;; # get the last element of the array
-        esac
+        # get the last element of the array
+        echo ${BASH_REMATCH[@]: -1} 
     fi
-    
+    return
 }
 
 mustHaveTargetBoardName() {
@@ -38,12 +46,14 @@ getLocationName() {
     #             LFS  CI | Prod      branch      Build      FSM-r3/r2         target
     local regex='^LFS_[[:alpha:]]*_([[:alpha:]]*)_[[:alpha:]]*(_[[:graph:]]*)?_-_.*$'
 
-    trace "JENKINS_JOB_NAME = ${JENKINS_JOB_NAME}"
-
     if [[ ${JENKINS_JOB_NAME} =~ ${regex} ]] ; then
         
         # 2014-02-17 demx2fk3 TODO do this in a better wa
         case ${BASH_REMATCH[1]} in
+            Kernel3xDev)
+                trace "TODO: mapping location name from trunk to pronb-developer"
+                echo KERNEL_3.x_DEV
+            ;;
             trunk)
                 trace "TODO: mapping location name from trunk to pronb-developer"
                 echo pronb-developer
@@ -53,7 +63,7 @@ getLocationName() {
             ;;
         esac
     fi
-    
+    return
 }
 
 mustHaveLocationName() {
@@ -123,8 +133,10 @@ switchToNewLocation() {
     #     exit 1
     # fi
 
-    trace "switching to new location \"${location}\""
-    execute build newlocations ${location}
+    newLocation=$(getConfig locationMapping)
+
+    trace "switching to new location \"${newLocation}\""
+    execute build newlocations ${newLocation}
 }
 
 # side effect: change directory

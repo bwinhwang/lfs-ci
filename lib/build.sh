@@ -29,13 +29,12 @@ _build() {
     local target=$(getTargetBoardName) 
     mustHaveTargetBoardName
 
-    local grepMinusV=$(getConfig "platformTargets_${location}_${target}")
-    sortbuildsfromdependencies ${target} | grep -v -e ftlb ${grepMinusV} > ${cfgFile}
+    sortbuildsfromdependencies ${target} > ${cfgFile}
+    rawDebug ${cfgFile}
 
     local amountOfTargets=$(wc -l ${cfgFile} | cut -d" " -f1)
     local counter=0
 
-    rawDebug ${cfgFile}
 
     while read SRC CFG
     do
@@ -78,11 +77,14 @@ _createWorkspace() {
     mustHaveCleanWorkspace
     mustHaveWritableWorkspace
 
+    local taskName=$(getTaskNameFromJobName)
+    local subTaskName=$(getSubTaskNameFromJobName)
+    trace "taskName is ${taskName} / ${subTaskName}"
     debug "create workspace for ${location} / ${target} in ${workspace}"
 
     local build="build -W \"${workspace}\""
 
-    debug "ceating a new workspace in \"${workspace}\""
+    debug "creating a new workspace in \"${workspace}\""
     setupNewWorkspace
 
     # change from svne1 to ulmscmi
@@ -92,9 +94,9 @@ _createWorkspace() {
 
     mustHaveValidWorkspace
 
-    local srcDirectory=$(getConfig "buildTargets_${location}_${target}")
+    local srcDirectory=$(getConfig "subsystem")
     if [[ ! "${srcDirectory}" ]] ; then
-        error "no srcDirectory found (buildTargets_${location}_${target})"
+        error "no srcDirectory found (subsystem)"
         exit 1;
     fi
     info "requested source directory: ${srcDirectory}"
@@ -108,18 +110,20 @@ _createWorkspace() {
         exit 1;
     fi
 
+    buildTargets="$(getConfig additionalSourceDirectories) ${buildTargets}"
+
     local revision=
     if [[ ${JENKINS_SVN_REVISION} ]] ; then
         info "using subversion revision: ${JENKINS_SVN_REVISION}"
         revision=${JENKINS_SVN_REVISION}
     fi
 
-    info "using src-dirs: ${buildTargets} : ${srcDirectory}"
+    info "using src-dirs: ${buildTargets}"
             
-    local amountOfTargets=$(echo ${buildTargets} ${srcDirectory} | wc -w)
+    local amountOfTargets=$(echo ${buildTargets} | wc -w)
     local counter=0
 
-    for src in ${buildTargets} ${srcDirectory}; do
+    for src in ${buildTargets} ; do
 
         counter=$( expr ${counter} + 1 )
         info "(${counter}/${amountOfTargets}) checking out sources for ${src}"
@@ -164,25 +168,33 @@ getConfig() {
     local key=$1
 
     trace "get config value for ${key}"
+
+    taskName=$(getTaskNameFromJobName)
+    subTaskName=$(getSubTaskNameFromJobName)
+    location=$(getLocationName)
+    config=$(getTargetBoardName)
+
     case "${key}" in 
-        buildTargets_pronb-developer_fspc)        echo src-psl ;;
-        buildTargets_pronb-developer_fcmd)        echo src-psl ;;
-        buildTargets_pronb-developer_qemu_x86)    echo src-psl ;;
-
-        buildTargets_pronb-developer_fsp)         echo src-fsmpsl ;;
-        buildTargets_pronb-developer_fct)         echo src-fsmpsl ;;
-        buildTargets_pronb-developer_qemu_x86_64) echo src-fsmpsl ;;
-        buildTargets_pronb-developer_octeon2)     echo src-fsmpsl ;;
-        buildTargets_LRC_lcpa)                    echo src-lrcpsl src-lrcbrm src-cvmxsources src-kernelsources src-bos src-lrcddg src-lrcddal src-rfs src-tools ;;
-        buildTargets_nightly_UBOOT)               echo src-fsmbrm ;;
-
-        platformTargets_pronb-developer_fct)         echo "-e octeon -e qemu_x86_64 -e ftlb -e qemu_i386 -e _x86 -e fcmd -e fspc       " ;;
-        platformTargets_pronb-developer_fspc)        echo "-e octeon -e qemu_x86_64 -e ftlb -e qemu_i386 -e _x86 -e fcmd         -e fct" ;;
-        platformTargets_pronb-developer_fcmd)        echo "-e octeon -e qemu_x86_64 -e ftlb -e qemu_i386 -e _x86         -e fspc -e fct" ;;
-        platformTargets_pronb-developer_qemu_x86)    echo "-e octeon -e qemu_x86_64 -e ftlb              -e _x86 -e fcmd -e fspc -e fct" ;;
-        platformTargets_pronb-developer_qemu_x86_64) echo "-e octeon                -e ftlb -e qemu_i386         -e fcmd -e fspc -e fct" ;;
-        platformTargets_pronb-developer_octeon2)     echo "          -e qemu_x86_64 -e ftlb -e qemu_i386 -e _x86 -e fcmd -e fspc -e fct" ;;
-        platformTargets_nightly_UBOOT) : ;;
+        subsystem)
+            case "${subTaskName}" in
+                FSM-r2) echo src-psl    ;;
+                FSM-r3) echo src-fsmpsl ;;
+                LRC)    echo src-lrcpsl ;;
+                UBOOT)  echo src-fsmbrm ;;
+            esac
+        ;;
+        locationMapping)
+            case "${subTaskName}" in
+                LRC)    echo LRC         ;;
+                UBOOT)  echo nightly     ;;
+                FSM-r3) echo ${location} ;;
+            esac
+        ;;
+        additionalSourceDirectories)
+            case "${subTaskName}" in
+                LRC)    echo src-lrcbrm src-bos  ;;
+            esac
+        ;;
         *) : ;;
     esac
 

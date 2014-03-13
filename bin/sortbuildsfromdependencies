@@ -71,7 +71,7 @@ sub readdependencies {
             my ( $src ) = "src-$subsys";
 
             print STDERR "$0: DEBUG SRCCFGS($src) is $cfg (target $bld)\n" if $debug;
-            if( $targets =~ /--targets=(.+)/ ) {
+            if( $targets =~ /--cfgs=(.+)/ ) {
                 $TARGETS{$src}{$cfg} = [ split( ",", $1 ) ];
             } else {
                 $TARGETS{$src}{$cfg} = [ map { s/.*-//; $_; } 
