@@ -1,9 +1,11 @@
 #!/bin/bash
 
 getTaskNameFromJobName() {
+    return
 }
 
 getSubTaskNameFromJobName() {
+    return
 }
 
 getTargetBoardName() {
