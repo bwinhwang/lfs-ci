@@ -35,6 +35,8 @@ _build() {
     local amountOfTargets=$(wc -l ${cfgFile} | cut -d" " -f1)
     local counter=0
 
+    rawDebug ${cfgFile}
+
     while read SRC CFG
     do
         counter=$( expr ${counter} + 1 )
@@ -86,7 +88,7 @@ _createWorkspace() {
     # change from svne1 to ulmscmi
     switchSvnServerInLocations
 
-    switchToNewLocation
+    switchToNewLocation ${location}
 
     mustHaveValidWorkspace
 
@@ -112,12 +114,12 @@ _createWorkspace() {
         revision=${JENKINS_SVN_REVISION}
     fi
 
-    info "using src-dirs: ${buildTargets}"
+    info "using src-dirs: ${buildTargets} : ${srcDirectory}"
             
-    local amountOfTargets=$(echo ${buildTargets} | wc -w)
+    local amountOfTargets=$(echo ${buildTargets} ${srcDirectory} | wc -w)
     local counter=0
 
-    for src in ${buildTargets} ; do
+    for src in ${buildTargets} ${srcDirectory}; do
 
         counter=$( expr ${counter} + 1 )
         info "(${counter}/${amountOfTargets}) checking out sources for ${src}"
@@ -171,7 +173,8 @@ getConfig() {
         buildTargets_pronb-developer_fct)         echo src-fsmpsl ;;
         buildTargets_pronb-developer_qemu_x86_64) echo src-fsmpsl ;;
         buildTargets_pronb-developer_octeon2)     echo src-fsmpsl ;;
-        buildTargets_pronb-developer_lcpa)        echo src-fsmpsl ;;
+        buildTargets_LRC_lcpa)                    echo src-lrcpsl src-lrcbrm src-cvmxsources src-kernelsources src-bos src-lrcddg src-lrcddal src-rfs src-tools ;;
+        buildTargets_nightly_UBOOT)               echo src-fsmbrm ;;
 
         platformTargets_pronb-developer_fct)         echo "-e octeon -e qemu_x86_64 -e ftlb -e qemu_i386 -e _x86 -e fcmd -e fspc       " ;;
         platformTargets_pronb-developer_fspc)        echo "-e octeon -e qemu_x86_64 -e ftlb -e qemu_i386 -e _x86 -e fcmd         -e fct" ;;

@@ -7,8 +7,8 @@ CI_EXIT_HANDLER_METHODS=''
 # automatically
 
 exit_add() {
-	CI_EXIT_HANDLER_METHODS="$1 $CI_EXIT_HANDLER_METHODS"
-	trace "exit: methods now '$CI_EXIT_HANDLER_METHODS'"
+	CI_EXIT_HANDLER_METHODS="$1 ${CI_EXIT_HANDLER_METHODS}"
+	trace "exit: methods now '${CI_EXIT_HANDLER_METHODS}'"
 }
 
 # exit handler registered to traps
@@ -19,7 +19,7 @@ exit_handler() {
     local rc=$?
     trace "now calling exit methods: $1"
     trace "disabling signal handler for ERR, EXIT, SIGTERM and SIGINT"
-
+    trace "exit methods are ${CI_EXIT_HANDLER_METHODS}"
 
 	trap - ERR EXIT SIGTERM SIGINT
 
