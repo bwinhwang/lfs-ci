@@ -192,7 +192,7 @@ getConfig() {
         ;;
         additionalSourceDirectories)
             case "${subTaskName}" in
-                LRC)    echo src-lrcbrm src-bos  ;;
+                LRC)    echo src-lrcbrm src-bos src-lrcddg ;;
             esac
         ;;
         *) : ;;
