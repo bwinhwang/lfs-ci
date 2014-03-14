@@ -1,32 +1,17 @@
 #!/bin/bash
 
 getTaskNameFromJobName() {
-    #             LFS  CI | Prod  _-_   branch   _-_  Build        _-_ FSM-r3/r2    _-_
-    local regex='^LFS_[[:alpha:]]*_-_[A-Za-z0-9_-.]*_-_([[:alpha:]]*)(_-_[[:graph:]]*)?_-_.*$'
-    if [[ ${JENKINS_JOB_NAME} =~ ${regex} ]] ; then
-        echo ${BASH_REMATCH[1]} 
-    fi
-
+    getFromString.pl "${JENKINS_JOB_NAME}" taskName
     return
 }
 
 getSubTaskNameFromJobName() {
-    #             LFS  CI | Prod  _-_   branch   _-_  Build        _-_ FSM-r3/r2    _-_
-    local regex='^LFS_[[:alpha:]]*_-_[A-Za-z0-9_-.]*_-_[[:alpha:]]*(_-_([[:graph:]]*))?_-_.*$'
-    if [[ ${JENKINS_JOB_NAME} =~ ${regex} ]] ; then
-        echo ${BASH_REMATCH[2]} 
-    fi
+    getFromString.pl "${JENKINS_JOB_NAME}" subTaskName
     return
 }
 
 getTargetBoardName() {
-    #             LFS  CI | Prod  _-_   branch   _-_  Build        _-_ FSM-r3/r2    _-_
-    local regex='^LFS_[[:alpha:]]*_-_[A-Za-z0-9_-.]*_-_[[:alpha:]]*(_-_[[:graph:]]*)?_-_(.*)$'
-
-    if [[ ${JENKINS_JOB_NAME} =~ ${regex} ]] ; then
-        # get the last element of the array
-        echo ${BASH_REMATCH[@]: -1} 
-    fi
+    getFromString.pl "${JENKINS_JOB_NAME}" platform
     return
 }
 
@@ -41,26 +26,23 @@ mustHaveTargetBoardName() {
 }
 
 getLocationName() {
-    #             LFS  CI | Prod  _-_   branch   _-_  Build        _-_ FSM-r3/r2    _-_
-    local regex='^LFS_[[:alpha:]]*_-_([A-Za-z0-9_-.]*)_-_[[:alpha:]]*(_-_[[:graph:]]*)?_-_.*$'
+    local location=$(getFromString.pl "${JENKINS_JOB_NAME}" location)
 
-    if [[ ${JENKINS_JOB_NAME} =~ ${regex} ]] ; then
-        
-        # 2014-02-17 demx2fk3 TODO do this in a better wa
-        case ${BASH_REMATCH[1]} in
-            Kernel3xDev)
-                trace "TODO: mapping location name from trunk to pronb-developer"
-                echo KERNEL_3.x_DEV
-            ;;
-            trunk)
-                trace "TODO: mapping location name from trunk to pronb-developer"
-                echo pronb-developer
-            ;;
-            *)
-                echo ${BASH_REMATCH[1]}
-            ;;
-        esac
-    fi
+    # 2014-02-17 demx2fk3 TODO do this in a better wa
+    case ${location} in
+        Kernel3xDev)
+            trace "TODO: mapping location name from trunk to pronb-developer"
+            echo KERNEL_3.x_DEV
+        ;;
+        trunk)
+            trace "TODO: mapping location name from trunk to pronb-developer"
+            echo pronb-developer
+        ;;
+        *)
+            echo ${BASH_REMATCH[1]}
+        ;;
+    esac
+
     return
 }
 

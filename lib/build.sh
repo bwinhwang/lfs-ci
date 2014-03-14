@@ -86,10 +86,10 @@ _createWorkspace() {
     debug "creating a new workspace in \"${workspace}\""
     setupNewWorkspace
 
+    switchToNewLocation ${location}
+
     # change from svne1 to ulmscmi
     switchSvnServerInLocations
-
-    switchToNewLocation ${location}
 
     mustHaveValidWorkspace
 
