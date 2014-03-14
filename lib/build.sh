@@ -215,16 +215,16 @@ syncroniceToLocalPath() {
 
             info "synchronice ${subsystem}/${tag} to local filesystem"
 
-            mkdir -p ${localCacheDir}/data
-            touch ${progressFile}
+            execute mkdir -p ${localCacheDir}/data
+            execute touch ${progressFile}
 
             execute rsync -a --numeric-ids --delete-excluded --ignore-errors -H -S \
                         --exclude=.svn                                     \
                         ${remotePath}/                                     \
                         ${LOCAL_CACHE_DIR}/data/${tag}/                    
 
-            ln -sf ${localCacheDir}/data/${tag} ${localCacheDir}/${tag}
-            rm -f ${progressFile}
+            execute ln -sf ${localCacheDir}/data/${tag} ${localCacheDir}/${tag}
+            execute rm -f ${progressFile}
         else
             info "waiting for ${tag} on local filesystem"
             # 2014-03-12 demx2fk3 TODO make this configurable
