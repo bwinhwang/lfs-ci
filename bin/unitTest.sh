@@ -2,9 +2,9 @@
 
 set -o errexit
 
-export CI_PATH=$PWD
+export LFS_CI_PATH=$PWD
 
-source ${CI_PATH}/lib/ci_logging.sh
+source ${LFS_CI_PATH}/lib/ci_logging.sh
 
 
 for file in test/*.sh ; do

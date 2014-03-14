@@ -4,13 +4,13 @@
 #
 
 TMP=$(dirname $0)
-export CI_PATH="$(readlink -f ${TMP}/..)"
-export PATH=${PATH}:${CI_PATH}/bin
+export LFS_CI_PATH="$(readlink -f ${TMP}/..)"
+export PATH=${PATH}:${LFS_CI_PATH}/bin
 
-source ${CI_PATH}/lib/ci_logging.sh
-source ${CI_PATH}/lib/commands.sh
-source ${CI_PATH}/lib/build.sh
-source ${CI_PATH}/lib/common.sh
+source ${LFS_CI_PATH}/lib/ci_logging.sh
+source ${LFS_CI_PATH}/lib/commands.sh
+source ${LFS_CI_PATH}/lib/build.sh
+source ${LFS_CI_PATH}/lib/common.sh
 
 cleanupEnvironmentVariables
 export CI_LOGGING_DURATION_OLD_DATE=0
