@@ -35,7 +35,6 @@ _build() {
     local amountOfTargets=$(wc -l ${cfgFile} | cut -d" " -f1)
     local counter=0
 
-
     while read SRC CFG
     do
         counter=$( expr ${counter} + 1 )
@@ -141,11 +140,13 @@ _createWorkspace() {
 preCheckoutPatchWorkspace() {
     _applyPatchesInWorkspace "${JENKINS_JOB_NAME}/preCheckout/"
     _applyPatchesInWorkspace "common/preCheckout/"
+    return
 }
 
 postCheckoutPatchWorkspace() {
     _applyPatchesInWorkspace "${JENKINS_JOB_NAME}/postCheckout/"
     _applyPatchesInWorkspace "common/postCheckout/"
+    return
 }
 
 _applyPatchesInWorkspace() {
@@ -197,7 +198,6 @@ getConfig() {
         ;;
         *) : ;;
     esac
-
 }
 
 syncroniceToLocalPath() {
@@ -233,13 +233,12 @@ syncroniceToLocalPath() {
         fi
     fi
 
+    return
 }
 
 mustHaveLocalSdks() {
-
     local workspace=$(getWorkspaceName)
     mustHaveWorkspaceName
-
 
     for bld in ${workspace}/bld/*
     do
@@ -258,5 +257,7 @@ mustHaveLocalSdks() {
         execute ln -sf ${localCacheDir}/${tag} ${bld}
     done
 
+    return
 }
+
 return 0

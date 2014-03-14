@@ -2,7 +2,7 @@
 
 getTaskNameFromJobName() {
     #             LFS  CI | Prod  _-_   branch   _-_  Build        _-_ FSM-r3/r2    _-_
-    local regex='^LFS_[[:alpha:]]*_-_[[:graph:]]*_-_([[:alpha:]]*)(_-_[[:graph:]]*)?_-_.*$'
+    local regex='^LFS_[[:alpha:]]*_-_[A-Za-z0-9_-.]*_-_([[:alpha:]]*)(_-_[[:graph:]]*)?_-_.*$'
     if [[ ${JENKINS_JOB_NAME} =~ ${regex} ]] ; then
         echo ${BASH_REMATCH[1]} 
     fi
@@ -12,7 +12,7 @@ getTaskNameFromJobName() {
 
 getSubTaskNameFromJobName() {
     #             LFS  CI | Prod  _-_   branch   _-_  Build        _-_ FSM-r3/r2    _-_
-    local regex='^LFS_[[:alpha:]]*_-_[[:graph:]]*_-_[[:alpha:]]*(_-_([[:graph:]]*))?_-_.*$'
+    local regex='^LFS_[[:alpha:]]*_-_[A-Za-z0-9_-.]*_-_[[:alpha:]]*(_-_([[:graph:]]*))?_-_.*$'
     if [[ ${JENKINS_JOB_NAME} =~ ${regex} ]] ; then
         echo ${BASH_REMATCH[2]} 
     fi
@@ -21,7 +21,7 @@ getSubTaskNameFromJobName() {
 
 getTargetBoardName() {
     #             LFS  CI | Prod  _-_   branch   _-_  Build        _-_ FSM-r3/r2    _-_
-    local regex='^LFS_[[:alpha:]]*_-_[[:graph:]]*_-_[[:alpha:]]*(_-_[[:graph:]]*)?_-_(.*)$'
+    local regex='^LFS_[[:alpha:]]*_-_[A-Za-z0-9_-.]*_-_[[:alpha:]]*(_-_[[:graph:]]*)?_-_(.*)$'
 
     if [[ ${JENKINS_JOB_NAME} =~ ${regex} ]] ; then
         # get the last element of the array
@@ -42,7 +42,7 @@ mustHaveTargetBoardName() {
 
 getLocationName() {
     #             LFS  CI | Prod  _-_   branch   _-_  Build        _-_ FSM-r3/r2    _-_
-    local regex='^LFS_[[:alpha:]]*_-_([[:graph:]]*)_-_[[:alpha:]]*(_-_[[:graph:]]*)?_-_.*$'
+    local regex='^LFS_[[:alpha:]]*_-_([A-Za-z0-9_-.]*)_-_[[:alpha:]]*(_-_[[:graph:]]*)?_-_.*$'
 
     if [[ ${JENKINS_JOB_NAME} =~ ${regex} ]] ; then
         
