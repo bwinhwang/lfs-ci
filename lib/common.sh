@@ -30,10 +30,6 @@ getLocationName() {
 
     # 2014-02-17 demx2fk3 TODO do this in a better wa
     case ${location} in
-        Kernel3xDev)
-            trace "TODO: mapping location name from trunk to pronb-developer"
-            echo KERNEL_3.x_DEV
-        ;;
         trunk)
             trace "TODO: mapping location name from trunk to pronb-developer"
             echo pronb-developer
