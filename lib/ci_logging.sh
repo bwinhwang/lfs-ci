@@ -228,10 +228,10 @@ rawDebug() {
     # file is empty
     [[ ! -s ${fileToLog} ]] && return
 
-    trace "adding content of file ${fileToLog} to logfile"
-    trace "----------------------------------------------"
+    trace "{{{ adding content of file ${fileToLog} to logfile"
+    trace     "----------------------------------------------"
     cat ${fileToLog} >> ${CI_LOGGING_LOGFILENAME}
-    trace "----------------------------------------------"
+    trace "}}} ----------------------------------------------"
 
     return
 }
@@ -242,10 +242,10 @@ rawOutput() {
     # file is empty
     [[ ! -s ${fileToLog} ]] && return
 
-    trace "content of file ${fileToLog}"
-    trace "----------------------------"
+    trace "{{{ content of file ${fileToLog}"
+    trace "    ----------------------------------------------"
     cat ${fileToLog} 
-    trace "----------------------------"
+    trace "}}} ----------------------------------------------"
 
     return
 }
