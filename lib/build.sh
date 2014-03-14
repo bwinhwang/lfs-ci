@@ -255,7 +255,7 @@ mustHaveLocalSdks() {
         fi
 
         execute rm -rf ${bld} 
-        execute ln -sf ${localCacheDir} ${bld}
+        execute ln -sf ${localCacheDir}/${tag} ${bld}
     done
 
 }
