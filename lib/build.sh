@@ -192,7 +192,7 @@ getConfig() {
         ;;
         additionalSourceDirectories)
             case "${subTaskName}" in
-                LRC)    echo src-lrcbrm src-bos src-lrcddg ;;
+                LRC)    echo src-lrcbrm src-cvmxsources src-kernelsources src-bos src-lrcddg src-ifdd src-commonddal src-lrcddal src-tools src-rfs ;;
             esac
         ;;
         *) : ;;
@@ -206,17 +206,16 @@ syncroniceToLocalPath() {
     local subsystem=$(basename ${localPath})
     local tag=$(basename ${remotePath})
 
-    # 2014-03-12 demx2fk3 TODO not hardcoded here
-    export LOCAL_CACHE_DIR=/var/fpwork/${USER}/lfs-ci-local/${subsystem}
+    local localCacheDir=${LFS_CI_SHARE_MIRROR}/${USER}/lfs-ci-local/${subsystem}
 
-    if [[ ! -e ${LOCAL_CACHE_DIR}/${tag} ]] ; then
-        progressFile=${LOCAL_CACHE_DIR}/data/${tag}.in_progress
+    if [[ ! -e ${localCacheDir}/${tag} ]] ; then
+        progressFile=${localCacheDir}/data/${tag}.in_progress
 
         if [[ ! -e ${progressFile} ]] ; then
 
             info "synchronice ${subsystem}/${tag} to local filesystem"
 
-            mkdir -p ${LOCAL_CACHE_DIR}/data
+            mkdir -p ${localCacheDir}/data
             touch ${progressFile}
 
             execute rsync -a --numeric-ids --delete-excluded --ignore-errors -H -S \
@@ -224,7 +223,7 @@ syncroniceToLocalPath() {
                         ${remotePath}/                                     \
                         ${LOCAL_CACHE_DIR}/data/${tag}/                    
 
-            ln -sf ${LOCAL_CACHE_DIR}/data/${tag} ${LOCAL_CACHE_DIR}/${tag}
+            ln -sf ${localCacheDir}/data/${tag} ${localCacheDir}/${tag}
             rm -f ${progressFile}
         else
             info "waiting for ${tag} on local filesystem"
@@ -247,17 +246,16 @@ mustHaveLocalSdks() {
         local pathToSdk=$(readlink ${bld})
         local tag=$(basename ${pathToSdk})
         local subsystem=$(basename ${bld})
-        # 2014-03-12 demx2fk3 TODO not hardcoded here
-        local localDir=/var/fpwork/${USER}/lfs-ci-local/${subsystem}/${tag}
+        local localCacheDir=${LFS_CI_SHARE_MIRROR}/${USER}/lfs-ci-local/${subsystem}
 
         info "checking for ${subsystem} on local disk"
         
-        if [[ ! -d ${localDir} ]] ; then
+        if [[ ! -d ${localCacheDir} ]] ; then
             syncroniceToLocalPath ${bld}
         fi
 
         execute rm -rf ${bld} 
-        execute ln -sf ${localDir} ${bld}
+        execute ln -sf ${localCacheDir} ${bld}
     done
 
 }

@@ -34,7 +34,8 @@ cleanupEnvironmentVariables() {
     for key in `perl -e 'print map { "$_\n" } sort keys %ENV'` ; do
         case ${key} in
             PATH|HOME|USER|HOSTNAME) : ;;
-            CI_PATH) : ;;
+            LFS_CI_PATH) : ;;
+            LFS_CI_SHARE_MIRROR) : ;;
             WORKSPACE) : ;;
             SVN_REVISION) : ;;
             *) 

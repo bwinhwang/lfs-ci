@@ -155,8 +155,13 @@ mustHaveValidWorkspace() {
 switchSvnServerInLocations() {
     local workspace=$(getWorkspaceName) 
 
-    # todo
+    info "changing svne1 to ulmscmi"
+    perl -pi -e "s/svne1.access.nokiasiemensnetworks.com/ulscmi.inside.nsn.com/g" locations/*/Dependencies
 
+    execute svn status locations/*/Dependencies
+    execute svn diff   locations/*/Dependencies
+
+    return
 }
 
 checkoutSubprojectDirectories() {
