@@ -2,14 +2,14 @@
 
 JAVA=/usr/lib/jvm/jre-1.6.0-openjdk.x86_64/bin/java
 ROOT=/var/fpwork/${USER}/lfs-jenkins
-CI_ROOT=/ps/lfs/ci
+LFS_CI_ROOT=/ps/lfs/ci
 JENKINS_VERSION=1.532.2
 
-JENKINS_WAR=${CI_ROOT}/lib/java/jenkins/jenkins-${JENKINS_VERSION}.war
+JENKINS_WAR=${LFS_CI_ROOT}/lib/java/jenkins/jenkins-${JENKINS_VERSION}.war
 JENKINS_HOME=${ROOT}/home
 JENKINS_ROOT=${ROOT}/root
 
-export JENKINS_HOME JENKINS_ROOT CI_ROOT
+export JENKINS_HOME JENKINS_ROOT LFS_CI_ROOT
 
 mkdir -p ${JENKINS_HOME} ${JENKINS_ROOT} ${JENKINS_ROOT}/log
 ulimit -u 40960
@@ -27,6 +27,6 @@ exec ${JAVA} -jar ${JENKINS_WAR}                                      \
         --httpsPort=12443                                             \
         --httpPort=1280                                               \
         --ajp13Port=-1                                                \
-        --httpsCertificate=${CI_ROOT}/etc/lfs-ci.emea.nsn-net.net.crt \
-        --httpsPrivateKey=${CI_ROOT}/etc/lfs-ci.emea.nsn-net.net.key  \
+        --httpsCertificate=${LFS_CI_ROOT}/etc/lfs-ci.emea.nsn-net.net.crt \
+        --httpsPrivateKey=${LFS_CI_ROOT}/etc/lfs-ci.emea.nsn-net.net.key  \
         > ${JENKINS_ROOT}/log/jenkins.log 2>&1 
