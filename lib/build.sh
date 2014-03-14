@@ -223,7 +223,7 @@ syncroniceToLocalPath() {
                         ${remotePath}/                                     \
                         ${LOCAL_CACHE_DIR}/data/${tag}/                    
 
-            execute ln -sf ${localCacheDir}/data/${tag} ${localCacheDir}/${tag}
+            execute ln -sf data/${tag} ${localCacheDir}/${tag}
             execute rm -f ${progressFile}
         else
             info "waiting for ${tag} on local filesystem"
