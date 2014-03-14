@@ -35,7 +35,7 @@ getLocationName() {
             echo pronb-developer
         ;;
         *)
-            echo ${BASH_REMATCH[1]}
+            echo ${location}
         ;;
     esac
 
