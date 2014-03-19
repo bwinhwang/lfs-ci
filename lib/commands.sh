@@ -24,15 +24,19 @@ execute() {
 
 showAllEnvironmentVariables() {
     local key=""
-    for key in `perl -e 'print map { "$_\n" } sort keys %ENV'` ; do
+    # workaround for screen / TERMCAP
+    keys=$( env | grep = | grep -v '^!' | awk -F= '{ if ( ! $0 ~ /\\\\$/ ) print $1; }' )
+    for key in ${keys}; do
         trace "environment variable: ${key} = \"${!key}\"" 
     done
 }
 
 cleanupEnvironmentVariables() {
     local key=""
+    # workaround for screen / TERMCAP
+    keys=$( env | grep = | grep -v '^!' | awk -F= '{ if ( ! $0 ~ /\\\\$/ ) print $1; }' )
 
-    for key in `perl -e 'print map { "$_\n" } sort keys %ENV'` ; do
+    for key in ${keys}; do
         case ${key} in
             PATH|HOME|USER|HOSTNAME) : ;;
             LFS_CI_PATH) : ;;
