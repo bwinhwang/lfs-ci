@@ -3,6 +3,7 @@
 # start skript for jenkins.
 #
 
+
 TMP=$(dirname $0)
 export LFS_CI_PATH="$(readlink -f ${TMP}/..)"
 export PATH=${PATH}:${LFS_CI_PATH}/bin
