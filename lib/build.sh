@@ -20,6 +20,23 @@ ci_job_build() {
     return 0
 }
 
+ci_job_package() {
+    info "package the build results"
+# TRIGGERED_BUILD_RUN_COUNT_LFS_CI_trunk_Build_LRC_lcpa=1
+# TRIGGERED_BUILD_NUMBER_LFS_CI_trunk_Build_FSM_r3_qemu_64=1
+# TRIGGERED_JOB_NAMES=LFS_CI_trunk_Build_FSM_r2_qemu,LFS_CI_trunk_Build_LRC_lcpa,LFS_CI_trunk_Build_FSM_r2_fcmd,LFS_CI_trunk_Build_UBOOT_fcta,LFS_CI_tr
+
+    local oldIFS=${IFS}
+    local jobName=""
+    for ${jobName} in ${TRIGGERED_JOB_NAMES} ; do
+        local varName=TRIGGERED_BUILD_NUMBER_${jobName}
+        ls -la /build/home/demx2fk3/lfs/${jobName}/${$varName}/
+    done
+    IFS=${oldIFS}
+
+    return 0
+}
+
 _build() {
     local cfgFile=$(createTempFile)
 
