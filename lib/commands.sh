@@ -23,31 +23,38 @@ execute() {
 }
 
 showAllEnvironmentVariables() {
-    local key=""
-    # workaround for screen / TERMCAP
-    keys=$( env | grep = | grep -v '^!' | awk -F= '{ if ( ! $0 ~ /\\\\$/ ) print $1; }' )
-    for key in ${keys}; do
-        trace "environment variable: ${key} = \"${!key}\"" 
-    done
+    execute printenv        
 }
 
 cleanupEnvironmentVariables() {
     local key=""
-    # workaround for screen / TERMCAP
-    keys=$( env | grep = | grep -v '^!' | awk -F= '{ if ( ! $0 ~ /\\\\$/ ) print $1; }' )
 
+    # workaround for screen / TERMCAP
+    unset TERM
+    unset TERMCAP
+    keys=`(set -o posix ; set ) | grep = | grep -v '^!' | awk -F= '{ if ( $0 ~ /\\\\$/ ) 
+                                                                        a=1; 
+                                                                     else 
+                                                                        print $1; }' `
     for key in ${keys}; do
         case ${key} in
+            BASH*) : ;; # can not unset 
+            UID|EUID)  : ;;
+            SHELLOPTS) : ;;
+            PPID) : ;;
             PATH|HOME|USER|HOSTNAME) : ;;
             LFS_CI_PATH) : ;;
             LFS_CI_SHARE_MIRROR) : ;;
             WORKSPACE) : ;;
             SVN_REVISION) : ;;
+            BUILD_*) : ;;
             *) 
                 trace "unsetting environment variable \"${key}\" with value \"${!key}\"" 
                 unset ${key} 
             ;;
         esac
     done
+
+    set
 }
 

@@ -50,18 +50,15 @@ _createArtifactArchive() {
     mustHaveWorkspaceName
 
     cd "${workspace}/bld/"
+    execute mkdir -p /build/home/demx2fk3/lfs/${JENKINS_JOB_NAME}/${BUILD_NUMBER}
     for dir in bld-* ; do
         [[ -d "${dir}" && ! -L "${dir}" ]] || continue
         info "creating artifact archive for ${dir}"
         execute tar -c -z -f "${dir}.tar.gz" "${dir}"
-        # copy "${dir}.tar.gz" /build/home/demx2fk3/lfs/
+        execute -f "${dir}.tar.gz" /build/home/demx2fk3/lfs/${JENKINS_JOB_NAME}/${BUILD_NUMBER}/
     done
 
     return 0
-}
-
-copy() {
-    execute cp $@ || exit 1
 }
 
 ## @fn      _createWorkspace()
