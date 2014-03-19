@@ -54,9 +54,14 @@ _createArtifactArchive() {
         [[ -d "${dir}" && ! -L "${dir}" ]] || continue
         info "creating artifact archive for ${dir}"
         execute tar -c -z -f "${dir}.tar.gz" "${dir}"
+        # copy "${dir}.tar.gz" /build/home/demx2fk3/lfs/
     done
 
     return 0
+}
+
+copy() {
+    execute cp $@ || exit 1
 }
 
 ## @fn      _createWorkspace()
@@ -193,7 +198,7 @@ getConfig() {
         ;;
         additionalSourceDirectories)
             case "${subTaskName}" in
-                LRC)    echo src-lrcbrm src-cvmxsources src-kernelsources src-bos src-lrcddg src-ifdd src-commonddal src-lrcddal src-tools src-rfs ;;
+                LRC)    echo src-lrcbrm src-cvmxsources src-kernelsources src-bos src-lrcddg src-ifdd src-commonddal src-lrcddal src-tools src-rfs src-toolset ;;
             esac
         ;;
         *) : ;;

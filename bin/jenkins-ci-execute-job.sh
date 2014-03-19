@@ -36,10 +36,8 @@ exit_add stopLogfile
 
 # first dispatcher, calling the correct script
 case "${JENKINS_JOB_NAME}" in
-    LFS_CI_*_Build*)
-        ci_job_build \
-            || exit 1
-    ;;
+    LFS_CI_*_Build_*) ci_job_build   || exit 1 ;;
+    LFS_CI_*_Build)   ci_job_package || exit 1 ;;
     *)
 
         # legacy call for the old scripting...
@@ -47,7 +45,7 @@ case "${JENKINS_JOB_NAME}" in
 
             info "executing legacy script \"${JENKINS_JOB_NAME}\""
 
-            call ${JENKINS_JOB_NAME} \
+            execute ${JENKINS_JOB_NAME} \
                 || exit 1
         else
             error "don't know what I shall do for job \"${JENKINS_JOB_NAME}\"" 
