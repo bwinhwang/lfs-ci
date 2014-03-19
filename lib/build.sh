@@ -55,7 +55,7 @@ _createArtifactArchive() {
         [[ -d "${dir}" && ! -L "${dir}" ]] || continue
         info "creating artifact archive for ${dir}"
         execute tar -c -z -f "${dir}.tar.gz" "${dir}"
-        execute -f "${dir}.tar.gz" /build/home/demx2fk3/lfs/${JENKINS_JOB_NAME}/${BUILD_NUMBER}/
+        execute cp -f "${dir}.tar.gz" /build/home/demx2fk3/lfs/${JENKINS_JOB_NAME}/${BUILD_NUMBER}/
     done
 
     return 0

@@ -54,7 +54,5 @@ cleanupEnvironmentVariables() {
             ;;
         esac
     done
-
-    set
 }
 
