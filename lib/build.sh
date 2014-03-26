@@ -204,7 +204,7 @@ getConfig() {
         subsystem)
             case "${subTaskName}" in
                 FSM-r2       ) echo src-psl    ;;
-                FSM-r2:rootfs) echo src-rfs    ;;
+                FSM-r2-rootfs) echo src-rfs    ;;
                 FSM-r3)        echo src-fsmpsl ;;
                 LRC)           echo src-lrcpsl ;;
                 UBOOT)         echo src-fsmbrm ;;
