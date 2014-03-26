@@ -67,13 +67,14 @@ _createArtifactArchive() {
     mustHaveWorkspaceName
 
     cd "${workspace}/bld/"
-    execute mkdir -p /build/home/demx2fk3/lfs/${JENKINS_JOB_NAME}/${BUILD_NUMBER}
+    execute ssh maxi.emea.nsn-net.net mkdir -p /build/home/demx2fk3/lfs/${JENKINS_JOB_NAME}/${BUILD_NUMBER}/save/
+    execute ssh maxi.emea.nsn-net.net ln -sf   /build/home/demx2fk3/lfs/${JENKINS_JOB_NAME}/${BUILD_NUMBER} /var/fpwork/demx2fk3/lfs-jenkins/home/jobs/${JENKINS_JOB_NAME}/builds/${BUILD_NUMBER}/archive 
+
     for dir in bld-* ; do
         [[ -d "${dir}" && ! -L "${dir}" ]] || continue
         info "creating artifact archive for ${dir}"
         execute tar -c -z -f "${dir}.tar.gz" "${dir}"
-        execute rsync -avrPe ssh "${dir}.tar.gz" maxi.emea.nsn-net.net:/build/home/demx2fk3/lfs/${JENKINS_JOB_NAME}/${BUILD_NUMBER}/
-        execute ssh maxi.emea.nsn-net.net ln -s /build/home/demx2fk3/lfs/${JENKINS_JOB_NAME}/${BUILD_NUMBER} /var/fpwork/demx2fk3/lfs-jenkins/home/jobs/${JENKINS_JOB_NAME}/archive/save
+        execute rsync -avrPe ssh "${dir}.tar.gz" maxi.emea.nsn-net.net:/build/home/demx2fk3/lfs/${JENKINS_JOB_NAME}/${BUILD_NUMBER}/save/
     done
 
     return 0
@@ -202,10 +203,11 @@ getConfig() {
     case "${key}" in 
         subsystem)
             case "${subTaskName}" in
-                FSM-r2) echo src-psl    ;;
-                FSM-r3) echo src-fsmpsl ;;
-                LRC)    echo src-lrcpsl ;;
-                UBOOT)  echo src-fsmbrm ;;
+                FSM-r2       ) echo src-psl    ;;
+                FSM-r2:rootfs) echo src-rfs    ;;
+                FSM-r3)        echo src-fsmpsl ;;
+                LRC)           echo src-lrcpsl ;;
+                UBOOT)         echo src-fsmbrm ;;
             esac
         ;;
         locationMapping)

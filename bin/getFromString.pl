@@ -8,11 +8,11 @@ my $string = $ARGV[0]; # string, which should be parsed
 my $wanted = $ARGV[1]; # wanted substring from regex
 
 my $locationRE    = qr / (?<location> 
-                           [A-Za-z0-9._-]+?
+                           [A-Za-z0-9.:_-]+?
                          )
                        /x;
 my $subTaskNameRE = qr / (?<subTaskName>
-                           [A-Za-z0-9._-]+
+                           [A-Za-z0-9.:_-]+
                          )
                        /x;
 my $taskNameRE    = qr / (?<taskName>
