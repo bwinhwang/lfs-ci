@@ -109,12 +109,14 @@ _createWorkspace() {
 
     switchToNewLocation ${location}
 
+
     if grep -q "ulm" <<< ${NODE_LABELS} ; then
         # change from svne1 to ulmscmi
         switchSvnServerInLocations
     fi
 
     mustHaveValidWorkspace
+    mustHaveBuildArtifactsFromUpstream
 
     local srcDirectory=$(getConfig "subsystem")
     if [[ ! "${srcDirectory}" ]] ; then
@@ -268,6 +270,7 @@ mustHaveLocalSdks() {
 
     for bld in ${workspace}/bld/*
     do
+        [[ -e ${bld} ]] || continue
         local pathToSdk=$(readlink ${bld})
         local tag=$(basename ${pathToSdk})
         local subsystem=$(basename ${bld})
@@ -282,6 +285,14 @@ mustHaveLocalSdks() {
         execute rm -rf ${bld} 
         execute ln -sf ${localCacheDir}/${tag} ${bld}
     done
+
+    return
+}
+mustHaveBuildArtifactsFromUpstream() {
+
+    local workspace=$(getWorkspaceName)
+
+    execute rsync -avrPe ssh "${dir}.tar.gz" maxi.emea.nsn-net.net:/build/home/demx2fk3/lfs/${UPSTREAM_PROJECT}/${UPSTREAM_BUILD}/save/. ${workspace}/bld/.
 
     return
 }
