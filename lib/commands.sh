@@ -50,6 +50,7 @@ cleanupEnvironmentVariables() {
             CI_*) : ;;
             WORKSPACE) : ;;
             SVN_REVISION) : ;;
+            UPSTREAM*) : ;;
             BUILD_*) : ;;
             NODE_LABELS) : ;;
             *) 
