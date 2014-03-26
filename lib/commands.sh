@@ -43,11 +43,15 @@ cleanupEnvironmentVariables() {
             SHELLOPTS) : ;;
             PPID) : ;;
             PATH|HOME|USER|HOSTNAME) : ;;
-            LFS_CI_PATH) : ;;
+            LFS_CI_ROOT) : ;;
             LFS_CI_SHARE_MIRROR) : ;;
+            LFS_CI*) : ;;
+            CI_LOGGING_LOGFILENAME) : ;;
+            CI_*) : ;;
             WORKSPACE) : ;;
             SVN_REVISION) : ;;
             BUILD_*) : ;;
+            NODE_LABELS) : ;;
             *) 
                 trace "unsetting environment variable \"${key}\" with value \"${!key}\"" 
                 unset ${key} 

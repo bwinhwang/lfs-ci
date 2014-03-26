@@ -72,7 +72,8 @@ _createArtifactArchive() {
         [[ -d "${dir}" && ! -L "${dir}" ]] || continue
         info "creating artifact archive for ${dir}"
         execute tar -c -z -f "${dir}.tar.gz" "${dir}"
-        execute cp -f "${dir}.tar.gz" /build/home/demx2fk3/lfs/${JENKINS_JOB_NAME}/${BUILD_NUMBER}/
+        execute rsync -avrPe ssh "${dir}.tar.gz" maxi.emea.nsn-net.net:/build/home/demx2fk3/lfs/${JENKINS_JOB_NAME}/${BUILD_NUMBER}/
+        execute ssh maxi.emea.nsn-net.net ln -s /build/home/demx2fk3/lfs/${JENKINS_JOB_NAME}/${BUILD_NUMBER} /var/fpwork/demx2fk3/lfs-jenkins/home/jobs/${JENKINS_JOB_NAME}/archive/save
     done
 
     return 0
@@ -107,8 +108,10 @@ _createWorkspace() {
 
     switchToNewLocation ${location}
 
-    # change from svne1 to ulmscmi
-    switchSvnServerInLocations
+    if grep -q "ulm" <<< ${NODE_LABELS} ; then
+        # change from svne1 to ulmscmi
+        switchSvnServerInLocations
+    fi
 
     mustHaveValidWorkspace
 
@@ -119,7 +122,9 @@ _createWorkspace() {
     fi
     info "requested source directory: ${srcDirectory}"
 
-    preCheckoutPatchWorkspace
+    if grep -q "ulm" <<< ${NODE_LABELS} ; then
+        preCheckoutPatchWorkspace
+    fi
 
     info "getting dependencies for ${srcDirectory}"
     local buildTargets=$(${LFS_CI_PATH}/bin/getDependencies ${srcDirectory} 2>/dev/null )
@@ -240,7 +245,7 @@ syncroniceToLocalPath() {
             execute rsync -a --numeric-ids --delete-excluded --ignore-errors -H -S \
                         --exclude=.svn                                     \
                         ${remotePath}/                                     \
-                        ${LOCAL_CACHE_DIR}/data/${tag}/                    
+                        ${localCacheDir}/data/${tag}/                    
 
             execute ln -sf data/${tag} ${localCacheDir}/${tag}
             execute rm -f ${progressFile}
