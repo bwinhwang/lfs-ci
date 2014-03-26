@@ -292,7 +292,10 @@ mustHaveBuildArtifactsFromUpstream() {
 
     local workspace=$(getWorkspaceName)
 
-    execute rsync -avrPe ssh "${dir}.tar.gz" maxi.emea.nsn-net.net:/build/home/demx2fk3/lfs/${UPSTREAM_PROJECT}/${UPSTREAM_BUILD}/save/. ${workspace}/bld/.
+    if [[ ${UPSTREAM_PROJECT} ]] ; then
+        info "copy artifacts of ${UPSTREAM_PROJECT} #${UPSTREAM_BUILD} from master"
+        execute rsync -avrPe ssh maxi.emea.nsn-net.net:/build/home/demx2fk3/lfs/${UPSTREAM_PROJECT}/${UPSTREAM_BUILD}/save/. ${workspace}/bld/.
+    fi
 
     return
 }
