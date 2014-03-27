@@ -13,6 +13,11 @@ source ${LFS_CI_PATH}/lib/commands.sh
 source ${LFS_CI_PATH}/lib/build.sh
 source ${LFS_CI_PATH}/lib/common.sh
 
+source ${WORKSPACE}/.properties
+
+echo ${UPSTREAM_PROJECT}
+echo ${UPSTREAM_BUILD}
+
 cleanupEnvironmentVariables
 export CI_LOGGING_DURATION_OLD_DATE=0
 
@@ -25,6 +30,7 @@ export JENKINS_JOB_NAME
 
 JENKINS_SVN_REVISION=${SVN_REVISION}
 export JENKINS_SVN_REVISION
+
 
 showAllEnvironmentVariables
 
