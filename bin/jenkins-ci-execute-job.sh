@@ -13,7 +13,9 @@ source ${LFS_CI_PATH}/lib/commands.sh
 source ${LFS_CI_PATH}/lib/build.sh
 source ${LFS_CI_PATH}/lib/common.sh
 
-source ${WORKSPACE}/.properties
+if [[ -f ${WORKSPACE}/.properties ]] ; then
+    source ${WORKSPACE}/.properties
+fi
 
 echo ${UPSTREAM_PROJECT}
 echo ${UPSTREAM_BUILD}
