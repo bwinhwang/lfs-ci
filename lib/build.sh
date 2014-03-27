@@ -1,6 +1,5 @@
 #!/bin/bash
 
-
 ## @fn      ci_job_build()
 #  @brief   create a build
 #  @param   <none>
@@ -264,6 +263,14 @@ syncroniceToLocalPath() {
     return
 }
 
+## @fn      mustHaveLocalSdks()
+#  @brief   ensure, that the "links to share" in bld are pointing to
+#           a local directory
+#  @detail  if there is a link in bld directory to the build share, 
+#           the method will trigger the copy of this directory to the local
+#           directory
+#  @param   <none>
+#  @return  <none>
 mustHaveLocalSdks() {
     local workspace=$(getWorkspaceName)
     mustHaveWorkspaceName
@@ -288,13 +295,21 @@ mustHaveLocalSdks() {
 
     return
 }
+
+## @fn      mustHaveBuildArtifactsFromUpstream()
+#  @brief   ensure, that the job has the artifacts from the upstream projekt, if exists
+#  @detail  the method check, if there is a upstream project is set and if this project has
+#           artifacts. If this is true, it copies the artifacts to the workspace bld directory
+#           and untar the artifacts.
+#  @param   <none>
+#  @return  <none>
 mustHaveBuildArtifactsFromUpstream() {
 
     local workspace=$(getWorkspaceName)
 
-    if [[ ${UPSTREAM_PROJECT} ]] ; then
+    if [[ -d ${artifactesShare}/${UPSTREAM_PROJECT}/${UPSTREAM_BUILD}/save/ ]] ; then
         info "copy artifacts of ${UPSTREAM_PROJECT} #${UPSTREAM_BUILD} from master"
-        execute rsync -avrPe ssh maxi.emea.nsn-net.net:/build/home/demx2fk3/lfs/${UPSTREAM_PROJECT}/${UPSTREAM_BUILD}/save/. ${workspace}/bld/.
+        execute rsync -avrPe ssh ${jenkinsMasterServerHostName}:${artifactesShare}/${UPSTREAM_PROJECT}/${UPSTREAM_BUILD}/save/. ${workspace}/bld/.
     fi
 
     return
