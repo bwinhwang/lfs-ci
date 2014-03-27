@@ -292,7 +292,7 @@ mustHaveBuildArtifactsFromUpstream() {
 
     local workspace=$(getWorkspaceName)
 
-    if [[ ${UPSTREAM_PROJECT} ]] ; then
+    if [[ -d /build/home/demx2fk3/lfs/${UPSTREAM_PROJECT}/${UPSTREAM_BUILD}/save/ ]] ; then
         info "copy artifacts of ${UPSTREAM_PROJECT} #${UPSTREAM_BUILD} from master"
         execute rsync -avrPe ssh maxi.emea.nsn-net.net:/build/home/demx2fk3/lfs/${UPSTREAM_PROJECT}/${UPSTREAM_BUILD}/save/. ${workspace}/bld/.
     fi
