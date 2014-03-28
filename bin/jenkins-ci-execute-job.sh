@@ -1,8 +1,6 @@
 #!/bin/bash
 #
 # start skript for jenkins.
-#
-
 
 TMP=$(dirname $0)
 export LFS_CI_PATH="$(readlink -f ${TMP}/..)"
@@ -30,7 +28,6 @@ export JENKINS_JOB_NAME
 
 JENKINS_SVN_REVISION=${SVN_REVISION}
 export JENKINS_SVN_REVISION
-
 
 showAllEnvironmentVariables
 
