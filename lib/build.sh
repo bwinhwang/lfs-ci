@@ -1,8 +1,8 @@
 #!/bin/bash
 
-
 ## @fn      ci_job_build()
-#  @brief   create a build
+#  @brief   usecase job ci build
+#  @details the use case job ci build makes a clean build 
 #  @param   <none>
 #  @return  <none>
 ci_job_build() {
@@ -20,23 +20,42 @@ ci_job_build() {
     return 0
 }
 
+## @fn      ci_job_package()
+#  @brief   create a package from the build results for the testing / release process
+#  @details copy all the artifacts from the sub jobs into the workspace and create the release structure
+#  @todo    implement this
+#  @param   <none>
+#  @return  <none>
 ci_job_package() {
     info "package the build results"
-# TRIGGERED_BUILD_RUN_COUNT_LFS_CI_trunk_Build_LRC_lcpa=1
-# TRIGGERED_BUILD_NUMBER_LFS_CI_trunk_Build_FSM_r3_qemu_64=1
-# TRIGGERED_JOB_NAMES=LFS_CI_trunk_Build_FSM_r2_qemu,LFS_CI_trunk_Build_LRC_lcpa,LFS_CI_trunk_Build_FSM_r2_fcmd,LFS_CI_trunk_Build_UBOOT_fcta,LFS_CI_tr
+
+    # env variables
+    # TRIGGERED_BUILD_RUN_COUNT_LFS_CI_trunk_Build_LRC_lcpa=1
+    # TRIGGERED_BUILD_NUMBER_LFS_CI_trunk_Build_FSM_r3_qemu_64=1
+    # TRIGGERED_JOB_NAMES=LFS_CI_trunk_Build_FSM_r2_qemu,LFS_CI_trunk_Build_LRC_lcpa,LFS_CI_trunk_Build_FSM_r2_fcmd,LFS_CI_trunk_Build_UBOOT_fcta,LFS_CI_tr
 
     local oldIFS=${IFS}
     local jobName=""
+
+    # TODO: demx2fk3 2014-03-27 implement this here
     for ${jobName} in ${TRIGGERED_JOB_NAMES} ; do
         local varName=TRIGGERED_BUILD_NUMBER_${jobName}
-        ls -la /build/home/demx2fk3/lfs/${jobName}/${$varName}/
+        ls -la ${artifactesShare}/${jobName}/${$varName}/save/
     done
     IFS=${oldIFS}
 
     return 0
 }
 
+## @fn      _build()
+#  @brief   make the build
+#  @details make the real build. The required build targets / configs will be determinates by
+#           sortbuildsfromdependencies. This creates a list with subsystems - configs in the
+#           correct order. After this, it calls the build script and executes the build.
+#  @todo    replace the sortbuildsfromdependencies with the new implemtation,
+#           introduce the new syntax for sortbuildsfromdependencies.
+#  @param   <none>
+#  @return  <none>
 _build() {
     local cfgFile=$(createTempFile)
 
@@ -62,26 +81,61 @@ _build() {
     return 0
 }
 
+## @fn      _createArtifactArchive()
+#  @brief   create the build artifacts archives and copy them to the share on the master server
+#  @details the build artifacts are not handled by jenkins. we are doing it by ourself, because
+#           jenkins can not handle artifacts on nfs via slaves very well.
+#           so we create a tarball of each bld/* directory. this tarball will be moved to the master
+#           on the /build share. Jenkins will see the artifacts, because we creating a link from
+#           the build share to the jenkins build directory
+#  @param   <none>
+#  @return  <none>
 _createArtifactArchive() {
     local workspace=$(getWorkspaceName)
     mustHaveWorkspaceName
 
     cd "${workspace}/bld/"
-    execute ssh maxi.emea.nsn-net.net mkdir -p /build/home/demx2fk3/lfs/${JENKINS_JOB_NAME}/${BUILD_NUMBER}/save/
-    execute ssh maxi.emea.nsn-net.net ln -sf   /build/home/demx2fk3/lfs/${JENKINS_JOB_NAME}/${BUILD_NUMBER} /var/fpwork/demx2fk3/lfs-jenkins/home/jobs/${JENKINS_JOB_NAME}/builds/${BUILD_NUMBER}/archive 
+
+    local artifactsPathOnShare=${artifactesShare}/${JENKINS_JOB_NAME}/${BUILD_NUMBER}
+    local artifactsPathOnMaster=${jenkinsMasterServerPath}/jobs/${JENKINS_JOB_NAME}/builds/${BUILD_NUMBER}/archive
+    runOnMaster mkdir -p  ${artifactsPathOnShare}/save
+    runOnMaster ln    -sf ${artifactsPathOnShare}      ${artifactsPathOnMaster}
 
     for dir in bld-* ; do
         [[ -d "${dir}" && ! -L "${dir}" ]] || continue
         info "creating artifact archive for ${dir}"
         execute tar -c -z -f "${dir}.tar.gz" "${dir}"
-        execute rsync -avrPe ssh "${dir}.tar.gz" maxi.emea.nsn-net.net:/build/home/demx2fk3/lfs/${JENKINS_JOB_NAME}/${BUILD_NUMBER}/save/
+        execute rsync -avrPe ssh "${dir}.tar.gz" \
+            ${jenkinsMasterServerHostName}:${artifactsPathOnShare}/save
     done
 
     return 0
 }
 
+## @fn      runOnMaster( command )
+#  @brief   runs the given command on the master servers
+#  @warning the output will be stored in the logfile and will not given back to the user.
+#           if there is an error, the programm will raise an error
+#  @param   {command}    command string - no quoting required
+#  @return  <none>
+#  @throws  raise an error, if command fails
+runOnMaster() {
+    local command=$@
+    execute ssh ${jenkinsMasterServerHostName} ${command}
+    return
+}
+
 ## @fn      _createWorkspace()
-#  @brief   create a workspace
+#  @brief   create a new workspace for the project
+#  @details this method is very huge. It creates a new workspace for a projects.
+#           this includes several steps:
+#           * create a new directory                             (build setup)
+#           * cleanup the old workspace if exists   
+#           * switch to the correct location (aka branch)        (build newlocations)
+#           * copy build artifacts from the upstream project if exists
+#           * apply patches to the workspace
+#           * get the list of required subsystem
+#           * check out the subsystem from svn                   (build adddir)
 #  @param   <none>
 #  @return  <none>
 _createWorkspace() {
@@ -108,7 +162,6 @@ _createWorkspace() {
     setupNewWorkspace
 
     switchToNewLocation ${location}
-
 
     if grep -q "ulm" <<< ${NODE_LABELS} ; then
         # change from svne1 to ulmscmi
@@ -164,18 +217,33 @@ _createWorkspace() {
     return 0
 }
 
+## @fn      postCheckoutPatchWorkspace()
+#  @brief   apply patches before the checkout of the workspace to the workspace
+#  @param   <none>
+#  @return  <none>
 preCheckoutPatchWorkspace() {
     _applyPatchesInWorkspace "${JENKINS_JOB_NAME}/preCheckout/"
     _applyPatchesInWorkspace "common/preCheckout/"
     return
 }
 
+## @fn      postCheckoutPatchWorkspace()
+#  @brief   apply patches after the checkout of the workspace to the workspace
+#  @param   <none>
+#  @return  <none>
 postCheckoutPatchWorkspace() {
     _applyPatchesInWorkspace "${JENKINS_JOB_NAME}/postCheckout/"
     _applyPatchesInWorkspace "common/postCheckout/"
     return
 }
 
+## @fn      _applyPatchesInWorkspace()
+#  @brief   apply patches to the workspace, if exist one for the directory
+#  @details in some cases, it's required to apply a patch to the workspace to
+#           change some "small" issue in the workspace, e.g. change the svn server
+#           from the master svne1 server to the slave ulisop01 server.
+#  @param   <none>
+#  @return  <none>
 _applyPatchesInWorkspace() {
 
     local patchPath=$@
@@ -191,7 +259,12 @@ _applyPatchesInWorkspace() {
     return
 }
 
-
+## @fn      getConfig( key )
+#  @brief   get the configuration to the requested key
+#  @details «full description»
+#  @todo    move this into a generic module. make it also more configureable
+#  @param   {key}    key name of the requested value
+#  @return  value for the key
 getConfig() {
     local key=$1
 
@@ -228,6 +301,14 @@ getConfig() {
     esac
 }
 
+## @fn      syncroniceToLocalPath( localPath )
+#  @brief   syncronice the given local path from there to the local cache directory
+#  @details in bld, there are links to the build share. We want to avoid using build
+#           share, because it's to slow. So we are rsyncing the directories from the
+#           share to a local directory.
+#           There are some safties active to avoid problems during syncing.
+#  @param   {localPath}    local bld path
+#  @return  <none>
 syncroniceToLocalPath() {
     local localPath=$1
     local remotePath=$(readlink ${localPath})
@@ -264,9 +345,19 @@ syncroniceToLocalPath() {
     return
 }
 
+## @fn      mustHaveLocalSdks()
+#  @brief   ensure, that the "links to share" in bld are pointing to
+#           a local directory
+#  @detail  if there is a link in bld directory to the build share, 
+#           the method will trigger the copy of this directory to the local
+#           directory
+#  @param   <none>
+#  @return  <none>
 mustHaveLocalSdks() {
     local workspace=$(getWorkspaceName)
     mustHaveWorkspaceName
+
+    debug "checking for links in bld" 
 
     for bld in ${workspace}/bld/*
     do
@@ -288,15 +379,24 @@ mustHaveLocalSdks() {
 
     return
 }
+
+## @fn      mustHaveBuildArtifactsFromUpstream()
+#  @brief   ensure, that the job has the artifacts from the upstream projekt, if exists
+#  @detail  the method check, if there is a upstream project is set and if this project has
+#           artifacts. If this is true, it copies the artifacts to the workspace bld directory
+#           and untar the artifacts.
+#  @param   <none>
+#  @return  <none>
 mustHaveBuildArtifactsFromUpstream() {
 
     local workspace=$(getWorkspaceName)
 
-    debug "checking for artifacts"
-    if [[ -d /build/home/demx2fk3/lfs/${UPSTREAM_PROJECT}/${UPSTREAM_BUILD}/save/ ]] ; then
+    debug "checking for build artifacts on share of upstream project"
+
+    if [[ -d ${artifactesShare}/${UPSTREAM_PROJECT}/${UPSTREAM_BUILD}/save/ ]] ; then
         info "copy artifacts of ${UPSTREAM_PROJECT} #${UPSTREAM_BUILD} from master"
         execute mkdir -p ${workspace}/bld/
-        execute rsync -avrPe ssh maxi.emea.nsn-net.net:/build/home/demx2fk3/lfs/${UPSTREAM_PROJECT}/${UPSTREAM_BUILD}/save/. ${workspace}/bld/.
+        execute rsync -avrPe ssh ${jenkinsMasterServerHostName}:${artifactesShare}/${UPSTREAM_PROJECT}/${UPSTREAM_BUILD}/save/. ${workspace}/bld/.
 
         for file in ${workspace}/bld/*.tar.gz
         do
@@ -304,8 +404,6 @@ mustHaveBuildArtifactsFromUpstream() {
             info "untaring build artifacts ${file}"
             execute tar -C ${workspace}/bld/ -xvzf ${file}
         done
-
-
     fi
 
     return
