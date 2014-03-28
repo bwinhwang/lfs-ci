@@ -1,5 +1,15 @@
 #!/bin/bash
 
+# the following methods are parsing the jenkins job name and return the
+# required / requested information. At the moment, the script will be called
+# every time. This is normally not so fast as it should be.
+# TODO: demx2fk3 2014-03-27 it should be done in this way:
+#  * check, if there is a "property" file which includes the information
+#  * if the files does not exist, create a new file with all information
+#  * source the new created file
+#  * use the sourced information
+# this is caching the information
+
 getTaskNameFromJobName() {
     getFromString.pl "${JENKINS_JOB_NAME}" taskName
     return
@@ -121,25 +131,41 @@ setupNewWorkspace() {
     execute cd "${workspace}"
     execute build setup                                                                                                
 }
-
+## @fn      mustHaveValidWorkspace()
+#  @brief   ensure, that the workspace is valid
+#  @todo    not implemented yet
+#  @param   <none>
+#  @return  <none>
+#  @throws  an error, if the workspace is not valid
 mustHaveValidWorkspace() {
-
     return
-
 }
 
+## @fn      switchSvnServerInLocations()
+#  @brief   change the svn server in the location/*/Dependencies files
+#  @details the connection from svne1 to ulm is very slow. So we want to use
+#           the ulm slave server for checkouts. This is much faster
+#           changes are documented in the logfile
+#  @param   <none>
+#  @return  <none>
 switchSvnServerInLocations() {
     local workspace=$(getWorkspaceName) 
 
     info "changing svne1 to ulmscmi"
-    perl -pi -e "s/svne1.access.nokiasiemensnetworks.com/ulscmi.inside.nsn.com/g" locations/*/Dependencies
+    perl -pi -e "s/${svnMasterServerHostName}/${svnSlaveServerUlmHostName}/g" \
+        locations/*/Dependencies
 
     execute svn status locations/*/Dependencies
     execute svn diff   locations/*/Dependencies
 
     return
 }
-
+## @fn      checkoutSubprojectDirectories( subsystem, revision )
+#  @brief   checkout a subsystem of LFS using build command with a revision
+#  @param   {subsystem}    name of the src-directory
+#  @param   {revision}     revision number from svn, which should be used
+#  @param   <none>
+#  @return  <none>
 checkoutSubprojectDirectories() {
     local workspace=$(getWorkspaceName) 
     local project=$1
@@ -148,14 +174,25 @@ checkoutSubprojectDirectories() {
         optRev="--revision=${revision}"
     fi
     execute build adddir "${project}" ${optRev}
+
+    return
 }
 
+## @fn      createTempFile()
+#  @brief   create a temp file
+#  @details it takes care, that the temp file will be removed in any case, if the programm exits
+#  @param   <none>
+#  @return  name of the new created temp file
 createTempFile() {
     local tempfile=$(mktemp)
     GLOBAL_tempfiles=("${tempfile}" "${GLOBAL_tempfiles[@]}")
     echo ${tempfile}
 }
 
+## @fn      cleanupTempFiles()
+#  @brief   reomve all the used temp files
+#  @param   <none>
+#  @return  <none>
 cleanupTempFiles() {
     for file in ${GLOBAL_tempfiles[@]}
     do
