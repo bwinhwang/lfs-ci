@@ -301,7 +301,7 @@ getConfig() {
     esac
 }
 
-## @fn      syncroniceToLocalPath( localPath )
+## @fn      synchroniceToLocalPath( localPath )
 #  @brief   syncronice the given local path from there to the local cache directory
 #  @details in bld, there are links to the build share. We want to avoid using build
 #           share, because it's to slow. So we are rsyncing the directories from the
@@ -309,7 +309,7 @@ getConfig() {
 #           There are some safties active to avoid problems during syncing.
 #  @param   {localPath}    local bld path
 #  @return  <none>
-syncroniceToLocalPath() {
+synchroniceToLocalPath() {
     local localPath=$1
     local remotePath=$(readlink ${localPath})
     local subsystem=$(basename ${localPath})
@@ -328,8 +328,9 @@ syncroniceToLocalPath() {
             execute touch ${progressFile}
 
             execute rsync -a --numeric-ids --delete-excluded --ignore-errors -H -S \
-                        --exclude=.svn                                     \
-                        ${remotePath}/                                     \
+                        --exclude=.svn                                             \
+                        -e ssh                                                     \
+                        ${jenkinsMasterServerHostName}:${remotePath}/              \
                         ${localCacheDir}/data/${tag}/                    
 
             execute ln -sf data/${tag} ${localCacheDir}/${tag}
@@ -338,7 +339,7 @@ syncroniceToLocalPath() {
             info "waiting for ${tag} on local filesystem"
             # 2014-03-12 demx2fk3 TODO make this configurable
             sleep 60
-            syncroniceToLocalPath ${localPath}
+            synchroniceToLocalPath ${localPath}
         fi
     fi
 
@@ -370,7 +371,7 @@ mustHaveLocalSdks() {
         info "checking for ${subsystem} on local disk"
         
         if [[ ! -d ${localCacheDir} ]] ; then
-            syncroniceToLocalPath ${bld}
+            synchroniceToLocalPath ${bld}
         fi
 
         execute rm -rf ${bld} 
