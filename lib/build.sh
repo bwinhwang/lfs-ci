@@ -75,7 +75,7 @@ _build() {
     do
         counter=$( expr ${counter} + 1 )
         info "(${counter}/${amountOfTargets}) building ${CFG} from ${SRC}..."
-        execute build -C ${SRC} ${CFG} GZIPLEVEL=0
+        execute build -C ${SRC} ${CFG} GZIPLEVEL=1
     done <${cfgFile}
 
     return 0
