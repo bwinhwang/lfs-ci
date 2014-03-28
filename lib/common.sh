@@ -10,16 +10,33 @@
 #  * use the sourced information
 # this is caching the information
 
+# the syntax of the jenkins job name is:
+#
+# LFS _ ( CI | PROD ) _-_ <branch> _-_ <task> _-_ <build> _-_ <boardName>
+#
+
+## @fn      getTaskNameFromJobName()
+#  @brief   get the task name from the jenkins job name
+#  @param   <none>
+#  @return  task name
 getTaskNameFromJobName() {
     getFromString.pl "${JENKINS_JOB_NAME}" taskName
     return
 }
 
+## @fn      getSubTaskNameFromJobName()
+#  @brief   get the sub task name from the jenkins job name
+#  @param   <none>
+#  @return  sub task name
 getSubTaskNameFromJobName() {
     getFromString.pl "${JENKINS_JOB_NAME}" subTaskName
     return
 }
 
+## @fn      getTargetBoardName()
+#  @brief   get the target board name from the jenkins job name
+#  @param   <none>
+#  @return  target board name
 getTargetBoardName() {
     getFromString.pl "${JENKINS_JOB_NAME}" platform
     return
