@@ -95,13 +95,24 @@ mustHaveLocationName() {
     return
 }
 
+## @fn      getWorkspaceName()
+#  @brief   get the workspace name / directory for the project
+#  @param   <none>
+#  @return  name / path of the workspace
 getWorkspaceName() {
     local location=$(getLocationName)
     mustHaveLocationName
 
     echo "${WORKSPACE}/workspace"
+
+    return
 }
 
+## @fn      mustHaveWorkspaceName()
+#  @brief   ensure, that there is a workspace name
+#  @param   <none>
+#  @return  <none>
+#  @throws  raise an error, if there is no workspace name avaibale
 mustHaveWorkspaceName() {
 
     local workspace=$(getWorkspaceName) 
@@ -109,8 +120,15 @@ mustHaveWorkspaceName() {
         error "can not get the correction workspace name from JENKINS_JOB_NAME \"${JENKINS_JOB_NAME}\""
         exit 1
     fi
+
+    return
 }
 
+## @fn      mustHaveWritableWorkspace()
+#  @brief   ensure, that the workspace is writable
+#  @param   <none>
+#  @return  <none>
+#  @throws  raise an error, if the workspace is not writable
 mustHaveWritableWorkspace() {
     local workspace=$(getWorkspaceName) 
     mustHaveWorkspaceName
@@ -119,8 +137,15 @@ mustHaveWritableWorkspace() {
         error "workspace ${workspace} is not writable"
         exit 1
     fi
+
+    return
 }
 
+## @fn      mustHaveCleanWorkspace()
+#  @brief   ensure, that the workspace is clean.
+#  @details if the workspace exists, the workspace directory will be removed and recreated
+#  @param   <none>
+#  @return  <none>
 mustHaveCleanWorkspace() {
 
     local workspace=$(getWorkspaceName) 
@@ -133,20 +158,34 @@ mustHaveCleanWorkspace() {
 
     trace "creating new workspace directory \"${workspace}\""
     execute mkdir -p "${workspace}"
+
+    return
 }
 
+## @fn      removeWorkspace()
+#  @brief   remove the workspace directory
+#  @todo    for big workspaces, move the directory into a trash folder and
+#           remove the workspace later
+#  @param   <none>
+#  @return  <none>
 removeWorkspace() {
     local workspace=$1
 
     execute chmod -R u+w "${workspace}"
     execute rm -rf "${workspace}"
+
+    return
 }
 
+## @fn      switchToNewLocation( locationName )
+#  @brief   swtich to the new location / branch (aka build newlocation <branch>)
+#  @param   {locationName}   the new location name aka branch name
+#  @return  <none>
 switchToNewLocation() {
     local location=$1
 
     trace "check, if user can use this location"
-    # 2014-02-17 demx2fk3 fixme
+    # TODO: demx2fk3 2014-03-28 fixme
     # if id -ng ${USER} | grep pronb ; then
     #     error "${USER} has wrong group id. correct is pronb"
     #     exit 1
@@ -156,14 +195,23 @@ switchToNewLocation() {
 
     trace "switching to new location \"${newLocation}\""
     execute build newlocations ${newLocation}
+
+    return
 }
 
-# side effect: change directory
+## @fn      setupNewWorkspace()
+#  @brief   setup a new workspace (aka build setup)
+#  @warning side effect: this change the current directory into the workspace!!
+#  @param   <none>
+#  @return  <none>
 setupNewWorkspace() {
     local workspace=$(getWorkspaceName) 
     execute cd "${workspace}"
     execute build setup                                                                                                
+
+    return
 }
+
 ## @fn      mustHaveValidWorkspace()
 #  @brief   ensure, that the workspace is valid
 #  @todo    not implemented yet

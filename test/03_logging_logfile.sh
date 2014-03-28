@@ -1,7 +1,7 @@
 #!/bin/bash
 
 
-source lib/ci_logging.sh
+source lib/logging.sh
 
 
 # mock the date command

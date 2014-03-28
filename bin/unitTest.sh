@@ -4,7 +4,7 @@ set -o errexit
 
 export LFS_CI_PATH=$PWD
 
-source ${LFS_CI_PATH}/lib/ci_logging.sh
+source ${LFS_CI_PATH}/lib/logging.sh
 
 
 for file in test/*.sh ; do

@@ -6,7 +6,7 @@ TMP=$(dirname $0)
 export LFS_CI_PATH="$(readlink -f ${TMP}/..)"
 export PATH=${PATH}:${LFS_CI_PATH}/bin
 
-source ${LFS_CI_PATH}/lib/ci_logging.sh
+source ${LFS_CI_PATH}/lib/logging.sh
 source ${LFS_CI_PATH}/lib/commands.sh
 source ${LFS_CI_PATH}/lib/build.sh
 source ${LFS_CI_PATH}/lib/common.sh

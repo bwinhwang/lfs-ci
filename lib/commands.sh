@@ -1,5 +1,16 @@
 #!/bin/bash
 
+## @fn      execute( command )
+#  @brief   executes the given command in a shell
+#  @details this method executes a given command in the same shell. The
+#           output (stderr and stdout) will be written into the logfile.
+#           The output is not shown on the console.
+#           If there is an error (exit code != 0) in the command, an
+#           error will be raised and logged. The scripting ends here!
+#  @todo    «description of incomplete business»
+#  @param   {command}    a command string
+#  @return  <none>
+#  @throws  raise an error, if the command exits with an exit code != 0
 execute() {
     local command=$@
     local output=$(createTempFile)
@@ -24,8 +35,15 @@ execute() {
 
 showAllEnvironmentVariables() {
     execute printenv        
+
+    return
 }
 
+## @fn      cleanupEnvironmentVariables()
+#  @brief   cleanup the environment variables to have a clean env.
+#  @todo    there are some problems here.. this is not working as expected.. 
+#  @param   <none>
+#  @return  <none>
 cleanupEnvironmentVariables() {
     local key=""
 
@@ -60,5 +78,7 @@ cleanupEnvironmentVariables() {
             ;;
         esac
     done
+
+    return
 }
 
