@@ -116,7 +116,6 @@ _createWorkspace() {
     fi
 
     mustHaveValidWorkspace
-    mustHaveBuildArtifactsFromUpstream
 
     local srcDirectory=$(getConfig "subsystem")
     if [[ ! "${srcDirectory}" ]] ; then
@@ -158,6 +157,7 @@ _createWorkspace() {
     done
 
     mustHaveLocalSdks
+    mustHaveBuildArtifactsFromUpstream
 
     postCheckoutPatchWorkspace
 
@@ -276,9 +276,9 @@ mustHaveLocalSdks() {
         local subsystem=$(basename ${bld})
         local localCacheDir=${LFS_CI_SHARE_MIRROR}/${USER}/lfs-ci-local/${subsystem}
 
-        info "checking for ${subsystem} on local disk"
+        info "checking for ${subsystem} / ${tag} on local disk"
         
-        if [[ ! -d ${localCacheDir} ]] ; then
+        if [[ ! -d ${localCacheDir}/${tag} ]] ; then
             syncroniceToLocalPath ${bld}
         fi
 
@@ -295,7 +295,17 @@ mustHaveBuildArtifactsFromUpstream() {
     debug "checking for artifacts"
     if [[ -d /build/home/demx2fk3/lfs/${UPSTREAM_PROJECT}/${UPSTREAM_BUILD}/save/ ]] ; then
         info "copy artifacts of ${UPSTREAM_PROJECT} #${UPSTREAM_BUILD} from master"
+        execute mkdir -p ${workspace}/bld/
         execute rsync -avrPe ssh maxi.emea.nsn-net.net:/build/home/demx2fk3/lfs/${UPSTREAM_PROJECT}/${UPSTREAM_BUILD}/save/. ${workspace}/bld/.
+
+        for file in ${workspace}/bld/*.tar.gz
+        do
+            [[ -f ${file} ]] || continue
+            info "untaring build artifacts ${file}"
+            execute tar -C ${workspace}/bld/ -xvzf ${file}
+        done
+
+
     fi
 
     return
