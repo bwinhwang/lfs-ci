@@ -10,21 +10,43 @@
 #  * use the sourced information
 # this is caching the information
 
+# the syntax of the jenkins job name is:
+#
+# LFS _ ( CI | PROD ) _-_ <branch> _-_ <task> _-_ <build> _-_ <boardName>
+#
+
+## @fn      getTaskNameFromJobName()
+#  @brief   get the task name from the jenkins job name
+#  @param   <none>
+#  @return  task name
 getTaskNameFromJobName() {
     getFromString.pl "${JENKINS_JOB_NAME}" taskName
     return
 }
 
+## @fn      getSubTaskNameFromJobName()
+#  @brief   get the sub task name from the jenkins job name
+#  @param   <none>
+#  @return  sub task name
 getSubTaskNameFromJobName() {
     getFromString.pl "${JENKINS_JOB_NAME}" subTaskName
     return
 }
 
+## @fn      getTargetBoardName()
+#  @brief   get the target board name from the jenkins job name
+#  @param   <none>
+#  @return  target board name
 getTargetBoardName() {
     getFromString.pl "${JENKINS_JOB_NAME}" platform
     return
 }
 
+## @fn      mustHaveTargetBoardName()
+#  @brief   ensure, that there is a target board name
+#  @param   <none>
+#  @return  <none>
+#  @throws  raise an error, if there is no target board name
 mustHaveTargetBoardName() {
 
     local location=$(getTargetBoardName) 
@@ -33,8 +55,13 @@ mustHaveTargetBoardName() {
         exit 1
     fi
 
+    return
 }
 
+## @fn      getLocationName()
+#  @brief   get the location name (aka branch) from the jenkins job name
+#  @param   <none>
+#  @return  location name
 getLocationName() {
     local location=$(getFromString.pl "${JENKINS_JOB_NAME}" location)
 
@@ -52,6 +79,11 @@ getLocationName() {
     return
 }
 
+## @fn      mustHaveLocationName()
+#  @brief   ensure, that there is a location name (aka branch)
+#  @param   <none>
+#  @return  <none>
+#  @throws  raises an error, if there is no location name
 mustHaveLocationName() {
 
     local location=$(getLocationName) 
@@ -60,6 +92,7 @@ mustHaveLocationName() {
         exit 1
     fi
 
+    return
 }
 
 getWorkspaceName() {

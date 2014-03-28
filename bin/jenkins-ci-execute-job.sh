@@ -16,7 +16,7 @@ if [[ -f ${WORKSPACE}/.properties ]] ; then
     source ${WORKSPACE}/.properties
 fi
 
-cleanupEnvironmentVariables
+# cleanupEnvironmentVariables
 export CI_LOGGING_DURATION_OLD_DATE=0
 
 # for better debugging
