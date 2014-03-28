@@ -12,13 +12,11 @@ source ${LFS_CI_PATH}/lib/ci_logging.sh
 source ${LFS_CI_PATH}/lib/commands.sh
 source ${LFS_CI_PATH}/lib/build.sh
 source ${LFS_CI_PATH}/lib/common.sh
+source ${LFS_CI_PATH}/lib/config.sh
 
 if [[ -f ${WORKSPACE}/.properties ]] ; then
     source ${WORKSPACE}/.properties
 fi
-
-echo ${UPSTREAM_PROJECT}
-echo ${UPSTREAM_BUILD}
 
 cleanupEnvironmentVariables
 export CI_LOGGING_DURATION_OLD_DATE=0
