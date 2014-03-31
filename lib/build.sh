@@ -42,14 +42,14 @@ ci_job_package() {
 
     local jobName=""
     local file=""
-    local oldIFS=${IFS}
+    # local oldIFS=${IFS}
     # replacing the , by space. This should be also possible with IFS, but
     # we have two for-loops, which is not good....
     local triggeredJobNames=$( echo ${TRIGGERED_JOB_NAMES} | tr "," " ")
-    IFS=${oldIFS}
+    # IFS=${oldIFS}
 
     # TODO: demx2fk3 2014-03-27 implement this here
-    for jobName in ${TRIGGERED_JOB_NAMES} ; do
+    for jobName in ${triggeredJobNames} ; do
 
         # map the env variables to local vars
         local tmpVarBuildNumber=TRIGGERED_BUILD_NUMBER_${jobName}
