@@ -40,6 +40,8 @@ ci_job_package() {
     local workspace=$(getWorkspaceName)
     mustHaveWorkspaceName
 
+    trace "workspace is ${workspace}"
+
     local jobName=""
     local file=""
     # local oldIFS=${IFS}
@@ -48,14 +50,20 @@ ci_job_package() {
     local triggeredJobNames=$( echo ${TRIGGERED_JOB_NAMES} | tr "," " ")
     # IFS=${oldIFS}
 
+    trace "triggered job names are: ${triggeredJobNames}"
+
     # TODO: demx2fk3 2014-03-27 implement this here
     for jobName in ${triggeredJobNames} ; do
+
+        debug "checking artifacts from jobName ${jobName}"
 
         # map the env variables to local vars
         local tmpVarBuildNumber=TRIGGERED_BUILD_NUMBER_${jobName}
         local tmpVarRunCount=TRIGGERED_BUILD_RUN_COUNT_${jobName}
         buildNumber=${!tmpVarBuildNumber}
         runCount=${!tmpVarRunCount}
+
+        debug "jobName ${jobName} buildNumber ${buildNumber} runCount ${runCount}"
 
         # TODO: demx2fk3 2014-03-31 add check, if the downstream job was running
         # if not, we should raise an error.
@@ -123,6 +131,7 @@ _createArtifactArchive() {
     local workspace=$(getWorkspaceName)
     mustHaveWorkspaceName
 
+    # TODO: demx2fk3 2014-03-31 remove cd - dont change the current directory
     cd "${workspace}/bld/"
 
     local artifactsPathOnShare=${artifactesShare}/${JENKINS_JOB_NAME}/${BUILD_NUMBER}
@@ -133,7 +142,7 @@ _createArtifactArchive() {
     for dir in bld-* ; do
         [[ -d "${dir}" && ! -L "${dir}" ]] || continue
         info "creating artifact archive for ${dir}"
-        execute tar -c -z -f "${dir}.tar.gz" "${dir}"
+        execute tar --create -gzip --filef "${dir}.tar.gz" "${dir}"
         execute rsync --archive --verbose --rsh=ssh -P                  \
             "${dir}.tar.gz"                                             \
             ${jenkinsMasterServerHostName}:${artifactsPathOnShare}/save
