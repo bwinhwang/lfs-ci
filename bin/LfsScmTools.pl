@@ -511,6 +511,9 @@ sub parse {
 
 # ------------------------------------------------------------------------------------------------------------------
 package Parser::Model;
+
+# @brief generic class to store information from the parser
+
 use strict;
 use warnings;
 use parent qw( -norequire Object );
@@ -518,13 +521,17 @@ use parent qw( -norequire Object );
 use Data::Dumper;
 use File::Basename;
 
+## @fn      match( $string )
+#  @brief   checks, if the given strings matches to the src regex
+#  @param   {string}    string to match
+#  @return  1 if string matches to regex, 0 otherwise
 sub match {
-    my $self  = shift;
-    my $match = shift;
-    my $regex = $self->{src};
+    my $self   = shift;
+    my $string = shift;
+    my $regex  = $self->{src};
     $regex =~ s/\*/\.\*/g;
 
-    return $match =~ m/$regex/ ? 1 : 0  
+    return $string =~ m/$regex/ ? 1 : 0  
 }
 
 sub replaceLocations {
