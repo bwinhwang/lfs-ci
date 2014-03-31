@@ -134,7 +134,7 @@ _createArtifactArchive() {
         [[ -d "${dir}" && ! -L "${dir}" ]] || continue
         info "creating artifact archive for ${dir}"
         execute tar -c -z -f "${dir}.tar.gz" "${dir}"
-        execute rsync --archive --verbose -rsh ssh -P                   \
+        execute rsync --archive --verbose --rsh=ssh -P                  \
             "${dir}.tar.gz"                                             \
             ${jenkinsMasterServerHostName}:${artifactsPathOnShare}/save
     done
@@ -358,7 +358,7 @@ synchroniceToLocalPath() {
             execute touch ${progressFile}
 
             execute rsync --archive --numeric-ids --delete-excluded --ignore-errors \
-                --hard-links --sparse --exclude=.svn --rsh ssh                      \
+                --hard-links --sparse --exclude=.svn --rsh=ssh                      \
                 ${jenkinsMasterServerHostName}:${remotePath}/                       \
                 ${localCacheDir}/data/${tag}/                    
 
