@@ -54,15 +54,15 @@ ci_job_package() {
         # map the env variables to local vars
         local tmpVarBuildNumber=TRIGGERED_BUILD_NUMBER_${jobName}
         local tmpVarRunCount=TRIGGERED_BUILD_RUN_COUNT_${jobName}
-        buildNumber=${$tmpVarBuildNumber}
-        runCount=${$tmpVarRunCount}
+        buildNumber=${!tmpVarBuildNumber}
+        runCount=${!tmpVarRunCount}
 
         # TODO: demx2fk3 2014-03-31 add check, if the downstream job was running
         # if not, we should raise an error.
         [[ ${runCount} ]] || error "downstream job ${jobName} was not running"
 
         ls -la ${artifactesShare}/${jobName}/${buildNumber}/save/
-        for file in ${artifactesShare}/${jobName}/${$varName}/save/*
+        for file in ${artifactesShare}/${jobName}/${buildNumber}/save/*
         do
             [[ -e ${file} ]] || continue
 
