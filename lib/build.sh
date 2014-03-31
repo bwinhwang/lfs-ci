@@ -142,7 +142,7 @@ _createArtifactArchive() {
     for dir in bld-* ; do
         [[ -d "${dir}" && ! -L "${dir}" ]] || continue
         info "creating artifact archive for ${dir}"
-        execute tar --create -gzip --filef "${dir}.tar.gz" "${dir}"
+        execute tar --create -gzip --file "${dir}.tar.gz" "${dir}"
         execute rsync --archive --verbose --rsh=ssh -P                  \
             "${dir}.tar.gz"                                             \
             ${jenkinsMasterServerHostName}:${artifactsPathOnShare}/save
