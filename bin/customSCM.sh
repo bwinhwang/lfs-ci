@@ -19,10 +19,10 @@ cat "${REVISION_STATE_FILE}"
 cat "${OLD_REVISION_STATE_FILE}"
 
 
-if [[ ${action} == calculate ]] ; then
-    echo ${UPSTREAM_PROJECT}   >   "${REVISION_STATE_FILE}"
-    echo ${UPSTREAM_BUILD}     >>  "${REVISION_STATE_FILE}"
-fi
+# if [[ ${action} == calculate ]] ; then
+#     echo ${UPSTREAM_PROJECT}   >   "${REVISION_STATE_FILE}"
+#     echo ${UPSTREAM_BUILD}     >>  "${REVISION_STATE_FILE}"
+# fi
 
 
 if [[ ${action} == calculate ]] ; then
