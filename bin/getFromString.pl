@@ -32,13 +32,13 @@ my $regex = qr /
                     _
                     ( CI | Prod )
                     $splitRE
-                    $locationRE
+                    $locationRE           # location aka branch 
                     $splitRE
-                    $taskNameRE 
+                    $taskNameRE           # task name (Build)
                     $splitRE?             # sub task name is 
                     $subTaskNameRE?       # an optional string
-                    $splitRE
-                    $platformRE
+                    $splitRE?
+                    $platformRE?
                     $
                /x;
 

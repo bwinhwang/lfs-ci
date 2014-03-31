@@ -25,8 +25,7 @@ if [[ ${action} == calculate ]] ; then
 fi
 
 
-
-if [[ ${action} == compare ]] ; then
+if [[ ${action} == calculate ]] ; then
 
     if [[ -z "${REVISION_STATE_FILE}" ]] ; then
         echo "no old revision state file found"
