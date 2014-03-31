@@ -29,20 +29,49 @@ ci_job_build() {
 ci_job_package() {
     info "package the build results"
 
-    # env variables
+    # from Jenkins: there are some environment variables, which are pointing to the downstream jobs
+    # which are execute within this jenkins jobs. So we collect the artifacts from those jobs
+    # and untar them in the workspace directory.
+    # 
     # TRIGGERED_BUILD_RUN_COUNT_LFS_CI_trunk_Build_LRC_lcpa=1
     # TRIGGERED_BUILD_NUMBER_LFS_CI_trunk_Build_FSM_r3_qemu_64=1
     # TRIGGERED_JOB_NAMES=LFS_CI_trunk_Build_FSM_r2_qemu,LFS_CI_trunk_Build_LRC_lcpa,LFS_CI_trunk_Build_FSM_r2_fcmd,LFS_CI_trunk_Build_UBOOT_fcta,LFS_CI_tr
 
-    local oldIFS=${IFS}
+    local workspace=$(getWorkspaceName)
+    mustHaveWorkspaceName
+
     local jobName=""
+    local file=""
+    local oldIFS=${IFS}
+    # replacing the , by space. This should be also possible with IFS, but
+    # we have two for-loops, which is not good....
+    local triggeredJobNames=$( echo ${TRIGGERED_JOB_NAMES} | tr "," " ")
+    IFS=${oldIFS}
 
     # TODO: demx2fk3 2014-03-27 implement this here
-    for ${jobName} in ${TRIGGERED_JOB_NAMES} ; do
-        local varName=TRIGGERED_BUILD_NUMBER_${jobName}
-        ls -la ${artifactesShare}/${jobName}/${$varName}/save/
+    for jobName in ${TRIGGERED_JOB_NAMES} ; do
+
+        # map the env variables to local vars
+        local tmpVarBuildNumber=TRIGGERED_BUILD_NUMBER_${jobName}
+        local tmpVarRunCount=TRIGGERED_BUILD_RUN_COUNT_${jobName}
+        buildNumber=${$tmpVarBuildNumber}
+        runCount=${$tmpVarRunCount}
+
+        # TODO: demx2fk3 2014-03-31 add check, if the downstream job was running
+        # if not, we should raise an error.
+        [[ ${runCount} ]] || error "downstream job ${jobName} was not running"
+
+        ls -la ${artifactesShare}/${jobName}/${buildNumber}/save/
+        for file in ${artifactesShare}/${jobName}/${$varName}/save/*
+        do
+            [[ -e ${file} ]] || continue
+
+            trace "untar ${file} from job ${jobName}"
+            execute mkdir -p ${workspace}/bld/
+            execute tar --directory ${workspace} --extract --ungzip --file ${file}  
+
+        done
     done
-    IFS=${oldIFS}
 
     return 0
 }
@@ -105,7 +134,8 @@ _createArtifactArchive() {
         [[ -d "${dir}" && ! -L "${dir}" ]] || continue
         info "creating artifact archive for ${dir}"
         execute tar -c -z -f "${dir}.tar.gz" "${dir}"
-        execute rsync -avrPe ssh "${dir}.tar.gz" \
+        execute rsync --archive --verbose -rsh ssh -P                   \
+            "${dir}.tar.gz"                                             \
             ${jenkinsMasterServerHostName}:${artifactsPathOnShare}/save
     done
 
@@ -327,11 +357,10 @@ synchroniceToLocalPath() {
             execute mkdir -p ${localCacheDir}/data
             execute touch ${progressFile}
 
-            execute rsync -a --numeric-ids --delete-excluded --ignore-errors -H -S \
-                        --exclude=.svn                                             \
-                        -e ssh                                                     \
-                        ${jenkinsMasterServerHostName}:${remotePath}/              \
-                        ${localCacheDir}/data/${tag}/                    
+            execute rsync --archive --numeric-ids --delete-excluded --ignore-errors \
+                --hard-links --sparse --exclude=.svn --rsh ssh                      \
+                ${jenkinsMasterServerHostName}:${remotePath}/                       \
+                ${localCacheDir}/data/${tag}/                    
 
             execute ln -sf data/${tag} ${localCacheDir}/${tag}
             execute rm -f ${progressFile}
@@ -397,13 +426,15 @@ mustHaveBuildArtifactsFromUpstream() {
     if [[ -d ${artifactesShare}/${UPSTREAM_PROJECT}/${UPSTREAM_BUILD}/save/ ]] ; then
         info "copy artifacts of ${UPSTREAM_PROJECT} #${UPSTREAM_BUILD} from master"
         execute mkdir -p ${workspace}/bld/
-        execute rsync -avrPe ssh ${jenkinsMasterServerHostName}:${artifactesShare}/${UPSTREAM_PROJECT}/${UPSTREAM_BUILD}/save/. ${workspace}/bld/.
+        execute rsync --archive --verbose -P --rsh=ssh                                                     \
+            ${jenkinsMasterServerHostName}:${artifactesShare}/${UPSTREAM_PROJECT}/${UPSTREAM_BUILD}/save/. \
+            ${workspace}/bld/.
 
         for file in ${workspace}/bld/*.tar.gz
         do
             [[ -f ${file} ]] || continue
             info "untaring build artifacts ${file}"
-            execute tar -C ${workspace}/bld/ -xvzf ${file}
+            execute tar -C ${workspace}/bld/ --extract --ungzip --file ${file}
         done
     fi
 
