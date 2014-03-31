@@ -26,7 +26,7 @@ my $platformRE    = qr / (?<platform>
                        /x;
 my $splitRE       = qr / _-_ /x;
 
-my $regex = qr /
+my $regex1 = qr /
                     ^
                     LFS
                     _
@@ -36,13 +36,26 @@ my $regex = qr /
                     $splitRE
                     $taskNameRE           # task name (Build)
                     $splitRE?             # sub task name is 
-                    $subTaskNameRE?       # an optional string
-                    $splitRE?
-                    $platformRE?
+                    $subTaskNameRE?       # optional string, like FSM-r3
+                    $splitRE
+                    $platformRE           # platfrom, like fcmd, fspc, fct, ...
                     $
                /x;
 
-if( $string =~ m/$regex/x ) {
+my $regex2 = qr /
+                    ^
+                    LFS
+                    _
+                    ( CI | Prod )
+                    $splitRE
+                    $locationRE           # location aka branch 
+                    $splitRE
+                    $taskNameRE           # task name (Build)
+                    $
+               /x;
+
+if( $string =~ m/$regex1/x or
+    $string =~ m/$regex2/x    ) {
     printf "%s\n", $+{ $wanted };
 }
 
