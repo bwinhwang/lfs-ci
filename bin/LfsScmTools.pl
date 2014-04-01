@@ -896,7 +896,7 @@ sub readBuildXml {
     foreach my $build ( @builds ) {
 
         my $newFile = sprintf( "%s/jobs/%s/builds/%s/build.xml",
-                                $ENV{JENKINS_HOME},
+                                $self->{home},
                                 $build->{projectName}->[0],
                                 $build->{buildNumber}->[0] );
 
@@ -915,9 +915,10 @@ sub prepare {
     my $self = shift;
     my @args = @_;
 
-    getopts( "j:b:", \my %opts );
+    getopts( "j:b:h:", \my %opts );
     $self->{jobName} = $opts{j} || die "no job name";
     $self->{build}   = $opts{b} || die "no build number";
+    $self->{home}    = $opts{h} || die "no home";
 
     return; 
 }
@@ -926,7 +927,7 @@ sub execute {
     my $self = shift;
 
     my $file = sprintf( "%s/jobs/%s/builds/%s/build.xml",
-                        $ENV{JENKINS_HOME},
+                        $self->{home},
                         $self->{jobName},
                         $self->{build},
                       );
