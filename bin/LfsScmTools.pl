@@ -874,11 +874,11 @@ sub execute {
     return;
 }
 
-package Command::GetDownStreamProjects
+package Command::GetDownStreamProjects;
 use strict;
 use warnings;
 
-use parents qw( -norequire Object );
+use parent qw( -norequire Object );
 use XML::Simple;
 
 sub readBuildXml {
@@ -1033,6 +1033,8 @@ if( $program eq "getDependencies" ) {
     $command = Command::SortBuildsFromDependencies->new();
 } elsif ( $program eq "getDownStreamProjects" ) {
     $command = Command::GetDownStreamProjects->new();
+} else {
+    die "command not defined";
 }
 
 $command->prepare( @ARGV );
