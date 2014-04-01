@@ -904,7 +904,7 @@ sub readBuildXml {
                                             $build->{buildResult}->[0],
                                             $build->{projectName}->[0] );
         if ( -f $newFile ) {
-            push @results, readFile( $newFile );
+            push @results, $self->readBuildXml( $newFile );
         }
     }
 
