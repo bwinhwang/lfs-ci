@@ -132,8 +132,8 @@ _createArtifactArchive() {
 
     local artifactsPathOnShare=${artifactesShare}/${JENKINS_JOB_NAME}/${BUILD_NUMBER}
     local artifactsPathOnMaster=${jenkinsMasterServerPath}/jobs/${JENKINS_JOB_NAME}/builds/${BUILD_NUMBER}/archive
-    runOnMaster mkdir -p  ${artifactsPathOnShare}/save
-    runOnMaster ln    -sf ${artifactsPathOnShare}      ${artifactsPathOnMaster}
+    executeOnMaster mkdir -p  ${artifactsPathOnShare}/save
+    executeOnMaster ln    -sf ${artifactsPathOnShare}      ${artifactsPathOnMaster}
 
     for dir in bld-* ; do
         [[ -d "${dir}" && ! -L "${dir}" ]] || continue

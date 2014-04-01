@@ -33,17 +33,23 @@ execute() {
     return
 }
 
-## @fn      runOnMaster( command )
-#  @brief   runs the given command on the master servers
+## @fn      executeOnMaster( command )
+#  @brief   executes the given command on the master servers
 #  @warning the output will be stored in the logfile and will not given back to the user.
 #           if there is an error, the programm will raise an error
 #  @param   {command}    command string - no quoting required
 #  @return  <none>
 #  @throws  raise an error, if command fails
-runOnMaster() {
+executeOnMaster() {
     local command=$@
     execute ssh ${jenkinsMasterServerHostName} ${command}
     return
+}
+
+runOnMaster() {
+    local command=$@
+    ssh ${jenkinsMasterServerHostName} ${command}
+    return $?
 }
 
 showAllEnvironmentVariables() {
