@@ -874,12 +874,14 @@ sub execute {
     return;
 }
 
+# ------------------------------------------------------------------------------------------------------------------
 package Command::GetDownStreamProjects;
 use strict;
 use warnings;
 
 use parent qw( -norequire Object );
 use XML::Simple;
+use Getopt::Std;
 
 sub readBuildXml {
     my $self  = shift;
@@ -890,12 +892,11 @@ sub readBuildXml {
     my @builds = @{ $xml->{actions}->[0]->{'hudson.plugins.parameterizedtrigger.BuildInfoExporterAction'}->[0]->{builds}->[0]->{'hudson.plugins.parameterizedtrigger.BuildInfoExporterAction_-BuildReference'} || [] };
 
     my @results;
-    my $jenkinsPath = $ENV{JENKINS_HOME};
 
     foreach my $build ( @builds ) {
 
-        my $newFile = sprintf( "%s/%s/builds/%s/build.xml",
-                                $jenkinsPath,
+        my $newFile = sprintf( "%s/jobs/%s/builds/%s/build.xml",
+                                $ENV{JENKINS_HOME},
                                 $build->{projectName}->[0],
                                 $build->{buildNumber}->[0] );
 
@@ -914,7 +915,9 @@ sub prepare {
     my $self = shift;
     my @args = @_;
 
-    $self->{file} = shift @args || die "no file";
+    getopts( "j:b:", \my %opts );
+    $self->{jobName} = $opts{j} || die "no job name";
+    $self->{build}   = $opts{b} || die "no build number";
 
     return; 
 }
@@ -922,7 +925,13 @@ sub prepare {
 sub execute {
     my $self = shift;
 
-    my @results = $self->readBuildXml( file => $self->{file} );
+    my $file = sprintf( "%s/jobs/%s/builds/%s/build.xml",
+                        $ENV{JENKINS_HOME},
+                        $self->{jobName},
+                        $self->{build},
+                      );
+
+    my @results = $self->readBuildXml( file => $file );
 
     foreach my $line ( @results ) {
         printf( "%s\n", $line );
