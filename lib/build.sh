@@ -79,7 +79,7 @@ ci_job_package() {
             [[ -f ${file} ]] || continue
 
             trace "untar ${file} from job ${jobName}"
-            execute tar --directory ${workspace}/bld/ --extract --ungzip --file ${file}  
+            execute tar --directory ${workspace}/bld/ --extract --xz --file ${file}  
             execute rm -f ${file}
         done
     done
@@ -145,9 +145,9 @@ _createArtifactArchive() {
     for dir in bld-* ; do
         [[ -d "${dir}" && ! -L "${dir}" ]] || continue
         info "creating artifact archive for ${dir}"
-        execute tar --create --gzip --file "${dir}.tar.gz" "${dir}"
+        execute tar --create --xz --file "${dir}.tar.xz" "${dir}"
         execute rsync --archive --verbose --rsh=ssh -P                  \
-            "${dir}.tar.gz"                                             \
+            "${dir}.tar.xz"                                             \
             ${jenkinsMasterServerHostName}:${artifactsPathOnShare}/save
     done
 
@@ -430,11 +430,11 @@ mustHaveBuildArtifactsFromUpstream() {
             ${jenkinsMasterServerHostName}:${artifactesShare}/${UPSTREAM_PROJECT}/${UPSTREAM_BUILD}/save/. \
             ${workspace}/bld/.
 
-        for file in ${workspace}/bld/*.tar.gz
+        for file in ${workspace}/bld/*.tar.xz
         do
             [[ -f ${file} ]] || continue
             info "untaring build artifacts ${file}"
-            execute tar -C ${workspace}/bld/ --extract --ungzip --file ${file}
+            execute tar -C ${workspace}/bld/ --extract --xz --file ${file}
         done
     fi
 
