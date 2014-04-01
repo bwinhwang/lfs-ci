@@ -44,30 +44,26 @@ ci_job_package() {
 
     local jobName=""
     local file=""
-    # local oldIFS=${IFS}
-    # replacing the , by space. This should be also possible with IFS, but
-    # we have two for-loops, which is not good....
-    local triggeredJobNames=$( echo ${TRIGGERED_JOB_NAMES} | tr "," " ")
-    # IFS=${oldIFS}
+
+    local downStreamprojectsFile=$(createTempFile)
+    getDownStreamProjects -j ${JENKINS_JOB_NAME} -b ${BUILD_NUMBER} > ${downStreamprojectsFile}
+    if [[ $? -ne 0 ]] ; then
+        error "error in getDownStreamProjects for ${JENKINS_JOB_NAME} #${BUILD_NUMBER}"
+        exit 1
+    fi
+    local triggeredJobData=$( cat ${downStreamprojectsFile} )
 
     trace "triggered job names are: ${triggeredJobNames}"
 
-    # TODO: demx2fk3 2014-03-27 implement this here
-    for jobName in ${triggeredJobNames} ; do
+    for jobData in ${triggeredJobData} ; do
 
-        debug "checking artifacts from jobName ${jobName}"
+        local jobName=$(    echo ${jobData} | cut -d: -f 3-)
+        local buildNumber=$(echo ${jobData} | cut -d: -f 3-)
+        local jobResult=$(  echo ${jobData} | cut -d: -f 3-)
 
-        # map the env variables to local vars
-        local tmpVarBuildNumber=TRIGGERED_BUILD_NUMBER_${jobName}
-        local tmpVarRunCount=TRIGGERED_BUILD_RUN_COUNT_${jobName}
-        buildNumber=${!tmpVarBuildNumber}
-        runCount=${!tmpVarRunCount}
+        debug "jobName ${jobName} buildNumber ${buildNumber} jobResult ${jobResult}"
 
-        debug "jobName ${jobName} buildNumber ${buildNumber} runCount ${runCount}"
-
-        # TODO: demx2fk3 2014-03-31 add check, if the downstream job was running
-        # if not, we should raise an error.
-        [[ ${runCount} ]] || error "downstream job ${jobName} was not running"
+        [[ ${jobResult} != SUCCESS ]] || error "downstream job ${jobName} was not successfull"
 
         ls -la ${artifactesShare}/${jobName}/${buildNumber}/save/
         for file in ${artifactesShare}/${jobName}/${buildNumber}/save/*
