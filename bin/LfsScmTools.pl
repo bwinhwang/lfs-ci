@@ -33,7 +33,7 @@ use parent qw( -norequire Object );
 # ------------------------------------------------------------------------------------------------------------------
 package Model::Subdirectory;
 ## @fn    Model::Subdirectory
-#  @brief this class represents a subdirectory of the build. It's a src- or a bld/bld- directory 
+#  @brief this class represents a subdirectory of the build. It's a src- or a bld/bld- directory
 
 use strict;
 use warnings;
@@ -43,7 +43,7 @@ use File::Basename;
 use Data::Dumper;
 
 ## @fn     isSubversion()
-#  @brief  checks, if the subdirectory is based / in subversion 
+#  @brief  checks, if the subdirectory is based / in subversion
 #  @param  <none>
 #  @return 1 if subdirectory is from svn, otherwise 0
 sub isSubversion {
@@ -82,7 +82,7 @@ sub checkDependencies {
         next                     if $use_readonly->hasSourceParameter();
         next                     if $use_readonly->existsDirectory();
 
-        my $childLocation = $locationParser->getLocation( subDir => $use_readonly->src(), 
+        my $childLocation = $locationParser->getLocation( subDir => $use_readonly->src(),
                                                           tag    => $use_readonly->tag() );
         $childLocation->createSymlink();
         push @{ $self->{dependencies} }, $childLocation;
@@ -115,9 +115,9 @@ sub loadDependencyTree {
     if( -f sprintf( "%s/Dependencies", $self->{directory} ) ) {
         # Dependency file exists in the local workspace
         $dependencyParser = Parser::Dependencies->new( fileName => sprintf( "%s/Dependencies", $self->{directory} ) );
-    } elsif ( $self->isSubversion() ) { 
+    } elsif ( $self->isSubversion() ) {
         # load Dependency file from subversion
-        $dependencyParser = Parser::Dependencies->new( 
+        $dependencyParser = Parser::Dependencies->new(
             fileContent => $svn->cat( url      => sprintf( "%s/Dependencies", $self->{repos} ),
                                       revision => $self->{revision}                             ) );
     } elsif ( -f sprintf( "%s/Dependencies", $self->{repos} ) )  {
@@ -139,8 +139,8 @@ sub loadDependencyTree {
     }
 
     foreach my $use_readonly ( @{ $dependencyParser->{data}->{useReadonly} } ) {
-        my $src = $use_readonly->hasSourceParameter() 
-            ? $use_readonly->sourceParameter() 
+        my $src = $use_readonly->hasSourceParameter()
+            ? $use_readonly->sourceParameter()
             : $use_readonly->{src};
 
         my $childLocation = $locationParser->getLocation( subDir => $src,
@@ -161,7 +161,7 @@ sub loadDependencyTree {
 }
 
 ## @fn     getSourceDirectoriesFromDependencies()
-#  @brief  
+#  @brief
 #  @param  <none>
 #  @return list of source directories
 sub getSourceDirectoriesFromDependencies {
@@ -175,8 +175,8 @@ sub getSourceDirectoriesFromDependencies {
         push @deps, $location->{directory};
     }
 
-    my %tmp = map  { $_ => undef } 
-              grep { /src-/ } 
+    my %tmp = map  { $_ => undef }
+              grep { /src-/ }
               @deps;
     return sort keys %tmp;
 }
@@ -191,7 +191,7 @@ sub matchesPlatform {
     my $platform = shift;
     my @targets  = @{ $self->{targets} || [] };
     my @matches = grep { 1 }
-                  map  { $_->matchesPlatform( $platform ) } 
+                  map  { $_->matchesPlatform( $platform ) }
                   @targets;
     return scalar( @matches ) > 0 ? 1 : 0;
 }
@@ -240,7 +240,7 @@ sub checkout {
                         args     => [ qw( -q --depth empty . ) ] );
     } else {
 
-        my $svnInfo = $svn->info(); 
+        my $svnInfo = $svn->info();
         # https://svne1.access.nsn.com/isource/svnroot/BTS_SC_LFS/os/KERNEL_3.4_DEV/trunk/fsmr3
         $svnUrl     = $svnInfo->{entry}->{url};
     }
@@ -402,8 +402,8 @@ sub replace {
     $modifieres =~ s/
                         .*
                         \$\{            # beginning of the string ${ TAG | BRANCH | DIR | ...  }
-                        $replace  
-                        (.*?)           # the optinal modifieres 
+                        $replace
+                        (.*?)           # the optinal modifieres
                         \}              # ending of the variable   }
                         .*
                     /$1/igx;
@@ -420,8 +420,8 @@ sub replace {
     # replace the final string...
     $string =~ s/
                         \$\{           # beginning of the string ${ TAG | BRANCH | DIR | ... }
-                        $replace  
-                        (.*?)          # the optinal modifieres 
+                        $replace
+                        (.*?)          # the optinal modifieres
                         \}             # ending of the variable   }
                     /$value/igx;
 
@@ -464,12 +464,12 @@ sub fileContent {
     return $self->{fileContent};
 }
 
-## @fn     joinMultiLines() 
+## @fn     joinMultiLines()
 #  @brief  joins a multiline "line" to a single line
 #  @detail example: a line
 #             foo \
 #             bar
-#          will be joined to "foo bar" 
+#          will be joined to "foo bar"
 #  @return join string
 sub joinMultiLines {
     my $self = shift;
@@ -482,7 +482,7 @@ sub joinMultiLines {
 }
 
 ## @fn     parse()
-#  @brief  parse a location or dependencies file 
+#  @brief  parse a location or dependencies file
 #  @param  <none>
 #  @return <none>
 sub parse {
@@ -491,7 +491,7 @@ sub parse {
     # printf( STDERR "parsing %s\n", $self->fileName() || "string from svn" );
 
     foreach my $line ( split( /\n/, $self->fileContent() ) ) {
-        next if $line =~ m/^\s*$/; # remove empty lines 
+        next if $line =~ m/^\s*$/; # remove empty lines
         next if $line =~ m/^\s*#/; # remove comments
 
         my ( $command, @args ) = split( /\s+/, $line );
@@ -531,7 +531,7 @@ sub match {
     my $regex  = $self->{src};
     $regex =~ s/\*/\.\*/g;
 
-    return $string =~ m/$regex/ ? 1 : 0  
+    return $string =~ m/$regex/ ? 1 : 0
 }
 
 sub replaceLocations {
@@ -539,11 +539,11 @@ sub replaceLocations {
     my $param = { @_ };
     my @locations = @{ $param->{locations} || [] };
 
-    foreach my $location ( 
+    foreach my $location (
                             map  { $_->[0]                     }
                             sort { $b->[1] cmp $a->[1]         }
                             map  { [ $_, length( $_->{src} ) ] }
-                            @locations 
+                            @locations
     ) {
         $self->{dst} =~ s/$location->{src}/$location->{dst}/ge;
     }
@@ -565,7 +565,7 @@ sub replaceLocations {
     $self->{dst} = $replacer->replace( replace => "BUILD_HOST",
                                        value   => $ENV{BUILD_HOST} || "",
                                        string  => $self->{dst} );
-    
+
     return;
 }
 
@@ -619,7 +619,7 @@ sub matchesPlatform {
 
     if( $self->hasTargetsParameter() ) {
         return scalar( grep { $platform eq $_ || $_ eq "all" } $self->targetsParameter() ) ? 1 : 0;
-    } 
+    }
     return 1 if $self->{target} =~ m/-$platform$/;
     return 0;
 }
@@ -632,7 +632,7 @@ sub hasTargetsParameter {
 
 sub targetsParameter {
     my $self = shift;
-    if( scalar( @{ $self->{params} } ) > 1 
+    if( scalar( @{ $self->{params} } ) > 1
         && $self->{params}->[1] =~ m/^-targets=(.*)/ )
     {
         return split( ",", $1 );
@@ -657,13 +657,13 @@ sub sourceParameter {
 
     # check for --source
     if( scalar( @{ $self->{dst} } ) > 1
-        && $self->{dst}->[1] =~ m/^--source=(.*)/ 
-      ) 
-    { 
+        && $self->{dst}->[1] =~ m/^--source=(.*)/
+      )
+    {
         return $1;
     }
 
-    return; 
+    return;
 }
 
 sub hasSourceParameter {
@@ -685,8 +685,8 @@ sub cleanup {
     my $self = shift;
     if( -l $self->{src} ) {
         # printf( "cleanup %s\n", $self->{src} );
-        unlink( $self->{src} ) 
-    }            
+        unlink( $self->{src} )
+    }
     return;
 }
 
@@ -714,23 +714,23 @@ sub svn_repository {
     return;
 }
 
-sub search_tag      { 
-    my $self = shift; 
+sub search_tag      {
+    my $self = shift;
     push @{ $self->{data}->{searchTag} }, Parser::Locations::Models::SearchTag->new( src => $_[0], dst => $_[1] );
     return;
 }
 
-sub search_trunk { 
-    my $self = shift; 
+sub search_trunk {
+    my $self = shift;
     push @{ $self->{data}->{searchTrunk} }, Parser::Locations::Models::SearchTrunk->new( src => $_[0], dst => $_[1] );
     return;
 }
 
 # not supported any more
-sub search_branch { 
-    my $self = shift; 
-    push @{ $self->{data}->{searchBranch} }, Parser::Locations::Models::SearchBranch->new( src => $_[0], dst => $_[1] ); 
-    return; 
+sub search_branch {
+    my $self = shift;
+    push @{ $self->{data}->{searchBranch} }, Parser::Locations::Models::SearchBranch->new( src => $_[0], dst => $_[1] );
+    return;
 }
 
 sub getReporitoryOrLocation {
@@ -742,15 +742,15 @@ sub getReporitoryOrLocation {
 
     # todo add support for hints here
 
-    foreach my $model ( 
+    foreach my $model (
                            @{ $self->{data}->{searchBranch} },
-                           $tag ? @{ $self->{data}->{searchTag} } : (), 
-                           @{ $self->{data}->{searchTrunk} } 
+                           $tag ? @{ $self->{data}->{searchTag} } : (),
+                           @{ $self->{data}->{searchTrunk} }
                       ) {
         if( $model->match( $subDir ) ) {
             return $model;
         }
-        
+
     }
     return;
 }
@@ -813,7 +813,7 @@ SOURCES:
         my $source = shift @sources;
         next if not $source;
 
-        my @deps = map { $_->{directory} } 
+        my @deps = map { $_->{directory} }
                    grep { $_->{sourceExistsInFileSystem} }
                    $source->getDependencies();
 
@@ -826,8 +826,8 @@ SOURCES:
         }
 
         my %duplicate;
-        printf "%s %s - %s\n", 
-                $source->{directory}, 
+        printf "%s %s - %s\n",
+                $source->{directory},
                 join( ",", sort $source->platforms() ),
                 join( ",", sort grep { /src-/ } grep { not $duplicate{ $_ }++; } @deps );
 
@@ -874,6 +874,63 @@ sub execute {
     return;
 }
 
+package Command::GetDownStreamProjects
+use strict;
+use warnings;
+
+use parents qw( -norequire Object );
+use XML::Simple;
+
+sub readBuildXml {
+    my $self  = shift;
+    my $param = { @_ };
+    my $file  = $param->{file};
+
+    my $xml  = XMLin( $file, ForceArray => 1 );
+    my @builds = @{ $xml->{actions}->[0]->{'hudson.plugins.parameterizedtrigger.BuildInfoExporterAction'}->[0]->{builds}->[0]->{'hudson.plugins.parameterizedtrigger.BuildInfoExporterAction_-BuildReference'} || [] };
+
+    my @results;
+    my $jenkinsPath = $ENV{JENKINS_HOME};
+
+    foreach my $build ( @builds ) {
+
+        my $newFile = sprintf( "%s/%s/builds/%s/build.xml",
+                                $jenkinsPath,
+                                $build->{projectName}->[0],
+                                $build->{buildNumber}->[0] );
+
+        push @results, sprintf( "%s:%s:%s", $build->{buildNumber}->[0],
+                                            $build->{buildResult}->[0],
+                                            $build->{projectName}->[0] );
+        if ( -f $newFile ) {
+            push @results, readFile( $newFile );
+        }
+    }
+
+    return @results;
+}
+
+sub prepare { 
+    my $self = shift;
+    my @args = @_;
+
+    $self->{file} = shift @args || die "no file";
+
+    return; 
+}
+
+sub execute {
+    my $self = shift;
+
+    my @results = $self->readBuildXml( file => $self->{file} );
+
+    foreach my $line ( @results ) {
+        printf( "%s\n", $line );
+    }
+
+    return;
+}
+
 # ------------------------------------------------------------------------------------------------------------------
 package Usecase::GetLocation;
 use strict;
@@ -904,22 +961,22 @@ sub getLocation {
     my $tag      = $param->{tag};
     my $revision = $param->{revision};
 
-    my $tmp = $self->{locations}->getReporitoryOrLocation( subDir => $subDir, 
+    my $tmp = $self->{locations}->getReporitoryOrLocation( subDir => $subDir,
                                                            tag    => $tag );
     if( $tmp ) {
         my $repos = dclone ( # create a deep clone copy of the object
-                            $tmp 
+                            $tmp
                            );
- 
+
         $repos->{subDir} = $subDir;
         $repos->replaceLocations( locations => $self->{locations}->{data}->{physicalLocations},
                                   dir       => $subDir,
                                   tag       => $tag );
 
-        my $subDirectory = Model::Subdirectory->new( 
+        my $subDirectory = Model::Subdirectory->new(
                                                     directory => $subDir,
                                                     tag       => $tag,
-                                                    revision  => $revision, 
+                                                    revision  => $revision,
                                                     repos     => $repos->{dst},
                                                 );
         return $subDirectory;
@@ -974,6 +1031,8 @@ if( $program eq "getDependencies" ) {
     $command = Command::GetDependencies->new();
 } elsif ( $program eq "sortBuildsFromDependencies" ) {
     $command = Command::SortBuildsFromDependencies->new();
+} elsif ( $program eq "getDownStreamProjects" ) {
+    $command = Command::GetDownStreamProjects->new();
 }
 
 $command->prepare( @ARGV );

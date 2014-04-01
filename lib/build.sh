@@ -151,18 +151,6 @@ _createArtifactArchive() {
     return 0
 }
 
-## @fn      runOnMaster( command )
-#  @brief   runs the given command on the master servers
-#  @warning the output will be stored in the logfile and will not given back to the user.
-#           if there is an error, the programm will raise an error
-#  @param   {command}    command string - no quoting required
-#  @return  <none>
-#  @throws  raise an error, if command fails
-runOnMaster() {
-    local command=$@
-    execute ssh ${jenkinsMasterServerHostName} ${command}
-    return
-}
 
 ## @fn      _createWorkspace()
 #  @brief   create a new workspace for the project
