@@ -874,6 +874,7 @@ sub execute {
     return;
 }
 
+# ------------------------------------------------------------------------------------------------------------------
 package Command::GetDownStreamProjects;
 use strict;
 use warnings;
@@ -894,7 +895,7 @@ sub readBuildXml {
 
     foreach my $build ( @builds ) {
 
-        my $newFile = sprintf( "%s/%s/builds/%s/build.xml",
+        my $newFile = sprintf( "%s/jobs/%s/builds/%s/build.xml",
                                 $jenkinsPath,
                                 $build->{projectName}->[0],
                                 $build->{buildNumber}->[0] );
