@@ -42,7 +42,7 @@ ci_job_package() {
     local file=""
 
     local downStreamprojectsFile=$(createTempFile)
-    runOnMaster ${LFS_CI_PATH}/bin/getDownStreamProjects -j ${UPSTREAM_PROJECT} -b ${UPSTREAM_BUILD} -h ${JENKINS_HOME} > ${downStreamprojectsFile}
+    runOnMaster ${LFS_CI_PATH}/bin/getDownStreamProjects -j ${UPSTREAM_PROJECT} -b ${UPSTREAM_BUILD} -h ${jenkinsMasterServerPath} > ${downStreamprojectsFile}
     if [[ $? -ne 0 ]] ; then
         error "error in getDownStreamProjects for ${JENKINS_JOB_NAME} #${BUILD_NUMBER}"
         exit 1

@@ -42,7 +42,7 @@ info "starting jenkins job \"${JENKINS_JOB_NAME}\" on ${HOSTNAME} as ${USER}"
 
 # first dispatcher, calling the correct script or function
 case "${JENKINS_JOB_NAME}" in
-    LFS_CI_*_Build)   ci_job_package || exit 1 ;;
+    LFS_CI_-_trunk_-_Package_-_package) ci_job_package || exit 1 ;;
     LFS_CI_*_Build_*) ci_job_build   || exit 1 ;;
     *)
 
