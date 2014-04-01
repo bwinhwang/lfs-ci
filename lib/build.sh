@@ -2,7 +2,7 @@
 
 ## @fn      ci_job_build()
 #  @brief   usecase job ci build
-#  @details the use case job ci build makes a clean build 
+#  @details the use case job ci build makes a clean build
 #  @param   <none>
 #  @return  <none>
 ci_job_build() {
@@ -11,7 +11,7 @@ ci_job_build() {
     _createWorkspace
 
     info "building targets..."
-    _build        
+    _build
 
     info "upload results to artifakts share."
     _createArtifactArchive
@@ -75,7 +75,7 @@ ci_job_package() {
             [[ -f ${file} ]] || continue
 
             trace "untar ${file} from job ${jobName}"
-            execute tar --directory ${workspace}/bld/ --extract --auto-compress --file ${file}  
+            execute tar --directory ${workspace}/bld/ --extract --auto-compress --file ${file}
             execute rm -f ${file}
         done
     done
@@ -84,6 +84,7 @@ ci_job_package() {
     copyAddons
     copyVersionFile
     copyDocumentation
+    copyPlatform
 
 
     return 0
@@ -102,7 +103,7 @@ mustHavePlatformFromDirectory() {
     local directory=$1
     local platform=$2
     if [[ ! ${platform} ]] ; then
-        error "can not found map for platform ${directory}" 
+        error "can not found map for platform ${directory}"
         exit 1
     fi
     return
@@ -126,20 +127,31 @@ copyAddons() {
         local dstDirectory=${workspace}/upload/addons/${destinationsPlatform}
 
         execute mkdir -p ${dstDirectory}
-        execute find ${srcDirectory}/ -type f -exec cp -av {} ${dstDirectory} \; 
+        execute find ${srcDirectory}/ -type f -exec cp -av {} ${dstDirectory} \;
 
     done
 
     return
+}
 
+copyArchs() {
+    local workspace=/tmp/demx2fk3/foobar/workspace
+    mustHaveWorkspaceName
+
+    local dst=${workspace}/upload/archs/
+    execute mkdir -p ${dst}
+
+    ln -sf ../../../sdk3/bld-tools ${dst}/archs/$SYSARCH/bld-tools                                                                                                                                                          
+    ln -sf ../../../sdk3/dbg-tools ${dst}/archs/$SYSARCH/dbg-tools                                                                                                                                                          
+    ln -sf ../../sys-root/$SYSARCH ${dst}/archs/$SYSARCH/sys-root
+
+    return
 }
 
 copyPlatform() {
     local workspace=/tmp/demx2fk3/foobar/workspace
     mustHaveWorkspaceName
 
-    local dstDirectory=${workspace}/upload/versions
-    mkdir -p ${dstDirectory}
 
     for bldDirectory in ${workspace}/bld/bld-*psl-* ; do
         [[ -d ${bldDirectory} ]] || continue
@@ -148,7 +160,50 @@ copyPlatform() {
         local destinationsPlatform=$(getPlatformFromDirectory ${bldDirectory})
         mustHavePlatformFromDirectory ${bldDirectory} ${destinationsPlatform}
 
+        local dst=${workspace}/upload/platforms/${destinationsPlatform}
+        execute mkdir -p ${dst}
+
         info "copy platform for ${destinationsPlatform}..."
+
+        execute rsync -avr --exclude=addons --exclude=sys-root --exclude=rfs.init_sys-root.tar.gz ${bldDirectory}/results/. ${dst}
+
+        debug "symlink addons"
+        execute ln -sf ../../addons/${destinationsPlatform} ${dst}/addons
+
+        debug "symlinks sys-root"
+        execute ln -sf ../../sys-root/${destinationsPlatform} ${dst}/sys-root
+
+        debug "cleanup stuff in platform ${destinationsPlatform}"
+
+        case ${destinationsPlatform} in
+            qemu)        : ;;  # no op
+            fcmd | fspc) : ;;  # no op
+            qemu_64) 
+                    mkdir ${dst}/devel
+                    for file in ${dst}/config     \
+                                ${dst}/System.map \
+                                ${dst}/vmlinux.*  \
+                                ${dst}/uImage.nfs
+                    do
+                        [[ -f ${file} ]] || continue
+                        execute mv -f ${file} ${dst}/devel
+                    done
+            ;;
+            fsm3_octeon2)
+                    ln -fs factory/u-boot.uim ${dst}/u-boot.uim
+                    mkdir ${dst}/devel
+                    for file in ${dst}/config     \
+                                ${dst}/rootfs*    \
+                                ${dst}/System.map \
+                                ${dst}/uImage.nfs \
+                                ${dst}/vmlinux.*  
+                    do
+                        [[ -f ${file} ]] || continue
+                        execute mv -f ${file} ${dst}/devel
+                    done
+                    rm -f ${dst}/bzImage
+            ;; 
+        esac
 
     done
 
@@ -202,10 +257,10 @@ copyDocumentation() {
 _build() {
     local cfgFile=$(createTempFile)
 
-    local location=$(getLocationName) 
+    local location=$(getLocationName)
     mustHaveLocationName
 
-    local target=$(getTargetBoardName) 
+    local target=$(getTargetBoardName)
     mustHaveTargetBoardName
 
     sortbuildsfromdependencies ${target} > ${cfgFile}
@@ -263,7 +318,7 @@ _createArtifactArchive() {
 #  @details this method is very huge. It creates a new workspace for a projects.
 #           this includes several steps:
 #           * create a new directory                             (build setup)
-#           * cleanup the old workspace if exists   
+#           * cleanup the old workspace if exists
 #           * switch to the correct location (aka branch)        (build newlocations)
 #           * copy build artifacts from the upstream project if exists
 #           * apply patches to the workspace
@@ -273,10 +328,10 @@ _createArtifactArchive() {
 #  @return  <none>
 _createWorkspace() {
 
-    local location=$(getLocationName) 
+    local location=$(getLocationName)
     mustHaveLocationName
 
-    local target=$(getTargetBoardName) 
+    local target=$(getTargetBoardName)
     mustHaveTargetBoardName
 
     local workspace=$(getWorkspaceName)
@@ -330,7 +385,7 @@ _createWorkspace() {
     fi
 
     info "using src-dirs: ${buildTargets}"
-            
+
     local amountOfTargets=$(echo ${buildTargets} | wc -w)
     local counter=0
 
@@ -408,7 +463,7 @@ getConfig() {
     location=$(getLocationName)
     config=$(getTargetBoardName)
 
-    case "${key}" in 
+    case "${key}" in
         subsystem)
             case "${subTaskName}" in
                 FSM-r2       ) echo src-psl    ;;
@@ -463,7 +518,7 @@ synchroniceToLocalPath() {
             execute rsync --archive --numeric-ids --delete-excluded --ignore-errors \
                 --hard-links --sparse --exclude=.svn --rsh=ssh                      \
                 ${jenkinsMasterServerHostName}:${remotePath}/                       \
-                ${localCacheDir}/data/${tag}/                    
+                ${localCacheDir}/data/${tag}/
 
             execute ln -sf data/${tag} ${localCacheDir}/${tag}
             execute rm -f ${progressFile}
@@ -481,7 +536,7 @@ synchroniceToLocalPath() {
 ## @fn      mustHaveLocalSdks()
 #  @brief   ensure, that the "links to share" in bld are pointing to
 #           a local directory
-#  @detail  if there is a link in bld directory to the build share, 
+#  @detail  if there is a link in bld directory to the build share,
 #           the method will trigger the copy of this directory to the local
 #           directory
 #  @param   <none>
@@ -490,7 +545,7 @@ mustHaveLocalSdks() {
     local workspace=$(getWorkspaceName)
     mustHaveWorkspaceName
 
-    debug "checking for links in bld" 
+    debug "checking for links in bld"
 
     for bld in ${workspace}/bld/*
     do
@@ -501,12 +556,12 @@ mustHaveLocalSdks() {
         local localCacheDir=${LFS_CI_SHARE_MIRROR}/${USER}/lfs-ci-local/${subsystem}
 
         info "checking for ${subsystem} / ${tag} on local disk"
-        
+
         if [[ ! -d ${localCacheDir}/${tag} ]] ; then
             synchroniceToLocalPath ${bld}
         fi
 
-        execute rm -rf ${bld} 
+        execute rm -rf ${bld}
         execute ln -sf ${localCacheDir}/${tag} ${bld}
     done
 
