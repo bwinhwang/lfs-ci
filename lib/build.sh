@@ -32,10 +32,6 @@ ci_job_package() {
     # from Jenkins: there are some environment variables, which are pointing to the downstream jobs
     # which are execute within this jenkins jobs. So we collect the artifacts from those jobs
     # and untar them in the workspace directory.
-    # 
-    # TRIGGERED_BUILD_RUN_COUNT_LFS_CI_trunk_Build_LRC_lcpa=1
-    # TRIGGERED_BUILD_NUMBER_LFS_CI_trunk_Build_FSM_r3_qemu_64=1
-    # TRIGGERED_JOB_NAMES=LFS_CI_trunk_Build_FSM_r2_qemu,LFS_CI_trunk_Build_LRC_lcpa,LFS_CI_trunk_Build_FSM_r2_fcmd,LFS_CI_trunk_Build_UBOOT_fcta,LFS_CI_tr
 
     local workspace=$(getWorkspaceName)
     mustHaveWorkspaceName
@@ -79,12 +75,119 @@ ci_job_package() {
             [[ -f ${file} ]] || continue
 
             trace "untar ${file} from job ${jobName}"
-            execute tar --directory ${workspace}/bld/ --extract --xz --file ${file}  
+            execute tar --directory ${workspace}/bld/ --extract --auto-compress --file ${file}  
             execute rm -f ${file}
         done
     done
 
+
+    copyAddons
+    copyVersionFile
+    copyDocumentation
+
+
     return 0
+}
+
+getPlatformFromDirectory() {
+    local directory=$1
+    baseName=$(basename ${directory})
+    directoryPlatform=$(cut -d- -f3 <<< ${baseName})
+    destinationsPlatform=${platformMap["${directoryPlatform}"]}
+    echo ${destinationsPlatform}
+    return
+}
+
+mustHavePlatformFromDirectory() {
+    local directory=$1
+    local platform=$2
+    if [[ ! ${platform} ]] ; then
+        error "can not found map for platform ${directory}" 
+        exit 1
+    fi
+    return
+}
+
+copyAddons() {
+
+    local workspace=/tmp/demx2fk3/foobar/workspace
+    mustHaveWorkspaceName
+
+    for bldDirectory in ${workspace}/bld/bld-*psl-* ; do
+        [[ -d ${bldDirectory} ]] || continue
+        [[ -d ${bldDirectory}/results/addons ]] || continue
+
+        local destinationsPlatform=$(getPlatformFromDirectory ${bldDirectory})
+        mustHavePlatformFromDirectory ${bldDirectory} ${destinationsPlatform}
+
+        info "copy addons for ${destinationsPlatform}..."
+
+        local srcDirectory=${bldDirectory}/results/addons
+        local dstDirectory=${workspace}/upload/addons/${destinationsPlatform}
+
+        execute mkdir -p ${dstDirectory}
+        execute find ${srcDirectory}/ -type f -exec cp -av {} ${dstDirectory} \; 
+
+    done
+
+    return
+
+}
+
+copyPlatform() {
+    local workspace=/tmp/demx2fk3/foobar/workspace
+    mustHaveWorkspaceName
+
+    local dstDirectory=${workspace}/upload/versions
+    mkdir -p ${dstDirectory}
+
+    for bldDirectory in ${workspace}/bld/bld-*psl-* ; do
+        [[ -d ${bldDirectory} ]] || continue
+        [[ -d ${bldDirectory}/results ]] || continue
+
+        local destinationsPlatform=$(getPlatformFromDirectory ${bldDirectory})
+        mustHavePlatformFromDirectory ${bldDirectory} ${destinationsPlatform}
+
+        info "copy platform for ${destinationsPlatform}..."
+
+    done
+
+    return
+}
+
+copyVersionFile() {
+    local workspace=/tmp/demx2fk3/foobar/workspace
+    mustHaveWorkspaceName
+
+    local dstDirectory=${workspace}/upload/versions
+    mkdir -p ${dstDirectory}
+
+    # TODO: demx2fk3 2014-04-01 implement this, fix in src-fsmpsl and src-psl is needed
+
+    info "copy verson control file..."
+
+    for file in ${workspace}/bld/bld-fsmpsl-fct/results/doc/versions/version_control.xml \
+                ${workspace}/bld/bld-fsmpsl-fct/results/doc/versions/ptsw_fsmr3_version_control.xml \
+                ${workspace}/bld/bld-fsmpsl-fct/results/doc/versions/ptsw_urec_version_control.xml
+    do
+        [[ -e ${file} ]] || continue
+        execute cp ${file} ${dstDirectory}
+    done
+
+    return
+}
+copyDocumentation() {
+    local workspace=/tmp/demx2fk3/foobar/workspace
+    mustHaveWorkspaceName
+
+    local dstDirectory=${workspace}/upload/docs
+    mkdir -p ${dstDirectory}
+
+    info "copy docs..."
+
+    # TODO: demx2fk3 2014-04-01 implement this, fix in src-fsmpsl and src-psl is needed
+
+    return
 }
 
 ## @fn      _build()
@@ -145,7 +248,7 @@ _createArtifactArchive() {
     for dir in bld-* ; do
         [[ -d "${dir}" && ! -L "${dir}" ]] || continue
         info "creating artifact archive for ${dir}"
-        execute tar --create --xz --file "${dir}.tar.xz" "${dir}"
+        execute tar --create --auto-compress --file "${dir}.tar.xz" "${dir}"
         execute rsync --archive --verbose --rsh=ssh -P                  \
             "${dir}.tar.xz"                                             \
             ${jenkinsMasterServerHostName}:${artifactsPathOnShare}/save
@@ -430,11 +533,11 @@ mustHaveBuildArtifactsFromUpstream() {
             ${jenkinsMasterServerHostName}:${artifactesShare}/${UPSTREAM_PROJECT}/${UPSTREAM_BUILD}/save/. \
             ${workspace}/bld/.
 
-        for file in ${workspace}/bld/*.tar.xz
+        for file in ${workspace}/bld/*.tar.{gz,xz,bz2}
         do
             [[ -f ${file} ]] || continue
             info "untaring build artifacts ${file}"
-            execute tar -C ${workspace}/bld/ --extract --xz --file ${file}
+            execute tar -C ${workspace}/bld/ --extract --auto-compress --file ${file}
         done
     fi
 

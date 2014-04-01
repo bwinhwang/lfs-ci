@@ -16,6 +16,7 @@ startLogfile() {
         local userName=${USER}
 
         export CI_LOGGING_LOGFILENAME=${LFS_CI_PATH}/log/ci.${dateString}.${hostName}.${userName}.${jobName}.log
+        export CI_LOGGING_DURATION_START_DATE=$(date +%s.%N)
 
         printf -- "logfile is ${CI_LOGGING_LOGFILENAME}\n"
         printf -- "------------------------------------------------------------------\n" >  ${CI_LOGGING_LOGFILENAME}
@@ -114,6 +115,53 @@ message() {
     startLogfile
 
     logLine=$(_loggingLine ${logType} "${logMessage}")
+
+    # ------------------------------------------------------------------------------------------
+    # interal stuff
+    # generate the logline
+    local config=${CI_LOGGING_CONFIG-"DATE SPACE DURATION SPACE TYPE SPACE MESSAGE NEWLINE"}
+    local prefix=${CI_LOGGING_PREFIX-${CI_LOGGING_PREFIX_HASH["$logType"]}}
+    local dateFormat=${CI_LOGGING_DATEFORMAT-"+%Y-%m-%d-%H:%M:%S.%N"}
+
+    for template in ${config}
+    do
+        case "${template}" in 
+            LINE)    logLine=$(printf "%s%s" "${logLine}" "-----------------------------------------------------------------") ;;
+            SPACE)   logLine=$(printf "%s "  "${logLine}" ) ;;
+            NEWLINE) logLine=$(printf "%s\n" "${logLine}" ) ;;
+            TAB)     logLine=$(printf "%s\t" "${logLine}" ) ;;
+            PREFIX)  logLine=$(printf "%s%s" "${logLine}" "${prefix}" ) ;;
+            DATE)    logLine=$(printf "%s%s" "${logLine}" "$(date "${dateFormat}")" ) ;;
+            TYPE)    logLine=$(printf "%s%-10s" "${logLine}" "[${logType}]" );;
+            DURATION) 
+                     if [[ "${logType}" != "TRACE" ]] ; then
+                        local cur=$(date +%s.%N)
+                        local old=${CI_LOGGING_DURATION_START_DATE}
+                        local dur=$(echo ${cur} - ${old} | bc)
+                        logLine=$(printf "%s[%7.3f]" "${logLine}" ${dur})
+                     else
+                        logLine=$(printf "%s        " "${logLine}")
+                     fi
+                     ;;
+            NONE)    :                                     ;;
+            MESSAGE) 
+                logLine=$(printf "%s%s" "${logLine}" "${logMessage}")
+            ;;
+            CALLER)
+                logLine=$(printf "called from Method '%s' in File %s, Line %s"    \
+                    "${logLine}"                                        \
+                    "${FUNCNAME[2]}"                                    \
+                    "${BASH_SOURCE[2]}"                                 \
+                    "${BASH_LINENO[1]}" )
+            ;;
+            STACKTRACE)
+                _stackTrace
+            ;;
+        esac
+
+    done
+    # -------------------------------------------------------------------------------------------
+
     if [[ "${logType}" != "TRACE" ]] ; then
         echo -e "${logLine}"
     fi
@@ -133,46 +181,6 @@ _loggingLine() {
     local logType=$1
     local logMessage=$2
 
-    local config=${CI_LOGGING_CONFIG-"TYPE SPACE MESSAGE NEWLINE"}
-    local prefix=${CI_LOGGING_PREFIX-${CI_LOGGING_PREFIX_HASH["$logType"]}}
-    local dateFormat=${CI_LOGGING_DATEFORMAT-"+%Y-%m-%d-%H:%M:%S.%N"}
-
-    for template in ${config}
-    do
-        case "${template}" in 
-            LINE)    printf -- "-----------------------------------------------------------------" ;;
-            SPACE)   printf " "                            ;;
-            NEWLINE) printf "\n"                           ;;
-            TAB)     printf "\t"                           ;;
-            PREFIX)  printf "%s"   "${prefix}"             ;;
-            DATE)    printf "%s" "$(date "${dateFormat}")" ;;
-            TYPE)    printf "%-10s" "[${logType}]"         ;;
-            DURATION) 
-                     if [[ "${logType}" != "TRACE" ]] ; then
-                        cur=$(date +%s.%N)
-                        dur=`echo ${cur} - ${CI_LOGGING_DURATION_OLD_DATE} | bc`
-                        printf "[%7.3f]" ${dur}
-                        export CI_LOGGING_DURATION_OLD_DATE=${cur}
-                     else
-                        printf "        "
-                     fi
-                     ;;
-            NONE)    :                                     ;;
-            MESSAGE) 
-                printf "%s" "${logMessage}" 
-            ;;
-            CALLER)
-                printf "called from Method '%s' in File %s, Line %s"    \
-                    "${FUNCNAME[2]}"                                    \
-                    "${BASH_SOURCE[2]}"                                 \
-                    "${BASH_LINENO[1]}"                               
-            ;;
-            STACKTRACE)
-                _stackTrace
-            ;;
-        esac
-
-    done
 }
 
 ## @fn      _stackTrace()
