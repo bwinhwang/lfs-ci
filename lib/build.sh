@@ -46,7 +46,7 @@ ci_job_package() {
     local file=""
 
     local downStreamprojectsFile=$(createTempFile)
-    runOnMaster getDownStreamProjects -j ${JENKINS_JOB_NAME} -b ${BUILD_NUMBER} > ${downStreamprojectsFile}
+    runOnMaster ${LFS_CI_PATH}/bin/getDownStreamProjects -j ${JENKINS_JOB_NAME} -b ${BUILD_NUMBER} -h ${JENKINS_HOME} > ${downStreamprojectsFile}
     if [[ $? -ne 0 ]] ; then
         error "error in getDownStreamProjects for ${JENKINS_JOB_NAME} #${BUILD_NUMBER}"
         exit 1
@@ -54,27 +54,34 @@ ci_job_package() {
     local triggeredJobData=$( cat ${downStreamprojectsFile} )
 
     trace "triggered job names are: ${triggeredJobNames}"
+    execute mkdir -p ${workspace}/bld/
 
     for jobData in ${triggeredJobData} ; do
 
+        local buildNumber=$(echo ${jobData} | cut -d: -f 1)
+        local jobResult=$(  echo ${jobData} | cut -d: -f 2)
         local jobName=$(    echo ${jobData} | cut -d: -f 3-)
-        local buildNumber=$(echo ${jobData} | cut -d: -f 3-)
-        local jobResult=$(  echo ${jobData} | cut -d: -f 3-)
 
-        debug "jobName ${jobName} buildNumber ${buildNumber} jobResult ${jobResult}"
+        trace "jobName ${jobName} buildNumber ${buildNumber} jobResult ${jobResult}"
 
-        [[ ${jobResult} != SUCCESS ]] || error "downstream job ${jobName} was not successfull"
+        [[ ${jobResult} != "SUCCESS" ]] && error "downstream job ${jobName} was not successfull"
 
-        runOnMaster ls -la ${artifactesShare}/${jobName}/${buildNumber}/save/
-#         for file in ${artifactesShare}/${jobName}/${buildNumber}/save/*
-#         do
-#             [[ -e ${file} ]] || continue
-# 
-#             trace "untar ${file} from job ${jobName}"
-#             execute mkdir -p ${workspace}/bld/
-#             execute tar --directory ${workspace} --extract --ungzip --file ${file}  
-# 
-#         done
+        info "copy artifacts from job ${jobName}#${buildNumber} to workspace and untarring it"
+
+        local artifactsPathOnMaster=${artifactesShare}/${jobName}/${buildNumber}/save/
+
+        execute rsync --archive --verbose --rsh=ssh -P                    \
+            ${jenkinsMasterServerHostName}:${artifactsPathOnMaster}/ \
+            ${workspace}/bld/
+
+        for file in ${workspace}/bld/*
+        do
+            [[ -f ${file} ]] || continue
+
+            trace "untar ${file} from job ${jobName}"
+            execute tar --directory ${workspace}/bld/ --extract --ungzip --file ${file}  
+            execute rm -f ${file}
+        done
     done
 
     return 0
