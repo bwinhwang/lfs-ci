@@ -121,7 +121,7 @@ message() {
     # generate the logline
     local config=${CI_LOGGING_CONFIG-"DATE SPACE DURATION SPACE TYPE SPACE MESSAGE NEWLINE"}
     local prefix=${CI_LOGGING_PREFIX-${CI_LOGGING_PREFIX_HASH["$logType"]}}
-    local dateFormat=${CI_LOGGING_DATEFORMAT-"+%Y-%m-%d-%H:%M:%S.%N"}
+    local dateFormat=${CI_LOGGING_DATEFORMAT-"+%Y-%m-%d %H:%M:%S.%N"}
 
     for template in ${config}
     do
@@ -134,24 +134,20 @@ message() {
             DATE)    logLine=$(printf "%s%s" "${logLine}" "$(date "${dateFormat}")" ) ;;
             TYPE)    logLine=$(printf "%s%-10s" "${logLine}" "[${logType}]" );;
             DURATION) 
-                     if [[ "${logType}" != "TRACE" ]] ; then
-                        local cur=$(date +%s.%N)
-                        local old=${CI_LOGGING_DURATION_START_DATE}
-                        local dur=$(echo ${cur} - ${old} | bc)
-                        logLine=$(printf "%s[%9.3f]" "${logLine}" ${dur})
-                     else
-                        logLine=$(printf "%s           " "${logLine}")
-                     fi
-                     ;;
-            NONE)    :                                     ;;
+                     local cur=$(date +%s.%N)
+                     local old=${CI_LOGGING_DURATION_START_DATE}
+                     local dur=$(echo ${cur} - ${old} | bc)
+                     logLine=$(printf "%s[%9.3f]" "${logLine}" ${dur})
+            ;;
+            NONE)    : ;;
             MESSAGE) 
                 logLine=$(printf "%s%s" "${logLine}" "${logMessage}")
             ;;
             CALLER)
-                logLine=$(printf "called from Method '%s' in File %s, Line %s"    \
-                    "${logLine}"                                        \
-                    "${FUNCNAME[2]}"                                    \
-                    "${BASH_SOURCE[2]}"                                 \
+                logLine=$(printf "called from Method '%s' in File %s, Line %s" \
+                    "${logLine}"                                               \
+                    "${FUNCNAME[2]}"                                           \
+                    "${BASH_SOURCE[2]}"                                        \
                     "${BASH_LINENO[1]}" )
             ;;
             STACKTRACE)
