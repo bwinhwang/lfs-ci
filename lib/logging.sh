@@ -138,9 +138,9 @@ message() {
                         local cur=$(date +%s.%N)
                         local old=${CI_LOGGING_DURATION_START_DATE}
                         local dur=$(echo ${cur} - ${old} | bc)
-                        logLine=$(printf "%s[%7.3f]" "${logLine}" ${dur})
+                        logLine=$(printf "%s[%9.3f]" "${logLine}" ${dur})
                      else
-                        logLine=$(printf "%s        " "${logLine}")
+                        logLine=$(printf "%s           " "${logLine}")
                      fi
                      ;;
             NONE)    :                                     ;;
