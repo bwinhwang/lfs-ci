@@ -38,6 +38,8 @@ ci_job_package() {
 
     trace "workspace is ${workspace}"
 
+    sleep 4h
+
     local jobName=""
     local file=""
 
