@@ -60,32 +60,40 @@ ci_job_package() {
 
         trace "jobName ${jobName} buildNumber ${buildNumber} jobResult ${jobResult}"
 
-        [[ ${jobResult} != "SUCCESS" ]] && error "downstream job ${jobName} was not successfull"
-
-        info "copy artifacts from job ${jobName}#${buildNumber} to workspace and untarring it"
+        if [[ ${jobResult} != "SUCCESS" ]] ; then
+            error "downstream job ${jobName} was not successfull"
+            exit 1
+        fi
 
         local artifactsPathOnMaster=${artifactesShare}/${jobName}/${buildNumber}/save/
 
-        execute rsync --archive --verbose --rsh=ssh -P                    \
-            ${jenkinsMasterServerHostName}:${artifactsPathOnMaster}/ \
-            ${workspace}/bld/
+        local files=$(runOnMaster ls ${artifactsPathOnMaster})
+        trace "artifacts files for ${jobName}#${buildNumber} on master: ${files}"
 
-        for file in ${workspace}/bld/*
+        for file in ${files}
         do
-            [[ -f ${file} ]] || continue
+            local base=$(basename ${file} .tar.gz)
 
-            trace "untar ${file} from job ${jobName}"
-            execute tar --directory ${workspace}/bld/ --extract --auto-compress --file ${file}
+            if [[ -d ${workspace}/bld/${base} ]] ; then 
+                trace "skipping ${file}, 'cause it's already transfered from another project"
+                continue
+            fi
+            info "copy artifact ${file} from job ${jobName}#${buildNumber} to workspace and untar it"
+
+            execute rsync --archive --verbose --rsh=ssh -P                      \
+                ${jenkinsMasterServerHostName}:${artifactsPathOnMaster}/${file} \
+                ${workspace}/bld/
+
+            debug "untar ${file} from job ${jobName}"
+            execute tar --directory ${workspace}/bld/ --extract --auto-compress --file ${workspace}/bld/${file}
             execute rm -f ${file}
         done
     done
-
 
     copyAddons
     copyVersionFile
     copyDocumentation
     copyPlatform
-
 
     return 0
 }
@@ -300,7 +308,7 @@ _createArtifactArchive() {
     executeOnMaster mkdir -p  ${artifactsPathOnShare}/save
     executeOnMaster ln    -sf ${artifactsPathOnShare}      ${artifactsPathOnMaster}
 
-    for dir in bld-* ; do
+    for dir in bld-*{psl,rfs,ddal}-* ; do
         [[ -d "${dir}" && ! -L "${dir}" ]] || continue
         info "creating artifact archive for ${dir}"
         execute tar --create --auto-compress --file "${dir}.tar.gz" "${dir}"
