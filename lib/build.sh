@@ -305,7 +305,7 @@ _createArtifactArchive() {
         info "creating artifact archive for ${dir}"
         execute tar --create --auto-compress --file "${dir}.tar.gz" "${dir}"
         execute rsync --archive --verbose --rsh=ssh -P                  \
-            "${dir}.tar.xz"                                             \
+            "${dir}.tar.gz"                                             \
             ${jenkinsMasterServerHostName}:${artifactsPathOnShare}/save
     done
 
