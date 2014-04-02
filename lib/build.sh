@@ -121,7 +121,7 @@ mustHavePlatformFromDirectory() {
 
 copyAddons() {
 
-    local workspace=/tmp/demx2fk3/foobar/workspace
+    local workspace=$(getWorkspaceName)
     mustHaveWorkspaceName
 
     for bldDirectory in ${workspace}/bld/bld-*psl-* ; do
@@ -145,7 +145,7 @@ copyAddons() {
 }
 
 copyArchs() {
-    local workspace=/tmp/demx2fk3/foobar/workspace
+    local workspace=$(getWorkspaceName)
     mustHaveWorkspaceName
 
     local dst=${workspace}/upload/archs/
@@ -159,7 +159,7 @@ copyArchs() {
 }
 
 copyPlatform() {
-    local workspace=/tmp/demx2fk3/foobar/workspace
+    local workspace=$(getWorkspaceName)
     mustHaveWorkspaceName
 
 
@@ -221,7 +221,7 @@ copyPlatform() {
 }
 
 copyVersionFile() {
-    local workspace=/tmp/demx2fk3/foobar/workspace
+    local workspace=$(getWorkspaceName)
     mustHaveWorkspaceName
 
     local dstDirectory=${workspace}/upload/versions
@@ -242,7 +242,7 @@ copyVersionFile() {
     return
 }
 copyDocumentation() {
-    local workspace=/tmp/demx2fk3/foobar/workspace
+    local workspace=$(getWorkspaceName)
     mustHaveWorkspaceName
 
     local dstDirectory=${workspace}/upload/docs
