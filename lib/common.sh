@@ -277,6 +277,7 @@ createTempFile() {
 cleanupTempFiles() {
     for file in ${GLOBAL_tempfiles[@]}
     do
+        echo "cleaning up temp file ${file}"
         rm -rf ${file}            
     done
 }
