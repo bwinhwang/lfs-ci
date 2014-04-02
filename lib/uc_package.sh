@@ -1,6 +1,5 @@
 #!/bin/bash
 
-
 ## @fn      ci_job_package()
 #  @brief   create a package from the build results for the testing / release process
 #  @details copy all the artifacts from the sub jobs into the workspace and create the release structure
@@ -81,24 +80,6 @@ ci_job_package() {
     return 0
 }
 
-getPlatformFromDirectory() {
-    local directory=$1
-    baseName=$(basename ${directory})
-    directoryPlatform=$(cut -d- -f3 <<< ${baseName})
-    destinationsPlatform=${platformMap["${directoryPlatform}"]}
-    echo ${destinationsPlatform}
-    return
-}
-
-mustHavePlatformFromDirectory() {
-    local directory=$1
-    local platform=$2
-    if [[ ! ${platform} ]] ; then
-        error "can not found map for platform ${directory}"
-        exit 1
-    fi
-    return
-}
 
 copyAddons() {
 
@@ -222,6 +203,7 @@ copyVersionFile() {
 
     return
 }
+
 copyDocumentation() {
     local workspace=$(getWorkspaceName)
     mustHaveWorkspaceName
@@ -236,169 +218,24 @@ copyDocumentation() {
     return
 }
 
-
-
-## @fn      postCheckoutPatchWorkspace()
-#  @brief   apply patches before the checkout of the workspace to the workspace
-#  @param   <none>
-#  @return  <none>
-preCheckoutPatchWorkspace() {
-    _applyPatchesInWorkspace "${JENKINS_JOB_NAME}/preCheckout/"
-    _applyPatchesInWorkspace "common/preCheckout/"
+getPlatformFromDirectory() {
+    local directory=$1
+    baseName=$(basename ${directory})
+    directoryPlatform=$(cut -d- -f3 <<< ${baseName})
+    destinationsPlatform=${platformMap["${directoryPlatform}"]}
+    echo ${destinationsPlatform}
     return
 }
 
-## @fn      postCheckoutPatchWorkspace()
-#  @brief   apply patches after the checkout of the workspace to the workspace
-#  @param   <none>
-#  @return  <none>
-postCheckoutPatchWorkspace() {
-    _applyPatchesInWorkspace "${JENKINS_JOB_NAME}/postCheckout/"
-    _applyPatchesInWorkspace "common/postCheckout/"
-    return
-}
-
-## @fn      _applyPatchesInWorkspace()
-#  @brief   apply patches to the workspace, if exist one for the directory
-#  @details in some cases, it's required to apply a patch to the workspace to
-#           change some "small" issue in the workspace, e.g. change the svn server
-#           from the master svne1 server to the slave ulisop01 server.
-#  @param   <none>
-#  @return  <none>
-_applyPatchesInWorkspace() {
-
-    local patchPath=$@
-
-    if [[ -d "${LFS_CI_PATH}/patches/${patchPath}" ]] ; then
-        for patch in "${LFS_CI_PATH}/patches/${patchPath}/"* ; do
-            [[ ! -f "${patch}" ]] && continue
-            info "applying post checkout patch $(basename \"${patch}\")"
-            patch -p0 < "${patch}" || exit 1
-        done
+mustHavePlatformFromDirectory() {
+    local directory=$1
+    local platform=$2
+    if [[ ! ${platform} ]] ; then
+        error "can not found map for platform ${directory}"
+        exit 1
     fi
-
-    return
-}
-
-## @fn      getConfig( key )
-#  @brief   get the configuration to the requested key
-#  @details «full description»
-#  @todo    move this into a generic module. make it also more configureable
-#  @param   {key}    key name of the requested value
-#  @return  value for the key
-getConfig() {
-    local key=$1
-
-    trace "get config value for ${key}"
-
-    taskName=$(getTaskNameFromJobName)
-    subTaskName=$(getSubTaskNameFromJobName)
-    location=$(getLocationName)
-    config=$(getTargetBoardName)
-
-    case "${key}" in
-        subsystem)
-            case "${subTaskName}" in
-                FSM-r2       ) echo src-psl    ;;
-                FSM-r2-rootfs) echo src-rfs    ;;
-                FSM-r3)        echo src-fsmpsl ;;
-                LRC)           echo src-lrcpsl ;;
-                UBOOT)         echo src-fsmbrm ;;
-            esac
-        ;;
-        locationMapping)
-            case "${subTaskName}" in
-                LRC)    echo LRC         ;;
-                UBOOT)  echo nightly     ;;
-                FSM-r3) echo ${location} ;;
-            esac
-        ;;
-        additionalSourceDirectories)
-            case "${subTaskName}" in
-                LRC)    echo src-lrcbrm src-cvmxsources src-kernelsources src-bos src-lrcddg src-ifdd src-commonddal src-lrcddal src-tools src-rfs src-toolset ;;
-            esac
-        ;;
-        *) : ;;
-    esac
-}
-
-## @fn      synchroniceToLocalPath( localPath )
-#  @brief   syncronice the given local path from there to the local cache directory
-#  @details in bld, there are links to the build share. We want to avoid using build
-#           share, because it's to slow. So we are rsyncing the directories from the
-#           share to a local directory.
-#           There are some safties active to avoid problems during syncing.
-#  @param   {localPath}    local bld path
-#  @return  <none>
-synchroniceToLocalPath() {
-    local localPath=$1
-    local remotePath=$(readlink ${localPath})
-    local subsystem=$(basename ${localPath})
-    local tag=$(basename ${remotePath})
-
-    local localCacheDir=${LFS_CI_SHARE_MIRROR}/${USER}/lfs-ci-local/${subsystem}
-
-    if [[ ! -e ${localCacheDir}/${tag} ]] ; then
-        progressFile=${localCacheDir}/data/${tag}.in_progress
-
-        if [[ ! -e ${progressFile} ]] ; then
-
-            info "synchronice ${subsystem}/${tag} to local filesystem"
-
-            execute mkdir -p ${localCacheDir}/data
-            execute touch ${progressFile}
-
-            execute rsync --archive --numeric-ids --delete-excluded --ignore-errors \
-                --hard-links --sparse --exclude=.svn --rsh=ssh                      \
-                ${jenkinsMasterServerHostName}:${remotePath}/                       \
-                ${localCacheDir}/data/${tag}/
-
-            execute ln -sf data/${tag} ${localCacheDir}/${tag}
-            execute rm -f ${progressFile}
-        else
-            info "waiting for ${tag} on local filesystem"
-            # 2014-03-12 demx2fk3 TODO make this configurable
-            sleep 60
-            synchroniceToLocalPath ${localPath}
-        fi
-    fi
-
-    return
-}
-
-## @fn      mustHaveLocalSdks()
-#  @brief   ensure, that the "links to share" in bld are pointing to
-#           a local directory
-#  @detail  if there is a link in bld directory to the build share,
-#           the method will trigger the copy of this directory to the local
-#           directory
-#  @param   <none>
-#  @return  <none>
-mustHaveLocalSdks() {
-    local workspace=$(getWorkspaceName)
-    mustHaveWorkspaceName
-
-    debug "checking for links in bld"
-
-    for bld in ${workspace}/bld/*
-    do
-        [[ -e ${bld} ]] || continue
-        local pathToSdk=$(readlink ${bld})
-        local tag=$(basename ${pathToSdk})
-        local subsystem=$(basename ${bld})
-        local localCacheDir=${LFS_CI_SHARE_MIRROR}/${USER}/lfs-ci-local/${subsystem}
-
-        info "checking for ${subsystem} / ${tag} on local disk"
-
-        if [[ ! -d ${localCacheDir}/${tag} ]] ; then
-            synchroniceToLocalPath ${bld}
-        fi
-
-        execute rm -rf ${bld}
-        execute ln -sf ${localCacheDir}/${tag} ${bld}
-    done
-
     return
 }
 
 return 0
+

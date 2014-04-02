@@ -9,7 +9,6 @@ export PATH=${PATH}:${LFS_CI_PATH}/bin
 
 source ${LFS_CI_PATH}/lib/logging.sh
 source ${LFS_CI_PATH}/lib/commands.sh
-source ${LFS_CI_PATH}/lib/build.sh
 source ${LFS_CI_PATH}/lib/common.sh
 source ${LFS_CI_PATH}/lib/config.sh
 
@@ -42,8 +41,14 @@ info "starting jenkins job \"${JENKINS_JOB_NAME}\" on ${HOSTNAME} as ${USER}"
 
 # first dispatcher, calling the correct script or function
 case "${JENKINS_JOB_NAME}" in
-    LFS_CI_-_trunk_-_Package_-_package) ci_job_package || exit 1 ;;
-    LFS_CI_*_Build_*) ci_job_build   || exit 1 ;;
+    LFS_CI_-_*_-_Package_-_*) 
+        source ${LFS_CI_PATH}/lib/uc_package.sh
+        ci_job_package || exit 1 
+    ;;
+    LFS_CI_*_Build_*) 
+        source ${LFS_CI_PATH}/lib/uc_build.sh
+        ci_job_build   || exit 1 
+    ;;
     *)
 
         # legacy call for the old scripting...

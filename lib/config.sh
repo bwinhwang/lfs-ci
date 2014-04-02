@@ -44,3 +44,47 @@ svnSlaveServerUlmHostName=ulscmi.inside.nsn.com
                                 ["fspc"]="mips64-octeon-linux-gnu"  \
                                 ["fcmd"]="mips64-octeon-linux-gnu"  \
                           )
+
+## @fn      getConfig( key )
+#  @brief   get the configuration to the requested key
+#  @details «full description»
+#  @todo    move this into a generic module. make it also more configureable
+#  @param   {key}    key name of the requested value
+#  @return  value for the key
+getConfig() {
+    local key=$1
+
+    trace "get config value for ${key}"
+
+    taskName=$(getTaskNameFromJobName)
+    subTaskName=$(getSubTaskNameFromJobName)
+    location=$(getLocationName)
+    config=$(getTargetBoardName)
+
+    case "${key}" in
+        subsystem)
+            case "${subTaskName}" in
+                FSM-r2       ) echo src-psl    ;;
+                FSM-r2-rootfs) echo src-rfs    ;;
+                FSM-r3)        echo src-fsmpsl ;;
+                LRC)           echo src-lrcpsl ;;
+                UBOOT)         echo src-fsmbrm ;;
+            esac
+        ;;
+        locationMapping)
+            case "${subTaskName}" in
+                LRC)    echo LRC         ;;
+                UBOOT)  echo nightly     ;;
+                FSM-r3) echo ${location} ;;
+            esac
+        ;;
+        additionalSourceDirectories)
+            case "${subTaskName}" in
+                LRC)    echo src-lrcbrm src-cvmxsources src-kernelsources src-bos src-lrcddg src-ifdd src-commonddal src-lrcddal src-tools src-rfs src-toolset ;;
+            esac
+        ;;
+        *) : ;;
+    esac
+}
+
+
