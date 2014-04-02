@@ -27,6 +27,7 @@ exit_handler() {
 	[ ${rc} -ne 0 ] && trace "$(_stackTrace)"
 
 	for m in ${CI_EXIT_HANDLER_METHODS}; do
+        echo "calling $m"
 		$m
 	done
 
