@@ -35,6 +35,8 @@ ci_job_package() {
 
     local workspace=$(getWorkspaceName)
     mustHaveWorkspaceName
+    mustHaveCleanWorkspace
+    mustHaveWritableWorkspace
 
     trace "workspace is ${workspace}"
 
