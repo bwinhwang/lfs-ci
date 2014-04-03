@@ -2,49 +2,41 @@
 
 action=$1
 
-export LFS_CI_ROOT
-
 source ${LFS_CI_ROOT}/lib/config.sh
 source ${LFS_CI_ROOT}/lib/logging.sh
 
-
-echo "===== action = ${action} ====="
+info "===== action = ${action} ====="
 
 for var in BUILD_DIR BUILD_NUMBER BUILD_URL BUILD_URL_LAST BUILD_URL_LAST_STABLE BUILD_URL_LAST_SUCCESS \
            CHANGELOG JENKINS_HOME JENKINS_URL JOB_DIR JOB_NAME OLD_REVISION_STATE_FILE REVISION_STATE_FILE  \
            UPSTREAM_BUILD UPSTREAM_JOB_URLS UPSTREAM_PROJECT WORKSPACE 
 do
-    printf "%30s %-30s\n" "${var}" "${!var}"
+    debug "$(printf "%30s %-30s\n" "${var}" "${!var}")"
 done
 
-echo "revision state file ....."
-cat "${REVISION_STATE_FILE}"
-cat "${OLD_REVISION_STATE_FILE}"
-
+rawDebug "${REVISION_STATE_FILE}"
+rawDebug "${OLD_REVISION_STATE_FILE}"
 
 cd "${WORKSPACE}"
 echo UPSTREAM_BUILD=${UPSTREAM_BUILD}     >  .properties
 echo UPSTREAM_PROJECT=${UPSTREAM_PROJECT} >> .properties
 
-if [[ ${action} == calculate ]] ; then
+if [[ ${action} == compare ]] ; then
 
     if [[ -z "${REVISION_STATE_FILE}" ]] ; then
-        echo "no old revision state file found"
+        info "no old revision state file found"
         exit 0
     fi
 
-    { read oldUpstreamProjectName ; read oldUpstreamBuildNumber ;  } < "${OLD_REVISION_STATE_FILE}"
+    { read oldUpstreamProjectName ; read oldUpstreamBuildNumber ;  } < "${REVISION_STATE_FILE}"
 
     if [[ ${oldUpstreamProjectName} != ${UPSTREAM_PROJECT} ]] ; then
-        echo "old upstream project name has changed, trigger new build"
+        info "old upstream project name has changed, trigger new build"
         exit 0
     fi
     if [[ ${oldUpstreamBuildNumber} != ${UPSTREAM_BUILD} ]] ; then
-
-        echo "random exit value :)"
-        echo ${UPSTREAM_PROJECT}   >   "${REVISION_STATE_FILE}"
-        echo ${UPSTREAM_BUILD}     >>  "${REVISION_STATE_FILE}"
-        exit 1
+        info "upstream build number has changed, need to trigger build"
+        exit 0
     fi
 
     echo "upstream build ${UPSTREAM_PROJECT}#${UPSTREAM_BUILD} has already been tested, will not trigger a new build"
@@ -82,6 +74,9 @@ if [[ ${action} == checkout ]] ; then
     if [ ! -s "$CHANGELOG" ] ; then
         echo -n "<log/>" >"$CHANGELOG"
     fi
+
+        echo ${UPSTREAM_PROJECT}   >   "${REVISION_STATE_FILE}"
+        echo ${UPSTREAM_BUILD}     >>  "${REVISION_STATE_FILE}"
 
 
      exit 0
