@@ -1,22 +1,22 @@
 #!/bin/bash
 
 dumpCustomScmEnvironmentVariables() {
-    for var in BUILD_DIR 
-               BUILD_NUMBER 
-               BUILD_URL \
-               BUILD_URL_LAST \
-               BUILD_URL_LAST_STABLE  \
-               BUILD_URL_LAST_SUCCESS \
-               CHANGELOG  \
-               JENKINS_HOME  \
-               JENKINS_URL  \
-               JOB_DIR  \
-               JOB_NAME  \
-               OLD_REVISION_STATE_FILE  \
-               REVISION_STATE_FILE  \
-               UPSTREAM_BUILD  \
-               UPSTREAM_JOB_URLS  \
-               UPSTREAM_PROJECT  \
+    for var in BUILD_DIR               \
+               BUILD_NUMBER            \
+               BUILD_URL               \
+               BUILD_URL_LAST          \
+               BUILD_URL_LAST_STABLE   \
+               BUILD_URL_LAST_SUCCESS  \
+               CHANGELOG               \
+               JENKINS_HOME            \
+               JENKINS_URL             \
+               JOB_DIR                 \
+               JOB_NAME                \
+               OLD_REVISION_STATE_FILE \
+               REVISION_STATE_FILE     \
+               UPSTREAM_BUILD          \
+               UPSTREAM_JOB_URLS       \
+               UPSTREAM_PROJECT        \
                WORKSPACE 
     do
         debug "$(printf "%30s %-30s\n" "${var}" "${!var}")"
