@@ -265,9 +265,7 @@ checkoutSubprojectDirectories() {
 #  @param   <none>
 #  @return  name of the new created temp file
 createTempFile() {
-    local tempfile=$(mktemp)
-    GLOBAL_tempfiles=("${tempfile}" "${GLOBAL_tempfiles[@]}")
-    echo ${tempfile}
+    mktemp tmp.XXXXXXXXXXXXXXXX -t ${LFS_CI_TEMPDIR}
 }
 
 ## @fn      cleanupTempFiles()
@@ -275,12 +273,13 @@ createTempFile() {
 #  @param   <none>
 #  @return  <none>
 cleanupTempFiles() {
-    for file in ${GLOBAL_tempfiles[@]}
-    do
-        echo "cleaning up temp file ${file}"
-        rm -rf ${file}            
-    done
+    [[ -d ${LFS_CI_TEMPDIR} ]] && rm -rf ${LFS_CI_TEMPDIR}
 }
 
-declare -a GLOBAL_tempfiles 
+initTempDirectory() {
+    export LFS_CI_TEMPDIR=$(mktemp -d /tmp/${JENKINS_JOB_NAME}.$$.xxxx)
+}
+
+initTempDirectory
 exit_add cleanupTempFiles
+
