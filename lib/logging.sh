@@ -10,7 +10,7 @@ startLogfile() {
 
     if [[ ! -w ${CI_LOGGING_LOGFILENAME} ]] ; then
 
-        local jobName=${JOB_NAME:-unknownJobs}
+        local jobName=${JOB_NAME:-unknownJobName}
         local dateString=$(date +%Y%m%d%H%M%S)
         local hostName=$(hostname -s)
         local userName=${USER}
