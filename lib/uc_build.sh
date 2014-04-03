@@ -111,7 +111,7 @@ _createWorkspace() {
     fi
 
     info "getting dependencies for ${srcDirectory}"
-    local buildTargets=$(${LFS_CI_PATH}/bin/getDependencies ${srcDirectory} 2>/dev/null )
+    local buildTargets=$(${LFS_CI_ROOT}/bin/getDependencies ${srcDirectory} 2>/dev/null )
     if [[ ! "${buildTargets}" ]] ; then
         error "no build targets configured"
         exit 1;
@@ -210,8 +210,8 @@ _applyPatchesInWorkspace() {
 
     local patchPath=$@
 
-    if [[ -d "${LFS_CI_PATH}/patches/${patchPath}" ]] ; then
-        for patch in "${LFS_CI_PATH}/patches/${patchPath}/"* ; do
+    if [[ -d "${LFS_CI_ROOT}/patches/${patchPath}" ]] ; then
+        for patch in "${LFS_CI_ROOT}/patches/${patchPath}/"* ; do
             [[ ! -f "${patch}" ]] && continue
             info "applying post checkout patch $(basename \"${patch}\")"
             patch -p0 < "${patch}" || exit 1

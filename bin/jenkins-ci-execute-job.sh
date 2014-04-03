@@ -3,14 +3,14 @@
 # start skript for jenkins.
 #
 
-TMP=$(dirname $0)
-export LFS_CI_PATH="$(readlink -f ${TMP}/..)"
-export PATH=${PATH}:${LFS_CI_PATH}/bin
+# TMP=$(dirname $0)
+# export LFS_CI_PATH="$(readlink -f ${TMP}/..)"
+export PATH=${PATH}:${LFS_CI_ROOT}/bin
 
-source ${LFS_CI_PATH}/lib/logging.sh
-source ${LFS_CI_PATH}/lib/commands.sh
-source ${LFS_CI_PATH}/lib/common.sh
-source ${LFS_CI_PATH}/lib/config.sh
+source ${LFS_CI_ROOT}/lib/logging.sh
+source ${LFS_CI_ROOT}/lib/commands.sh
+source ${LFS_CI_ROOT}/lib/common.sh
+source ${LFS_CI_ROOT}/lib/config.sh
 
 # load the properties from the custom SCM jenkins plugin
 if [[ -f ${WORKSPACE}/.properties ]] ; then
@@ -42,11 +42,11 @@ info "starting jenkins job \"${JENKINS_JOB_NAME}\" on ${HOSTNAME} as ${USER}"
 # first dispatcher, calling the correct script or function
 case "${JENKINS_JOB_NAME}" in
     LFS_CI_-_*_-_Package_-_*) 
-        source ${LFS_CI_PATH}/lib/uc_package.sh
+        source ${LFS_CI_ROOT}/lib/uc_package.sh
         ci_job_package || exit 1 
     ;;
     LFS_CI_*_Build_*) 
-        source ${LFS_CI_PATH}/lib/uc_build.sh
+        source ${LFS_CI_ROOT}/lib/uc_build.sh
         ci_job_build   || exit 1 
     ;;
     NOOP)

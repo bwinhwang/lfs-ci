@@ -1,6 +1,6 @@
 #!/bin/bash
 
-source ${LFS_CI_PATH}/lib/exit_handling.sh
+source ${LFS_CI_ROOT}/lib/exit_handling.sh
 
 ## @fn      startLogfile()
 #  @brief   creates a new logfile and adds an header
@@ -15,7 +15,7 @@ startLogfile() {
         local hostName=$(hostname -s)
         local userName=${USER}
 
-        export CI_LOGGING_LOGFILENAME=${LFS_CI_PATH}/log/ci.${dateString}.${hostName}.${userName}.${jobName}.log
+        export CI_LOGGING_LOGFILENAME=${LFS_CI_ROOT}/log/ci.${dateString}.${hostName}.${userName}.${jobName}.log
         export CI_LOGGING_DURATION_START_DATE=$(date +%s.%N)
 
         printf -- "logfile is ${CI_LOGGING_LOGFILENAME}\n"
