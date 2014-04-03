@@ -29,8 +29,8 @@ artifactesShare=/build/home/${USER}/lfs/
 
 svnMasterServerHostName=svne1.access.nokiasiemensnetworks.com
 svnSlaveServerUlmHostName=ulscmi.inside.nsn.com
-
-
+lfsSourceRepos=https://${svnSlaveServerUlmHostName}/isource/svnroot/BTS_SC_LFS/
+lfsSourceReposTrunk=${lfsSourceRepos}/os/trunk/
 
     declare -A platformMap=(         ["fct"]="fsm3_octeon2" \
                                ["qemu_i386"]="qemu"         \

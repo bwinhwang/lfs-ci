@@ -2,14 +2,17 @@
 
 action=$1
 
-cd "${WORKSPACE}"
+export LFS_CI_ROOT
 
-echo UPSTREAM_BUILD=${UPSTREAM_BUILD}     >  .properties
-echo UPSTREAM_PROJECT=${UPSTREAM_PROJECT} >> .properties
+source ${LFS_CI_ROOT}/lib/config.sh
+source ${LFS_CI_ROOT}/lib/logging.sh
+
 
 echo "===== action = ${action} ====="
 
-for var in JOB_NAME JOB_DIR WORKSPACE BUILD_NUMBER BUILD_DIR REVISION_STATE_FILE OLD_REVISION_STATE_FILE JENKINS_URL JENKINS_HOME BUILD_URL BUILD_URL_LAST BUILD_URL_LAST_SUCCESS BUILD_URL_LAST_STABLE UPSTREAM_JOB_URLS UPSTREAM_PROJECT UPSTREAM_BUILD CHANGELOG
+for var in BUILD_DIR BUILD_NUMBER BUILD_URL BUILD_URL_LAST BUILD_URL_LAST_STABLE BUILD_URL_LAST_SUCCESS \
+           CHANGELOG JENKINS_HOME JENKINS_URL JOB_DIR JOB_NAME OLD_REVISION_STATE_FILE REVISION_STATE_FILE  \
+           UPSTREAM_BUILD UPSTREAM_JOB_URLS UPSTREAM_PROJECT WORKSPACE 
 do
     printf "%30s %-30s\n" "${var}" "${!var}"
 done
@@ -18,6 +21,10 @@ echo "revision state file ....."
 cat "${REVISION_STATE_FILE}"
 cat "${OLD_REVISION_STATE_FILE}"
 
+
+cd "${WORKSPACE}"
+echo UPSTREAM_BUILD=${UPSTREAM_BUILD}     >  .properties
+echo UPSTREAM_PROJECT=${UPSTREAM_PROJECT} >> .properties
 
 if [[ ${action} == calculate ]] ; then
 
@@ -35,7 +42,9 @@ if [[ ${action} == calculate ]] ; then
     if [[ ${oldUpstreamBuildNumber} != ${UPSTREAM_BUILD} ]] ; then
 
         echo "random exit value :)"
-        exit $(( RANDOM % 2 ))
+        echo ${UPSTREAM_PROJECT}   >   "${REVISION_STATE_FILE}"
+        echo ${UPSTREAM_BUILD}     >>  "${REVISION_STATE_FILE}"
+        exit 1
     fi
 
     echo "upstream build ${UPSTREAM_PROJECT}#${UPSTREAM_BUILD} has already been tested, will not trigger a new build"
@@ -74,7 +83,7 @@ if [[ ${action} == checkout ]] ; then
         echo -n "<log/>" >"$CHANGELOG"
     fi
 
-     echo ${UPSTREAM_PROJECT}   >   "${REVISION_STATE_FILE}"
-     echo ${UPSTREAM_BUILD}     >>  "${REVISION_STATE_FILE}"
+
+     exit 0
 fi
 
