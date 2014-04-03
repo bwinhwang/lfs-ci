@@ -49,6 +49,11 @@ case "${JENKINS_JOB_NAME}" in
         source ${LFS_CI_PATH}/lib/uc_build.sh
         ci_job_build   || exit 1 
     ;;
+    NOOP)
+        echo no operation
+        a=$(createTempFile)
+        echo ${a}
+    ;;
     *)
 
         # legacy call for the old scripting...
