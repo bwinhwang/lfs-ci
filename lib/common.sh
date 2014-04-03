@@ -273,7 +273,8 @@ createTempFile() {
 #  @param   <none>
 #  @return  <none>
 cleanupTempFiles() {
-    [[ -d ${LFS_CI_TEMPDIR} ]] && rm -rf ${LFS_CI_TEMPDIR}
+    find ${LFS_CI_TEMPDIR}
+    [[ -d ${LFS_CI_TEMPDIR} ]] && rm -rfv ${LFS_CI_TEMPDIR}
 }
 
 initTempDirectory() {
