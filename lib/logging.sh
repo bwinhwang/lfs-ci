@@ -41,6 +41,11 @@ stopLogfile() {
         printf -- "script: $0\n"                                                          >> ${CI_LOGGING_LOGFILENAME}
         printf -- "ending logfile\n"                                                      >> ${CI_LOGGING_LOGFILENAME}
         printf -- "-------------------------------------------------------------------\n" >> ${CI_LOGGING_LOGFILENAME}
+
+        if [[ -d ${WORKSPACE} ]] ; then
+            mv ${CI_LOGGING_LOGFILENAME} ${WORKSPACE}
+            gzip ${WORKSPACE}/${CI_LOGGING_LOGFILENAME}.gz
+        fi
     fi
     
     unset CI_LOGGING_LOGFILENAME
