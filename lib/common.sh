@@ -278,6 +278,7 @@ cleanupTempFiles() {
 }
 
 initTempDirectory() {
+    echo init temp dir
     export LFS_CI_TEMPDIR=$(mktemp -d /tmp/${JENKINS_JOB_NAME}.$$.xxxx)
 }
 
