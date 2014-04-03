@@ -265,7 +265,7 @@ checkoutSubprojectDirectories() {
 #  @param   <none>
 #  @return  name of the new created temp file
 createTempFile() {
-    mktemp tmp.XXXXXXXXXXXXXXXX -t ${LFS_CI_TEMPDIR}
+    mktemp ${LFS_CI_TEMPDIR}/tmp.$$.XXXXXXXXX
 }
 
 ## @fn      cleanupTempFiles()
@@ -273,13 +273,11 @@ createTempFile() {
 #  @param   <none>
 #  @return  <none>
 cleanupTempFiles() {
-    find ${LFS_CI_TEMPDIR}
-    [[ -d ${LFS_CI_TEMPDIR} ]] && rm -rfv ${LFS_CI_TEMPDIR}
+    [[ -d ${LFS_CI_TEMPDIR} ]] && rm -rf ${LFS_CI_TEMPDIR}
 }
 
 initTempDirectory() {
-    echo init temp dir
-    export LFS_CI_TEMPDIR=$(mktemp -d /tmp/${JENKINS_JOB_NAME}.$$.xxxx)
+    export LFS_CI_TEMPDIR=$(mktemp -d /tmp/jenkins.${USER}.${JENKINS_JOB_NAME:-unknown}.$$.XXXXXXXXX)
 }
 
 initTempDirectory
