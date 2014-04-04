@@ -18,6 +18,12 @@ source ${LFS_CI_ROOT}/lib/config.sh
 source ${LFS_CI_ROOT}/lib/common.sh
 source ${LFS_CI_ROOT}/lib/logging.sh
 source ${LFS_CI_ROOT}/lib/customScm.sh
+source ${LFS_CI_ROOT}/lib/exit_handling.sh
+
+# start the logfile
+startLogfile
+# and end it, if the script exited in some way
+exit_add stopLogfile
 
 action=$1
 info "===== action = ${action} ====="

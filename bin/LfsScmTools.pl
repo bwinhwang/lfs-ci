@@ -940,6 +940,33 @@ sub execute {
 
     return;
 }
+# ------------------------------------------------------------------------------------------------------------------
+package Command::GetRevisionTxtFromDependencies;
+use strict;
+use warnings;
+
+use parent qw( -norequire Object );
+use Getopt::Std;
+
+sub prepare {
+    my $self = shift;
+    getopts( "f:", \my %opts );
+    $self->{fileName} = $opts{f} || die "no file name";
+}
+
+sub execute {
+    my $self = shift;
+    my $loc = Usecase::GetLocation->new( fileName => $self->{fileName} );
+
+    print Dumper( $loc );
+#     my $dir = $loc->getLocation( subDir   => $subDir,
+#                                  tag      => $tag,
+#                                  revision => $revision );
+#     $dir->loadDependencyTree();
+#     printf( "%s %s", join( " ", $dir->getSourceDirectoriesFromDependencies() ),
+#                      $subDir,
+#           );
+}
 
 # ------------------------------------------------------------------------------------------------------------------
 package Usecase::GetLocation;
@@ -954,10 +981,14 @@ sub init {
     my $self = shift;
 
     my $locations = Parser::Locations->new();
-    my @tmp = glob("locations/*/Dependencies");
-    $locations->{fileName} = shift @tmp;
-    $locations->parse();
 
+    if( not $self->{fileName} ) {
+        my @tmp = glob("locations/*/Dependencies");
+        $self->{fileName} = shift @tmp;
+    }
+
+    $locations->{fileName} = $self->{fileName};
+    $locations->parse();
     $self->{locations} = $locations;
 
     return;
@@ -1043,6 +1074,8 @@ if( $program eq "getDependencies" ) {
     $command = Command::SortBuildsFromDependencies->new();
 } elsif ( $program eq "getDownStreamProjects" ) {
     $command = Command::GetDownStreamProjects->new();
+} elsif ( $program eq "getRevisionTxtFromDependencies" ) {
+    $command = Command::GetRevisionTxtFromDependencies->new();
 } else {
     die "command not defined";
 }

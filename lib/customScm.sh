@@ -32,27 +32,110 @@ createPropertiesFileForBuild() {
     return
 }
 
+getBuildNumberFromUrl() {
+    local url=$1
+    # url example: http://maxi.emea.nsn-net.net:1280/job/custom_SCM_test_-_down/634/
+    cut -d/ -f 6 <<< ${url}
+}
 
+getJobNameFromUrl() {
+    local url=$1
+    # url example: http://maxi.emea.nsn-net.net:1280/job/custom_SCM_test_-_down/634/
+    cut -d/ -f 5 <<< ${url}
+}
+
+## @fn      actionCompare()
+#  @brief   this command is called by jenkins custom scm plugin via a
+#           polling trigger. It should decide, if a build is required
+#           or not
+#  @details INPUT: REVISION_STATE_FILE revision state file from the old build
+# 
+#           Idea: we get the information from the old build in the
+#           revision state file (old project name and old build
+#           number). With this information we can look for the
+#           revisions.txt file, which is located on the jenkins
+#           master server in the build directory of the old build
+#           ($JENKINS_HOME/jobs/<projekt>/builds/<number>). In the next
+#           step, we have to create the same revisions.txt for the head
+#           revisions of the used svn repos (we need the svn urls with
+#           branches, ...) which are used in the trunk / branch. This
+#           info is located in the locations/<branch>/Dependencies
+#           files. So the steps got the the new revisions.txt are:
+# 
+#           * get the branch / trunk information (use the job name)
+# 
+#           * get the locations/<branch>/Dependencies file from svn
+#           (svn cat <url>)
+# 
+#           * generate all urls from "build listdirs" (aka
+#           grep -h '^'"dir " locations/*/Dependencies) and
+#           locations/<branch>/Dependencies with revisions
+# 
+#           * if the new generated and the old, stored files are
+#           different, trigger a new build, and store the new file
+# 
+#  @param   <none>
+#  @return  1 if if a build is not required, 0 otherwise
 actionCompare() {
+
+    exit 1
+
     if [[ -z "${REVISION_STATE_FILE}" ]] ; then
         info "no old revision state file found"
         exit 0
     fi
 
-    { read oldUpstreamProjectName ; read oldUpstreamBuildNumber ;  } < "${REVISION_STATE_FILE}"
+    # getting old revision file 
+    oldRevisionsFile=$(createTempFile)
+   
+    { read oldProjectName ; read oldBuildNumber ; } < "${REVISION_STATE_FILE}"
+
+    oldRevisionsFileOnServer=${jenkinsMasterServerPath}/jobs/${oldProjectName}/builds/${oldBuildNumber}/revisions.txt
+    if ! runOnMaster test -e ${oldRevisionsFileOnServer} ; then
+        info "revisions file does not exist, trigger new build"
+        exit 1
+    fi
+
+    execute rsync -ae ssh ${jenkinsMasterServerHostName}:${oldRevisionsFileOnServer} ${oldRevisionsFile}
+
+
+    # generate the new revsions file
+    newRevisionsFile=$(createTempFile)
+    
+    locationName=$(getLocationName)
+    mustHaveLocationName
+
+    # get the locations/<branch>/Dependencies
+    if ! svn ls ${lfsSourceRepos}/os/trunk/bldtools/locations-${locationName}/Dependencies 2>/dev/null
+    then
+        error "svn is not responding or locations-${locationName}/Dependencies does not exist"
+        exit 1
+    fi
+    # can not use execute here, so we have to do the error handling by hande
+    svn ${lfsSourceRepos}/os/trunk/bldtools/locations-${locationName}/Dependencies > ${newRevisionsFile}
+    if [[ $? != 0 ]] ; then
+        error "svn cat reported an error"
+        exit 1
+    fi
+
+    # do the magic for all dir
+    # TODO: demx2fk3 2014-04-04 impelemente here
+
 
     if [[ ${oldUpstreamProjectName} != ${UPSTREAM_PROJECT} ]] ; then
         info "old upstream project name has changed, trigger new build"
-        exit 0
+        exit 1
     fi
     if [[ ${oldUpstreamBuildNumber} != ${UPSTREAM_BUILD} ]] ; then
         info "upstream build number has changed, need to trigger build"
-        exit 0
+        exit 1
     fi
 
     echo "upstream build ${UPSTREAM_PROJECT}#${UPSTREAM_BUILD} has already been tested, will not trigger a new build"
-    echo 1
+
+    return
 }
+
 actionCheckout() {
     # changelog handling
     # idea: the upstream project has the correct change log. We have to get it from them.
@@ -85,14 +168,15 @@ actionCheckout() {
         echo -n "<log/>" >"$CHANGELOG"
     fi
 
-        echo ${UPSTREAM_PROJECT}   >   "${REVISION_STATE_FILE}"
-        echo ${UPSTREAM_BUILD}     >>  "${REVISION_STATE_FILE}"
-
 
      exit 0
 }
 
 actionCalculate() {
+
+    debug "creating revision state file ${REVISION_STATE_FILE}"
+    echo ${UPSTREAM_PROJECT}   >   "${REVISION_STATE_FILE}"
+    echo ${UPSTREAM_BUILD}     >>  "${REVISION_STATE_FILE}"
     return 
 }
 
