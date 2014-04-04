@@ -88,12 +88,8 @@ actionCompare() {
     # getting old revision file 
     oldRevisionsFile=$(createTempFile)
 
-    ls
-
-#     echo ${HOSTNAME}
-#     cat ${REVISION_STATE_FILE}
-#    
-    { read oldProjectName ; read oldBuildNumber ; } < "${REVISION_STATE_FILE}"
+    local oldProjectName=$(getJobNameFromUrl     ${BUILD_URL_LAST})
+    local oldBuildNumber=$(getBuildNumberFromUrl ${BUILD_URL_LAST})
 
     oldRevisionsFileOnServer=${jenkinsMasterServerPath}/jobs/${oldProjectName}/builds/${oldBuildNumber}/revisions.txt
     if ! runOnMaster test -e ${oldRevisionsFileOnServer} ; then
@@ -101,7 +97,8 @@ actionCompare() {
         exit 1
     fi
 
-    execute rsync -ae ssh ${jenkinsMasterServerHostName}:${oldRevisionsFileOnServer} ${oldRevisionsFile}
+    execute rsync -ae ssh ${jenkinsMasterServerHostName}:${oldRevisionsFileOnServer} \
+                          ${oldRevisionsFile}
 
     # generate the new revsions file
     newRevisionsFile=$(createTempFile)
