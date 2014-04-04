@@ -88,9 +88,11 @@ actionCompare() {
     # getting old revision file 
     oldRevisionsFile=$(createTempFile)
 
-    echo ${HOSTNAME}
-    cat ${REVISION_STATE_FILE}
-   
+    ls
+
+#     echo ${HOSTNAME}
+#     cat ${REVISION_STATE_FILE}
+#    
     { read oldProjectName ; read oldBuildNumber ; } < "${REVISION_STATE_FILE}"
 
     oldRevisionsFileOnServer=${jenkinsMasterServerPath}/jobs/${oldProjectName}/builds/${oldBuildNumber}/revisions.txt
