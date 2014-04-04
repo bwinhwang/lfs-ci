@@ -29,18 +29,15 @@ exit_add stopLogfile
 PS4='+(${BASH_SOURCE}:${LINENO}): ${FUNCNAME[0]:+${FUNCNAME[0]}(): }'
 export PS4
 
-JENKINS_JOB_NAME="$1"
-export JENKINS_JOB_NAME 
-
 JENKINS_SVN_REVISION=${SVN_REVISION}
 export JENKINS_SVN_REVISION
 
 showAllEnvironmentVariables
 
-info "starting jenkins job \"${JENKINS_JOB_NAME}\" on ${HOSTNAME} as ${USER}"
+info "starting jenkins job \"${JOB_NAME}\" on ${HOSTNAME} as ${USER}"
 
 # first dispatcher, calling the correct script or function
-case "${JENKINS_JOB_NAME}" in
+case "${JOB_NAME}" in
     LFS_CI_-_*_-_Package_-_*) 
         source ${LFS_CI_ROOT}/lib/uc_package.sh
         ci_job_package || exit 1 
@@ -57,14 +54,14 @@ case "${JENKINS_JOB_NAME}" in
     *)
 
         # legacy call for the old scripting...
-        if [[ -x "${JENKINS_JOB_NAME}" ]] ; then
+        if [[ -x "${JOB_NAME}" ]] ; then
 
-            info "executing legacy script \"${JENKINS_JOB_NAME}\""
+            info "executing legacy script \"${JOB_NAME}\""
 
-            execute ${JENKINS_JOB_NAME} \
+            execute ${JOB_NAME} \
                 || exit 1
         else
-            error "don't know what I shall do for job \"${JENKINS_JOB_NAME}\"" 
+            error "don't know what I shall do for job \"${JOB_NAME}\"" 
             exit 1
         fi
 

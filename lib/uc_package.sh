@@ -26,7 +26,7 @@ ci_job_package() {
     local downStreamprojectsFile=$(createTempFile)
     runOnMaster ${LFS_CI_ROOT}/bin/getDownStreamProjects -j ${UPSTREAM_PROJECT} -b ${UPSTREAM_BUILD} -h ${jenkinsMasterServerPath} > ${downStreamprojectsFile}
     if [[ $? -ne 0 ]] ; then
-        error "error in getDownStreamProjects for ${JENKINS_JOB_NAME} #${BUILD_NUMBER}"
+        error "error in getDownStreamProjects for ${JOB_NAME} #${BUILD_NUMBER}"
         exit 1
     fi
     local triggeredJobData=$( cat ${downStreamprojectsFile} )
