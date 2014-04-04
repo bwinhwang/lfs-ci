@@ -85,8 +85,6 @@ actionCompare() {
         exit 0
     fi
 
-    set -x
-
     # getting old revision file 
     oldRevisionsFile=$(createTempFile)
 
