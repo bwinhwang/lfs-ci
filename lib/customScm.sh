@@ -96,9 +96,24 @@ actionCompare() {
 
     execute rsync -ae ssh ${jenkinsMasterServerHostName}:${oldRevisionsFileOnServer} ${oldRevisionsFile}
 
-
     # generate the new revsions file
     newRevisionsFile=$(createTempFile)
+    _createRevisionsTxtFile ${newRevisionsFile}
+
+    # now we have both files, we can compare them
+    if cmp --silent ${oldRevisionsFile} ${newRevisionsFile} ; then
+        info "no changes in revision files, no build required"
+        execute diff -rub ${oldRevisionsFile} ${newRevisionsFile}
+        exit 1
+    fi
+
+    return
+}
+
+
+_createRevisionsTxtFile() {
+
+    local newRevisionsFile=$1
     dependenciesFile=$(createTempFile)
     
     locationName=$(getLocationName)
@@ -117,13 +132,6 @@ actionCompare() {
     ${LFS_CI_ROOT}/bin/getRevisionTxtFromDependencies -u ${dependenciesFileUrl} -f ${dependenciesFile} > ${newRevisionsFile} 
     if [[ $? != 0 ]] ; then
         error "reported an error..."
-        exit 1
-    fi
-
-    # now we have both files, we can compare them
-    if cmp --silent ${oldRevisionsFile} ${newRevisionsFile} ; then
-        info "no changes in revision files, no build required"
-        execute diff -rub ${oldRevisionsFile} ${newRevisionsFile}
         exit 1
     fi
 
@@ -171,6 +179,14 @@ actionCalculate() {
     debug "creating revision state file ${REVISION_STATE_FILE}"
     echo ${UPSTREAM_PROJECT}   >   "${REVISION_STATE_FILE}"
     echo ${UPSTREAM_BUILD}     >>  "${REVISION_STATE_FILE}"
+
+    # generate the new revsions file
+    newRevisionsFile=$(createTempFile)
+    _createRevisionsTxtFile ${newRevisionsFile}
+
+    execute rsync -ae ssh $(newRevisionsFile) \
+                ${jenkinsMasterServerPath}/jobs/${JOB_NAME}/builds/${BUILD_NUMBER}/revisions.txt
+
     return 
 }
 
