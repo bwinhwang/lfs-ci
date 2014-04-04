@@ -89,6 +89,7 @@ actionCompare() {
     oldRevisionsFile=$(createTempFile)
 
     ls
+    pwd
 
 #     echo ${HOSTNAME}
 #     cat ${REVISION_STATE_FILE}
