@@ -83,8 +83,13 @@ actionCompare() {
         exit 0
     fi
 
+    set -x
+
     # getting old revision file 
     oldRevisionsFile=$(createTempFile)
+
+    echo ${HOSTNAME}
+    cat ${REVISION_STATE_FILE}
    
     { read oldProjectName ; read oldBuildNumber ; } < "${REVISION_STATE_FILE}"
 
