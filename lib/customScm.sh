@@ -101,37 +101,33 @@ actionCompare() {
 
     # generate the new revsions file
     newRevisionsFile=$(createTempFile)
+    dependenciesFile=$(createTempFile)
     
     locationName=$(getLocationName)
     mustHaveLocationName
 
     # get the locations/<branch>/Dependencies
-    if ! svn ls ${lfsSourceRepos}/os/trunk/bldtools/locations-${locationName}/Dependencies 2>/dev/null
+    dependenciesFileUrl=${lfsSourceRepos}/os/trunk/bldtools/locations-${locationName}/Dependencies
+    if ! svn ls ${dependenciesFileUrl} 2>/dev/null
     then
-        error "svn is not responding or locations-${locationName}/Dependencies does not exist"
+        error "svn is not responding or ${dependenciesFileUrl}does not exist"
         exit 1
     fi
+
     # can not use execute here, so we have to do the error handling by hande
-    svn ${lfsSourceRepos}/os/trunk/bldtools/locations-${locationName}/Dependencies > ${newRevisionsFile}
-    if [[ $? != 0 ]] ; then
-        error "svn cat reported an error"
-        exit 1
-    fi
-
     # do the magic for all dir
-    # TODO: demx2fk3 2014-04-04 impelemente here
-
-
-    if [[ ${oldUpstreamProjectName} != ${UPSTREAM_PROJECT} ]] ; then
-        info "old upstream project name has changed, trigger new build"
-        exit 1
-    fi
-    if [[ ${oldUpstreamBuildNumber} != ${UPSTREAM_BUILD} ]] ; then
-        info "upstream build number has changed, need to trigger build"
+    ${LFS_CI_ROOT}/bin/getRevisionTxtFromDependencies -u ${dependenciesFileUrl} -f ${dependenciesFile} > ${newRevisionsFile} 
+    if [[ $? != 0 ]] ; then
+        error "reported an error..."
         exit 1
     fi
 
-    echo "upstream build ${UPSTREAM_PROJECT}#${UPSTREAM_BUILD} has already been tested, will not trigger a new build"
+    # now we have both files, we can compare them
+    if cmp --silent ${oldRevisionsFile} ${newRevisionsFile} ; then
+        info "no changes in revision files, no build required"
+        execute diff -rub ${oldRevisionsFile} ${newRevisionsFile}
+        exit 1
+    fi
 
     return
 }
