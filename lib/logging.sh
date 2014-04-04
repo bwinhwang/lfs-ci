@@ -42,10 +42,13 @@ stopLogfile() {
         printf -- "ending logfile\n"                                                      >> ${CI_LOGGING_LOGFILENAME}
         printf -- "-------------------------------------------------------------------\n" >> ${CI_LOGGING_LOGFILENAME}
 
-        if [[ -d ${WORKSPACE} ]] ; then
-            mv ${CI_LOGGING_LOGFILENAME} ${WORKSPACE}
-            gzip ${WORKSPACE}/${CI_LOGGING_LOGFILENAME}.gz
-        fi
+# TODO: demx2fk3 2014-04-04 fixme
+#         if [[ -d ${WORKSPACE} ]] ; then
+#         set -x
+#             mv ${CI_LOGGING_LOGFILENAME} ${WORKSPACE}
+#             gzip ${WORKSPACE}/$(basename ${CI_LOGGING_LOGFILENAME}).gz
+#         set +x
+#         fi
     fi
     
     unset CI_LOGGING_LOGFILENAME
