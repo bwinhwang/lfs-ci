@@ -78,8 +78,6 @@ getJobNameFromUrl() {
 #  @return  1 if if a build is not required, 0 otherwise
 actionCompare() {
 
-    exit 1
-
     if [[ -z "${REVISION_STATE_FILE}" ]] ; then
         info "no old revision state file found"
         exit 0
