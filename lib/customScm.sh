@@ -187,7 +187,7 @@ actionCalculate() {
     newRevisionsFile=$(createTempFile)
     _createRevisionsTxtFile ${newRevisionsFile}
 
-    execute rsync -ae ssh $(newRevisionsFile) \
+    execute rsync -ae ssh ${newRevisionsFile} \
                 ${jenkinsMasterServerPath}/jobs/${JOB_NAME}/builds/${BUILD_NUMBER}/revisions.txt
 
     return 
