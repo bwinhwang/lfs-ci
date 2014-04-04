@@ -20,7 +20,7 @@
 #  @param   <none>
 #  @return  task name
 getTaskNameFromJobName() {
-    getFromString.pl "${JENKINS_JOB_NAME}" taskName
+    ${LFS_CI_ROOT}/bin/getFromString.pl "${JENKINS_JOB_NAME}" taskName
     return
 }
 
@@ -29,7 +29,7 @@ getTaskNameFromJobName() {
 #  @param   <none>
 #  @return  sub task name
 getSubTaskNameFromJobName() {
-    getFromString.pl "${JENKINS_JOB_NAME}" subTaskName
+    ${LFS_CI_ROOT}/bin/getFromString.pl "${JENKINS_JOB_NAME}" subTaskName
     return
 }
 
@@ -38,7 +38,7 @@ getSubTaskNameFromJobName() {
 #  @param   <none>
 #  @return  target board name
 getTargetBoardName() {
-    getFromString.pl "${JENKINS_JOB_NAME}" platform
+    ${LFS_CI_ROOT}/bin/getFromString.pl "${JENKINS_JOB_NAME}" platform
     return
 }
 
@@ -63,7 +63,7 @@ mustHaveTargetBoardName() {
 #  @param   <none>
 #  @return  location name
 getLocationName() {
-    local location=$(getFromString.pl "${JENKINS_JOB_NAME}" location)
+    local location=$(${LFS_CI_ROOT}/bin/getFromString.pl "${JENKINS_JOB_NAME}" location)
 
     # 2014-02-17 demx2fk3 TODO do this in a better wa
     case ${location} in
