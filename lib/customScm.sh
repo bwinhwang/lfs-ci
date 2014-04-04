@@ -51,7 +51,7 @@ getJobNameFromUrl() {
 #  @details INPUT: REVISION_STATE_FILE revision state file from the old build
 # 
 #           Idea: we get the information from the old build in the
-#           revision state file (old project name and old build
+#           BUILD_URL_LAST (old project name and old build
 #           number). With this information we can look for the
 #           revisions.txt file, which is located on the jenkins
 #           master server in the build directory of the old build
