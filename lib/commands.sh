@@ -48,6 +48,7 @@ executeOnMaster() {
 
 runOnMaster() {
     local command=$@
+    trace "running command on server: ssh ${jenkinsMasterServerHostName} ${command}"
     ssh ${jenkinsMasterServerHostName} ${command}
     return $?
 }
