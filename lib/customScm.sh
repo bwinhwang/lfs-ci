@@ -93,7 +93,7 @@ actionCompare() {
     oldRevisionsFileOnServer=${jenkinsMasterServerPath}/jobs/${oldProjectName}/builds/${oldBuildNumber}/revisions.txt
     if ! runOnMaster test -e ${oldRevisionsFileOnServer} ; then
         info "revisions file does not exist, trigger new build"
-        exit 1
+        exit 0
     fi
 
     execute rsync -ae ssh ${jenkinsMasterServerHostName}:${oldRevisionsFileOnServer} \
