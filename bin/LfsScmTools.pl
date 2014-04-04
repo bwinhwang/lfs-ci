@@ -53,6 +53,15 @@ sub isSubversion {
     return 0;
 }
 
+sub getHeadRevision {
+    my $self = shift;
+    if( $self->isSubversion() ) {
+        my $svn = Singelton::svn();
+        $self->{revision} = $svn->info( url => $self->{repos} )->{entry}->{commit}->{revision};
+    }
+    return $self->{revision};
+}
+
 ## @fn     checkDependencies()
 #  @brief  checks dependencies of a subdirectory and get the required dependencies
 #  @param  <none>
@@ -301,7 +310,7 @@ sub cat {
     my $self  = shift;
     my $param = { @_ };
 
-    my $url      = $param->{url};
+    my $url      = replaceMasterByUlmServer( $param->{url} );
     my $revision = $param->{revision};
     my $cmd = sprintf( "%s cat %s %s|",
                         $self->{svnCli},
@@ -325,7 +334,7 @@ sub cat {
 sub info {
     my $self  = shift;
     my $param = { @_ } ;
-    my $url   = $param->{url} || "";
+    my $url   = replaceMasterByUlmServer( $param->{url} || "" );
 
     open SVN_INFO, sprintf( "%s --xml info %s|", $self->{svnCli}, $url ) || die "can not open svn info: %!";
     my $xml = join( "", <SVN_INFO>);
@@ -344,7 +353,7 @@ sub command {
     my $param = { @_ };
 
     my $revision = $param->{revision} || "";
-    my $url      = $param->{url}      || "";
+    my $url      = replaceMasterByUlmServer( $param->{url} || "");
     my $action   = $param->{action}   || "";
     my $args     = join( " ", @{ $param->{args} || [] } );
 
@@ -360,6 +369,13 @@ sub command {
     }
 
     return;
+}
+
+sub replaceMasterByUlmServer {
+    my $url = shift;
+    $url =~ s/svne1.access.nokiasiemensnetworks.com/ulscmi.inside.nsn.com/g;
+    $url =~ s/svne1.access.nsn.com/ulscmi.inside.nsn.com/g;
+    return $url;
 }
 
 # ------------------------------------------------------------------------------------------------------------------
@@ -947,25 +963,43 @@ use warnings;
 
 use parent qw( -norequire Object );
 use Getopt::Std;
+use Data::Dumper;
 
 sub prepare {
     my $self = shift;
-    getopts( "f:", \my %opts );
+    getopts( "f:u:", \my %opts );
     $self->{fileName} = $opts{f} || die "no file name";
+    $self->{url}      = $opts{u} || die "no svn url";
+
+    return;
 }
 
 sub execute {
     my $self = shift;
+
+    my $svn = Singelton::svn();
+
+    my $dependencies = $svn->cat(  url => $self->{url} );
+    my $rev          = $svn->info( url => $self->{url} )->{entry}->{commit}->{revision};
+
+    open FILE, sprintf( ">%s", $self->{fileName} ) or die "can not open temp file";
+    print FILE $dependencies;
+    close FILE;
+
+    printf( "%s %s\n", $self->{url}, $rev );
+
     my $loc = Usecase::GetLocation->new( fileName => $self->{fileName} );
 
-    print Dumper( $loc );
-#     my $dir = $loc->getLocation( subDir   => $subDir,
-#                                  tag      => $tag,
-#                                  revision => $revision );
-#     $dir->loadDependencyTree();
-#     printf( "%s %s", join( " ", $dir->getSourceDirectoriesFromDependencies() ),
-#                      $subDir,
-#           );
+    foreach my $subDir ( $loc->getDirEntries() ) {
+        my $dir = $loc->getLocation( subDir   => $subDir,
+                                     tag      => "",
+                                     revision => "", );
+        $dir->getHeadRevision();
+        printf( "%s %s\n", $dir->{repos}, $dir->{revision});
+
+    }
+
+    return;
 }
 
 # ------------------------------------------------------------------------------------------------------------------
@@ -992,6 +1026,11 @@ sub init {
     $self->{locations} = $locations;
 
     return;
+}
+
+sub getDirEntries {
+    my $self = shift;
+    return @{ $self->{locations}->{data}->{dir} || []};
 }
 
 sub getLocation {
