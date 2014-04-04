@@ -83,14 +83,13 @@ actionCompare() {
         exit 0
     fi
 
-    set -x
-
     # getting old revision file 
     oldRevisionsFile=$(createTempFile)
 
     local oldProjectName=$(getJobNameFromUrl     ${BUILD_URL_LAST})
     local oldBuildNumber=$(getBuildNumberFromUrl ${BUILD_URL_LAST})
 
+    info "last project was ${oldProjectName} / ${oldBuildNumber}"
     oldRevisionsFileOnServer=${jenkinsMasterServerPath}/jobs/${oldProjectName}/builds/${oldBuildNumber}/revisions.txt
     if ! runOnMaster test -e ${oldRevisionsFileOnServer} ; then
         info "revisions file does not exist, trigger new build"
