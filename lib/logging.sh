@@ -44,7 +44,7 @@ stopLogfile() {
 
         if [[ -d ${WORKSPACE} ]] ; then
             mv ${CI_LOGGING_LOGFILENAME} ${WORKSPACE}
-            gzip ${WORKSPACE}/${CI_LOGGING_LOGFILENAME}.gz
+            gzip ${WORKSPACE}/$(basename ${CI_LOGGING_LOGFILENAME}).gz
         fi
     fi
     
