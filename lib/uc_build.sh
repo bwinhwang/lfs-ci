@@ -162,8 +162,8 @@ _createArtifactArchive() {
     # TODO: demx2fk3 2014-03-31 remove cd - dont change the current directory
     cd "${workspace}/bld/"
 
-    local artifactsPathOnShare=${artifactesShare}/${JENKINS_JOB_NAME}/${BUILD_NUMBER}
-    local artifactsPathOnMaster=${jenkinsMasterServerPath}/jobs/${JENKINS_JOB_NAME}/builds/${BUILD_NUMBER}/archive
+    local artifactsPathOnShare=${artifactesShare}/${JOB_NAME}/${BUILD_NUMBER}
+    local artifactsPathOnMaster=${jenkinsMasterServerPath}/jobs/${JOB_NAME}/builds/${BUILD_NUMBER}/archive
     executeOnMaster mkdir -p  ${artifactsPathOnShare}/save
     executeOnMaster ln    -sf ${artifactsPathOnShare}      ${artifactsPathOnMaster}
 
@@ -184,7 +184,7 @@ _createArtifactArchive() {
 #  @param   <none>
 #  @return  <none>
 preCheckoutPatchWorkspace() {
-    _applyPatchesInWorkspace "${JENKINS_JOB_NAME}/preCheckout/"
+    _applyPatchesInWorkspace "${JOB_NAME}/preCheckout/"
     _applyPatchesInWorkspace "common/preCheckout/"
     return
 }
@@ -194,7 +194,7 @@ preCheckoutPatchWorkspace() {
 #  @param   <none>
 #  @return  <none>
 postCheckoutPatchWorkspace() {
-    _applyPatchesInWorkspace "${JENKINS_JOB_NAME}/postCheckout/"
+    _applyPatchesInWorkspace "${JOB_NAME}/postCheckout/"
     _applyPatchesInWorkspace "common/postCheckout/"
     return
 }

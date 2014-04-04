@@ -20,7 +20,7 @@
 #  @param   <none>
 #  @return  task name
 getTaskNameFromJobName() {
-    ${LFS_CI_ROOT}/bin/getFromString.pl "${JENKINS_JOB_NAME}" taskName
+    ${LFS_CI_ROOT}/bin/getFromString.pl "${JOB_NAME}" taskName
     return
 }
 
@@ -29,7 +29,7 @@ getTaskNameFromJobName() {
 #  @param   <none>
 #  @return  sub task name
 getSubTaskNameFromJobName() {
-    ${LFS_CI_ROOT}/bin/getFromString.pl "${JENKINS_JOB_NAME}" subTaskName
+    ${LFS_CI_ROOT}/bin/getFromString.pl "${JOB_NAME}" subTaskName
     return
 }
 
@@ -38,7 +38,7 @@ getSubTaskNameFromJobName() {
 #  @param   <none>
 #  @return  target board name
 getTargetBoardName() {
-    ${LFS_CI_ROOT}/bin/getFromString.pl "${JENKINS_JOB_NAME}" platform
+    ${LFS_CI_ROOT}/bin/getFromString.pl "${JOB_NAME}" platform
     return
 }
 
@@ -51,7 +51,7 @@ mustHaveTargetBoardName() {
 
     local location=$(getTargetBoardName) 
     if [[ ! ${location} ]] ; then
-        error "can not get the correction target board name from JENKINS_JOB_NAME \"${JENKINS_JOB_NAME}\""
+        error "can not get the correction target board name from JOB_NAME \"${JOB_NAME}\""
         exit 1
     fi
 
@@ -63,7 +63,7 @@ mustHaveTargetBoardName() {
 #  @param   <none>
 #  @return  location name
 getLocationName() {
-    local location=$(${LFS_CI_ROOT}/bin/getFromString.pl "${JENKINS_JOB_NAME}" location)
+    local location=$(${LFS_CI_ROOT}/bin/getFromString.pl "${JOB_NAME}" location)
 
     # 2014-02-17 demx2fk3 TODO do this in a better wa
     case ${location} in
@@ -88,7 +88,7 @@ mustHaveLocationName() {
 
     local location=$(getLocationName) 
     if [[ ! ${location} ]] ; then
-        error "can not get the correction location name from JENKINS_JOB_NAME \"${JENKINS_JOB_NAME}\""
+        error "can not get the correction location name from JOB_NAME \"${JOB_NAME}\""
         exit 1
     fi
 
@@ -117,7 +117,7 @@ mustHaveWorkspaceName() {
 
     local workspace=$(getWorkspaceName) 
     if [[ ! "${workspace}" ]] ; then
-        error "can not get the correction workspace name from JENKINS_JOB_NAME \"${JENKINS_JOB_NAME}\""
+        error "can not get the correction workspace name from JOB_NAME \"${JOB_NAME}\""
         exit 1
     fi
 
@@ -277,7 +277,7 @@ cleanupTempFiles() {
 }
 
 initTempDirectory() {
-    export LFS_CI_TEMPDIR=$(mktemp -d /tmp/jenkins.${USER}.${JENKINS_JOB_NAME:-unknown}.$$.XXXXXXXXX)
+    export LFS_CI_TEMPDIR=$(mktemp -d /tmp/jenkins.${USER}.${JOB_NAME:-unknown}.$$.XXXXXXXXX)
 }
 
 initTempDirectory

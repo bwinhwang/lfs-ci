@@ -4,7 +4,7 @@
 # string: e.g. LFS_CI_-_asdf_v3.x_-_build_-_FSM-r3_-_fct
 # wanted: location | subTaskName | subTaskName | platform
 
-# usage: $0 <JENKINS_JOB_NAME> <wanted>
+# usage: $0 <JOB_NAME> <wanted>
 
 my $string = $ARGV[0]; # string, which should be parsed
 my $wanted = $ARGV[1]; # wanted substring from regex
