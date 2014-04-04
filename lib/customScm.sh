@@ -78,6 +78,8 @@ getJobNameFromUrl() {
 #  @return  1 if if a build is not required, 0 otherwise
 actionCompare() {
 
+    exit 1
+
     if [[ -z "${REVISION_STATE_FILE}" ]] ; then
         info "no old revision state file found"
         exit 0
@@ -88,13 +90,8 @@ actionCompare() {
     # getting old revision file 
     oldRevisionsFile=$(createTempFile)
 
-    ls
-    pwd
-
-#     echo ${HOSTNAME}
-#     cat ${REVISION_STATE_FILE}
-#    
-    { read oldProjectName ; read oldBuildNumber ; } < "${REVISION_STATE_FILE}"
+    local oldProjectName=$(getJobNameFromUrl     ${BUILD_URL_LAST})
+    local oldBuildNumber=$(getBuildNumberFromUrl ${BUILD_URL_LAST})
 
     oldRevisionsFileOnServer=${jenkinsMasterServerPath}/jobs/${oldProjectName}/builds/${oldBuildNumber}/revisions.txt
     if ! runOnMaster test -e ${oldRevisionsFileOnServer} ; then
@@ -102,7 +99,8 @@ actionCompare() {
         exit 1
     fi
 
-    execute rsync -ae ssh ${jenkinsMasterServerHostName}:${oldRevisionsFileOnServer} ${oldRevisionsFile}
+    execute rsync -ae ssh ${jenkinsMasterServerHostName}:${oldRevisionsFileOnServer} \
+                          ${oldRevisionsFile}
 
     # generate the new revsions file
     newRevisionsFile=$(createTempFile)
