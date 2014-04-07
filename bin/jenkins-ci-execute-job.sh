@@ -38,9 +38,14 @@ info "starting jenkins job \"${JOB_NAME}\" on ${HOSTNAME} as ${USER}"
 
 # first dispatcher, calling the correct script or function
 case "${JOB_NAME}" in
-    LFS_CI_-_*_-_Package_-_*) 
+    LFS_CI_*_Package_*) 
         source ${LFS_CI_ROOT}/lib/uc_package.sh
         ci_job_package || exit 1 
+    ;;
+    LFS_CI_*_Test_*)
+        echo "NOOP"
+#        source ${LFS_CI_ROOT}/lib/uc_build.sh
+#        ci_job_build   || exit 1 
     ;;
     LFS_CI_*_Build_*) 
         source ${LFS_CI_ROOT}/lib/uc_build.sh
