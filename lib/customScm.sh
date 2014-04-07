@@ -1,5 +1,9 @@
 #!/bin/bash
 
+## @fn      dumpCustomScmEnvironmentVariables(  )
+#  @brief   dump / show all environment variables which are related to Custom SCM Jenkins Plugin
+#  @param   <none>
+#  @return  <none>
 dumpCustomScmEnvironmentVariables() {
     for var in BUILD_DIR               \
                BUILD_NUMBER            \
@@ -25,6 +29,11 @@ dumpCustomScmEnvironmentVariables() {
     return
 }
 
+## @fn      createPropertiesFileForBuild()
+#  @brief   create a properties file, which are used by the build script.
+#  @details format is bash. so you can source the file
+#  @param   <none>
+#  @return  <none>
 createPropertiesFileForBuild() {
     execute rm -rf ${WORKSPACE}/.properties
     echo UPSTREAM_BUILD=${UPSTREAM_BUILD}     >  ${WORKSPACE}/.properties
@@ -32,16 +41,28 @@ createPropertiesFileForBuild() {
     return
 }
 
+## @fn      getBuildNumberFromUrl( $url  )
+#  @brief   get the build number out of a jenkins url
+#  @details the format is
+#           http://maxi.emea.nsn-net.net:1280/job/custom_SCM_test_-_down/634/
+#  @param   {url}    a jenkins url
+#  @return  build number
 getBuildNumberFromUrl() {
     local url=$1
-    # url example: http://maxi.emea.nsn-net.net:1280/job/custom_SCM_test_-_down/634/
     cut -d/ -f 6 <<< ${url}
+    return
 }
 
+## @fn      getJobNameFromUrl( $url  )
+#  @brief   get the job name out of a jenkins url
+#  @details the format is
+#           http://maxi.emea.nsn-net.net:1280/job/custom_SCM_test_-_down/634/
+#  @param   {url}    a jenkins url
+#  @return  build number
 getJobNameFromUrl() {
     local url=$1
-    # url example: http://maxi.emea.nsn-net.net:1280/job/custom_SCM_test_-_down/634/
     cut -d/ -f 5 <<< ${url}
+    return
 }
 
 ## @fn      actionCompare()
@@ -114,6 +135,12 @@ actionCompare() {
 }
 
 
+## @fn      _createRevisionsTxtFile( $fileName )
+#  @brief   create the revisions.txt file 
+#  @details see actionCompare for more details
+#  @param   {fileName}    file name
+#  @param   <none>
+#  @return  <none>
 _createRevisionsTxtFile() {
 
     local newRevisionsFile=$1
@@ -141,6 +168,11 @@ _createRevisionsTxtFile() {
     return
 }
 
+## @fn      actionCheckout()
+#  @brief   action which is called by custom scm jenkins plugin to create or update a workspace
+#  @details 
+#  @param   <none>
+#  @return  <none>
 actionCheckout() {
     # changelog handling
     # idea: the upstream project has the correct change log. We have to get it from them.
@@ -177,6 +209,11 @@ actionCheckout() {
      exit 0
 }
 
+## @fn      actionCalculate()
+#  @brief   action ...
+#  @details «full description»
+#  @param   <none>
+#  @return  <none>
 actionCalculate() {
 
     debug "creating revision state file ${REVISION_STATE_FILE}"
