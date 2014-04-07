@@ -32,11 +32,15 @@ svnSlaveServerUlmHostName=ulscmi.inside.nsn.com
 lfsSourceRepos=https://${svnSlaveServerUlmHostName}/isource/svnroot/BTS_SC_LFS/
 lfsSourceReposTrunk=${lfsSourceRepos}/os/trunk/
 
+lfsDeliveryShare=/build/home/${USER}/delivery
+lfsCiBuildsShare=/build/home/${USER}/ci_builds
+
     declare -A platformMap=(         ["fct"]="fsm3_octeon2" \
                                ["qemu_i386"]="qemu"         \
                              ["qemu_x86_64"]="qemu_64"      \
                                     ["fspc"]="fspc"         \
                                     ["fcmd"]="fcmd"         \
+                                     ["arm"]="fsm35_k2"     \
                            )
     declare -A archMap=(         ["fct"]="mips64-octeon2-linux-gnu" \
                            ["qemu_i386"]="i686-pc-linux-gnu"        \
@@ -64,11 +68,12 @@ getConfig() {
     case "${key}" in
         subsystem)
             case "${subTaskName}" in
-                FSM-r2       ) echo src-psl    ;;
-                FSM-r2-rootfs) echo src-rfs    ;;
-                FSM-r3)        echo src-fsmpsl ;;
-                LRC)           echo src-lrcpsl ;;
-                UBOOT)         echo src-fsmbrm ;;
+                FSM-r2       ) echo src-psl      ;;
+                FSM-r2-rootfs) echo src-rfs      ;;
+                FSM-r3)        echo src-fsmpsl   ;;
+                FSM-r3.5)      echo src-fsmpsl35 ;;
+                LRC)           echo src-lrcpsl   ;;
+                UBOOT)         echo src-fsmbrm   ;;
             esac
         ;;
         locationMapping)
