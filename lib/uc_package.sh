@@ -76,6 +76,9 @@ ci_job_package() {
     copyVersionFile
     copyDocumentation
     copyPlatform
+    copyArchs
+    copySysroot
+    copyFactoryZip
 
     return 0
 }
@@ -110,12 +113,22 @@ copyArchs() {
     local workspace=$(getWorkspaceName)
     mustHaveWorkspaceName
 
-    local dst=${workspace}/upload/archs/
-    execute mkdir -p ${dst}
 
-    execute ln -sf ../../../sdk3/bld-tools ${dst}/archs/$SYSARCH/bld-tools
-    execute ln -sf ../../../sdk3/dbg-tools ${dst}/archs/$SYSARCH/dbg-tools
-    execute ln -sf ../../sys-root/$SYSARCH ${dst}/archs/$SYSARCH/sys-root
+    for bldDirectory in ${workspace}/bld/bld-*psl-* ; do
+        [[ -d ${bldDirectory} ]] || continue
+
+        local destinationsArchitecture=$(getArchitectureFromDirectory ${bldDirectory})
+        info "handling archs for ${destinationsArchitecture}"
+        # todo
+        # mustHavePlatformFromDirectory ${bldDirectory} ${destinationsArchitecture} 
+        local dst=${workspace}/upload/archs/${destinationsArchitecture}
+        execute mkdir -p ${dst}
+
+        execute ln -sf ../../../sdk3/bld-tools                    ${dst}/bld-tools
+        execute ln -sf ../../../sdk3/dbg-tools                    ${dst}/dbg-tools
+        execute ln -sf ../../sys-root/${destinationsArchitecture} ${dst}/sys-root
+
+    done
 
     return
 }
@@ -127,15 +140,19 @@ copySysroot() {
 
     for bldDirectory in ${workspace}/bld/bld-*psl-* ; do
 
-        local destinationsArchitecture=$(getArchitectureFromDirectory ${bldDirectory})
-        mustHavePlatformFromDirectory ${bldDirectory} ${destinationsArchitecture}
+        [[ -d ${bldDirectory} ]] || continue
 
-        local dst=${workspace}/upload/sys-root//${destinationsArchitecture}
+        local destinationsArchitecture=$(getArchitectureFromDirectory ${bldDirectory})
+        mustHavePlatformFromDirectory ${bldDirectory} ${destinationsArchitecture} 
+
+        info "copy sys-root for ${destinationsArchitecture}"
+
+        local dst=${workspace}/upload/sys-root/${destinationsArchitecture}
         execute mkdir -p ${dst}/doc
 
         # check for sysroot.tgz
             # tar xvfz sysroot.tgz -C ...
-            # cp DDAL.pdf docs
+            # cp DDAL.pdf doc
             # ln -sf libDDAL.so.* ..
         # else
             # find toolset
@@ -145,7 +162,8 @@ copySysroot() {
             # untar debug.tgz
             # copy some other sysroo dirs
         if [[ ${bldDirectory}/results/rfs.init_sys-root.tar.gz ]] ; then
-            execute tar -xvzf ${bldDirectory}/results/rfs.init_sys-root.tar.gz -C ${dst}
+            debug "untar ${bldDirectory}/results/rfs.init_sys-root.tar.gz"
+            execute tar -xzf ${bldDirectory}/results/rfs.init_sys-root.tar.gz -C ${dst}
         else
             error "missing rfs.init_sys-root.tar.gz, else path not implemented"
             exit 1
@@ -153,28 +171,32 @@ copySysroot() {
 
         case ${destinationsArchitecture} in
             i686-pc-linux-gnu)
-                execut ln -sf libDDAL.so.fcmd libDDAL_fcmd.so
+                execute ln -sf ${dst}/usr/lib/libDDAL.so.fcmd libDDAL_fcmd.so
             ;;
             powerpc-e500-linux-gnu)
-                execute ln -sf libDDAL.so.fcmd libDDAL_fcmd.so
-                execute ln -sf libDDAL.so.fcmd libDDAL_fspc.so
+                execute ln -sf ${dst}/usr/lib/libDDAL.so.fcmd libDDAL_fcmd.so
+                execute ln -sf ${dst}/usr/lib/libDDAL.so.fcmd libDDAL_fspc.so
             ;;
             x86_64-pc-linux-gnu)
-                execute ln -sf libFSMDDAL.so.fcmd libFSMDDAL_fspc.so
+                execute ln -sf ${dst}/usr/lib/libFSMDDAL.so.fcmd libFSMDDAL_fspc.so
             ;;
             mips64-octeon2-linux-gnu)
-                execute ln -sf libFSMDDAL.so.fct libFSMDDAL_fsm3_octeon2.so
+                execute ln -sf ${dst}/usr/lib64/libFSMDDAL.so.fct libFSMDDAL_fsm3_octeon2.so
+            ;;
+            mips64-octeon-linux-gnu)
+                execute ln -sf ${dst}/usr/lib64/libFSMDDAL.so.fct libFSMDDAL_fsm3_octeon.so
             ;;
             *)
-                error "platform not supported"
+                error "architecture ${destinationsArchitecture} not supported"
                 exit 1
             ;;
         esac            
 
-
-        if [[ ${bldDirectory}/results/{FSM,}DDAL.pdf ]] ; then
-            execute cp ${bldDirectory}/results/{FSM,}DDAL.pdf ${dst}/doc
-        fi
+        for file in ${bldDirectory}/results/{FSM,}DDAL.pdf ; do
+            if [[ -f ${file} ]] ; then
+                execute cp ${bldDirectory}/results/{FSM,}DDAL.pdf ${dst}/doc
+            fi
+        done
 
     done
 
@@ -184,12 +206,18 @@ copySysroot() {
 copyFactoryZip() {
     local workspace=$(getWorkspaceName)
     mustHaveWorkspaceName
+
+    local dst=${workspace}/upload/platforms/fsm3_octeon2
+    execute cd ${dst}
+    execute zip -r factory.zip factory
+    execute cd $OLDPWD
+
+    return
 }
 
 copyPlatform() {
     local workspace=$(getWorkspaceName)
     mustHaveWorkspaceName
-
 
     for bldDirectory in ${workspace}/bld/bld-*psl-* ; do
         [[ -d ${bldDirectory} ]] || continue
@@ -274,10 +302,10 @@ copyDocumentation() {
     local workspace=$(getWorkspaceName)
     mustHaveWorkspaceName
 
-    local dstDirectory=${workspace}/upload/docs
+    local dstDirectory=${workspace}/upload/doc
     mkdir -p ${dstDirectory}
 
-    info "copy docs..."
+    info "copy doc..."
 
     # TODO: demx2fk3 2014-04-01 implement this, fix in src-fsmpsl and src-psl is needed
 

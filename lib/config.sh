@@ -41,8 +41,8 @@ lfsSourceReposTrunk=${lfsSourceRepos}/os/trunk/
     declare -A archMap=(         ["fct"]="mips64-octeon2-linux-gnu" \
                            ["qemu_i386"]="i686-pc-linux-gnu"        \
                          ["qemu_x86_64"]="x86_64-pc-linux-gnu"      \
-                                ["fspc"]="mips64-octeon-linux-gnu"  \
-                                ["fcmd"]="mips64-octeon-linux-gnu"  \
+                                ["fspc"]="powerpc-e500-linux-gnu"   \
+                                ["fcmd"]="powerpc-e500-linux-gnu"   \
                           )
 
 ## @fn      getConfig( key )
