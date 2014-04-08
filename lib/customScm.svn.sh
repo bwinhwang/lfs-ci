@@ -47,8 +47,11 @@ actionCompare() {
     # now we have both files, we can compare them
     if cmp --silent ${oldRevisionsFile} ${newRevisionsFile} ; then
         info "no changes in revision files, no build required"
-        execute diff -rub ${oldRevisionsFile} ${newRevisionsFile}
         exit 1
+    else
+        info "changes in revision file found, trigger build"
+        execute diff -rub ${oldRevisionsFile} ${newRevisionsFile}
+        exit 0
     fi
 
     return
