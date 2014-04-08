@@ -21,7 +21,7 @@ source ${LFS_CI_ROOT}/lib/exit_handling.sh
 source ${LFS_CI_ROOT}/lib/common.sh
 source ${LFS_CI_ROOT}/lib/customSCM.common.sh
 
-local fileBaseName=$(basename $0)
+fileBaseName=$(basename $0)
 
 case "${fileBaseName}" in 
     customSCM.svn.sh)      source ${LFS_CI_ROOT}/lib/customSCM.svn.sh      ;;
