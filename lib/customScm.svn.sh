@@ -156,14 +156,16 @@ actionCheckout() {
 #  @return  <none>
 actionCalculate() {
 
-    # generate the new revsions file
+    debug "generate the new revision file"
     newRevisionsFile=$(createTempFile)
     _createRevisionsTxtFile ${newRevisionsFile}
 
+    # maybe we are to fast. just wait a second...
     if runOnMaster test ! -d ${jenkinsMasterServerPath}/jobs/${JOB_NAME}/builds/${BUILD_NUMBER}/ ; then
         sleep 1
     fi
 
+    debug "copy new revision file to jenkins master server"
     execute rsync -ae ssh ${newRevisionsFile} \
                     ${jenkinsMasterServerHostName}:${jenkinsMasterServerPath}/jobs/${JOB_NAME}/builds/${BUILD_NUMBER}/revisions.txt
 
