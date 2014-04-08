@@ -49,7 +49,7 @@ createPropertiesFileForBuild() {
 #  @return  build number
 getBuildNumberFromUrl() {
     local url=$1
-    cut -d/ -f 6 <<< ${url}
+    cut -d/ -f 6 <<< "${url}"
     return
 }
 

@@ -6,104 +6,42 @@
 #           or not
 #  @details INPUT: REVISION_STATE_FILE revision state file from the old build
 # 
-#           Idea: we get the information from the old build in the
-#           BUILD_URL_LAST (old project name and old build
-#           number). With this information we can look for the
-#           revisions.txt file, which is located on the jenkins
-#           master server in the build directory of the old build
-#           ($JENKINS_HOME/jobs/<projekt>/builds/<number>). In the next
-#           step, we have to create the same revisions.txt for the head
-#           revisions of the used svn repos (we need the svn urls with
-#           branches, ...) which are used in the trunk / branch. This
-#           info is located in the locations/<branch>/Dependencies
-#           files. So the steps got the the new revisions.txt are:
-# 
-#           * get the branch / trunk information (use the job name)
-# 
-#           * get the locations/<branch>/Dependencies file from svn
-#           (svn cat <url>)
-# 
-#           * generate all urls from "build listdirs" (aka
-#           grep -h '^'"dir " locations/*/Dependencies) and
-#           locations/<branch>/Dependencies with revisions
-# 
-#           * if the new generated and the old, stored files are
-#           different, trigger a new build, and store the new file
-# 
 #  @param   <none>
 #  @return  1 if if a build is not required, 0 otherwise
 actionCompare() {
-
-    exit 1
 
     if [[ -z "${REVISION_STATE_FILE}" ]] ; then
         info "no old revision state file found"
         exit 0
     fi
 
-    # getting old revision file 
-    oldRevisionsFile=$(createTempFile)
+    local upstreamProjectName=${UPSTREAM_PROJECT}
+    local upstreamBuildNumber=${UPSTREAM_BUILD}
 
-    local oldProjectName=$(getJobNameFromUrl     ${BUILD_URL_LAST})
-    local oldBuildNumber=$(getBuildNumberFromUrl ${BUILD_URL_LAST})
+    # read the revision state file
+    # format:
+    # projectName
+    # buildNumber
+    { read oldUpstreamProjectName ; 
+      read oldUpstreamBuildNumber ; } < "${REVISION_STATE_FILE}"
 
-    info "last project was ${oldProjectName} / ${oldBuildNumber}"
-    oldRevisionsFileOnServer=${jenkinsMasterServerPath}/jobs/${oldProjectName}/builds/${oldBuildNumber}/revisions.txt
-    if ! runOnMaster test -e ${oldRevisionsFileOnServer} ; then
-        info "revisions file does not exist, trigger new build"
+    info "old upstream project was ${oldProjectName} / ${oldBuildNumber}"
+
+    # comparing to new state
+    if [[ "${upstreamProjectName}" != "${oldUpstreamProjectName}" ]] ; then
+        info "upstream project name changed, trigger build"
         exit 0
     fi
 
-    execute rsync -ae ssh ${jenkinsMasterServerHostName}:${oldRevisionsFileOnServer} \
-                          ${oldRevisionsFile}
-
-    # generate the new revsions file
-    newRevisionsFile=$(createTempFile)
-    _createRevisionsTxtFile ${newRevisionsFile}
-
-    # now we have both files, we can compare them
-    if cmp --silent ${oldRevisionsFile} ${newRevisionsFile} ; then
-        info "no changes in revision files, no build required"
-        execute diff -rub ${oldRevisionsFile} ${newRevisionsFile}
-        exit 1
+    if [[ "${upstreamBuildNumber}" != "${oldUpstreamBuildNumber}" ]] ; then
+        info "upstream build number has changed, trigger build"
+        exit 0
     fi
 
-    return
+    info "upstream build ${upstreamProjectName}#${upstreamBuildNumber} was already tested"
+    exit 1
 }
 
-
-## @fn      _createRevisionsTxtFile( $fileName )
-#  @brief   create the revisions.txt file 
-#  @details see actionCompare for more details
-#  @param   {fileName}    file name
-#  @param   <none>
-#  @return  <none>
-_createRevisionsTxtFile() {
-
-    local newRevisionsFile=$1
-    dependenciesFile=$(createTempFile)
-    
-    locationName=$(getLocationName)
-    mustHaveLocationName
-
-    # get the locations/<branch>/Dependencies
-    dependenciesFileUrl=${lfsSourceRepos}/os/trunk/bldtools/locations-${locationName}/Dependencies
-    if ! svn ls ${dependenciesFileUrl} 2>/dev/null
-    then
-        error "svn is not responding or ${dependenciesFileUrl}does not exist"
-        exit 1
-    fi
-
-    # can not use execute here, so we have to do the error handling by hande
-    # do the magic for all dir
-    ${LFS_CI_ROOT}/bin/getRevisionTxtFromDependencies -u ${dependenciesFileUrl} -f ${dependenciesFile} > ${newRevisionsFile} 
-    if [[ $? != 0 ]] ; then
-        error "reported an error..."
-        exit 1
-    fi
-
-    return
-}
 
 ## @fn      actionCheckout()
 #  @brief   action which is called by custom scm jenkins plugin to create or update a workspace and create the changelog
@@ -121,14 +59,18 @@ actionCheckout() {
     cat < /dev/null > "${CHANGELOG}"
 
     echo "get the old upstream project data..."
-    { read oldUpstreamProjectName ; read oldUpstreamBuildNumber ;  } < "${OLD_REVISION_STATE_FILE}"
+    { read oldUpstreamProjectName ; 
+      read oldUpstreamBuildNumber ;  } < "${OLD_REVISION_STATE_FILE}"
     echo "old upstream project data are: ${oldUpstreamProjectName} / ${oldUpstreamBuildNumber}"
 
     build=${UPSTREAM_BUILD}
     while [[ ${build} -gt ${oldUpstreamBuildNumber} ]] ; do
+        # TODO: demx2fk3 2014-04-07 use configuration for this
         buildDirectory=/var/fpwork/demx2fk3/lfs-jenkins/home/jobs/${UPSTREAM_PROJECT}/builds/${build}
         # we must only concatenate non-empty logs; empty logs with a
         # single "<log/>" entry will break the concatenation:
+
+        # TODO: demx2fk3 2014-04-07 use configuration for this
         ssh maxi.emea.nsn-net.net "grep -q logentry \"${buildDirectory}/changelog.xml\" && cat \"${buildDirectory}/changelog.xml\"" >> ${CHANGELOG}
         build=$(( build - 1 ))
     done
@@ -142,8 +84,7 @@ actionCheckout() {
         echo -n "<log/>" >"$CHANGELOG"
     fi
 
-
-     exit 0
+    return
 }
 
 ## @fn      actionCalculate()
@@ -157,14 +98,6 @@ actionCalculate() {
     echo ${UPSTREAM_PROJECT}   >   "${REVISION_STATE_FILE}"
     echo ${UPSTREAM_BUILD}     >>  "${REVISION_STATE_FILE}"
 
-    # generate the new revsions file
-    newRevisionsFile=$(createTempFile)
-    # _createRevisionsTxtFile ${newRevisionsFile}
-
-    # execute rsync -ae ssh ${newRevisionsFile} \
-    #             ${jenkinsMasterServerPath}/jobs/${JOB_NAME}/builds/${BUILD_NUMBER}/revisions.txt
-
     return 
 }
 
-return
