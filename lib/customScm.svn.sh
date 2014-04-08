@@ -50,7 +50,9 @@ actionCompare() {
         exit 1
     else
         info "changes in revision file found, trigger build"
-        execute "diff -rub ${oldRevisionsFile} ${newRevisionsFile} || true"
+        tmpFile=$(createTempFile)
+        diff -rub ${oldRevisionsFile} ${newRevisionsFile} > ${tmpFile}
+        rawDebug ${tmpFile}
         exit 0
     fi
 
