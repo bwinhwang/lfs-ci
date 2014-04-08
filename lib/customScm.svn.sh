@@ -163,7 +163,7 @@ actionCalculate() {
     cat ${newRevisionsFile}
 
     execute rsync -ae ssh ${newRevisionsFile} \
-                    ${jenkinsMasterServerPath}/jobs/${JOB_NAME}/builds/${BUILD_NUMBER}/revisions.txt
+                    ${jenkinsMasterServerHostName}:${jenkinsMasterServerPath}/jobs/${JOB_NAME}/builds/${BUILD_NUMBER}/revisions.txt
 
     return 
 }
