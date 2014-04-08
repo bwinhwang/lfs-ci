@@ -160,10 +160,10 @@ actionCalculate() {
     newRevisionsFile=$(createTempFile)
     _createRevisionsTxtFile ${newRevisionsFile}
 
-    cat ${newRevisionsFile}
+    if runOnMaster test ! -d ${jenkinsMasterServerPath}/jobs/${JOB_NAME}/builds/${BUILD_NUMBER}/ ; then
+        sleep 1
+    fi
 
-    runOnMaster ls -lart ${jenkinsMasterServerPath}/jobs/${JOB_NAME}/builds/
-    runOnMaster ls -lart ${jenkinsMasterServerPath}/jobs/${JOB_NAME}/builds/${BUILD_NUMBER}
     execute rsync -ae ssh ${newRevisionsFile} \
                     ${jenkinsMasterServerHostName}:${jenkinsMasterServerPath}/jobs/${JOB_NAME}/builds/${BUILD_NUMBER}/revisions.txt
 
