@@ -107,17 +107,29 @@ actionCheckout() {
     # create a new changelog file
     cat < /dev/null > "${CHANGELOG}"
 
-    echo "get the old upstream project data..."
-    { read oldUpstreamProjectName ; read oldUpstreamBuildNumber ;  } < "${OLD_REVISION_STATE_FILE}"
-    echo "old upstream project data are: ${oldUpstreamProjectName} / ${oldUpstreamBuildNumber}"
+    local oldRevisionsFile=${OLD_REVISION_STATE_FILE}
 
-    build=${UPSTREAM_BUILD}
-    while [[ ${build} -gt ${oldUpstreamBuildNumber} ]] ; do
-        buildDirectory=/var/fpwork/demx2fk3/lfs-jenkins/home/jobs/${UPSTREAM_PROJECT}/builds/${build}
-        # we must only concatenate non-empty logs; empty logs with a
-        # single "<log/>" entry will break the concatenation:
-        ssh maxi.emea.nsn-net.net "grep -q logentry \"${buildDirectory}/changelog.xml\" && cat \"${buildDirectory}/changelog.xml\"" >> ${CHANGELOG}
-        build=$(( build - 1 ))
+    debug "generate the new revision file"
+    local newRevisionsFile=${REVISION_STATE_FILE}
+    _createRevisionsTxtFile ${newRevisionsFile}
+
+    # check the revision from old state file and current state file
+    for subSystem in $(cut -d" " -f 1 ${newRevisionsFile}) ; do
+
+        oldUrl=$(grep -e "^${subSystem} " ${oldRevisionsFile} | cut -d" " -f2)
+        oldRev=$(grep -e "^${subSystem} " ${oldRevisionsFile} | cut -d" " -f3)
+
+        newUrl=$(grep -e "^${subSystem} " ${newRevisionsFile} | cut -d" " -f2)
+        newRev=$(grep -e "^${subSystem} " ${newRevisionsFile} | cut -d" " -f3)
+
+        if [[ "${oldUrl}" != "${newUrl}" ]] ; then
+            # just get the latest revision
+            continue
+        fi
+        if [[ "${oldRev}" != "${newRev}" ]] ; then
+            # get the changes
+            svn log -v --xml -r${oldRev}:${newRev} ${newUrl} 
+        fi
     done
 
     # Remove inter-log cruft arising from the concatenation of individual
@@ -139,9 +151,6 @@ actionCheckout() {
 #  @return  <none>
 actionCalculate() {
 
-    debug "generate the new revision file"
-    newRevisionsFile=${REVISION_STATE_FILE}
-    _createRevisionsTxtFile ${newRevisionsFile}
 
     return 
 }
