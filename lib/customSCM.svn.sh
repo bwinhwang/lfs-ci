@@ -139,7 +139,7 @@ actionCheckout() {
             ls -lart ${CHANGELOG} ${tmpChangeLogFile}
 
             if [[ ! -s ${CHANGELOG} ]] ; then
-                execute cat ${tmpChangeLogFile} > ${CHANGELOG}
+                execute cp -f ${tmpChangeLogFile} > ${CHANGELOG}
             else
                 local tmpChangeLogFile=$(createTempFile)
                 execute xsltproc                                          \
