@@ -120,8 +120,8 @@ _createWorkspace() {
     buildTargets="$(getConfig additionalSourceDirectories) ${buildTargets}"
 
     local revision=
-    if [[ ${JENKINS_SVN_REVISION} ]] ; then
-        info "using subversion revision: ${JENKINS_SVN_REVISION}"
+    if [[ -r "${WORKSPACE}/revisions.txt" ]] ; then
+        info "using revision from revisions.txt file"
         revision=${JENKINS_SVN_REVISION}
     fi
 
