@@ -41,6 +41,7 @@ actionCompare() {
     # getting old revision file 
     oldRevisionsFile=$(createTempFile)
 
+    set -x
     local oldProjectName=$(getJobNameFromUrl     ${BUILD_URL_LAST})
     local oldBuildNumber=$(getBuildNumberFromUrl ${BUILD_URL_LAST})
 
