@@ -58,10 +58,10 @@ actionCheckout() {
     # create a new changelog file
     cat < /dev/null > "${CHANGELOG}"
 
-    echo "get the old upstream project data..."
+    debug "get the old upstream project data..."
     { read oldUpstreamProjectName ; 
       read oldUpstreamBuildNumber ;  } < "${OLD_REVISION_STATE_FILE}"
-    echo "old upstream project data are: ${oldUpstreamProjectName} / ${oldUpstreamBuildNumber}"
+    debug "old upstream project data are: ${oldUpstreamProjectName} / ${oldUpstreamBuildNumber}"
 
     build=${UPSTREAM_BUILD}
     while [[ ${build} -gt ${oldUpstreamBuildNumber} ]] ; do
@@ -88,7 +88,7 @@ actionCheckout() {
     if runOnMaster test -f ${buildDirectory}/revisionstate.xml ; then
         execute rsync -a ${jenkinsMasterServerHostName}:${buildDirectory}/revisionstate.xml ${WORKSPACE}/revisions.txt
     else
-        touch ${WORKSPACE}/revisions.txtt
+        touch ${WORKSPACE}/revisions.txt
     fi
 
     return
@@ -104,6 +104,9 @@ actionCalculate() {
     debug "creating revision state file ${REVISION_STATE_FILE}"
     echo ${UPSTREAM_PROJECT}   >   "${REVISION_STATE_FILE}"
     echo ${UPSTREAM_BUILD}     >>  "${REVISION_STATE_FILE}"
+
+    echo UPSTREAM_PROJECT=${UPSTREAM_PROJECT}   > ${WORKSPACE}/.property
+    echo UPSTREAM_BUILD=${UPSTREAM_BUILD}      >> ${WORKSPACE}/.property
 
     return 
 }
