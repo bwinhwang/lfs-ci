@@ -122,7 +122,8 @@ _createWorkspace() {
     local revision=
     if [[ -r "${WORKSPACE}/revisions.txt" ]] ; then
         info "using revision from revisions.txt file"
-        revision=${JENKINS_SVN_REVISION}
+        # TODO: demx2fk3 2014-04-08 add handling here
+        revision=
     fi
 
     info "using src-dirs: ${buildTargets}"

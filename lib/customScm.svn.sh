@@ -50,7 +50,7 @@ actionCompare() {
         exit 1
     else
         info "changes in revision file found, trigger build"
-        execute diff -rub ${oldRevisionsFile} ${newRevisionsFile}
+        execute diff -rub ${oldRevisionsFile} ${newRevisionsFile} && true
         exit 0
     fi
 
