@@ -130,7 +130,11 @@ actionCheckout() {
             # get the changes
             info "get changelog for ${subSystem}"
             local tmpChangeLogFile=$(createTempFile)
-            execute svn log -v --xml -r${oldRev}:${newRev} ${newUrl} > ${tmpChangeLogFile}
+            svn log -v --xml -r${oldRev}:${newRev} ${newUrl} > ${tmpChangeLogFile}
+            if [[ $? != 0 ]] ; then
+                error "svn log -v --xml -r${oldRev}:${newRev} ${newUrl} failed"
+                exit 1
+            fi
 
             ls -lart ${CHANGELOG} ${tmpChangeLogFile}
 
