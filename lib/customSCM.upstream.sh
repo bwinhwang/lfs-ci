@@ -71,7 +71,7 @@ actionCheckout() {
         # single "<log/>" entry will break the concatenation:
 
         # TODO: demx2fk3 2014-04-07 use configuration for this
-        ssh maxi.emea.nsn-net.net "grep -q logentry \"${buildDirectory}/changelog.xml\" && cat \"${buildDirectory}/changelog.xml\"" >> ${CHANGELOG}
+        ssh ${jenkinsMasterServerHostName} "test -f ${buildDirectory}/changelog.xml && grep -q logentry ${buildDirectory}/changelog.xml && cat ${buildDirectory}/changelog.xml" >> ${CHANGELOG}
         build=$(( build - 1 ))
     done
 
@@ -85,7 +85,11 @@ actionCheckout() {
     fi
 
     # copy revisions.txt from upstream
-    execute rsync -a ${jenkinsMasterServerHostName}:${buildDirectory}/revisionstate.xml ${WORKSPACE}/revisions.txt
+    if runOnMaster test -f ${buildDirectory}/revisionstate.xml ; then
+        execute rsync -a ${jenkinsMasterServerHostName}:${buildDirectory}/revisionstate.xml ${WORKSPACE}/revisions.txt
+    else
+        touch ${WORKSPACE}/revisions.txtt
+    fi
 
     return
 }
