@@ -105,9 +105,19 @@ actionCalculate() {
     echo ${UPSTREAM_PROJECT}   >   "${REVISION_STATE_FILE}"
     echo ${UPSTREAM_BUILD}     >>  "${REVISION_STATE_FILE}"
 
-    echo UPSTREAM_PROJECT=${UPSTREAM_PROJECT}   > ${WORKSPACE}/.property
-    echo UPSTREAM_BUILD=${UPSTREAM_BUILD}      >> ${WORKSPACE}/.property
+    # upstream handling if missing
+    echo UPSTREAM_PROJECT=${UPSTREAM_PROJECT}   > ${WORKSPACE}/.properties
+    echo UPSTREAM_BUILD=${UPSTREAM_BUILD}      >> ${WORKSPACE}/.properties
 
     return 
 }
+
+# _setUpstream() {
+#     if [[ "${BUILD_CAUSE_MANUALTRIGGER}" == true ]] ; then
+#         debug "build was triggered manually, get last stable upstream"
+#         
+#     else
+#         debug "build was triggered by upstream"
+#     fi
+# }
 
