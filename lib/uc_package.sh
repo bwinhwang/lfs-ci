@@ -82,7 +82,7 @@ _copyArtifactsToWorkspace() {
 #  @param   {buildNumber}   jenkins buld number 
 #  @param   <none>
 #  @return  <none>
-_copyAndUntarArtifactFromMasterToWorkspace() {
+_copyAndUntarArtifactOfJenkinsJobFromMasterToWorkspace() {
     local jobName=$1
     local buildNumber=$2
     local artifactsPathOnMaster=${artifactesShare}/${jobName}/${buildNumber}/save/
