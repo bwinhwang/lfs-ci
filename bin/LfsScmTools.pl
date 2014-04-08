@@ -986,7 +986,7 @@ sub execute {
     print FILE $dependencies;
     close FILE;
 
-    printf( "%s %s\n", $self->{url}, $rev );
+    printf( "location %s %s\n", $self->{url}, $rev );
 
     my $loc = Usecase::GetLocation->new( fileName => $self->{fileName} );
 
@@ -995,7 +995,7 @@ sub execute {
                                      tag      => "",
                                      revision => "", );
         $dir->getHeadRevision();
-        printf( "%s %s\n", $dir->{repos}, $dir->{revision});
+        printf( "%s %s %s\n", $subDir, $dir->{repos}, $dir->{revision});
 
     }
 
