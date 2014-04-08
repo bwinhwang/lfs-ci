@@ -19,8 +19,19 @@ source ${LFS_CI_ROOT}/lib/logging.sh
 source ${LFS_CI_ROOT}/lib/commands.sh
 source ${LFS_CI_ROOT}/lib/exit_handling.sh
 source ${LFS_CI_ROOT}/lib/common.sh
-source ${LFS_CI_ROOT}/lib/customScm.common.sh
-source ${LFS_CI_ROOT}/lib/customScm.upstream.sh
+source ${LFS_CI_ROOT}/lib/customSCM.common.sh
+
+local fileBaseName=$(basename $0)
+
+case "${fileBaseName}" in 
+    customSCM.svn.sh)      source ${LFS_CI_ROOT}/lib/customSCM.svn.sh      ;;
+    customSCM.upstream.sh) source ${LFS_CI_ROOT}/lib/customSCM.upstream.sh ;;
+    customSCM.sh)          source ${LFS_CI_ROOT}/lib/customSCM.sh          ;;
+    *)
+        echo "can not found ${LFS_CI_ROOT}/lib/${fileBaseName}. exit"
+        exit 1
+    ;;
+esac
 
 # start the logfile
 startLogfile
