@@ -44,14 +44,14 @@ actionCompare() {
     local oldProjectName=$(getJobNameFromUrl     ${BUILD_URL_LAST})
     local oldBuildNumber=$(getBuildNumberFromUrl ${BUILD_URL_LAST})
 
-    info "last build was ${oldProjectName} / ${oldBuildNumber}"
+    info "last build was   ${oldProjectName} / ${oldBuildNumber}"
+    info "last project was ${oldProjectName} / ${oldBuildNumber}"
 
     if [[ -z "${oldBuildNumber}" ]] ; then
         info "never build up to now, trigger new build"
         exit 0
     fi
 
-    info "last project was ${oldProjectName} / ${oldBuildNumber}"
     local oldRevisionsFileOnServer=${jenkinsMasterServerPath}/jobs/${oldProjectName}/builds/${oldBuildNumber}/revisions.txt
 
     if ! runOnMaster test -e ${oldRevisionsFileOnServer} ; then
