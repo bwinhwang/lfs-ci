@@ -84,6 +84,9 @@ actionCheckout() {
         echo -n "<log/>" >"$CHANGELOG"
     fi
 
+    # copy revisions.txt from upstream
+    execute rsync -a ${jenkinsMasterServerHostName}:${buildDirectory}/revisionstate.xml ${WORKSPACE}/revisions.txt
+
     return
 }
 
