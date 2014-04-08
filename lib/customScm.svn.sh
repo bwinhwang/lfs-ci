@@ -44,6 +44,8 @@ actionCompare() {
     local oldProjectName=$(getJobNameFromUrl     ${BUILD_URL_LAST})
     local oldBuildNumber=$(getBuildNumberFromUrl ${BUILD_URL_LAST})
 
+    info "last build was ${oldProjectName} / ${oldBuildNumber}"
+
     if [[ -z "${oldBuildNumber}" ]] ; then
         info "never build up to now, trigger new build"
         exit 0
