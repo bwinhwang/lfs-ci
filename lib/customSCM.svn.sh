@@ -136,8 +136,6 @@ actionCheckout() {
                 exit 1
             fi
 
-            ls -lart ${CHANGELOG} ${tmpChangeLogFile}
-
             if [[ ! -s ${CHANGELOG} ]] ; then
                 debug "copy ${tmpChangeLogFile} to ${CHANGELOG}"
                 execute cp -f ${tmpChangeLogFile} ${CHANGELOG}
