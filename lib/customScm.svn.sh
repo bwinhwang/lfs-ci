@@ -162,6 +162,8 @@ actionCalculate() {
 
     cat ${newRevisionsFile}
 
+    runOnMaster ls -la ${jenkinsMasterServerPath}/jobs/${JOB_NAME}/builds/
+    runOnMaster ls -la ${jenkinsMasterServerPath}/jobs/${JOB_NAME}/builds/${BUILD_NUMBER}
     execute rsync -ae ssh ${newRevisionsFile} \
                     ${jenkinsMasterServerHostName}:${jenkinsMasterServerPath}/jobs/${JOB_NAME}/builds/${BUILD_NUMBER}/revisions.txt
 
