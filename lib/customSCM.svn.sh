@@ -128,7 +128,18 @@ actionCheckout() {
         fi
         if [[ "${oldRev}" != "${newRev}" ]] ; then
             # get the changes
-            svn log -v --xml -r${oldRev}:${newRev} ${newUrl} 
+            local tmpChangeLogFile=$(createTempFile)
+            execute svn log -v --xml -r${oldRev}:${newRev} ${newUrl} > ${tmpChangeLogFile}
+            if [[ ! -s ${CHANGELOG} ]] ; then
+                execute cp -f ${tmpChangeLogFile} ${CHANGELOG}
+            else
+                local tmpChangeLogFile=$(createTempFile)
+                execute xsltproc                                          \
+                            --stringparam file ${tmpChangeLogFile}        \
+                            --output ${CHANGELOG}                         \
+                            ${LFS_CI_ROOT}/lib/contrib/joinChangelog.xslt \
+                            ${CHANGELOG}  
+            fi
         fi
     done
 
