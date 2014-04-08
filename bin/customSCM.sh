@@ -26,7 +26,7 @@ fileBaseName=$(basename $0)
 case "${fileBaseName}" in 
     customSCM.svn.sh)      source ${LFS_CI_ROOT}/lib/customSCM.svn.sh      ;;
     customSCM.upstream.sh) source ${LFS_CI_ROOT}/lib/customSCM.upstream.sh ;;
-    customSCM.sh)          source ${LFS_CI_ROOT}/lib/customSCM.sh          ;;
+    customSCM.sh)          source ${LFS_CI_ROOT}/lib/customSCM.upstream.sh ;;
     *)
         echo "can not found ${LFS_CI_ROOT}/lib/${fileBaseName}. exit"
         exit 1
