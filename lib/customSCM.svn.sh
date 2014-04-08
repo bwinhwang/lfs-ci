@@ -140,7 +140,7 @@ actionCheckout() {
 
             if [[ ! -s ${CHANGELOG} ]] ; then
                 debug "copy ${tmpChangeLogFile} to ${CHANGELOG}"
-                execute cp -f ${tmpChangeLogFile} > ${CHANGELOG}
+                execute cp -f ${tmpChangeLogFile} ${CHANGELOG}
             else
                 debug "using xsltproc to create new ${CHANGELOG}"
                 local tmpChangeLogFile=$(createTempFile)
