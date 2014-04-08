@@ -33,6 +33,7 @@
 #  @return  1 if if a build is not required, 0 otherwise
 actionCompare() {
 
+set -x
     if [[ -z "${REVISION_STATE_FILE}" ]] ; then
         info "no old revision state file found"
         exit 0
