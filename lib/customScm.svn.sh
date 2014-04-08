@@ -41,11 +41,9 @@ actionCompare() {
     # getting old revision file 
     oldRevisionsFile=$(createTempFile)
 
-    set -x
     local oldProjectName=$(getJobNameFromUrl     ${BUILD_URL_LAST})
     local oldBuildNumber=$(getBuildNumberFromUrl ${BUILD_URL_LAST})
 
-    info "last build was   ${oldProjectName} / ${oldBuildNumber}"
     info "last project was ${oldProjectName} / ${oldBuildNumber}"
 
     if [[ -z "${oldBuildNumber}" ]] ; then
