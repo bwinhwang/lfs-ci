@@ -29,7 +29,6 @@
 # 
 #           * if the new generated and the old, stored files are
 #           different, trigger a new build, and store the new file
-# 
 #  @param   <none>
 #  @return  1 if if a build is not required, 0 otherwise
 actionCompare() {
@@ -45,18 +44,25 @@ actionCompare() {
     local oldProjectName=$(getJobNameFromUrl     ${BUILD_URL_LAST})
     local oldBuildNumber=$(getBuildNumberFromUrl ${BUILD_URL_LAST})
 
+    if [[ -z "${oldBuildNumber}" ]] ; then
+        info "never build up to now, trigger new build"
+        exit 0
+    fi
+
     info "last project was ${oldProjectName} / ${oldBuildNumber}"
-    oldRevisionsFileOnServer=${jenkinsMasterServerPath}/jobs/${oldProjectName}/builds/${oldBuildNumber}/revisions.txt
+    local oldRevisionsFileOnServer=${jenkinsMasterServerPath}/jobs/${oldProjectName}/builds/${oldBuildNumber}/revisions.txt
+
     if ! runOnMaster test -e ${oldRevisionsFileOnServer} ; then
         info "revisions file does not exist, trigger new build"
         exit 0
     fi
 
+    # TODO: demx2fk3 2014-04-08 use long version of parameters
     execute rsync -ae ssh ${jenkinsMasterServerHostName}:${oldRevisionsFileOnServer} \
                           ${oldRevisionsFile}
 
     # generate the new revsions file
-    newRevisionsFile=$(createTempFile)
+    local newRevisionsFile=$(createTempFile)
     _createRevisionsTxtFile ${newRevisionsFile}
 
     # now we have both files, we can compare them
@@ -68,7 +74,6 @@ actionCompare() {
 
     return
 }
-
 
 ## @fn      _createRevisionsTxtFile( $fileName )
 #  @brief   create the revisions.txt file 
