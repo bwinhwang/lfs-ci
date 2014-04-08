@@ -23,7 +23,7 @@ dumpCustomScmEnvironmentVariables() {
                UPSTREAM_PROJECT        \
                WORKSPACE 
     do
-        debug "$(printf "%30s %-30s\n" "${var}" "${!var}")"
+        debug "$(printf "%20s %-30s\n" "${var}" "${!var}")"
     done
 
     return
