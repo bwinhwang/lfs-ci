@@ -131,7 +131,9 @@ actionCheckout() {
             info "get changelog for ${subSystem}"
             local tmpChangeLogFile=$(createTempFile)
             execute svn log -v --xml -r${oldRev}:${newRev} ${newUrl} > ${tmpChangeLogFile}
-            ls -lart ${CHANGELOG}
+
+            ls -lart ${CHANGELOG} ${tmpChangeLogFile}
+
             if [[ ! -s ${CHANGELOG} ]] ; then
                 execute cat ${tmpChangeLogFile} > ${CHANGELOG}
             else
