@@ -19,7 +19,8 @@ source ${LFS_CI_ROOT}/lib/logging.sh
 source ${LFS_CI_ROOT}/lib/commands.sh
 source ${LFS_CI_ROOT}/lib/exit_handling.sh
 source ${LFS_CI_ROOT}/lib/common.sh
-source ${LFS_CI_ROOT}/lib/customScm.sh
+source ${LFS_CI_ROOT}/lib/customScm.common.sh
+source ${LFS_CI_ROOT}/lib/customScm.upstream.sh
 
 # start the logfile
 startLogfile
@@ -32,11 +33,7 @@ info "===== action = ${action} ====="
 dumpCustomScmEnvironmentVariables
 
 if [[ ${action} == compare ]] ; then
-
-    # TODO: demx2fk3 2014-04-03 add compare action
-    # TODO: demx2fk3 2014-04-03 always trigger a new build
     actionCompare
-
 fi
 
 if [[ ${action} == checkout ]] ; then

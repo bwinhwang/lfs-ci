@@ -1,49 +1,5 @@
 #!/bin/bash
 
-dumpCustomScmEnvironmentVariables() {
-    for var in BUILD_DIR               \
-               BUILD_NUMBER            \
-               BUILD_URL               \
-               BUILD_URL_LAST          \
-               BUILD_URL_LAST_STABLE   \
-               BUILD_URL_LAST_SUCCESS  \
-               CHANGELOG               \
-               JENKINS_HOME            \
-               JENKINS_URL             \
-               JOB_DIR                 \
-               JOB_NAME                \
-               OLD_REVISION_STATE_FILE \
-               REVISION_STATE_FILE     \
-               UPSTREAM_BUILD          \
-               UPSTREAM_JOB_URLS       \
-               UPSTREAM_PROJECT        \
-               WORKSPACE 
-    do
-        debug "$(printf "%30s %-30s\n" "${var}" "${!var}")"
-    done
-
-    return
-}
-
-createPropertiesFileForBuild() {
-    execute rm -rf ${WORKSPACE}/.properties
-    echo UPSTREAM_BUILD=${UPSTREAM_BUILD}     >  ${WORKSPACE}/.properties
-    echo UPSTREAM_PROJECT=${UPSTREAM_PROJECT} >> ${WORKSPACE}/.properties
-    return
-}
-
-getBuildNumberFromUrl() {
-    local url=$1
-    # url example: http://maxi.emea.nsn-net.net:1280/job/custom_SCM_test_-_down/634/
-    cut -d/ -f 6 <<< ${url}
-}
-
-getJobNameFromUrl() {
-    local url=$1
-    # url example: http://maxi.emea.nsn-net.net:1280/job/custom_SCM_test_-_down/634/
-    cut -d/ -f 5 <<< ${url}
-}
-
 ## @fn      actionCompare()
 #  @brief   this command is called by jenkins custom scm plugin via a
 #           polling trigger. It should decide, if a build is required
@@ -77,8 +33,6 @@ getJobNameFromUrl() {
 #  @param   <none>
 #  @return  1 if if a build is not required, 0 otherwise
 actionCompare() {
-
-    exit 1
 
     if [[ -z "${REVISION_STATE_FILE}" ]] ; then
         info "no old revision state file found"
@@ -116,6 +70,12 @@ actionCompare() {
 }
 
 
+## @fn      _createRevisionsTxtFile( $fileName )
+#  @brief   create the revisions.txt file 
+#  @details see actionCompare for more details
+#  @param   {fileName}    file name
+#  @param   <none>
+#  @return  <none>
 _createRevisionsTxtFile() {
 
     local newRevisionsFile=$1
@@ -143,6 +103,11 @@ _createRevisionsTxtFile() {
     return
 }
 
+## @fn      actionCheckout()
+#  @brief   action which is called by custom scm jenkins plugin to create or update a workspace and create the changelog
+#  @details the create workspace task is empty here. We just calculate the changelog
+#  @param   <none>
+#  @return  <none>
 actionCheckout() {
     # changelog handling
     # idea: the upstream project has the correct change log. We have to get it from them.
@@ -175,22 +140,22 @@ actionCheckout() {
         echo -n "<log/>" >"$CHANGELOG"
     fi
 
-
-     exit 0
+    exit 0
 }
 
+## @fn      actionCalculate()
+#  @brief   action ...
+#  @details «full description»
+#  @param   <none>
+#  @return  <none>
 actionCalculate() {
-
-    debug "creating revision state file ${REVISION_STATE_FILE}"
-    echo ${UPSTREAM_PROJECT}   >   "${REVISION_STATE_FILE}"
-    echo ${UPSTREAM_BUILD}     >>  "${REVISION_STATE_FILE}"
 
     # generate the new revsions file
     newRevisionsFile=$(createTempFile)
-    # _createRevisionsTxtFile ${newRevisionsFile}
+    _createRevisionsTxtFile ${newRevisionsFile}
 
-    # execute rsync -ae ssh ${newRevisionsFile} \
-    #             ${jenkinsMasterServerPath}/jobs/${JOB_NAME}/builds/${BUILD_NUMBER}/revisions.txt
+    execute rsync -ae ssh ${newRevisionsFile} \
+                    ${jenkinsMasterServerPath}/jobs/${JOB_NAME}/builds/${BUILD_NUMBER}/revisions.txt
 
     return 
 }

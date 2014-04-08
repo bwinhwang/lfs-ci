@@ -20,6 +20,29 @@ ci_job_package() {
 
     trace "workspace is ${workspace}"
 
+    _copyArtifactsToWorkspace
+
+    copyAddons
+    copyVersionFile
+    copyDocumentation
+    copyPlatform
+    copyArchs
+    copySysroot
+    copyFactoryZip
+
+    return 0
+}
+
+## @fn      _copyArtifactsToWorkspace()
+#  @brief   copy artifacts of all releated jenkins tasks of a build to the workspace
+#           based on the upstream job
+#  @details «full description»
+#  @param   <none>
+#  @return  <none>
+_copyArtifactsToWorkspace() {
+    local workspace=$(getWorkspaceName)
+    mustHaveWorkspaceName
+
     local jobName=""
     local file=""
 
@@ -47,43 +70,59 @@ ci_job_package() {
             exit 1
         fi
 
-        local artifactsPathOnMaster=${artifactesShare}/${jobName}/${buildNumber}/save/
+        _copyAndUntarArtifactOfJenkinsJobFromMasterToWorkspace ${jobName} ${buildNumber}
 
-        local files=$(runOnMaster ls ${artifactsPathOnMaster})
-        trace "artifacts files for ${jobName}#${buildNumber} on master: ${files}"
-
-        for file in ${files}
-        do
-            local base=$(basename ${file} .tar.gz)
-
-            if [[ -d ${workspace}/bld/${base} ]] ; then
-                trace "skipping ${file}, 'cause it's already transfered from another project"
-                continue
-            fi
-            info "copy artifact ${file} from job ${jobName}#${buildNumber} to workspace and untar it"
-
-            execute rsync --archive --verbose --rsh=ssh -P                      \
-                ${jenkinsMasterServerHostName}:${artifactsPathOnMaster}/${file} \
-                ${workspace}/bld/
-
-            debug "untar ${file} from job ${jobName}"
-            execute tar --directory ${workspace}/bld/ --extract --auto-compress --file ${workspace}/bld/${file}
-            execute rm -f ${file}
-        done
     done
-
-    copyAddons
-    copyVersionFile
-    copyDocumentation
-    copyPlatform
-    copyArchs
-    copySysroot
-    copyFactoryZip
-
-    return 0
 }
 
+## @fn      _copyAndUntarArtifactOfJenkinsJobFromMasterToWorkspace( $jobName, $buildName )
+#  @brief   copy and untar the build artifacts from a jenkins job from the master artifacts share 
+#           into the workspace
+#  @param   {jobName}       jenkins job name
+#  @param   {buildNumber}   jenkins buld number 
+#  @param   <none>
+#  @return  <none>
+_copyAndUntarArtifactFromMasterToWorkspace() {
+    local jobName=$1
+    local buildNumber=$2
+    local artifactsPathOnMaster=${artifactesShare}/${jobName}/${buildNumber}/save/
 
+    local files=$(runOnMaster ls ${artifactsPathOnMaster})
+
+    local workspace=$(getWorkspaceName)
+    mustHaveWorkspaceName
+
+    trace "artifacts files for ${jobName}#${buildNumber} on master: ${files}"
+    
+    for file in ${files}
+    do
+        local base=$(basename ${file} .tar.gz)
+
+        if [[ -d ${workspace}/bld/${base} ]] ; then
+            trace "skipping ${file}, 'cause it's already transfered from another project"
+            continue
+        fi
+        info "copy artifact ${file} from job ${jobName}#${buildNumber} to workspace and untar it"
+
+        execute rsync --archive --verbose --rsh=ssh -P                      \
+            ${jenkinsMasterServerHostName}:${artifactsPathOnMaster}/${file} \
+            ${workspace}/bld/
+
+        debug "untar ${file} from job ${jobName}"
+        execute tar --directory ${workspace}/bld/ \
+                    --extract                     \
+                    --auto-compress               \
+                    --file ${workspace}/bld/${file}
+        execute rm -f ${file}
+    done
+}
+
+## @fn      copyAddons()
+#  @brief   handle the addons, copy the addons from the results directory into the delivery structure
+#  @details function checks for bld-*psl-*/results/addons directory and copy the content into the
+#           regarding delivery directory
+#  @param   <none>
+#  @return  <none>
 copyAddons() {
 
     local workspace=$(getWorkspaceName)
@@ -94,7 +133,7 @@ copyAddons() {
         [[ -d ${bldDirectory}/results/addons ]] || continue
 
         local destinationsPlatform=$(getArchitectureFromDirectory ${bldDirectory})
-        mustHavePlatformFromDirectory ${bldDirectory} ${destinationsPlatform}
+        mustHaveArchitectureFromDirectory ${bldDirectory} ${destinationsPlatform}
 
         info "copy addons for ${destinationsPlatform}..."
 
@@ -102,13 +141,18 @@ copyAddons() {
         local dstDirectory=${workspace}/upload/addons/${destinationsPlatform}
 
         execute mkdir -p ${dstDirectory}
-        execute find ${srcDirectory}/ -type f -exec cp -av {} ${dstDirectory} \;
-
+        execute find ${srcDirectory}/ -type f \
+                    -exec cp -av {} ${dstDirectory} \;
     done
 
     return
 }
 
+## @fn      copyArchs()
+#  @brief   handle the archs directory
+#  @details «full description»
+#  @param   <none>
+#  @return  <none>
 copyArchs() {
     local workspace=$(getWorkspaceName)
     mustHaveWorkspaceName
@@ -133,6 +177,16 @@ copyArchs() {
     return
 }
 
+## @fn      copySysroot()
+#  @brief   handle the sysroot directory
+#  @details the method create the sysroot structure in the delivery directory.
+#           if there is a sysroot.tgz, it will be untarred. Also some additional links
+#           for ddal are created and ddal.pdf is copied
+#  @todo    TODO: demx2fk3 2014-04-07 this is maybe not fully implemented. the else path 
+#           of the if is not migrated from createBTS... I think, it's not executed any more
+#  @todo    TODO: demx2fk3 2014-04-07 verify links
+#  @param   <none>
+#  @return  <none>
 copySysroot() {
     local workspace=$(getWorkspaceName)
     mustHaveWorkspaceName
@@ -163,6 +217,7 @@ copySysroot() {
             # copy some other sysroo dirs
         if [[ ${bldDirectory}/results/rfs.init_sys-root.tar.gz ]] ; then
             debug "untar ${bldDirectory}/results/rfs.init_sys-root.tar.gz"
+            # TODO: demx2fk3 2014-04-07 expand the short parameter names
             execute tar -xzf ${bldDirectory}/results/rfs.init_sys-root.tar.gz -C ${dst}
         else
             error "missing rfs.init_sys-root.tar.gz, else path not implemented"
@@ -200,9 +255,14 @@ copySysroot() {
 
     done
 
-
+    return
 }
 
+## @fn      copyFactoryZip( «param» )
+#  @brief   create the factory.zip file out of platforms/fsm3_octeon2
+#  @warning side effect: change the current directory (and change it back!)
+#  @param   <none>
+#  @return  <none>
 copyFactoryZip() {
     local workspace=$(getWorkspaceName)
     mustHaveWorkspaceName
@@ -215,6 +275,11 @@ copyFactoryZip() {
     return
 }
 
+## @fn      copyPlatform(  )
+#  @brief   handle the platform directory in the delivery structure
+#  @details «full description»
+#  @param   <none>
+#  @return  <none>
 copyPlatform() {
     local workspace=$(getWorkspaceName)
     mustHaveWorkspaceName
@@ -223,25 +288,26 @@ copyPlatform() {
         [[ -d ${bldDirectory} ]] || continue
         [[ -d ${bldDirectory}/results ]] || continue
 
-        local destinationsPlatform=$(getPlatformFromDirectory ${bldDirectory})
-        mustHavePlatformFromDirectory ${bldDirectory} ${destinationsPlatform}
+        local architecture=$(getPlatformFromDirectory ${bldDirectory})
+        mustHavePlatformFromDirectory ${bldDirectory} ${architecture}
 
-        local dst=${workspace}/upload/platforms/${destinationsPlatform}
+        local dst=${workspace}/upload/platforms/${architecture}
         execute mkdir -p ${dst}
 
-        info "copy platform for ${destinationsPlatform}..."
+        info "copy platform for ${architecture}..."
 
+        # TODO: demx2fk3 2014-04-07 expand the short parameter names
         execute rsync -avr --exclude=addons --exclude=sys-root --exclude=rfs.init_sys-root.tar.gz ${bldDirectory}/results/. ${dst}
 
         debug "symlink addons"
-        execute ln -sf ../../addons/${destinationsPlatform} ${dst}/addons
+        execute ln -sf ../../addons/${architecture} ${dst}/addons
 
         debug "symlinks sys-root"
-        execute ln -sf ../../sys-root/${destinationsPlatform} ${dst}/sys-root
+        execute ln -sf ../../sys-root/${architecture} ${dst}/sys-root
 
-        debug "cleanup stuff in platform ${destinationsPlatform}"
+        debug "cleanup stuff in platform ${architecture}"
 
-        case ${destinationsPlatform} in
+        case ${architecture} in
             qemu)        : ;;  # no op
             fcmd | fspc) : ;;  # no op
             qemu_64)
@@ -276,6 +342,10 @@ copyPlatform() {
     return
 }
 
+## @fn      copyVersionFile()
+#  @brief   copy version control file into the delivery structure
+#  @param   <none>
+#  @return  <none>
 copyVersionFile() {
     local workspace=$(getWorkspaceName)
     mustHaveWorkspaceName
@@ -298,6 +368,10 @@ copyVersionFile() {
     return
 }
 
+## @fn      copyDocumentation()
+#  @brief   copy the documentation into the delivery structure
+#  @param   <none>
+#  @return  <none>
 copyDocumentation() {
     local workspace=$(getWorkspaceName)
     mustHaveWorkspaceName
@@ -312,6 +386,13 @@ copyDocumentation() {
     return
 }
 
+
+## @fn      getArchitectureFromDirectory( $dir )
+#  @brief   get the arcitecture from the bld directory
+#  @details maps e.g. fct to mips64-octeon2-linux-gnu
+#           see also mapping on config.sh
+#  @param   {directory}    a bld directory name
+#  @return  architecture
 getArchitectureFromDirectory() {
     local directory=$1
     baseName=$(basename ${directory})
@@ -320,6 +401,12 @@ getArchitectureFromDirectory() {
     return
 }
 
+## @fn      getPlatformFromDirectory( $dir )
+#  @brief   get the platform from the bld directory
+#  @details maps e.g. fct to fsm3_octeon2
+#           see also mapping in config.sh
+#  @param   {directory}    a bld directory name
+#  @return  platform
 getPlatformFromDirectory() {
     local directory=$1
     baseName=$(basename ${directory})
@@ -329,6 +416,28 @@ getPlatformFromDirectory() {
     return
 }
 
+## @fn      mustHaveArchitectureFromDirectory( $dir, $arch )
+#  @brief   ensure, that there is a architecture name
+#  @param   {dir}             the bld directory name
+#  @param   {architecture}    the architecture
+#  @return  <none>
+#  @return  1 if there is no archtecutre, 0 otherwise
+mustHaveArchitectureFromDirectory() {
+    local directory=$1
+    local architecture=$2
+    if [[ ! ${platform} ]] ; then
+        error "can not found map for platform ${directory}"
+        exit 1
+    fi
+    return
+}
+
+## @fn      mustHavePlatformFromDirectory( $dir, $arch )
+#  @brief   ensure, that there is a platform name
+#  @param   {dir}             the bld directory name
+#  @param   {architecture}    the platform
+#  @return  <none>
+#  @return  1 if there is no platform, 0 otherwise
 mustHavePlatformFromDirectory() {
     local directory=$1
     local platform=$2
