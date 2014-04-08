@@ -423,10 +423,10 @@ getPlatformFromDirectory() {
 #  @return  <none>
 #  @return  1 if there is no archtecutre, 0 otherwise
 mustHaveArchitectureFromDirectory() {
-    local directory=$1
+    local directory=$(basename $1)
     local architecture=$2
-    if [[ ! ${platform} ]] ; then
-        error "can not found map for platform ${directory}"
+    if [[ ! ${architecture} ]] ; then
+        error "can not found map for architecture ${directory}"
         exit 1
     fi
     return
@@ -439,7 +439,7 @@ mustHaveArchitectureFromDirectory() {
 #  @return  <none>
 #  @return  1 if there is no platform, 0 otherwise
 mustHavePlatformFromDirectory() {
-    local directory=$1
+    local directory=$(basename $1)
     local platform=$2
     if [[ ! ${platform} ]] ; then
         error "can not found map for platform ${directory}"
