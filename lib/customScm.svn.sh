@@ -71,9 +71,9 @@ _createRevisionsTxtFile() {
 
     # get the locations/<branch>/Dependencies
     dependenciesFileUrl=${lfsSourceRepos}/os/trunk/bldtools/locations-${locationName}/Dependencies
-    if ! svn ls ${dependenciesFileUrl} 2>/dev/null
+    if ! svn ls ${dependenciesFileUrl} >/dev/null 
     then
-        error "svn is not responding or ${dependenciesFileUrl}does not exist"
+        error "svn is not responding or ${dependenciesFileUrl} does not exist"
         exit 1
     fi
 
