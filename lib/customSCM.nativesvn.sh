@@ -51,8 +51,8 @@ actionCheckout() {
     cat < /dev/null > "${CHANGELOG}"
 
     svn info --xml $SVN_URL | /home/demx2fk3/xpath -q -e '//info/entry/commit/@revision' | cut -d'"' -f 2 >  ${REVISION_STATE_FILE}
+    oldRevisions=$(( oldRevisions + 1 ))
     local oldRevisions=$(cat ${OLD_REVISION_STATE_FILE})
-    local newRevisions=$(cat ${REVISION_STATE_FILE})
 
     svn log -v --xml -r${oldRevisions}:${newRevisions} ${SVN_URL} > ${CHANGELOG}
 
