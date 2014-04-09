@@ -50,17 +50,16 @@ actionCheckout() {
     # create a new changelog file
     cat < /dev/null > "${CHANGELOG}"
 
+    svn info --xml $SVN_URL | /home/demx2fk3/xpath -q -e '//info/entry/commit/@revision' | cut -d'"' -f 2 >  ${REVISION_STATE_FILE}
     local oldRevisions=$(cat ${OLD_REVISION_STATE_FILE})
     local newRevisions=$(cat ${REVISION_STATE_FILE})
 
-    svn log -v --xml -r${oldRevisions}:${newRevisions} ${SVN_URL} < ${CHANGELOG}
+    svn log -v --xml -r${oldRevisions}:${newRevisions} ${SVN_URL} > ${CHANGELOG}
 
     # Fix empty changelogs:
     if [ ! -s "$CHANGELOG" ] ; then
         echo -n "<log/>" >"$CHANGELOG"
     fi
-
-    exit 0
 }
 
 ## @fn      actionCalculate()
