@@ -24,6 +24,7 @@ source ${LFS_CI_ROOT}/lib/customSCM.common.sh
 fileBaseName=$(basename $0)
 
 case "${fileBaseName}" in 
+    customSCM.sh)           source ${LFS_CI_ROOT}/lib/customSCM.upstream.sh  ;;
     customSCM.svn.sh)       source ${LFS_CI_ROOT}/lib/customSCM.svn.sh       ;;
     customSCM.upstream.sh)  source ${LFS_CI_ROOT}/lib/customSCM.upstream.sh  ;;
     customSCM.nativesvn.sh) source ${LFS_CI_ROOT}/lib/customSCM.nativesvn.sh ;;
