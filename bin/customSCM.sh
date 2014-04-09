@@ -45,13 +45,13 @@ info "===== action = ${action} ====="
 # dumpCustomScmEnvironmentVariables
 
 if [[ ${action} == compare ]] ; then
-set -x
     actionCompare
-set +x
 fi
 
 if [[ ${action} == checkout ]] ; then
+set -x
     actionCheckout
+set +x
 fi
 
 if [[ ${action} == calculate ]] ; then
