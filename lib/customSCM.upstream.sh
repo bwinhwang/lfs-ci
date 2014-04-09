@@ -71,7 +71,20 @@ actionCheckout() {
         # single "<log/>" entry will break the concatenation:
 
         # TODO: demx2fk3 2014-04-07 use configuration for this
-        ssh ${jenkinsMasterServerHostName} "test -f ${buildDirectory}/changelog.xml && grep -q logentry ${buildDirectory}/changelog.xml && cat ${buildDirectory}/changelog.xml" >> ${CHANGELOG}
+        local tmpChangeLogFile=$(createTempFile)
+        ssh ${jenkinsMasterServerHostName} "test -f ${buildDirectory}/changelog.xml && grep -q logentry ${buildDirectory}/changelog.xml && cat ${buildDirectory}/changelog.xml" > ${tmpChangeLogFile}
+        if [[ ! -s ${CHANGELOG} ]] ; then
+            debug "copy ${tmpChangeLogFile} to ${CHANGELOG}"
+            execute cp -f ${tmpChangeLogFile} ${CHANGELOG}
+        else
+            debug "using xsltproc to create new ${CHANGELOG}"
+            local tmpChangeLogFile=$(createTempFile)
+            execute xsltproc                                          \
+                        --stringparam file ${tmpChangeLogFile}        \
+                        --output ${CHANGELOG}                         \
+                        ${LFS_CI_ROOT}/lib/contrib/joinChangelog.xslt \
+                        ${CHANGELOG}  
+        fi
         build=$(( build - 1 ))
     done
 
