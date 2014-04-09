@@ -69,6 +69,7 @@ actionCheckout() {
         buildDirectory=/var/fpwork/demx2fk3/lfs-jenkins/home/jobs/${UPSTREAM_PROJECT}/builds/${build}
         # we must only concatenate non-empty logs; empty logs with a
         # single "<log/>" entry will break the concatenation:
+        debug "checking ${UPSTREAM_PROJECT} / ${build}"
 
         # TODO: demx2fk3 2014-04-07 use configuration for this
         local tmpChangeLogFile=$(createTempFile)
@@ -78,19 +79,16 @@ actionCheckout() {
             execute cp -f ${tmpChangeLogFile} ${CHANGELOG}
         else
             debug "using xsltproc to create new ${CHANGELOG}"
-            local tmpChangeLogFile=$(createTempFile)
+            local newTmpChangeLogFile=$(createTempFile)
             execute xsltproc                                          \
                         --stringparam file ${tmpChangeLogFile}        \
                         --output ${CHANGELOG}                         \
                         ${LFS_CI_ROOT}/lib/contrib/joinChangelog.xslt \
                         ${CHANGELOG}  
         fi
+
         build=$(( build - 1 ))
     done
-
-    # Remove inter-log cruft arising from the concatenation of individual
-    # changelogs:
-    sed -i 's:</log><?xml[^>]*><log>::g' "$CHANGELOG"
 
     # Fix empty changelogs:
     if [ ! -s "$CHANGELOG" ] ; then
