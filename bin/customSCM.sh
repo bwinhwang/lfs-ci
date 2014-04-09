@@ -50,9 +50,7 @@ if [[ ${action} == compare ]] ; then
 fi
 
 if [[ ${action} == checkout ]] ; then
-set -x
     actionCheckout
-set +x
 fi
 
 if [[ ${action} == calculate ]] ; then
