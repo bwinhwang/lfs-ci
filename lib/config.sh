@@ -37,6 +37,14 @@ lfsCiBuildsShare=/build/home/${USER}/ci_builds
 
 linseeUlmServer=ulling04.emea.nsn-net.net
 
+sshWithParameters="ssh -o BatchMode=yes \
+                       -o StrictHostKeyChecking=no \
+                       -o PasswordAuthentication=no \
+                       -o ChallengeResponseAuthentication=no \
+                       -o ForwardX11=no \
+                       -o ForwardX11Trusted=no \
+                       -o UserKnownHostsFile=/dev/null "
+
 declare -A sitesBuildShareMap=(  ["Ulm"]="ulling01:/build/home/${USER}/lfs/"                  \
                                 ["Oulu"]="ouling04.emea.nsn-net.net:/build/home/${USER}/lfs/" \
                               )
