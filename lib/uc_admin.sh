@@ -15,6 +15,7 @@ ci_job_admin() {
         ;;
     esac
 
+    return
 }
 
 cleanUpArtifactsShare() {
@@ -22,12 +23,19 @@ cleanUpArtifactsShare() {
     local listOfJobsWithArtifacts=$(ls ${artifactesShare})
 
     for job in ${listOfJobsWithArtifacts} ; do
-        info "cleanup artifacts from ${job}"
-        for build in ${artifactesShare}/${job} ; do
-            [[ -e ${jenkinsMasterServerPath}/${job}/builds/${build} ]] && continue
-            info "cleanup ${job} / ${build}"
+        info "cleanup artifacts for ${job}"
+        for build in ${artifactesShare}/${job}/* ; do
+            [[ -e ${build} ]] || continue
+            build=$(basename ${build})
+            if [[ -e ${jenkinsMasterServerPath}/jobs/${job}/builds/${build} ]] ; then
+                info "keep ${job} / ${build}"
+            else
+                info "cleanup ${job} / ${build}"
+                execute rm -rf ${artifactesShare}/${job}/${build}/
+            fi
         done
 
     done
 
+    return
 }
