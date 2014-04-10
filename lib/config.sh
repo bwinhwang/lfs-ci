@@ -35,6 +35,10 @@ lfsSourceReposTrunk=${lfsSourceRepos}/os/trunk/
 lfsDeliveryShare=/build/home/${USER}/delivery
 lfsCiBuildsShare=/build/home/${USER}/ci_builds
 
+declare -A sitesBuildShareMap(     ["Ulm"]="ulling01:/build/home/${USER}/lfs/" \
+                                  ["Oulu"]="ouling04.emea.nsn-net.net:/build/home/${USER}/lfs/" \
+                             )
+
     declare -A platformMap=(         ["fct"]="fsm3_octeon2" \
                                ["qemu_i386"]="qemu"         \
                              ["qemu_x86_64"]="qemu_64"      \
