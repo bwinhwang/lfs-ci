@@ -30,7 +30,28 @@ ci_job_package() {
     copySysroot
     copyFactoryZip
 
+    copyReleaseCandidateToShare
+
     return 0
+}
+
+copyReleaseCandidateToShare() {
+    local workspace=$(getWorkspaceName)
+    mustHaveWorkspaceName
+
+    local label=$(getNextReleaseLabel)
+
+    executeOnMaster mkdir -p ${lfsCiBuildsShare}/data/${label}/os/
+    execute rsync -avrPe ssh ${workspace}/upload/* ${jenkinsMasterServerHostName}:${lfsCiBuildsShare}/data/${label}/os/
+    # TODO: demx2fk3 2014-04-10 link sdks
+    executeOnMaster ln -sf ${lfsCiBuildsShare}/data/${label} ${lfsCiBuildsShare}/${label}
+    executeOnMaster ln -sf ${lfsCiBuildsShare}/data/${label} ${lfsCiBuildsShare}/trunk@${BUILD_NUMBER}
+
+    return
+}
+
+getNextReleaseLabel() {
+    echo BM_LFS_REL_OS_$(date +%Y_%m)_${BUILD_NUMBER)
 }
 
 ## @fn      _copyArtifactsToWorkspace()
