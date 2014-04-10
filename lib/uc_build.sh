@@ -172,7 +172,7 @@ _createArtifactArchive() {
         [[ -d "${dir}" && ! -L "${dir}" ]] || continue
         info "creating artifact archive for ${dir}"
         execute tar --create --auto-compress --file "${dir}.tar.gz" "${dir}"
-        execute rsync --archive --verbose --rsh=${sshWithParameters} -P     \
+        execute rsync --archive --verbose --rsh="${sshWithParameters}" -P     \
             "${dir}.tar.gz"                                \
             ${linseeUlmServer}:${artifactsPathOnShare}/save
     done
@@ -239,7 +239,7 @@ mustHaveBuildArtifactsFromUpstream() {
     if [[ -d ${artifactesShare}/${UPSTREAM_PROJECT}/${UPSTREAM_BUILD}/save/ ]] ; then
         info "copy artifacts of ${UPSTREAM_PROJECT} #${UPSTREAM_BUILD} from master"
         execute mkdir -p ${workspace}/bld/
-        execute rsync --archive --verbose -P --rsh=${sshWithParameters}                        \
+        execute rsync --archive --verbose -P --rsh="${sshWithParameters}"                      \
             ${linseeUlmServer}:${artifactesShare}/${UPSTREAM_PROJECT}/${UPSTREAM_BUILD}/save/. \
             ${workspace}/bld/.
 
@@ -316,7 +316,7 @@ synchroniceToLocalPath() {
             execute touch ${progressFile}
 
             execute rsync --archive --numeric-ids --delete-excluded --ignore-errors \
-                --hard-links --sparse --exclude=.svn --rsh=${sshWithParameters}     \
+                --hard-links --sparse --exclude=.svn --rsh="${sshWithParameters}"   \
                 ${linseeUlmServer}:${remotePath}/                                   \
                 ${localCacheDir}/data/${tag}/
 
