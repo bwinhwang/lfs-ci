@@ -172,9 +172,9 @@ _createArtifactArchive() {
         [[ -d "${dir}" && ! -L "${dir}" ]] || continue
         info "creating artifact archive for ${dir}"
         execute tar --create --auto-compress --file "${dir}.tar.gz" "${dir}"
-        execute rsync --archive --verbose --rsh=ssh -P                  \
-            "${dir}.tar.gz"                                             \
-            ${jenkinsMasterServerHostName}:${artifactsPathOnShare}/save
+        execute rsync --archive --verbose --rsh=ssh -P     \
+            "${dir}.tar.gz"                                \
+            ${linseeUlmServer}:${artifactsPathOnShare}/save
     done
 
     return 0
@@ -239,8 +239,8 @@ mustHaveBuildArtifactsFromUpstream() {
     if [[ -d ${artifactesShare}/${UPSTREAM_PROJECT}/${UPSTREAM_BUILD}/save/ ]] ; then
         info "copy artifacts of ${UPSTREAM_PROJECT} #${UPSTREAM_BUILD} from master"
         execute mkdir -p ${workspace}/bld/
-        execute rsync --archive --verbose -P --rsh=ssh                                                     \
-            ${jenkinsMasterServerHostName}:${artifactesShare}/${UPSTREAM_PROJECT}/${UPSTREAM_BUILD}/save/. \
+        execute rsync --archive --verbose -P --rsh=ssh                                         \
+            ${linseeUlmServer}:${artifactesShare}/${UPSTREAM_PROJECT}/${UPSTREAM_BUILD}/save/. \
             ${workspace}/bld/.
 
         for file in ${workspace}/bld/*.tar.{gz,xz,bz2}
@@ -317,7 +317,7 @@ synchroniceToLocalPath() {
 
             execute rsync --archive --numeric-ids --delete-excluded --ignore-errors \
                 --hard-links --sparse --exclude=.svn --rsh=ssh                      \
-                ${jenkinsMasterServerHostName}:${remotePath}/                       \
+                ${linseeUlmServer}:${remotePath}/                                   \
                 ${localCacheDir}/data/${tag}/
 
             execute ln -sf data/${tag} ${localCacheDir}/${tag}

@@ -36,21 +36,24 @@ ci_job_package() {
 }
 
 copyReleaseCandidateToShare() {
-    local workspace=$(getWorkspaceName)
-    mustHaveWorkspaceName
 
-    local label=$(getNextReleaseLabel)
-    
+# TODO: demx2fk3 2014-04-10 not working yet...
 
-    executeOnMaster tar cvf transfer.tar -C ${workspace}/upload .
-    executeOnMaster mkdir -p ${lfsCiBuildsShare}/data/${label}/os/
-    # execute rsync -avrPe ssh ${workspace}/upload/* ${jenkinsMasterServerHostName}:${lfsCiBuildsShare}/data/${label}/os/
-    execute rsync -avrPe ssh transfer.tar  ${jenkinsMasterServerHostName}:${lfsCiBuildsShare}/data/${label}/os/
-    executeOnMaster tar xvf -C ${lfsCiBuildsShare}/data/${label}/os/ ${lfsCiBuildsShare}/data/${label}/os/transfer.tar
-
-    # TODO: demx2fk3 2014-04-10 link sdks
-    executeOnMaster ln -sf ${lfsCiBuildsShare}/data/${label} ${lfsCiBuildsShare}/${label}
-    executeOnMaster ln -sf ${lfsCiBuildsShare}/data/${label} ${lfsCiBuildsShare}/trunk@${BUILD_NUMBER}
+#     local workspace=$(getWorkspaceName)
+#     mustHaveWorkspaceName
+# 
+#     local label=$(getNextReleaseLabel)
+#     
+# 
+#     executeOnMaster tar cvf transfer.tar -C ${workspace}/upload .
+#     executeOnMaster mkdir -p ${lfsCiBuildsShare}/data/${label}/os/
+#     # execute rsync -avrPe ssh ${workspace}/upload/* ${jenkinsMasterServerHostName}:${lfsCiBuildsShare}/data/${label}/os/
+#     execute rsync -avrPe ssh transfer.tar ${linseeUlmServer}:${lfsCiBuildsShare}/data/${label}/os/
+#     executeOnMaster tar xvf -C ${lfsCiBuildsShare}/data/${label}/os/ ${lfsCiBuildsShare}/data/${label}/os/transfer.tar
+# 
+#     # TODO: demx2fk3 2014-04-10 link sdks
+#     executeOnMaster ln -sf ${lfsCiBuildsShare}/data/${label} ${lfsCiBuildsShare}/${label}
+#     executeOnMaster ln -sf ${lfsCiBuildsShare}/data/${label} ${lfsCiBuildsShare}/trunk@${BUILD_NUMBER}
 
     return
 }
@@ -130,8 +133,8 @@ _copyAndUntarArtifactOfJenkinsJobFromMasterToWorkspace() {
         fi
         info "copy artifact ${file} from job ${jobName}#${buildNumber} to workspace and untar it"
 
-        execute rsync --archive --verbose --rsh=ssh -P                      \
-            ${jenkinsMasterServerHostName}:${artifactsPathOnMaster}/${file} \
+        execute rsync --archive --verbose --rsh=ssh -P          \
+            ${linseeUlmServer}:${artifactsPathOnMaster}/${file} \
             ${workspace}/bld/
 
         debug "untar ${file} from job ${jobName}"
