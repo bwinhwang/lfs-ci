@@ -24,10 +24,10 @@ jenkinsMasterServerHttpPort=1280
 jenkinsMasterServerHttpsPort=12443
 
 # the http (unsecure) url of the jenkins master webinterface
-jenkinsMasterServerHttpUrl=http://${jenkinsMasterServerHostName}:${jenkinsMasterServerPort}/
+jenkinsMasterServerHttpUrl=http://${jenkinsMasterServerHostName}:${jenkinsMasterServerHttpPort}/
 
 # the https (secure) url of the jenkins master webinterface
-jenkinsMasterServerHttpsUrl=http://${jenkinsMasterServerHostName}:${jenkinsMasterServerPort}/
+jenkinsMasterServerHttpsUrl=http://${jenkinsMasterServerHostName}:${jenkinsMasterServerHttpsPort}/
 
 # home directory of the jenkins master server installation
 # (only valid on the master server)
