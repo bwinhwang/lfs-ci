@@ -283,3 +283,14 @@ initTempDirectory() {
 initTempDirectory
 exit_add cleanupTempFiles
 
+
+requiredParameters() {
+    local parameterNames=$@
+    for name in ${parameterNames} ; do
+        if [[ ! ${!name} ]] ; then
+            error "required parameter ${name} is missing"
+            exit 1
+        fi
+    done
+}
+
