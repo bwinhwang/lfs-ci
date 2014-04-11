@@ -4,6 +4,16 @@
 # stuff in here.
 # it must be also valid for all slaves and the master
 
+java=/usr/lib/jvm/jre-1.6.0-openjdk.x86_64/bin/java
+
+jenkinsVersion=1.532.2
+
+jenkinsWarFile=${LFS_CI_ROOT}/lib/java/jenkins/jenkins-${JENKINS_VERSION}.war
+jenkinsRoot=/var/fpwork/${USER}/lfs-jenkins
+
+jenkinsMasterSslCertificate=${LFS_CI_ROOT}/etc/lfs-ci.emea.nsn-net.net.crt
+jenkinsMasterSslPrivateKey=${LFS_CI_ROOT}/etc/lfs-ci.emea.nsn-net.net.key
+
 # hostname (fqdn) of the jenkins master server
 jenkinsMasterServerHostName=maxi.emea.nsn-net.net
 
@@ -22,6 +32,8 @@ jenkinsMasterServerHttpsUrl=http://${jenkinsMasterServerHostName}:${jenkinsMaste
 # home directory of the jenkins master server installation
 # (only valid on the master server)
 jenkinsMasterServerPath=/var/fpwork/${USER}/lfs-jenkins/home/
+
+jenkinsCli=${jenkinsMasterServerPath}/war/WEB-INF/jenkins-cli.jar
 
 # path to the share, where the build artifacts are located
 # (location for ulm, not valid for other sites)

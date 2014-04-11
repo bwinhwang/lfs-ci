@@ -23,15 +23,15 @@ cleanUpArtifactsShare() {
     local listOfJobsWithArtifacts=$(ls ${artifactesShare})
 
     for job in ${listOfJobsWithArtifacts} ; do
-        info "cleanup artifacts for ${job}"
+        info "cleanup artifacts of ${job}"
         for build in ${artifactesShare}/${job}/* ; do
             [[ -e ${build} ]] || continue
             build=$(basename ${build})
-            if [[ -e ${jenkinsMasterServerPath}/jobs/${job}/builds/${build} ]] ; then
-                info "keep ${job} / ${build}"
-            else
-                info "cleanup ${job} / ${build}"
+            if [[ ! -e ${jenkinsMasterServerPath}/jobs/${job}/builds/${build} ]] ; then
+                info "removing artifacts of ${job} / ${build}"
                 execute rm -rf ${artifactesShare}/${job}/${build}/
+            else
+                trace "keep ${job} / ${build}"
             fi
         done
 

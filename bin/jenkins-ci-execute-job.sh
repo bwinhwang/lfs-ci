@@ -54,6 +54,10 @@ case "${JOB_NAME}" in
         source ${LFS_CI_ROOT}/lib/uc_admin.sh
         ci_job_admin   || exit 1 
     ;;
+    LFS_CI_*_Admin_*)
+        source ${LFS_CI_ROOT}/lib/uc_release.sh
+        ci_job_release   || exit 1 
+    ;;
     *)
 
         # legacy call for the old scripting...

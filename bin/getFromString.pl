@@ -28,7 +28,7 @@ my $splitRE       = qr / _-_ /x;
 
 my $regex1 = qr /
                     ^
-                    LFS
+                    (Admin | LFS)
                     _
                     ( CI | Prod )
                     $splitRE
@@ -44,15 +44,17 @@ my $regex1 = qr /
 
 my $regex2 = qr /
                     ^
-                    LFS
+                    (Admin | LFS)
                     _
                     ( CI | Prod )
                     $splitRE
                     $locationRE           # location aka branch 
                     $splitRE
-                    $taskNameRE           # task name (Build)
+                    $taskNameRE           # task name (Build | Package | Testing )
                     $
                /x;
+
+
 
 if( $string =~ m/$regex1/x or
     $string =~ m/$regex2/x    ) {
