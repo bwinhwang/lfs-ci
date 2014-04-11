@@ -55,7 +55,7 @@ case "${JOB_NAME}" in
         source ${LFS_CI_ROOT}/lib/uc_admin.sh
         ci_job_admin   || exit 1 
     ;;
-    LFS_Prod_*_Releasing)
+    LFS_Prod_*_Releasing_*)
         source ${LFS_CI_ROOT}/lib/uc_release.sh
         ci_job_release   || exit 1 
     ;;
