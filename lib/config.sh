@@ -33,7 +33,7 @@ jenkinsMasterServerHttpsUrl=http://${jenkinsMasterServerHostName}:${jenkinsMaste
 # (only valid on the master server)
 jenkinsMasterServerPath=/var/fpwork/${USER}/lfs-jenkins/home/
 
-jenkinsCli=${jenkinsMasterServerPath}/war/WEB-INF/jenkins-cli.jar
+jenkinsCli=${LFS_CI_ROOT}/lib/java/jenkins/jenkins-cli-${jenkinsVersion}.jar
 
 # path to the share, where the build artifacts are located
 # (location for ulm, not valid for other sites)

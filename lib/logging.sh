@@ -82,6 +82,8 @@ info() {
 #  @return  <none>
 error() {
     message "ERROR" "$@"
+    if [[ ${JOB_NAME} ]] ; then
+    setBuildDescription "${JOB_NAME}" "${BUILD_NUMBER}" "$@"
     _stackTrace
 }
 
