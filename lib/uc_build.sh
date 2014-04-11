@@ -168,7 +168,9 @@ _createArtifactArchive() {
     executeOnMaster mkdir -p  ${artifactsPathOnShare}/save
     executeOnMaster ln    -sf ${artifactsPathOnShare}      ${artifactsPathOnMaster}
 
-    for dir in bld-*{psl,rfs,ddal}-* ; do
+    local srcDirectory=$(getConfig "subsystem" | sed "s/src-//" )
+
+    for dir in bld-*${srcDirectory}-* ; do
         [[ -d "${dir}" && ! -L "${dir}" ]] || continue
         info "creating artifact archive for ${dir}"
         execute tar --create --auto-compress --file "${dir}.tar.gz" "${dir}"
