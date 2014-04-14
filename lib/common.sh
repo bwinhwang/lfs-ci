@@ -276,6 +276,10 @@ cleanupTempFiles() {
     [[ -d ${LFS_CI_TEMPDIR} ]] && rm -rf ${LFS_CI_TEMPDIR}
 }
 
+## @fn      initTempDirectory()
+#  @brief   initialize the use for temp directory
+#  @param   <none>
+#  @return  <none>
 initTempDirectory() {
     export LFS_CI_TEMPDIR=$(mktemp -d /tmp/jenkins.${USER}.${JOB_NAME:-unknown}.$$.XXXXXXXXX)
 }
@@ -283,7 +287,11 @@ initTempDirectory() {
 initTempDirectory
 exit_add cleanupTempFiles
 
-
+## @fn      requiredParameters( list of variables )
+#  @brief   checks, if the given lists of variables names are set and have some valid values
+#  @param   list of variable names
+#  @return  <none>
+#  @throws  raise an error, if there is a variable is not set or has no value
 requiredParameters() {
     local parameterNames=$@
     for name in ${parameterNames} ; do
@@ -292,5 +300,7 @@ requiredParameters() {
             exit 1
         fi
     done
+
+    return
 }
 

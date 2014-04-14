@@ -169,8 +169,6 @@ actionCheckout() {
 #  @param   <none>
 #  @return  <none>
 actionCalculate() {
-
-
     return 
 }
 

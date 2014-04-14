@@ -46,6 +46,10 @@ executeOnMaster() {
     return
 }
 
+## @fn      runOnMaster( command )
+#  @brief   ron a command on the master server and show the results.
+#  @param   {command}    command string
+#  @return  exit code of the command
 runOnMaster() {
     local command=$@
     trace "running command on server: ssh ${jenkinsMasterServerHostName} ${command}"
@@ -53,9 +57,12 @@ runOnMaster() {
     return $?
 }
 
+## @fn      showAllEnvironmentVariables()
+#  @brief   show all environment variables, which are available at the moment
+#  @param   <none>
+#  @return  <none>
 showAllEnvironmentVariables() {
     execute printenv        
-
     return
 }
 
