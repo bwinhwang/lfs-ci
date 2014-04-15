@@ -79,6 +79,10 @@ getLocationName() {
     return
 }
 
+getBranchName() {
+    getLocationName
+}
+
 ## @fn      mustHaveLocationName()
 #  @brief   ensure, that there is a location name (aka branch)
 #  @param   <none>

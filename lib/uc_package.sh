@@ -39,12 +39,24 @@ copyReleaseCandidateToShare() {
 
 # TODO: demx2fk3 2014-04-10 not working yet...
 
-#     local workspace=$(getWorkspaceName)
-#     mustHaveWorkspaceName
-# 
-#     local label=$(getNextReleaseLabel)
-#     
-# 
+    local workspace=$(getWorkspaceName)
+    mustHaveWorkspaceName
+ 
+    local label=$(getNextReleaseLabel)
+    local branch=$(getBranchName)
+
+    local localDirectory=${workspace}/upload
+    local remoteDirectory=${lfsCiBuildsShare}/${branch}/data/${label}/os
+    local oldRemoteDirectory=${lfsCiBuildsShare}/${branch}/$(ls ${lfsCiBuildsShare}/${branch} | tail -n 1 )
+    local hardlink=""
+
+    execute mkdir -p ${remoteDirectory}
+
+    if [[ -d ${oldRemoteDirectory} ]] ; then
+        hardlink="--link-dest=${oldRemoteDirectory}"
+    fi
+    execute rsync -av --delete ${hardlink} ${localDirectory}/. ${remoteDirectory}
+
 #     executeOnMaster tar cvf transfer.tar -C ${workspace}/upload .
 #     executeOnMaster mkdir -p ${lfsCiBuildsShare}/data/${label}/os/
 #     # execute rsync -avrPe ssh ${workspace}/upload/* ${jenkinsMasterServerHostName}:${lfsCiBuildsShare}/data/${label}/os/
