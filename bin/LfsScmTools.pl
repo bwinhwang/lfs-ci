@@ -922,24 +922,21 @@ sub readBuildXml {
 #       </causes>
 
     my $xml  = XMLin( $file, ForceArray => 1 );
-    my @upstream = @{ $xml->{actions}->[0]->{'hudson.model.CauseAction'}->[0] || [] }
+    my @upstream = @{ $xml->{actions}->[0]->{'hudson.model.CauseAction'}->[0] || [] };
 
     my @results;
-    push @results, sprintf( "%s:%s", $build->{upstreamProject}->[0],
-                                     $build->{upstreamBuild}->[0],   );
+    push @results, sprintf( "%s:%s", $upstream[0]->{upstreamProject}->[0],
+                                     $upstream[0]->{upstreamBuild}->[0],   );
 
     while ( exists $upstream[0]->{upstreamCauses} and
             exists $upstream[0]->{upstreamCauses}->[0]->{'hudson.model.Cause_-UpstreamCause'} ) {
 
-            exists $upstream[0]->{upstreamCauses}->[0]->{'hudson.model.Cause_-UpstreamCause'} ) {
-
-        push @results, sprintf( "%s:%s", $build->{upstreamProject}->[0],
-                                         $build->{upstreamBuild}->[0],   );
-        $upstream = $upstream[0]->{upstreamCauses}->[0]->{'hudson.model.Cause_-UpstreamCause'};
+        push @results, sprintf( "%s:%s", $upstream[0]->{upstreamProject}->[0],
+                                         $upstream[0]->{upstreamBuild}->[0],   );
+        @upstream = @{ $upstream[0]->{upstreamCauses}->[0]->{'hudson.model.Cause_-UpstreamCause'} };
     }
 
     return @results;
-
 }
 
 sub prepare { 
