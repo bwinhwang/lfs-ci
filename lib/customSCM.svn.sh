@@ -136,6 +136,8 @@ actionCheckout() {
                 exit 1
             fi
 
+            cat ${tmpChangeLogFile}
+
             if [[ ! -s ${CHANGELOG} ]] ; then
                 debug "copy ${tmpChangeLogFile} to ${CHANGELOG}"
                 execute cp -f ${tmpChangeLogFile} ${CHANGELOG}
@@ -148,6 +150,7 @@ actionCheckout() {
                             ${LFS_CI_ROOT}/lib/contrib/joinChangelog.xslt \
                             ${CHANGELOG}  
             fi
+            cat ${CHANGELOG}
         fi
     done
 
