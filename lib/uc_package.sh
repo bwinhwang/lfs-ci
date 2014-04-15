@@ -47,7 +47,7 @@ copyReleaseCandidateToShare() {
 
     local localDirectory=${workspace}/upload
     local remoteDirectory=${lfsCiBuildsShare}/${branch}/data/${label}/os
-    local oldRemoteDirectory=${lfsCiBuildsShare}/${branch}/$(ls ${lfsCiBuildsShare}/${branch} | tail -n 1 )
+    local oldRemoteDirectory=${lfsCiBuildsShare}/${branch}/data/$(ls ${lfsCiBuildsShare}/${branch} | tail -n 1 )
     local hardlink=""
 
     info "copy build results to ${remoteDirectory}"
@@ -65,9 +65,9 @@ copyReleaseCandidateToShare() {
 #     execute rsync -avrPe ssh transfer.tar ${linseeUlmServer}:${lfsCiBuildsShare}/data/${label}/os/
 #     executeOnMaster tar xvf -C ${lfsCiBuildsShare}/data/${label}/os/ ${lfsCiBuildsShare}/data/${label}/os/transfer.tar
 # 
-#     # TODO: demx2fk3 2014-04-10 link sdks
-#     executeOnMaster ln -sf ${lfsCiBuildsShare}/data/${label} ${lfsCiBuildsShare}/${label}
-#     executeOnMaster ln -sf ${lfsCiBuildsShare}/data/${label} ${lfsCiBuildsShare}/trunk@${BUILD_NUMBER}
+    # TODO: demx2fk3 2014-04-10 link sdks
+    executeOnMaster ln -sf ${lfsCiBuildsShare}/${branch}/data/${label} ${lfsCiBuildsShare}/${branch}/${label}
+    executeOnMaster ln -sf ${lfsCiBuildsShare}/${branch}/data/${label} ${lfsCiBuildsShare}/${branch}/trunk@${BUILD_NUMBER}
 
     return
 }
