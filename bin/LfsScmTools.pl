@@ -891,6 +891,87 @@ sub execute {
 }
 
 # ------------------------------------------------------------------------------------------------------------------
+package Command::GetUpStreamProject;
+use strict;
+use warnings;
+
+use parent qw( -norequire Object );
+use XML::Simple;
+use Getopt::Std;
+
+sub readBuildXml {
+    my $self  = shift;
+    my $param = { @_ };
+    my $file  = $param->{file};
+
+#         <hudson.model.Cause_-UpstreamCause>
+#           <upstreamProject>LFS_CI_-_trunk_-_Package_-_package</upstreamProject>
+#           <upstreamUrl>job/LFS_CI_-_trunk_-_Package_-_package/</upstreamUrl>
+#           <upstreamBuild>159</upstreamBuild>
+#           <upstreamCauses>
+#             <hudson.model.Cause_-UpstreamCause>
+#               <upstreamProject>LFS_CI_-_trunk_-_Build</upstreamProject>
+#               <upstreamUrl>job/LFS_CI_-_trunk_-_Build/</upstreamUrl>
+#               <upstreamBuild>473</upstreamBuild>
+#               <upstreamCauses>
+#                 <hudson.triggers.SCMTrigger_-SCMTriggerCause/>
+#               </upstreamCauses>
+#             </hudson.model.Cause_-UpstreamCause>
+#           </upstreamCauses>
+#         </hudson.model.Cause_-UpstreamCause>
+#       </causes>
+
+    my $xml  = XMLin( $file, ForceArray => 1 );
+    my @upstream = @{ $xml->{actions}->[0]->{'hudson.model.CauseAction'}->[0] || [] }
+
+    my @results;
+    push @results, sprintf( "%s:%s", $build->{upstreamProject}->[0],
+                                     $build->{upstreamBuild}->[0],   );
+
+    while ( exists $upstream[0]->{upstreamCauses} and
+            exists $upstream[0]->{upstreamCauses}->[0]->{'hudson.model.Cause_-UpstreamCause'} ) {
+
+            exists $upstream[0]->{upstreamCauses}->[0]->{'hudson.model.Cause_-UpstreamCause'} ) {
+
+        push @results, sprintf( "%s:%s", $build->{upstreamProject}->[0],
+                                         $build->{upstreamBuild}->[0],   );
+        $upstream = $upstream[0]->{upstreamCauses}->[0]->{'hudson.model.Cause_-UpstreamCause'};
+    }
+
+    return @results;
+
+}
+
+sub prepare { 
+    my $self = shift;
+    my @args = @_;
+
+    getopts( "j:b:h:", \my %opts );
+    $self->{jobName} = $opts{j} || die "no job name";
+    $self->{build}   = $opts{b} || die "no build number";
+    $self->{home}    = $opts{h} || die "no home";
+
+    return; 
+}
+
+sub execute {
+    my $self = shift;
+
+    my $file = sprintf( "%s/jobs/%s/builds/%s/build.xml",
+                        $self->{home},
+                        $self->{jobName},
+                        $self->{build},
+                      );
+
+    my @results = $self->readBuildXml( file => $file );
+
+    foreach my $line ( @results ) {
+        printf( "%s\n", $line );
+    }
+
+    return;
+}
+# ------------------------------------------------------------------------------------------------------------------
 package Command::GetDownStreamProjects;
 use strict;
 use warnings;
@@ -1111,6 +1192,8 @@ if( $program eq "getDependencies" ) {
     $command = Command::GetDependencies->new();
 } elsif ( $program eq "sortBuildsFromDependencies" ) {
     $command = Command::SortBuildsFromDependencies->new();
+} elsif ( $program eq "getUpStreamProject" ) {
+    $command = Command::GetUpStreamProject->new();
 } elsif ( $program eq "getDownStreamProjects" ) {
     $command = Command::GetDownStreamProjects->new();
 } elsif ( $program eq "getRevisionTxtFromDependencies" ) {
