@@ -47,7 +47,7 @@ copyReleaseCandidateToShare() {
 
     local localDirectory=${workspace}/upload
     local remoteDirectory=${lfsCiBuildsShare}/${branch}/data/${label}/os
-    local oldRemoteDirectory=${lfsCiBuildsShare}/${branch}/data/$(ls ${lfsCiBuildsShare}/${branch} | tail -n 1 )
+    local oldRemoteDirectory=${lfsCiBuildsShare}/${branch}/data/$(ls ${lfsCiBuildsShare}/${branch}/data/ | tail -n 1 )
     local hardlink=""
 
     info "copy build results to ${remoteDirectory}"
@@ -56,9 +56,10 @@ copyReleaseCandidateToShare() {
     execute mkdir -p ${remoteDirectory}
 
     if [[ -d ${oldRemoteDirectory} ]] ; then
-        hardlink="--link-dest=${oldRemoteDirectory}"
+        hardlink="--link-dest=${oldRemoteDirectory}/os/"
     fi
     execute rsync -av --delete ${hardlink} ${localDirectory}/. ${remoteDirectory}
+    echo rsync -av --delete ${hardlink} ${localDirectory}/. ${remoteDirectory}
 
 #     executeOnMaster tar cvf transfer.tar -C ${workspace}/upload .
 #     executeOnMaster mkdir -p ${lfsCiBuildsShare}/data/${label}/os/
