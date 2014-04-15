@@ -1,7 +1,6 @@
 #!/bin/bash
 
 ci_job_admin() {
-
     local subJob=$(getTargetBoardName)
     mustHaveTargetBoardName
 
@@ -19,7 +18,6 @@ ci_job_admin() {
 }
 
 cleanUpArtifactsShare() {
-
     local listOfJobsWithArtifacts=$(ls ${artifactesShare})
 
     for job in ${listOfJobsWithArtifacts} ; do
