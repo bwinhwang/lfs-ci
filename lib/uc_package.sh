@@ -18,7 +18,7 @@ ci_job_package() {
     mustHaveCleanWorkspace
     mustHaveWritableWorkspace
 
-    trace "workspace is ${workspace}"
+    debug "workspace is ${workspace}"
 
     _copyArtifactsToWorkspace
 
