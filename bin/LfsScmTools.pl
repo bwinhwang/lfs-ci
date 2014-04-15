@@ -898,6 +898,7 @@ use warnings;
 use parent qw( -norequire Object );
 use XML::Simple;
 use Getopt::Std;
+use Data::Dumper;
 
 sub readBuildXml {
     my $self  = shift;
@@ -921,19 +922,19 @@ sub readBuildXml {
 #         </hudson.model.Cause_-UpstreamCause>
 #       </causes>
 
-    my $xml  = XMLin( $file, ForceArray => 1 );
-    my @upstream = @{ $xml->{actions}->[0]->{'hudson.model.CauseAction'}->[0] || [] };
-
     my @results;
-    push @results, sprintf( "%s:%s", $upstream[0]->{upstreamProject}->[0],
-                                     $upstream[0]->{upstreamBuild}->[0],   );
+    my $xml = XMLin( $file, ForceArray => 1 );
+    my $upstream = $xml->{actions}->[0]->{'hudson.model.CauseAction'}->[0]->{causes}->[0]->{'hudson.model.Cause_-UpstreamCause'};
 
-    while ( exists $upstream[0]->{upstreamCauses} and
-            exists $upstream[0]->{upstreamCauses}->[0]->{'hudson.model.Cause_-UpstreamCause'} ) {
+    push @results, sprintf( "%s:%s", $upstream->[0]->{upstreamProject}->[0],
+                                     $upstream->[0]->{upstreamBuild}->[0],   );
 
-        push @results, sprintf( "%s:%s", $upstream[0]->{upstreamProject}->[0],
-                                         $upstream[0]->{upstreamBuild}->[0],   );
-        @upstream = @{ $upstream[0]->{upstreamCauses}->[0]->{'hudson.model.Cause_-UpstreamCause'} };
+    while ( exists $upstream->[0]->{upstreamCauses} and
+            exists $upstream->[0]->{upstreamCauses}->[0]->{'hudson.model.Cause_-UpstreamCause'} ) {
+
+        $upstream = $upstream->[0]->{upstreamCauses}->[0]->{'hudson.model.Cause_-UpstreamCause'};
+        push @results, sprintf( "%s:%s", $upstream->[0]->{upstreamProject}->[0],
+                                         $upstream->[0]->{upstreamBuild}->[0],   );
     }
 
     return @results;

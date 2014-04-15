@@ -50,6 +50,8 @@ copyReleaseCandidateToShare() {
     local oldRemoteDirectory=${lfsCiBuildsShare}/${branch}/$(ls ${lfsCiBuildsShare}/${branch} | tail -n 1 )
     local hardlink=""
 
+    info "copy build results to ${remoteDirectory}"
+
     execute mkdir -p ${remoteDirectory}
 
     if [[ -d ${oldRemoteDirectory} ]] ; then
@@ -81,14 +83,17 @@ getNextReleaseLabel() {
 #  @param   <none>
 #  @return  <none>
 _copyArtifactsToWorkspace() {
-    local workspace=$(getWorkspaceName)
-    mustHaveWorkspaceName
+
+    requiredParameters UPSTREAM_PROJECT LFS_CI_ROOT UPSTREAM_BUILD JOB_NAME BUILD_NUMBER
 
     local jobName=""
     local file=""
-
     local downStreamprojectsFile=$(createTempFile)
+    local workspace=$(getWorkspaceName)
+    mustHaveWorkspaceName
+
     runOnMaster ${LFS_CI_ROOT}/bin/getDownStreamProjects -j ${UPSTREAM_PROJECT} -b ${UPSTREAM_BUILD} -h ${jenkinsMasterServerPath} > ${downStreamprojectsFile}
+
     if [[ $? -ne 0 ]] ; then
         error "error in getDownStreamProjects for ${JOB_NAME} #${BUILD_NUMBER}"
         exit 1
@@ -257,7 +262,7 @@ copySysroot() {
             # untar debug.tgz
             # copy some other sysroo dirs
         if [[ ${bldDirectory}/results/rfs.init_sys-root.tar.gz ]] ; then
-            debug "untar ${bldDirectory}/results/rfs.init_sys-root.tar.gz"
+            debug "untar results/rfs.init_sys-root.tar.gz"
             # TODO: demx2fk3 2014-04-07 expand the short parameter names
             execute tar -xzf ${bldDirectory}/results/rfs.init_sys-root.tar.gz -C ${dst}
         else
