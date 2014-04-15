@@ -51,6 +51,7 @@ copyReleaseCandidateToShare() {
     local hardlink=""
 
     info "copy build results to ${remoteDirectory}"
+    info "based on ${oldRemoteDirectory}"
 
     execute mkdir -p ${remoteDirectory}
 
