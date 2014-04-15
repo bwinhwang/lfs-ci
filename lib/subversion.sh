@@ -20,7 +20,7 @@ uploadToSubversion() {
 
     # "compare" / execute svn_updater and execute the generated script
     local uploadScript=$(createTempFile)
-    if ${LFS_CI_ROOT}/bin/svn_updater > ${uploadScript}
+    if ${LFS_CI_ROOT}/bin/svn_updater > ${uploadScript} ; then
         execute bash ${uploadScript}
     else
         error "failed to create svn upload script via svn_updater"
