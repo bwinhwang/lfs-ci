@@ -51,13 +51,15 @@ copyReleaseCandidateToShare() {
     local hardlink=""
 
     info "copy build results to ${remoteDirectory}"
+    info "based on ${oldRemoteDirectory}"
 
     execute mkdir -p ${remoteDirectory}
 
     if [[ -d ${oldRemoteDirectory} ]] ; then
-        hardlink="--link-dest=${oldRemoteDirectory}"
+        hardlink="--link-dest=${oldRemoteDirectory}/os/"
     fi
     execute rsync -av --delete ${hardlink} ${localDirectory}/. ${remoteDirectory}
+    echo rsync -av --delete ${hardlink} ${localDirectory}/. ${remoteDirectory}
 
     # TODO: demx2fk3 2014-04-10 link sdks
     executeOnMaster ln -sf ${lfsCiBuildsShare}/${branch}/data/${label} ${lfsCiBuildsShare}/${branch}/${label}
