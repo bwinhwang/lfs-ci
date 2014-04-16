@@ -1,5 +1,9 @@
 #!/bin/bash
 
+## @fn      ci_job_admin()
+#  @brief   dispatcher for admin jobs, detailed jobs is in seperated functions
+#  @param   <none>
+#  @return  <none>
 ci_job_admin() {
     local subJob=$(getTargetBoardName)
     mustHaveTargetBoardName
@@ -17,8 +21,16 @@ ci_job_admin() {
     return
 }
 
+## @fn      cleanUpArtifactsShare()
+#  @brief   clean up the artifcats from share, if a build of a job was removed / delete from the jenkins master
+#  @details the jenkins server removes the builds from ${JENKINS_HOME}/jobs/<job>/builds/ directory after some
+#           time (or number of builds). We have also to clean up the artifacts on the build share, because we
+#           are handling the artifacts by ourself
+#  @param   <none>
+#  @return  <none>
 cleanUpArtifactsShare() {
     local listOfJobsWithArtifacts=$(ls ${artifactesShare})
+    # TODO: demx2fk3 2014-04-16 add error handling, if listOfJobsWithArtifacts is empty
 
     for job in ${listOfJobsWithArtifacts} ; do
         info "cleanup artifacts of ${job}"
