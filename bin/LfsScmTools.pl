@@ -1036,6 +1036,7 @@ sub execute {
     return;
 }
 # ------------------------------------------------------------------------------------------------------------------
+## @brief this command creates a file with svn revisions and svn urls
 package Command::GetRevisionTxtFromDependencies;
 use strict;
 use warnings;
