@@ -2,31 +2,34 @@
 
 uploadToSubversion() {
 
-    requiredParameters WORKSPACE LFS_CI_ROOT
+    requiredParameters LFS_CI_ROOT
 
     local pathToUpload=$1
     local branchToUpload=$2
+    local commitMessage="$3"
 
-    # locate the workspace / path which should be used to upload the production
-    workspace=${WORKSPACE}/upload/${branchToUpload}
-    execute mkdir -p ${workspace}
-    
-    # update the workspace
-    if [[ -d ${workspace}/.svn ]] ; then
-        execute svn up ${workspace}
-    else
-        execute svn co ${repos}
+    info "upload local path ${pathToUpload} to ${branchToUpload}"
+
+    # local tmp dir is to small
+    local OLD_TMPDIR=${TMPDIR}
+    export TMPDIR=/var/fpwork/${USER}/tmp/
+
+    local branch=${locationToSubversionMap["${branchToUpload}"]}
+    if [[ ! "${branch}" ]] ; then
+        DEBUG "mapping for branchToUpload ${branchToUpload} not found"
+        branch=${branchToUpload}
     fi
 
-    # "compare" / execute svn_updater and execute the generated script
-    local uploadScript=$(createTempFile)
-    if ${LFS_CI_ROOT}/bin/svn_updater > ${uploadScript} ; then
-        execute bash ${uploadScript}
-    else
-        error "failed to create svn upload script via svn_updater"
+    ${LFS_CI_ROOT}/bin/svn_load_dirs.pl -m "${commitMessage}" \
+        ${lfsDeliveryRepos} os/branches/${branch} \
+        ${pathToUpload} \
+
+    if [[ $? != 0 ]] ; then
+        error "upload to svn failed"
+        exit 1
     fi
-    # svn commit
-    execute svn commit -m "upload for production" 
+    # reset to old / correct TMPDIR
+    export TMPDIR=${OLD_TMPDIR}
 
     return
 }
