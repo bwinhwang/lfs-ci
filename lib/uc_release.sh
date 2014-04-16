@@ -36,7 +36,7 @@ ci_job_release() {
     info "subjob is ${subjob}"
 
     case ${subJob} in
-        uploadToSubversion)
+        upload_to_subversion)
             uploadToSubversion "${workspace}" "${branch}" "upload of build ${JOB_NAME} / ${BUILD_NUMBER}"
         ;;
         *)
