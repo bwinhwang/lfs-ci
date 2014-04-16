@@ -4,7 +4,6 @@ LFS_CI_ROOT=/ps/lfs/ci
 
 source ${LFS_CI_ROOT}/lib/config.sh
 
-
 JENKINS_WAR=${LFS_CI_ROOT}/lib/java/jenkins/jenkins-${jenkinsVersion}.war
 JENKINS_HOME=${jenkinsRoot}/home
 JENKINS_ROOT=${jenkinsRoot}/root
@@ -21,6 +20,10 @@ if [[ ${group} != pronb ]] ; then
     exit 1
 fi
 
+if [[ ! -e ${jenkinsWarFile} ]] ; then
+    echo "jenkins war file ${jenkinsWarFile} does not exist"
+    exit 1
+fi
 
 cd ${JENKINS_HOME}
 exec ${java} -jar ${jenkinsWarFile}                                      \

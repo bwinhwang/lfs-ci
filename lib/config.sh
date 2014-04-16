@@ -8,10 +8,10 @@
 java=/usr/lib/jvm/jre-1.6.0-openjdk.x86_64/bin/java
 
 # version number of jenkins, which should be used
-jenkinsVersion=1.532.2
+jenkinsVersion=1.532.3
 
 # location of the jenkins war files
-jenkinsWarFile=${LFS_CI_ROOT}/lib/java/jenkins/jenkins-${JENKINS_VERSION}.war
+jenkinsWarFile=${LFS_CI_ROOT}/lib/java/jenkins/jenkins-${jenkinsVersion}.war
 
 # location of the jenkins installation on the master server
 jenkinsRoot=/var/fpwork/${USER}/lfs-jenkins
