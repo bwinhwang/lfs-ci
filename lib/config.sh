@@ -58,6 +58,8 @@ lfsSourceRepos=https://${svnSlaveServerUlmHostName}/isource/svnroot/BTS_SC_LFS/
 # url of the trunk version of LFS source
 lfsSourceReposTrunk=${lfsSourceRepos}/os/trunk/
 
+lfsDeliveryRepos=https://${svnSlaveServerUlmHostName}/isource/svnroot/BTS_D_SC_LFS_2014/
+
 # location where the LFS delivery / productions / releases are put on (in Ulm only)
 lfsDeliveryShare=/build/home/${USER}/delivery
 
@@ -86,6 +88,9 @@ declare -A archMap=(         ["fct"]="mips64-octeon2-linux-gnu" \
                             ["fspc"]="powerpc-e500-linux-gnu"   \
                             ["fcmd"]="powerpc-e500-linux-gnu"   \
 )
+
+declare -A locationToSubversionMap=( ["pronb-developer"]="PS_LFS_OS_MAINBRANCH" \
+                                   )
 
 ## @fn      getConfig( key )
 #  @brief   get the configuration to the requested key

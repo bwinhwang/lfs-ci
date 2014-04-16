@@ -43,7 +43,9 @@ copyReleaseCandidateToShare() {
     mustHaveWorkspaceName
  
     local label=$(getNextReleaseLabel)
+    # TODO: demx2fk3 2014-04-16 add mustHaveLabelName here
     local branch=$(getBranchName)
+    # TODO: demx2fk3 2014-04-16 add mustHaveBranchName here
 
     local localDirectory=${workspace}/upload
     local remoteDirectory=${lfsCiBuildsShare}/${branch}/data/${label}/os
@@ -59,11 +61,12 @@ copyReleaseCandidateToShare() {
         hardlink="--link-dest=${oldRemoteDirectory}/os/"
     fi
     execute rsync -av --delete ${hardlink} ${localDirectory}/. ${remoteDirectory}
-    echo rsync -av --delete ${hardlink} ${localDirectory}/. ${remoteDirectory}
 
     # TODO: demx2fk3 2014-04-10 link sdks
     executeOnMaster ln -sf ${lfsCiBuildsShare}/${branch}/data/${label} ${lfsCiBuildsShare}/${branch}/${label}
     executeOnMaster ln -sf ${lfsCiBuildsShare}/${branch}/data/${label} ${lfsCiBuildsShare}/${branch}/trunk@${BUILD_NUMBER}
+    executeOnMaster ln -sf ${lfsCiBuildsShare}/${branch}/data/${label} ${lfsCiBuildsShare}/${branch}/build_${BUILD_NUMBER}
+
 
     return
 }
