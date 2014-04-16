@@ -42,7 +42,9 @@ ci_job_release() {
 
     debug "found results of package job on share: ${workspace}"
 
-    info "subjob is ${subjob}"
+    local subJob=$(getTargetBoardName)
+
+    info "subJob is ${subJob}"
     case ${subJob} in
         upload_to_subversion)
             # from subversion.sh
