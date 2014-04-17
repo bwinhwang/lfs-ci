@@ -59,6 +59,10 @@ ci_job_release() {
     return
 }
 
+# extractArtifactsOnReleaseShare() {
+#     local
+# }
+
 copyToReleaseShareOnSite() {
     local workspace=$1
     local destination=$2
