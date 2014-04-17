@@ -15,6 +15,9 @@ uploadToSubversion() {
         DEBUG "mapping for branchToUpload ${branchToUpload} not found"
         branch=${branchToUpload}
     fi
+    local oldTemp=${TMPDIR}
+    export TMPDIR=${WORKSPACE}/tmp/
+    mkdir -p ${TMPDIR}
 
 #     local workspace=${WORKSPACE}/svnUpload/${branchToUpload}/
 # 
@@ -35,6 +38,7 @@ uploadToSubversion() {
         error "upload to svn failed"
         exit 1
     fi
+    export TMPDIR=${oldTemp}
 
     return
 }
