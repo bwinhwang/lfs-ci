@@ -1,5 +1,7 @@
 #!/bin/bash
 
+source ${LFS_CI_ROOT}/lib/artifacts.sh
+
 ## @fn      ci_job_release()
 #  @brief   dispatcher for the release jobs
 #  @param   <none>
@@ -27,16 +29,18 @@ ci_job_release() {
         exit 1
     fi
 
-    local upstreamBuildNumber=$(grep Package ${upstreamsFile} | cut -d: -f2)
-    local upstreamJobName=$(grep Package ${upstreamsFile} | cut -d: -f1)
+    local packageBuildNumber=$(grep Package ${upstreamsFile} | cut -d: -f2)
+    local packageJobName=$(grep Package ${upstreamsFile} | cut -d: -f1)
+    local buildBuildNumber=$(grep Build ${upstreamsFile} | cut -d: -f2)
+    local buildJobName=$(grep Build ${upstreamsFile} | cut -d: -f1)
 
     # TODO: demx2fk3 2014-04-16 add check for valid values here
 
-    info "found upstream package job: ${upstreamJobName} / ${upstreamBuildNumber}"
+    info "found package job: ${packageJobName} / ${packageBuildNumber}"
     
-    local workspace=${lfsCiBuildsShare}/${branch}/build_${upstreamBuildNumber}
+    local workspace=${lfsCiBuildsShare}/${branch}/build_${packageBuildNumber}
     if [[ ! -d ${workspace} ]] ; then
-        error "can not find workspace of upstream job on build share (${workspace})"
+        error "can not find workspace of package job on build share (${workspace})"
         exit 1
     fi
 
@@ -50,6 +54,10 @@ ci_job_release() {
             # from subversion.sh
             uploadToSubversion "${workspace}" "${branch}" "upload of build ${JOB_NAME} / ${BUILD_NUMBER}"
         ;;
+        build_results_to_share)
+            # TODO: demx2fk3 2014-04-17 implement this
+            extractArtifactsOnReleaseShare "${buildJobName}" "${buildBuildNumber}"
+        ;;
         *)
             error "subjob not known (${subjob})"
             # TODO: demx2fk3 2014-04-16 add exit 1 here
@@ -59,9 +67,23 @@ ci_job_release() {
     return
 }
 
-# extractArtifactsOnReleaseShare() {
-#     local
-# }
+extractArtifactsOnReleaseShare() {
+    local jobName=$1
+    local buildNumber=$2
+    local workspace=$(getWorkspaceName)
+    local labelName=$(getNextLabelName)
+
+    # TODO: demx2fk3 2014-04-17 add mustHaveWorkspaceNmae
+    # TODO: demx2fk3 2014-04-17 add mustHaveLabelName
+
+    copyAndextractBuildArtifactsFromProject "${jobName}" "${buildNumber}"
+
+#     cd ${workspace}/bld/
+#     for dir in bld-*-* ; do
+#     done
+
+    return
+}
 
 copyToReleaseShareOnSite() {
     local workspace=$1
