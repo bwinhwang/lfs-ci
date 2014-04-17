@@ -27,7 +27,7 @@ uploadToSubversion() {
     execute ${LFS_CI_ROOT}/bin/svn_load_dirs.pl           \
                 -no_user_input                            \
                 -message "upload"                         \
-                -glob_ignores=""                          \
+                -glob_ignores="#.#"                       \
                 ${lfsDeliveryRepos} os/branches/${branch} \
                 ${pathToUpload} 
 
