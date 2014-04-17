@@ -56,7 +56,7 @@ copyAndextractBuildArtifactsFromProject() {
 
     local workspace=$(getWorkspaceName)
 
-    debug "checking for build artifacts on share of upstream project"
+    debug "checking for build artifacts on share of upstream project (${jobName}/${buildNumber})"
 
     if runOnMaster test -d ${artifactesShare}/${jobName}/${buildNumber}/save/ 
     then
