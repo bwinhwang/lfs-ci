@@ -19,9 +19,9 @@ ci_job_release() {
 
     info "promoted build is ${TESTED_BUILD_JOBNAME} / ${TESTED_BUILD_NUMBER}"
 
-    ${LFS_CI_ROOT}/bin/getUpStreamProject -j ${TESTED_BUILD_JOBNAME}      \
-                                          -b ${TESTED_BUILD_NUMBER}       \
-                                          -h ${jenkinsMasterServerPath} > ${upstreamsFile}
+    runOnMaster ${LFS_CI_ROOT}/bin/getUpStreamProject -j ${TESTED_BUILD_JOBNAME}      \
+                                                      -b ${TESTED_BUILD_NUMBER}       \
+                                                      -h ${jenkinsMasterServerPath} > ${upstreamsFile}
 
     trace "output of getUpStreamProject" 
     rawDebug ${upstreamsFile}
