@@ -16,18 +16,18 @@ uploadToSubversion() {
         branch=${branchToUpload}
     fi
 
-    local workspace=${WORKSPACE}/svnUpload/${branchToUpload}/
-
-    if [[ ! -d ${workspace} ]] ; then
-        execute mkdir -p ${workspace}
-        execute svn checkout --depth=empty \
-                ${lfsDeliveryRepos}/os/branches/${branch}/ ${workspace}
-    fi
-
+#     local workspace=${WORKSPACE}/svnUpload/${branchToUpload}/
+# 
+#     if [[ ! -d ${workspace} ]] ; then
+#         execute mkdir -p ${workspace}
+#         execute svn checkout --depth=empty \
+#                 ${lfsDeliveryRepos}/os/branches/${branch}/ ${workspace}
+#     fi
+#                -wc=${workspace}                          \
     execute ${LFS_CI_ROOT}/bin/svn_load_dirs.pl           \
                 -no_user_input                            \
                 -message "upload"                         \
-                -wc=${workspace}                          \
+                -glob_ignores=""                          \
                 ${lfsDeliveryRepos} os/branches/${branch} \
                 ${pathToUpload} 
 
