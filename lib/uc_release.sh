@@ -75,11 +75,12 @@ extractArtifactsOnReleaseShare() {
     local workspace=$(getWorkspaceName)
     mustHaveWorkspaceName
 
-    local labelName=$(getNextLabelName)
+    local labelName=$(getNextReleaseLabel)
     # TODO: demx2fk3 2014-04-17 add mustHaveLabelName
 
     copyAndextractBuildArtifactsFromProject "${jobName}" "${buildNumber}"
 
+    mkdir -p ${workspace}/bld/
     cd ${workspace}/bld/
     for dir in bld-*-* ; do
         [[ -d ${dir} ]] || continue
