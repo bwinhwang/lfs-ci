@@ -308,3 +308,15 @@ requiredParameters() {
     return
 }
 
+## @fn      getNextReleaseLabel()
+#  @brief   get the next release label name
+#  @param   <none>
+#  @return  <none>
+getNextReleaseLabel() {
+    # TODO: demx2fk3 2014-04-16 dummy function
+    # TODO: demx2fk3 2014-04-16 move to another file,
+    # TODO: demx2fk3 2014-04-16 fill with real content
+
+    echo BM_LFS_REL_OS_$(date +%Y_%m)_${BUILD_NUMBER}
+}
+
