@@ -58,8 +58,7 @@ copyAndextractBuildArtifactsFromProject() {
 
     debug "checking for build artifacts on share of upstream project (${jobName}/${buildNumber})"
 
-    if runOnMaster test -d ${artifactesShare}/${jobName}/${buildNumber}/save/ 
-    then
+    if [[ -d ${artifactesShare}/${jobName}/${buildNumber}/save/ ]] ; then
         info "copy artifacts of ${jobName} #${buildNumber} from master"
         execute mkdir -p ${workspace}/bld/
         execute rsync --archive --verbose -P --rsh=ssh                                         \
