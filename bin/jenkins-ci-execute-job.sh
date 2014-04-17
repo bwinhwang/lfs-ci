@@ -12,6 +12,7 @@ source ${LFS_CI_ROOT}/lib/commands.sh
 source ${LFS_CI_ROOT}/lib/common.sh
 source ${LFS_CI_ROOT}/lib/config.sh
 source ${LFS_CI_ROOT}/lib/jenkins.sh
+source ${LFS_CI_ROOT}/lib/subversion.sh
 
 # load the properties from the custom SCM jenkins plugin
 if [[ -f ${WORKSPACE}/.properties ]] ; then
