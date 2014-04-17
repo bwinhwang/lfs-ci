@@ -59,3 +59,12 @@ ci_job_release() {
     return
 }
 
+copyToReleaseShareOnSite() {
+    local workspace=$1
+    local destination=$2
+
+    info "impelemente this"
+
+    return
+}
+
