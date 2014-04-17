@@ -55,7 +55,6 @@ ci_job_release() {
             uploadToSubversion "${workspace}" "${branch}" "upload of build ${JOB_NAME} / ${BUILD_NUMBER}"
         ;;
         build_results_to_share)
-            # TODO: demx2fk3 2014-04-17 implement this
             extractArtifactsOnReleaseShare "${buildJobName}" "${buildBuildNumber}"
         ;;
         *)
@@ -71,16 +70,28 @@ extractArtifactsOnReleaseShare() {
     local jobName=$1
     local buildNumber=$2
     local workspace=$(getWorkspaceName)
-    local labelName=$(getNextLabelName)
+    mustHaveWorkspaceName
 
-    # TODO: demx2fk3 2014-04-17 add mustHaveWorkspaceNmae
+    local labelName=$(getNextLabelName)
     # TODO: demx2fk3 2014-04-17 add mustHaveLabelName
 
     copyAndextractBuildArtifactsFromProject "${jobName}" "${buildNumber}"
 
-#     cd ${workspace}/bld/
-#     for dir in bld-*-* ; do
-#     done
+    cd ${workspace}/bld/
+    for dir in bld-*-* ; do
+        [[ -d ${dir} ]] || continue
+        basename=$(basename ${dir})
+
+        info "copy ${basename} to buildresults share"
+        execute mv ${basename} ${labelName}
+        execute mkdir ${basename}
+        execute mv ${labelName} ${basename}
+
+        execute rsync -avrP ${workspace}/bld/. ${jenkinsMasterServerHostName}:${lfsCiBuildsShare}/buildresults/
+    done
+
+    info "clean up workspace"
+    execute rm -rf ${workspace}/bld
 
     return
 }
