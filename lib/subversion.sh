@@ -20,9 +20,9 @@ uploadToSubversion() {
         branch=${branchToUpload}
     fi
 
-    ${LFS_CI_ROOT}/bin/svn_load_dirs.pl -no_user_input -m "${commitMessage}" \
-        ${lfsDeliveryRepos} os/branches/${branch} \
-        ${pathToUpload} \
+    execute ${LFS_CI_ROOT}/bin/svn_load_dirs.pl -no_user_input -m "${commitMessage}" \
+                ${lfsDeliveryRepos} os/branches/${branch} \
+                ${pathToUpload} \
 
     if [[ $? != 0 ]] ; then
         error "upload to svn failed"
