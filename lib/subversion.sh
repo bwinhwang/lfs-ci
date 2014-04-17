@@ -24,9 +24,12 @@ uploadToSubversion() {
                 ${lfsDeliveryRepos}/os/branches/${branch}/ ${workspace}
     fi
 
-    execute ${LFS_CI_ROOT}/bin/svn_load_dirs.pl -m "${commitMessage}" \
+    execute ${LFS_CI_ROOT}/bin/svn_load_dirs.pl           \
+                -no_user_input                            \
+                -message "upload"                         \
+                -wc=${workspace}                          \
                 ${lfsDeliveryRepos} os/branches/${branch} \
-                ${pathToUpload} \
+                ${pathToUpload} 
 
     if [[ $? != 0 ]] ; then
         error "upload to svn failed"
