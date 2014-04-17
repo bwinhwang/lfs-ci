@@ -20,7 +20,7 @@ uploadToSubversion() {
         branch=${branchToUpload}
     fi
 
-    execute ${LFS_CI_ROOT}/bin/svn_load_dirs.pl -no_user_input -m "${commitMessage}" \
+    execute ${LFS_CI_ROOT}/bin/svn_load_dirs.pl -no_user_input -message \"upload\" \
                 ${lfsDeliveryRepos} os/branches/${branch} \
                 ${pathToUpload} \
 
