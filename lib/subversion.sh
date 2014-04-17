@@ -10,14 +10,18 @@ uploadToSubversion() {
 
     info "upload local path ${pathToUpload} to ${branchToUpload}"
 
-    # local tmp dir is to small
-    local OLD_TMPDIR=${TMPDIR}
-    export TMPDIR=/var/fpwork/${USER}/tmp/
-
     local branch=${locationToSubversionMap["${branchToUpload}"]}
     if [[ ! "${branch}" ]] ; then
         DEBUG "mapping for branchToUpload ${branchToUpload} not found"
         branch=${branchToUpload}
+    fi
+
+    local workspace=${WORKSPACE}/svnUpload/${branchToUpload}/
+
+    if [[ ! -d ${workspace} ]] ; then
+        execute mkdir -p ${workspace}
+        execute svn checkout --depth=empty \
+                ${lfsDeliveryRepos}/os/branches/${branch}/ ${workspace}
     fi
 
     execute ${LFS_CI_ROOT}/bin/svn_load_dirs.pl -m "${commitMessage}" \
@@ -28,8 +32,6 @@ uploadToSubversion() {
         error "upload to svn failed"
         exit 1
     fi
-    # reset to old / correct TMPDIR
-    export TMPDIR=${OLD_TMPDIR}
 
     return
 }
