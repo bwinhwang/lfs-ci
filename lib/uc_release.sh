@@ -6,7 +6,7 @@
 #  @return  <none>
 ci_job_release() {
 
-    requiredParameters UPSTREAM_PROJECT UPSTREAM_BUILD
+    requiredParameters TESTED_BUILD_JOBNAME TESTED_BUILD_NUMBER
 
     local subJob=$(getTargetBoardName)
     mustHaveTargetBoardName
@@ -15,8 +15,8 @@ ci_job_release() {
 
     local upstreamsFile=$(createTempFile)
 
-    ${LFS_CI_ROOT}/bin/getUpStreamProject -j ${UPSTREAM_PROJECT}      \
-                                          -b ${UPSTREAM_BUILD}        \
+    ${LFS_CI_ROOT}/bin/getUpStreamProject -j ${TESTED_BUILD_JOBNAME}      \
+                                          -b ${TESTED_BUILD_NUMBER}       \
                                           -h ${jenkinsMasterServerPath} > ${upstreamsFile}
 
     trace "output of getUpStreamProject" 
