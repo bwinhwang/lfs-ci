@@ -17,6 +17,8 @@ ci_job_release() {
 
     local upstreamsFile=$(createTempFile)
 
+    info "promoted build is ${TESTED_BUILD_JOBNAME} / ${TESTED_BUILD_NUMBER}"
+
     ${LFS_CI_ROOT}/bin/getUpStreamProject -j ${TESTED_BUILD_JOBNAME}      \
                                           -b ${TESTED_BUILD_NUMBER}       \
                                           -h ${jenkinsMasterServerPath} > ${upstreamsFile}
@@ -37,6 +39,7 @@ ci_job_release() {
     # TODO: demx2fk3 2014-04-16 add check for valid values here
 
     info "found package job: ${packageJobName} / ${packageBuildNumber}"
+    info "found build   job: ${buildJobName} / ${buildBuildNumber}"
     
     local workspace=${lfsCiBuildsShare}/${branch}/build_${packageBuildNumber}
     if [[ ! -d ${workspace} ]] ; then
