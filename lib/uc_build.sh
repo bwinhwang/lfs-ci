@@ -34,24 +34,34 @@ ci_job_build() {
 _build() {
     local cfgFile=$(createTempFile)
 
-    local location=$(getLocationName)
-    mustHaveLocationName
+    local workspace=$(getWorkspaceName)
+    mustHaveWorkspaceName
 
     local target=$(getTargetBoardName)
     mustHaveTargetBoardName
 
-    sortbuildsfromdependencies ${target} > ${cfgFile}
+    cd ${workspace}
+    info "creating temporary makefile"
+    ${LFS_CI_ROOT}/bin/sortBuildsFromDependencies ${target} > ${cfgFile}
+
     rawDebug ${cfgFile}
 
-    local amountOfTargets=$(wc -l ${cfgFile} | cut -d" " -f1)
-    local counter=0
+    local makeTarget=$(getConfig subsystem)-${target}
 
-    while read SRC CFG
-    do
-        counter=$( expr ${counter} + 1 )
-        info "(${counter}/${amountOfTargets}) building ${CFG} from ${SRC}..."
-        execute build -C ${SRC} ${CFG} 
-    done <${cfgFile}
+    execute make -f ${cfgFile} -j ${makeTarget}
+
+#     sortbuildsfromdependencies ${target} > ${cfgFile}
+#     rawDebug ${cfgFile}
+# 
+#     local amountOfTargets=$(wc -l ${cfgFile} | cut -d" " -f1)
+#     local counter=0
+# 
+#     while read SRC CFG
+#     do
+#         counter=$( expr ${counter} + 1 )
+#         info "(${counter}/${amountOfTargets}) building ${CFG} from ${SRC}..."
+#         execute build -C ${SRC} ${CFG} 
+#     done <${cfgFile}
 
     return 0
 }
