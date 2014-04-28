@@ -847,15 +847,20 @@ SOURCES:
         # t-1:
         #     build -C t 1
 
-        foreach my $target ( sort grep { /src-/ } grep { not $duplicate{ $_ }++; } @deps ) {
+        my @filteredDeps = sort grep { /src-/ } grep { not $duplicate{ $_ }++; } @deps;
+            printf "%s: ", $source->{directory};
             foreach my $platform ( sort $source->platforms() ) {
-                printf "%s: %s\n", $source->{directory}, $target;
-                printf "\tbuild -L %s.log -C %s %s\n\n", 
-                            $source->{directory},
+                printf "%s-%s ", $source->{directory}, $platform;
+            }
+            printf "\n";
+
+            foreach my $platform ( sort $source->platforms() ) {
+                printf "%s-%s: %s\n", $source->{directory}, $platform, join(" ", @filteredDeps );
+                printf "\tbuild -L \$@.log -C %s %s\n\n", 
                             $source->{directory},
                             $platform;
             }
-        }
+
 
 #         printf "%s %s - %s\n",
 #                 $source->{directory},
