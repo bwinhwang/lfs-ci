@@ -842,11 +842,26 @@ SOURCES:
         }
 
         my %duplicate;
-        printf "%s %s - %s\n",
-                $source->{directory},
-                join( ",", sort $source->platforms() ),
-                join( ",", sort grep { /src-/ } grep { not $duplicate{ $_ }++; } @deps );
 
+        # t: t-1 t-2
+        # t-1:
+        #     build -C t 1
+
+        foreach my $target ( sort grep { /src-/ } grep { not $duplicate{ $_ }++; } @deps ) {
+            foreach my $platform ( sort $source->platforms() ) {
+                printf "%s: %s\n", $source->{directory}, $target;
+                printf "\tbuild -L %s.log -C %s %s\n\n", 
+                            $source->{directory},
+                            $source->{directory},
+                            $platform;
+            }
+        }
+
+#         printf "%s %s - %s\n",
+#                 $source->{directory},
+#                 join( ",", sort $source->platforms() ),
+#                 join( ",", sort grep { /src-/ } grep { not $duplicate{ $_ }++; } @deps );
+ 
         $seen{ $source->{directory} } ++;
     }
 
