@@ -50,7 +50,7 @@ _build() {
     do
         counter=$( expr ${counter} + 1 )
         info "(${counter}/${amountOfTargets}) building ${CFG} from ${SRC}..."
-        execute build -C ${SRC} ${CFG} JOBS=20
+        execute build -C ${SRC} ${CFG} 
     done <${cfgFile}
 
     return 0
