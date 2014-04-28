@@ -45,34 +45,107 @@ mustHaveBuildArtifactsFromUpstream() {
 
     requiredParameters UPSTREAM_PROJECT UPSTREAM_BUILD
 
-    copyAndextractBuildArtifactsFromProject "${UPSTREAM_PROJECT}" "${UPSTREAM_BUILD}"
+    copyAndExtractBuildArtifactsFromProject "${UPSTREAM_PROJECT}" "${UPSTREAM_BUILD}"
 
     return
 }
 
-copyAndextractBuildArtifactsFromProject() {
+## @fn      copyAndExtractBuildArtifactsFromProject( $jobName, $buildName )
+#  @brief   copy and untar the build artifacts from a jenkins job from the master artifacts share 
+#           into the workspace
+#  @param   {jobName}       jenkins job name
+#  @param   {buildNumber}   jenkins buld number 
+#  @param   <none>
+#  @return  <none>
+copyAndExtractBuildArtifactsFromProject() {
+    local jobName=$1
+    local buildNumber=$2
+    local artifactsPathOnMaster=${artifactesShare}/${jobName}/${buildNumber}/save/
+
+    local files=$(runOnMaster ls ${artifactsPathOnMaster})
+
+    local workspace=$(getWorkspaceName)
+    mustHaveWorkspaceName
+
+    debug "checking for build artifacts on share of upstream project (${jobName}/${buildNumber})"
+    trace "artifacts files for ${jobName}#${buildNumber} on master: ${files}"
+
+    execute mkdir -p ${workspace}/bld/
+
+    for file in ${files}
+    do
+        local base=$(basename ${file} .tar.gz)
+
+        if [[ -d ${workspace}/bld/${base} ]] ; then
+            trace "skipping ${file}, 'cause it's already transfered from another project"
+            continue
+        fi
+
+        info "copy artifact ${file} from job ${jobName}#${buildNumber} to workspace and untar it"
+
+        execute rsync --archive --verbose --rsh=ssh -P          \
+            ${linseeUlmServer}:${artifactsPathOnMaster}/${file} \
+            ${workspace}/bld/
+
+        debug "untar ${file} from job ${jobName}"
+        execute tar --directory ${workspace}/bld/ \
+                    --extract                     \
+                    --auto-compress               \
+                    --file ${workspace}/bld/${file}
+    done
+
+    return
+}
+
+
+## @fn      copyArtifactsToWorkspace()
+#  @brief   copy artifacts of all releated jenkins tasks of a build to the workspace
+#           based on the upstream job
+#  @details «full description»
+#  @param   <none>
+#  @return  <none>
+copyArtifactsToWorkspace() {
     local jobName=$1
     local buildNumber=$2
 
+    requiredParameters LFS_CI_ROOT
+
+    local file=""
+    local downStreamprojectsFile=$(createTempFile)
+
     local workspace=$(getWorkspaceName)
+    mustHaveWorkspaceName
 
-    debug "checking for build artifacts on share of upstream project (${jobName}/${buildNumber})"
+    runOnMaster ${LFS_CI_ROOT}/bin/getDownStreamProjects -j ${jobName}       \
+                                                         -b ${buildNumber}   \
+                                                         -h ${jenkinsMasterServerPath} > ${downStreamprojectsFile}
 
-    if [[ -d ${artifactesShare}/${jobName}/${buildNumber}/save/ ]] ; then
-        info "copy artifacts of ${jobName} #${buildNumber} from master"
-        execute mkdir -p ${workspace}/bld/
-        execute rsync --archive --verbose -P --rsh=ssh                                         \
-            ${linseeUlmServer}:${artifactesShare}/${jobName}/${buildNumber}/save/. \
-            ${workspace}/bld/.
-
-        for file in ${workspace}/bld/*.tar.{gz,xz,bz2}
-        do
-            [[ -f ${file} ]] || continue
-            info "untaring build artifacts ${file}"
-            execute tar -C ${workspace}/bld/ --extract --auto-compress --file ${file}
-        done
+    if [[ $? -ne 0 ]] ; then
+        error "error in getDownStreamProjects for ${jobName} #${buildNumber}"
+        exit 1
     fi
 
-    return
+    local triggeredJobData=$(cat ${downStreamprojectsFile})
+
+    trace "triggered job names are: ${triggeredJobNames}"
+    execute mkdir -p ${workspace}/bld/
+
+    for jobData in ${triggeredJobData} ; do
+
+        local number=$(echo ${jobData} | cut -d: -f 1)
+        local result=$(echo ${jobData} | cut -d: -f 2)
+        local name=$(  echo ${jobData} | cut -d: -f 3-)
+
+        trace "jobName ${name} buildNumber ${nuber} jobResult ${result}"
+
+        if [[ ${result} != "SUCCESS" ]] ; then
+            error "downstream job ${name} has ${result}. Was not successfull"
+            exit 1
+        fi
+
+        # TODO: demx2fk3 2014-04-28 rename, fix typo
+        copyAndExtractBuildArtifactsFromProject ${name} ${number}
+
+    done
 }
 

@@ -20,7 +20,7 @@ ci_job_package() {
 
     debug "workspace is ${workspace}"
 
-    _copyArtifactsToWorkspace
+    copyArtifactsToWorkspace ${UPSTREAM_PROJECT} ${UPSTREAM_BUILD}
 
     copyAddons
     copyVersionFile
@@ -77,92 +77,7 @@ copyReleaseCandidateToShare() {
     return
 }
 
-## @fn      _copyArtifactsToWorkspace()
-#  @brief   copy artifacts of all releated jenkins tasks of a build to the workspace
-#           based on the upstream job
-#  @details «full description»
-#  @param   <none>
-#  @return  <none>
-_copyArtifactsToWorkspace() {
 
-    requiredParameters UPSTREAM_PROJECT LFS_CI_ROOT UPSTREAM_BUILD JOB_NAME BUILD_NUMBER
-
-    local jobName=""
-    local file=""
-    local downStreamprojectsFile=$(createTempFile)
-    local workspace=$(getWorkspaceName)
-    mustHaveWorkspaceName
-
-    runOnMaster ${LFS_CI_ROOT}/bin/getDownStreamProjects -j ${UPSTREAM_PROJECT} -b ${UPSTREAM_BUILD} -h ${jenkinsMasterServerPath} > ${downStreamprojectsFile}
-
-    if [[ $? -ne 0 ]] ; then
-        error "error in getDownStreamProjects for ${JOB_NAME} #${BUILD_NUMBER}"
-        exit 1
-    fi
-    local triggeredJobData=$( cat ${downStreamprojectsFile} )
-
-    trace "triggered job names are: ${triggeredJobNames}"
-    execute mkdir -p ${workspace}/bld/
-
-    for jobData in ${triggeredJobData} ; do
-
-        local buildNumber=$(echo ${jobData} | cut -d: -f 1)
-        local jobResult=$(  echo ${jobData} | cut -d: -f 2)
-        local jobName=$(    echo ${jobData} | cut -d: -f 3-)
-
-        trace "jobName ${jobName} buildNumber ${buildNumber} jobResult ${jobResult}"
-
-        if [[ ${jobResult} != "SUCCESS" ]] ; then
-            error "downstream job ${jobName} was not successfull"
-            exit 1
-        fi
-
-        _copyAndUntarArtifactOfJenkinsJobFromMasterToWorkspace ${jobName} ${buildNumber}
-
-    done
-}
-
-## @fn      _copyAndUntarArtifactOfJenkinsJobFromMasterToWorkspace( $jobName, $buildName )
-#  @brief   copy and untar the build artifacts from a jenkins job from the master artifacts share 
-#           into the workspace
-#  @param   {jobName}       jenkins job name
-#  @param   {buildNumber}   jenkins buld number 
-#  @param   <none>
-#  @return  <none>
-_copyAndUntarArtifactOfJenkinsJobFromMasterToWorkspace() {
-    local jobName=$1
-    local buildNumber=$2
-    local artifactsPathOnMaster=${artifactesShare}/${jobName}/${buildNumber}/save/
-
-    local files=$(runOnMaster ls ${artifactsPathOnMaster})
-
-    local workspace=$(getWorkspaceName)
-    mustHaveWorkspaceName
-
-    trace "artifacts files for ${jobName}#${buildNumber} on master: ${files}"
-    
-    for file in ${files}
-    do
-        local base=$(basename ${file} .tar.gz)
-
-        if [[ -d ${workspace}/bld/${base} ]] ; then
-            trace "skipping ${file}, 'cause it's already transfered from another project"
-            continue
-        fi
-        info "copy artifact ${file} from job ${jobName}#${buildNumber} to workspace and untar it"
-
-        execute rsync --archive --verbose --rsh=ssh -P          \
-            ${linseeUlmServer}:${artifactsPathOnMaster}/${file} \
-            ${workspace}/bld/
-
-        debug "untar ${file} from job ${jobName}"
-        execute tar --directory ${workspace}/bld/ \
-                    --extract                     \
-                    --auto-compress               \
-                    --file ${workspace}/bld/${file}
-        execute rm -f ${file}
-    done
-}
 
 ## @fn      copyAddons()
 #  @brief   handle the addons, copy the addons from the results directory into the delivery structure
