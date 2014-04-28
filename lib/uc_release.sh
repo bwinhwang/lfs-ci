@@ -32,9 +32,9 @@ ci_job_release() {
     fi
 
     local packageBuildNumber=$(grep Package ${upstreamsFile} | cut -d: -f2)
-    local packageJobName=$(grep Package ${upstreamsFile} | cut -d: -f1)
-    local buildBuildNumber=$(grep Build ${upstreamsFile} | cut -d: -f2)
-    local buildJobName=$(grep Build ${upstreamsFile} | cut -d: -f1)
+    local packageJobName=$(    grep Package ${upstreamsFile} | cut -d: -f1)
+    local buildBuildNumber=$(  grep Build   ${upstreamsFile} | cut -d: -f2)
+    local buildJobName=$(      grep Build   ${upstreamsFile} | cut -d: -f1)
 
     # TODO: demx2fk3 2014-04-16 add check for valid values here
 
