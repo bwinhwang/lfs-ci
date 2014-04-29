@@ -9,6 +9,9 @@ ci_job_admin() {
     mustHaveTargetBoardName
 
     case ${subJob} in
+        backupJenkins)
+            backupJenkinsMasterServerInstallation
+        ;;
         cleanUpArtifactsShare)
             cleanUpArtifactsShare
         ;;
@@ -48,4 +51,18 @@ cleanUpArtifactsShare() {
     done
 
     return
+}
+
+backupJenkinsMasterServerInstallation() {
+
+    local backupPath=${jenkinsMasterServerBackupPath}
+
+    execute mkdir -p ${backupPath}
+
+    rm -rf ${backupPath}/backup.11
+    for i in $(seq -w 1 10 | tac) ; do
+        old=$(( i + 1 ))
+        info mv ${backupPath}/backup.${old} ${backupPath}/backup.${i}
+    done
+    
 }

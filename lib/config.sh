@@ -39,6 +39,8 @@ jenkinsMasterServerHttpsUrl=http://${jenkinsMasterServerHostName}:${jenkinsMaste
 # (only valid on the master server)
 jenkinsMasterServerPath=${jenkinsRoot}/home/
 
+jenkinsMasterServerBackupPath=/build/home/${USER}/jenkinsBackup/
+
 # location of the jenkins cli jar file
 jenkinsCli=${LFS_CI_ROOT}/lib/java/jenkins/jenkins-cli-${jenkinsVersion}.jar
 

@@ -48,6 +48,7 @@ _build() {
 
     local makeTarget=$(getConfig subsystem)-${target}
 
+    info "executing all targets in parallel"
     execute make -f ${cfgFile} -j ${makeTarget}
 
 #     sortbuildsfromdependencies ${target} > ${cfgFile}
