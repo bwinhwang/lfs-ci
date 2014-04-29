@@ -210,6 +210,11 @@ sub platforms {
     return map { $_->platforms() } @{ $self->{targets} };
 }
 
+sub targets {
+    my $self = shift;
+    return @{ $self->{targets} || [] };
+}
+
 ## @fn     createSymlink
 #  @brief  create a symlink for this directory from the share
 #  @param  <none>
@@ -618,6 +623,13 @@ sub cleanup {
     return;
 }
 
+sub platform {
+    my $self   = shift;
+    my $target = $self->{target};
+    $target =~ s:bld/bld-\w+-(\w+):$1:;
+    return $target;
+}
+
 sub platforms {
     my $self   = shift;
     my $target = $self->{target};
@@ -648,9 +660,10 @@ sub hasTargetsParameter {
 
 sub targetsParameter {
     my $self = shift;
-    if( scalar( @{ $self->{params} } ) > 1
-        && $self->{params}->[1] =~ m/^-targets=(.*)/ )
-    {
+
+    return if scalar( @{ $self->{params} } ) != 1;
+
+    if(  $self->{params}->[0] =~ m/^--cfgs=(.*)/ ) {
         return split( ",", $1 );
     }
     return;
@@ -821,6 +834,7 @@ sub execute {
     my $self = shift;
     my $goal = $self->{goal};
 
+
     my @sources = sort { $a->{directory} cmp $b->{directory} } @{ $self->{sources} };
     my %seen;
 
@@ -829,7 +843,7 @@ SOURCES:
         my $source = shift @sources;
         next if not $source;
 
-        my @deps = map { $_->{directory} }
+        my @deps = map  { $_->{directory} }
                    grep { $_->{sourceExistsInFileSystem} }
                    $source->getDependencies();
 
@@ -847,19 +861,25 @@ SOURCES:
         # t-1:
         #     build -C t 1
 
-        my @filteredDeps = sort grep { /src-/ } grep { not $duplicate{ $_ }++; } @deps;
+        my @filteredDeps = sort grep { /src-/ } grep { not $duplicate{$_}++; } @deps;
+
+        if( grep { $_ eq $goal } $source->platforms() ) {
             printf "%s: ", $source->{directory};
-            foreach my $platform ( sort $source->platforms() ) {
+            foreach my $platform ( sort grep { $_ eq $goal } $source->platforms() ) {
                 printf "%s-%s ", $source->{directory}, $platform;
             }
             printf "\n";
+        }
 
-            foreach my $platform ( sort $source->platforms() ) {
-                printf "%s-%s: %s\n", $source->{directory}, $platform, join(" ", @filteredDeps );
-                printf "\tbuild -L \$@.log -C %s %s\n\n", 
-                            $source->{directory},
-                            $platform;
+        foreach my $target ( sort $source->targets() ) {
+            my $platform = $target->platform();
+            foreach my $p ( $target->targetsParameter() ) {
+                printf "%s-%s: %s-%s\n\n", $source->{directory}, $p, $source->{directory}, $platform;
+
             }
+            printf "%s-%s: %s\n", $source->{directory}, $platform, join( " ", @filteredDeps );
+            printf "\tbuild -L \$@.log -C %s %s\n\n", $source->{directory}, $platform;
+        }
 
 
 #         printf "%s %s - %s\n",
