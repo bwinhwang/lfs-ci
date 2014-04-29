@@ -60,7 +60,7 @@ backupJenkinsMasterServerInstallation() {
     execute mkdir -p ${backupPath}
 
     rm -rf ${backupPath}/backup.11
-    for i in $(seq -w 1 10 | tac) ; do
+    for i in $(seq 1 10 | tac) ; do
         old=$(( i + 1 ))
         info mv ${backupPath}/backup.${old} ${backupPath}/backup.${i}
     done
