@@ -69,7 +69,7 @@ setBuildDescription() {
     local buildNumber=$2
     local description="$3"
 
-    executeJenkinsCli set-build-description "${jobName}" "${buildNumber}" "\"${description}\""
+    echo ${description} | executeJenkinsCli set-build-description "${jobName}" "${buildNumber}" =
 
     return
 }
