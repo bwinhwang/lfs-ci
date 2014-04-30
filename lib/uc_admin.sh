@@ -54,6 +54,8 @@ cleanUpArtifactsShare() {
 
     setBuildDescription "${JOB_NAME}" "${BUILD_NUMBER}" "removed ${counter} artifacts"
 
+    info "cleanup done"
+
     return
 }
 
@@ -62,11 +64,13 @@ backupJenkinsMasterServerInstallation() {
     local backupPath=${jenkinsMasterServerBackupPath}
 
     execute mkdir -p ${backupPath}
-
     execute rm -rf ${backupPath}/backup.11
-    for i in $(seq 1 10 | tac) ; do
+
+    for i in $(seq 0 10 | tac) ; do
         old=$(( i + 1 ))
-        [[ ! -d ${backupPath}/backup.${i} ]] && continue
+        debug "test for ${backupPath}/backup.${i}"
+
+        [[ -d ${backupPath}/backup.${i} ]] || continue
 
         execute mv -f ${backupPath}/backup.${i} ${backupPath}/backup.${old}
     done
@@ -76,6 +80,8 @@ backupJenkinsMasterServerInstallation() {
     fi
 
     execute rsync -a --delete --exclude=workspace ${jenkinsMasterServerPath}/. ${backupPath}/backup.0/.
+
+    info "backup done"
 
     return
     
