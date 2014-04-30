@@ -37,16 +37,16 @@ jenkinsMasterServerHttpsUrl=http://${jenkinsMasterServerHostName}:${jenkinsMaste
 
 # home directory of the jenkins master server installation
 # (only valid on the master server)
-jenkinsMasterServerPath=${jenkinsRoot}/home/
+jenkinsMasterServerPath=${jenkinsRoot}/home
 
-jenkinsMasterServerBackupPath=/build/home/${USER}/jenkinsBackup/
+jenkinsMasterServerBackupPath=/build/home/${USER}/jenkinsBackup
 
 # location of the jenkins cli jar file
 jenkinsCli=${LFS_CI_ROOT}/lib/java/jenkins/jenkins-cli-${jenkinsVersion}.jar
 
 # path to the share, where the build artifacts are located
 # (location for ulm, not valid for other sites)
-artifactesShare=/build/home/${USER}/lfs/
+artifactesShare=/build/home/${USER}/lfs
 
 # hostname of the svn master server
 svnMasterServerHostName=svne1.access.nokiasiemensnetworks.com
@@ -55,10 +55,10 @@ svnMasterServerHostName=svne1.access.nokiasiemensnetworks.com
 svnSlaveServerUlmHostName=ulscmi.inside.nsn.com
 
 # url of the LFS source repositroy
-lfsSourceRepos=https://${svnSlaveServerUlmHostName}/isource/svnroot/BTS_SC_LFS/
+lfsSourceRepos=https://${svnSlaveServerUlmHostName}/isource/svnroot/BTS_SC_LFS
 
 # url of the trunk version of LFS source
-lfsSourceReposTrunk=${lfsSourceRepos}/os/trunk/
+lfsSourceReposTrunk=${lfsSourceRepos}/os/trunk
 
 lfsDeliveryRepos=https://${svnSlaveServerUlmHostName}/isource/svnroot/BTS_D_SC_LFS_2014/
 
