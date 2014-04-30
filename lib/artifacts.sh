@@ -67,7 +67,7 @@ copyAndExtractBuildArtifactsFromProject() {
     local workspace=$(getWorkspaceName)
     mustHaveWorkspaceName
 
-    debug "checking for build artifacts on share of upstream project (${jobName}/${buildNumber})"
+    debug "checking for build artifacts on share of project (${jobName}/${buildNumber})"
     trace "artifacts files for ${jobName}#${buildNumber} on master: ${files}"
 
     execute mkdir -p ${workspace}/bld/
