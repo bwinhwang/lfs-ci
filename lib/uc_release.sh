@@ -90,7 +90,7 @@ extractArtifactsOnReleaseShare() {
         execute mkdir ${basename}
         execute mv ${labelName} ${basename}
 
-        execute rsync -av ${workspace}/bld/. ${jenkinsMasterServerHostName}:${lfsCiBuildsShare}/buildresults/
+        execute rsync -av --exclude=.svn ${workspace}/bld/. ${jenkinsMasterServerHostName}:${lfsCiBuildsShare}/buildresults/
     done
 
     info "clean up workspace"
