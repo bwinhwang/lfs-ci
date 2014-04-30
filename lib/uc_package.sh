@@ -1,5 +1,7 @@
 #!/bin/bash
 
+source ${LFS_CI_ROOT}/lib/artifacts.sh
+
 ## @fn      ci_job_package()
 #  @brief   create a package from the build results for the testing / release process
 #  @details copy all the artifacts from the sub jobs into the workspace and create the release structure
