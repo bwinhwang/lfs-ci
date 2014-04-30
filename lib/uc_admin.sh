@@ -79,7 +79,7 @@ backupJenkinsMasterServerInstallation() {
         execute cp -rl ${backupPath}/backup.1 ${backupPath}/backup.0
     fi
 
-    execute rsync -a --delete --exclude=workspace ${jenkinsMasterServerPath}/. ${backupPath}/backup.0/.
+    execute rsync -av --delete --exclude=workspace ${jenkinsMasterServerPath}/. ${backupPath}/backup.0/.
 
     info "backup done"
 
