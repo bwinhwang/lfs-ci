@@ -119,7 +119,10 @@ getWorkspaceName() {
 #  @throws  raise an error, if there is no workspace name avaibale
 mustHaveWorkspaceName() {
 
+    requiredParameters WORKSPACE
+
     local workspace=$(getWorkspaceName) 
+
     if [[ ! "${workspace}" ]] ; then
         error "can not get the correction workspace name from JOB_NAME \"${JOB_NAME}\""
         exit 1
