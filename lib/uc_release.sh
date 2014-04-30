@@ -78,7 +78,7 @@ extractArtifactsOnReleaseShare() {
     local labelName=$(getNextReleaseLabel)
     # TODO: demx2fk3 2014-04-17 add mustHaveLabelName
 
-    copyAndExtractBuildArtifactsFromProject "${jobName}" "${buildNumber}"
+    copyArtifactsToWorkspace "${jobName}" "${buildNumber}"
 
     cd ${workspace}/bld/
     for dir in bld-*-* ; do
