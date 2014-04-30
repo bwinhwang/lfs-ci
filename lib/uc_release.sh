@@ -85,12 +85,12 @@ extractArtifactsOnReleaseShare() {
         [[ -d ${dir} ]] || continue
         basename=$(basename ${dir})
 
-        info "copy ${basename} to buildresults share ${lfsCiBuildsShare}/buildresults/"
-        execute mv ${basename} ${labelName}
-        execute mkdir ${basename}
-        execute mv ${labelName} ${basename}
+        local destination=${lfsCiBuildsShare}/buildresults/${basename}/${labelName}
+        info "copy ${basename} to buildresults share ${destination}"
 
-        execute rsync -av ${workspace}/bld/. ${jenkinsMasterServerHostName}:${lfsCiBuildsShare}/buildresults/
+        executeOnMaster mkdir -p ${destination}
+        execute rsync -av --exclude=.svn ${workspace}/bld/${basename}/. ${jenkinsMasterServerHostName}:${destination}
+
     done
 
     info "clean up workspace"
