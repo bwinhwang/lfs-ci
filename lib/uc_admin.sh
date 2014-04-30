@@ -66,7 +66,15 @@ backupJenkinsMasterServerInstallation() {
     rm -rf ${backupPath}/backup.11
     for i in $(seq 1 10 | tac) ; do
         old=$(( i + 1 ))
-        info "mv ${backupPath}/backup.${i} ${backupPath}/backup.${old}"
+        execute mv -f ${backupPath}/backup.${i} ${backupPath}/backup.${old}
     done
+
+    if [[ -d ${backupPath}/backup.1 ]] ; then
+        execute cp -rl ${backupPath}/backup.1 ${backupPath}/backup.0
+    fi
+
+    execute rsync -a --delete --exclude=workspace ${jenkinsMasterServerPath}/. ${backupPath}/backup.0/.
+
+    return
     
 }

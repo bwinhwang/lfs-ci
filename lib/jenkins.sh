@@ -54,7 +54,7 @@
 #  @param   {parameters} the parameters of the given command   
 #  @return  <none>
 executeJenkinsCli() {
-    execute ${java} -jar ${jenkinsCli} -s "${jenkinsMasterServerHttpUrl}" "$@"
+    execute ${java} -jar ${jenkinsCli} -s "${jenkinsMasterServerHttpUrl}" $@
     return
 }
 
@@ -69,7 +69,7 @@ setBuildDescription() {
     local buildNumber=$2
     local description="$3"
 
-    executeJenkinsCli set-build-description "${jobName}" "${buildNumber}" "${description}"
+    executeJenkinsCli set-build-description "${jobName}" "${buildNumber}" "\"${description}\""
 
     return
 }
