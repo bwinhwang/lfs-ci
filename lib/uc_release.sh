@@ -78,11 +78,8 @@ extractArtifactsOnReleaseShare() {
     local labelName=$(getNextReleaseLabel)
     # TODO: demx2fk3 2014-04-17 add mustHaveLabelName
 
-    # TODO: demx2fk3 2014-04-28 fixme 
-    copyAndextractBuildArtifactsFromProject "${jobName}" "${buildNumber}"
+    copyAndExtractBuildArtifactsFromProject "${jobName}" "${buildNumber}"
 
-
-    mkdir -p ${workspace}/bld/
     cd ${workspace}/bld/
     for dir in bld-*-* ; do
         [[ -d ${dir} ]] || continue
@@ -93,7 +90,7 @@ extractArtifactsOnReleaseShare() {
         execute mkdir ${basename}
         execute mv ${labelName} ${basename}
 
-        execute rsync -avrP ${workspace}/bld/. ${jenkinsMasterServerHostName}:${lfsCiBuildsShare}/buildresults/
+        execute rsync -av ${workspace}/bld/. ${jenkinsMasterServerHostName}:${lfsCiBuildsShare}/buildresults/
     done
 
     info "clean up workspace"
