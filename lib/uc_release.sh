@@ -85,7 +85,7 @@ extractArtifactsOnReleaseShare() {
         [[ -d ${dir} ]] || continue
         basename=$(basename ${dir})
 
-        info "copy ${basename} to buildresults share"
+        info "copy ${basename} to buildresults share ${lfsCiBuildsShare}/buildresults/"
         execute mv ${basename} ${labelName}
         execute mkdir ${basename}
         execute mv ${labelName} ${basename}
