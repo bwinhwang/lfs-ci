@@ -34,6 +34,7 @@ ci_job_admin() {
 cleanUpArtifactsShare() {
     local listOfJobsWithArtifacts=$(ls ${artifactesShare})
     # TODO: demx2fk3 2014-04-16 add error handling, if listOfJobsWithArtifacts is empty
+    local counter=0
 
     for job in ${listOfJobsWithArtifacts} ; do
         info "cleanup artifacts of ${job}"
@@ -43,12 +44,15 @@ cleanUpArtifactsShare() {
             if [[ ! -e ${jenkinsMasterServerPath}/jobs/${job}/builds/${build} ]] ; then
                 info "removing artifacts of ${job} / ${build}"
                 execute rm -rf ${artifactesShare}/${job}/${build}/
+                counter=$(( counter + 1 ))
             else
                 trace "keep ${job} / ${build}"
             fi
         done
 
     done
+
+    setBuildDescription "${JOB_NAME}" "${BUILD_NUMBER}" "removed ${counter} artifacts"
 
     return
 }
