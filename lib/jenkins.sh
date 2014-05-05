@@ -79,3 +79,15 @@ startBuildJobs() {
 
     return
 }
+
+listJobNames() {
+    runOnMaster ls ${jenkinsMasterServerPath}/jobs
+}
+
+getJob() {
+    local jobName=$1
+    
+    executeJenkinsCli get-job "${jobName}"
+
+    return
+}
