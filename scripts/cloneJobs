@@ -1,0 +1,49 @@
+source ${LFS_CI_ROOT}/lib/common.sh
+source ${LFS_CI_ROOT}/lib/jenkins.sh
+
+
+# ls /var/fpwork/demx2fk3/lfs-jenkins/home/jobs/*/promotions
+
+for job in $(listJobNames | grep trunk)
+do
+    info "${job}"
+    rm -rf ${job}.xml
+    getJob "${job}" ${job}.xml
+
+    newJobName=$(echo ${job} | sed "s/_-_trunk_-_/_-_FB1404_-_/")
+    displayName=$(       xpath -q -e '/project/displayName/node()' ${job}.xml)
+    downStreamProjects=$(xpath -q -e '/project/builders/hudson.plugins.parameterizedtrigger.TriggerBuilder/configs/hudson.plugins.parameterizedtrigger.BlockableBuildTriggerConfig/projects/node()' ${job}.xml)
+    upStreamProjects=$(  xpath -q -e '/project/publishers//hudson.tasks.BuildTrigger/childProjects/node()' ${job}.xml)
+
+    newDownStreamProjects=$(echo ${downStreamProjects} | sed "s/_-_trunk_-_/_-_FB1404_-_/g")
+    newUpStreamProjects=$(  echo ${upStreamProjects}   | sed "s/_-_trunk_-_/_-_FB1404_-_/g")
+    newDisplayName=$(       echo ${displayName}        | sed "s/ - trunk - / - FB1404 - /g")
+
+    if [[ ${job} == ${newJobName} ]] ; then
+        error "something is wrong. old and new job name is the same"
+        exit 1
+    fi        
+
+    info "new job     name         ${newJobName}"
+    info "new display name         ${newDisplayName}"
+    info "new down stream projects ${newDownStreamProjects}"
+    info "new up stream projects   ${newUpStreamProjects}"
+
+    cat ${job}.xml | xmlsubst.pl "/project/displayName:=fix(${newDisplayName})" > a
+    mv a ${job}.xml
+    cat ${job}.xml | xmlsubst.pl "/project/builders/hudson.plugins.parameterizedtrigger.TriggerBuilder/configs/hudson.plugins.parameterizedtrigger.BlockableBuildTriggerConfig/projects:=fix(${newDownStreamProjects})" > a
+    mv a ${job}.xml
+    cat ${job}.xml | xmlsubst.pl "/project/publishers/hudson.tasks.BuildTrigger/childProjects:=fix(${newUpStreamProjects})" > a
+    mv a ${job}.xml
+    cat ${job}.xml | xmlsubst.pl "/project/publishers/hudson.plugins.parameterizedtrigger.BuildTrigger/configs/hudson.plugins.parameterizedtrigger.BuildTriggerConfig/projects:=fix(${newUpStreamProjects})" > a
+    mv a ${job}.xml
+
+    if existsJenkinsJob "${newJobName}" ; then
+        info "delete new job ${newJobName} first, because it exists"
+        deleteJenkinsJob "${newJobName}"
+    fi
+
+    # createJenkinsJob "${newJobName}" ${job}.xml
+    # info "job ${newJobName} created."
+
+done

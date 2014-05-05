@@ -136,7 +136,7 @@ copyToReleaseShareOnSite() {
     for subsystemDirectory in $(find ${lfsCiBuildsShare}/buildresults/ -maxdepth 2 -name ${labelName} ) ; do
         [[ -d ${subsystemDirectory} ]] || continue
 
-        local sourceDirectory=${lfsCiBuildsShare}/buildresults/${subsystemDirectory}
+        local sourceDirectory=${subsystemDirectory}
         info "copy ${sourceDirectory} to ${siteName}"
 
         # TODO: demx2fk3 2014-05-05 not fully implemented
