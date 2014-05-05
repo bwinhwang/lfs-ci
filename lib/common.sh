@@ -78,10 +78,7 @@ getLocationName() {
 
     return
 }
-
-getBranchName() {
-    getLocationName
-}
+getBranchName() { getLocationName }
 
 ## @fn      mustHaveLocationName()
 #  @brief   ensure, that there is a location name (aka branch)
@@ -98,6 +95,7 @@ mustHaveLocationName() {
 
     return
 }
+mustHaveBranchName() { mustHaveLocationName }
 
 ## @fn      getWorkspaceName()
 #  @brief   get the workspace name / directory for the project
@@ -321,5 +319,44 @@ getNextReleaseLabel() {
     # TODO: demx2fk3 2014-04-16 fill with real content
 
     echo BM_LFS_REL_OS_$(date +%Y_%m)_${BUILD_NUMBER}
+}
+
+## @fn      mustHaveValue( $value )
+#  @brief   ensure, that the value is a not empty string
+#  @param   {value}    just a value
+#  @return  <none>
+#  @throws  raise an error, if the value is empty
+mustHaveValue() {
+    local value=$1
+    local message=${1:-unkown variable name}
+
+    if [[ -z "${value}" ]] ; then
+        error "excpect a value for ${message}, but didn't got one..."
+        exit 1
+    fi
+
+    return
+}
+
+## @fn      mustHaveWritableFile( fileName )
+#  @brief   ensure, that the file is a writable file
+#  @param   {fileName}    name of the file
+#  @return  <none>
+#  @throws  raise an error, if the file is not writable (or not exists)
+mustHaveWritableFile() {
+    local file=$1
+    mustHaveValue "${file}"
+
+    if [[ ! -e ${file} ]] ; then
+        error "the file ${file} does not exist"
+        exit 1
+    fi
+
+    if [[ ! -w ${file} ]] ; then
+        error "the file ${file} is not writable"
+        exit 1
+    fi
+
+    return
 }
 

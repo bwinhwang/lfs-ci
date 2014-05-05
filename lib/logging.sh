@@ -27,6 +27,8 @@ startLogfile() {
         printf -- "  arguments: $@\n"                                                    >> ${CI_LOGGING_LOGFILENAME}
         printf -- "  jobName: $jobName\n"                                                >> ${CI_LOGGING_LOGFILENAME}
         printf -- "------------------------------------------------------------------\n" >> ${CI_LOGGING_LOGFILENAME}
+        printf -- "-- Please note, all timestamps are in UTC                       --\n" >> ${CI_LOGGING_LOGFILENAME}
+        printf -- "------------------------------------------------------------------\n" >> ${CI_LOGGING_LOGFILENAME}
         printf -- "{{{\n"                                                                >> ${CI_LOGGING_LOGFILENAME}
     fi
 }
@@ -127,7 +129,7 @@ message() {
     # generate the logline
     local config=${CI_LOGGING_CONFIG-"DATE SPACE DURATION SPACE TYPE SPACE MESSAGE NEWLINE"}
     local prefix=${CI_LOGGING_PREFIX-${CI_LOGGING_PREFIX_HASH["$logType"]}}
-    local dateFormat=${CI_LOGGING_DATEFORMAT-"+%Y-%m-%d %H:%M:%S.%N"}
+    local dateFormat=${CI_LOGGING_DATEFORMAT-"+%Y-%m-%d %H:%M:%S.%N %Z"}
 
     for template in ${config}
     do
@@ -232,6 +234,11 @@ logCommand() {
     unset CI_LOGGING_CONFIG
 }
 
+## @fn      rawDebug( $fileName )
+#  @brief   put the content of the file into the logfile
+#  @param   {fileName}    name of the file
+#  @param   <none>
+#  @return  <none>
 rawDebug() {
     local fileToLog=$1
 
@@ -246,6 +253,11 @@ rawDebug() {
     return
 }
 
+## @fn      rawOutput( $fileName )
+#  @brief   put the content of the file on the console
+#  @param   {fileName}    name of the file
+#  @param   <none>
+#  @return  <none>
 rawOutput() {
     local fileToLog=$1
 
