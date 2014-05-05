@@ -75,6 +75,7 @@ linseeUlmServer=ulling04.emea.nsn-net.net
 declare -A sitesBuildShareMap=(  ["Ulm"]="ulling01:/build/home/${USER}/lfs/"                  \
                                 ["Oulu"]="ouling04.emea.nsn-net.net:/build/home/${USER}/lfs/" \
 )
+
 # ....
 declare -A platformMap=(         ["fct"]="fsm3_octeon2" \
                            ["qemu_i386"]="qemu"         \
@@ -83,7 +84,8 @@ declare -A platformMap=(         ["fct"]="fsm3_octeon2" \
                                 ["fcmd"]="fcmd"         \
                                  ["arm"]="fsm35_k2"     \
 )
-# ...
+
+# ....
 declare -A archMap=(         ["fct"]="mips64-octeon2-linux-gnu" \
                        ["qemu_i386"]="i686-pc-linux-gnu"        \
                      ["qemu_x86_64"]="x86_64-pc-linux-gnu"      \
@@ -91,6 +93,7 @@ declare -A archMap=(         ["fct"]="mips64-octeon2-linux-gnu" \
                             ["fcmd"]="powerpc-e500-linux-gnu"   \
 )
 
+# ....
 declare -A locationToSubversionMap=( ["pronb-developer"]="PS_LFS_OS_MAINBRANCH" \
                                    )
 

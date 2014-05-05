@@ -19,14 +19,6 @@ uploadToSubversion() {
     export TMPDIR=${WORKSPACE}/tmp/
     mkdir -p ${TMPDIR}
 
-#     local workspace=${WORKSPACE}/svnUpload/${branchToUpload}/
-# 
-#     if [[ ! -d ${workspace} ]] ; then
-#         execute mkdir -p ${workspace}
-#         execute svn checkout --depth=empty \
-#                 ${lfsDeliveryRepos}/os/branches/${branch}/ ${workspace}
-#     fi
-#                -wc=${workspace}                          \
     execute ${LFS_CI_ROOT}/bin/svn_load_dirs.pl           \
                 -no_user_input                            \
                 -message "upload"                         \
@@ -43,3 +35,24 @@ uploadToSubversion() {
     return
 }
 
+svnCommand() {
+    local args=$@
+    debug "executing svn $@"
+    execute svn --non-interactive --trust-server-cert $@
+    return
+}
+
+svnCheckout() {
+    svnCommand checkout $@
+    return
+}
+
+svnCommit() {
+    svnCommand commit $@
+    return
+}
+
+svnDiff() {
+    svnCommand diff $@
+    return
+}

@@ -31,7 +31,7 @@ createArtifactArchive() {
             ${linseeUlmServer}:${artifactsPathOnShare}/save
     done
 
-    return 0
+    return 
 }
 
 ## @fn      mustHaveBuildArtifactsFromUpstream()
@@ -97,7 +97,6 @@ copyAndExtractBuildArtifactsFromProject() {
     return
 }
 
-
 ## @fn      copyArtifactsToWorkspace()
 #  @brief   copy artifacts of all releated jenkins tasks of a build to the workspace
 #           based on the upstream job
@@ -147,5 +146,7 @@ copyArtifactsToWorkspace() {
         copyAndExtractBuildArtifactsFromProject ${name} ${number}
 
     done
+
+    return
 }
 
