@@ -58,6 +58,17 @@ executeJenkinsCli() {
     return
 }
 
+runJenkinsCli() {
+    local tmpFile=$(createTempFile)
+    ${java} -jar ${jenkinsCli} -s "${jenkinsMasterServerHttpUrl}" $@ 2> ${tmpFile}
+    if [[ $? != 0 ]] ; then
+        error "error in executing jenkins CLI: $@"
+        rawDebug ${tmpFile}
+        exit 1
+    fi
+    return
+}
+
 ## @fn      setBuildDescription( jobName, buildNumber, description )
 #  @brief   set the description of a build job
 #  @param   {jobName}      name of the job
@@ -86,8 +97,34 @@ listJobNames() {
 
 getJob() {
     local jobName=$1
+    local fileName=$2
     
-    executeJenkinsCli get-job "${jobName}"
+    runJenkinsCli get-job "${jobName}" > ${fileName}
 
+    return
+}
+
+existsJenkinsJob() {
+    local jobName=$1
+
+    if listJobNames | grep -q "^${jobName}$" ; then
+        return 0
+    fi
+
+    return 1
+}
+
+createJenkinsJob() {
+    local jobName=$1
+    local xmlConfigFile=$2
+
+    executeJenkinsCli create-job "${jobName}" < ${xmlConfigFile}
+    return
+}
+
+deleteJenkinsJob() {
+    local jobName=$1
+
+    executeJenkinsCli delete-job "${jobName}" 
     return
 }
