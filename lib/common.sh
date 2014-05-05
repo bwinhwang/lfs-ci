@@ -1,5 +1,9 @@
 #!/bin/bash
 
+source ${LFS_CI_ROOT}/lib/commands.sh
+source ${LFS_CI_ROOT}/lib/config.sh
+source ${LFS_CI_ROOT}/lib/logging.sh
+
 # the following methods are parsing the jenkins job name and return the
 # required / requested information. At the moment, the script will be called
 # every time. This is normally not so fast as it should be.
@@ -78,7 +82,10 @@ getLocationName() {
 
     return
 }
-getBranchName() { getLocationName }
+
+getBranchName() { 
+    getLocationName 
+}
 
 ## @fn      mustHaveLocationName()
 #  @brief   ensure, that there is a location name (aka branch)
@@ -95,7 +102,10 @@ mustHaveLocationName() {
 
     return
 }
-mustHaveBranchName() { mustHaveLocationName }
+
+mustHaveBranchName() { 
+    mustHaveLocationName 
+}
 
 ## @fn      getWorkspaceName()
 #  @brief   get the workspace name / directory for the project
@@ -246,6 +256,7 @@ switchSvnServerInLocations() {
 
     return
 }
+
 ## @fn      checkoutSubprojectDirectories( subsystem, revision )
 #  @brief   checkout a subsystem of LFS using build command with a revision
 #  @param   {subsystem}    name of the src-directory
