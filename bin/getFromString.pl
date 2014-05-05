@@ -40,7 +40,7 @@ my $regex1 = qr /
                     $splitRE
                     $platformRE           # platfrom, like fcmd, fspc, fct, ...
                     $
-               /x;
+                /x;
 
 my $regex2 = qr /
                     ^
@@ -52,12 +52,23 @@ my $regex2 = qr /
                     $splitRE
                     $taskNameRE           # task name (Build | Package | Testing )
                     $
-               /x;
+                /x;
 
+my $regex3 = qr /
+                    ^
+                    (Admin)
+                    $splitRE
+                    $taskNameRE           # task name (Build)
+                    $splitRE?             # sub task name is 
+                    $subTaskNameRE?       # optional string, like FSM-r3
+                    $
+                /x;
 
 
 if( $string =~ m/$regex1/x or
-    $string =~ m/$regex2/x    ) {
+    $string =~ m/$regex2/x or
+    $string =~ m/$regex3/x
+  ) {
     printf "%s\n", $+{ $wanted };
 }
 
