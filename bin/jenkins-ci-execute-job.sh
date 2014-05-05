@@ -3,9 +3,11 @@
 # start skript for jenkins.
 #
 
-# TMP=$(dirname $0)
-# export LFS_CI_PATH="$(readlink -f ${TMP}/..)"
-export PATH=${PATH}:${LFS_CI_ROOT}/bin
+if [[ -z "${LFS_CI_ROOT}" ]] ; then
+    export LFS_CI_ROOT=${PWD}
+fi
+
+export PATH=${LFS_CI_ROOT}/bin:${PATH}
 
 source ${LFS_CI_ROOT}/lib/logging.sh
 source ${LFS_CI_ROOT}/lib/commands.sh
@@ -34,6 +36,12 @@ export PS4
 JENKINS_SVN_REVISION=${SVN_REVISION}
 export JENKINS_SVN_REVISION
 
+if [[ -z "${JOB_NAME}" ]] ; then
+    export JOB_NAME=$1
+fi
+
+requiredParameters LFS_CI_ROOT JOB_NAME HOSTNAME USER 
+
 showAllEnvironmentVariables
 
 info "starting jenkins job \"${JOB_NAME}\" on ${HOSTNAME} as ${USER}"
@@ -60,19 +68,26 @@ case "${JOB_NAME}" in
         source ${LFS_CI_ROOT}/lib/uc_release.sh
         ci_job_release   || exit 1 
     ;;
+    listJobs)
+        listJobs
+    ;;
     *)
 
         # legacy call for the old scripting...
-        if [[ -x "${JOB_NAME}" ]] ; then
+        for pathName in ${LFS_CI_ROOT}/scripts/ ${LFS_CI_ROOT}/legacy
+        do
+            if [[ -x "$pathName/${JOB_NAME}" ]] ; then
 
-            info "executing legacy script \"${JOB_NAME}\""
+                info "executing legacy script \"${JOB_NAME}\""
 
-            execute ${JOB_NAME} \
-                || exit 1
-        else
-            error "don't know what I shall do for job \"${JOB_NAME}\"" 
-            exit 1
-        fi
+                $pathName/${JOB_NAME} || exit 1
+                break
+            else
+                # fixme
+                error "don't know what I shall do for job \"${JOB_NAME}\"" 
+                exit 1
+            fi
+        done
 
     ;;
 esac
