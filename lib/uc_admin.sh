@@ -5,8 +5,8 @@
 #  @param   <none>
 #  @return  <none>
 ci_job_admin() {
-    local subJob=$(getTargetBoardName)
-    mustHaveTargetBoardName
+    local subJob=$(getTaskNameFromJobName)
+    # TODO mustHaveTargetBoardName
 
     case ${subJob} in
         backupJenkins)
