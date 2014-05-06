@@ -73,7 +73,7 @@ _createRevisionsTxtFile() {
     locationName=$(getLocationName)
     mustHaveLocationName
 
-    info "get the locations/<branch>/Dependencies"
+    # get the locations/<branch>/Dependencies
     dependenciesFileUrl=${lfsSourceRepos}/os/trunk/bldtools/locations-${locationName}/Dependencies
     if ! svn ls ${dependenciesFileUrl} >/dev/null 
     then
@@ -83,7 +83,6 @@ _createRevisionsTxtFile() {
 
     # can not use execute here, so we have to do the error handling by hande
     # do the magic for all dir
-    info "create revisions.txt via perl"
     ${LFS_CI_ROOT}/bin/getRevisionTxtFromDependencies -u ${dependenciesFileUrl} \
                                                       -f ${dependenciesFile} > ${newRevisionsFile} 
     if [[ $? != 0 ]] ; then
@@ -91,13 +90,11 @@ _createRevisionsTxtFile() {
         exit 1
     fi
 
-    info "add also buildtools location"
-    set -x
+    # add also buildtools location
     local bldToolsUrl=${lfsSourceRepos}/os/trunk/bldtools/bld-buildtools-common
     echo "svn info --xml ${bldToolsUrl}| ${LFS_CI_ROOT}/bin/xpath -q -e '/info/entry/commit/@revision' "
     local rev=$(svn info --xml ${bldToolsUrl}| ${LFS_CI_ROOT}/bin/xpath -q -e '/info/entry/commit/@revision'  | cut -d'"' -f 2)
     printf "%s %s %s" bld-buildtools "${bldToolsUrl}" "${rev}" >> ${newRevisionsFile}
-    set +x
 
     return
 }

@@ -20,7 +20,6 @@ actionCompare() {
     local oldRevisionsFile=${REVISION_STATE_FILE}
 
     local newRevisionsFile=$(createTempFile)
-    echo "svn info --xml $SVN_URL | ${LFS_CI_ROOT}/bin/xpath -q -e '//info/entry/commit/@revision' | cut -d'' -f 2 >  ${newRevisionsFile}"
     svn info --xml $SVN_URL | ${LFS_CI_ROOT}/bin/xpath -q -e '//info/entry/commit/@revision' | cut -d'"' -f 2 >  ${newRevisionsFile}
 
     # now we have both files, we can compare them
