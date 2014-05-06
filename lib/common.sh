@@ -371,3 +371,18 @@ mustHaveWritableFile() {
     return
 }
 
+
+## @fn      mustExistDirectory( $directoryName )
+#  @brief   ensure, that the directory exists 
+#  @param   {directoryName}    nae of the directory
+#  @return  <none>
+#  @throws  raise an error, if the directory is nit exists
+mustExistDirectory() {
+    local directory=$1
+
+    if [[ ! -d ${directory} ]] ; then
+        error "${directory} is not a directory"
+        exit 1
+    fi
+    return
+}

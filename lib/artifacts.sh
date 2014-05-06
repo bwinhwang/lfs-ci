@@ -13,7 +13,8 @@ createArtifactArchive() {
     local workspace=$(getWorkspaceName)
     mustHaveWorkspaceName
 
-    # TODO: demx2fk3 2014-04-17 add mustHaveBuildResultsDirectory here
+    mustExistDirectory "${workspace}/bld/"
+
     # TODO: demx2fk3 2014-03-31 remove cd - dont change the current directory
     cd "${workspace}/bld/"
 
@@ -42,7 +43,6 @@ createArtifactArchive() {
 #  @param   <none>
 #  @return  <none>
 mustHaveBuildArtifactsFromUpstream() {
-
     requiredParameters UPSTREAM_PROJECT UPSTREAM_BUILD
 
     copyAndExtractBuildArtifactsFromProject "${UPSTREAM_PROJECT}" "${UPSTREAM_BUILD}"
