@@ -83,11 +83,17 @@ _createRevisionsTxtFile() {
 
     # can not use execute here, so we have to do the error handling by hande
     # do the magic for all dir
-    ${LFS_CI_ROOT}/bin/getRevisionTxtFromDependencies -u ${dependenciesFileUrl} -f ${dependenciesFile} > ${newRevisionsFile} 
+    ${LFS_CI_ROOT}/bin/getRevisionTxtFromDependencies -u ${dependenciesFileUrl} \
+                                                      -f ${dependenciesFile} > ${newRevisionsFile} 
     if [[ $? != 0 ]] ; then
         error "reported an error..."
         exit 1
     fi
+
+    # add also buildtools location
+    local bldToolsUrl=${lfsSourceRepos}/os/trunk/bldtools/bld-buildtools-common
+    local rev=$(svn info --xml ${bldToolsUrl}| xpath -q -e '/info/entry/commit/@revision'  | cut -d'"' -f 2)
+    printf "%s %s %s" bld-buildtools "${bldToolsUrl}" "${rev}" >> ${newRevisionsFile}
 
     return
 }
