@@ -92,7 +92,6 @@ _createRevisionsTxtFile() {
 
     # add also buildtools location
     local bldToolsUrl=${lfsSourceRepos}/os/trunk/bldtools/bld-buildtools-common
-    echo "svn info --xml ${bldToolsUrl}| ${LFS_CI_ROOT}/bin/xpath -q -e '/info/entry/commit/@revision' "
     local rev=$(svn info --xml ${bldToolsUrl}| ${LFS_CI_ROOT}/bin/xpath -q -e '/info/entry/commit/@revision'  | cut -d'"' -f 2)
     printf "%s %s %s" bld-buildtools "${bldToolsUrl}" "${rev}" >> ${newRevisionsFile}
 
