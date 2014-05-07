@@ -16,5 +16,7 @@ ci_job_test() {
     # copy the files to a workspace directory
     # jobs will be executed by jenkins job, so we can exit very early
 
+    exit 2
+
     return
 }
