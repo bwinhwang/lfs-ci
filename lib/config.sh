@@ -83,6 +83,8 @@ declare -A platformMap=(         ["fct"]="fsm3_octeon2" \
                                 ["fspc"]="fspc"         \
                                 ["fcmd"]="fcmd"         \
                                  ["arm"]="fsm35_k2"     \
+                           ["keystone2"]="fsm35_k2"     \
+                                 ["axm"]="fsm35_axm"     \
 )
 
 # ....
@@ -91,6 +93,8 @@ declare -A archMap=(         ["fct"]="mips64-octeon2-linux-gnu" \
                      ["qemu_x86_64"]="x86_64-pc-linux-gnu"      \
                             ["fspc"]="powerpc-e500-linux-gnu"   \
                             ["fcmd"]="powerpc-e500-linux-gnu"   \
+                             ["axm"]="arm-cortexa15-linux-gnueabihf"   \
+                       ["keystone2"]="arm-cortexa15-linux-gnueabihf"   \
 )
 
 # ....
