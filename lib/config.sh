@@ -136,6 +136,11 @@ getConfig() {
                 LRC)    echo src-lrcbrm src-cvmxsources src-kernelsources src-bos src-lrcddg src-ifdd src-commonddal src-lrcddal src-tools src-rfs src-toolset ;;
             esac
         ;;
+        onlySourceDirectories) # just use this source directory only
+            case "${subTaskName}" in
+                FSM-r3.5)    echo src-fsmpsl35 ;;
+            esac
+        ;;
         *) : ;;
     esac
 }

@@ -132,6 +132,11 @@ _createWorkspace() {
 
     buildTargets="$(getConfig additionalSourceDirectories) ${buildTargets}"
 
+    local onlySourceDirectory=$(getConfig onlySourceDirectories)
+    if [[ ${onlySourceDirectory} ]] ; then
+        buildTargets=${onlySourceDirectory}
+    fi
+
     local revision=
     if [[ -r "${WORKSPACE}/revisions.txt" ]] ; then
         info "using revision from revisions.txt file"
