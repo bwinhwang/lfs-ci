@@ -329,6 +329,12 @@ getNextReleaseLabel() {
     # TODO: demx2fk3 2014-04-16 move to another file,
     # TODO: demx2fk3 2014-04-16 fill with real content
 
+#    local branchName=$(getBranchName)
+#    mustHaveBranchName
+
+#    local labelNameRegex=${branchToTagRegexMap["$branchName"]}
+#    info "labelNameRegex is ${labelNameRegex}"
+
     echo BM_LFS_REL_OS_$(date +%Y_%m)_${BUILD_NUMBER}
 }
 

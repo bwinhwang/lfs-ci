@@ -84,22 +84,27 @@ declare -A platformMap=(         ["fct"]="fsm3_octeon2" \
                                 ["fcmd"]="fcmd"         \
                                  ["arm"]="fsm35_k2"     \
                            ["keystone2"]="fsm35_k2"     \
-                                 ["axm"]="fsm35_axm"     \
+                                 ["axm"]="fsm35_axm"    \
 )
 
 # ....
-declare -A archMap=(         ["fct"]="mips64-octeon2-linux-gnu" \
-                       ["qemu_i386"]="i686-pc-linux-gnu"        \
-                     ["qemu_x86_64"]="x86_64-pc-linux-gnu"      \
-                            ["fspc"]="powerpc-e500-linux-gnu"   \
-                            ["fcmd"]="powerpc-e500-linux-gnu"   \
-                             ["axm"]="arm-cortexa15-linux-gnueabihf"   \
-                       ["keystone2"]="arm-cortexa15-linux-gnueabihf"   \
+declare -A archMap=(         ["fct"]="mips64-octeon2-linux-gnu"      \
+                       ["qemu_i386"]="i686-pc-linux-gnu"             \
+                     ["qemu_x86_64"]="x86_64-pc-linux-gnu"           \
+                            ["fspc"]="powerpc-e500-linux-gnu"        \
+                            ["fcmd"]="powerpc-e500-linux-gnu"        \
+                             ["axm"]="arm-cortexa15-linux-gnueabihf" \
+                       ["keystone2"]="arm-cortexa15-linux-gnueabihf" \
 )
 
 # ....
 declare -A locationToSubversionMap=( ["pronb-developer"]="PS_LFS_OS_MAINBRANCH" \
                                    )
+
+# define the mapping from branch to label/tag name
+declare -A branchToTagRegexMap=(
+                                  ["pronb-developer"]="BM_PS_LFS_OS_$(date +%Y)_$(date +%m)_\([0-9][0-9]\)"
+                               )
 
 ## @fn      getConfig( key )
 #  @brief   get the configuration to the requested key
@@ -120,7 +125,7 @@ getConfig() {
     case "${key}" in
         subsystem)
             case "${subTaskName}" in
-                FSM-r2       ) echo src-psl      ;;
+                FSM-r2)        echo src-psl      ;;
                 FSM-r2-rootfs) echo src-rfs      ;;
                 FSM-r3)        echo src-fsmpsl   ;;
                 FSM-r3.5)      echo src-fsmpsl35 ;;
@@ -137,12 +142,12 @@ getConfig() {
         ;;
         additionalSourceDirectories)
             case "${subTaskName}" in
-                LRC)    echo src-lrcbrm src-cvmxsources src-kernelsources src-bos src-lrcddg src-ifdd src-commonddal src-lrcddal src-tools src-rfs src-toolset ;;
+                LRC) echo src-lrcbrm src-cvmxsources src-kernelsources src-bos src-lrcddg src-ifdd src-commonddal src-lrcddal src-tools src-rfs src-toolset ;;
             esac
         ;;
         onlySourceDirectories) # just use this source directory only
             case "${subTaskName}" in
-                FSM-r3.5)    echo src-fsmpsl35 ;;
+                FSM-r3.5) echo src-fsmpsl35 ;;
             esac
         ;;
         *) : ;;
