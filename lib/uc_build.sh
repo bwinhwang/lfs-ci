@@ -40,7 +40,7 @@ _build_fsmddal_pdf() {
     local label=$(getNextReleaseLabel)
     mustHaveValue ${label}
 
-
+    cd ${workspace}
     execute build -C src-fsmifdd -L src-fsmifdd.log defcfg
 
     execute tar -C   ${workspace}/bld/bld-fsmifdd-defcfg/results \
