@@ -284,6 +284,10 @@ createTempFile() {
     mktemp ${LFS_CI_TEMPDIR}/tmp.$$.XXXXXXXXX
 }
 
+createTempDirectory() {
+    mktemp --directory ${LFS_CI_TEMPDIR}/tmp.$$.XXXXXXXXX
+}
+
 ## @fn      cleanupTempFiles()
 #  @brief   reomve all the used temp files
 #  @param   <none>

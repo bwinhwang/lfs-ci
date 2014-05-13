@@ -45,7 +45,7 @@ _build_fsmddal_pdf() {
     cd ${workspace}
     execute build -C src-fsmifdd -L src-fsmifdd.log defcfg
 
-    local tmpDir=$(createTempFile)
+    local tmpDir=$(createTempDirectory)
     execute mkdir -p ${tmpDir}/ddal/
     execute cp -r ${workspace}/bld/bld-fsmifdd-defcfg/results/include ${tmpDir}/ddal/
 
