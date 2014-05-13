@@ -37,8 +37,11 @@ _build_fsmddal_pdf() {
     mustHaveWorkspaceName
     mustHaveCleanWorkspace
 
+    info "workspace is ${workspace}"
+
     local label=$(getNextReleaseLabel)
     mustHaveValue ${label}
+
 
     cd ${workspace}
     execute build -C src-fsmifdd -L src-fsmifdd.log defcfg
