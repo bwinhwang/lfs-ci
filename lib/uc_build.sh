@@ -13,12 +13,12 @@ ci_job_build() {
     _createWorkspace
 
     info "building targets..."
-    local subsystem=$(getConfig subsystem)
-    mustHaveValue "${subsystem}"
+    local subTaskName=$(getSubTaskNameFromJobName)
+    mustHaveValue "${subTaskName}"
 
-    info "subsystem is ${subsystem}"
+    info "subTaskName is ${subTaskName}"
 
-    case ${subsystem} in
+    case ${subTaskName} in
         *FSMDDALpdf*) _build_fsmddal_pdf ;;
         *)            _build             ;;
     esac
