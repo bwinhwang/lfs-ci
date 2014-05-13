@@ -57,8 +57,9 @@ _build_fsmddal_pdf() {
     execute make -C ${workspace}/src-fsmpsl/src/fsmddal.d/
 
     # fixme
-    execute mkdir -p ${workspace}/bld/bld-fsmpsl-fct/results/doc/
-    execute cp ${workspace}/src-fsmpsl/src/fsmddal.d/FSMDDAL.pdf ${workspace}/bld/bld-fsmpsl-fct/results/doc/
+    execute mkdir -p ${workspace}/bld/bld-fsmpsl-doc/results/doc/
+    execute cp ${workspace}/src-fsmpsl/src/fsmddal.d/FSMDDAL.pdf ${workspace}/bld/bld-fsmpsl-doc/results/doc/
+    execute rm -rf ${workspace}/bld/bld-fsmifdd-defcfg
 
     return
 }
