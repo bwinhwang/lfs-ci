@@ -292,6 +292,8 @@ synchroniceToLocalPath() {
     local subsystem=$(basename ${localPath})
     local tag=$(basename ${remotePath})
 
+    requiredParameters LFS_CI_SHARE_MIRROR
+
     local localCacheDir=${LFS_CI_SHARE_MIRROR}/${USER}/lfs-ci-local/${subsystem}
 
     if [[ ! -e ${localCacheDir}/${tag} ]] ; then
