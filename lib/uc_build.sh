@@ -45,9 +45,13 @@ _build_fsmddal_pdf() {
     cd ${workspace}
     execute build -C src-fsmifdd -L src-fsmifdd.log defcfg
 
-    execute tar -C   ${workspace}/bld/bld-fsmifdd-defcfg/results/      \
+    local tmpDir=$(createTempFile)
+    execute mkdir -p ${tmpDir}/ddal/
+    execute cp -r ${workspace}/bld/bld-fsmifdd-defcfg/results/include ${tmpDir}/ddal/
+
+    execute tar -C   ${tmpDir} \
                 -czf ${workspace}/src-fsmpsl/src/fsmddal.d/fsmifdd.tgz \
-                include
+                ddal
 
     echo ${label} > ${workspace}/src-fsmpsl/src/fsmddal.d/label
     execute make -C ${workspace}/src-fsmpsl/src/fsmddal.d/
