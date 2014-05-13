@@ -16,6 +16,8 @@ ci_job_build() {
     local subsystem=$(getConfig subsystem)
     mustHaveValue "${subsystem}"
 
+    info "subsystem is ${subsystem}"
+
     case ${subsystem} in
         *FSMDDALpdf*) _build_fsmddal_pdf ;;
         *)            _build             ;;
