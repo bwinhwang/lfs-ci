@@ -45,7 +45,7 @@ _build_fsmddal_pdf() {
     cd ${workspace}
     execute build -C src-fsmifdd -L src-fsmifdd.log defcfg
 
-    execute tar -C   ${workspace}/bld/bld-fsmifdd-defcfg/results \
+    execute tar -C   ${workspace}/bld/bld-fsmifdd-defcfg/results/include \
                 -czf ${workspace}/fsmifdd.tgz                    \
                 ddal
 
