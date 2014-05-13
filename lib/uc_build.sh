@@ -13,12 +13,12 @@ ci_job_build() {
     _createWorkspace
 
     info "building targets..."
-    local taskName=$(getTaskNameFromJobName)
-    mustHaveValue "${taskName}"
+    local subsystem=$(getConfig subsystem)
+    mustHaveValue "${subsystem}"
 
-    case ${taskName} in
-        Build_)            _build             ;; 
-        Build_FSMDDALpdf_) _build_fsmddal_pdf ;;
+    case ${subsystem} in
+        *FSMDDALpdf*) _build_fsmddal_pdf ;;
+        *)            _build             ;;
     esac
 
     info "upload results to artifakts share."
@@ -37,6 +37,7 @@ _build_fsmddal_pdf() {
 
     local label=$(getNextReleaseLabel)
     mustHaveValue ${label}
+
 
     execute build -C src-fsmifdd -L src-fsmifdd.log defcfg
 
