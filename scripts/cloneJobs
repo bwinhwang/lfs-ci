@@ -43,7 +43,7 @@ do
         deleteJenkinsJob "${newJobName}"
     fi
 
-    # createJenkinsJob "${newJobName}" ${job}.xml
-    # info "job ${newJobName} created."
+    createJenkinsJob "${newJobName}" ${job}.xml
+    info "job ${newJobName} created."
 
 done

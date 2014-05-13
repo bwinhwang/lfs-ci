@@ -18,7 +18,7 @@ my $subTaskNameRE = qr / (?<subTaskName>
                          )
                        /x;
 my $taskNameRE    = qr / (?<taskName>
-                           [^_-_]+
+                           [A-Za-z0-9.:_+]+
                          )
                        /x;
 my $platformRE    = qr / (?<platform>

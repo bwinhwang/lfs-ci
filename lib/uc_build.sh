@@ -13,7 +13,13 @@ ci_job_build() {
     _createWorkspace
 
     info "building targets..."
-    _build
+    local taskName=$(getTaskNameFromJobName)
+    mustHaveValue "${taskName}"
+
+    case ${taskName} in
+        Build_)            _build             ;; 
+        Build_FSMDDALpdf_) _build_fsmddal_pdf ;;
+    esac
 
     info "upload results to artifakts share."
     createArtifactArchive
@@ -21,6 +27,33 @@ ci_job_build() {
     info "build job finished."
     return 0
 }
+
+
+_build_fsmddal_pdf() {
+
+    local workspace=$(getWorkspaceName)
+    mustHaveWorkspaceName
+    mustHaveCleanWorkspace
+
+    local label=$(getNextReleaseLabel)
+    mustHaveValue ${label}
+
+    execute build -C src-fsmifdd -L src-fsmifdd.log defcfg
+
+    execute tar -C   ${workspace}/bld/bld-fsmifdd-defcfg/results \
+                -czf ${workspace}/fsmifdd.tgz                    \
+                ddal
+
+    echo ${label} > ${workspace}/src-fsmpsl/src/fsmddal.d/label
+    execute make -C ${workspace}/src-fsmpsl/src/fsmddal.d/
+
+    # fixme
+    execute mkdir -p ${workspace}/bld/bld-fsmpsl-fct/results/doc/
+    execute cp FSMDDAL.pdf ${workspace}/bld/bld-fsmpsl-fct/results/doc/
+
+    return
+}
+
 
 ## @fn      _build()
 #  @brief   make the build
