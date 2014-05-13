@@ -35,7 +35,6 @@ _build_fsmddal_pdf() {
 
     local workspace=$(getWorkspaceName)
     mustHaveWorkspaceName
-    mustHaveCleanWorkspace
 
     info "workspace is ${workspace}"
 
