@@ -1204,6 +1204,8 @@ sub execute {
 }
 
 # ------------------------------------------------------------------------------------------------------------------
+## @fn    Singelton
+#  @brief class which just provide a singelton - just one instance of this class
 package Singelton;
 use strict;
 use warnings;
@@ -1218,6 +1220,8 @@ sub svn {
 }
 
 # ------------------------------------------------------------------------------------------------------------------
+## @fn    main
+#  @brief the main programm and dispatcher to the command objects.
 package main;
 use strict;
 use warnings;

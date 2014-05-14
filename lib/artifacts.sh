@@ -130,7 +130,6 @@ copyArtifactsToWorkspace() {
     execute mkdir -p ${workspace}/bld/
 
     for jobData in ${triggeredJobData} ; do
-
         local number=$(echo ${jobData} | cut -d: -f 1)
         local result=$(echo ${jobData} | cut -d: -f 2)
         local name=$(  echo ${jobData} | cut -d: -f 3-)
@@ -142,9 +141,7 @@ copyArtifactsToWorkspace() {
             exit 1
         fi
 
-        # TODO: demx2fk3 2014-04-28 rename, fix typo
         copyAndExtractBuildArtifactsFromProject ${name} ${number}
-
     done
 
     return
