@@ -354,7 +354,7 @@ mustHaveNextLabelName() {
     local regex=${branchToTagRegexMap["${branch}"]}
     mustHaveValue "${regex}"
 
-    local label=$(${LFS_CI_ROOT}/bin/getNextLabelName -u ${lfsSourceRepos}/os/tags -r "${regex}" )
+    local label=$(${LFS_CI_ROOT}/bin/getNewTagName -u ${lfsSourceRepos}/os/tags -r "${regex}" )
     mustHaveValue "${label}"
 
     export LFS_CI_NEXT_LABEL_NAME="${label}"
