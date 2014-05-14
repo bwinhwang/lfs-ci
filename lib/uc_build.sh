@@ -26,6 +26,7 @@ ci_job_build() {
 
     case ${subTaskName} in
         *FSMDDALpdf*) _build_fsmddal_pdf ;;
+        *Summary*)    _build_version     ;;
         *)            _build             ;;
     esac
 
@@ -36,6 +37,22 @@ ci_job_build() {
     return 0
 }
 
+_build_version() {
+    local workspace=$(getWorkspaceName)
+    mustHaveCleanWorkspace
+    mustHaveWorkspaceName
+
+    info "workspace is ${workspace}"
+
+    mustHaveNextCiLabelName
+    local label=$(getNextCiLabelName)
+    mustHaveValue ${label}
+
+    execute mkdir -p ${workspace}/bld/bld-fsmci-summary
+    echo ${label} > ${workspace}/bld/bld-fsmci-summary
+
+    return
+}
 
 _build_fsmddal_pdf() {
 
