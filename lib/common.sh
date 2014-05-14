@@ -368,7 +368,10 @@ mustHaveNextCiLabelName() {
     mustHaveNextLabelName
     local label=$(getNextReleaseLabel)
 
-    oldLabel=$(runOnMaster grep ${LFS_CI_NEXT_CI_LABEL_NAME} ${jenkinsMasterServerPath}/jobs/${JOB_NAME}/builds/${BUILD_NUMBER}/label)
+    local workspace=$(getWorkspaceName)
+    mustHaveWorkspaceName
+
+    oldLabel=$(grep ${LFS_CI_NEXT_CI_LABEL_NAME} ${workspace}/bld/bld-fsmci-summary/version)
 
     local postfix="00"
 
