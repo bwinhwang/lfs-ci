@@ -85,16 +85,32 @@ setBuildDescription() {
     return
 }
 
+## @fn      startBuildJobs( $jobName )
+#  @brief   start a jenkins job with a specified job name
+#  @param   {jobName}    name of the job
+#  @return  <none>
 startBuildJobs() {
     local jobName=$1
+
+    # TODO: demx2fk3 2014-05-12 not implemented yet
 
     return
 }
 
+## @fn      listJobNames()
+#  @brief   list all jenkins jobs
+#  @param   <none>
+#  @return  list of jobs names
 listJobNames() {
     runOnMaster ls ${jenkinsMasterServerPath}/jobs
 }
 
+## @fn      getJob( $jobName, $outputFileName )
+#  @brief   get the configuration of the jenkins project as xml.
+#  @details the xml configuration will be written into the specified file
+#  @param   {jobName}    name of the jenkins projekt
+#  @param   {fileName}   output filename where the config should be written 
+#  @return  <none>
 getJob() {
     local jobName=$1
     local fileName=$2
@@ -104,6 +120,11 @@ getJob() {
     return
 }
 
+## @fn      existsJenkinsJob( $jobName )
+#  @brief   checks, if the jenkins projekt / job exists or not
+#  @param   {jobName}    name of the jenkins project
+#  @return  <none>
+#  @return  1 if jenkins projekt exists, 0 otherwise
 existsJenkinsJob() {
     local jobName=$1
 
@@ -114,6 +135,11 @@ existsJenkinsJob() {
     return 1
 }
 
+## @fn      createJenkinsJob( $jobName, $fileName  )
+#  @brief   creates a jenkins job with the specified name and config
+#  @param   {jobName}    name of the new jenkins project
+#  @param   {fileName}   filename, which contains the config for the new jenkins project
+#  @return  <none>
 createJenkinsJob() {
     local jobName=$1
     local xmlConfigFile=$2
@@ -122,6 +148,10 @@ createJenkinsJob() {
     return
 }
 
+## @fn      deleteJenkinsJob( $jobName )
+#  @brief   delete a jenkins job with the specified name
+#  @param   {jobName}     name of the jenkins project
+#  @return  <none>
 deleteJenkinsJob() {
     local jobName=$1
 
