@@ -54,13 +54,13 @@
 #  @param   {parameters} the parameters of the given command   
 #  @return  <none>
 executeJenkinsCli() {
-    execute ${java} -jar ${jenkinsCli} -s "${jenkinsMasterServerHttpUrl}" $@
+    execute ${java} -jar ${jenkinsCli} -s "${jenkinsMasterServerHttpUrl}" -i ${jenkinsSshIdentification} $@
     return
 }
 
 runJenkinsCli() {
     local tmpFile=$(createTempFile)
-    ${java} -jar ${jenkinsCli} -s "${jenkinsMasterServerHttpUrl}" $@ 2> ${tmpFile}
+    ${java} -jar ${jenkinsCli} -s "${jenkinsMasterServerHttpUrl}" -i ${jenkinsSshIdentification} $@ 2> ${tmpFile}
     if [[ $? != 0 ]] ; then
         error "error in executing jenkins CLI: $@"
         rawDebug ${tmpFile}

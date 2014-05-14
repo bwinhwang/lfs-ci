@@ -41,12 +41,15 @@ jenkinsMasterServerPath=${jenkinsRoot}/home
 
 jenkinsMasterServerBackupPath=/build/home/${USER}/jenkinsBackup
 
+jenkinsSshIdentification=${HOME}/.ssh/id_dsa
+
 # location of the jenkins cli jar file
 jenkinsCli=${LFS_CI_ROOT}/lib/java/jenkins/jenkins-cli-${jenkinsVersion}.jar
 
 # path to the share, where the build artifacts are located
 # (location for ulm, not valid for other sites)
 artifactesShare=/build/home/${USER}/lfs
+
 
 # hostname of the svn master server
 svnMasterServerHostName=svne1.access.nokiasiemensnetworks.com
