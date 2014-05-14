@@ -106,7 +106,7 @@ declare -A locationToSubversionMap=( ["pronb-developer"]="PS_LFS_OS_MAINBRANCH" 
 
 # define the mapping from branch to label/tag name
 declare -A branchToTagRegexMap=(
-                                  ["pronb-developer"]="BM_PS_LFS_OS_$(date +%Y)_$(date +%m)_\([0-9][0-9]\)"
+                                  ["pronb-developer"]="BM_PS_LFS_OS_$(date +%Y)_$(date +%m)_([0-9][0-9])"
                                )
 
 ## @fn      getConfig( key )
