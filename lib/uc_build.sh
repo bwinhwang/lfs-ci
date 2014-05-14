@@ -38,10 +38,9 @@ _build_fsmddal_pdf() {
 
     info "workspace is ${workspace}"
 
-    mustHaveNextLabelName
-    local label=$(getNextReleaseLabel)
+    mustHaveNextCiLabelName
+    local label=$(getNextCiLabelName)
     mustHaveValue ${label}
-
 
     cd ${workspace}
     execute build -C src-fsmifdd -L src-fsmifdd.log defcfg
@@ -55,7 +54,7 @@ _build_fsmddal_pdf() {
                 ddal
 
     echo ${label} > ${workspace}/src-fsmpsl/src/fsmddal.d/label
-    execute make -C ${workspace}/src-fsmpsl/src/fsmddal.d/
+    execute make -C ${workspace}/src-fsmpsl/src/fsmddal.d/ LABEL=${label}
 
     # fixme
     local destinationDir=${workspace}/bld/bld-fsmddal-doc/results/doc/
@@ -85,6 +84,10 @@ _build() {
     local target=$(getTargetBoardName)
     mustHaveTargetBoardName
 
+    mustHaveNextCiLabelName
+    local label=$(getNextCiLabelName)
+    mustHaveValue ${label}
+
     cd ${workspace}
     info "creating temporary makefile"
     ${LFS_CI_ROOT}/bin/sortBuildsFromDependencies ${target} > ${cfgFile}
@@ -94,7 +97,7 @@ _build() {
     local makeTarget=$(getConfig subsystem)-${target}
 
     info "executing all targets in parallel"
-    execute make -f ${cfgFile} -j ${makeTarget}
+    execute make -f ${cfgFile} -j ${makeTarget} LABEL=${label}
 
 #     sortbuildsfromdependencies ${target} > ${cfgFile}
 #     rawDebug ${cfgFile}

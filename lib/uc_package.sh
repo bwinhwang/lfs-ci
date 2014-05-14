@@ -50,8 +50,8 @@ copyReleaseCandidateToShare() {
     local workspace=$(getWorkspaceName)
     mustHaveWorkspaceName
 
-    mustHaveNextLabelName
-    local label=$(getNextReleaseLabel)
+    mustHaveNextCiLabelName
+    local label=$(getNextCiLabelName)
     mustHaveValue "${label}"
     
     local branch=$(getBranchName)
