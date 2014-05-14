@@ -4,7 +4,7 @@ use strict;
 use warnings;
 use Data::Dumper;
 
-my $debug = 0;
+my $debug = 1;
 
 # my $SUBDIR=".";
 # $SUBDIR=shift(@ARGV) if $#ARGV>=0;

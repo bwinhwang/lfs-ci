@@ -815,7 +815,8 @@ sub prepare {
     my $self = shift;
     my @args = @_;
 
-    $self->{goal}     = shift @args || die "no src dir";
+    $self->{goal}  = shift @args || die "no src dir";
+    $self->{style} = shift @args || "makefile";
 
     @{ $self->{sourcesDirectories} } = <src-*>;
     @{ $self->{sources} } = ();
@@ -863,29 +864,32 @@ SOURCES:
 
         my @filteredDeps = sort grep { /src-/ } grep { not $duplicate{$_}++; } @deps;
 
-        if( grep { $_ eq $goal } $source->platforms() ) {
-            printf "%s: ", $source->{directory};
-            foreach my $platform ( sort grep { $_ eq $goal } $source->platforms() ) {
-                printf "%s-%s ", $source->{directory}, $platform;
+        if( $self->{style} eq "makefile" ) {
+            if( grep { $_ eq $goal } $source->platforms() ) {
+                printf "%s: ", $source->{directory};
+                foreach my $platform ( sort grep { $_ eq $goal } $source->platforms() ) {
+                    printf "%s-%s ", $source->{directory}, $platform;
+                }
+                printf "\n";
             }
-            printf "\n";
-        }
 
-        foreach my $target ( sort $source->targets() ) {
-            my $platform = $target->platform();
-            foreach my $p ( $target->targetsParameter() ) {
-                printf "%s-%s: %s-%s\n\n", $source->{directory}, $p, $source->{directory}, $platform;
+            foreach my $target ( sort $source->targets() ) {
+                my $platform = $target->platform();
+                foreach my $p ( $target->targetsParameter() ) {
+                    printf "%s-%s: %s-%s\n\n", $source->{directory}, $p, $source->{directory}, $platform;
 
+                }
+                printf "%s-%s: %s\n", $source->{directory}, $platform, join( " ", @filteredDeps );
+                printf "\tbuild -L \$@.log -C %s %s\n\n", $source->{directory}, $platform;
             }
-            printf "%s-%s: %s\n", $source->{directory}, $platform, join( " ", @filteredDeps );
-            printf "\tbuild -L \$@.log -C %s %s\n\n", $source->{directory}, $platform;
+        } 
+
+        if( $self->{style} eq "legacy" ) {
+            printf "%s %s - %s\n",
+                    $source->{directory},
+                    join( ",", sort $source->platforms() ),
+                    join( ",", sort grep { /src-/ } grep { not $duplicate{ $_ }++; } @deps );
         }
-
-
-#         printf "%s %s - %s\n",
-#                 $source->{directory},
-#                 join( ",", sort $source->platforms() ),
-#                 join( ",", sort grep { /src-/ } grep { not $duplicate{ $_ }++; } @deps );
  
         $seen{ $source->{directory} } ++;
     }

@@ -13,7 +13,15 @@ ci_job_build() {
     _createWorkspace
 
     info "building targets..."
-    _build
+    local subTaskName=$(getSubTaskNameFromJobName)
+    mustHaveValue "${subTaskName}"
+
+    info "subTaskName is ${subTaskName}"
+
+    case ${subTaskName} in
+        *FSMDDALpdf*) _build_fsmddal_pdf ;;
+        *)            _build             ;;
+    esac
 
     info "upload results to artifakts share."
     createArtifactArchive
@@ -21,6 +29,40 @@ ci_job_build() {
     info "build job finished."
     return 0
 }
+
+
+_build_fsmddal_pdf() {
+
+    local workspace=$(getWorkspaceName)
+    mustHaveWorkspaceName
+
+    info "workspace is ${workspace}"
+
+    local label=$(getNextReleaseLabel)
+    mustHaveValue ${label}
+
+
+    cd ${workspace}
+    execute build -C src-fsmifdd -L src-fsmifdd.log defcfg
+
+    local tmpDir=$(createTempFile)
+    execute mkdir -p ${tmpDir}/ddal/
+    execute cp -r ${workspace}/bld/bld-fsmifdd-defcfg/results/include ${tmpDir}/ddal/
+
+    execute tar -C   ${tmpDir} \
+                -czf ${workspace}/src-fsmpsl/src/fsmddal.d/fsmifdd.tgz \
+                ddal
+
+    echo ${label} > ${workspace}/src-fsmpsl/src/fsmddal.d/label
+    execute make -C ${workspace}/src-fsmpsl/src/fsmddal.d/
+
+    # fixme
+    execute mkdir -p ${workspace}/bld/bld-fsmpsl-fct/results/doc/
+    execute cp FSMDDAL.pdf ${workspace}/bld/bld-fsmpsl-fct/results/doc/
+
+    return
+}
+
 
 ## @fn      _build()
 #  @brief   make the build
@@ -255,6 +297,8 @@ synchroniceToLocalPath() {
     local remotePath=$(readlink ${localPath})
     local subsystem=$(basename ${localPath})
     local tag=$(basename ${remotePath})
+
+    requiredParameters LFS_CI_SHARE_MIRROR
 
     local localCacheDir=${LFS_CI_SHARE_MIRROR}/${USER}/lfs-ci-local/${subsystem}
 

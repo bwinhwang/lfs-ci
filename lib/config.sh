@@ -126,19 +126,22 @@ getConfig() {
     case "${key}" in
         subsystem)
             case "${subTaskName}" in
-                FSM-r2)        echo src-psl      ;;
-                FSM-r2-rootfs) echo src-rfs      ;;
-                FSM-r3)        echo src-fsmpsl   ;;
-                FSM-r3.5)      echo src-fsmpsl35 ;;
-                LRC)           echo src-lrcpsl   ;;
-                UBOOT)         echo src-fsmbrm   ;;
+                FSM-r2)     echo src-psl      ;;
+                FSM-r2-*)   echo src-rfs      ;;
+                FSM-r3)     echo src-fsmpsl   ;;
+                FSM-r3-*)   echo src-fsmpsl   ;;
+                FSM-r3.5)   echo src-fsmpsl35 ;;
+                FSM-r3.5-*) echo src-fsmpsl35 ;;
+                LRC)        echo src-lrcpsl   ;;
+                UBOOT)      echo src-fsmbrm   ;;
             esac
         ;;
         locationMapping)
             case "${subTaskName}" in
-                LRC)    echo LRC         ;;
-                UBOOT)  echo nightly     ;;
-                FSM-r3) echo ${location} ;;
+                LRC)      echo LRC         ;;
+                UBOOT)    echo nightly     ;;
+                FSM-r3)   echo ${location} ;;
+                FSM-r3-*) echo ${location} ;;
             esac
         ;;
         additionalSourceDirectories)
@@ -148,7 +151,8 @@ getConfig() {
         ;;
         onlySourceDirectories) # just use this source directory only
             case "${subTaskName}" in
-                FSM-r3.5) echo src-fsmpsl35 ;;
+                FSM-r3.5)   echo src-fsmpsl35 ;;
+                FSM-r3.5-*) echo src-fsmpsl35 ;;
             esac
         ;;
         *) : ;;
