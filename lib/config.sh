@@ -85,7 +85,6 @@ declare -A platformMap=(         ["fct"]="fsm3_octeon2" \
                                  ["arm"]="fsm35_k2"     \
                            ["keystone2"]="fsm35_k2"     \
                                  ["axm"]="fsm35_axm"    \
-                                 ["doc"]="doc"          \
 )
 
 # ....

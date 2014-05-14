@@ -211,12 +211,6 @@ copySysroot() {
             ;;
         esac            
 
-        for file in ${bldDirectory}/results/{FSM,}DDAL.pdf ; do
-            if [[ -f ${file} ]] ; then
-                execute cp ${bldDirectory}/results/{FSM,}DDAL.pdf ${dst}/doc
-            fi
-        done
-
     done
 
     return
@@ -340,12 +334,20 @@ copyDocumentation() {
     local workspace=$(getWorkspaceName)
     mustHaveWorkspaceName
 
-    local dstDirectory=${workspace}/upload/doc
-    mkdir -p ${dstDirectory}
+    local dst=${workspace}/upload/doc
+    mkdir -p ${dst}
 
     info "copy doc..."
 
     # TODO: demx2fk3 2014-04-01 implement this, fix in src-fsmpsl and src-psl is needed
+
+    for file in ${workspace}/bld/bld-fsmddal-doc/results/doc/results/{FSM,}DDAL.pdf ; do
+        if [[ -f ${file} ]] ; then
+            info "copy ${file} to documentation directory"
+            execute cp ${file} ${dst}/doc
+        fi
+    done
+
 
     return
 }
