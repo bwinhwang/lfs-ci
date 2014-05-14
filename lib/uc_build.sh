@@ -48,6 +48,8 @@ _build_version() {
     local label=$(getNextCiLabelName)
     mustHaveValue ${label}
 
+    setBuildDescription "${JOB_NAME}" "${BUILD_NUMBER}" "${label}"
+
     execute mkdir -p ${workspace}/bld/bld-fsmci-summary
     echo ${label} > ${workspace}/bld/bld-fsmci-summary
 
