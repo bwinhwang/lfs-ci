@@ -16,6 +16,12 @@ ci_job_build() {
     local subTaskName=$(getSubTaskNameFromJobName)
     mustHaveValue "${subTaskName}"
 
+    mustHaveNextCiLabelName
+    local label=$(getNextCiLabelName)
+    mustHaveValue ${label}
+
+    setBuildDescription "${JOB_NAME}" "${BUILD_NUMBER}" "${label}"
+
     info "subTaskName is ${subTaskName}"
 
     case ${subTaskName} in
