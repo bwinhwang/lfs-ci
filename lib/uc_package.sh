@@ -49,11 +49,13 @@ copyReleaseCandidateToShare() {
 
     local workspace=$(getWorkspaceName)
     mustHaveWorkspaceName
- 
+
+    mustHaveNextLabelName
     local label=$(getNextReleaseLabel)
-    # TODO: demx2fk3 2014-04-16 add mustHaveLabelName here
+    mustHaveValue "${label}"
+    
     local branch=$(getBranchName)
-    # TODO: demx2fk3 2014-04-16 add mustHaveBranchName here
+    mustHaveBranchName
 
     local localDirectory=${workspace}/upload
     local remoteDirectory=${lfsCiBuildsShare}/${branch}/data/${label}/os
@@ -74,7 +76,6 @@ copyReleaseCandidateToShare() {
     executeOnMaster ln -sf ${lfsCiBuildsShare}/${branch}/data/${label} ${lfsCiBuildsShare}/${branch}/${label}
     executeOnMaster ln -sf ${lfsCiBuildsShare}/${branch}/data/${label} ${lfsCiBuildsShare}/${branch}/trunk@${BUILD_NUMBER}
     executeOnMaster ln -sf ${lfsCiBuildsShare}/${branch}/data/${label} ${lfsCiBuildsShare}/${branch}/build_${BUILD_NUMBER}
-
 
     return
 }

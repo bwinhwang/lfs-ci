@@ -339,7 +339,23 @@ getNextReleaseLabel() {
 #    local labelNameRegex=${branchToTagRegexMap["$branchName"]}
 #    info "labelNameRegex is ${labelNameRegex}"
 
-    echo BM_LFS_REL_OS_$(date +%Y_%m)_${BUILD_NUMBER}
+    echo ${LFS_CI_NEXT_LABEL_NAME}
+}
+
+mustHaveNextLabelName() {
+
+    local branch=$(getBranchName)
+    mustHaveBranchName
+
+    local regex=${branchToTagRegexMap["${branch}"]}
+    mustHaveValue "${regex}"
+
+    local label=$(${LFS_CI_ROOT}/bin/getNextLabelName -u ${lfsSourceRepos}/os/tags -r "${regex}" )
+    mustHaveValue "${label}"
+
+    export LFS_CI_NEXT_LABEL_NAME="${label}"
+
+    return
 }
 
 ## @fn      mustHaveValue( $value )

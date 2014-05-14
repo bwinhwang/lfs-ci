@@ -38,6 +38,7 @@ _build_fsmddal_pdf() {
 
     info "workspace is ${workspace}"
 
+    mustHaveNextLabelName
     local label=$(getNextReleaseLabel)
     mustHaveValue ${label}
 

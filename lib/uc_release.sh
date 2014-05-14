@@ -100,6 +100,7 @@ extractArtifactsOnReleaseShare() {
     local workspace=$(getWorkspaceName)
     mustHaveWorkspaceName
 
+    mustHaveNextLabelName
     local labelName=$(getNextReleaseLabel)
     mustHaveValue "${labelName}"
 
