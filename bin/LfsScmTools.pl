@@ -342,9 +342,22 @@ sub info {
     my $url   = replaceMasterByUlmServer( $param->{url} || "" );
 
     open SVN_INFO, sprintf( "%s --xml info %s|", $self->{svnCli}, $url ) || die "can not open svn info: %!";
-    my $xml = join( "", <SVN_INFO>);
+    my $xml = join( "", <SVN_INFO> );
     close SVN_INFO;
+
     return XMLin( $xml );
+}
+
+sub ls {
+    my $self  = shift;
+    my $param = { @_ };
+    my $url   = replaceMasterByUlmServer( $param->{url} || "" );
+
+    open SVN_LS, sprintf( "%s --xml ls %s|", $self->{svnCli}, $url ) || die "can not open svn info: %!";
+    my $xml = join( "", <SVN_LS> );
+    close SVN_LS;
+
+    return XMLin( $xml, ForceArray => 1 );
 }
 
 ## @fn     command( %param )
@@ -882,7 +895,7 @@ SOURCES:
                 printf "%s-%s: %s\n", $source->{directory}, $platform, join( " ", @filteredDeps );
                 printf "\tbuild -L \$@.log -C %s %s\n\n", $source->{directory}, $platform;
             }
-        } 
+        }
 
         if( $self->{style} eq "legacy" ) {
             printf "%s %s - %s\n",
@@ -890,7 +903,7 @@ SOURCES:
                     join( ",", sort $source->platforms() ),
                     join( ",", sort grep { /src-/ } grep { not $duplicate{ $_ }++; } @deps );
         }
- 
+
         $seen{ $source->{directory} } ++;
     }
 
@@ -984,7 +997,7 @@ sub readBuildXml {
     return @results;
 }
 
-sub prepare { 
+sub prepare {
     my $self = shift;
     my @args = @_;
 
@@ -993,7 +1006,7 @@ sub prepare {
     $self->{build}   = $opts{b} || die "no build number";
     $self->{home}    = $opts{h} || die "no home";
 
-    return; 
+    return;
 }
 
 sub execute {
@@ -1050,7 +1063,7 @@ sub readBuildXml {
     return @results;
 }
 
-sub prepare { 
+sub prepare {
     my $self = shift;
     my @args = @_;
 
@@ -1059,7 +1072,7 @@ sub prepare {
     $self->{build}   = $opts{b} || die "no build number";
     $self->{home}    = $opts{h} || die "no home";
 
-    return; 
+    return;
 }
 
 sub execute {
@@ -1079,6 +1092,7 @@ sub execute {
 
     return;
 }
+
 # ------------------------------------------------------------------------------------------------------------------
 ## @brief this command creates a file with svn revisions and svn urls
 package Command::GetRevisionTxtFromDependencies;
@@ -1125,6 +1139,53 @@ sub execute {
 
     return;
 }
+
+# ------------------------------------------------------------------------------------------------------------------
+## @brief generate new tag
+package Command::GetNewTagName;
+use strict;
+use warnings;
+
+use parent qw( -norequire Object );
+use Getopt::Std;
+use Data::Dumper;
+
+sub prepare {
+    my $self = shift;
+    getopts( "f:u:", \my %opts );
+    $self->{regex} = $opts{r} || die "no regex";
+    $self->{url}   = $opts{u} || die "no svn url";
+
+    return;
+}
+
+sub execute {
+    my $self = shift;
+
+    my $svn   = Singelton::svn();
+    my $xml   = $svn->ls( url => $self->{url} );
+
+    my $regex = $self->{regex};
+
+    my $lastTag         = ();
+    my $newTag          = $regex;
+    my $lastTagLastByte = "00";
+
+    my @okList = map  { m/^${regex}$/; $1 }
+                 grep { m/^${regex}$/;    }
+                 map  { $_->{name}->[0]   }
+                 @{ $xml->{list}->[0]->{entry} };
+
+    if( scalar( @okList ) ) {
+        $lastTagLastByte = pop @okList;
+    }
+    my $newTagLastByte = sprintf( "%02d", $lastTagLastByte + 1 );
+    $newTag =~ s/\(.*\)/$newTagLastByte/g;
+
+    printf $newTag;
+    return;
+}
+
 
 # ------------------------------------------------------------------------------------------------------------------
 package Usecase::GetLocation;
@@ -1245,6 +1306,8 @@ if( $program eq "getDependencies" ) {
     $command = Command::GetDownStreamProjects->new();
 } elsif ( $program eq "getRevisionTxtFromDependencies" ) {
     $command = Command::GetRevisionTxtFromDependencies->new();
+} elsif ( $program eq "getNewTagName" ) {
+    $command = Command::GetNewTagName->new();
 } else {
     die "command not defined";
 }

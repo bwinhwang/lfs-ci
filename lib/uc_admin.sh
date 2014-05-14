@@ -63,14 +63,8 @@ cleanUpArtifactsShare() {
 #  @brief   backup the jenkins installation from the master server on the build share
 #  @details we keep 10 backups of the jenkins installation, we use the 
 #  @todo    «description of incomplete business»
-#  @param   {«parameter name»}    «parameter description»
-#  @param   {«parameter name»}    «parameter description»
 #  @param   <none>
 #  @return  <none>
-#  @return  «»
-#  @return  1 if «», 0 otherwise
-#  @throws  «»
-
 backupJenkinsMasterServerInstallation() {
 
     local backupPath=${jenkinsMasterServerBackupPath}
@@ -93,5 +87,4 @@ backupJenkinsMasterServerInstallation() {
     info "backup done"
 
     return
-    
 }
