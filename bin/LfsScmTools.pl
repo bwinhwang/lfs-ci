@@ -1152,7 +1152,7 @@ use Data::Dumper;
 
 sub prepare {
     my $self = shift;
-    getopts( "f:u:", \my %opts );
+    getopts( "r:u:", \my %opts );
     $self->{regex} = $opts{r} || die "no regex";
     $self->{url}   = $opts{u} || die "no svn url";
 
