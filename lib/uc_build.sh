@@ -66,6 +66,8 @@ ci_job_build_version() {
     execute mkdir -p     ${workspace}/bld/bld-fsmci-summary
     echo ${newCiLabel} > ${workspace}/bld/bld-fsmci-summary/label
 
+    executeOnMaster "echo ${newCiLabel} > ${jenkinsMasterServerPath}/jobs/${JOB_NAME}/builds/${BUILD_NUMBER}/label"
+
     info "upload results to artifakts share."
     createArtifactArchive
 
@@ -82,6 +84,8 @@ _build_fsmddal_pdf() {
     mustHaveNextCiLabelName
     local label=$(getNextCiLabelName)
     mustHaveValue ${label}
+
+    setBuildDescription "${JOB_NAME}" "${BUILD_NUMBER}" "${newCiLabel}"
 
     cd ${workspace}
     execute build -C src-fsmifdd -L src-fsmifdd.log defcfg
