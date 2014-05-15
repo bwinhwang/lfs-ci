@@ -51,21 +51,26 @@ ci_job_build_version() {
     local jobDirectory=${jenkinsMasterServerPath}/jobs/${JOB_NAME}/lastSuccessful/ 
     local oldLabel=$(runOnMaster test -d ${jobDirectory} && grep ${label} ${jobDirectory}/label 2>/dev/null)
 
+    info "old label ${oldLabel} from ${jobDirectory} on master"
     local postfix="00"
 
     if [[ "${oldLabel}" != "" ]] ; then
         local tmp=$(echo ${oldLabel} | sed "s/.*-ci\(.*\)/\1/")
         local newPostfix=$(( tmp + 1 ))
         postfix=$(printf "%02d" ${newPostfix})
+
+        info "calculated new postfix for label ${postfix}"
     fi
 
     newCiLabel="${label}-ci${postfix}"
 
     setBuildDescription "${JOB_NAME}" "${BUILD_NUMBER}" "${newCiLabel}"
 
+    debug "writing new label file in workspace ${workspace}"
     execute mkdir -p     ${workspace}/bld/bld-fsmci-summary
     echo ${newCiLabel} > ${workspace}/bld/bld-fsmci-summary/label
 
+    debug "writing new label file in ${jenkinsMasterServerPath}/jobs/${JOB_NAME}/builds/${BUILD_NUMBER}/label"
     executeOnMaster "echo ${newCiLabel} > ${jenkinsMasterServerPath}/jobs/${JOB_NAME}/builds/${BUILD_NUMBER}/label"
 
     info "upload results to artifakts share."
