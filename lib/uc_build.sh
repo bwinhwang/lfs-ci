@@ -64,7 +64,7 @@ ci_job_build_version() {
     setBuildDescription "${JOB_NAME}" "${BUILD_NUMBER}" "${newCiLabel}"
 
     execute mkdir -p     ${workspace}/bld/bld-fsmci-summary
-    echo ${newCiLabel} > ${workspace}/bld/bld-fsmci-summary
+    echo ${newCiLabel} > ${workspace}/bld/bld-fsmci-summary/label
 
     info "upload results to artifakts share."
     createArtifactArchive
