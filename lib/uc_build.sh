@@ -34,24 +34,40 @@ ci_job_build() {
     createArtifactArchive
 
     info "build job finished."
-    return 0
+    return
 }
 
-_build_version() {
+ci_job_build_version() {
     local workspace=$(getWorkspaceName)
     mustHaveCleanWorkspace
     mustHaveWorkspaceName
 
     info "workspace is ${workspace}"
 
-    mustHaveNextCiLabelName
-    local label=$(getNextCiLabelName)
+    mustHaveNextLabelName
+    local label=$(getNextReleaseLabel)
     mustHaveValue ${label}
 
-    setBuildDescription "${JOB_NAME}" "${BUILD_NUMBER}" "${label}"
+    local jobDirectory=${jenkinsMasterServerPath}/jobs/${JOB_NAME}/lastSuccessful/ 
+    local oldLabel=$(runOnMaster test -d ${jobDirectory} && grep ${label} ${jobDirectory}/label 2>/dev/null)
 
-    execute mkdir -p ${workspace}/bld/bld-fsmci-summary
-    echo ${label} > ${workspace}/bld/bld-fsmci-summary
+    local postfix="00"
+
+    if [[ "${oldLabel}" != "" ]] ; then
+        local tmp=$(echo ${oldLabel} | sed "s/.*-ci\(.*\)/\1/")
+        local newPostfix=$(( tmp + 1 ))
+        postfix=$(printf "%02d" ${newPostfix})
+    fi
+
+    newCiLabel="${label}-ci${postfix}"
+
+    setBuildDescription "${JOB_NAME}" "${BUILD_NUMBER}" "${newCiLabel}"
+
+    execute mkdir -p     ${workspace}/bld/bld-fsmci-summary
+    echo ${newCiLabel} > ${workspace}/bld/bld-fsmci-summary
+
+    info "upload results to artifakts share."
+    createArtifactArchive
 
     return
 }

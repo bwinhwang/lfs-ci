@@ -365,23 +365,13 @@ mustHaveNextLabelName() {
 }
 
 mustHaveNextCiLabelName() {
-    mustHaveNextLabelName
-    local label=$(getNextReleaseLabel)
-
     local workspace=$(getWorkspaceName)
     mustHaveWorkspaceName
 
-    oldLabel=$(grep ${LFS_CI_NEXT_CI_LABEL_NAME} ${workspace}/bld/bld-fsmci-summary/version)
+    local label=$(cat ${workspace}/bld/bld-fsmci-summary/label 2>/dev/null)
+    mustHaveValue "${label}"
 
-    local postfix="00"
-
-    if [[ "${oldLabel}" != "" ]] ; then
-        local tmp=$(echo ${oldLabel} | sed "s/.*-ci\(.*\)/\1/")
-        local newPostfix=$(( tmp + 1 ))
-        postfix=$(printf "%02d" ${newPostfix})
-    fi
-
-    export LFS_CI_NEXT_CI_LABEL_NAME="${label}-ci${postfix}"
+    export LFS_CI_NEXT_CI_LABEL_NAME=${label}
     return
 }
 
