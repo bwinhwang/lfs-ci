@@ -49,7 +49,7 @@ ci_job_build_version() {
     mustHaveValue ${label}
 
     local jobDirectory=${jenkinsMasterServerPath}/jobs/${JOB_NAME}/lastSuccessful/ 
-    local oldLabel=$(runOnMaster test -d ${jobDirectory} && grep ${label} ${jobDirectory}/label 2>/dev/null)
+    local oldLabel=$(runOnMaster "test -d ${jobDirectory} && grep ${label} ${jobDirectory}/label 2>/dev/null")
 
     info "old label ${oldLabel} from ${jobDirectory} on master"
     local postfix="00"
