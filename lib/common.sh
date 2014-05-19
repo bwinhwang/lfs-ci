@@ -356,12 +356,12 @@ mustHaveNextLabelName() {
     mustHaveBranchName
 
     local regex=${branchToTagRegexMap["${branch}"]}
-    mustHaveValue "${regex}"
+    mustHaveValue "${regex}" "branch to tag regex map"
 
     info "branch ${branch} has release label regex ${regex}"
 
     local label=$(${LFS_CI_ROOT}/bin/getNewTagName -u ${lfsSourceRepos}/os/tags -r "${regex}" )
-    mustHaveValue "${label}"
+    mustHaveValue "${label}" "next release label name"
 
     export LFS_CI_NEXT_LABEL_NAME="${label}"
 
@@ -373,7 +373,7 @@ mustHaveNextCiLabelName() {
     mustHaveWorkspaceName
 
     local label=$(cat ${workspace}/bld/bld-fsmci-summary/label 2>/dev/null)
-    mustHaveValue "${label}"
+    mustHaveValue "${label}" "next ci label name"
 
     export LFS_CI_NEXT_CI_LABEL_NAME=${label}
     return
@@ -390,7 +390,7 @@ getJenkinsJobBuildDirectory() {
 #  @throws  raise an error, if the value is empty
 mustHaveValue() {
     local value=$1
-    local message=${1:-unkown variable name}
+    local message="${2:-unkown variable name}"
 
     if [[ -z "${value}" ]] ; then
         error "excpect a value for ${message}, but didn't got one..."
