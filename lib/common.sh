@@ -46,6 +46,11 @@ getTargetBoardName() {
     return
 }
 
+getProductNameFromJobName() {
+    ${LFS_CI_ROOT}/bin/getFromString.pl "${JOB_NAME}" productName
+    return
+}
+
 ## @fn      mustHaveTargetBoardName()
 #  @brief   ensure, that there is a target board name
 #  @param   <none>

@@ -121,6 +121,7 @@ getConfig() {
 
     trace "get config value for ${key}"
 
+    productName=$(getProductNameFromJobName)
     taskName=$(getTaskNameFromJobName)
     subTaskName=$(getSubTaskNameFromJobName)
     location=$(getLocationName)
@@ -128,34 +129,61 @@ getConfig() {
 
     case "${key}" in
         subsystem)
-            case "${subTaskName}" in
-                FSM-r2)     echo src-psl      ;;
-                FSM-r2-*)   echo src-rfs      ;;
-                FSM-r3)     echo src-fsmpsl   ;;
-                FSM-r3-*)   echo src-fsmpsl   ;;
-                FSM-r3.5)   echo src-fsmpsl35 ;;
-                FSM-r3.5-*) echo src-fsmpsl35 ;;
-                LRC)        echo src-lrcpsl   ;;
-                UBOOT)      echo src-fsmbrm   ;;
+            case "${productName}" in
+                UBOOT) 
+                    case "${subTaskName}" in
+                        FSM-r2)     echo src-brm      ;;
+                        FSM-r3)     echo src-fsmbrm   ;;
+                        FSM-r3.5)   echo src-fsmbrm35 ;;
+                        FSM-r4)     echo src-fsmbrm35 ;;
+                    esac
+                ;;
+                *)
+                    case "${subTaskName}" in
+                        FSM-r2)     echo src-psl      ;;
+                        FSM-r2-*)   echo src-rfs      ;;
+                        FSM-r3)     echo src-fsmpsl   ;;
+                        FSM-r3-*)   echo src-fsmpsl   ;;
+                        FSM-r3.5)   echo src-fsmpsl35 ;;
+                        FSM-r3.5-*) echo src-fsmpsl35 ;;
+                        FSM-r4)     echo src-fsmpsl35 ;;
+                        FSM-r4-*)   echo src-fsmpsl35 ;;
+                        LRC)        echo src-lrcpsl   ;;
+                        UBOOT)      echo src-fsmbrm   ;;
+                    esac
+                ;;
             esac
         ;;
         locationMapping)
             case "${subTaskName}" in
                 LRC)      echo LRC         ;;
+                # TODO fixme
                 UBOOT)    echo nightly     ;;
                 FSM-r3)   echo ${location} ;;
                 FSM-r3-*) echo ${location} ;;
             esac
         ;;
         additionalSourceDirectories)
-            case "${subTaskName}" in
-                LRC) echo src-lrcbrm src-cvmxsources src-kernelsources src-bos src-lrcddg src-ifdd src-commonddal src-lrcddal src-tools src-rfs src-toolset ;;
-            esac
+            case "${productName}" in
+                UBOOT) 
+                ;;
+                *)
+                    case "${subTaskName}" in
+                        LRC) echo src-lrcbrm src-cvmxsources src-kernelsources src-bos src-lrcddg src-ifdd src-commonddal src-lrcddal src-tools src-rfs src-toolset ;;
+                    esac
+                ;;
+            esac                        
         ;;
         onlySourceDirectories) # just use this source directory only
-            case "${subTaskName}" in
-                FSM-r3.5)   echo src-fsmpsl35 ;;
-                FSM-r3.5-*) echo src-fsmpsl35 ;;
+            case "${productName}" in
+                UBOOT) 
+                ;;
+                *)
+                    case "${subTaskName}" in
+                        FSM-r3.5)   echo src-fsmpsl35 ;;
+                        FSM-r3.5-*) echo src-fsmpsl35 ;;
+                    esac
+                ;;
             esac
         ;;
         *) : ;;
