@@ -55,7 +55,7 @@ ci_job_build_version() {
     local postfix="00"
 
     if [[ "${oldLabel}" != "" ]] ; then
-        local tmp=$(echo ${oldLabel} | sed "s/.*-ci\(.*\)/\1/")
+        local tmp=$(echo ${oldLabel} | sed "s/.*-ci0*\(.*\)/\1/")
         local newPostfix=$(( tmp + 1 ))
         postfix=$(printf "%02d" ${newPostfix})
 

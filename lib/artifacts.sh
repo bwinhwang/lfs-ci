@@ -10,6 +10,8 @@
 #  @param   <none>
 #  @return  <none>
 createArtifactArchive() {
+
+    requiredParameters JOB_NAME BUILD_NUMBER
     local workspace=$(getWorkspaceName)
     mustHaveWorkspaceName
 
