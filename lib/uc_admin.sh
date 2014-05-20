@@ -119,5 +119,11 @@ cleanupBaselineShares() {
     # remove the directory
     debug "not implemented yet"
 
+    if [[ ${LFS_CI_SHARE_MIRROR} ]] ; then
+        mustExistDirectory "${LFS_CI_SHARE_MIRROR}"
+        execute chmod -R u+w ${LFS_CI_SHARE_MIRROR}
+        execute rm -rf ${LFS_CI_SHARE_MIRROR}
+    fi
+
     return
 }
