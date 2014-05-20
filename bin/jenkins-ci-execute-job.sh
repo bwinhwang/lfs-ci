@@ -70,7 +70,7 @@ case "${JOB_NAME}" in
     ;;
     LFS_Prod_*_Releasing_*)
         source ${LFS_CI_ROOT}/lib/uc_release.sh
-        ci_job_release   || exit 1 
+        ci_job_release || exit 1 
     ;;
     listJobs)
         listJobs
