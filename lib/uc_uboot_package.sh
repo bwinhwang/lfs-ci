@@ -16,9 +16,14 @@ ci_job_package() {
     mustHaveCleanWorkspace
     mustHaveWritableWorkspace
 
+
     debug "workspace is ${workspace}"
 
     copyArtifactsToWorkspace ${UPSTREAM_PROJECT} ${UPSTREAM_BUILD}
+
+    mustHaveNextCiLabelName
+    local label=$(getNextCiLabelName)
+    setBuildDescription "${JOB_NAME}" "${BUILD_NUMBER}" "${label}"
 
     local localDirectory=${workspace}/upload
     execute mkdir -p ${localDirectory}
