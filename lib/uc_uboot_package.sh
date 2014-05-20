@@ -16,7 +16,6 @@ ci_job_package() {
     mustHaveCleanWorkspace
     mustHaveWritableWorkspace
 
-
     debug "workspace is ${workspace}"
 
     copyArtifactsToWorkspace ${UPSTREAM_PROJECT} ${UPSTREAM_BUILD}
