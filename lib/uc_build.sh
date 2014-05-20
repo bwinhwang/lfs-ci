@@ -371,6 +371,8 @@ synchroniceToLocalPath() {
     if [[ ! -e ${localCacheDir}/${tag} ]] ; then
         progressFile=${localCacheDir}/data/${tag}.in_progress
 
+        sleep $(( RANDOM % 60 ))
+
         if [[ ! -e ${progressFile} ]] ; then
 
             info "synchronice ${subsystem}/${tag} to local filesystem"
