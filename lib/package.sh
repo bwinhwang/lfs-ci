@@ -82,7 +82,10 @@ copyReleaseCandidateToShare() {
     mustHaveBranchName
 
     local localDirectory=${workspace}/upload
+    # TODO: demx2fk3 2014-05-20 fixme. The os should be configurable
     local remoteDirectory=${lfsCiBuildsShare}/${branch}/data/${label}/os
+
+    # TODO: demx2fk3 2014-05-20 fixme use lastSuccessfull build here (or empty)
     local oldRemoteDirectory=${lfsCiBuildsShare}/${branch}/data/$(ls ${lfsCiBuildsShare}/${branch}/data/ | tail -n 1 )
     local hardlink=""
 
