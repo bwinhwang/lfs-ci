@@ -191,7 +191,6 @@ getConfig() {
                         FSM-r3.5-*) echo src-fsmpsl35 ;;
                     esac
                 ;;
->>>>>>> linsee/master
             esac
         ;;
         *) : ;;
