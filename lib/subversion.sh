@@ -27,7 +27,11 @@ uploadToSubversion() {
     export TMPDIR=${WORKSPACE}/tmp/
     mkdir -p ${TMPDIR}
 
+    local tagName=$(getNextReleaseLabel)
+
     execute ${LFS_CI_ROOT}/bin/svn_load_dirs.pl           \
+                -v                                        \
+                -t os/tag/${tagName}                      \
                 -no_user_input                            \
                 -message "upload"                         \
                 -glob_ignores="#.#"                       \
