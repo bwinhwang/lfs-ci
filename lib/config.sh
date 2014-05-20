@@ -39,8 +39,11 @@ jenkinsMasterServerHttpsUrl=http://${jenkinsMasterServerHostName}:${jenkinsMaste
 # (only valid on the master server)
 jenkinsMasterServerPath=${jenkinsRoot}/home
 
+# path name, where the backups of the jenkins server installation should be stored in the share.
+# this should be on a network share - most probably with backup 
 jenkinsMasterServerBackupPath=/build/home/${USER}/jenkinsBackup
 
+# ssh identification file, which should be used to authenicate for the scripting 
 jenkinsSshIdentification=${HOME}/.ssh/id_dsa
 
 # location of the jenkins cli jar file
@@ -49,7 +52,6 @@ jenkinsCli=${LFS_CI_ROOT}/lib/java/jenkins/jenkins-cli-${jenkinsVersion}.jar
 # path to the share, where the build artifacts are located
 # (location for ulm, not valid for other sites)
 artifactesShare=/build/home/${USER}/lfs
-
 
 # hostname of the svn master server
 svnMasterServerHostName=svne1.access.nokiasiemensnetworks.com
@@ -63,6 +65,7 @@ lfsSourceRepos=https://${svnSlaveServerUlmHostName}/isource/svnroot/BTS_SC_LFS
 # url of the trunk version of LFS source
 lfsSourceReposTrunk=${lfsSourceRepos}/os/trunk
 
+# url of the LFS delivery repository in SVN
 lfsDeliveryRepos=https://${svnSlaveServerUlmHostName}/isource/svnroot/BTS_D_SC_LFS_2014/
 
 # location where the LFS delivery / productions / releases are put on (in Ulm only)
@@ -100,14 +103,14 @@ declare -A archMap=(         ["fct"]="mips64-octeon2-linux-gnu"      \
                        ["keystone2"]="arm-cortexa15-linux-gnueabihf" \
 )
 
-# ....
+# maps the location name to the branch name in the svn delivery repos
 declare -A locationToSubversionMap=( ["pronb-developer"]="PS_LFS_OS_MAINBRANCH" \
                                    )
 
 # define the mapping from branch to label/tag name
 declare -A branchToTagRegexMap=( ["pronb-developer"]="BM_PS_LFS_OS_$(date +%Y)_$(date +%m)_([0-9][0-9])" \
                                           ["FB1404"]="BM_FB_PS_LFS_OS_1404_04_([0-9][0-9])" \
-                                          ["KERNEL_3.x_DEV"]="BM_KERNEL3x_PS_LFS_OS_$(date +%Y)_$(date +%m)_([0-9][0-9])" \
+                                  ["KERNEL_3.x_DEV"]="BM_KERNEL3x_PS_LFS_OS_$(date +%Y)_$(date +%m)_([0-9][0-9])" \
                                )
 
 ## @fn      getConfig( key )
@@ -154,12 +157,15 @@ getConfig() {
         ;;
         onlySourceDirectories) # just use this source directory only
             case "${subTaskName}" in
-                FSM-r3.5)   echo src-fsmpsl35 ;;
-                FSM-r3.5-*) echo src-fsmpsl35 ;;
+                FSM-r3.5)       echo src-fsmpsl35 ;;
+                FSM-r3.5-UBOOT) echo src-fsmbrm35 ;;
+                FSM-r3.5-*)     echo src-fsmpsl35 ;;
             esac
         ;;
         *) : ;;
     esac
+
+    return
 }
 
 

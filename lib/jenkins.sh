@@ -58,6 +58,11 @@ executeJenkinsCli() {
     return
 }
 
+## @fn      runJenkinsCli( args )
+#  @brief   runs a jenkins cli command and returns the output to the caller
+#  @param   {jenkins cli args}    list of arguments for the jenkins cli
+#  @param   <none>
+#  @return  output of jenkins cli
 runJenkinsCli() {
     local tmpFile=$(createTempFile)
     ${java} -jar ${jenkinsCli} -s "${jenkinsMasterServerHttpUrl}" -i ${jenkinsSshIdentification} $@ 2> ${tmpFile}

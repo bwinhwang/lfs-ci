@@ -333,23 +333,22 @@ requiredParameters() {
 #  @param   <none>
 #  @return  <none>
 getNextReleaseLabel() {
-    # TODO: demx2fk3 2014-04-16 dummy function
-    # TODO: demx2fk3 2014-04-16 move to another file,
-    # TODO: demx2fk3 2014-04-16 fill with real content
-
-#    local branchName=$(getBranchName)
-#    mustHaveBranchName
-
-#    local labelNameRegex=${branchToTagRegexMap["$branchName"]}
-#    info "labelNameRegex is ${labelNameRegex}"
-
     echo ${LFS_CI_NEXT_LABEL_NAME}
 }
 
+## @fn      getNextCiLabelName()
+#  @brief   get the next ci label name
+#  @param   <none>
+#  @return  next ci label name
 getNextCiLabelName() {
     echo ${LFS_CI_NEXT_CI_LABEL_NAME}
 }
 
+## @fn      mustHaveNextLabelName()
+#  @brief   ensure, that there is a release label name
+#  @details to get the next release label name, it checks the svn repos
+#  @param   <none>
+#  @return  <none>
 mustHaveNextLabelName() {
 
     local branch=$(getBranchName)
@@ -368,6 +367,10 @@ mustHaveNextLabelName() {
     return
 }
 
+## @fn      mustHaveNextCiLabelName()
+#  @brief   ensure, that there is a ci label name for this build
+#  @param   <none>
+#  @return  <none>
 mustHaveNextCiLabelName() {
     local workspace=$(getWorkspaceName)
     mustHaveWorkspaceName
@@ -379,6 +382,10 @@ mustHaveNextCiLabelName() {
     return
 }
 
+## @fn      getJobNameFromUrl()
+#  @brief   get the current build directory of the jenkins jobs
+#  @param   <none>
+#  @return  <none>
 getJenkinsJobBuildDirectory() {
     echo ${jenkinsMasterServerPath}/jobs/${JOB_NAME}/builds/${BUILD_NUMBER}/
 }

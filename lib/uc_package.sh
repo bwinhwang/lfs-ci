@@ -353,7 +353,6 @@ copyDocumentation() {
     return
 }
 
-
 ## @fn      getArchitectureFromDirectory( $dir )
 #  @brief   get the arcitecture from the bld directory
 #  @details maps e.g. fct to mips64-octeon2-linux-gnu
@@ -416,4 +415,3 @@ mustHavePlatformFromDirectory() {
 }
 
 return 0
-

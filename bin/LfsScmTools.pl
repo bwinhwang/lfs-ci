@@ -875,7 +875,10 @@ SOURCES:
         # t-1:
         #     build -C t 1
 
-        my @filteredDeps = sort grep { /src-/ } grep { not $duplicate{$_}++; } @deps;
+        my @filteredDeps = sort 
+                           grep { /src-/ } 
+                           grep { not $duplicate{$_}++; } 
+                           @deps;
 
         if( $self->{style} eq "makefile" ) {
             if( grep { $_ eq $goal } $source->platforms() ) {
@@ -895,13 +898,17 @@ SOURCES:
                 printf "%s-%s: %s\n", $source->{directory}, $platform, join( " ", @filteredDeps );
                 printf "\tbuild -L \$@.log -C %s %s\n\n", $source->{directory}, $platform;
             }
-        }
-
-        if( $self->{style} eq "legacy" ) {
+        } elsif( $self->{style} eq "legacy" ) {
             printf "%s %s - %s\n",
                     $source->{directory},
                     join( ",", sort $source->platforms() ),
-                    join( ",", sort grep { /src-/ } grep { not $duplicate{ $_ }++; } @deps );
+                    join( ",", sort 
+                               grep { /src-/ } 
+                               grep { not $duplicate{ $_ }++; } 
+                               @filteredDeps 
+                    );
+        } else {
+            die "style is unknown";
         }
 
         $seen{ $source->{directory} } ++;

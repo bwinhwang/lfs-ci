@@ -83,22 +83,22 @@ cleanupEnvironmentVariables() {
                                                                         print $1; }' `
     for key in ${keys}; do
         case ${key} in
-            BASH*) : ;; # can not unset 
-            UID|EUID)  : ;;
-            SHELLOPTS) : ;;
-            PPID) : ;;
+            BASH*)                   : ;; #  can not unset
+            UID|EUID)                : ;;
+            SHELLOPTS)               : ;;
+            PPID)                    : ;;
             PATH|HOME|USER|HOSTNAME) : ;;
-            LFS_CI_ROOT) : ;;
-            LFS_CI_SHARE_MIRROR) : ;;
-            LFS_CI*) : ;;
-            CI_LOGGING_LOGFILENAME) : ;;
-            CI_*) : ;;
-            WORKSPACE) : ;;
-            SVN_REVISION) : ;;
-            UPSTREAM_BUILD) : ;;
-            UPSTREAM_PROJECT) : ;;
-            BUILD_*) : ;;
-            NODE_LABELS) : ;;
+            LFS_CI_ROOT)             : ;;
+            LFS_CI_SHARE_MIRROR)     : ;;
+            LFS_CI*)                 : ;;
+            CI_LOGGING_LOGFILENAME)  : ;;
+            CI_*)                    : ;;
+            WORKSPACE)               : ;;
+            SVN_REVISION)            : ;;
+            UPSTREAM_BUILD)          : ;;
+            UPSTREAM_PROJECT)        : ;;
+            BUILD_*)                 : ;;
+            NODE_LABELS)             : ;;
             *) 
                 trace "unsetting environment variable \"${key}\" with value \"${!key}\"" 
                 unset ${key} 

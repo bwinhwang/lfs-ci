@@ -37,6 +37,13 @@ ci_job_build() {
     return
 }
 
+## @fn      ci_job_build_version()
+#  @brief   usecase which creates the version label
+#  @details the usecase get the last label name from the last successful build and calculates
+#           a new label name. The label name will be stored in a file and be artifacted.
+#           The downstream jobs will use this artifact.
+#  @param   <none>
+#  @return  <none>
 ci_job_build_version() {
     local workspace=$(getWorkspaceName)
     mustHaveCleanWorkspace
@@ -79,6 +86,10 @@ ci_job_build_version() {
     return
 }
 
+## @fn      _build_fsmddal_pdf()
+#  @brief   creates the FSMDDAL.pdf file
+#  @param   <none>
+#  @return  <none>
 _build_fsmddal_pdf() {
 
     local workspace=$(getWorkspaceName)
@@ -114,7 +125,6 @@ _build_fsmddal_pdf() {
 
     return
 }
-
 
 ## @fn      _build()
 #  @brief   make the build

@@ -18,8 +18,7 @@ createArtifactArchive() {
     mustExistDirectory "${workspace}/bld/"
 
     # TODO: demx2fk3 2014-03-31 remove cd - dont change the current directory
-    cd "${workspace}/bld/"
-
+    cd "${workspace}/bld/" 
     local artifactsPathOnShare=${artifactesShare}/${JOB_NAME}/${BUILD_NUMBER}
     local artifactsPathOnMaster=${jenkinsMasterServerPath}/jobs/${JOB_NAME}/builds/${BUILD_NUMBER}/archive
     executeOnMaster mkdir -p  ${artifactsPathOnShare}/save
