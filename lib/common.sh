@@ -373,6 +373,7 @@ mustHaveNextLabelName() {
                                     -e 's/PS_LFS_BT_/LBT/' \
                                     -e 's/20//' \
                                     -e 's/_//g')
+        info "reajusting label to ${label}"
     fi
 
     export LFS_CI_NEXT_LABEL_NAME="${label}"
