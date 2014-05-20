@@ -27,6 +27,7 @@ uploadToSubversion() {
     export TMPDIR=${WORKSPACE}/tmp/
     mkdir -p ${TMPDIR}
 
+    mustHaveNextLabelName
     local tagName=$(getNextReleaseLabel)
 
     execute ${LFS_CI_ROOT}/bin/svn_load_dirs.pl           \
