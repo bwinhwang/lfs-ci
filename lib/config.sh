@@ -163,6 +163,7 @@ getConfig() {
                 # TODO fixme
                 UBOOT)    echo nightly     ;;
                 FSM-r3)   echo ${location} ;;
+                FSM-r4)   echo ${location} ;;
                 FSM-r3-*) echo ${location} ;;
             esac
         ;;
@@ -181,8 +182,8 @@ getConfig() {
             case "${productName}" in
                 UBOOT) 
                     case "${subTaskName}" in
-                        FSM-r3) echo src-fsmpsl   ;;
-                        FSM-r4) echo src-fsmpsl35 ;;
+                        FSM-r3) echo src-fsmbrm   ;;
+                        FSM-r4) echo src-fsmbrm35 ;;
                     esac
                 ;;
                 *)
@@ -191,7 +192,6 @@ getConfig() {
                         FSM-r3.5-*) echo src-fsmpsl35 ;;
                     esac
                 ;;
->>>>>>> linsee/master
             esac
         ;;
         *) : ;;
