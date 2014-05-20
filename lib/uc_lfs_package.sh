@@ -16,6 +16,12 @@ ci_job_package() {
     # which are execute within this jenkins jobs. So we collect the artifacts from those jobs
     # and untar them in the workspace directory.
 
+    mustHaveNextCiLabelName
+    local label=$(getNextCiLabelName)
+
+    setBuildDescription "${JOB_NAME}" "${BUILD_NUMBER}" "${label}"
+
+
     local workspace=$(getWorkspaceName)
     mustHaveWorkspaceName
     mustHaveCleanWorkspace
