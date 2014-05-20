@@ -367,7 +367,7 @@ mustHaveNextLabelName() {
     local label=$(${LFS_CI_ROOT}/bin/getNewTagName -u ${lfsSourceRepos}/os/tags -r "${regex}" )
     mustHaveValue "${label}" "next release label name"
 
-    local taskName=$(getProductNameFromJobNamet)
+    local taskName=$(getProductNameFromJobName)
     if [[ "${taskName}" == "UBOOT" ]] ; then
         label=$(echo ${label} | sed -e 's/PS_LFS_OS_/LFS/' \
                                     -e 's/PS_LFS_BT_/LBT/' \
