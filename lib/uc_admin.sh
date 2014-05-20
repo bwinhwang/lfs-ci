@@ -6,7 +6,7 @@
 #  @return  <none>
 ci_job_admin() {
     local subJob=$(getTaskNameFromJobName)
-    mustHaveTargetBoardName
+    # mustHaveTargetBoardName
 
     case ${subJob} in
         backupJenkins)           backupJenkinsMasterServerInstallation ;;
