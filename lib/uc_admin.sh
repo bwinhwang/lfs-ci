@@ -120,9 +120,11 @@ cleanupBaselineShares() {
     debug "not implemented yet"
 
     if [[ ${LFS_CI_SHARE_MIRROR} ]] ; then
-        mustExistDirectory "${LFS_CI_SHARE_MIRROR}"
-        execute chmod -R u+w ${LFS_CI_SHARE_MIRROR}
-        execute rm -rf ${LFS_CI_SHARE_MIRROR}
+        mustExistDirectory "${LFS_CI_SHARE_MIRROR}/${USER}/lfs-ci-local/"
+        info "changing write permissions..."
+        execute chmod -R u+w ${LFS_CI_SHARE_MIRROR}/${USER}/lfs-ci-local/
+        info "removing local baseline share"
+        execute rm -rf ${LFS_CI_SHARE_MIRROR}/${USER}/lfs-ci-local/
     fi
 
     return
