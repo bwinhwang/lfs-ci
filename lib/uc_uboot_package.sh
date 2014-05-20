@@ -23,6 +23,7 @@ ci_job_package() {
     mustHaveNextCiLabelName
     local label=$(getNextCiLabelName)
     setBuildDescription "${JOB_NAME}" "${BUILD_NUMBER}" "${label}"
+    info "label name is ${label}"
 
     local localDirectory=${workspace}/upload
     execute mkdir -p ${localDirectory}
@@ -41,7 +42,7 @@ ci_job_package() {
         local dstDirectory=${workspace}/upload/${destinationsPlatform}
 
         execute mkdir -p ${dstDirectory}
-        execute rsync -av ${srcDirectory}/. ${dstDirectory}
+        execute rsync -av ${srcDirectory}/. ${dstDirectory}/
 
     done
 
@@ -49,5 +50,4 @@ ci_job_package() {
 
     return 0
 }
-
 
