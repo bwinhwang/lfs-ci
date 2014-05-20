@@ -21,6 +21,7 @@ ci_job_package() {
     copyArtifactsToWorkspace ${UPSTREAM_PROJECT} ${UPSTREAM_BUILD}
 
     local localDirectory=${workspace}/upload
+    execute mkdir -p ${localDirectory}
 
     find ${workspace}
 
