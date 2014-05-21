@@ -476,16 +476,6 @@ removeBrokenSymlinks() {
 
     mustExistDirectory "${dir}"
 
-    find ${dir} -type l > ${tmp}
-    mustBeSuccessfull $? "find command"
-
-    while read link ; do
-        [[ -e ${link} ]] || continue
-        if file ${link} | grep -v '/archs/' | grep -q "broken symbolic link to" ; then
-            warning "removing broken symlink ${link} to $(readlink ${link})"
-            rm -f ${link}
-        fi
-    done < ${tmp}
-
+    execute symlinks -c -d -v -r ${dir} 
     return            
 }
