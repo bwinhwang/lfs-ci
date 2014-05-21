@@ -459,6 +459,16 @@ mustExistDirectory() {
     return
 }
 
+mustBeSuccessfull() {
+    local rc=$1
+    local msg="${2:-unkown message}"
+
+    if [[ ${rc} != 0 ]] ; then
+        error "error: ${msg} failed"
+        exit 1
+    fi
+    return
+}
 
 removeBrokenSymlinks() {
     local dir=$1
@@ -466,7 +476,8 @@ removeBrokenSymlinks() {
 
     mustExistDirectory "${dir}"
 
-    execute "find ${dir} -type l > ${tmp}"
+    find ${dir} -type l > ${tmp}
+    mustBeSuccessfull $? "find command"
 
     while read link ; do
         [[ -e ${link} ]] || continue
