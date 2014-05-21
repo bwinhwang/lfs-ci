@@ -148,7 +148,15 @@ sub getConfig {
         return "";
     } else {
         # print "name $name " .  $canidates[0]->value() . "\n";
-        return $canidates[0]->value();
+        my $value = $canidates[0]->value();
+        $value =~ s:
+                       \$\{
+                            ( [^}]+ )
+                         \}
+                   :
+                         $self->getConfig( name => $1 ) || "\${$1}"
+                   :xgie;
+        return $value
     } 
     return;
 }

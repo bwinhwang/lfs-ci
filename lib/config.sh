@@ -132,46 +132,13 @@ getConfig() {
 
     case "${key}" in
         subsystem)
-            case "${productName}" in
-                UBOOT) 
-                    ${LFS_CI_ROOT}/bin/config.pl LFS_CI_UC_build_subsystem_to_build
-                ;;
-                *)
-                    case "${subTaskName}" in
-                        FSM-r2)     echo src-psl      ;;
-                        FSM-r2-*)   echo src-rfs      ;;
-                        FSM-r3)     echo src-fsmpsl   ;;
-                        FSM-r3-*)   echo src-fsmpsl   ;;
-                        FSM-r3.5)   echo src-fsmpsl35 ;;
-                        FSM-r3.5-*) echo src-fsmpsl35 ;;
-                        FSM-r4)     echo src-fsmpsl35 ;;
-                        FSM-r4-*)   echo src-fsmpsl35 ;;
-                        LRC)        echo src-lrcpsl   ;;
-                        UBOOT)      echo src-fsmbrm   ;;
-                    esac
-                ;;
-            esac
+            ${LFS_CI_ROOT}/bin/config.pl LFS_CI_UC_build_subsystem_to_build
         ;;
         locationMapping)
-            case "${subTaskName}" in
-                LRC)      echo LRC         ;;
-                # TODO fixme
-                UBOOT)    echo nightly     ;;
-                FSM-r3)   echo ${location} ;;
-                FSM-r4)   echo ${location} ;;
-                FSM-r3-*) echo ${location} ;;
-            esac
+            ${LFS_CI_ROOT}/bin/config.pl LFS_CI_location_mapping
         ;;
         additionalSourceDirectories)
-            case "${productName}" in
-                UBOOT) 
-                ;;
-                *)
-                    case "${subTaskName}" in
-                        LRC) echo src-lrcbrm src-cvmxsources src-kernelsources src-bos src-lrcddg src-ifdd src-commonddal src-lrcddal src-tools src-rfs src-toolset ;;
-                    esac
-                ;;
-            esac                        
+            ${LFS_CI_ROOT}/bin/config.pl LFS_CI_UC_build_additionalSourceDirectories
         ;;
         onlySourceDirectories) # just use this source directory only
             ${LFS_CI_ROOT}/bin/config.pl LFS_CI_UC_build_onlySourceDirectories
