@@ -211,26 +211,29 @@ copyPlatform() {
         [[ -d ${bldDirectory} ]] || continue
         [[ -d ${bldDirectory}/results ]] || continue
 
-        local architecture=$(getPlatformFromDirectory ${bldDirectory})
-        mustHavePlatformFromDirectory ${bldDirectory} ${architecture}
+        local platform=$(getPlatformFromDirectory ${bldDirectory})
+        mustHavePlatformFromDirectory ${bldDirectory} ${platform}
 
-        local dst=${workspace}/upload/platforms/${architecture}
+        local architecture=$(getArchitectureFromDirectory ${bldDirectory})
+        mustHaveArchitectureFromDirectory ${bldDirectory} ${architecture}
+
+        local dst=${workspace}/upload/platforms/${platform}
         execute mkdir -p ${dst}
 
-        info "copy platform for ${architecture}..."
+        info "copy platform for ${platform} / ${architecture} ..."
 
         # TODO: demx2fk3 2014-04-07 expand the short parameter names
         execute rsync -avr --exclude=addons --exclude=sys-root --exclude=rfs.init_sys-root.tar.gz ${bldDirectory}/results/. ${dst}
 
         debug "symlink addons"
-        execute ln -sf ../../addons/${architecture} ${dst}/addons
+        execute ln -sf ../../addons/${platform} ${dst}/addons
 
         debug "symlinks sys-root"
         execute ln -sf ../../sys-root/${architecture} ${dst}/sys-root
 
-        debug "cleanup stuff in platform ${architecture}"
+        debug "cleanup stuff in platform ${platform}"
 
-        case ${architecture} in
+        case ${platform} in
             qemu)        : ;;  # no op
             fcmd | fspc) : ;;  # no op
             qemu_64)
