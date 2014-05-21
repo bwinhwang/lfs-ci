@@ -458,3 +458,23 @@ mustExistDirectory() {
     fi
     return
 }
+
+
+removeBrokenSymlinks() {
+    local dir=$1
+    local tmp=$(createTempFile)
+
+    mustExistDirectory "${dir}"
+
+    execute "find ${dir} -type l > ${tmp}"
+
+    while read link ; do
+        [[ -e ${link} ]] || continue
+        if file ${link} | grep -v '/archs/' | grep -q "broken symbolic link to" ; then
+            warning "removing broken symlink ${link} to $(readlink ${link})"
+            rm -f ${link}
+        fi
+    done < ${tmp}
+
+    return            
+}
