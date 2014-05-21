@@ -134,12 +134,7 @@ getConfig() {
         subsystem)
             case "${productName}" in
                 UBOOT) 
-                    case "${subTaskName}" in
-                        FSM-r2)     echo src-brm      ;;
-                        FSM-r3)     echo src-fsmbrm   ;;
-                        FSM-r3.5)   echo src-fsmbrm35 ;;
-                        FSM-r4)     echo src-fsmbrm35 ;;
-                    esac
+                    ${LFS_CI_ROOT}/bin/config.pl LFS_CI_UC_build_subsystem_to_build
                 ;;
                 *)
                     case "${subTaskName}" in
@@ -179,20 +174,7 @@ getConfig() {
             esac                        
         ;;
         onlySourceDirectories) # just use this source directory only
-            case "${productName}" in
-                UBOOT) 
-                    case "${subTaskName}" in
-                        FSM-r3) echo src-fsmbrm   ;;
-                        FSM-r4) echo src-fsmbrm35 ;;
-                    esac
-                ;;
-                *)
-                    case "${subTaskName}" in
-                        FSM-r3.5)   echo src-fsmpsl35 ;;
-                        FSM-r3.5-*) echo src-fsmpsl35 ;;
-                    esac
-                ;;
-            esac
+            ${LFS_CI_ROOT}/bin/config.pl LFS_CI_UC_build_onlySourceDirectories
         ;;
         *) : ;;
     esac
