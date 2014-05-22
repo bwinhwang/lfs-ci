@@ -54,10 +54,10 @@ sub matches {
 
     foreach my $tag ( @{ $self->{tags} } ) {
         if( $tag->value() eq $self->{handler}->getConfig( name => $tag->name() ) ) {
-            printf STDERR "matching tag %s / %s found...\n", $tag->name(), $tag->value();
+            # printf STDERR "matching tag %s / %s found...\n", $tag->name(), $tag->value();
             $matches ++;
         } else {
-            printf STDERR "NOT matching tag %s / %s found...\n", $tag->name(), $tag->value();
+            # printf STDERR "NOT matching tag %s / %s found...\n", $tag->name(), $tag->value();
             return 0;
         }
     }
@@ -206,6 +206,6 @@ my $configFileName = $ARGV[1] || $ENV{LFS_CI_CONFIG_FILE};
 my $handler = Handler->new( configFileName => $configFileName );
 $handler->loadData();
 
-print STDERR Dumper( $handler );
+# print STDERR Dumper( $handler );
 my $value = $handler->getConfig( name => $ARGV[0] );
 print $value;
