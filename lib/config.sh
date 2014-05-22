@@ -72,9 +72,13 @@ getConfig() {
         onlySourceDirectories) # just use this source directory only
             ${LFS_CI_ROOT}/bin/config.pl LFS_CI_UC_build_onlySourceDirectories
         ;;
-        *) : ;;
-# url of the LFS delivery repository in SVN
-lfsDeliveryRepos=https://${svnSlaveServerUlmHostName}/isource/svnroot/BTS_D_SC_LFS_2014/
+        lfsDeliveryRepos)
+            # url of the LFS delivery repository in SVN
+            local slaveServer=$(getConfig svnSlaveServerUlmHostName)
+            echo https://${slaveServer}/isource/svnroot/BTS_D_SC_LFS_2014/
+        *) 
+            ${LFS_CI_ROOT}/bin/config.pl "${key}"
+        ;;
     esac
 
     return
