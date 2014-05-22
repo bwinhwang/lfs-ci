@@ -54,11 +54,17 @@ getConfig() {
 
     trace "get config value for ${key}"
 
-    productName=$(getProductNameFromJobName)
-    taskName=$(getTaskNameFromJobName)
-    subTaskName=$(getSubTaskNameFromJobName)
-    location=$(getLocationName)
-    config=$(getTargetBoardName)
+    export productName=$(getProductNameFromJobName)
+    export taskName=$(getTaskNameFromJobName)
+    export subTaskName=$(getSubTaskNameFromJobName)
+    export location=$(getLocationName)
+    export config=$(getTargetBoardName)
+
+    trace "config/${config}"
+    trace "location/${location}"
+    trace "subTaskName/${subTaskName}"
+    trace "taskName/${taskName}"
+    trace "productName/${productName}"
 
     export LFS_CI_CONFIG_FILE=${LFS_CI_ROOT}/etc/file.cfg
 
