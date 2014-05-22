@@ -216,7 +216,7 @@ switchToNewLocation() {
     # fi
 
     local newLocation=$(getConfig locationMapping)
-    newLocation=$branchToLocationMap["${location}"]
+    newLocation=${branchToLocationMap["${location}"]}
     if [[ ! "${newLocation}" ]] ; then
         newLocation=${location}
         
