@@ -13,14 +13,17 @@ createArtifactArchive() {
 
     requiredParameters JOB_NAME BUILD_NUMBER
     local workspace=$(getWorkspaceName)
+    local serverPath=$(getConfig jenkinsMasterServerPath)
+    local serverName=$(getConfig linseeUlmServer)
     mustHaveWorkspaceName
 
     mustExistDirectory "${workspace}/bld/"
 
     # TODO: demx2fk3 2014-03-31 remove cd - dont change the current directory
     cd "${workspace}/bld/" 
+    local artifactesShare=$(getConfig artifactesShare)
     local artifactsPathOnShare=${artifactesShare}/${JOB_NAME}/${BUILD_NUMBER}
-    local artifactsPathOnMaster=${jenkinsMasterServerPath}/jobs/${JOB_NAME}/builds/${BUILD_NUMBER}/archive
+    local artifactsPathOnMaster=${serverPath}/jobs/${JOB_NAME}/builds/${BUILD_NUMBER}/archive
     executeOnMaster mkdir -p  ${artifactsPathOnShare}/save
     executeOnMaster ln    -sf ${artifactsPathOnShare}      ${artifactsPathOnMaster}
 
@@ -30,7 +33,7 @@ createArtifactArchive() {
         execute tar --create --auto-compress --file "${dir}.tar.gz" "${dir}"
         execute rsync --archive --verbose --rsh=ssh -P     \
             "${dir}.tar.gz"                                \
-            ${linseeUlmServer}:${artifactsPathOnShare}/save
+            ${serverName}:${artifactsPathOnShare}/save
     done
 
     return 
@@ -61,7 +64,9 @@ mustHaveBuildArtifactsFromUpstream() {
 copyAndExtractBuildArtifactsFromProject() {
     local jobName=$1
     local buildNumber=$2
+    local artifactesShare=$(getConfig artifactesShare)
     local artifactsPathOnMaster=${artifactesShare}/${jobName}/${buildNumber}/save/
+    local serverName=$(getConfig linseeUlmServer)
 
     local files=$(runOnMaster ls ${artifactsPathOnMaster})
 
@@ -85,7 +90,7 @@ copyAndExtractBuildArtifactsFromProject() {
         info "copy artifact ${file} from job ${jobName}#${buildNumber} to workspace and untar it"
 
         execute rsync --archive --verbose --rsh=ssh -P          \
-            ${linseeUlmServer}:${artifactsPathOnMaster}/${file} \
+            ${serverName}:${artifactsPathOnMaster}/${file} \
             ${workspace}/bld/
 
         debug "untar ${file} from job ${jobName}"
@@ -112,13 +117,14 @@ copyArtifactsToWorkspace() {
 
     local file=""
     local downStreamprojectsFile=$(createTempFile)
+    local serverPath=$(getConfig jenkinsMasterServerPath)
 
     local workspace=$(getWorkspaceName)
     mustHaveWorkspaceName
 
     runOnMaster ${LFS_CI_ROOT}/bin/getDownStreamProjects -j ${jobName}       \
                                                          -b ${buildNumber}   \
-                                                         -h ${jenkinsMasterServerPath} > ${downStreamprojectsFile}
+                                                         -h ${serverPath} > ${downStreamprojectsFile}
 
     if [[ $? -ne 0 ]] ; then
         error "error in getDownStreamProjects for ${jobName} #${buildNumber}"

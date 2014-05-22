@@ -1,35 +1,44 @@
 #!/bin/bash
 
-LFS_CI_ROOT=/ps/lfs/ci
+main() {
+    local LFS_CI_ROOT=/ps/lfs/ci
 
-source ${LFS_CI_ROOT}/lib/config.sh
+    source ${LFS_CI_ROOT}/lib/config.sh
 
-JENKINS_WAR=${LFS_CI_ROOT}/lib/java/jenkins/jenkins-${jenkinsVersion}.war
-JENKINS_HOME=${jenkinsRoot}/home
-JENKINS_ROOT=${jenkinsRoot}/root
+    local java=$(getConfig java)
+    local jenkins_war=$(getConfig jenkinsWarFile)
+    local JENKINS_HOME=$(getConfig jenkinsRoot)/home
+    local JENKINS_ROOT=$(getConfig jenkinsRoot)/root
+    local jenkinsMasterSslCertificate=$(getConfig jenkinsMasterSslCertificate)
+    local jenkinsMasterSslPrivateKey=$(getConfig jenkinsMasterSslPrivateKey)
+    local jenkinsMasterServerHttpPort=$(getConfig jenkinsMasterServerHttpPort)
+    local jenkinsMasterServerHttpsPort=$(getConfig jenkinsMasterServerHttpsPort)
 
-export JENKINS_HOME JENKINS_ROOT LFS_CI_ROOT
+    export JENKINS_HOME JENKINS_ROOT LFS_CI_ROOT
 
-mkdir -p ${JENKINS_HOME} ${JENKINS_ROOT} ${JENKINS_ROOT}/log
-ulimit -u 40960
+    mkdir -p ${JENKINS_HOME} ${JENKINS_ROOT} ${JENKINS_ROOT}/log
+    ulimit -u 40960
 
-group=$(id -n -g)
+    group=$(id -n -g)
 
-if [[ ${group} != pronb ]] ; then
-    echo "wrong group ${group} , please switch to pronb"
-    exit 1
-fi
+    if [[ ${group} != pronb ]] ; then
+        echo "wrong group ${group} , please switch to pronb"
+        exit 1
+    fi
 
-if [[ ! -e ${jenkinsWarFile} ]] ; then
-    echo "jenkins war file ${jenkinsWarFile} does not exist"
-    exit 1
-fi
+    if [[ ! -e ${jenkins_war} ]] ; then
+        echo "jenkins war file ${jenkins_war} does not exist"
+        exit 1
+    fi
 
-cd ${JENKINS_HOME}
-exec ${java} -jar ${jenkinsWarFile}                                      \
-        --httpsPort=12443                                             \
-        --httpPort=1280                                               \
-        --ajp13Port=-1                                                \
-        --httpsCertificate=${jenkinsMasterSslCertificate} \
-        --httpsPrivateKey=${jenkinsMasterSslPrivateKey} \
-        > ${JENKINS_ROOT}/log/jenkins.log 2>&1 
+    cd ${JENKINS_HOME}
+    exec ${java} -jar ${jenkins_war}                          \
+            --httpsPort=${jenkinsMasterServerHttpsPort}       \
+            --httpPort=${jenkinsMasterServerHttpPort}         \
+            --ajp13Port=-1                                    \
+            --httpsCertificate=${jenkinsMasterSslCertificate} \
+            --httpsPrivateKey=${jenkinsMasterSslPrivateKey}   \
+            > ${jenkins_root}/log/jenkins.log 2>&1 
+
+}
+main

@@ -255,9 +255,11 @@ mustHaveValidWorkspace() {
 #  @return  <none>
 switchSvnServerInLocations() {
     local workspace=$(getWorkspaceName) 
+    local masterServer=$(getConfig svnMasterServerHostName)
+    local slaveServer=$(getConfig svnSlaveServerUlmHostName)
 
     info "changing svne1 to ulmscmi"
-    perl -pi -e "s/${svnMasterServerHostName}/${svnSlaveServerUlmHostName}/g" \
+    perl -pi -e "s/${masterServer}/${slaveServer}/g" \
         locations/*/Dependencies
 
     execute svn status locations/*/Dependencies
@@ -362,9 +364,11 @@ mustHaveNextLabelName() {
     local regex=${branchToTagRegexMap["${branch}"]}
     mustHaveValue "${regex}" "branch to tag regex map"
 
+    local srcRepos=$(getConfig lfsSourceRepos)
+
     info "branch ${branch} has release label regex ${regex}"
 
-    local label=$(${LFS_CI_ROOT}/bin/getNewTagName -u ${lfsSourceRepos}/os/tags -r "${regex}" )
+    local label=$(${LFS_CI_ROOT}/bin/getNewTagName -u ${srcRepos}/os/tags -r "${regex}" )
     mustHaveValue "${label}" "next release label name"
 
     local taskName=$(getProductNameFromJobName)
@@ -401,7 +405,8 @@ mustHaveNextCiLabelName() {
 #  @param   <none>
 #  @return  <none>
 getJenkinsJobBuildDirectory() {
-    echo ${jenkinsMasterServerPath}/jobs/${JOB_NAME}/builds/${BUILD_NUMBER}/
+    local serverPath=$(getConfig jenkinsMasterServerPath)
+    echo ${serverPath}/jobs/${JOB_NAME}/builds/${BUILD_NUMBER}/
 }
 
 ## @fn      mustHaveValue( $value )

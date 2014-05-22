@@ -42,7 +42,9 @@ execute() {
 #  @throws  raise an error, if command fails
 executeOnMaster() {
     local command=$@
-    execute ssh ${jenkinsMasterServerHostName} ${command}
+    local server=$(getConfig jenkinsMasterServerHostName)
+
+    execute ssh ${server} ${command}
     return
 }
 
@@ -52,8 +54,9 @@ executeOnMaster() {
 #  @return  exit code of the command
 runOnMaster() {
     local command=$@
-    trace "running command on server: ssh ${jenkinsMasterServerHostName} ${command}"
-    ssh ${jenkinsMasterServerHostName} ${command}
+    local server=$(getConfig jenkinsMasterServerHostName)
+    trace "running command on server: ssh ${server} ${command}"
+    ssh ${server} ${command}
     return $?
 }
 

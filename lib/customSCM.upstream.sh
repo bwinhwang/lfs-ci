@@ -58,6 +58,8 @@ actionCheckout() {
     # create a new changelog file
     cat < /dev/null > "${CHANGELOG}"
 
+    local server=$(getConfig jenkinsMasterServerHostName)
+
     debug "get the old upstream project data..."
     { read oldUpstreamProjectName ; 
       read oldUpstreamBuildNumber ;  } < "${OLD_REVISION_STATE_FILE}"
@@ -73,7 +75,7 @@ actionCheckout() {
 
         # TODO: demx2fk3 2014-04-07 use configuration for this
         local tmpChangeLogFile=$(createTempFile)
-        ssh ${jenkinsMasterServerHostName} "test -f ${buildDirectory}/changelog.xml && grep -q logentry ${buildDirectory}/changelog.xml && cat ${buildDirectory}/changelog.xml" > ${tmpChangeLogFile}
+        ssh ${server} "test -f ${buildDirectory}/changelog.xml && grep -q logentry ${buildDirectory}/changelog.xml && cat ${buildDirectory}/changelog.xml" > ${tmpChangeLogFile}
         if [[ ! -s ${CHANGELOG} ]] ; then
             debug "copy ${tmpChangeLogFile} to ${CHANGELOG}"
             execute cp -f ${tmpChangeLogFile} ${CHANGELOG}
@@ -97,7 +99,7 @@ actionCheckout() {
 
     # copy revisions.txt from upstream
     if runOnMaster test -f ${buildDirectory}/revisionstate.xml ; then
-        execute rsync -a ${jenkinsMasterServerHostName}:${buildDirectory}/revisionstate.xml ${WORKSPACE}/revisions.txt
+        execute rsync -a ${server}:${buildDirectory}/revisionstate.xml ${WORKSPACE}/revisions.txt
     else
         touch ${WORKSPACE}/revisions.txt
     fi

@@ -54,7 +54,12 @@
 #  @param   {parameters} the parameters of the given command   
 #  @return  <none>
 executeJenkinsCli() {
-    execute ${java} -jar ${jenkinsCli} -s "${jenkinsMasterServerHttpUrl}" -i ${jenkinsSshIdentification} $@
+    local java=$(getConfig java)
+    local url=$(getConfig jenkinsMasterServerHttpUrl)
+    local sshIdentity=$(getConfig jenkinsSshIdentification)
+    local cli=$(getConfig jenkinsCli)
+
+    execute ${java} -jar ${cli} -s "${url}" -i ${sshIdentity} $@
     return
 }
 
@@ -65,7 +70,12 @@ executeJenkinsCli() {
 #  @return  output of jenkins cli
 runJenkinsCli() {
     local tmpFile=$(createTempFile)
-    ${java} -jar ${jenkinsCli} -s "${jenkinsMasterServerHttpUrl}" -i ${jenkinsSshIdentification} $@ 2> ${tmpFile}
+    local java=$(getConfig java)
+    local url=$(getConfig jenkinsMasterServerHttpUrl)
+    local sshIdentity=$(getConfig jenkinsSshIdentification)
+    local cli=$(getConfig jenkinsCli)
+
+    ${java} -jar ${cli} -s "${url}" -i ${sshIdentity} $@ 2> ${tmpFile}
     if [[ $? != 0 ]] ; then
         error "error in executing jenkins CLI: $@"
         rawDebug ${tmpFile}
@@ -107,7 +117,8 @@ startBuildJobs() {
 #  @param   <none>
 #  @return  list of jobs names
 listJobNames() {
-    runOnMaster ls ${jenkinsMasterServerPath}/jobs
+    local serverPath=$(getConfig jenkinsMasterServerPath)
+    runOnMaster ls ${serverPath}/jobs
 }
 
 ## @fn      getJob( $jobName, $outputFileName )

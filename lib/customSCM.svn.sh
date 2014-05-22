@@ -73,8 +73,10 @@ _createRevisionsTxtFile() {
     locationName=$(getLocationName)
     mustHaveLocationName
 
+    local srcRepos=$(getLocationName lfsSourceRepos)
+
     # get the locations/<branch>/Dependencies
-    dependenciesFileUrl=${lfsSourceRepos}/os/trunk/bldtools/locations-${locationName}/Dependencies
+    dependenciesFileUrl=${srcRepos}/os/trunk/bldtools/locations-${locationName}/Dependencies
     if ! svn ls ${dependenciesFileUrl} >/dev/null 
     then
         error "svn is not responding or ${dependenciesFileUrl} does not exist"
@@ -91,7 +93,7 @@ _createRevisionsTxtFile() {
     fi
 
     # add also buildtools location
-    local bldToolsUrl=${lfsSourceRepos}/os/trunk/bldtools/bld-buildtools-common
+    local bldToolsUrl=${srcRepos}/os/trunk/bldtools/bld-buildtools-common
     local rev=$(svn info --xml ${bldToolsUrl}| ${LFS_CI_ROOT}/bin/xpath -q -e '/info/entry/commit/@revision'  | cut -d'"' -f 2)
     printf "%s %s %s" bld-buildtools "${bldToolsUrl}" "${rev}" >> ${newRevisionsFile}
 

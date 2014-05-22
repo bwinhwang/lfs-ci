@@ -81,12 +81,14 @@ copyReleaseCandidateToShare() {
     local branch=$(getBranchName)
     mustHaveBranchName
 
+    local ciBuildShare=$(getConfig lfsCiBuildsShare)
+
     local localDirectory=${workspace}/upload
     # TODO: demx2fk3 2014-05-20 fixme. The os should be configurable
-    local remoteDirectory=${lfsCiBuildsShare}/${branch}/data/${label}/os
+    local remoteDirectory=${ciBuildShare}/${branch}/data/${label}/os
 
     # TODO: demx2fk3 2014-05-20 fixme use lastSuccessfull build here (or empty)
-    local oldRemoteDirectory=${lfsCiBuildsShare}/${branch}/data/$(ls ${lfsCiBuildsShare}/${branch}/data/ | tail -n 1 )
+    local oldRemoteDirectory=${ciBuildShare}/${branch}/data/$(ls ${ciBuildShare}/${branch}/data/ | tail -n 1 )
     local hardlink=""
 
     info "copy build results to ${remoteDirectory}"
@@ -100,9 +102,9 @@ copyReleaseCandidateToShare() {
     execute rsync -av --delete ${hardlink} ${localDirectory}/. ${remoteDirectory}
 
     # TODO: demx2fk3 2014-04-10 link sdks
-    executeOnMaster ln -sf ${lfsCiBuildsShare}/${branch}/data/${label} ${lfsCiBuildsShare}/${branch}/${label}
-    executeOnMaster ln -sf ${lfsCiBuildsShare}/${branch}/data/${label} ${lfsCiBuildsShare}/${branch}/trunk@${BUILD_NUMBER}
-    executeOnMaster ln -sf ${lfsCiBuildsShare}/${branch}/data/${label} ${lfsCiBuildsShare}/${branch}/build_${BUILD_NUMBER}
+    executeOnMaster ln -sf ${ciBuildShare}/${branch}/data/${label} ${ciBuildShare}/${branch}/${label}
+    executeOnMaster ln -sf ${ciBuildShare}/${branch}/data/${label} ${ciBuildShare}/${branch}/trunk@${BUILD_NUMBER}
+    executeOnMaster ln -sf ${ciBuildShare}/${branch}/data/${label} ${ciBuildShare}/${branch}/build_${BUILD_NUMBER}
 
     return
 }

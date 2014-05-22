@@ -49,13 +49,15 @@ ci_job_build_version() {
     mustHaveCleanWorkspace
     mustHaveWorkspaceName
 
+    local serverPath=$(getConfig jenkinsMasterServerPath)
+
     info "workspace is ${workspace}"
 
     mustHaveNextLabelName
     local label=$(getNextReleaseLabel)
     mustHaveValue ${label}
 
-    local jobDirectory=${jenkinsMasterServerPath}/jobs/${JOB_NAME}/lastSuccessful/ 
+    local jobDirectory=${serverPath}/jobs/${JOB_NAME}/lastSuccessful/ 
     local oldLabel=$(runOnMaster "test -d ${jobDirectory} && grep ${label} ${jobDirectory}/label 2>/dev/null")
 
     info "old label ${oldLabel} from ${jobDirectory} on master"
@@ -77,8 +79,8 @@ ci_job_build_version() {
     execute mkdir -p     ${workspace}/bld/bld-fsmci-summary
     echo ${newCiLabel} > ${workspace}/bld/bld-fsmci-summary/label
 
-    debug "writing new label file in ${jenkinsMasterServerPath}/jobs/${JOB_NAME}/builds/${BUILD_NUMBER}/label"
-    executeOnMaster "echo ${newCiLabel} > ${jenkinsMasterServerPath}/jobs/${JOB_NAME}/builds/${BUILD_NUMBER}/label"
+    debug "writing new label file in ${serverPath}/jobs/${JOB_NAME}/builds/${BUILD_NUMBER}/label"
+    executeOnMaster "echo ${newCiLabel} > ${serverPath}/jobs/${JOB_NAME}/builds/${BUILD_NUMBER}/label"
 
     info "upload results to artifakts share."
     createArtifactArchive

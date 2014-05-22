@@ -16,6 +16,8 @@ uploadToSubversion() {
     local branchToUpload=$2
     local commitMessage="$3"
 
+    local svnReposUrl=$(getConfig lfsDeliveryRepos)
+
     info "upload local path ${pathToUpload} to ${branchToUpload}"
 
     local branch=${locationToSubversionMap["${branchToUpload}"]}
@@ -30,13 +32,13 @@ uploadToSubversion() {
     mustHaveNextLabelName
     local tagName=$(getNextReleaseLabel)
 
-    execute ${LFS_CI_ROOT}/bin/svn_load_dirs.pl           \
-                -v                                        \
-                -t os/tag/${tagName}                      \
-                -no_user_input                            \
-                -message "upload"                         \
-                -glob_ignores="#.#"                       \
-                ${lfsDeliveryRepos} os/branches/${branch} \
+    execute ${LFS_CI_ROOT}/bin/svn_load_dirs.pl      \
+                -v                                   \
+                -t os/tag/${tagName}                 \
+                -no_user_input                       \
+                -message "upload"                    \
+                -glob_ignores="#.#"                  \
+                ${svnReposUrl} os/branches/${branch} \
                 ${pathToUpload} 
 
     if [[ $? != 0 ]] ; then
