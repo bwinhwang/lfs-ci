@@ -215,7 +215,12 @@ switchToNewLocation() {
     #     exit 1
     # fi
 
-    newLocation=$(getConfig locationMapping)
+    local newLocation=$(getConfig locationMapping)
+    newLocation=$branchToLocationMap["${location}"]
+    if [[ ! "${newLocation}" ]] ; then
+        newLocation=${location}
+        
+    fi
 
     trace "switching to new location \"${newLocation}\""
     execute build newlocations ${newLocation}
