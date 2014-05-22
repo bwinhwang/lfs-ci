@@ -73,7 +73,7 @@ _createRevisionsTxtFile() {
     locationName=$(getLocationName)
     mustHaveLocationName
 
-    local srcRepos=$(getLocationName lfsSourceRepos)
+    local srcRepos=$(getConfig lfsSourceRepos)
 
     # get the locations/<branch>/Dependencies
     dependenciesFileUrl=${srcRepos}/os/trunk/bldtools/locations-${locationName}/Dependencies
