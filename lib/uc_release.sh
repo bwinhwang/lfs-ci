@@ -11,6 +11,7 @@ ci_job_release() {
 
     requiredParameters TESTED_BUILD_JOBNAME TESTED_BUILD_NUMBER
 
+    local serverPath=$(getConfig jenkinsMasterServerPath)
     local subJob=$(getTargetBoardName)
     mustHaveTargetBoardName
 
@@ -25,7 +26,7 @@ ci_job_release() {
     runOnMaster ${LFS_CI_ROOT}/bin/getUpStreamProject \
                     -j ${TESTED_BUILD_JOBNAME}        \
                     -b ${TESTED_BUILD_NUMBER}         \
-                    -h ${jenkinsMasterServerPath} > ${upstreamsFile}
+                    -h ${serverPath} > ${upstreamsFile}
 
     trace "output of getUpStreamProject" 
     rawDebug ${upstreamsFile}
@@ -51,7 +52,8 @@ ci_job_release() {
     info "found package job: ${packageJobName} / ${packageBuildNumber}"
     info "found build   job: ${buildJobName} / ${buildBuildNumber}"
     
-    local workspace=${lfsCiBuildsShare}/${branch}/build_${packageBuildNumber}
+    local ciBuildShare=$(getConfig lfsCiBuildsShare)
+    local workspace=${ciBuildShare}/${branch}/build_${packageBuildNumber}
     if [[ ! -d ${workspace} ]] ; then
         error "can not find workspace of package job on build share (${workspace})"
         exit 1
@@ -98,6 +100,8 @@ extractArtifactsOnReleaseShare() {
     local jobName=$1
     local buildNumber=$2
     local workspace=$(getWorkspaceName)
+    local server=$(getConfig jenkinsMasterServerHostName)
+    local ciBuildShare=$(getConfig lfsCiBuildsShare)
     mustHaveWorkspaceName
 
     mustHaveNextLabelName
@@ -111,11 +115,11 @@ extractArtifactsOnReleaseShare() {
         [[ -d ${dir} ]] || continue
         basename=$(basename ${dir})
 
-        local destination=${lfsCiBuildsShare}/buildresults/${basename}/${labelName}
+        local destination=${ciBuildShare}/buildresults/${basename}/${labelName}
         info "copy ${basename} to buildresults share ${destination}"
 
         executeOnMaster mkdir -p ${destination}
-        execute rsync -av --exclude=.svn ${workspace}/bld/${basename}/. ${jenkinsMasterServerHostName}:${destination}
+        execute rsync -av --exclude=.svn ${workspace}/bld/${basename}/. ${server}:${destination}
     done
 
     info "clean up workspace"
@@ -136,8 +140,9 @@ copyToReleaseShareOnSite_copyToSite() {
 
     local siteName=${SITE_NAME}
     local labelName=${RELEASE_NAME}
+    local ciBuildShare=$(getConfig lfsCiBuildsShare)
 
-    for subsystemDirectory in $(find ${lfsCiBuildsShare}/buildresults/ -maxdepth 2 -name ${labelName} ) ; do
+    for subsystemDirectory in $(find ${ciBuildShare}/buildresults/ -maxdepth 2 -name ${labelName} ) ; do
         [[ -d ${subsystemDirectory} ]] || continue
 
         local sourceDirectory=${subsystemDirectory}

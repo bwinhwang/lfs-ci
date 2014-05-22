@@ -30,8 +30,12 @@ ci_job_admin() {
 #  @param   <none>
 #  @return  <none>
 cleanupArtifactsShare() {
+    local artifactesShare=$(getConfig artifactesShare)
+
     local listOfJobsWithArtifacts=$(ls ${artifactesShare})
     mustHaveValue "${listOfJobsWithArtifacts}"
+
+    local serverPath=$(getConfig jenkinsMasterServerPath)
 
     local counter=0
 
@@ -40,7 +44,7 @@ cleanupArtifactsShare() {
         for build in ${artifactesShare}/${job}/* ; do
             [[ -e ${build} ]] || continue
             build=$(basename ${build})
-            if [[ ! -e ${jenkinsMasterServerPath}/jobs/${job}/builds/${build} ]] ; then
+            if [[ ! -e ${serverPath}/jobs/${job}/builds/${build} ]] ; then
                 info "removing artifacts of ${job} / ${build}"
                 execute rm -rf ${artifactesShare}/${job}/${build}/
                 counter=$(( counter + 1 ))
@@ -67,6 +71,7 @@ cleanupArtifactsShare() {
 backupJenkinsMasterServerInstallation() {
 
     local backupPath=${jenkinsMasterServerBackupPath}
+    local serverPath=$(getConfig jenkinsMasterServerPath)
 
     execute mkdir -p ${backupPath}
     execute rm -rf ${backupPath}/backup.11
@@ -81,7 +86,7 @@ backupJenkinsMasterServerInstallation() {
         execute cp -rl ${backupPath}/backup.1 ${backupPath}/backup.0
     fi
 
-    execute rsync -av --delete --exclude=workspace ${jenkinsMasterServerPath}/. ${backupPath}/backup.0/.
+    execute rsync -av --delete --exclude=workspace ${serverPath}/. ${backupPath}/backup.0/.
 
     info "backup done"
 
