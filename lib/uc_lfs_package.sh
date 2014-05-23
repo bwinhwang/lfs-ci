@@ -170,6 +170,9 @@ copySysroot() {
             mips64-octeon-linux-gnu)
                 execute ln -sf ${dst}/usr/lib64/libFSMDDAL.so.fct libFSMDDAL_fsm3_octeon.so
             ;;
+            arm-cortexa15-linux-gnueabihf)
+                execute ln -sf ${dst}/usr/lib64/libFSMDDAL.so.fsm35_k2 libFSMDDAL_fsm4_k2.so
+            ;;
             *)
                 error "architecture ${destinationsArchitecture} not supported"
                 exit 1
@@ -247,7 +250,7 @@ copyPlatform() {
                         execute mv -f ${file} ${dst}/devel
                     done
             ;;
-            fsm3_octeon2)
+            fsm3_octeon2|fsm35_k2|fsm35_axm|keystone2|axm)
                     ln -fs factory/u-boot.uim ${dst}/u-boot.uim
                     mkdir ${dst}/devel
                     for file in ${dst}/config     \
