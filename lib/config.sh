@@ -38,9 +38,10 @@ declare -a branchToLocationMap=( ["trunk"]="pronb-developer" \
                                )
 
 # define the mapping from branch to label/tag name
-declare -A branchToTagRegexMap=( ["pronb-developer"]="PS_LFS_OS_$(date +%Y)_$(date +%m)_([0-9][0-9])" \
-                                          ["FB1404"]="FB_PS_LFS_OS_1404_04_([0-9][0-9])" \
-                                  ["KERNEL_3.x_DEV"]="KERNEL3x_PS_LFS_OS_$(date +%Y)_$(date +%m)_([0-9][0-9])" \
+labelPrefix=$(getConfig labelPrefix)
+declare -A branchToTagRegexMap=( ["pronb-developer"]="${labelPrefix}_$(date +%Y)_$(date +%m)_([0-9][0-9])" \
+                                          ["FB1404"]="FB_${labelPrefix}_1404_04_([0-9][0-9])" \
+                                  ["KERNEL_3.x_DEV"]="KERNEL3x_${labelPrefix}_$(date +%Y)_$(date +%m)_([0-9][0-9])" \
                                )
 
 ## @fn      getConfig( key )
