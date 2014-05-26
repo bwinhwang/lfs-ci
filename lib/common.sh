@@ -337,6 +337,10 @@ requiredParameters() {
         fi
     done
 
+    local workspace=$(getWorkspaceName)
+
+    echo "${parameterNames}=${!name}" >> ${workspace}/.env
+
     return
 }
 
@@ -398,8 +402,10 @@ mustHaveNextCiLabelName() {
     local workspace=$(getWorkspaceName)
     mustHaveWorkspaceName
 
-    local label=$(cat ${workspace}/bld/bld-fsmci-summary/label 2>/dev/null)
-    mustHaveValue "${label}" "next ci label name"
+    if [[ ! "${LFS_CI_NEXT_CI_LABEL_NAME}" ]] ; then
+        local label=$(cat ${workspace}/bld/bld-fsmci-summary/label 2>/dev/null)
+        mustHaveValue "${label}" "next ci label name"
+    fi
 
     export LFS_CI_NEXT_CI_LABEL_NAME=${label}
     return
