@@ -152,16 +152,14 @@ _build() {
 
     cd ${workspace}
     info "creating temporary makefile"
-    ${LFS_CI_ROOT}/bin/sortBuildsFromDependencies ${target} > ${cfgFile}
+    ${LFS_CI_ROOT}/bin/sortBuildsFromDependencies ${target} makefile ${label} > ${cfgFile}
 
     rawDebug ${cfgFile}
 
     local makeTarget=$(getConfig subsystem)-${target}
 
-    export LABEL=${label}
-
     info "executing all targets in parallel with ${makeTarget} and label=${label}"
-    execute make -f ${cfgFile} -j ${makeTarget} LABEL=${label}
+    execute make -f ${cfgFile} -j ${makeTarget} 
 
 #     sortbuildsfromdependencies ${target} > ${cfgFile}
 #     rawDebug ${cfgFile}

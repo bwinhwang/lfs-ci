@@ -847,6 +847,7 @@ sub prepare {
 
     $self->{goal}  = shift @args || die "no src dir";
     $self->{style} = shift @args || "makefile";
+    $self->{label} = shift @args;
 
     @{ $self->{sourcesDirectories} } = <src-*>;
     @{ $self->{sources} } = ();
@@ -913,7 +914,7 @@ SOURCES:
 
                 }
                 printf "%s-%s: %s\n", $source->{directory}, $platform, join( " ", @filteredDeps );
-                printf "\tbuild -L \$@.log -C %s %s --label=%s\n\n", $source->{directory}, $platform, $ENV{LABEL};
+                printf "\tbuild -L \$@.log -C %s %s --label=%s\n\n", $source->{directory}, $platform, $self->{label};
             }
         } elsif( $self->{style} eq "legacy" ) {
             printf "%s %s - %s\n",
