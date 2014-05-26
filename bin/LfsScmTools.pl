@@ -913,7 +913,7 @@ SOURCES:
 
                 }
                 printf "%s-%s: %s\n", $source->{directory}, $platform, join( " ", @filteredDeps );
-                printf "\tbuild -L \$@.log -C %s %s --label=%\n\n", $source->{directory}, $platform, $ENV{LABEL};
+                printf "\tbuild -L \$@.log -C %s %s --label=%s\n\n", $source->{directory}, $platform, $ENV{LABEL};
             }
         } elsif( $self->{style} eq "legacy" ) {
             printf "%s %s - %s\n",
