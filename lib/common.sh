@@ -335,7 +335,7 @@ requiredParameters() {
             error "required parameter ${name} is missing"
             exit 1
         fi
-        echo "${name}=${!name}" >> ${workspace}/../.env
+        # echo "${name}=${!name}" >> ${workspace}/../.env
     done
 
     local workspace=$(getWorkspaceName)
