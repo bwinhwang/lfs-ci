@@ -365,6 +365,7 @@ synchroniceToLocalPath() {
     local remotePath=$(readlink ${localPath})
     local subsystem=$(basename ${localPath})
     local tag=$(basename ${remotePath})
+    local serverName=$(getConfig linseeUlmServer)
 
     requiredParameters LFS_CI_SHARE_MIRROR
 
@@ -384,7 +385,7 @@ synchroniceToLocalPath() {
 
             execute rsync --archive --numeric-ids --delete-excluded --ignore-errors \
                 --hard-links --sparse --exclude=.svn --rsh=ssh                      \
-                ${linseeUlmServer}:${remotePath}/                                   \
+                ${serverName}:${remotePath}/                                   \
                 ${localCacheDir}/data/${tag}/
 
             execute ln -sf data/${tag} ${localCacheDir}/${tag}
