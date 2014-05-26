@@ -34,13 +34,10 @@ ci_job_package() {
         info "bldDirectory is ${bldDirectory}"
         [[ -d ${bldDirectory} ]] || continue
 
-        local destinationsPlatform=$(getPlatformFromDirectory ${bldDirectory})
-        mustHaveArchitectureFromDirectory ${bldDirectory} ${destinationsPlatform}
+        info "copy uboot for ${bldDirectory}..."
 
-        info "copy uboot for ${destinationsPlatform}..."
-
-        local srcDirectory=${bldDirectory}/results/
-        local dstDirectory=${workspace}/upload/${destinationsPlatform}
+        local srcDirectory=${bldDirectory}/results
+        local dstDirectory=${workspace}/upload/bld/${bldDirectory}/results
 
         execute mkdir -p ${dstDirectory}
         execute rsync -av ${srcDirectory}/. ${dstDirectory}/
