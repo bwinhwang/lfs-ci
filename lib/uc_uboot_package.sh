@@ -31,6 +31,7 @@ ci_job_package() {
     find ${workspace}
 
     for bldDirectory in ${workspace}/bld/bld-*brm-* ; do
+        info "bldDirectory is ${bldDirectory}"
         [[ -d ${bldDirectory} ]] || continue
 
         local destinationsPlatform=$(getArchitectureFromDirectory ${bldDirectory})
