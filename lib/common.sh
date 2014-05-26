@@ -339,7 +339,7 @@ requiredParameters() {
 
     local workspace=$(getWorkspaceName)
 
-    echo "${parameterNames}=${!name}" >> ${workspace}/.env
+    echo "${parameterNames}=${!name}" >> ${workspace}/../.env
 
     return
 }
