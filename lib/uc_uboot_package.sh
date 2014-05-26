@@ -34,7 +34,7 @@ ci_job_package() {
         info "bldDirectory is ${bldDirectory}"
         [[ -d ${bldDirectory} ]] || continue
 
-        local destinationsPlatform=$(getArchitectureFromDirectory ${bldDirectory})
+        local destinationsPlatform=$(getPlatformFromDirectory ${bldDirectory})
         mustHaveArchitectureFromDirectory ${bldDirectory} ${destinationsPlatform}
 
         info "copy uboot for ${destinationsPlatform}..."
