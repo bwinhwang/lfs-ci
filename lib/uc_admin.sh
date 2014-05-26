@@ -70,8 +70,11 @@ cleanupArtifactsShare() {
 #  @return  <none>
 backupJenkinsMasterServerInstallation() {
 
-    local backupPath=${jenkinsMasterServerBackupPath}
+    local backupPath=$(getConfig jenkinsMasterServerBackupPath)
     local serverPath=$(getConfig jenkinsMasterServerPath)
+
+    mustHaveValue ${backupPath}
+    mustHaveValue ${serverPath}
 
     execute mkdir -p ${backupPath}
     execute rm -rf ${backupPath}/backup.11
