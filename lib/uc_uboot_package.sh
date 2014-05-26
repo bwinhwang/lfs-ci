@@ -37,8 +37,8 @@ ci_job_package() {
 
         info "copy uboot for ${bldDirectory}..."
 
-        local srcDirectory=${bldDirectory}/results
-        local dstDirectory=${workspace}/upload/bld/${baseNameBldDir}/results
+        local srcDirectory=${bldDirectory}
+        local dstDirectory=${workspace}/upload/bld/${baseNameBldDir}
 
         execute mkdir -p ${dstDirectory}
         execute rsync -av ${srcDirectory}/. ${dstDirectory}/
