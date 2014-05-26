@@ -947,6 +947,8 @@ sub execute {
                                  tag      => $tag,
                                  revision => $revision );
     $dir->loadDependencyTree();
+
+    print STDERR Dumper( $dir );
     printf( "%s %s", join( " ", $dir->getSourceDirectoriesFromDependencies() ),
                      $subDir,
           );
