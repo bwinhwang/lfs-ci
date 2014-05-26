@@ -21,7 +21,6 @@ ci_job_package() {
 
     setBuildDescription "${JOB_NAME}" "${BUILD_NUMBER}" "${label}"
 
-
     local workspace=$(getWorkspaceName)
     mustHaveWorkspaceName
     mustHaveCleanWorkspace
@@ -211,7 +210,7 @@ copyPlatform() {
     mustHaveWorkspaceName
 
     for bldDirectory in ${workspace}/bld/bld-*psl-* ; do
-        [[ -d ${bldDirectory} ]] || continue
+        [[ -d ${bldDirectory}         ]] || continue
         [[ -d ${bldDirectory}/results ]] || continue
 
         local platform=$(getPlatformFromDirectory ${bldDirectory})
