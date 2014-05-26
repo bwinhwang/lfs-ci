@@ -33,11 +33,12 @@ ci_job_package() {
     for bldDirectory in ${workspace}/bld/bld-*brm*-* ; do
         info "bldDirectory is ${bldDirectory}"
         [[ -d ${bldDirectory} ]] || continue
+        local baseNameBldDir=$(basename ${bldDirectory})
 
         info "copy uboot for ${bldDirectory}..."
 
         local srcDirectory=${bldDirectory}/results
-        local dstDirectory=${workspace}/upload/bld/${bldDirectory}/results
+        local dstDirectory=${workspace}/upload/bld/${baseNameBldDir}/results
 
         execute mkdir -p ${dstDirectory}
         execute rsync -av ${srcDirectory}/. ${dstDirectory}/
