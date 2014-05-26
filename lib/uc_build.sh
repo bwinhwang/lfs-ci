@@ -158,6 +158,8 @@ _build() {
 
     local makeTarget=$(getConfig subsystem)-${target}
 
+    export LABEL=${label}
+
     info "executing all targets in parallel with ${makeTarget} and label=${label}"
     execute make -f ${cfgFile} -j ${makeTarget} LABEL=${label}
 
