@@ -47,7 +47,7 @@ ci_job_package() {
 
 ## @fn      copyAddons()
 #  @brief   handle the addons, copy the addons from the results directory into the delivery structure
-#  @details function checks for bld-*psl-*/results/addons directory and copy the content into the
+#  @details function checks for bld-*psl*-*/results/addons directory and copy the content into the
 #           regarding delivery directory
 #  @param   <none>
 #  @return  <none>
@@ -56,7 +56,7 @@ copyAddons() {
     local workspace=$(getWorkspaceName)
     mustHaveWorkspaceName
 
-    for bldDirectory in ${workspace}/bld/bld-*psl-* ; do
+    for bldDirectory in ${workspace}/bld/bld-*psl*-* ; do
         [[ -d ${bldDirectory} ]] || continue
         [[ -d ${bldDirectory}/results/addons ]] || continue
 
@@ -86,7 +86,7 @@ copyArchs() {
     mustHaveWorkspaceName
 
 
-    for bldDirectory in ${workspace}/bld/bld-*psl-* ; do
+    for bldDirectory in ${workspace}/bld/bld-*psl*-* ; do
         [[ -d ${bldDirectory} ]] || continue
 
         local destinationsArchitecture=$(getArchitectureFromDirectory ${bldDirectory})
@@ -120,7 +120,7 @@ copySysroot() {
     mustHaveWorkspaceName
 
 
-    for bldDirectory in ${workspace}/bld/bld-*psl-* ; do
+    for bldDirectory in ${workspace}/bld/bld-*psl*-* ; do
 
         [[ -d ${bldDirectory} ]] || continue
 
@@ -209,7 +209,7 @@ copyPlatform() {
     local workspace=$(getWorkspaceName)
     mustHaveWorkspaceName
 
-    for bldDirectory in ${workspace}/bld/bld-*psl-* ; do
+    for bldDirectory in ${workspace}/bld/bld-*psl*-* ; do
         [[ -d ${bldDirectory}         ]] || continue
         [[ -d ${bldDirectory}/results ]] || continue
 
