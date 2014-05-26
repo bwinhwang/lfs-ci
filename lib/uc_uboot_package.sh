@@ -30,7 +30,7 @@ ci_job_package() {
 
     find ${workspace}
 
-    for bldDirectory in ${workspace}/bld/bld-*brm-* ; do
+    for bldDirectory in ${workspace}/bld/bld-*brm*-* ; do
         info "bldDirectory is ${bldDirectory}"
         [[ -d ${bldDirectory} ]] || continue
 
