@@ -143,7 +143,7 @@ copySysroot() {
             # copy lib
             # untar debug.tgz
             # copy some other sysroo dirs
-        if [[ ${bldDirectory}/results/rfs.init_sys-root.tar.gz ]] ; then
+        if [[ -e ${bldDirectory}/results/rfs.init_sys-root.tar.gz ]] ; then
             debug "untar results/rfs.init_sys-root.tar.gz"
             # TODO: demx2fk3 2014-04-07 expand the short parameter names
             execute tar -xzf ${bldDirectory}/results/rfs.init_sys-root.tar.gz -C ${dst}
