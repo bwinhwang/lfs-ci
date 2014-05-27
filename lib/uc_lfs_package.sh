@@ -202,7 +202,10 @@ copyFactoryZip() {
     local workspace=$(getWorkspaceName)
     mustHaveWorkspaceName
 
-    local dst=${workspace}/upload/platforms/fsm3_octeon2
+    local destinationsPlatform=$(getArchitectureFromDirectory ${bldDirectory})
+    mustHaveArchitectureFromDirectory ${bldDirectory} ${destinationsPlatform}
+
+    local dst=${workspace}/upload/platforms/${destinationsPlatform}
     execute cd ${dst}
     execute zip -r factory.zip factory
     execute cd $OLDPWD
