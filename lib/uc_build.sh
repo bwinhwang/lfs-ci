@@ -370,6 +370,9 @@ synchroniceToLocalPath() {
     requiredParameters LFS_CI_SHARE_MIRROR
 
     local localCacheDir=${LFS_CI_SHARE_MIRROR}/${USER}/lfs-ci-local/${subsystem}
+    if [[ ${subsystem} == "pkgpool" ]] ; then
+        local rsync_opts=-L
+    fi        
 
     if [[ ! -e ${localCacheDir}/${tag} ]] ; then
         progressFile=${localCacheDir}/data/${tag}.in_progress
@@ -385,6 +388,7 @@ synchroniceToLocalPath() {
 
             execute rsync --archive --numeric-ids --delete-excluded --ignore-errors \
                 --hard-links --sparse --exclude=.svn --rsh=ssh                      \
+                ${rsync_opts} \
                 ${serverName}:${remotePath}/                                   \
                 ${localCacheDir}/data/${tag}/
 
