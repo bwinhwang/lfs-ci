@@ -206,9 +206,12 @@ copyFactoryZip() {
     mustHaveArchitectureFromDirectory ${bldDirectory} ${destinationsPlatform}
 
     local dst=${workspace}/upload/platforms/${destinationsPlatform}
-    execute cd ${dst}
-    execute zip -r factory.zip factory
-    execute cd $OLDPWD
+
+    if [[ -d ${dst} ]] ; then
+        execute cd ${dst}
+        execute zip -r factory.zip factory
+        execute cd $OLDPWD
+    fi
 
     return
 }
