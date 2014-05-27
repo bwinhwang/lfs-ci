@@ -9,6 +9,20 @@ branchDisplayName="FSM-r4 trunk"
 
 for job in $(listJobNames | grep trunk)
 do
+
+    info "delete ${job}"
+    rm -rf ${job}.xml
+    getJob "${job}" ${job}.xml
+
+    newJobName=$(echo ${job} | sed "s/_-_trunk_-_/_-_${branchName}_-_/")
+    if existsJenkinsJob "${newJobName}" ; then
+        info "delete new job ${newJobName} first, because it exists"
+        deleteJenkinsJob "${newJobName}"
+    fi
+done
+
+for job in $(listJobNames | grep trunk)
+do
     info "${job}"
     rm -rf ${job}.xml
     getJob "${job}" ${job}.xml
@@ -41,12 +55,10 @@ do
     cat ${job}.xml | xmlsubst.pl "/project/publishers/hudson.plugins.parameterizedtrigger.BuildTrigger/configs/hudson.plugins.parameterizedtrigger.BuildTriggerConfig/projects:=fix(${newUpStreamProjects})" > a
     mv a ${job}.xml
 
-    if existsJenkinsJob "${newJobName}" ; then
-        info "delete new job ${newJobName} first, because it exists"
-        deleteJenkinsJob "${newJobName}"
-    fi
 
     createJenkinsJob "${newJobName}" ${job}.xml
     info "job ${newJobName} created."
+
+    disableJob "${newJobName}"
 
 done
