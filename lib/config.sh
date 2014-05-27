@@ -1,55 +1,5 @@
 #!/bin/bash
 
-## @fn      getConfig( key )
-#  @brief   get the configuration to the requested key
-#  @details «full description»
-#  @todo    move this into a generic module. make it also more configureable
-#  @param   {key}    key name of the requested value
-#  @return  value for the key
-getConfig() {
-    local key=$1
-
-    # trace "get config value for ${key}"
-
-    export productName=$(getProductNameFromJobName)
-    export taskName=$(getTaskNameFromJobName)
-    export subTaskName=$(getSubTaskNameFromJobName)
-    export location=$(getLocationName)
-    export config=$(getTargetBoardName)
-
-    # trace "config/${config}"
-    # trace "location/${location}"
-    # trace "subTaskName/${subTaskName}"
-    # trace "taskName/${taskName}"
-    # trace "productName/${productName}"
-
-    export LFS_CI_CONFIG_FILE=${LFS_CI_ROOT}/etc/file.cfg
-
-    case "${key}" in
-        subsystem)
-            ${LFS_CI_ROOT}/bin/config.pl LFS_CI_UC_build_subsystem_to_build
-        ;;
-        locationMapping)
-            ${LFS_CI_ROOT}/bin/config.pl LFS_CI_location_mapping
-        ;;
-        additionalSourceDirectories)
-            ${LFS_CI_ROOT}/bin/config.pl LFS_CI_UC_build_additionalSourceDirectories
-        ;;
-        onlySourceDirectories) # just use this source directory only
-            ${LFS_CI_ROOT}/bin/config.pl LFS_CI_UC_build_onlySourceDirectories
-        ;;
-        lfsDeliveryRepos)
-            # url of the LFS delivery repository in SVN
-            local slaveServer=$(getConfig svnSlaveServerUlmHostName)
-            echo https://${slaveServer}/isource/svnroot/BTS_D_SC_LFS_2014/
-        ;;
-        *) 
-            ${LFS_CI_ROOT}/bin/config.pl "${key}"
-        ;;
-    esac
-
-    return
-}
 
 
 # this is the static configuration, which is valid for all scripting
