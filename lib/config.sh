@@ -133,9 +133,9 @@ declare -A platformMap=(         ["fct"]="fsm3_octeon2" \
                          ["qemu_x86_64"]="qemu_64"      \
                                 ["fspc"]="fspc"         \
                                 ["fcmd"]="fcmd"         \
-                                 ["arm"]="fsm35_k2"     \
-                           ["keystone2"]="fsm35_k2"     \
-                                 ["axm"]="fsm35_axm"    \
+                                 ["arm"]="fsm4_k2"     \
+                           ["keystone2"]="fsm4_k2"     \
+                                 ["axm"]="fsm4_axm"    \
 )
 
 # ....
