@@ -144,12 +144,21 @@ copySysroot() {
             # copy lib
             # untar debug.tgz
             # copy some other sysroo dirs
-        if [[ -e ${bldDirectory}/results/rfs.init_sys-root.tar.gz ]] ; then
-            debug "untar results/rfs.init_sys-root.tar.gz"
+        case ${destinationsArchitecture} in
+            arm-cortexa15-linux-gnueabihf)
+                local sysroot_tgz=${workspace}/bld/bld-rfs-arm/results/sysroot.tar.gz
+            ;;
+            *)
+                local sysroot_tgz=${bldDirectory}/results/rfs.init_sys-root.tar.gz
+            ;;
+        esac
+
+        if [[ -e ${sysroot_tgz} ]] ; then
+            debug "untar ${sysroot_tgz}"
             # TODO: demx2fk3 2014-04-07 expand the short parameter names
-            execute tar -xzf ${bldDirectory}/results/rfs.init_sys-root.tar.gz -C ${dst}
+            execute tar -xzf ${sysroot_tgz} -C ${dst}
         else
-            error "missing rfs.init_sys-root.tar.gz, else path not implemented"
+            error "missing ${sysroot_tgz}, else path not implemented"
             exit 1
         fi
 
