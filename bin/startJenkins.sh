@@ -3,6 +3,8 @@
 main() {
     local LFS_CI_ROOT=/ps/lfs/ci
 
+    source ${LFS_CI_ROOT}/lib/logging.sh
+    source ${LFS_CI_ROOT}/lib/common.sh
     source ${LFS_CI_ROOT}/lib/config.sh
 
     local java=$(getConfig java)
@@ -15,6 +17,8 @@ main() {
     local jenkinsMasterServerHttpsPort=$(getConfig jenkinsMasterServerHttpsPort)
 
     export JENKINS_HOME JENKINS_ROOT LFS_CI_ROOT
+
+    set -x
 
     mkdir -p ${JENKINS_HOME} ${JENKINS_ROOT} ${JENKINS_ROOT}/log
     ulimit -u 40960
@@ -38,7 +42,10 @@ main() {
             --ajp13Port=-1                                    \
             --httpsCertificate=${jenkinsMasterSslCertificate} \
             --httpsPrivateKey=${jenkinsMasterSslPrivateKey}   \
-            > ${jenkins_root}/log/jenkins.log 2>&1 
+            > ${JENKINS_ROOT}/log/jenkins.log 2>&1 
+    set +x
 
 }
+
+export LFS_CI_ROOT=/ps/lfs/ci/
 main

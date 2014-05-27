@@ -1,8 +1,5 @@
 #!/bin/bash
 
-source ${LFS_CI_ROOT}/lib/commands.sh
-source ${LFS_CI_ROOT}/lib/config.sh
-source ${LFS_CI_ROOT}/lib/logging.sh
 
 # the following methods are parsing the jenkins job name and return the
 # required / requested information. At the moment, the script will be called
@@ -495,3 +492,7 @@ removeBrokenSymlinks() {
     execute symlinks -c -d -v -r ${dir} 
     return            
 }
+
+source ${LFS_CI_ROOT}/lib/commands.sh
+source ${LFS_CI_ROOT}/lib/config.sh
+source ${LFS_CI_ROOT}/lib/logging.sh
