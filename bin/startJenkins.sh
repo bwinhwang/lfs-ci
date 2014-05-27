@@ -18,6 +18,9 @@ main() {
 
     export JENKINS_HOME JENKINS_ROOT LFS_CI_ROOT
 
+    unset CI_LOGGING_LOGFILENAME
+    unset CI_LOGGING_DURATION_START_DATE
+
     set -x
 
     mkdir -p ${JENKINS_HOME} ${JENKINS_ROOT} ${JENKINS_ROOT}/log

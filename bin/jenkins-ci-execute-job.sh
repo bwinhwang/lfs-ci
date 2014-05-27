@@ -7,8 +7,6 @@ if [[ -z "${LFS_CI_ROOT}" ]] ; then
     export LFS_CI_ROOT=${PWD}
 fi
 
-unset CI_LOGGING_LOGFILENAME
-
 export PATH=${LFS_CI_ROOT}/bin:${PATH}
 
 source ${LFS_CI_ROOT}/lib/common.sh
