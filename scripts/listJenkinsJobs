@@ -1,0 +1,7 @@
+#!/bin/bash
+
+source ${LFS_CI_ROOT}/lib/common.sh
+source ${LFS_CI_ROOT}/lib/logging.sh
+source ${LFS_CI_ROOT}/lib/jenkins.sh
+
+listJobNames
