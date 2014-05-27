@@ -243,6 +243,9 @@ cleanupTempFiles() {
     [[ -d ${LFS_CI_TEMPDIR} ]] && rm -rf ${LFS_CI_TEMPDIR}
 }
 
+initTempDirectory
+exit_add cleanupTempFiles
+
 ## @fn      initTempDirectory()
 #  @brief   initialize the use for temp directory
 #  @param   <none>

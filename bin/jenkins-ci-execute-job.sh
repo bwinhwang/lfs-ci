@@ -23,10 +23,8 @@ fi
 
 # start the logfile
 startLogfile
-initTempDirectory
 # and end it, if the script exited in some way
 exit_add stopLogfile
-exit_add cleanupTempFiles
 
 # TODO: demx2fk3 2014-03-31 fixme
 # cleanupEnvironmentVariables
