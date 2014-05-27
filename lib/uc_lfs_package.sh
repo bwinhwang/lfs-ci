@@ -202,10 +202,8 @@ copyFactoryZip() {
     local workspace=$(getWorkspaceName)
     mustHaveWorkspaceName
 
-    local destinationsPlatform=$(getArchitectureFromDirectory ${bldDirectory})
-    mustHaveArchitectureFromDirectory ${bldDirectory} ${destinationsPlatform}
-
-    local dst=${workspace}/upload/platforms/${destinationsPlatform}
+    # TODO: demx2fk3 2014-05-27 fixme
+    local dst=${workspace}/upload/platforms/fsm3_octeon2
 
     if [[ -d ${dst} ]] ; then
         execute cd ${dst}
