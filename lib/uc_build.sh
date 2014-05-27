@@ -267,7 +267,7 @@ _createWorkspace() {
 
     done
 
-    # mustHaveLocalSdks
+    mustHaveLocalSdks
     mustHaveBuildArtifactsFromUpstream
 
     postCheckoutPatchWorkspace
