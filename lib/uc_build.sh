@@ -159,7 +159,7 @@ _build() {
     local makeTarget=$(getConfig subsystem)-${target}
 
     info "executing all targets in parallel with ${makeTarget} and label=${label}"
-    execute make -f ${cfgFile} -j ${makeTarget} 
+    execute make -f ${cfgFile} ${makeTarget} 
 
 #     sortbuildsfromdependencies ${target} > ${cfgFile}
 #     rawDebug ${cfgFile}
