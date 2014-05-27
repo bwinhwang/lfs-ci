@@ -9,7 +9,7 @@
 getConfig() {
     local key=$1
 
-    trace "get config value for ${key}"
+    # trace "get config value for ${key}"
 
     export productName=$(getProductNameFromJobName)
     export taskName=$(getTaskNameFromJobName)
@@ -17,11 +17,11 @@ getConfig() {
     export location=$(getLocationName)
     export config=$(getTargetBoardName)
 
-    trace "config/${config}"
-    trace "location/${location}"
-    trace "subTaskName/${subTaskName}"
-    trace "taskName/${taskName}"
-    trace "productName/${productName}"
+    # trace "config/${config}"
+    # trace "location/${location}"
+    # trace "subTaskName/${subTaskName}"
+    # trace "taskName/${taskName}"
+    # trace "productName/${productName}"
 
     export LFS_CI_CONFIG_FILE=${LFS_CI_ROOT}/etc/file.cfg
 
@@ -84,14 +84,17 @@ declare -A archMap=(         ["fct"]="mips64-octeon2-linux-gnu"      \
 
 # maps the location name to the branch name in the svn delivery repos
 declare -A locationToSubversionMap=( ["pronb-developer"]="PS_LFS_OS_MAINBRANCH" \
+                                     ["FSM_R4_DEV"]="PS_LFS_OS_FSM_R$" \
                                    )
 
 declare -a branchToLocationMap=( ["trunk"]="pronb-developer" \
+                                 ["fsmr4"]="FSM_R4_DEV" \
                                )
 
 # define the mapping from branch to label/tag name
 labelPrefix=$(getConfig labelPrefix)
 declare -A branchToTagRegexMap=( ["pronb-developer"]="${labelPrefix}_$(date +%Y)_$(date +%m)_([0-9][0-9])" \
+                                      ["FSM_R4_DEV"]="FSMR4_${labelPrefix}_1404_$(date +%m)_([0-9][0-9])" \
                                           ["FB1404"]="FB_${labelPrefix}_1404_04_([0-9][0-9])" \
                                   ["KERNEL_3.x_DEV"]="KERNEL3x_${labelPrefix}_$(date +%Y)_$(date +%m)_([0-9][0-9])" \
                                )

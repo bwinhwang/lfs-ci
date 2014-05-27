@@ -4,8 +4,8 @@ source ${LFS_CI_ROOT}/lib/jenkins.sh
 
 # ls /var/fpwork/demx2fk3/lfs-jenkins/home/jobs/*/promotions
 
-branchName=kernel3x
-branchDisplayName="Kernel 3.x"
+branchName=fsmr4
+branchDisplayName="FSM-r4 dev"
 
 for job in $(listJobNames | grep trunk)
 do
