@@ -160,7 +160,7 @@ declare -a branchToLocationMap=( ["trunk"]="pronb-developer" \
 # define the mapping from branch to label/tag name
 labelPrefix=$(getConfig labelPrefix)
 declare -A branchToTagRegexMap=( ["pronb-developer"]="${labelPrefix}_$(date +%Y)_$(date +%m)_([0-9][0-9])" \
-                                      ["FSM_R4_DEV"]="FSMR4_${labelPrefix}_1404_$(date +%m)_([0-9][0-9])" \
+                                      ["FSM_R4_DEV"]="FSMR4_${labelPrefix}_$(date +%Y)_$(date +%m)_([0-9][0-9])" \
                                           ["FB1404"]="FB_${labelPrefix}_1404_04_([0-9][0-9])" \
                                   ["KERNEL_3.x_DEV"]="KERNEL3x_${labelPrefix}_$(date +%Y)_$(date +%m)_([0-9][0-9])" \
                                )
