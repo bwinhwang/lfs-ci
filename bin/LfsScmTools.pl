@@ -1008,6 +1008,7 @@ sub readBuildXml {
     my $xml = XMLin( $file, ForceArray => 1 );
     my $upstream = $xml->{actions}->[0]->{'hudson.model.CauseAction'}->[0]->{causes}->[0]->{'hudson.model.Cause_-UpstreamCause'};
 
+    # print STDERR Dumper( $xml->{actions}->[0]->{'hudson.model.CauseAction'}->[0] );
     push @results, sprintf( "%s:%s", $upstream->[0]->{upstreamProject}->[0],
                                      $upstream->[0]->{upstreamBuild}->[0],   );
 
@@ -1177,7 +1178,7 @@ use Data::Dumper;
 
 sub prepare {
     my $self = shift;
-    my $xml  = XMLin( "changelog.xml", ForceArray => 1 );
+    my $xml  = XMLin( "changelog.xml", ForceArray => 1 ) or die "can not open changelog.xml";
 
     my $subsysHash;
     foreach my $entry ( @{ $xml->{logentry} } ) {
@@ -1195,12 +1196,12 @@ sub prepare {
     my $changeLogAsTextHash;
     my $duplicates;
     foreach my $key ( keys %{ $subsysHash } ) {
-        my @components = split( "/", $key );
-        my $componentName = $components[1];
+        # my @components = split( "/", $key );
+        my $componentName = $key; # $components[1];
         
         push @{ $changeLogAsTextHash->{ $componentName } }, grep { $_ }
                                                             grep { not $duplicates->{ $componentName }{$_}++ }
-                                                            map  { $self->filterComments(); } 
+                                                            map  { $self->filterComments( $_ ); } 
                                                             keys %{ $subsysHash->{$key} };
     }
 
@@ -1238,11 +1239,11 @@ sub mapComponentName {
 sub filterComments {
     my $self        = shift;
     my $commentLine = shift;
-    return if $commentLine =~ m/update/;
-    return if $commentLine =~ m/konto/;
 
     # remove new lines at the end
     $commentLine =~ s/\n$//g;
+
+    return if $commentLine =~ m/BTSPS-1657 IN psulm: DESCRIPTION: set Dependencies, Revisions for Release .* r\d+ NOJCHK/;
 
     return $commentLine;
 }

@@ -83,7 +83,7 @@ ci_job_release() {
             copyToReleaseShareOnSite "${buildJobName}" "${buildBuildNumber}"
         ;;
         create_releasenote_textfile)
-            createReleaseNoteTextFile
+            createReleaseNoteTextFile ${TESTED_BUILD_JOBNAME} ${TESTED_BUILD_NUMBER}
         ;;
         summary)
             # no op
@@ -165,10 +165,11 @@ copyToReleaseShareOnSite_copyToSite() {
 }
 
 createReleaseNoteTextFile() {
-    requiredParameters JOB_NAME BUILD_NUMBER        
+    local jobName=$1
+    local buildNumber=$2
 
     # get the change log file from master
-    local buildDirectory=$(getBuildDirectoryOnMaster)
+    local buildDirectory=$(getBuildDirectoryOnMaster ${jobName} ${buildNumber})
     local serverName=$(getConfig jenkinsMasterServerHostName)
 
     local workspace=$(getWorkspaceName)
