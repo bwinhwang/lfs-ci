@@ -150,7 +150,7 @@ switchToNewLocation() {
     local newLocation=$(getLocationName)
     info "location Name is ${newLocation}"
 
-    newLocation=${branchToLocationMap["${location}"]}
+    newLocation=${branchToLocationMap["${newLocation}"]}
     if [[ ! "${newLocation}" ]] ; then
         newLocation=${location}
     fi
