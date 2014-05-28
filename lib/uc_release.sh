@@ -183,8 +183,12 @@ createReleaseNoteTextFile() {
 
     # convert the changelog xml to a release note
     cd ${workspace}
+
+    echo -e "Hi all,\nThe LFS Release ${releaseLabel} is available in Subversion.\n\n"
+
     ${LFS_CI_ROOT}/bin/getReleaseNoteContent > releasenote.txt
     mustBeSuccessfull "$?" "getReleaseNoteContent"
+
 
     # store release note as artifact
     cat releasenote.txt
@@ -221,3 +225,18 @@ createTagOnSourceRepository() {
     requiredParameters JOB_NAME BUILD_NUMBER        
     return
 }
+
+createReleaseTag() {
+    requiredParameters JOB_NAME BUILD_NUMBER        
+
+    # check for branch
+    # create branch if required
+    # get sdk label
+    # get os label
+    # update svn:externals
+    # commit
+    # make a tag
+
+    return
+}
+

@@ -96,3 +96,7 @@ svnDiff() {
     svnCommand diff $@
     return
 }
+
+svnExistsPath() {
+    return
+}
