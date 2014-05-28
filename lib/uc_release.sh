@@ -40,6 +40,7 @@ ci_job_release() {
         exit 1
     fi
 
+    local releaseLabel=$(getNextReleaseLabel)
     local packageBuildNumber=$(grep Package ${upstreamsFile} | cut -d: -f2)
     local packageJobName=$(    grep Package ${upstreamsFile} | cut -d: -f1)
     local buildBuildNumber=$(  grep Build   ${upstreamsFile} | cut -d: -f2)
@@ -48,6 +49,9 @@ ci_job_release() {
     mustHaveValue ${packageBuildNumber}
     mustHaveValue ${buildJobName}
     mustHaveValue ${buildBuildNumber}
+    mustHaveValue ${releaseLabel}
+
+    setBuildDescription "${releaseLabel}"
 
     info "found package job: ${packageJobName} / ${packageBuildNumber}"
     info "found build   job: ${buildJobName} / ${buildBuildNumber}"
