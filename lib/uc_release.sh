@@ -10,6 +10,7 @@ source ${LFS_CI_ROOT}/lib/subversion.sh
 ci_job_release() {
 
     requiredParameters TESTED_BUILD_JOBNAME TESTED_BUILD_NUMBER
+    requiredParameters JOB_NAME BUILD_NUMBER
 
     local serverPath=$(getConfig jenkinsMasterServerPath)
     local subJob=$(getTargetBoardName)
