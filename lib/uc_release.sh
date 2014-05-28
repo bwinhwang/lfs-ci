@@ -159,3 +159,57 @@ copyToReleaseShareOnSite_copyToSite() {
     return
 }
 
+createReleaseNoteTextFile() {
+    requiredParameters JOB_NAME BUILD_NUMBER        
+
+    # get the change log file from master
+    local buildDirectory=$(getBuildDirectoryOnMaster)
+    local serverName=$(getConfig jenkinsMasterServerHostName)
+
+    local workspace=$(getWorkspaceName)
+    mustHaveWorkspaceName
+    mustHaveCleanWorkspace
+    mustHaveWritableWorkspace
+
+    execute rsync -ae ssh ${serverName}:${buildDirectory}/changelog.xml ${workspace}
+
+    # TODO: demx2fk3 2014-05-28 annotate with additonal informations
+
+    # convert the changelog xml to a release note
+    cd ${workspace}
+    execute "${LFS_CI_ROOT}/bin/getReleaseNoteContent > releasenote.txt"
+
+    # store release note as artifact
+
+    return
+}
+
+createReleaseNoteXmlFile() {
+    requiredParameters JOB_NAME BUILD_NUMBER        
+
+    # get the change log file from master
+    local buildDirectory=$(getBuildDirectoryOnMaster)
+    local serverName=$(getConfig jenkinsMasterServerHostName)
+
+    local workspace=$(getWorkspaceName)
+    mustHaveWorkspaceName
+    mustHaveCleanWorkspace
+    mustHaveWritableWorkspace
+
+    execute rsync -ae ssh ${serverName}:${buildDirectory}/changelog.xml ${workspace}
+    
+    # convert changelog to release note xml file
+
+    return
+}
+
+releaseBuildToWorkFlowTool() {
+    requiredParameters JOB_NAME BUILD_NUMBER        
+    return
+}
+
+
+createTagOnSourceRepository() {
+    requiredParameters JOB_NAME BUILD_NUMBER        
+    return
+}
