@@ -32,19 +32,20 @@ uploadToSubversion() {
     mustHaveNextLabelName
     local tagName=$(getNextReleaseLabel)
 
-    execute ${LFS_CI_ROOT}/bin/svn_load_dirs.pl      \
-                -v                                   \
-                -t os/tag/${tagName}                 \
-                -no_user_input                       \
-                -message "upload"                    \
-                -glob_ignores="#.#"                  \
-                ${svnReposUrl} os/branches/${branch} \
+    local branchPath=$(getConfig SVN_branch_path_name)
+    local tagPath=$(getConfig SVN_tag_path_name)
+    mustHaveValue "${tagPath}"
+    mustHaveValue "${branchPath}"
+
+    execute ${LFS_CI_ROOT}/bin/svn_load_dirs.pl        \
+                -v                                     \
+                -t ${tagPath}/${tagName}               \
+                -no_user_input                         \
+                -message "upload"                      \
+                -glob_ignores="#.#"                    \
+                ${svnReposUrl} ${branchPath}/${branch} \
                 ${pathToUpload} 
 
-    if [[ $? != 0 ]] ; then
-        error "upload to svn failed"
-        exit 1
-    fi
     export TMPDIR=${oldTemp}
 
     return

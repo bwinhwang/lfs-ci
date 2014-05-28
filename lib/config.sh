@@ -150,7 +150,7 @@ declare -A archMap=(         ["fct"]="mips64-octeon2-linux-gnu"      \
 
 # maps the location name to the branch name in the svn delivery repos
 declare -A locationToSubversionMap=( ["pronb-developer"]="PS_LFS_OS_MAINBRANCH" \
-                                     ["FSM_R4_DEV"]="PS_LFS_OS_FSM_R$" \
+                                     ["FSM_R4_DEV"]="PS_LFS_OS_FSM_R4" \
                                    )
 
 declare -a branchToLocationMap=( ["trunk"]="pronb-developer" \
