@@ -489,3 +489,12 @@ removeBrokenSymlinks() {
     execute symlinks -c -d -v -r ${dir} 
     return            
 }
+
+getBuildDirectoryOnMaster() {
+    local jobName=${1:-JOB_NAME}
+    local buildNumber=${2:-BUILD_NUMBER}
+    local pathName=$(getConfig jenkinsMasterServerPath)
+
+    echo ${pathName}/jobs/${jobName}/builds/${buildNumber}
+    return
+}

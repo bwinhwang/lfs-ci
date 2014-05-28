@@ -814,7 +814,18 @@ sub use_readonly {
     push @{ $self->{data}->{useReadonly} }, Parser::Dependencies::Models::UseReadonly->new( src => shift, dst => \@_ );
     return;
 }
-sub use { my $self = shift; push @{ $self->{data}->{use} }, { src => shift , dst => \@_ }; return; }
+
+sub use {
+    my $self = shift;
+    push @{ $self->{data}->{use} }, { src => shift, dst => \@_ };
+    return;
+}
+
+sub hint {
+    my $self = shift;
+    push @{ $self->{data}->{hint} }, { src => shift, dst => \@_ };
+    return;
+}
 
 # ------------------------------------------------------------------------------------------------------------------
 package Command::SortBuildsFromDependencies;
@@ -1146,6 +1157,88 @@ sub execute {
 
     return;
 }
+# ------------------------------------------------------------------------------------------------------------------
+## @brief generate release note content
+package Command::GetReleaseNoteContent;
+use strict;
+use warnings;
+
+use parent qw( -norequire Object );
+
+use XML::Simple;
+use Data::Dumper;
+
+sub prepare {
+    my $self = shift;
+    my $xml  = XMLin( "changelog.xml", ForceArray => 1 );
+
+    my $subsysHash;
+    foreach my $entry ( @{ $xml->{logentry} } ) {
+        my $msg    = $entry->{msg}->[0];
+        my @pathes = map { $_->{content} }
+                    @{ $entry->{paths}->[0]->{path} };
+
+        foreach my $p ( @pathes ) {
+            $p =~ s:.*/(src-.*?)/.*:$1:;
+            $subsysHash->{ $p }->{ $msg } = undef;
+        }
+    }
+
+    # map the comments to the component names
+    my $changeLogAsTextHash;
+    my $duplicates;
+    foreach my $key ( keys %{ $subsysHash } ) {
+        my @components = split( "/", $key );
+        my $componentName = $components[1];
+        
+        push @{ $changeLogAsTextHash->{ $componentName } }, grep { $_ }
+                                                            grep { not $duplicates->{ $componentName }{$_}++ }
+                                                            map  { $self->filterComments(); } 
+                                                            keys %{ $subsysHash->{$key} };
+    }
+
+    $self->{changeLog} = $changeLogAsTextHash;
+    return;
+}
+
+sub execute {
+    my $self = shift;
+
+    foreach my $component ( keys %{ $self->{changeLog} } ) {
+        my @list = $self->{changeLog}->{$component};
+        @list = map { @{ $_ } } @list;
+        
+        if( @list ) {
+            print "\n";
+            printf "=== %s ===\n", $self->mapComponentName( $component );
+            print         "   * ";
+            print join( "\n   * ", map { s/\n/\n     /g; $_ } @list );
+            print "\n";
+        }
+    }
+
+    return;
+}
+
+sub mapComponentName {
+    my $self = shift;
+    my $name = shift;
+
+    my $componentName = { "albertia" => "K.St.V. Albertia" };
+    return $componentName->{$name} ? $componentName->{$name} : $name;
+}
+
+sub filterComments {
+    my $self        = shift;
+    my $commentLine = shift;
+    return if $commentLine =~ m/update/;
+    return if $commentLine =~ m/konto/;
+
+    # remove new lines at the end
+    $commentLine =~ s/\n$//g;
+
+    return $commentLine;
+}
 
 # ------------------------------------------------------------------------------------------------------------------
 ## @brief generate new tag
@@ -1315,6 +1408,8 @@ if( $program eq "getDependencies" ) {
     $command = Command::GetRevisionTxtFromDependencies->new();
 } elsif ( $program eq "getNewTagName" ) {
     $command = Command::GetNewTagName->new();
+} elsif ( $program eq "getReleaseNoteContent" ) {
+    $command = Command::GetReleaseNoteContent->new();
 } else {
     die "command not defined";
 }
