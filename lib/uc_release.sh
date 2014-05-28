@@ -40,6 +40,7 @@ ci_job_release() {
         exit 1
     fi
 
+    mustHaveNextLabelName
     local releaseLabel=$(getNextReleaseLabel)
     local packageBuildNumber=$(grep Package ${upstreamsFile} | cut -d: -f2)
     local packageJobName=$(    grep Package ${upstreamsFile} | cut -d: -f1)

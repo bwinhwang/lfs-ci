@@ -431,3 +431,4 @@ getBuildDirectoryOnMaster() {
     echo ${pathName}/jobs/${jobName}/builds/${buildNumber}
     return
 }
+
