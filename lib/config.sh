@@ -24,10 +24,10 @@ getLocationName() {
 
     # 2014-02-17 demx2fk3 TODO do this in a better wa
     case ${location} in
-        fsmr4) echo FSM_R4_DEV ;;
-        kernel3x) echo KERNEL_3.x_DEV ;;
-        trunk) echo pronb-developer ;;
-        *) echo ${location} ;;
+        fsmr4)    echo FSM_R4_DEV      ;;
+        kernel3x) echo KERNEL_3.x_DEV  ;;
+        trunk)    echo pronb-developer ;;
+        *)        echo ${location}     ;;
     esac
 
     return
