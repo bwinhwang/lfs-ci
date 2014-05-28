@@ -185,6 +185,7 @@ createReleaseNoteTextFile() {
     execute "${LFS_CI_ROOT}/bin/getReleaseNoteContent > releasenote.txt"
 
     # store release note as artifact
+    cat releasenote.txt
 
     return
 }
