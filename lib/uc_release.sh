@@ -183,7 +183,8 @@ createReleaseNoteTextFile() {
 
     # convert the changelog xml to a release note
     cd ${workspace}
-    execute "${LFS_CI_ROOT}/bin/getReleaseNoteContent > releasenote.txt"
+    ${LFS_CI_ROOT}/bin/getReleaseNoteContent > releasenote.txt
+    mustBeSuccessfull "$?" "getReleaseNoteContent"
 
     # store release note as artifact
     cat releasenote.txt
