@@ -118,6 +118,7 @@ copyArtifactsToWorkspace() {
     local file=""
     local downStreamprojectsFile=$(createTempFile)
     local serverPath=$(getConfig jenkinsMasterServerPath)
+    mustHaveValue "${serverPath}"
 
     local workspace=$(getWorkspaceName)
     mustHaveWorkspaceName

@@ -1,55 +1,10 @@
 #!/bin/bash
 
-source ${LFS_CI_ROOT}/lib/commands.sh
 source ${LFS_CI_ROOT}/lib/config.sh
 source ${LFS_CI_ROOT}/lib/logging.sh
+source ${LFS_CI_ROOT}/lib/commands.sh
+source ${LFS_CI_ROOT}/lib/exit_handling.sh
 
-# the following methods are parsing the jenkins job name and return the
-# required / requested information. At the moment, the script will be called
-# every time. This is normally not so fast as it should be.
-# TODO: demx2fk3 2014-03-27 it should be done in this way:
-#  * check, if there is a "property" file which includes the information
-#  * if the files does not exist, create a new file with all information
-#  * source the new created file
-#  * use the sourced information
-# this is caching the information
-
-# the syntax of the jenkins job name is:
-#
-# LFS _ ( CI | PROD ) _-_ <branch> _-_ <task> _-_ <build> _-_ <boardName>
-#
-
-## @fn      getTaskNameFromJobName()
-#  @brief   get the task name from the jenkins job name
-#  @param   <none>
-#  @return  task name
-getTaskNameFromJobName() {
-    ${LFS_CI_ROOT}/bin/getFromString.pl "${JOB_NAME}" taskName
-    return
-}
-
-## @fn      getSubTaskNameFromJobName()
-#  @brief   get the sub task name from the jenkins job name
-#  @param   <none>
-#  @return  sub task name
-getSubTaskNameFromJobName() {
-    ${LFS_CI_ROOT}/bin/getFromString.pl "${JOB_NAME}" subTaskName
-    return
-}
-
-## @fn      getTargetBoardName()
-#  @brief   get the target board name from the jenkins job name
-#  @param   <none>
-#  @return  target board name
-getTargetBoardName() {
-    ${LFS_CI_ROOT}/bin/getFromString.pl "${JOB_NAME}" platform
-    return
-}
-
-getProductNameFromJobName() {
-    ${LFS_CI_ROOT}/bin/getFromString.pl "${JOB_NAME}" productName
-    return
-}
 
 ## @fn      mustHaveTargetBoardName()
 #  @brief   ensure, that there is a target board name
@@ -67,30 +22,6 @@ mustHaveTargetBoardName() {
     return
 }
 
-## @fn      getLocationName()
-#  @brief   get the location name (aka branch) from the jenkins job name
-#  @param   <none>
-#  @return  location name
-getLocationName() {
-    local location=$(${LFS_CI_ROOT}/bin/getFromString.pl "${JOB_NAME}" location)
-
-    # 2014-02-17 demx2fk3 TODO do this in a better wa
-    case ${location} in
-        kernel3x)
-            trace "TODO: mapping location name from kernel3x to KERNEL_3.x_DEV"
-            echo KERNEL_3.x_DEV
-        ;;
-        trunk)
-            trace "TODO: mapping location name from trunk to pronb-developer"
-            echo pronb-developer
-        ;;
-        *)
-            echo ${location}
-        ;;
-    esac
-
-    return
-}
 
 getBranchName() { 
     getLocationName 
@@ -215,15 +146,10 @@ switchToNewLocation() {
     #     exit 1
     # fi
 
-    local newLocation=$(getConfig locationMapping)
-    newLocation=${branchToLocationMap["${location}"]}
-    if [[ ! "${newLocation}" ]] ; then
-        newLocation=${location}
-        
-    fi
-
-    trace "switching to new location \"${newLocation}\""
-    execute build newlocations ${newLocation}
+    # local newLocation=$(getConfig locationMapping)
+    local location=$(getLocationName)
+    info "switching to new location \"${location}\""
+    execute build newlocations ${location}
 
     return
 }
@@ -323,6 +249,7 @@ initTempDirectory() {
 initTempDirectory
 exit_add cleanupTempFiles
 
+
 ## @fn      requiredParameters( list of variables )
 #  @brief   checks, if the given lists of variables names are set and have some valid values
 #  @param   list of variable names
@@ -335,7 +262,11 @@ requiredParameters() {
             error "required parameter ${name} is missing"
             exit 1
         fi
+        # echo "${name}=${!name}" >> ${workspace}/../.env
     done
+
+    local workspace=$(getWorkspaceName)
+
 
     return
 }
@@ -398,8 +329,10 @@ mustHaveNextCiLabelName() {
     local workspace=$(getWorkspaceName)
     mustHaveWorkspaceName
 
-    local label=$(cat ${workspace}/bld/bld-fsmci-summary/label 2>/dev/null)
-    mustHaveValue "${label}" "next ci label name"
+    if [[ ! "${LFS_CI_NEXT_CI_LABEL_NAME}" ]] ; then
+        local label=$(cat ${workspace}/bld/bld-fsmci-summary/label 2>/dev/null)
+        mustHaveValue "${label}" "next ci label name"
+    fi
 
     export LFS_CI_NEXT_CI_LABEL_NAME=${label}
     return

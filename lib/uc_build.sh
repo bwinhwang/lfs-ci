@@ -152,14 +152,14 @@ _build() {
 
     cd ${workspace}
     info "creating temporary makefile"
-    ${LFS_CI_ROOT}/bin/sortBuildsFromDependencies ${target} > ${cfgFile}
+    ${LFS_CI_ROOT}/bin/sortBuildsFromDependencies ${target} makefile ${label} > ${cfgFile}
 
     rawDebug ${cfgFile}
 
     local makeTarget=$(getConfig subsystem)-${target}
 
-    info "executing all targets in parallel"
-    execute make -f ${cfgFile} -j ${makeTarget} LABEL=${label}
+    info "executing all targets in parallel with ${makeTarget} and label=${label}"
+    execute make -f ${cfgFile} ${makeTarget} 
 
 #     sortbuildsfromdependencies ${target} > ${cfgFile}
 #     rawDebug ${cfgFile}
@@ -365,10 +365,14 @@ synchroniceToLocalPath() {
     local remotePath=$(readlink ${localPath})
     local subsystem=$(basename ${localPath})
     local tag=$(basename ${remotePath})
+    local serverName=$(getConfig linseeUlmServer)
 
     requiredParameters LFS_CI_SHARE_MIRROR
 
     local localCacheDir=${LFS_CI_SHARE_MIRROR}/${USER}/lfs-ci-local/${subsystem}
+    if [[ ${subsystem} == "pkgpool" ]] ; then
+        local rsync_opts=-L
+    fi        
 
     if [[ ! -e ${localCacheDir}/${tag} ]] ; then
         progressFile=${localCacheDir}/data/${tag}.in_progress
@@ -384,7 +388,8 @@ synchroniceToLocalPath() {
 
             execute rsync --archive --numeric-ids --delete-excluded --ignore-errors \
                 --hard-links --sparse --exclude=.svn --rsh=ssh                      \
-                ${linseeUlmServer}:${remotePath}/                                   \
+                ${rsync_opts} \
+                ${serverName}:${remotePath}/                                   \
                 ${localCacheDir}/data/${tag}/
 
             execute ln -sf data/${tag} ${localCacheDir}/${tag}

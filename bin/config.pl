@@ -147,7 +147,8 @@ sub getConfig {
         # print "empty $name\n";
         return "";
     } else {
-        # print "name $name " .  $canidates[0]->value() . "\n";
+        # print STDERR Dumper( $canidates[0] );
+
         my $value = $canidates[0]->value();
         $value =~ s:
                        \$\{

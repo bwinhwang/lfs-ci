@@ -174,3 +174,15 @@ deleteJenkinsJob() {
     executeJenkinsCli delete-job "${jobName}" 
     return
 }
+
+disableJob() {
+    local jobName=$1
+    executeJenkinsCli disable-job "${jobName}"
+    return
+}
+
+enableJob() {
+    local jobName=$1
+    executeJenkinsCli enable-job "${jobName}"
+    return
+}

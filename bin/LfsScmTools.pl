@@ -141,6 +141,12 @@ sub loadDependencyTree {
     $dependencyParser->parse();
 
     my $locationParser = Usecase::GetLocation->new();
+
+    foreach my $hint ( @{ $dependencyParser->{data}->{hint} } ) {
+            push @{ $self->{hints} }, $hint;
+            Singelton::hint()->addHint( $hint->{src} => $hint->{dst}[0] );
+    }
+
     foreach my $useLine ( @{ $dependencyParser->{data}->{use} } ) {
         my $childLocation = $locationParser->getLocation( subDir => $useLine->{src} );
         $childLocation->loadDependencyTree();
@@ -841,6 +847,7 @@ sub prepare {
 
     $self->{goal}  = shift @args || die "no src dir";
     $self->{style} = shift @args || "makefile";
+    $self->{label} = shift @args;
 
     @{ $self->{sourcesDirectories} } = <src-*>;
     @{ $self->{sources} } = ();
@@ -907,7 +914,7 @@ SOURCES:
 
                 }
                 printf "%s-%s: %s\n", $source->{directory}, $platform, join( " ", @filteredDeps );
-                printf "\tbuild -L \$@.log -C %s %s\n\n", $source->{directory}, $platform;
+                printf "\tbuild -L \$@.log -C %s %s --label=%s\n\n", $source->{directory}, $platform, $self->{label};
             }
         } elsif( $self->{style} eq "legacy" ) {
             printf "%s %s - %s\n",
@@ -958,10 +965,10 @@ sub execute {
                                  tag      => $tag,
                                  revision => $revision );
     $dir->loadDependencyTree();
+
     printf( "%s %s", join( " ", $dir->getSourceDirectoriesFromDependencies() ),
                      $subDir,
           );
-
     return;
 }
 
@@ -1326,6 +1333,12 @@ sub getLocation {
     my $tag      = $param->{tag};
     my $revision = $param->{revision};
 
+    if( Singelton::hint()->hint( $subDir ) ) {
+        $tag = Singelton::hint()->hint( $subDir );
+    }
+
+    # printf STDERR "LOCATION HINT %s %s -- %s\n", $subDir, $tag // "undef tag", Singelton::hint()->hint( $subDir ) // "undef";
+    
     my $tmp = $self->{locations}->getReporitoryOrLocation( subDir => $subDir,
                                                            tag    => $tag );
     if( $tmp ) {
@@ -1369,6 +1382,31 @@ sub execute {
 }
 
 # ------------------------------------------------------------------------------------------------------------------
+## @fn    Hints
+#  @brief 
+package Hints;
+use strict;
+use warnings;
+use Data::Dumper;
+
+use parent qw( -norequire Object );
+
+sub addHint {
+    my $self = shift;
+    my $param = { @_ };
+    foreach my $key ( keys %{ $param } ) {
+        $self->{$key} = $param->{$key};
+    }
+    return;
+}
+
+sub hint { 
+    my $self = shift;
+    my $key  = shift;
+    return exists $self->{$key} ? $self->{$key} : undef;
+}
+
+# ------------------------------------------------------------------------------------------------------------------
 ## @fn    Singelton
 #  @brief class which just provide a singelton - just one instance of this class
 package Singelton;
@@ -1383,6 +1421,14 @@ sub svn {
     }
     return $obj->{svn};
 }
+
+sub hint {
+    if( not $obj->{hint} ) {
+        $obj->{hint} = Hints->new();
+    }
+    return $obj->{hint};
+}
+
 
 # ------------------------------------------------------------------------------------------------------------------
 ## @fn    main

@@ -30,16 +30,15 @@ ci_job_package() {
 
     find ${workspace}
 
-    for bldDirectory in ${workspace}/bld/bld-*brm-* ; do
+    for bldDirectory in ${workspace}/bld/bld-*brm*-* ; do
+        info "bldDirectory is ${bldDirectory}"
         [[ -d ${bldDirectory} ]] || continue
+        local baseNameBldDir=$(basename ${bldDirectory})
 
-        local destinationsPlatform=$(getArchitectureFromDirectory ${bldDirectory})
-        mustHaveArchitectureFromDirectory ${bldDirectory} ${destinationsPlatform}
+        info "copy uboot for ${bldDirectory}..."
 
-        info "copy uboot for ${destinationsPlatform}..."
-
-        local srcDirectory=${bldDirectory}/results/
-        local dstDirectory=${workspace}/upload/${destinationsPlatform}
+        local srcDirectory=${bldDirectory}
+        local dstDirectory=${workspace}/upload/bld/${baseNameBldDir}
 
         execute mkdir -p ${dstDirectory}
         execute rsync -av ${srcDirectory}/. ${dstDirectory}/

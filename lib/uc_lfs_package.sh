@@ -16,11 +16,6 @@ ci_job_package() {
     # which are execute within this jenkins jobs. So we collect the artifacts from those jobs
     # and untar them in the workspace directory.
 
-    mustHaveNextCiLabelName
-    local label=$(getNextCiLabelName)
-
-    setBuildDescription "${JOB_NAME}" "${BUILD_NUMBER}" "${label}"
-
 
     local workspace=$(getWorkspaceName)
     mustHaveWorkspaceName
@@ -30,6 +25,11 @@ ci_job_package() {
     debug "workspace is ${workspace}"
 
     copyArtifactsToWorkspace ${UPSTREAM_PROJECT} ${UPSTREAM_BUILD}
+
+    mustHaveNextCiLabelName
+    local label=$(getNextCiLabelName)
+
+    setBuildDescription "${JOB_NAME}" "${BUILD_NUMBER}" "${label}"
 
     copyAddons
     copyVersionFile
@@ -48,7 +48,7 @@ ci_job_package() {
 
 ## @fn      copyAddons()
 #  @brief   handle the addons, copy the addons from the results directory into the delivery structure
-#  @details function checks for bld-*psl-*/results/addons directory and copy the content into the
+#  @details function checks for bld-*psl*-*/results/addons directory and copy the content into the
 #           regarding delivery directory
 #  @param   <none>
 #  @return  <none>
@@ -57,7 +57,7 @@ copyAddons() {
     local workspace=$(getWorkspaceName)
     mustHaveWorkspaceName
 
-    for bldDirectory in ${workspace}/bld/bld-*psl-* ; do
+    for bldDirectory in ${workspace}/bld/bld-*psl*-* ; do
         [[ -d ${bldDirectory} ]] || continue
         [[ -d ${bldDirectory}/results/addons ]] || continue
 
@@ -87,7 +87,7 @@ copyArchs() {
     mustHaveWorkspaceName
 
 
-    for bldDirectory in ${workspace}/bld/bld-*psl-* ; do
+    for bldDirectory in ${workspace}/bld/bld-*psl*-* ; do
         [[ -d ${bldDirectory} ]] || continue
 
         local destinationsArchitecture=$(getArchitectureFromDirectory ${bldDirectory})
@@ -121,7 +121,7 @@ copySysroot() {
     mustHaveWorkspaceName
 
 
-    for bldDirectory in ${workspace}/bld/bld-*psl-* ; do
+    for bldDirectory in ${workspace}/bld/bld-*psl*-* ; do
 
         [[ -d ${bldDirectory} ]] || continue
 
@@ -144,12 +144,21 @@ copySysroot() {
             # copy lib
             # untar debug.tgz
             # copy some other sysroo dirs
-        if [[ ${bldDirectory}/results/rfs.init_sys-root.tar.gz ]] ; then
-            debug "untar results/rfs.init_sys-root.tar.gz"
+        case ${destinationsArchitecture} in
+            arm-cortexa15-linux-gnueabihf)
+                local sysroot_tgz=${workspace}/bld/bld-rfs-arm/results/sysroot.tar.gz
+            ;;
+            *)
+                local sysroot_tgz=${bldDirectory}/results/rfs.init_sys-root.tar.gz
+            ;;
+        esac
+
+        if [[ -e ${sysroot_tgz} ]] ; then
+            debug "untar ${sysroot_tgz}"
             # TODO: demx2fk3 2014-04-07 expand the short parameter names
-            execute tar -xzf ${bldDirectory}/results/rfs.init_sys-root.tar.gz -C ${dst}
+            execute tar -xzf ${sysroot_tgz} -C ${dst}
         else
-            error "missing rfs.init_sys-root.tar.gz, else path not implemented"
+            error "missing ${sysroot_tgz}, else path not implemented"
             exit 1
         fi
 
@@ -193,10 +202,14 @@ copyFactoryZip() {
     local workspace=$(getWorkspaceName)
     mustHaveWorkspaceName
 
+    # TODO: demx2fk3 2014-05-27 fixme
     local dst=${workspace}/upload/platforms/fsm3_octeon2
-    execute cd ${dst}
-    execute zip -r factory.zip factory
-    execute cd $OLDPWD
+
+    if [[ -d ${dst} ]] ; then
+        execute cd ${dst}
+        execute zip -r factory.zip factory
+        execute cd $OLDPWD
+    fi
 
     return
 }
@@ -210,8 +223,8 @@ copyPlatform() {
     local workspace=$(getWorkspaceName)
     mustHaveWorkspaceName
 
-    for bldDirectory in ${workspace}/bld/bld-*psl-* ; do
-        [[ -d ${bldDirectory} ]] || continue
+    for bldDirectory in ${workspace}/bld/bld-*psl*-* ; do
+        [[ -d ${bldDirectory}         ]] || continue
         [[ -d ${bldDirectory}/results ]] || continue
 
         local platform=$(getPlatformFromDirectory ${bldDirectory})

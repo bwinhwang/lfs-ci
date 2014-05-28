@@ -9,9 +9,9 @@ fi
 
 export PATH=${LFS_CI_ROOT}/bin:${PATH}
 
+source ${LFS_CI_ROOT}/lib/common.sh
 source ${LFS_CI_ROOT}/lib/logging.sh
 source ${LFS_CI_ROOT}/lib/commands.sh
-source ${LFS_CI_ROOT}/lib/common.sh
 source ${LFS_CI_ROOT}/lib/config.sh
 source ${LFS_CI_ROOT}/lib/jenkins.sh
 source ${LFS_CI_ROOT}/lib/subversion.sh
@@ -38,6 +38,7 @@ export JENKINS_SVN_REVISION
 
 if [[ -z "${JOB_NAME}" ]] ; then
     export JOB_NAME=$1
+    shift
 fi
 
 requiredParameters LFS_CI_ROOT JOB_NAME HOSTNAME USER 
@@ -88,7 +89,7 @@ case "${JOB_NAME}" in
 
                 info "executing legacy script \"${JOB_NAME}\""
 
-                $pathName/${JOB_NAME} || exit 1
+                $pathName/${JOB_NAME} $@ || exit 1
                 break
             else
                 # fixme
