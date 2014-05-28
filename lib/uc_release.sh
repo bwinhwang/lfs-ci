@@ -52,7 +52,7 @@ ci_job_release() {
     mustHaveValue ${buildBuildNumber}
     mustHaveValue ${releaseLabel}
 
-    setBuildDescription "${releaseLabel}"
+    setBuildDescription "${JOB_NAME}" "${BUILD_NUMBER}" "${releaseLabel}"
 
     info "found package job: ${packageJobName} / ${packageBuildNumber}"
     info "found build   job: ${buildJobName} / ${buildBuildNumber}"
