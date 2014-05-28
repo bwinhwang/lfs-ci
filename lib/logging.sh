@@ -20,7 +20,7 @@ startLogfile() {
         export CI_LOGGING_LOGFILENAME=${LFS_CI_ROOT}/log/ci.${dateString}.${hostName}.${userName}.${jobName}.log
         export CI_LOGGING_DURATION_START_DATE=$(date +%s.%N)
 
-        echo 1>&2 "logfile is ${CI_LOGGING_LOGFILENAME}\n"
+        echo 1>&2 "logfile is ${CI_LOGGING_LOGFILENAME}"
         printf -- "------------------------------------------------------------------\n" >  ${CI_LOGGING_LOGFILENAME}
         printf -- "starting logfile\n"                                                   >> ${CI_LOGGING_LOGFILENAME}
         printf -- "  script: $0\n"                                                       >> ${CI_LOGGING_LOGFILENAME}
