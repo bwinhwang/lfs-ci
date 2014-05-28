@@ -9,7 +9,7 @@ source ${LFS_CI_ROOT}/lib/subversion.sh
 #  @return  <none>
 ci_job_release() {
 
-    requiredParameters TESTED_BUILD_JOBNAME TESTED_BUILD_NUMBER
+    # requiredParameters TESTED_BUILD_JOBNAME TESTED_BUILD_NUMBER
     requiredParameters JOB_NAME BUILD_NUMBER
 
     local serverPath=$(getConfig jenkinsMasterServerPath)
@@ -81,6 +81,9 @@ ci_job_release() {
         ;;
         build_results_to_share_on_site)
             copyToReleaseShareOnSite "${buildJobName}" "${buildBuildNumber}"
+        ;;
+        create_releasenote_textfile)
+            createReleaseNoteTextFile
         ;;
         summary)
             # no op
