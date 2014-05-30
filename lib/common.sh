@@ -276,7 +276,6 @@ requiredParameters() {
 #  @param   <none>
 #  @return  <none>
 getNextReleaseLabel() {
-    mustHaveNextLabelName
     echo ${LFS_CI_NEXT_LABEL_NAME}
 }
 
@@ -285,7 +284,6 @@ getNextReleaseLabel() {
 #  @param   <none>
 #  @return  next ci label name
 getNextCiLabelName() {
-    mustHaveNextCiLabelName
     echo ${LFS_CI_NEXT_CI_LABEL_NAME}
 }
 
