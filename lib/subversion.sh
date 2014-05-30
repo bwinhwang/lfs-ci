@@ -45,10 +45,11 @@ uploadToSubversion() {
                 -v                                     \
                 -t ${tagPath}/${tagName}               \
                 -no_user_input                         \
-                -message "upload"                      \
                 -glob_ignores="#.#"                    \
                 ${svnReposUrl} ${branchPath}/${branch} \
                 ${pathToUpload} 
+
+#                -message "upload"                      \
 
     export TMPDIR=${oldTemp}
     info "upload done";
