@@ -5,7 +5,6 @@ source ${LFS_CI_ROOT}/lib/logging.sh
 source ${LFS_CI_ROOT}/lib/commands.sh
 source ${LFS_CI_ROOT}/lib/exit_handling.sh
 
-
 ## @fn      mustHaveTargetBoardName()
 #  @brief   ensure, that there is a target board name
 #  @param   <none>
@@ -224,10 +223,16 @@ checkoutSubprojectDirectories() {
 #  @return  name of the new created temp file
 createTempFile() {
     mktemp ${LFS_CI_TEMPDIR}/tmp.$$.XXXXXXXXX
+    return
 }
 
+## @fn      createTempDirectory()
+#  @brief   creates a temp directory
+#  @param   <none>
+#  @return  name of the temp directory
 createTempDirectory() {
     mktemp --directory ${LFS_CI_TEMPDIR}/tmp.$$.XXXXXXXXX
+    return
 }
 
 ## @fn      cleanupTempFiles()
@@ -236,6 +241,7 @@ createTempDirectory() {
 #  @return  <none>
 cleanupTempFiles() {
     [[ -d ${LFS_CI_TEMPDIR} ]] && rm -rf ${LFS_CI_TEMPDIR}
+    return
 }
 
 ## @fn      initTempDirectory()
@@ -244,6 +250,7 @@ cleanupTempFiles() {
 #  @return  <none>
 initTempDirectory() {
     export LFS_CI_TEMPDIR=$(mktemp -d /tmp/jenkins.${USER}.${JOB_NAME:-unknown}.$$.XXXXXXXXX)
+    return
 }
 
 initTempDirectory
@@ -266,7 +273,6 @@ requiredParameters() {
     done
 
     local workspace=$(getWorkspaceName)
-
 
     return
 }
@@ -402,6 +408,11 @@ mustExistDirectory() {
     return
 }
 
+## @fn      mustBeSuccessfull( $rc )
+#  @brief   ensures, that the given return code is 0, if not it will raise an error
+#  @param   {rc}         return code of the command
+#  @param   {message}    optional message, which will be displayed
+#  @throws  rased an error, if the rc is != 0
 mustBeSuccessfull() {
     local rc=$1
     local msg="${2:-unkown message}"
@@ -413,6 +424,10 @@ mustBeSuccessfull() {
     return
 }
 
+## @fn      removeBrokenSymlinks( $dir  )
+#  @brief   remove all broken links and fixes "stragne" links in a given directory
+#  @param   {dir}    directory to remove broken links
+#  @return  <none>
 removeBrokenSymlinks() {
     local dir=$1
     local tmp=$(createTempFile)
@@ -423,6 +438,11 @@ removeBrokenSymlinks() {
     return            
 }
 
+## @fn      getBuildDirectoryOnMaster( $jobName, $buildNumber )
+#  @brief   get the build directory in jenkins root on the master server
+#  @param   {jobName}        name of the job
+#  @param   {buildNumber}    number of the build
+#  @return  path of the build 
 getBuildDirectoryOnMaster() {
     local jobName=${1:-$JOB_NAME}
     local buildNumber=${2:-$BUILD_NUMBER}
