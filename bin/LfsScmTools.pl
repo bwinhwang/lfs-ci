@@ -1182,7 +1182,10 @@ sub prepare {
 
     my $subsysHash;
     foreach my $entry ( @{ $xml->{logentry} } ) {
-        my $msg    = $entry->{msg}->[0];
+        print Dumper( $entry );
+        my $msg    = not ref( $entry->{msg}->[0] ) eq "HASH" ?
+                        $entry->{msg}->[0] :
+                        sprintf( "empty commit (r%s) message from %s at %s", $entry->{revision}, $entry->{author}, $entry->{date} );
         my @pathes = map { $_->{content} }
                     @{ $entry->{paths}->[0]->{path} };
 
