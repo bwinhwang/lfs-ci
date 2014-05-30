@@ -37,7 +37,7 @@ uploadToSubversion() {
     mustHaveValue "${tagPath}"
     mustHaveValue "${branchPath}"
 
-    info ${LFS_CI_ROOT}/bin/svn_load_dirs.pl        \
+    execute ${LFS_CI_ROOT}/bin/svn_load_dirs.pl        \
                 -v                                     \
                 -t ${tagPath}/${tagName}               \
                 -no_user_input                         \
@@ -45,14 +45,6 @@ uploadToSubversion() {
                 -glob_ignores="#.#"                    \
                 ${svnReposUrl} ${branchPath}/${branch} \
                 ${pathToUpload} 
-#    execute ${LFS_CI_ROOT}/bin/svn_load_dirs.pl        \
-#                -v                                     \
-#                -t ${tagPath}/${tagName}               \
-#                -no_user_input                         \
-#                -message "upload"                      \
-#                -glob_ignores="#.#"                    \
-#                ${svnReposUrl} ${branchPath}/${branch} \
-#                ${pathToUpload} 
 
     export TMPDIR=${oldTemp}
 
