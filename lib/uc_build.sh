@@ -162,7 +162,8 @@ _build() {
     execute make -f ${cfgFile} ${makeTarget} 
 
     execute mkdir -p ${workspace}/bld/bld-sdk-summary/
-    execute "ls -d ${workspace}/bld/sdk* > ${workspace}/bld/bld-sdk-summary/sdks"
+    ls -d ${workspace}/bld/sdk* > ${workspace}/bld/bld-sdk-summary/sdks
+    mustBeSuccessfull "$?" "ls bld/sdk"
 
 #     sortbuildsfromdependencies ${target} > ${cfgFile}
 #     rawDebug ${cfgFile}
