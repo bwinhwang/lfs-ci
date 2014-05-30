@@ -276,6 +276,7 @@ requiredParameters() {
 #  @param   <none>
 #  @return  <none>
 getNextReleaseLabel() {
+    mustHaveNextLabelName
     echo ${LFS_CI_NEXT_LABEL_NAME}
 }
 
@@ -284,6 +285,7 @@ getNextReleaseLabel() {
 #  @param   <none>
 #  @return  next ci label name
 getNextCiLabelName() {
+    mustHaveNextCiLabelName
     echo ${LFS_CI_NEXT_CI_LABEL_NAME}
 }
 
@@ -300,11 +302,11 @@ mustHaveNextLabelName() {
     local regex=${branchToTagRegexMap["${branch}"]}
     mustHaveValue "${regex}" "branch to tag regex map"
 
-    local srcRepos=$(getConfig lfsSourceRepos)
+    local repos=$(getConfig lfsOsDeliveryRepos)
 
     info "branch ${branch} has release label regex ${regex}"
 
-    local label=$(${LFS_CI_ROOT}/bin/getNewTagName -u ${srcRepos}/os/tags -r "${regex}" )
+    local label=$(${LFS_CI_ROOT}/bin/getNewTagName -u ${repos}/tags -r "${regex}" )
     mustHaveValue "${label}" "next release label name"
 
     local taskName=$(getProductNameFromJobName)
