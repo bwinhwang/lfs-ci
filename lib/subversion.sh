@@ -16,7 +16,7 @@ uploadToSubversion() {
     local branchToUpload=$2
     local commitMessage="$3"
 
-    local svnReposUrl=$(getConfig lfsDeliveryRepos)
+    local svnReposUrl=$(getConfig lfsOsDeliveryRepos)
 
     info "upload local path ${pathToUpload} to ${branchToUpload}"
 

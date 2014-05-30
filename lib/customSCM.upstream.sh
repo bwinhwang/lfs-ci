@@ -25,7 +25,7 @@ actionCompare() {
     { read oldUpstreamProjectName ; 
       read oldUpstreamBuildNumber ; } < "${REVISION_STATE_FILE}"
 
-    info "old upstream project was ${oldProjectName} / ${oldBuildNumber}"
+    trace "old upstream project was ${oldProjectName} / ${oldBuildNumber}"
 
     # comparing to new state
     if [[ "${upstreamProjectName}" != "${oldUpstreamProjectName}" ]] ; then
