@@ -42,7 +42,7 @@ startLogfile
 exit_add stopLogfile
 
 action=$1
-info "===== action = ${action} ====="
+trace "===== action = ${action} ====="
 
 # TODO: demx2fk3 2014-04-08 for debugging
 # dumpCustomScmEnvironmentVariables
