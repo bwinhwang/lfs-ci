@@ -107,12 +107,13 @@ getConfig() {
         lfsOsDeliveryRepos)
             # url of the LFS delivery repository in SVN
             local slaveServer=$(getConfig svnSlaveServerUlmHostName)
-            echo https://${slaveServer}/isource/svnroot/BTS_D_SC_LFS_2014/os/
+            # echo https://${slaveServer}/isource/svnroot/BTS_D_SC_LFS_2014/os/
+            echo file:///var/fpwork2/demx2fk3/svnDummyRepos/os
         ;;
         lfsRelDeliveryRepos)
             # url of the LFS delivery repository in SVN
             local slaveServer=$(getConfig svnSlaveServerUlmHostName)
-            echo https://${slaveServer}/isource/svnroot/BTS_D_SC_LFS_2014/
+            # echo https://${slaveServer}/isource/svnroot/BTS_D_SC_LFS_2014/
             echo file:///var/fpwork2/demx2fk3/svnDummyRepos/
         ;;
         *) 
