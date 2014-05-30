@@ -27,6 +27,8 @@ uploadToSubversion() {
     fi
     local oldTemp=${TMPDIR}
     export TMPDIR=${WORKSPACE}/tmp/
+    debug "cleanup tmp directory"
+    rm -rf ${TMPDIR}
     mkdir -p ${TMPDIR}
 
     mustHaveNextLabelName
@@ -36,6 +38,8 @@ uploadToSubversion() {
     local tagPath=$(getConfig SVN_tag_path_name)
     mustHaveValue "${tagPath}"
     mustHaveValue "${branchPath}"
+
+    info "upload to svn and create copy (${tagName})"
 
     execute ${LFS_CI_ROOT}/bin/svn_load_dirs.pl        \
                 -v                                     \
@@ -47,6 +51,7 @@ uploadToSubversion() {
                 ${pathToUpload} 
 
     export TMPDIR=${oldTemp}
+    info "upload done";
 
     return
 }
