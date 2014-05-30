@@ -161,6 +161,9 @@ _build() {
     info "executing all targets in parallel with ${makeTarget} and label=${label}"
     execute make -f ${cfgFile} ${makeTarget} 
 
+    execute mkdir -p ${workspace}/bld/bld-sdk-summary/
+    execute "ls -d ${workspace}/bld/sdk* > ${workspace}/bld/bld-sdk-summary/sdks"
+
 #     sortbuildsfromdependencies ${target} > ${cfgFile}
 #     rawDebug ${cfgFile}
 # 
