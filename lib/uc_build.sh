@@ -162,7 +162,13 @@ _build() {
     execute make -f ${cfgFile} ${makeTarget} 
 
     execute mkdir -p ${workspace}/bld/bld-sdk-summary/
-    ls -la ${workspace}/bld/sdk* > ${workspace}/bld/bld-sdk-summary/sdks
+    execute rm -f ${workspace}/bld/bld-sdk-summary/sdks
+
+    # storing sdk labels for later use in a artifact file.
+    foreach sdk in $(ls ${workspace}/bld/sdk*) ; do
+        [[ -e ${sdk} ]] || continue
+        readlink ${sdk} >> ${workspace}/bld/bld-sdk-summary/sdks
+    done
 
 #     sortbuildsfromdependencies ${target} > ${cfgFile}
 #     rawDebug ${cfgFile}
