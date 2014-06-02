@@ -165,7 +165,7 @@ _build() {
     execute rm -f ${workspace}/bld/bld-sdk-summary/sdks
 
     # storing sdk labels for later use in a artifact file.
-    foreach sdk in $(ls ${workspace}/bld/sdk*) ; do
+    for sdk in $(ls ${workspace}/bld/sdk*) ; do
         [[ -e ${sdk} ]] || continue
         readlink ${sdk} >> ${workspace}/bld/bld-sdk-summary/sdks
     done
