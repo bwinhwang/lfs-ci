@@ -226,16 +226,39 @@ createTagOnSourceRepository() {
     return
 }
 
+## @fn      createReleaseTag()
+#  @brief   create the release tag
+#  @details the release tag / branch just contains a svn:externals with two externals to sdk and lfs_os tag
+#  @param   <none>
+#  @return  <none>
 createReleaseTag() {
     requiredParameters JOB_NAME BUILD_NUMBER        
 
+    local workspace=$(getWorkspaceName)
+    mustHaveWorkspaceName
+    mustHaveCleanWorkspace
+    mustHaveWritableWorkspace
+
+    local osLabelName=$(getNextLabelName)
+
     # check for branch
-    # create branch if required
+    local svnUrl=$(getConfig lfsRelDeliveryRepos)
+    local svnBranch=...
+
     # get sdk label
+
+
     # get os label
     # update svn:externals
+    svnExternalsFile=$(getTempFile)
+    echo "^os  ${osLabel}"   > ${svnExternalsFile}
+    echo "^sdk ${osLabel}"  >> ${svnExternalsFile}
+
     # commit
+    svnPropEdit svn:externals -m "update svn:externals" -F ${svnExternalsFile} ${workspace}
+
     # make a tag
+    svnCopy 
 
     return
 }

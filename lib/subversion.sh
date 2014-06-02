@@ -95,6 +95,11 @@ svnDiff() {
     return
 }
 
+svnPropEdit() {
+    subversion propedit $@
+    return
+}
+
 svnExistsPath() {
     return
 }

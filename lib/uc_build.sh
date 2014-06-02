@@ -159,16 +159,9 @@ _build() {
     local makeTarget=$(getConfig subsystem)-${target}
 
     info "executing all targets in parallel with ${makeTarget} and label=${label}"
-    execute make -f ${cfgFile} ${makeTarget} 
+    execute make -j -f ${cfgFile} ${makeTarget} 
 
-    execute mkdir -p ${workspace}/bld/bld-sdk-summary/
-    execute rm -f ${workspace}/bld/bld-sdk-summary/sdks
-
-    # storing sdk labels for later use in a artifact file.
-    for sdk in $(ls ${workspace}/bld/sdk*) ; do
-        [[ -e ${sdk} ]] || continue
-        readlink ${sdk} >> ${workspace}/bld/bld-sdk-summary/sdks
-    done
+    storeExternalComponentBaselines
 
 #     sortbuildsfromdependencies ${target} > ${cfgFile}
 #     rawDebug ${cfgFile}
@@ -410,6 +403,29 @@ synchroniceToLocalPath() {
             synchroniceToLocalPath ${localPath}
         fi
     fi
+
+    return
+}
+
+storeExternalComponentBaselines() {
+
+    local workspace=$(getWorkspaceName)
+    mustHaveWorkspaceName
+
+    local externalComponentFile=${workspace}/bld/bld-sdk-summary/externalComponents
+
+    execute mkdir -p ${workspace}/bld/bld-sdk-summary/
+    execute rm -f ${externalComponentFile}
+
+    # storing sdk labels for later use in a artifact file.
+    for component in $(getConfig externalsComponents) ; do
+        [[ -e ${component} ]] || continue
+        local baselineLink=$(readlink ${component})
+        local baseline=$(basename ${basename})
+        printf "%s=%s" "${component}" "${baseline}" >> ${externalComponentFile}
+    done
+
+    rawDebug ${externalComponentFile}
 
     return
 }
