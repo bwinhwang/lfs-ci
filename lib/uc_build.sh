@@ -412,17 +412,17 @@ storeExternalComponentBaselines() {
     local workspace=$(getWorkspaceName)
     mustHaveWorkspaceName
 
-    local externalComponentFile=${workspace}/bld/bld-sdk-summary/externalComponents
+    local externalComponentFile=${workspace}/bld/bld-externalComponents-summary/externalComponents
 
-    execute mkdir -p ${workspace}/bld/bld-sdk-summary/
+    execute mkdir -p ${workspace}/bld/bld-externalComponents-summary/
     execute rm -f ${externalComponentFile}
 
     # storing sdk labels for later use in a artifact file.
-    for component in $(getConfig externalsComponents) ; do
+    for component in $(getConfig LFS_BUILD_externalsComponents) ; do
         [[ -e ${component} ]] || continue
         local baselineLink=$(readlink ${component})
         local baseline=$(basename ${basename})
-        printf "%s=%s" "${component}" "${baseline}" >> ${externalComponentFile}
+        printf "%s=%s" "${component}" "${baseline:-undef}" >> ${externalComponentFile}
     done
 
     rawDebug ${externalComponentFile}
