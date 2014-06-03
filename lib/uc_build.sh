@@ -151,6 +151,10 @@ _build() {
     mustHaveValue ${label}
 
     cd ${workspace}
+
+    info "store used baselines (bld) information"
+    storeExternalComponentBaselines
+
     info "creating temporary makefile"
     ${LFS_CI_ROOT}/bin/sortBuildsFromDependencies ${target} makefile ${label} > ${cfgFile}
 
@@ -161,7 +165,6 @@ _build() {
     info "executing all targets in parallel with ${makeTarget} and label=${label}"
     execute make -j -f ${cfgFile} ${makeTarget} 
 
-    storeExternalComponentBaselines
 
 #     sortbuildsfromdependencies ${target} > ${cfgFile}
 #     rawDebug ${cfgFile}
@@ -419,8 +422,9 @@ storeExternalComponentBaselines() {
 
     # storing sdk labels for later use in a artifact file.
     for component in $(getConfig LFS_BUILD_externalsComponents) ; do
-        [[ -e ${workspace}/${component} ]] || continue
-        local baselineLink=$(readlink ${workspace}/${component})
+        [[ -e ${workspace}/bld/${component} ]] || continue
+
+        local baselineLink=$(readlink ${workspace}/bld/${component})
         local baseline=$(basename ${basename})
         printf "%s=%s" "${component}" "${baseline:-undef}" >> ${externalComponentFile}
     done
