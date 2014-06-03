@@ -103,3 +103,20 @@ svnPropEdit() {
 svnExistsPath() {
     return
 }
+
+shouldNotExistsTagInSubversion() {
+    local url=$1
+    local tag=$2
+
+    local tmp=$(createTempFile)
+
+    svn ls --xml $url | ${LFS_CI_ROOT}/bin/xpath -q -e /lists/list/entry/name > ${tmp}
+    if [[ $? != 0 ]] ; then
+        error "svn ls failed"
+    fi
+    if grep "<name>${tag}</name>" ${tmp}
+    then
+        return 1
+    fi
+    return 0
+}
