@@ -232,7 +232,8 @@ createTagOnSourceRepository() {
 #  @param   <none>
 #  @return  <none>
 createReleaseTag() {
-    requiredParameters JOB_NAME BUILD_NUMBER        
+    local jobName=$1
+    local buildNumber=$2
 
     local workspace=$(getWorkspaceName)
     mustHaveWorkspaceName
@@ -241,24 +242,32 @@ createReleaseTag() {
 
     local osLabelName=$(getNextLabelName)
 
+    copyArtifactsToWorkspace "${jobName}" "${buildNumber}"
+
+    find ${workspace}
+
+    commonentsFile=$(workspace}/bld//bld-externalComponents-summary/externalComponents  
+    mustExistFile ${commonentsFile}
+    local sdk=$(getConfig sdk ${commonentsFile})
+
     # check for branch
-    local svnUrl=$(getConfig lfsRelDeliveryRepos)
-    local svnBranch=...
+#    local svnUrl=$(getConfig lfsRelDeliveryRepos)
+#    local svnBranch=...
 
     # get sdk label
 
 
     # get os label
     # update svn:externals
-    svnExternalsFile=$(getTempFile)
-    echo "^os  ${osLabel}"   > ${svnExternalsFile}
-    echo "^sdk ${osLabel}"  >> ${svnExternalsFile}
-
+#    svnExternalsFile=$(getTempFile)
+#    echo "^os  ${osLabel}"   > ${svnExternalsFile}
+#    echo "^sdk ${osLabel}"  >> ${svnExternalsFile}
+#
     # commit
-    svnPropEdit svn:externals -m "update svn:externals" -F ${svnExternalsFile} ${workspace}
-
+#    svnPropEdit svn:externals -m "update svn:externals" -F ${svnExternalsFile} ${workspace}
+#
     # make a tag
-    svnCopy 
+#    svnCopy 
 
     return
 }

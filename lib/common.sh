@@ -408,6 +408,16 @@ mustExistDirectory() {
     return
 }
 
+mustExistFile() {
+    local file=$1
+
+    if [[ ! -f ${file} ]] ; then
+        error "${file} is not a file"
+        exit 1
+    fi
+    return
+}
+
 ## @fn      mustBeSuccessfull( $rc )
 #  @brief   ensures, that the given return code is 0, if not it will raise an error
 #  @param   {rc}         return code of the command
