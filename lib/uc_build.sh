@@ -426,7 +426,7 @@ storeExternalComponentBaselines() {
         local baselineLink=$(readlink ${workspace}/bld/${component})
         local baseline=$(basename ${baselineLink})
 
-        TRACE "component ${component} exists with link to ${baselineLink} and ${baseline}"
+        trace "component ${component} exists with link to ${baselineLink} and ${baseline}"
         printf "%s <> =%s\n" "${component}" "${baseline:-undef}" >> ${externalComponentFile}
     done
 

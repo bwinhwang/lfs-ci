@@ -166,9 +166,12 @@ message() {
     done
     # -------------------------------------------------------------------------------------------
 
-    if [[ "${logType}" != "TRACE" ]] ; then
-        echo -e 1>&2 "${logLine}"
-    fi
+    case "${logType}" in
+        TRACE) : ;;
+        DEBUG) : ;;
+        *) echo -e 1>&2 "${logLine}" ;;
+    esac
+
     echo -e 1>&2 "${logLine}" >> ${CI_LOGGING_LOGFILENAME}
 
     if [[ "${CI_LOGGING_ENABLE_COLORS}" && "${color}" ]] ; then

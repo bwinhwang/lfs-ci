@@ -16,7 +16,9 @@ ci_job_release() {
     local subJob=$(getTargetBoardName)
     mustHaveTargetBoardName
 
-    local branch=$(getBranchName)
+    local location=$(getLocationName)
+    local branch=${locationToSubversionMap["${location}"]}
+
     mustHaveBranchName
 
     local upstreamsFile=$(createTempFile)
@@ -59,11 +61,8 @@ ci_job_release() {
     info "found build   job: ${buildJobName} / ${buildBuildNumber}"
     
     local ciBuildShare=$(getConfig lfsCiBuildsShare)
-    local workspace=${ciBuildShare}/${branch}/build_${packageBuildNumber}
-    if [[ ! -d ${workspace} ]] ; then
-        error "can not find workspace of package job on build share (${workspace})"
-        exit 1
-    fi
+    local workspace=${ciBuildShare}/${location}/build_${packageBuildNumber}
+    mustExistDirectory  ${workspace}
 
     debug "found results of package job on share: ${workspace}"
 
@@ -86,7 +85,7 @@ ci_job_release() {
             createReleaseNoteTextFile ${TESTED_BUILD_JOBNAME} ${TESTED_BUILD_NUMBER}
         ;;
         create_release_tag)
-            createReleaseTag ${TESTED_BUILD_JOBNAME} ${TESTED_BUILD_NUMBER}
+            createReleaseTag ${buildJobName} ${buildBuildNumber}
         ;;
         summary)
             # no op
@@ -243,24 +242,34 @@ createReleaseTag() {
     mustHaveCleanWorkspace
     mustHaveWritableWorkspace
 
-    local osLabelName=$(getNextLabelName)
-
-    copyArtifactsToWorkspace "${jobName}" "${buildNumber}"
-
-    find ${workspace}
-
-    commonentsFile=${workspace}/bld//bld-externalComponents-summary/externalComponents   
-    mustExistFile ${commonentsFile}
-    local sdk=$(getConfig sdk ${commonentsFile})
-
-    # check for branch
-#    local svnUrl=$(getConfig lfsRelDeliveryRepos)
-#    local svnBranch=...
+    # get os label
+    # no mustHaveNextLabelName, because it's already calculated
+    local osLabelName=$(getNextReleaseLabel)
+    local osReleaseLabelName=$(sed "s/_LFS_OS_/_LFS_REL_/" <<< ${osLabelName} )
 
     # get sdk label
+    copyArtifactsToWorkspace "${jobName}" "${buildNumber}"
+    commonentsFile=${workspace}/bld//bld-externalComponents-summary/externalComponents   
+    mustExistFile ${commonentsFile}
+    local sdk2=$(getConfig sdk2 ${commonentsFile})
+    local sdk3=$(getConfig sdk3 ${commonentsFile})
+
+    cat ${commonentsFile}
+
+    info "using sdk2 ${sdk2}"
+    info "using sdk3 ${sdk3}"
+    info "using lfs os ${osLabelName}"
+    info "using lfs rel ${osReleaseLabelName}"
+
+    # check for branch
+    local svnUrl=$(getConfig lfsRelDeliveryRepos)
+
+    local branch=$(getBranchName)
+    mustHaveBranchName
+    info "svn repos url is ${svnUrl}/branches/${branch}
+"
 
 
-    # get os label
     # update svn:externals
 #    svnExternalsFile=$(getTempFile)
 #    echo "^os  ${osLabel}"   > ${svnExternalsFile}

@@ -105,7 +105,7 @@ sub readConfig {
         next if $line =~ m/^#/;
         next if $line =~ m/^\s*$/;
 
-        if( $line =~ /^(\w+)\s+\<\s*([^>]*)\s*\>\s+=\s+(.*)$/ ) {
+        if( $line =~ /^(\w+)\s+\<\s*([^>]*)\s*\>\s*=\s*(.*)$/ ) {
             push @{ $data }, {
                                 name  => $1 || "",
                                 tags  => $2 || "",
