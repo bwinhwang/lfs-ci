@@ -423,10 +423,11 @@ storeExternalComponentBaselines() {
     # storing sdk labels for later use in a artifact file.
     for component in $(getConfig LFS_BUILD_externalsComponents) ; do
         [[ -e ${workspace}/bld/${component} ]] || continue
-
         local baselineLink=$(readlink ${workspace}/bld/${component})
-        local baseline=$(basename ${basename})
-        printf "%s=%s" "${component}" "${baseline:-undef}" >> ${externalComponentFile}
+        local baseline=$(basename ${baselineLink})
+
+        TRACE "component ${component} exists with link to ${baselineLink} and ${baseline}"
+        printf "%s=%s\n" "${component}" "${baseline:-undef}" >> ${externalComponentFile}
     done
 
     rawDebug ${externalComponentFile}
