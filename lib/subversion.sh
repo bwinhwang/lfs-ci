@@ -86,6 +86,16 @@ svnCommit() {
     return
 }
 
+svnMkdir() {
+    svnCommand mkdir $@
+    return
+}
+
+svnCopy() {
+    svnCommand copy $@
+    return
+}
+
 ## @fn      svnDiff( $args )
 #  @brief   executes an svn diff command
 #  @param   {args}    args for the svn diff command
@@ -95,8 +105,8 @@ svnDiff() {
     return
 }
 
-svnPropEdit() {
-    subversion propedit $@
+svnPropSet() {
+    svnCommand propset $@
     return
 }
 
@@ -104,19 +114,44 @@ svnExistsPath() {
     return
 }
 
-shouldNotExistsTagInSubversion() {
+shouldNotExistsInSubversion() {
     local url=$1
     local tag=$2
 
-    local tmp=$(createTempFile)
-
-    svn ls --xml $url | ${LFS_CI_ROOT}/bin/xpath -q -e /lists/list/entry/name > ${tmp}
-    if [[ $? != 0 ]] ; then
-        error "svn ls failed"
-    fi
-    if grep "<name>${tag}</name>" ${tmp}
-    then
-        return 1
+    if existsInSubversion ${url} ${tag} ; then
+        error "entry ${tag} exists in ${url}"
+        exit 1
     fi
     return 0
 }
+
+existsInSubversion() {
+    local url=$1
+    local tag=$2
+    local tmp=$(createTempFile)
+
+    svn ls --xml ${url} | ${LFS_CI_ROOT}/bin/xpath -q -e /lists/list/entry/name > ${tmp}
+    if [[ $? != 0 ]] ; then
+        error "svn ls failed"
+        exit 1
+    fi
+
+    if grep -q "<name>${tag}</name>" ${tmp} ; then
+        return 0
+    fi
+
+    return 1
+}
+
+mustExistInSubversion() {
+    local url=$1
+    local tag=$2
+
+    if ! existsInSubversion ${url} ${tag} ; then
+        error "entry ${tag} exists in ${url}"
+        exit 1
+    fi
+
+    return 0
+}
+

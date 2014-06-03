@@ -241,11 +241,18 @@ createReleaseTag() {
     mustHaveWorkspaceName
     mustHaveCleanWorkspace
     mustHaveWritableWorkspace
+    info "workspace is ${workspace}"
 
     # get os label
     # no mustHaveNextLabelName, because it's already calculated
     local osLabelName=$(getNextReleaseLabel)
     local osReleaseLabelName=$(sed "s/_LFS_OS_/_LFS_REL_/" <<< ${osLabelName} )
+    mustHaveValue "${osLabelName}" "no os label name"
+
+    # check for branch
+    local svnUrl=$(getConfig lfsRelDeliveryRepos)
+    local branch=$(getBranchName)
+    mustHaveBranchName
 
     # get sdk label
     copyArtifactsToWorkspace "${jobName}" "${buildNumber}"
@@ -255,32 +262,44 @@ createReleaseTag() {
     local sdk2=$(getConfig sdk2 ${commonentsFile})
     local sdk3=$(getConfig sdk3 ${commonentsFile})
 
-    cat ${commonentsFile}
-
     info "using sdk2 ${sdk2}"
     info "using sdk3 ${sdk3}"
     info "using lfs os ${osLabelName}"
     info "using lfs rel ${osReleaseLabelName}"
 
-    # check for branch
-    local svnUrl=$(getConfig lfsRelDeliveryRepos)
+    # check for the branch
+    info "svn repos url is ${svnUrl}/branches/${branch}"
+    shouldNotExistsInSubversion ${svnUrl}/tags/ "${osReleaseLabelName}"
 
-    local branch=$(getBranchName)
-    mustHaveBranchName
-    info "svn repos url is ${svnUrl}/branches/${branch}
-"
-
+    if ! existsInSubversion ${svnUrl}/branches ${branch} ; then
+        svnMkdir -m \"creating branch for ${branch}\" ${svnUrl}/branches/${branch} 
+    fi
 
     # update svn:externals
-#    svnExternalsFile=$(getTempFile)
-#    echo "^os  ${osLabel}"   > ${svnExternalsFile}
-#    echo "^sdk ${osLabel}"  >> ${svnExternalsFile}
-#
+    local svnExternalsFile=$(createTempFile)
+    echo "^/os/tags/${osLabelName} os " >> ${svnExternalsFile}
+
+    if [[ ${sdk3} ]] ; then 
+        echo "^/sdk/tags/{sdk3} sdk3" >> ${svnExternalsFile}
+    fi
+
+    if [[ ${sdk2} ]] ; then 
+        echo "^/sdk/tags/{sdk2} sdk2" >> ${svnExternalsFile}
+    fi
+
     # commit
-#    svnPropEdit svn:externals -m "update svn:externals" -F ${svnExternalsFile} ${workspace}
-#
+    info "updating svn:externals"
+    svnCheckout --ignore-externals ${svnUrl}/branches/${branch} ${workspace}/svn
+
+    cd ${workspace}/svn
+    svnPropSet svn:externals -F ${svnExternalsFile} .
+    svnCommit -m updating_svn:externals_for_${osReleaseLabelName} .
+
     # make a tag
-#    svnCopy 
+    info "create tag ${osReleaseLabelName}"
+    svnCopy -m create_new_tag ${svnUrl}/branches/${branch} ${svnUrl}/tags/${osReleaseLabelName}
+
+    info "tag created..."
 
     return
 }
