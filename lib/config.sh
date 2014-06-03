@@ -74,8 +74,9 @@ getProductNameFromJobName() {
 #  @return  value for the key
 getConfig() {
     local key=$1
+    local file=$2
 
-    echo 1>&2 "get config value for ${key}"
+    echo 1>&2 "get config value for ${key} using ${file}"
 
     export productName=$(getProductNameFromJobName)
     export taskName=$(getTaskNameFromJobName)
@@ -117,7 +118,7 @@ getConfig() {
             echo file:///var/fpwork2/demx2fk3/svnDummyRepos
         ;;
         *) 
-            ${LFS_CI_ROOT}/bin/config.pl "${key}"
+            ${LFS_CI_ROOT}/bin/config.pl "${key}" ${file}
         ;;
     esac
 
