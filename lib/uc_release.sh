@@ -246,7 +246,7 @@ createReleaseTag() {
 
     find ${workspace}
 
-    commonentsFile=$(workspace}/bld//bld-externalComponents-summary/externalComponents  
+    commonentsFile=${workspace}/bld//bld-externalComponents-summary/externalComponents   
     mustExistFile ${commonentsFile}
     local sdk=$(getConfig sdk ${commonentsFile})
 
