@@ -427,7 +427,7 @@ storeExternalComponentBaselines() {
         local baseline=$(basename ${baselineLink})
 
         TRACE "component ${component} exists with link to ${baselineLink} and ${baseline}"
-        printf "%s=%s\n" "${component}" "${baseline:-undef}" >> ${externalComponentFile}
+        printf "%s <> =%s\n" "${component}" "${baseline:-undef}" >> ${externalComponentFile}
     done
 
     rawDebug ${externalComponentFile}
