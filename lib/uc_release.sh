@@ -85,6 +85,9 @@ ci_job_release() {
         create_releasenote_textfile)
             createReleaseNoteTextFile ${TESTED_BUILD_JOBNAME} ${TESTED_BUILD_NUMBER}
         ;;
+        create_release_tag)
+            createReleaseTag ${TESTED_BUILD_JOBNAME} ${TESTED_BUILD_NUMBER}
+        ;;
         summary)
             # no op
         ;;
