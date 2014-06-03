@@ -251,6 +251,7 @@ createReleaseTag() {
     copyArtifactsToWorkspace "${jobName}" "${buildNumber}"
     commonentsFile=${workspace}/bld//bld-externalComponents-summary/externalComponents   
     mustExistFile ${commonentsFile}
+
     local sdk2=$(getConfig sdk2 ${commonentsFile})
     local sdk3=$(getConfig sdk3 ${commonentsFile})
 

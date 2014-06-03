@@ -75,7 +75,7 @@ getProductNameFromJobName() {
 getConfig() {
     local key=$1
 
-    # trace "get config value for ${key}"
+    echo 1>&2 "get config value for ${key}"
 
     export productName=$(getProductNameFromJobName)
     export taskName=$(getTaskNameFromJobName)
