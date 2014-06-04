@@ -178,7 +178,7 @@ getSvnInfo() {
     local xmlPath=$2
     local tmpFile=$(createTempFile)
 
-    svn info ${url} > ${tmpFile}
+    svn info --xml ${url} > ${tmpFile}
     mustBeSuccessfull "$?" "svn info ${url}"
 
     ${LFS_CI_ROOT}/bin/xpath -q -e ${xmlPath} ${tmpFile}
