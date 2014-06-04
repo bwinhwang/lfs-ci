@@ -163,13 +163,13 @@ getSvnUrl() {
 
 getSvnRevision() {
     local url=$1
-    getSvnInfo ${url} "/info/entry/@revision"
+    getSvnInfo ${url} "/info/entry/@revision" | cut -d'"' -f2
     return
 }
 
 getSvnLastChangedRevision() {
     local url=$1
-    getSvnInfo ${url} "/info/entry/commit/@revision"
+    getSvnInfo ${url} "/info/entry/commit/@revision" | cut -d'"' -f2
     return
 }
 

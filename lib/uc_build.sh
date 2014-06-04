@@ -446,7 +446,7 @@ storeRevisions() {
     execute mkdir -p ${workspace}/bld/bld-externalComponents-summary/
     execute rm -f ${revisionsFile}
 
-    for component in ${workspace}/{src-,bldtools,locations/,src-}* ; do
+    for component in ${workspace}/{src-,bldtools/bld-buildtools-common,locations/}* ; do
 
         [[ -d ${component} ]] || continue
         local revision=$(getSvnLastChangedRevision ${component})

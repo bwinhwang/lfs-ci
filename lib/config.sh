@@ -76,7 +76,7 @@ getConfig() {
     local key=$1
     local file=$2
 
-    echo 1>&2 "get config value for ${key} using ${file}"
+    # echo 1>&2 "get config value for ${key} using ${file}"
 
     export productName=$(getProductNameFromJobName)
     export taskName=$(getTaskNameFromJobName)
