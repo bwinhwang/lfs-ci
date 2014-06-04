@@ -155,3 +155,35 @@ mustExistInSubversion() {
     return 0
 }
 
+getSvnUrl() {
+    local url=$1
+    getSvnInfo ${url} '/info/entry/url/node()'
+    return
+}
+
+getSvnRevision() {
+    local url=$1
+    getSvnInfo ${url} "/info/entry/@revision"
+    return
+}
+
+getSvnLastChangedRevision() {
+    local url=$1
+    getSvnInfo ${url} "/info/entry/commit/@revision"
+    return
+}
+
+getSvnInfo() {
+    local url=$1
+    local xmlPath=$2
+    local tmpFile=$(createTempFile)
+
+    svn info ${url} > ${tmpFile}
+    mustBeSuccessfull "$?" "svn info ${url}"
+
+    ${LFS_CI_ROOT}/bin/xpath -q -e ${xmlPath} ${tmpFile}
+    mustBeSuccessfull "$?" "xmlPath -q -e ${xmlPath}"
+
+    return
+}
+

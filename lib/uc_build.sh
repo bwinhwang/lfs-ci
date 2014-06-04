@@ -155,6 +155,9 @@ _build() {
     info "store used baselines (bld) information"
     storeExternalComponentBaselines
 
+    info "store svn revision information"
+    storeRevisions
+
     info "creating temporary makefile"
     ${LFS_CI_ROOT}/bin/sortBuildsFromDependencies ${target} makefile ${label} > ${cfgFile}
 
@@ -411,7 +414,6 @@ synchroniceToLocalPath() {
 }
 
 storeExternalComponentBaselines() {
-
     local workspace=$(getWorkspaceName)
     mustHaveWorkspaceName
 
@@ -431,6 +433,31 @@ storeExternalComponentBaselines() {
     done
 
     rawDebug ${externalComponentFile}
+
+    return
+}
+
+storeRevisions() {
+    local workspace=$(getWorkspaceName)
+    mustHaveWorkspaceName
+
+    local revisionsFile=${workspace}/bld/bld-externalComponents-summary/usedRevisions.txt
+
+    execute mkdir -p ${workspace}/bld/bld-externalComponents-summary/
+    execute rm -f ${revisionsFile}
+
+    for component in ${workspace}/{src-,bldtools,locations/,src-}* ; do
+
+        [[ -d ${component} ]] || continue
+        local revision=$(getLastChangedRevision ${component})
+        local url=$(getSvnUrl ${component})
+
+        mustHaveValue "${revision}" "svn last changed revision of ${component}"
+        mustHaveValue "${url}" "svn url of ${component}"
+
+        printf "%s@%d\n" ${url} ${revision} >> ${revisionsFile}
+
+    done
 
     return
 }
