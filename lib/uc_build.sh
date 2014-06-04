@@ -454,12 +454,12 @@ storeRevisions() {
         [[ -d ${component} ]] || continue
         local revision=$(getSvnLastChangedRevision ${component})
         local url=$(getSvnUrl ${component})
-        local componentName=$(sed "s:${workspace}::" <<< ${component})
+        local componentName=$(sed "s:${workspace}/::" <<< ${component})
 
         mustHaveValue "${revision}" "svn last changed revision of ${component}"
         mustHaveValue "${url}" "svn url of ${component}"
 
-        printf "%s %s %d\n" $componentName} ${url} ${revision} >> ${revisionsFile}
+        printf "%s %s %d\n" ${componentName} ${url} ${revision} >> ${revisionsFile}
 
     done
 
