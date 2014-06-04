@@ -444,9 +444,9 @@ storeRevisions() {
     local workspace=$(getWorkspaceName)
     mustHaveWorkspaceName
 
-    local revisionsFile=${workspace}/bld/bld-externalComponents-${componentName}/usedRevisions.txt
+    local revisionsFile=${workspace}/bld/bld-externalComponents-${targetName}/usedRevisions.txt
 
-    execute mkdir -p ${workspace}/bld/bld-externalComponents-${componentName}/
+    execute mkdir -p ${workspace}/bld/bld-externalComponents-${targetName}/
     execute rm -f ${revisionsFile}
 
     for component in ${workspace}/{src-,bldtools/bld-buildtools-common,locations/}* ; do
