@@ -248,28 +248,32 @@ createTagOnSourceRepository() {
     rawDebug ${revisionFile}
 
     # check for branch
-    local svnUrl=$(getConfig lfsSourceRepos)/os
+    local svnUrl=$(getConfig lfsSourceRepos)
+    local svnUrlOs=${svnUrl}/os
     local branch=demx2fk3_pre_${osLabelName}
 
+    svnUrlOs=$(normalizeSvnUrl ${svnUrlOs})
     svnUrl=$(normalizeSvnUrl ${svnUrl})
     mustHaveValue "${svnUrl}" "svnUrl"
+    mustHaveValue "${svnUrlOs}" "svnUrlOs"
 
     info "using lfs os ${osLabelName}"
-    info "using repos ${svnUrl}/branches/${branch}"
-    info "creating new tag ${svnUrl}/tags/${osLabelName}"
+    info "using repos ${svnUrlOs}/branches/${branch}"
+    info "using repos for new tag ${svnUrlOs}/tags/${osLabelName}"
+    info "using repos for package ${svnUrl}/subsystems/"
 
     if existsInSubversion ${svnUrl}/tags ${osLabelName} ; then
         error "tag ${osLabelName} already exists"
         exit 1
     fi
 
-    if existsInSubversion ${svnUrl}/branches ${branch} ; then
+    if existsInSubversion ${svnUrlOs}/branches ${branch} ; then
         info "removing branch ${branch}"
-        svnRemove -m removing_branch_for_production ${svnUrl}/branches/${branch} 
+        svnRemove -m removing_branch_for_production ${svnUrlOs}/branches/${branch} 
     fi
 
     info "creating branch ${branch}"
-    svnMkdir -m creating_new_branch_${branch} ${svnUrl}/branches/${branch}
+    svnMkdir -m creating_new_branch_${branch} ${svnUrlOs}/branches/${branch}
 
     for componentUrl in $(cat ${revisionFile}) ; do
         local url=$(cut -d@ -f1 <<< ${componentUrl})
@@ -283,7 +287,11 @@ createTagOnSourceRepository() {
         info "copy ${src} to ${branch}"
         svnCopy -r ${rev} -m branching_src_${src}_to_${branch} \
             ${normalizedUrl}                             \
-            ${svnUrl}/branches/${branch}
+            ${svnUrlOs}/branches/${branch}
+
+        # TODO continue here
+        echo svnCopy -m tag_for_package_src_${src} ${svnUrlOs}/branches/${branch} \
+            ${svnUrl}/subsystems/${src}/${osLabelName}
     done
 
     # check for the branch
