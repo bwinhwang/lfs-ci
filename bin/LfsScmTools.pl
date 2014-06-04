@@ -966,6 +966,9 @@ sub execute {
                                  revision => $revision );
     $dir->loadDependencyTree();
 
+    use YAML;
+    print STDERR Dump($dir);
+
     printf( "%s %s", join( " ", $dir->getSourceDirectoriesFromDependencies() ),
                      $subDir,
           );

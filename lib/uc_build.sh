@@ -449,7 +449,7 @@ storeRevisions() {
     for component in ${workspace}/{src-,bldtools,locations/,src-}* ; do
 
         [[ -d ${component} ]] || continue
-        local revision=$(getLastChangedRevision ${component})
+        local revision=$(getSvnLastChangedRevision ${component})
         local url=$(getSvnUrl ${component})
 
         mustHaveValue "${revision}" "svn last changed revision of ${component}"
