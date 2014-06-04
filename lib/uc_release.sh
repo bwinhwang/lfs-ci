@@ -87,6 +87,9 @@ ci_job_release() {
         create_release_tag)
             createReleaseTag ${buildJobName} ${buildBuildNumber}
         ;;
+        create_source_tag) 
+            createTagOnSourceRepository ${buildJobName} ${buildBuildNumber}
+        ;;
         summary)
             # no op
         ;;
@@ -224,7 +227,78 @@ releaseBuildToWorkFlowTool() {
 
 
 createTagOnSourceRepository() {
-    requiredParameters JOB_NAME BUILD_NUMBER        
+    local jobName=$1
+    local buildNumber=$2
+
+    local workspace=$(getWorkspaceName)
+    mustHaveWorkspaceName
+    mustHaveCleanWorkspace
+    mustHaveWritableWorkspace
+    info "workspace is ${workspace}"
+
+    # get os label
+    # no mustHaveNextLabelName, because it's already calculated
+    local osLabelName=$(getNextReleaseLabel)
+    mustHaveValue "${osLabelName}" "no os label name"
+
+    # get artifacts
+    copyArtifactsToWorkspace "${jobName}" "${buildNumber}"
+    revisionFile=${workspace}/bld//bld-externalComponents-summary/usedRevisions.txt
+    mustExistFile ${revisionFile}
+    rawDebug ${revisionFile}
+
+    # check for branch
+    local svnUrl=$(getConfig lfsSourceRepos)/os
+    local branch=demx2fk3_pre_${osLabelName}
+
+    svnUrl=$(normalizeSvnUrl ${svnUrl})
+    mustHaveValue "${svnUrl}" "svnUrl"
+
+    info "using lfs os ${osLabelName}"
+    info "using repos ${svnUrl}/branches/${branch}"
+    info "creating new tag ${svnUrl}/tags/${osLabelName}"
+
+    if existsInSubversion ${svnUrl}/tags ${osLabelName} ; then
+        error "tag ${osLabelName} already exists"
+        exit 1
+    fi
+
+    if existsInSubversion ${svnUrl}/branches ${branch} ; then
+        info "removing branch ${branch}"
+        svnRemove -m removing_branch_for_production ${svnUrl}/branches/${branch} 
+    fi
+
+    info "creating branch ${branch}"
+    svnMkdir -m creating_new_branch_${branch} ${svnUrl}/branches/${branch}
+
+    for componentUrl in $(cat ${revisionFile}) ; do
+        local url=$(cut -d@ -f1 <<< ${componentUrl})
+        local rev=$(cut -d@ -f2 <<< ${componentUrl})
+        local src=$(basename ${url})
+        mustHaveValue "${url}" "svn url"
+        mustHaveValue "${rev}" "svn revision"
+
+        local normalizedUrl=$(normalizeSvnUrl ${url})
+
+        info "copy ${src} to ${branch}"
+        svnCopy -r ${rev} -m branching_src_${src}_to_${branch} \
+            ${normalizedUrl}                             \
+            ${svnUrl}/branches/${branch}
+    done
+
+    # check for the branch
+    info "svn repos url is ${svnUrl}/branches/${branch}"
+    shouldNotExistsInSubversion ${svnUrl}/tags/ "${osReleaseLabelName}"
+
+    echo svnCopy -m create_new_tag_${osLabelName} \
+        ${svnUrl}/branches/${branch}             \
+        ${svnUrl}/tags/${osLabelName}
+
+    info "branch ${branch} no longer required, removing branch"
+    svnRemove -m removing_branch_for_production ${svnUrl}/branches/${branch} 
+
+    info "tagging done"
+
     return
 }
 

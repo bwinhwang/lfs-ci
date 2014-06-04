@@ -156,7 +156,7 @@ _build() {
     storeExternalComponentBaselines
 
     info "store svn revision information"
-    storeRevisions
+    storeRevisions ${target}
 
     info "creating temporary makefile"
     ${LFS_CI_ROOT}/bin/sortBuildsFromDependencies ${target} makefile ${label} > ${cfgFile}
@@ -438,12 +438,15 @@ storeExternalComponentBaselines() {
 }
 
 storeRevisions() {
+    local targetName=$(sed "s/-//g" <<< ${1})
+    mustHaveValue "${targetName}" "target name"
+
     local workspace=$(getWorkspaceName)
     mustHaveWorkspaceName
 
-    local revisionsFile=${workspace}/bld/bld-externalComponents-summary/usedRevisions.txt
+    local revisionsFile=${workspace}/bld/bld-externalComponents-${componentName}/usedRevisions.txt
 
-    execute mkdir -p ${workspace}/bld/bld-externalComponents-summary/
+    execute mkdir -p ${workspace}/bld/bld-externalComponents-${componentName}/
     execute rm -f ${revisionsFile}
 
     for component in ${workspace}/{src-,bldtools/bld-buildtools-common,locations/}* ; do
@@ -451,11 +454,12 @@ storeRevisions() {
         [[ -d ${component} ]] || continue
         local revision=$(getSvnLastChangedRevision ${component})
         local url=$(getSvnUrl ${component})
+        local componentName=$(sed "s:${workspace}::" <<< ${component})
 
         mustHaveValue "${revision}" "svn last changed revision of ${component}"
         mustHaveValue "${url}" "svn url of ${component}"
 
-        printf "%s@%d\n" ${url} ${revision} >> ${revisionsFile}
+        printf "%s %s %d\n" $componentName} ${url} ${revision} >> ${revisionsFile}
 
     done
 

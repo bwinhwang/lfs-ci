@@ -110,6 +110,11 @@ svnPropSet() {
     return
 }
 
+svnRemove() {
+    svnCommand rm $@
+    return
+}
+
 svnExistsPath() {
     return
 }
@@ -187,3 +192,17 @@ getSvnInfo() {
     return
 }
 
+normalizeSvnUrl() {
+    local url=$1
+    local masterHostname=$(getConfig svnMasterServerHostName)
+
+    local currentHostname=$(cut -d/ -f3 <<< ${url})
+
+    if [[ ${currentHostname} ]] ; then
+        url=$(sed "s/${currentHostname}/${masterHostname}/g" <<< ${url})
+    fi
+
+    echo ${url}
+
+    return
+}
