@@ -1185,10 +1185,10 @@ sub prepare {
 
     my $subsysHash;
     foreach my $entry ( @{ $xml->{logentry} } ) {
-        print Dumper( $entry );
-        my $msg    = not ref( $entry->{msg}->[0] ) eq "HASH" ?
-                        $entry->{msg}->[0] :
-                        sprintf( "empty commit (r%s) message from %s at %s", $entry->{revision}, $entry->{author}, $entry->{date} );
+#        my $msg    = not ref( $entry->{msg}->[0] ) eq "HASH" ?
+#                        $entry->{msg}->[0] :
+#                        sprintf( "empty commit (r%s) message from %s at %s", $entry->{revision}, $entry->{author}, $entry->{date} );
+        my $msg = $entry->{msg}->[0];
         my @pathes = map { $_->{content} }
                     @{ $entry->{paths}->[0]->{path} };
 
@@ -1210,6 +1210,7 @@ sub prepare {
                                                             map  { $self->filterComments( $_ ); } 
                                                             keys %{ $subsysHash->{$key} };
     }
+
 
     $self->{changeLog} = $changeLogAsTextHash;
     return;

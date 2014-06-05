@@ -51,11 +51,7 @@ mustHaveBranchName() {
 #  @param   <none>
 #  @return  name / path of the workspace
 getWorkspaceName() {
-    local location=$(getLocationName)
-    mustHaveLocationName
-
     echo "${WORKSPACE}/workspace"
-
     return
 }
 
