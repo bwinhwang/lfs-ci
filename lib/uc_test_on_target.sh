@@ -24,6 +24,8 @@ ci_job_test_on_target() {
     execute make powercycle
     info "wait for prompt"
     execute make waitprompt
+    sleep 60
+
     info "executing checks"
     execute make test
 
