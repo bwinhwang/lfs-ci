@@ -45,10 +45,10 @@ ci_job_release() {
 
     mustHaveNextLabelName
     local releaseLabel=$(getNextReleaseLabel)
-    local packageBuildNumber=$(grep Package ${upstreamsFile} | cut -d: -f2)
     local packageJobName=$(    grep Package ${upstreamsFile} | cut -d: -f1)
-    local buildBuildNumber=$(  grep Build   ${upstreamsFile} | cut -d: -f2)
+    local packageBuildNumber=$(grep Package ${upstreamsFile} | cut -d: -f2)
     local buildJobName=$(      grep Build   ${upstreamsFile} | cut -d: -f1)
+    local buildBuildNumber=$(  grep Build   ${upstreamsFile} | cut -d: -f2)
     mustHaveValue ${packageJobName}
     mustHaveValue ${packageBuildNumber}
     mustHaveValue ${buildJobName}

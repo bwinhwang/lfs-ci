@@ -1,3 +1,5 @@
+#!/bin/bash
+
 ci_job_test_on_target() {
 
     requiredParameters JOB_NAME 
@@ -10,6 +12,26 @@ ci_job_test_on_target() {
     local targetName=$(sed "s/^Test-//" <<< ${JOB_NAME})
     mustHaveValue ${targetName} "target name"
     info "testing on target ${targetName}"
+
+    # find the related jobs of the build
+    runOnMaster ${LFS_CI_ROOT}/bin/getUpStreamProject \
+                    -j ${TESTED_BUILD_JOBNAME}        \
+                    -b ${TESTED_BUILD_NUMBER}         \
+                    -h ${serverPath} > ${upstreamsFile}
+
+    local packageJobName=$(    grep Package ${upstreamsFile} | cut -d: -f1)
+    local packageBuildNumber=$(grep Package ${upstreamsFile} | cut -d: -f2)
+    local buildJobName=$(      grep Build   ${upstreamsFile} | cut -d: -f1)
+    local buildBuildNumber=$(  grep Build   ${upstreamsFile} | cut -d: -f2)
+    mustHaveValue ${packageJobName}
+    mustHaveValue ${packageBuildNumber}
+    mustHaveValue ${buildJobName}
+    mustHaveValue ${buildBuildNumber}
+
+    trace "output of getUpStreamProject" 
+    rawDebug ${upstreamsFile}
+
+    copyArtifactsToWorkspace "${buildJobName}" "${buildBuildNumber}"
 
     info "create workspace for testing"
     cd ${workspace}
@@ -31,3 +53,4 @@ ci_job_test_on_target() {
 
     return 0
 }
+
