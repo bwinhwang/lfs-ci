@@ -16,9 +16,16 @@ ci_job_test_on_target() {
     execute build setup
     execute build adddir src-test
 
+    cd ${workspace}/src-test/src/unittest/tests/common/checkuname
     info "installing software on the target"
+    info make install
+
     info "powercycle target"
+    execute make powercycle
+    info "wait for prompt"
+    execute make waitprompt
     info "executing checks"
+    execute make test
 
     return 0
 }
