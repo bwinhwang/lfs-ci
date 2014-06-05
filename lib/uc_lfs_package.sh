@@ -263,7 +263,7 @@ copyPlatform() {
                         execute mv -f ${file} ${dst}/devel
                     done
             ;;
-            fsm3_octeon2|fsm35_k2|fsm35_axm|keystone2|axm)
+            fsm3_octeon2|fsm35_k2|fsm35_axm|fsm4_axm|fsm4_k2|keystone2|axm)
                     ln -fs factory/u-boot.uim ${dst}/u-boot.uim
                     mkdir ${dst}/devel
                     for file in ${dst}/config     \
