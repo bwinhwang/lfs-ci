@@ -117,7 +117,7 @@ _build_fsmddal_pdf() {
                 ddal
 
     echo ${label} > ${workspace}/src-fsmpsl/src/fsmddal.d/label
-    execute make -j -C ${workspace}/src-fsmpsl/src/fsmddal.d/ LABEL=${label}
+    execute make -C ${workspace}/src-fsmpsl/src/fsmddal.d/ LABEL=${label}
 
     # fixme
     local destinationDir=${workspace}/bld/bld-fsmddal-doc/results/doc/
