@@ -44,7 +44,7 @@ ci_job_test_on_target() {
 
     cd ${workspace}/src-test/src/unittest/tests/common/checkuname
     info "installing software on the target"
-    info make install
+    make install WORKSPACE=${workspace}
 
     info "powercycle target"
     execute make powercycle
