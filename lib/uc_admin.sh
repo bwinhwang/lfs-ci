@@ -9,10 +9,11 @@ ci_job_admin() {
     # mustHaveTargetBoardName
 
     case ${subJob} in
-        backupJenkins)           backupJenkinsMasterServerInstallation ;;
-        cleanUpArtifactsShare)   cleanupArtifactsShare                 ;;
-        cleanupOrphanWorkspaces) cleanupOrphanWorkspaces               ;;
-        cleanupBaselineShares)   cleanupBaselineShares                 ;;
+        backupJenkins)               backupJenkinsMasterServerInstallation ;;
+        cleanUpArtifactsShare)       cleanupArtifactsShare                 ;;
+        cleanupBaselineShares)       cleanupBaselineShares                 ;;
+        cleanupOrphanJobDirectories) cleanupOrphanJobDirectories           ;;
+        cleanupOrphanWorkspaces)     cleanupOrphanWorkspaces               ;;
         *)
             error "subjob not known (${subjob})"
             exit 1;
@@ -135,5 +136,17 @@ cleanupBaselineShares() {
         execute rm -rf ${LFS_CI_SHARE_MIRROR}/${USER}/lfs-ci-local/
     fi
 
+    return
+}
+
+
+## @fn      cleanupOrphanJobDirectories()
+#  @brief   clean up the orphan job directories (mostly on slaves)
+#  @details if a job directory is not modified after x days, the directory will be removed.
+#           if the job directory is still required, the jenkins slave will recreate the directory
+#  @param   <none>
+#  @return  <none>
+cleanupOrphanJobDirectories() {
+    debug "not implemented yet"
     return
 }

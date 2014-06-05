@@ -95,6 +95,15 @@ warning() {
     message "WARNING" "$@"
 }
 
+## @fn      fatal( message )
+#  @brief   shows a fatal message
+#  @param   {message}  a fatal message
+#  @return  <none>
+fatal() {
+    message "FATAL ERROR" "$@"
+    exit 1
+}
+
 ## @fn      message( logType, logMessage )
 #  @brief   shows a warning message
 #  @detail  

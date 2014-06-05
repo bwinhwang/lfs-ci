@@ -86,11 +86,19 @@ svnCommit() {
     return
 }
 
+## @fn      svnMkdir( $args )
+#  @brief   executes an svn mkdir command
+#  @param   {args}    args for the svn mkdir command
+#  @return  <none>
 svnMkdir() {
     svnCommand mkdir $@
     return
 }
 
+## @fn      svnCopy( $args )
+#  @brief   executes an svn copy command
+#  @param   {args}    args for the svn copy command
+#  @return  <none>
 svnCopy() {
     svnCommand copy $@
     return
@@ -105,20 +113,32 @@ svnDiff() {
     return
 }
 
+## @fn      svnPropSet( $args )
+#  @brief   executes an svn propset command
+#  @param   {args}    args for the svn propset command
+#  @return  <none>
 svnPropSet() {
     svnCommand propset $@
     return
 }
 
+## @fn      svnRemove( $args )
+#  @brief   executes an svn remove command
+#  @param   {args}    args for the svn remove command
+#  @return  <none>
 svnRemove() {
     svnCommand rm $@
     return
 }
 
-svnExistsPath() {
-    return
-}
-
+## @fn      shouldNotExistsInSubversion( $url, $pathOrFile )
+#  @brief   checks, if the path/file exists in svn 
+#  @detail  if you want to check http://server/path/to/repos/foo, the
+#           input url is:  http://server/path/to/repos
+#           input path is: foo
+#  @param   {url}           a svn url (dirname only)
+#  @param   {pathOrFIle}    a path / file elemnt of the path
+#  @throws  raise an error if the url exists
 shouldNotExistsInSubversion() {
     local url=$1
     local tag=$2
@@ -130,6 +150,14 @@ shouldNotExistsInSubversion() {
     return 0
 }
 
+## @fn      existsInSubversion( $url, $pathOrFile )
+#  @brief   checks, if the path/file exists in svn 
+#  @detail  if you want to check http://server/path/to/repos/foo, the
+#           input url is:  http://server/path/to/repos
+#           input path is: foo
+#  @param   {url}           a svn url (dirname only)
+#  @param   {pathOrFIle}    a path / file elemnt of the path
+#  @return  1 if it exists, otherwise 0
 existsInSubversion() {
     local url=$1
     local tag=$2
@@ -148,6 +176,14 @@ existsInSubversion() {
     return 1
 }
 
+## @fn      mustExistInSubversion( $url, $pathOrFile )
+#  @brief   ensure, that the path/file exists in svn 
+#  @detail  if you want to check http://server/path/to/repos/foo, the
+#           input url is:  http://server/path/to/repos
+#           input path is: foo
+#  @param   {url}           a svn url (dirname only)
+#  @param   {pathOrFIle}    a path / file elemnt of the path
+#  @throws  raise an error, if it not exists
 mustExistInSubversion() {
     local url=$1
     local tag=$2
@@ -160,24 +196,44 @@ mustExistInSubversion() {
     return 0
 }
 
+## @fn      getSvnUrl( $url )
+#  @brief   get the svn url for a svn url
+#  @details hae? why url from a url? Cause the url can be also a location in the filesystem
+#           input url: /path/to/workspace
+#           output url: https://master/path/to/repos/
+#  @param   {url}    a svn url
+#  @return  a svn url
 getSvnUrl() {
     local url=$1
     getSvnInfo ${url} '/info/entry/url/node()'
     return
 }
 
+## @fn      getSvnRevision( $url )
+#  @brief   get the revision for a svn url
+#  @param   {url}    a svn url
+#  @return  the svn revision
 getSvnRevision() {
     local url=$1
     getSvnInfo ${url} "/info/entry/@revision" | cut -d'"' -f2
     return
 }
 
+## @fn      getSvnLastChangedRevision( $url )
+#  @brief   get the last changed revision for a svn url
+#  @param   {url}    a svn url
+#  @return  the last changed revision 
 getSvnLastChangedRevision() {
     local url=$1
     getSvnInfo ${url} "/info/entry/commit/@revision" | cut -d'"' -f2
     return
 }
 
+## @fn      getSvnInfo( $url, $xmlPath )
+#  @brief   get a specific information out of the svn info output for a svn url
+#  @param   {url}      a svn url
+#  @param   {xmlPath}  a xml path, e.g. /info/entry/commit/@revision for last changed revision   
+#  @return  the information from svn info
 getSvnInfo() {
     local url=$1
     local xmlPath=$2
@@ -192,6 +248,10 @@ getSvnInfo() {
     return
 }
 
+## @fn      normalizeSvnUrl( $url )
+#  @brief   normalize a svn url, replace the hostname with the master server host name
+#  @param   {url}    a svn url
+#  @return  a normalized (master server) svn url
 normalizeSvnUrl() {
     local url=$1
     local masterHostname=$(getConfig svnMasterServerHostName)

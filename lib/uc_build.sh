@@ -413,6 +413,13 @@ synchroniceToLocalPath() {
     return
 }
 
+## @fn      storeExternalComponentBaselines()
+#  @brief   store externals components baseline into a artifacts file
+#  @details The information is used during the releasing later for tagging.
+#           Externals components can be configured in config LFS_BUILD_externalsComponents.
+#           Externals components are baselines like sdk{1,2,3,} or pkgpool.  
+#  @param   <none>
+#  @return  <none>
 storeExternalComponentBaselines() {
     local workspace=$(getWorkspaceName)
     mustHaveWorkspaceName
@@ -437,6 +444,12 @@ storeExternalComponentBaselines() {
     return
 }
 
+## @fn      storeRevisions()
+#  @brief   store all the revisions of the used src-directories (incl. bldtools and locations)
+#  @details this information will be used and is required later for tagging the sources
+#           the file will be stored in the artifacts and is so accessable for following jobs
+#  @param   <none>
+#  @return  <none>
 storeRevisions() {
     local targetName=$(sed "s/-//g" <<< ${1})
     mustHaveValue "${targetName}" "target name"

@@ -336,5 +336,3 @@ copyDocumentation() {
     return
 }
 
-
-return 0

@@ -69,7 +69,7 @@ ci_job_release() {
     local subJob=$(getTargetBoardName)
     mustHaveTargetBoardName
 
-    info "subJob is ${subJob}"
+    info "sub task is ${subJob}"
     case ${subJob} in
         upload_to_subversion)
             # from subversion.sh
@@ -82,6 +82,7 @@ ci_job_release() {
             copyToReleaseShareOnSite "${buildJobName}" "${buildBuildNumber}"
         ;;
         create_releasenote_textfile)
+            # TODO: demx2fk3 2014-06-05  is this correct?!?!
             createReleaseNoteTextFile ${TESTED_BUILD_JOBNAME} ${TESTED_BUILD_NUMBER}
         ;;
         create_release_tag)
@@ -169,10 +170,16 @@ copyToReleaseShareOnSite_copyToSite() {
     return
 }
 
+## @fn      createReleaseNoteTextFile()
+#  @brief   create a release note in txt format
+#  @param   <none>
+#  @return  <none>
 createReleaseNoteTextFile() {
     local jobName=$1
     local buildNumber=$2
 
+
+    # TODO: demx2fk3 2014-06-05  is this correct?!?!
     # get the change log file from master
     local buildDirectory=$(getBuildDirectoryOnMaster ${jobName} ${buildNumber})
     local serverName=$(getConfig jenkinsMasterServerHostName)
@@ -201,6 +208,11 @@ createReleaseNoteTextFile() {
     return
 }
 
+## @fn      createReleaseNoteXmlFile()
+#  @brief   create a release note in xml format
+#  @todo    not implemented
+#  @param   <none>
+#  @return  <none>
 createReleaseNoteXmlFile() {
     requiredParameters JOB_NAME BUILD_NUMBER        
 
@@ -226,15 +238,19 @@ releaseBuildToWorkFlowTool() {
 }
 
 
+## @fn      createTagOnSourceRepository( $jobName, $buildNumber )
+#  @brief   create a tag(s) on source repository 
+#  @details create tags in the source repository (os/tags) and subsystems (subsystems/tags)
+#  @param   {jobName}        a job name
+#  @param   {buildNumber}    a build number
+#  @param   <none>
+#  @return  <none>
 createTagOnSourceRepository() {
     local jobName=$1
     local buildNumber=$2
 
     local workspace=$(getWorkspaceName)
-    mustHaveWorkspaceName
-    mustHaveCleanWorkspace
-    mustHaveWritableWorkspace
-    info "workspace is ${workspace}"
+    mustHaveWorkspaceWithArtefactsFromUpstreamProjects ${jobName} ${buildNumber}
 
     # get os label
     # no mustHaveNextLabelName, because it's already calculated
@@ -242,7 +258,6 @@ createTagOnSourceRepository() {
     mustHaveValue "${osLabelName}" "no os label name"
 
     # get artifacts
-    copyArtifactsToWorkspace "${jobName}" "${buildNumber}"
     revisionFile=${workspace}/bld//bld-externalComponents-summary/usedRevisions.txt
     mustExistFile ${revisionFile}
     rawDebug ${revisionFile}
@@ -318,12 +333,8 @@ createTagOnSourceRepository() {
 createReleaseTag() {
     local jobName=$1
     local buildNumber=$2
-
     local workspace=$(getWorkspaceName)
-    mustHaveWorkspaceName
-    mustHaveCleanWorkspace
-    mustHaveWritableWorkspace
-    info "workspace is ${workspace}"
+    mustHaveWorkspaceWithArtefactsFromUpstreamProjects ${jobName} ${buildNumber}
 
     # get os label
     # no mustHaveNextLabelName, because it's already calculated
@@ -337,7 +348,6 @@ createReleaseTag() {
     mustHaveBranchName
 
     # get sdk label
-    copyArtifactsToWorkspace "${jobName}" "${buildNumber}"
     commonentsFile=${workspace}/bld//bld-externalComponents-summary/externalComponents   
     mustExistFile ${commonentsFile}
 
@@ -354,7 +364,7 @@ createReleaseTag() {
     shouldNotExistsInSubversion ${svnUrl}/tags/ "${osReleaseLabelName}"
 
     if ! existsInSubversion ${svnUrl}/branches ${branch} ; then
-        svnMkdir -m \"creating branch for ${branch}\" ${svnUrl}/branches/${branch} 
+        svnMkdir -m creating_branch_for_${branch} ${svnUrl}/branches/${branch} 
     fi
 
     # update svn:externals
@@ -381,8 +391,26 @@ createReleaseTag() {
     info "create tag ${osReleaseLabelName}"
     svnCopy -m create_new_tag ${svnUrl}/branches/${branch} ${svnUrl}/tags/${osReleaseLabelName}
 
-    info "tag created..."
-
+    info "tag created."
     return
 }
 
+## @fn      mustHaveWorkspaceWithArtefactsFromUpstreamProjects( $jobsName, $buildNumber )
+#  @brief   ensures, that a new workspace will be created with artifacts of the upstream project
+#  @param   {jobsName}     a job name
+#  @param   {buildNumber}  a build number
+#  @return  <none>
+mustHaveWorkspaceWithArtefactsFromUpstreamProjects() {
+    local jobName=$1
+    local buildNumber=$2
+
+    local workspace=$(getWorkspaceName)
+    mustHaveWorkspaceName
+    mustHaveCleanWorkspace
+    mustHaveWritableWorkspace
+    info "workspace is ${workspace}"
+
+    copyArtifactsToWorkspace "${jobName}" "${buildNumber}"
+
+    return
+}
