@@ -1,9 +1,12 @@
 #!/bin/bash
 
+source ${LFS_CI_ROOT}/lib/artifacts.sh
+
 ci_job_test_on_target() {
 
     requiredParameters JOB_NAME 
 
+    local serverPath=$(getConfig jenkinsMasterServerPath)
     local workspace=$(getWorkspaceName)
     mustHaveCleanWorkspace
     mustHaveWorkspaceName
@@ -13,11 +16,17 @@ ci_job_test_on_target() {
     mustHaveValue ${targetName} "target name"
     info "testing on target ${targetName}"
 
+    info "create workspace for testing"
+    cd ${workspace}
+    execute build setup
+    execute build adddir src-test
+
     # find the related jobs of the build
+    local upstreamsFile=$(createTempFile)
     runOnMaster ${LFS_CI_ROOT}/bin/getUpStreamProject \
-                    -j ${TESTED_BUILD_JOBNAME}        \
-                    -b ${TESTED_BUILD_NUMBER}         \
-                    -h ${serverPath} > ${upstreamsFile}
+                    -j ${UPSTREAM_PROJECT}        \
+                    -b ${UPSTREAM_BUILD}          \
+                    -h ${serverPath}  > ${upstreamsFile}
 
     local packageJobName=$(    grep Package ${upstreamsFile} | cut -d: -f1)
     local packageBuildNumber=$(grep Package ${upstreamsFile} | cut -d: -f2)
@@ -33,11 +42,6 @@ ci_job_test_on_target() {
 
     copyArtifactsToWorkspace "${buildJobName}" "${buildBuildNumber}"
 
-    info "create workspace for testing"
-    cd ${workspace}
-    execute build setup
-    execute build adddir src-test
-
     cd ${workspace}/src-test/src/unittest/tests/common/checkuname
     info "installing software on the target"
     info make install
@@ -50,6 +54,8 @@ ci_job_test_on_target() {
 
     info "executing checks"
     execute make test
+
+    info "testing done."
 
     return 0
 }
