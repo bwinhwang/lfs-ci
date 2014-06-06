@@ -469,6 +469,10 @@ storeRevisions() {
         local url=$(getSvnUrl ${component})
         local componentName=$(sed "s:${workspace}/::" <<< ${component})
 
+        url=$(normalizeSvnUrl ${url})
+
+        debug "using for ${componentName} from ${url} with ${revision}"
+
         mustHaveValue "${revision}" "svn last changed revision of ${component}"
         mustHaveValue "${url}" "svn url of ${component}"
 

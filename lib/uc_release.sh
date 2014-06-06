@@ -50,11 +50,13 @@ ci_job_release() {
     local packageBuildNumber=$(grep Package ${upstreamsFile} | cut -d: -f2)
     local buildJobName=$(      grep Build   ${upstreamsFile} | cut -d: -f1)
     local buildBuildNumber=$(  grep Build   ${upstreamsFile} | cut -d: -f2)
+    local productName=$(getProductNameFromJobName)
     mustHaveValue ${packageJobName}
     mustHaveValue ${packageBuildNumber}
     mustHaveValue ${buildJobName}
     mustHaveValue ${buildBuildNumber}
     mustHaveValue ${releaseLabel}
+    mustHaveValue "${productName}" "product name"
 
     setBuildDescription "${JOB_NAME}" "${BUILD_NUMBER}" "${releaseLabel}"
 
@@ -62,7 +64,7 @@ ci_job_release() {
     info "found build   job: ${buildJobName} / ${buildBuildNumber}"
     
     local ciBuildShare=$(getConfig lfsCiBuildsShare)
-    local workspace=${ciBuildShare}/${location}/build_${packageBuildNumber}
+    local workspace=${ciBuildShare}/${productName}/${location}/build_${packageBuildNumber}
     mustExistDirectory  ${workspace}
 
     debug "found results of package job on share: ${workspace}"
@@ -258,8 +260,19 @@ createTagOnSourceRepository() {
     local osLabelName=$(getNextReleaseLabel)
     mustHaveValue "${osLabelName}" "no os label name"
 
+
     # get artifacts
     revisionFile=${workspace}/bld//bld-externalComponents-summary/usedRevisions.txt
+
+    cat ${workspace}/bld//bld-externalComponents-*/usedRevisions.txt | sort -u > ${revisionFile}
+
+    rawDebug ${revisionFile}
+
+
+    exit 1
+
+    # TODO: demx2fk3 2014-06-06 add check: ensure, that locataions are unque
+
     mustExistFile ${revisionFile}
     rawDebug ${revisionFile}
 
