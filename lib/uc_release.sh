@@ -344,8 +344,8 @@ createTagOnSourceRepository() {
     info "svn repos url is ${svnUrl}/branches/${branch}"
 
     svnCopy -m create_new_tag_${osLabelName} \
-        ${svnUrl}/branches/${branch}             \
-        ${svnUrl}/tags/${osLabelName}
+        ${svnUrl}/os/branches/${branch}             \
+        ${svnUrl}/os/tags/${osLabelName}
 
     info "branch ${branch} no longer required, removing branch"
     svnRemove -m removing_branch_for_production ${svnUrlOs}/branches/${branch} 

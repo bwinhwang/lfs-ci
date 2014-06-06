@@ -1,6 +1,7 @@
 #!/bin/bash
 
 source ${LFS_CI_ROOT}/lib/artifacts.sh
+source ${LFS_CI_ROOT}/lib/jenkins.sh
 
 ## @fn      ci_job_test()
 #  @brief   dispatcher for test jobs
@@ -31,8 +32,14 @@ ci_job_test() {
     upstreamBuildNumber=lastSuccessfulBuild
     upstreamProject=$(sed "s/Test/Build/" <<< ${UPSTREAM_PROJECT})
 
+
     info "upstream is ${upstreamProject} / ${upstreamBuildNumber}"
 
     copyArtifactsToWorkspace "${upstreamProject}" "${upstreamBuildNumber}"
+
+
+    mustHaveNextCiLabelName
+    local labelName=$(getNextCiLabelName)        
+    setBuildDescription "${JOB_NAME}" "${BUILD_NUMBER}" "${labelName}"
     return
 }
