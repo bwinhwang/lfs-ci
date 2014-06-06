@@ -108,5 +108,13 @@ copyReleaseCandidateToShare() {
     executeOnMaster ln -sf ${ciBuildShare}/${productName}/${branch}/data/${label} ${ciBuildShare}/${productName}/${branch}/${label}
     executeOnMaster ln -sf ${ciBuildShare}/${productName}/${branch}/data/${label} ${ciBuildShare}/${productName}/${branch}/build_${BUILD_NUMBER}
 
+    local serverPath=$(getConfig jenkinsMasterServerPath)
+    local artifactesShare=$(getConfig artifactesShare)
+    local artifactsPathOnShare=${artifactesShare}/${JOB_NAME}/${BUILD_NUMBER}
+    local artifactsPathOnMaster=${serverPath}/jobs/${JOB_NAME}/builds/${BUILD_NUMBER}/archive
+    executeOnMaster mkdir -p  ${artifactsPathOnShare}/save
+    executeOnMaster ln    -sf ${ciBuildShare}/${productName}/${branch}/data/${label} ${artifactsPathOnMaster}
+
+
     return
 }

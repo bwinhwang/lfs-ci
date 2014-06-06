@@ -116,15 +116,15 @@ sub loadDependencyTree {
     my $svn = Singelton::svn();
 
     # hack
-    # if( $self->{directory} eq "src-bos" and $self->{tag} eq "EMPTY" ) {
-    #     warn "skipping src-bos with tag EMPTY";
-    #     return;
-    # }
+    if( $self->{directory} eq "src-bos" and $self->{tag} eq "EMPTY" ) {
+        warn "skipping src-bos with tag EMPTY";
+        return;
+    }
 
     if( -f sprintf( "%s/Dependencies", $self->{directory} ) ) {
         # Dependency file exists in the local workspace
         $dependencyParser = Parser::Dependencies->new( fileName => sprintf( "%s/Dependencies", $self->{directory} ) );
-    } elsif ( $self->isSubversion() and $self->{tag} eq "EMPTY" ) {
+    } elsif ( $self->isSubversion() ) {
         # load Dependency file from subversion
         $dependencyParser = Parser::Dependencies->new(
             fileContent => $svn->cat( url      => sprintf( "%s/Dependencies", $self->{repos} ),
@@ -966,8 +966,8 @@ sub execute {
                                  revision => $revision );
     $dir->loadDependencyTree();
 
-    use YAML;
-    print STDERR Dump($dir);
+    # use YAML;
+    # print STDERR Dump($dir);
 
     printf( "%s %s", join( " ", $dir->getSourceDirectoriesFromDependencies() ),
                      $subDir,
