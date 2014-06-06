@@ -28,30 +28,11 @@ ci_job_test() {
     local upstreamProject=${UPSTREAM_PROJECT}
     local upstreamBuildNumber=${UPSTREAM_BUILD}
 
-    if [[ ! ${upstreamProject} ]] ; then
-        upstreamBuildNumber=lastSuccessfulBuild
-        upstreamProject=$(sed "s/Test/Build/" <<< ${JOB_NAME})
-    fi
+    upstreamBuildNumber=lastSuccessfulBuild
+    upstreamProject=$(sed "s/Test/Build/" <<< ${UPSTREAM_PROJECT})
 
-    # find the related jobs of the build
-    local upstreamsFile=$(createTempFile)
-    runOnMaster ${LFS_CI_ROOT}/bin/getUpStreamProject \
-                    -j ${upstreamProject}             \
-                    -b ${upstreamBuildNumber}         \
-                    -h ${serverPath}  > ${upstreamsFile}
+    info "upstream is ${upstreamProject} / ${upstreamBuildNumber}"
 
-    local packageJobName=$(    grep Package ${upstreamsFile} | cut -d: -f1)
-    local packageBuildNumber=$(grep Package ${upstreamsFile} | cut -d: -f2)
-    local buildJobName=$(      grep Build   ${upstreamsFile} | cut -d: -f1)
-    local buildBuildNumber=$(  grep Build   ${upstreamsFile} | cut -d: -f2)
-    mustHaveValue ${packageJobName}
-    mustHaveValue ${packageBuildNumber}
-    mustHaveValue ${buildJobName}
-    mustHaveValue ${buildBuildNumber}
-
-    trace "output of getUpStreamProject" 
-    rawDebug ${upstreamsFile}
-
-    copyArtifactsToWorkspace "${buildJobName}" "${buildBuildNumber}"
+    copyArtifactsToWorkspace "${upstreamProject}" "${upstreamBuildNumber}"
     return
 }

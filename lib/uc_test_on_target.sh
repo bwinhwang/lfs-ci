@@ -37,6 +37,9 @@ ci_job_test_on_target() {
     info "executing checks"
     execute make test
 
+    info "show uptime"
+    execute make invoke_console_cmd CMD=uptime
+
     info "testing done."
 
     return 0
