@@ -108,14 +108,14 @@ getConfig() {
         lfsOsDeliveryRepos)
             # url of the LFS delivery repository in SVN
             local slaveServer=$(getConfig svnSlaveServerUlmHostName)
-            # echo https://${slaveServer}/isource/svnroot/BTS_D_SC_LFS_2014/os/
-            echo file:///var/fpwork2/demx2fk3/svnDummyRepos/os
+            echo https://${slaveServer}/isource/svnroot/BTS_D_SC_LFS_2014/os/
+            # echo file:///var/fpwork2/demx2fk3/svnDummyRepos/os
         ;;
         lfsRelDeliveryRepos)
             # url of the LFS delivery repository in SVN
             local slaveServer=$(getConfig svnSlaveServerUlmHostName)
-            # echo https://${slaveServer}/isource/svnroot/BTS_D_SC_LFS_2014/
-            echo file:///var/fpwork2/demx2fk3/svnDummyRepos
+            echo https://${slaveServer}/isource/svnroot/BTS_D_SC_LFS_2014/
+            # echo file:///var/fpwork2/demx2fk3/svnDummyRepos
         ;;
         *) 
             ${LFS_CI_ROOT}/bin/config.pl "${key}" ${file}
@@ -174,7 +174,7 @@ declare -a branchToLocationMap=( ["trunk"]="pronb-developer" \
 # define the mapping from branch to label/tag name
 labelPrefix=$(getConfig labelPrefix)
 declare -A branchToTagRegexMap=( ["pronb-developer"]="${labelPrefix}_$(date +%Y)_$(date +%m)_([0-9][0-9])" \
-                                      ["FSM_R4_DEV"]="FSMR4_${labelPrefix}_$(date +%Y)_$(date +%m)_([0-9][0-9])" \
+                                      ["FSM_R4_DEV"]="pre_FSMR4_${labelPrefix}_$(date +%Y)_$(date +%m)_([0-9][0-9])" \
                                           ["FB1404"]="FB_${labelPrefix}_1404_04_([0-9][0-9])" \
                                   ["KERNEL_3.x_DEV"]="KERNEL3x_${labelPrefix}_$(date +%Y)_$(date +%m)_([0-9][0-9])" \
                                )

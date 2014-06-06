@@ -263,23 +263,27 @@ createTagOnSourceRepository() {
 
     # get artifacts
     revisionFile=${workspace}/bld//bld-externalComponents-summary/usedRevisions.txt
-
     cat ${workspace}/bld//bld-externalComponents-*/usedRevisions.txt | sort -u > ${revisionFile}
-
     rawDebug ${revisionFile}
 
 
-    exit 1
+    # TODO: demx2fk3 2014-06-06 CLEAN UP!!!!
+    #
+    #       _                                _ 
+    #   ___| | ___  __ _ _ __    _   _ _ __ | |
+    #  / __| |/ _ \/ _` | '_ \  | | | | '_ \| |
+    # | (__| |  __/ (_| | | | | | |_| | |_) |_|
+    #  \___|_|\___|\__,_|_| |_|  \__,_| .__/(_)
+    #                                 |_|      
 
     # TODO: demx2fk3 2014-06-06 add check: ensure, that locataions are unque
-
     mustExistFile ${revisionFile}
     rawDebug ${revisionFile}
 
     # check for branch
     local svnUrl=$(getConfig lfsSourceRepos)
     local svnUrlOs=${svnUrl}/os
-    local branch=demx2fk3_pre_${osLabelName}
+    local branch=pre_${osLabelName}
 
     svnUrlOs=$(normalizeSvnUrl ${svnUrlOs})
     svnUrl=$(normalizeSvnUrl ${svnUrl})
@@ -291,7 +295,7 @@ createTagOnSourceRepository() {
     info "using repos for new tag ${svnUrlOs}/tags/${osLabelName}"
     info "using repos for package ${svnUrl}/subsystems/"
 
-    if existsInSubversion ${svnUrl}/tags ${osLabelName} ; then
+    if existsInSubversion ${svnUrlOs}/tags ${osLabelName} ; then
         error "tag ${osLabelName} already exists"
         exit 1
     fi
@@ -304,35 +308,47 @@ createTagOnSourceRepository() {
     info "creating branch ${branch}"
     svnMkdir -m creating_new_branch_${branch} ${svnUrlOs}/branches/${branch}
 
-    for componentUrl in $(cat ${revisionFile}) ; do
-        local url=$(cut -d@ -f1 <<< ${componentUrl})
-        local rev=$(cut -d@ -f2 <<< ${componentUrl})
-        local src=$(basename ${url})
+    while read src url rev ; do
         mustHaveValue "${url}" "svn url"
         mustHaveValue "${rev}" "svn revision"
+        mustHaveValue "${src}" "src"
+
+        info "src ${src}"
+        info "rev ${rev}"
+        info "url ${url}"
+
+        local dirname=
 
         local normalizedUrl=$(normalizeSvnUrl ${url})
 
+        case ${src} in 
+            src-*)
+                # TODO continue here
+                echo svnCopy -m tag_for_package_src_${src} ${svnUrlOs}/branches/${branch} \
+                    ${svnUrl}/subsystems/${src}/${osLabelName}
+            ;;
+            *)
+                dirname=$(dirname ${src})
+                svnMkdir -m mkdir_for_${src} ${svnUrlOs}/branches/${branch}/${dirname}
+            ;;
+        esac
+
         info "copy ${src} to ${branch}"
         svnCopy -r ${rev} -m branching_src_${src}_to_${branch} \
-            ${normalizedUrl}                             \
-            ${svnUrlOs}/branches/${branch}
+            ${normalizedUrl}                                   \
+            ${svnUrlOs}/branches/${branch}/${dirname}
 
-        # TODO continue here
-        echo svnCopy -m tag_for_package_src_${src} ${svnUrlOs}/branches/${branch} \
-            ${svnUrl}/subsystems/${src}/${osLabelName}
-    done
+    done < ${revisionFile}
 
     # check for the branch
     info "svn repos url is ${svnUrl}/branches/${branch}"
-    shouldNotExistsInSubversion ${svnUrl}/tags/ "${osReleaseLabelName}"
 
-    echo svnCopy -m create_new_tag_${osLabelName} \
+    svnCopy -m create_new_tag_${osLabelName} \
         ${svnUrl}/branches/${branch}             \
         ${svnUrl}/tags/${osLabelName}
 
     info "branch ${branch} no longer required, removing branch"
-    svnRemove -m removing_branch_for_production ${svnUrl}/branches/${branch} 
+    svnRemove -m removing_branch_for_production ${svnUrlOs}/branches/${branch} 
 
     info "tagging done"
 
