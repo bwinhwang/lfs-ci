@@ -17,7 +17,8 @@ ci_job_release() {
     mustHaveTargetBoardName
 
     local location=$(getLocationName)
-    local branch=${locationToSubversionMap["${location}"]}
+    local product=$(getProductNameFromJobName)
+    local branch=${locationToSubversionMap["${product}_${location}"]}
 
     mustHaveBranchName
 

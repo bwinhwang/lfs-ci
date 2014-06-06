@@ -22,9 +22,12 @@ uploadToSubversion() {
 
     local branch=${locationToSubversionMap["${branchToUpload}"]}
     if [[ ! "${branch}" ]] ; then
-        DEBUG "mapping for branchToUpload ${branchToUpload} not found"
+        debug "mapping for branchToUpload ${branchToUpload} not found"
         branch=${branchToUpload}
     fi
+
+    info "upload to ${branch}"
+
     local oldTemp=${TMPDIR}
     export TMPDIR=${WORKSPACE}/tmp/
     debug "cleanup tmp directory"
@@ -36,8 +39,8 @@ uploadToSubversion() {
 
     local branchPath=$(getConfig SVN_branch_path_name)
     local tagPath=$(getConfig SVN_tag_path_name)
-    mustHaveValue "${tagPath}"
-    mustHaveValue "${branchPath}"
+    mustHaveValue "${tagPath}" "tag path"
+    mustHaveValue "${branchPath}" "branch path"
 
     info "upload to svn and create copy (${tagName})"
 
