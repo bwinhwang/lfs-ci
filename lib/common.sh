@@ -237,6 +237,7 @@ createTempDirectory() {
 #  @return  <none>
 cleanupTempFiles() {
     [[ -d ${LFS_CI_TEMPDIR} ]] && rm -rf ${LFS_CI_TEMPDIR}
+    echo cleanup tmp dir ${LFS_CI_TEMPDIR}
     return
 }
 
@@ -251,7 +252,6 @@ initTempDirectory() {
 
 initTempDirectory
 exit_add cleanupTempFiles
-
 
 ## @fn      requiredParameters( list of variables )
 #  @brief   checks, if the given lists of variables names are set and have some valid values

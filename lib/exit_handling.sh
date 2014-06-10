@@ -1,7 +1,7 @@
 #!/bin/bash
 
 
-CI_EXIT_HANDLER_METHODS=''
+export CI_EXIT_HANDLER_METHODS=''
 
 # print stacktrace using trace logging. this enables trace log output
 # automatically

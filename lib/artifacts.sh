@@ -1,5 +1,7 @@
 #!/bin/bash
 
+LFS_CI_SOURCE_artifacts.sh='$Id: $'
+
 ## @fn      createArtifactArchive()
 #  @brief   create the build artifacts archives and copy them to the share on the master server
 #  @details the build artifacts are not handled by jenkins. we are doing it by ourself, because

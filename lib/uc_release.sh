@@ -324,7 +324,7 @@ createTagOnSourceRepository() {
         case ${src} in 
             src-*)
                 # TODO continue here
-                echo svnCopy -m tag_for_package_src_${src} ${svnUrlOs}/branches/${branch} \
+                svnCopy -m tag_for_package_src_${src} ${svnUrlOs}/branches/${branch} \
                     ${svnUrl}/subsystems/${src}/${osLabelName}
             ;;
             *)
@@ -399,14 +399,14 @@ createReleaseTag() {
 
     # update svn:externals
     local svnExternalsFile=$(createTempFile)
-    echo "^/os/tags/${osLabelName} os " >> ${svnExternalsFile}
+    echo "^/os/tags/${osLabelName}/os os " >> ${svnExternalsFile}
 
     if [[ ${sdk3} ]] ; then 
-        echo "^/sdk/tags/{sdk3} sdk3" >> ${svnExternalsFile}
+        echo "/isource/svnroot/BTS_D_SC_LFS/sdk/tags/${sdk3} sdk3" >> ${svnExternalsFile}
     fi
 
     if [[ ${sdk2} ]] ; then 
-        echo "^/sdk/tags/{sdk2} sdk2" >> ${svnExternalsFile}
+        echo "/isource/svnroot/BTS_D_SC_LFS/sdk/tags/${sdk2} sdk2" >> ${svnExternalsFile}
     fi
 
     # commit
