@@ -251,6 +251,7 @@ cleanupTempFiles() {
 #  @return  <none>
 initTempDirectory() {
     if [[ -z ${LFS_CI_TEMPDIR} ]] ; then
+        INFO "init temp directory"
         export LFS_CI_TEMPDIR=$(mktemp -d /tmp/jenkins.${USER}.${JOB_NAME:-unknown}.$$.XXXXXXXXX)
         exit_add cleanupTempFiles
     fi
