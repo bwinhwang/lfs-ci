@@ -32,11 +32,9 @@ ci_job_test() {
     upstreamBuildNumber=lastSuccessfulBuild
     upstreamProject=$(sed "s/Test/Build/" <<< ${UPSTREAM_PROJECT})
 
-
     info "upstream is ${upstreamProject} / ${upstreamBuildNumber}"
 
     copyArtifactsToWorkspace "${upstreamProject}" "${upstreamBuildNumber}"
-
 
     mustHaveNextCiLabelName
     local labelName=$(getNextCiLabelName)        

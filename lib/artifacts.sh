@@ -31,6 +31,16 @@ createArtifactArchive() {
 
     for dir in bld-*-* ; do
         [[ -d "${dir}" && ! -L "${dir}" ]] || continue
+
+        local subsystem=$(cut -d- -f2 <<< ${dir})
+
+        case ${subsystem} in
+            kernelsources)
+                debug "skipping ${dir}"
+                continue
+            ;;
+        esac
+
         info "creating artifact archive for ${dir}"
         execute tar --create --auto-compress --file "${dir}.tar.gz" "${dir}"
         execute rsync --archive --verbose --rsh=ssh -P     \
@@ -125,8 +135,8 @@ copyArtifactsToWorkspace() {
     local workspace=$(getWorkspaceName)
     mustHaveWorkspaceName
 
-    runOnMaster ${LFS_CI_ROOT}/bin/getDownStreamProjects -j ${jobName}       \
-                                                         -b ${buildNumber}   \
+    runOnMaster ${LFS_CI_ROOT}/bin/getDownStreamProjects -j ${jobName}     \
+                                                         -b ${buildNumber} \
                                                          -h ${serverPath} > ${downStreamprojectsFile}
 
     if [[ $? -ne 0 ]] ; then
