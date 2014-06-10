@@ -1,11 +1,11 @@
 #!/bin/bash
 
-LFS_CI_SOURCE_common.sh='$Id$'
+LFS_CI_SOURCE_common='$Id$'
 
-[[ -z ${LFS_CI_SOURCE_config.sh}        ]] && source ${LFS_CI_ROOT}/lib/config.sh
-[[ -Z ${LFS_CI_SOURCE_logging.sh}       ]] && source ${LFS_CI_ROOT}/lib/logging.sh
-[[ -Z ${LFS_CI_SOURCE_commands.sh}      ]] && source ${LFS_CI_ROOT}/lib/commands.sh
-[[ -Z ${LFS_CI_SOURCE_exit_handling.sh} ]] && source ${LFS_CI_ROOT}/lib/exit_handling.sh
+[[ -z ${LFS_CI_SOURCE_config}        ]] && source ${LFS_CI_ROOT}/lib/config.sh
+[[ -z ${LFS_CI_SOURCE_logging}       ]] && source ${LFS_CI_ROOT}/lib/logging.sh
+[[ -z ${LFS_CI_SOURCE_commands}      ]] && source ${LFS_CI_ROOT}/lib/commands.sh
+[[ -z ${LFS_CI_SOURCE_exit_handling} ]] && source ${LFS_CI_ROOT}/lib/exit_handling.sh
 
 ## @fn      mustHaveTargetBoardName()
 #  @brief   ensure, that there is a target board name

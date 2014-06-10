@@ -1,6 +1,6 @@
 #!/bin/bash
 
-LFS_CI_SOURCE_package.sh='$Id$'
+LFS_CI_SOURCE_package='$Id$'
 
 ## @fn      getArchitectureFromDirectory( $dir )
 #  @brief   get the arcitecture from the bld directory

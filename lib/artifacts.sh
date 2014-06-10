@@ -1,6 +1,6 @@
 #!/bin/bash
 
-LFS_CI_SOURCE_artifacts.sh='$Id$'
+LFS_CI_SOURCE_artifacts='$Id$'
 
 ## @fn      createArtifactArchive()
 #  @brief   create the build artifacts archives and copy them to the share on the master server

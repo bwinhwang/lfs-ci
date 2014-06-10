@@ -1,6 +1,6 @@
 #!/bin/bash
 
-LFS_CI_SOURCE_jenkins.sh='$Id$'
+LFS_CI_SOURCE_jenkins='$Id$'
 
 ## @fn      executeJenkinsCli( command, parameters )
 #  @brief   execute a command via the jenkins CLI with some parameters

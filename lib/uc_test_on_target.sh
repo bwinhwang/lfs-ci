@@ -1,6 +1,6 @@
 #!/bin/bash
 
-[[ -z ${LFS_CI_SOURCE_artifacts.sh} ]] && source ${LFS_CI_ROOT}/lib/artifacts.sh
+[[ -z ${LFS_CI_SOURCE_artifacts} ]] && source ${LFS_CI_ROOT}/lib/artifacts.sh
 
 ci_job_test_on_target() {
     requiredParameters JOB_NAME 

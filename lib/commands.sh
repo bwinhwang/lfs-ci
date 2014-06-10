@@ -1,6 +1,6 @@
 #!/bin/bash
 
-LFS_CI_SOURCE_commands.sh='$Id$'
+LFS_CI_SOURCE_commands='$Id$'
 
 ## @fn      execute( command )
 #  @brief   executes the given command in a shell

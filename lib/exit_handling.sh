@@ -1,6 +1,6 @@
 #!/bin/bash
 
-LFS_CI_SOURCE_exit_handling.sh='$Id$'
+LFS_CI_SOURCE_exit_handling='$Id$'
 
 export CI_EXIT_HANDLER_METHODS=''
 

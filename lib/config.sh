@@ -1,6 +1,6 @@
 #!/bin/bash
 
-LFS_CI_SOURCE_config.sh='$Id$'
+LFS_CI_SOURCE_config='$Id$'
 
 # the following methods are parsing the jenkins job name and return the
 # required / requested information. At the moment, the script will be called
