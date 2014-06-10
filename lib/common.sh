@@ -220,7 +220,6 @@ checkoutSubprojectDirectories() {
 #  @param   <none>
 #  @return  name of the new created temp file
 createTempFile() {
-    initTempDirectory
     mktemp ${LFS_CI_TEMPDIR}/tmp.$$.XXXXXXXXX
     return
 }
@@ -230,7 +229,6 @@ createTempFile() {
 #  @param   <none>
 #  @return  name of the temp directory
 createTempDirectory() {
-    initTempDirectory
     mktemp --directory ${LFS_CI_TEMPDIR}/tmp.$$.XXXXXXXXX
     return
 }
