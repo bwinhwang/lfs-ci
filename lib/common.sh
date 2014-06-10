@@ -220,6 +220,7 @@ checkoutSubprojectDirectories() {
 #  @param   <none>
 #  @return  name of the new created temp file
 createTempFile() {
+    initTempDirectory
     mktemp ${LFS_CI_TEMPDIR}/tmp.$$.XXXXXXXXX
     return
 }
@@ -229,6 +230,7 @@ createTempFile() {
 #  @param   <none>
 #  @return  name of the temp directory
 createTempDirectory() {
+    initTempDirectory
     mktemp --directory ${LFS_CI_TEMPDIR}/tmp.$$.XXXXXXXXX
     return
 }
@@ -248,12 +250,12 @@ cleanupTempFiles() {
 #  @param   <none>
 #  @return  <none>
 initTempDirectory() {
-    export LFS_CI_TEMPDIR=$(mktemp -d /tmp/jenkins.${USER}.${JOB_NAME:-unknown}.$$.XXXXXXXXX)
+    if [[ -z ${LFS_CI_TEMPDIR} ]] ; then
+        export LFS_CI_TEMPDIR=$(mktemp -d /tmp/jenkins.${USER}.${JOB_NAME:-unknown}.$$.XXXXXXXXX)
+        exit_add cleanupTempFiles
+    fi
     return
 }
-
-initTempDirectory
-exit_add cleanupTempFiles
 
 ## @fn      requiredParameters( list of variables )
 #  @brief   checks, if the given lists of variables names are set and have some valid values
