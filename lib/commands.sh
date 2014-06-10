@@ -1,5 +1,7 @@
 #!/bin/bash
 
+LFS_CI_SOURCE_commands.sh='$Id$'
+
 ## @fn      execute( command )
 #  @brief   executes the given command in a shell
 #  @details this method executes a given command in the same shell. The

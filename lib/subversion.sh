@@ -1,5 +1,7 @@
 #!/bin/bash
 
+LFS_CI_SOURCE_subversion.sh='$Id$'
+
 ## @fn      uploadToSubversion( $pathToUpload, $branchToUpload, $commitMessage )
 #  @brief   uploads a directory to the specified svn location and commit it
 #  @details this method upload a directory to subversion using the script svn_load_dirs.pl

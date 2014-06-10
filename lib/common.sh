@@ -1,5 +1,7 @@
 #!/bin/bash
 
+LFS_CI_SOURCE_common.sh='$Id$'
+
 source ${LFS_CI_ROOT}/lib/config.sh
 source ${LFS_CI_ROOT}/lib/logging.sh
 source ${LFS_CI_ROOT}/lib/commands.sh

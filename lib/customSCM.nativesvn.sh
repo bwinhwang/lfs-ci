@@ -1,6 +1,5 @@
 #!/bin/bash
 
-export SVN_URL=file:///home/demx2fk3/svn/foobar/
 
 ## @fn      actionCompare()
 #  @brief   this command is called by jenkins custom scm plugin via a

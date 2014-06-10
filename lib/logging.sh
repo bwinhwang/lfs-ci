@@ -1,5 +1,6 @@
 #!/bin/bash
 
+LFS_CI_SOURCE_logging.sh='$Id$'
 source ${LFS_CI_ROOT}/lib/exit_handling.sh
 
 ## @fn      startLogfile()
