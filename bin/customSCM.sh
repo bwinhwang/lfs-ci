@@ -13,7 +13,6 @@
 
 # * checkout
 #   see web page
-set -x
 export PATH=${LFS_CI_ROOT}/bin:${PATH}
 
 source ${LFS_CI_ROOT}/lib/logging.sh
