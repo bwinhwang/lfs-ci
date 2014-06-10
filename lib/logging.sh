@@ -48,9 +48,7 @@ stopLogfile() {
         printf -- "ending logfile\n"                                                      >> ${CI_LOGGING_LOGFILENAME}
         printf -- "-------------------------------------------------------------------\n" >> ${CI_LOGGING_LOGFILENAME}
 
-#         if [[ -d ${WORKSPACE} ]] ; then
-#             mv ${CI_LOGGING_LOGFILENAME} ${WORKSPACE}/
-#         fi
+        gzip ${CI_LOGGING_LOGFILENAME}
     fi
     
     unset CI_LOGGING_LOGFILENAME
