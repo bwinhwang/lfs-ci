@@ -22,6 +22,7 @@ if [[ -f ${WORKSPACE}/.properties ]] ; then
 fi
 
 # start the logfile
+initTempDirectory
 startLogfile
 # and end it, if the script exited in some way
 exit_add stopLogfile

@@ -23,8 +23,6 @@ source ${LFS_CI_ROOT}/lib/commands.sh
 source ${LFS_CI_ROOT}/lib/exit_handling.sh
 source ${LFS_CI_ROOT}/lib/customSCM.common.sh
 
-# TODO: demx2fk3 2014-06-10 fix me
-unset LFS_CI_TEMPDIR
 initTempDirectory
 
 fileBaseName=$(basename $0)
