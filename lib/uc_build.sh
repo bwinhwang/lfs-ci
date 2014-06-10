@@ -1,6 +1,6 @@
 #!/bin/bash
 
-source ${LFS_CI_ROOT}/lib/artifacts.sh
+[[ -z ${LFS_CI_SOURCE_artifacts.sh} ]] && source ${LFS_CI_ROOT}/lib/artifacts.sh
 
 ## @fn      ci_job_build()
 #  @brief   usecase job ci build

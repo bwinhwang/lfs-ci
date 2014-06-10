@@ -1,7 +1,8 @@
 #!/bin/bash
 
 LFS_CI_SOURCE_logging.sh='$Id$'
-source ${LFS_CI_ROOT}/lib/exit_handling.sh
+
+[[ -z ${LFS_CI_SOURCE_exit_handling.sh} ]] && source ${LFS_CI_ROOT}/lib/exit_handling.sh
 
 ## @fn      startLogfile()
 #  @brief   creates a new logfile and adds an header

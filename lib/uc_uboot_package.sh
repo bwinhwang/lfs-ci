@@ -1,7 +1,7 @@
 #!/bin/bash
 
-source ${LFS_CI_ROOT}/lib/artifacts.sh
-source ${LFS_CI_ROOT}/lib/package.sh
+[[ -z ${LFS_CI_SOURCE_artifacts.sh} ]] && source ${LFS_CI_ROOT}/lib/artifacts.sh
+[[ -z ${LFS_CI_SOURCE_package.sh}   ]] && source ${LFS_CI_ROOT}/lib/package.sh
 
 ## @fn      ci_job_package()
 #  @brief   create a package from the build results for the testing / release process

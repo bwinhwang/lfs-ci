@@ -1,7 +1,7 @@
 #!/bin/bash
 
-source ${LFS_CI_ROOT}/lib/artifacts.sh
-source ${LFS_CI_ROOT}/lib/jenkins.sh
+[[ -z ${LFS_CI_SOURCE_artifacts.sh} ]] && source ${LFS_CI_ROOT}/lib/artifacts.sh
+[[ -z ${LFS_CI_SOURCE_jenkins.sh}   ]] && source ${LFS_CI_ROOT}/lib/jenkins.sh
 
 ## @fn      ci_job_test()
 #  @brief   dispatcher for test jobs

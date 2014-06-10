@@ -1,7 +1,7 @@
 #!/bin/bash
 
-source ${LFS_CI_ROOT}/lib/artifacts.sh
-source ${LFS_CI_ROOT}/lib/subversion.sh
+[[ -z ${LFS_CI_SOURCE_artifacts.sh}  ]] && source ${LFS_CI_ROOT}/lib/artifacts.sh
+[[ -z ${LFS_CI_SOURCE_subversion.sh} ]] && source ${LFS_CI_ROOT}/lib/subversion.sh
 
 ## @fn      ci_job_release()
 #  @brief   dispatcher for the release jobs
