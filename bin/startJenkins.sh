@@ -20,6 +20,7 @@ main() {
 
     unset CI_LOGGING_LOGFILENAME
     unset CI_LOGGING_DURATION_START_DATE
+    unset LFS_CI_TEMPDIR
 
     set -x
 
