@@ -80,7 +80,7 @@ backupJenkinsMasterServerInstallation() {
     execute mkdir -p ${backupPath}
     execute rm -rf ${backupPath}/backup.11
 
-    for i in $(seq 0 10 | tac) ; do
+    for i in $(seq 0 100 | tac) ; do
         [[ -d ${backupPath}/backup.${i} ]] || continue
         old=$(( i + 1 ))
         execute mv -f ${backupPath}/backup.${i} ${backupPath}/backup.${old}
@@ -91,6 +91,7 @@ backupJenkinsMasterServerInstallation() {
     fi
 
     execute rsync -av --delete --exclude=workspace ${serverPath}/. ${backupPath}/backup.0/.
+    execute touch ${backupPath}/backup.0
 
     info "backup done"
 
