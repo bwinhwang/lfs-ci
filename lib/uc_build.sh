@@ -158,29 +158,29 @@ _build() {
     info "store svn revision information"
     storeRevisions ${target}
 
-    info "creating temporary makefile"
-    ${LFS_CI_ROOT}/bin/sortBuildsFromDependencies ${target} makefile ${label} > ${cfgFile}
-
-    rawDebug ${cfgFile}
-
-    local makeTarget=$(getConfig subsystem)-${target}
-
-    info "executing all targets in parallel with ${makeTarget} and label=${label}"
-    execute make -f ${cfgFile} ${makeTarget} 
-
-
-#     sortbuildsfromdependencies ${target} > ${cfgFile}
+#     info "creating temporary makefile"
+#     ${LFS_CI_ROOT}/bin/sortBuildsFromDependencies ${target} makefile ${label} > ${cfgFile}
+# 
 #     rawDebug ${cfgFile}
 # 
-#     local amountOfTargets=$(wc -l ${cfgFile} | cut -d" " -f1)
-#     local counter=0
+#     local makeTarget=$(getConfig subsystem)-${target}
 # 
-#     while read SRC CFG
-#     do
-#         counter=$( expr ${counter} + 1 )
-#         info "(${counter}/${amountOfTargets}) building ${CFG} from ${SRC}..."
-#         execute build -C ${SRC} ${CFG} 
-#     done <${cfgFile}
+#     info "executing all targets in parallel with ${makeTarget} and label=${label}"
+#     execute make -f ${cfgFile} ${makeTarget} 
+
+
+    ${LFS_CI_ROOT}/bin/sortBuildsFromDependencies ${target} legacy ${label} > ${cfgFile}
+    rawDebug ${cfgFile}
+
+    local amountOfTargets=$(wc -l ${cfgFile} | cut -d" " -f1)
+    local counter=0
+
+    while read SRC CFG
+    do
+        counter=$( expr ${counter} + 1 )
+        info "(${counter}/${amountOfTargets}) building ${CFG} from ${SRC}..."
+        execute build -C ${SRC} ${CFG} 
+    done <${cfgFile}
 
     return 0
 }
