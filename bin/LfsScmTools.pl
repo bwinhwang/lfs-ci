@@ -914,7 +914,7 @@ SOURCES:
 
                 }
                 printf "%s-%s: %s\n", $source->{directory}, $platform, join( " ", @filteredDeps );
-                printf "\tbuild -L \$@.log -C %s %s --label=%s\n\n", $source->{directory}, $platform, $self->{label};
+                printf "\t/usr/bin/time -v build -L \$@.log -C %s %s --label=%s\n\n", $source->{directory}, $platform, $self->{label};
             }
         } elsif( $self->{style} eq "legacy" ) {
             printf "%s %s - %s\n",
