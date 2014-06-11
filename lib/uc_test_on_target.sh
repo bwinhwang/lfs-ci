@@ -40,6 +40,9 @@ ci_job_test_on_target() {
     info "show uptime"
     execute make invoke_console_cmd CMD=uptime
 
+    info "show kernel version"
+    execute make invoke_console_cmd CMD="uname -a"
+
     info "testing done."
 
     return 0
