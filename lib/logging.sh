@@ -37,8 +37,9 @@ startLogfile() {
         printf -- "------------------------------------------------------------------\n" >  ${CI_LOGGING_LOGFILENAME}
         printf -- "starting logfile\n"                                                   >> ${CI_LOGGING_LOGFILENAME}
         printf -- "  script: $0\n"                                                       >> ${CI_LOGGING_LOGFILENAME}
-        printf -- "  arguments: $@\n"                                                    >> ${CI_LOGGING_LOGFILENAME}
-        printf -- "  jobName: $jobName\n"                                                >> ${CI_LOGGING_LOGFILENAME}
+        printf -- "  jobName:  $jobName\n"                                               >> ${CI_LOGGING_LOGFILENAME}
+        printf -- "  hostname: $hostName\n"                                              >> ${CI_LOGGING_LOGFILENAME}
+        printf -- "  username: $userName\n"                                              >> ${CI_LOGGING_LOGFILENAME}
         printf -- "------------------------------------------------------------------\n" >> ${CI_LOGGING_LOGFILENAME}
         printf -- "-- Please note, all timestamps are in UTC                       --\n" >> ${CI_LOGGING_LOGFILENAME}
         printf -- "------------------------------------------------------------------\n" >> ${CI_LOGGING_LOGFILENAME}
