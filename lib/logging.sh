@@ -19,8 +19,18 @@ startLogfile() {
         local hostName=$(hostname -s)
         local userName=${USER}
 
-        export CI_LOGGING_LOGFILENAME=${LFS_CI_ROOT}/log/ci.${dateString}.${hostName}.${userName}.${jobName}.log
+        local counter=0
+
+        CI_LOGGING_LOGFILENAME=${LFS_CI_ROOT}/log/ci.${dateString}.${hostName}.${userName}.${jobName}.${counter}.log
+
+        while [[ ! -e ${CI_LOGGING_LOGFILENAME} ]] ; do
+            counter=$(( counter + 1 ))
+            CI_LOGGING_LOGFILENAME=${LFS_CI_ROOT}/log/ci.${dateString}.${hostName}.${userName}.${jobName}.${counter}.log
+        done
+
+        export CI_LOGGING_LOGFILENAME
         export CI_LOGGING_DURATION_START_DATE=$(date +%s.%N)
+        
 
         echo 1>&2 "logfile is ${CI_LOGGING_LOGFILENAME}"
         printf -- "------------------------------------------------------------------\n" >  ${CI_LOGGING_LOGFILENAME}
