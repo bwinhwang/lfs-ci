@@ -23,7 +23,7 @@ startLogfile() {
 
         CI_LOGGING_LOGFILENAME=${LFS_CI_ROOT}/log/ci.${dateString}.${hostName}.${userName}.${jobName}.${counter}.log
 
-        while [[ ! -e ${CI_LOGGING_LOGFILENAME} ]] ; do
+        while [[ -e ${CI_LOGGING_LOGFILENAME} ]] ; do
             counter=$(( counter + 1 ))
             CI_LOGGING_LOGFILENAME=${LFS_CI_ROOT}/log/ci.${dateString}.${hostName}.${userName}.${jobName}.${counter}.log
         done

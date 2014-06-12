@@ -899,6 +899,19 @@ SOURCES:
                            @deps;
 
         if( $self->{style} eq "makefile" ) {
+
+
+            # print label information for different components
+            my $label = $self->{label};
+            if( grep { $_ eq $source->{directory} } qw ( src-bos src-fsmbos src-fsmbos35 src-mbrm src-fsmbrm src-fsmbrm35 ) ) {
+                $label =~ s/PS_LFS_OS/LFS/g;
+                $label =~ s/PS_LFS_BT/LBT/g;
+                $label =~ s/_20(\d\d)_/$1/g;
+                $label =~ s/_//g;
+            }
+
+            printf "%s: LABEL := %s\n\n", $source->{directory}, $label;
+
             if( grep { $_ eq $goal } $source->platforms() ) {
                 printf "%s: ", $source->{directory};
                 foreach my $platform ( sort grep { $_ eq $goal } $source->platforms() ) {
@@ -914,7 +927,7 @@ SOURCES:
 
                 }
                 printf "%s-%s: %s\n", $source->{directory}, $platform, join( " ", @filteredDeps );
-                printf "\t/usr/bin/time -v build -L \$@.log -C %s %s --label=%s\n\n", $source->{directory}, $platform, $self->{label};
+                printf "\t/usr/bin/time -v build -L \$@.log -C %s %s --label=\$\{LABEL\}\n\n", $source->{directory}, $platform;
             }
         } elsif( $self->{style} eq "legacy" ) {
             printf "%s %s - %s\n",
