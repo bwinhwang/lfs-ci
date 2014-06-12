@@ -130,6 +130,9 @@ actionCheckout() {
         newUrl=$(grep -e "^${subSystem} " ${newRevisionsFile} | cut -d" " -f2)
         newRev=$(grep -e "^${subSystem} " ${newRevisionsFile} | cut -d" " -f3)
 
+        debug "old revision data: ${oldUrl} ${oldRev}"
+        debug "new revision data: ${newUrl} ${newRev}"
+
         if [[ "${oldUrl}" != "${newUrl}" ]] ; then
             # just get the latest revision
             continue
