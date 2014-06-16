@@ -1322,10 +1322,10 @@ sub prepare {
 
     my $subsysHash;
     foreach my $entry ( @{ $xml->{logentry} } ) {
-#        my $msg    = not ref( $entry->{msg}->[0] ) eq "HASH" ?
-#                        $entry->{msg}->[0] :
-#                        sprintf( "empty commit (r%s) message from %s at %s", $entry->{revision}, $entry->{author}, $entry->{date} );
-        my $msg = $entry->{msg}->[0];
+
+        my $msg = ref( $entry->{msg}->[0] ) eq "HASH" ?
+                  sprintf( "empty commit message (r%s) from %s at %s", $entry->{revision}, $entry->{author}->[0], $entry->{date}->[0] ) :
+                  $entry->{msg}->[0] ;
         
         if( $msg =~ m/set Dependencies, Revisions for Release/i or
             $msg =~ m/new Version files for Release/i or
@@ -1344,7 +1344,7 @@ sub prepare {
         $msg =~ s/^\s+//;
         $msg =~ s/\s+$//;
         $msg =~ s/\(ros\)/ /;
-        $msg =~ s/\s+NOJCHK\s*$//;
+        $msg =~ s/\s*NOJCHK\s*//;
         $msg =~ s/\bDESCRIPTION:\s*/ /;
         $msg =~ s/\bREADINESS\s*:\s*COMPLETED\s*/ /;
         $msg =~ s/^BTSPS-\d+\s+IN[^:]+:\s*//;
@@ -1408,6 +1408,8 @@ sub mapComponentName {
                             'src-cvmxsources'    => "CVMX Sources",
                             'src-cvmxsources3'   => "CVMX Sources 3.x",
                             'src-ddal'           => "FSMr2 DDAL",
+                            'src-ddg'            => "Kernel Drivers",
+                            'src-ifddg'          => "Intreface Kernel Drivers",
                             'src-firmware'       => "Firmware",
                             'src-fsmbos'         => "Linux Kernel Config",
                             'src-fsmbrm'         => "FSMr3 U-Boot",
@@ -1432,6 +1434,7 @@ sub mapComponentName {
                             'src-mrfs'           => "FSMr2 Root Filesystem",
                             'src-psl'            => "FSMr2 Software Load",
                             'src-rfs'            => "Common Root Filesystem",
+                            'src-test'           => "Testing",
                             'src-tools'          => "Tools (LRC)",
     };
 
