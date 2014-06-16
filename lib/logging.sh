@@ -19,15 +19,27 @@ startLogfile() {
         local hostName=$(hostname -s)
         local userName=${USER}
 
-        export CI_LOGGING_LOGFILENAME=${LFS_CI_ROOT}/log/ci.${dateString}.${hostName}.${userName}.${jobName}.log
+        local counter=0
+
+        CI_LOGGING_LOGFILENAME=${LFS_CI_ROOT}/log/ci.${dateString}.${hostName}.${userName}.${jobName}.${counter}.log
+
+        while [[ -e ${CI_LOGGING_LOGFILENAME}    ||
+                 -e ${CI_LOGGING_LOGFILENAME}.gz ]] ; do
+            counter=$(( counter + 1 ))
+            CI_LOGGING_LOGFILENAME=${LFS_CI_ROOT}/log/ci.${dateString}.${hostName}.${userName}.${jobName}.${counter}.log
+        done
+
+        export CI_LOGGING_LOGFILENAME
         export CI_LOGGING_DURATION_START_DATE=$(date +%s.%N)
+        
 
         echo 1>&2 "logfile is ${CI_LOGGING_LOGFILENAME}"
         printf -- "------------------------------------------------------------------\n" >  ${CI_LOGGING_LOGFILENAME}
         printf -- "starting logfile\n"                                                   >> ${CI_LOGGING_LOGFILENAME}
         printf -- "  script: $0\n"                                                       >> ${CI_LOGGING_LOGFILENAME}
-        printf -- "  arguments: $@\n"                                                    >> ${CI_LOGGING_LOGFILENAME}
-        printf -- "  jobName: $jobName\n"                                                >> ${CI_LOGGING_LOGFILENAME}
+        printf -- "  jobName:  $jobName\n"                                               >> ${CI_LOGGING_LOGFILENAME}
+        printf -- "  hostname: $hostName\n"                                              >> ${CI_LOGGING_LOGFILENAME}
+        printf -- "  username: $userName\n"                                              >> ${CI_LOGGING_LOGFILENAME}
         printf -- "------------------------------------------------------------------\n" >> ${CI_LOGGING_LOGFILENAME}
         printf -- "-- Please note, all timestamps are in UTC                       --\n" >> ${CI_LOGGING_LOGFILENAME}
         printf -- "------------------------------------------------------------------\n" >> ${CI_LOGGING_LOGFILENAME}

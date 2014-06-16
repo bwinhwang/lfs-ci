@@ -26,10 +26,11 @@ ci_job_test_on_target() {
 
     cd ${workspace}/src-test/src/unittest/tests/common/checkuname
     info "installing software on the target"
-    make install WORKSPACE=${testWorkspace}
+    execute make install WORKSPACE=${testWorkspace}
 
     info "powercycle target"
     execute make powercycle
+
     info "wait for prompt"
     execute make waitprompt
     sleep 60
@@ -41,7 +42,7 @@ ci_job_test_on_target() {
     execute make invoke_console_cmd CMD=uptime
 
     info "show kernel version"
-    execute make invoke_console_cmd CMD="uname -a"
+    make invoke_console_cmd CMD="uname -a"
 
     info "testing done."
 
