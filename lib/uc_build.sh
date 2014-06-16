@@ -163,7 +163,7 @@ _build() {
 
     rawDebug ${cfgFile}
 
-    local makeTarget=$(getConfig subsystem)-${target}
+    local makeTarget=$(getConfig LFS_CI_UC_build_subsystem_to_build)-${target}
 
     info "executing all targets in parallel with ${makeTarget} and label=${label}"
     execute make -f ${cfgFile} ${makeTarget} 
@@ -230,7 +230,7 @@ _createWorkspace() {
 
     mustHaveValidWorkspace
 
-    local srcDirectory=$(getConfig "subsystem")
+    local srcDirectory=$(getConfig LFS_CI_UC_build_subsystem_to_build)
     if [[ ! "${srcDirectory}" ]] ; then
         error "no srcDirectory found (subsystem)"
         exit 1;
@@ -248,9 +248,9 @@ _createWorkspace() {
         exit 1;
     fi
 
-    buildTargets="$(getConfig additionalSourceDirectories) ${buildTargets}"
+    buildTargets="$(getConfig LFS_CI_UC_build_additionalSourceDirectories) ${buildTargets}"
 
-    local onlySourceDirectory=$(getConfig onlySourceDirectories)
+    local onlySourceDirectory=$(getConfig LFS_CI_UC_build_onlySourceDirectories)
     if [[ ${onlySourceDirectory} ]] ; then
         buildTargets=${onlySourceDirectory}
     fi

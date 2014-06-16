@@ -93,36 +93,7 @@ getConfig() {
     # trace "productName/${productName}"
 
     export LFS_CI_CONFIG_FILE=${LFS_CI_ROOT}/etc/file.cfg
-
-    case "${key}" in
-        subsystem)
-            ${LFS_CI_ROOT}/bin/config.pl LFS_CI_UC_build_subsystem_to_build
-        ;;
-        locationMapping)
-            ${LFS_CI_ROOT}/bin/config.pl LFS_CI_location_mapping
-        ;;
-        additionalSourceDirectories)
-            ${LFS_CI_ROOT}/bin/config.pl LFS_CI_UC_build_additionalSourceDirectories
-        ;;
-        onlySourceDirectories) # just use this source directory only
-            ${LFS_CI_ROOT}/bin/config.pl LFS_CI_UC_build_onlySourceDirectories
-        ;;
-        lfsOsDeliveryRepos)
-            # url of the LFS delivery repository in SVN
-            local slaveServer=$(getConfig svnSlaveServerUlmHostName)
-            echo https://${slaveServer}/isource/svnroot/BTS_D_SC_LFS_2014/os/
-            # echo file:///var/fpwork2/demx2fk3/svnDummyRepos/os
-        ;;
-        lfsRelDeliveryRepos)
-            # url of the LFS delivery repository in SVN
-            local slaveServer=$(getConfig svnSlaveServerUlmHostName)
-            echo https://${slaveServer}/isource/svnroot/BTS_D_SC_LFS_2014/
-            # echo file:///var/fpwork2/demx2fk3/svnDummyRepos
-        ;;
-        *) 
-            ${LFS_CI_ROOT}/bin/config.pl "${key}" ${file}
-        ;;
-    esac
+    ${LFS_CI_ROOT}/bin/getConfig "${key}" ${file}
 
     return
 }

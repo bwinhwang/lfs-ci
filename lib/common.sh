@@ -23,7 +23,10 @@ mustHaveTargetBoardName() {
     return
 }
 
-
+## @fn      getBranchName()
+#  @brief   alias for getLocationName
+#  @param   <none>
+#  @return  return the branch name
 getBranchName() { 
     getLocationName 
 }
@@ -44,6 +47,10 @@ mustHaveLocationName() {
     return
 }
 
+## @fn      mustHaveBranchName()
+#  @brief   alias for mustHaveLocationName
+#  @param   <none>
+#  @return  <none>
 mustHaveBranchName() { 
     mustHaveLocationName 
 }
@@ -159,8 +166,7 @@ switchToNewLocation() {
 setupNewWorkspace() {
     local workspace=$(getWorkspaceName) 
     execute cd "${workspace}"
-    execute build setup                                                                                                
-
+    execute build setup
     return
 }
 
@@ -171,6 +177,7 @@ setupNewWorkspace() {
 #  @return  <none>
 #  @throws  an error, if the workspace is not valid
 mustHaveValidWorkspace() {
+    # TODO: demx2fk3 2014-06-16 not implemented
     return
 }
 
@@ -460,6 +467,10 @@ getBuildDirectoryOnMaster() {
 }
 
 
+## @fn      getWorkspaceDirectoryOfBuild()
+#  @brief   get the workspace directory of the build (on the master server only)
+#  @param   <none>
+#  @return  workspace directory name
 getWorkspaceDirectoryOfBuild() {
     local jobName=${1:-$JOB_NAME}
 
@@ -467,5 +478,4 @@ getWorkspaceDirectoryOfBuild() {
     echo ${pathName}/jobs/${jobName}/workspace/workspace/
 
     return
-
 }

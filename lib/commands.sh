@@ -79,6 +79,8 @@ showAllEnvironmentVariables() {
 cleanupEnvironmentVariables() {
     local key=""
 
+    # TODO: demx2fk3 2014-06-16 not in use!!
+
     # workaround for screen / TERMCAP
     unset TERM
     unset TERMCAP

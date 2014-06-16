@@ -22,6 +22,82 @@ sub new {
 }
 
 # ------------------------------------------------------------------------------------------------------------------
+package Store::Config::Date;
+
+use warnings;
+use strict;
+use parent qw( -norequire Object );
+use Data::Dumper;
+
+sub readConfig {
+    my $self  = shift;
+
+    my ( $sec, $min, $hour, $mday, $mon, $year, $wday, $yday, $isdst ) = localtime( time() );
+    $year += 1900;
+    $mon  += 1;
+
+    my $data = [];
+
+    push @{ $data }, { name => "date_%Y", value => sprintf( "%04d", $year ), tags => "" };
+    push @{ $data }, { name => "date_%m", value => sprintf( "%02d", $mon  ), tags => "" };
+
+    return $data;
+}
+# ------------------------------------------------------------------------------------------------------------------
+package Store::Config::File;
+
+use warnings;
+use strict;
+use parent qw( -norequire Object );
+
+sub readConfig {
+    my $self  = shift;
+    my $param = { @_ };
+    my $file  = $self->{file};
+
+    return if not -e $file;
+
+    my $data = [];
+    open FILE, $file or die "can not open file";
+    while ( my $line = <FILE> ) {
+        chomp( $line );
+        next if $line =~ m/^#/;
+        next if $line =~ m/^\s*$/;
+
+        if( $line =~ /^(\w+)\s+\<\s*([^>]*)\s*\>\s*=\s*(.*)$/ ) {
+            push @{ $data }, {
+                                name  => $1 || "",
+                                tags  => $2 || "",
+                                value => $3 || "",
+                             }
+        }
+    }
+    close FILE;
+
+    return $data;
+}
+
+# ------------------------------------------------------------------------------------------------------------------
+package Store::Config::Environment;
+
+use warnings;
+use strict;
+use parent qw( -norequire Object );
+
+sub readConfig {
+    my $self = shift;
+    my $data;
+
+    foreach my $key ( keys %ENV ) {
+        push @{ $data }, {
+                            name  => $key,
+                            value => $ENV{$key} || "",
+                            tags  => "",
+                            }
+    }
+    return $data;
+}
+# ------------------------------------------------------------------------------------------------------------------
 package Model;
 ## @fn     Model
 #  @brief  base class for all model classes. a model contains data from some sources.
@@ -30,6 +106,54 @@ use strict;
 use warnings;
 use parent qw( -norequire Object );
 
+# ------------------------------------------------------------------------------------------------------------------
+package Model::Config;
+use warnings;
+use strict;
+use parent qw( -norequire Model );
+
+our $AUTOLOAD;
+
+sub AUTOLOAD {
+    my $self = shift;
+    my $type = ref($self)
+      or die "$self is not an object";
+
+    my $name = $AUTOLOAD;
+    $name =~ s/.*://;    # strip fully-qualified portion
+
+    if( not exists $self->{$name} ) {
+        die "Can't access `$name' field in class $type";
+    }
+
+    if( @_ ) {
+        return $self->{$name} = shift;
+    }
+    else {
+        return $self->{$name};
+    }
+}
+
+sub DESTROY {
+    return;
+}
+
+sub matches {
+    my $self    = shift;
+    my $matches = 0;
+
+    foreach my $tag ( @{ $self->{tags} } ) {
+        if( $tag->value() eq $self->{handler}->getConfig( name => $tag->name() ) ) {
+            # printf STDERR "matching tag %s / %s found...\n", $tag->name(), $tag->value();
+            $matches ++;
+        } else {
+            # printf STDERR "NOT matching tag %s / %s found...\n", $tag->name(), $tag->value();
+            return 0;
+        }
+    }
+
+    return scalar( @{ $self->{tags} } ) == $matches ? 1 : 0;
+}
 # ------------------------------------------------------------------------------------------------------------------
 package Model::Subdirectory;
 ## @fn    Model::Subdirectory
@@ -1189,6 +1313,34 @@ sub prepare {
 #                        $entry->{msg}->[0] :
 #                        sprintf( "empty commit (r%s) message from %s at %s", $entry->{revision}, $entry->{author}, $entry->{date} );
         my $msg = $entry->{msg}->[0];
+        
+        if( $msg =~ m/set Dependencies, Revisions for Release/i or
+            $msg =~ m/new Version files for Release/i or
+            $msg =~ m/INTERNAL COMMENT/ )
+        {
+            # skip this type of comments.
+            next;
+        }
+
+        # cleanup the message a little bit
+        $msg =~ s/^[\%\#]FIN  *[\%\#](\w+)=(\S+)\s*(.*)/$1 $2 $3 (completed)/;
+        $msg =~ s/^[\%\#]TBC  *[\%\#](\w+)=(\S+)\s*(.*)/$1 $2 $3 (to be continued)/;
+        $msg =~ s/^[\%\#]TPC  *[\%\#](\w+)=(\S+)\s*(.*)/$1 $2 $3 (work in progress)/;
+        $msg =~ s/^[\%\#]REM /Remark: /;
+        $msg =~ s/\s+/ /g;
+        $msg =~ s/^\s+//;
+        $msg =~ s/\s+$//;
+        $msg =~ s/\(ros\)/ /;
+        $msg =~ s/\s+NOJCHK\s*$//;
+        $msg =~ s/\bDESCRIPTION:\s*/ /;
+        $msg =~ s/\bREADINESS\s*:\s*COMPLETED\s*/ /;
+        $msg =~ s/^BTSPS-\d+\s+IN[^:]+:\s*//;
+        $msg =~ s/^BTSPS-\d+\s+IN\s*//;
+        $msg =~ s/  */ /g;
+        $msg =~ s/^fk\s*:\s*//;
+        $msg =~ s/^\s+//;
+        $msg =~ s/\s+$//;
+
         my @pathes = map { $_->{content} }
                     @{ $entry->{paths}->[0]->{path} };
 
@@ -1210,7 +1362,6 @@ sub prepare {
                                                             map  { $self->filterComments( $_ ); } 
                                                             keys %{ $subsysHash->{$key} };
     }
-
 
     $self->{changeLog} = $changeLogAsTextHash;
     return;
@@ -1239,7 +1390,38 @@ sub mapComponentName {
     my $self = shift;
     my $name = shift;
 
-    my $componentName = { "albertia" => "K.St.V. Albertia" };
+    my $componentName = { 
+                            'src-bos'            => "Linux Kernel Config",
+                            'src-cvmxsources'    => "CVMX Sources",
+                            'src-cvmxsources3'   => "CVMX Sources 3.x",
+                            'src-ddal'           => "FSMr2 DDAL",
+                            'src-firmware'       => "Firmware",
+                            'src-fsmbos'         => "Linux Kernel Config",
+                            'src-fsmbrm'         => "FSMr3 U-Boot",
+                            'src-fsmbrm35'       => "FSMr4 U-Boot",
+                            'src-fsmddal'        => "DDAL Library",
+                            'src-fsmddg'         => "Kernel Drivers",
+                            'src-fsmdtg'         => "Transport Drivers",
+                            'src-fsmfirmware'    => "Firmware",
+                            'src-fsmfmon'        => "FMON",
+                            'src-fsmifdd'        => "DDAL Library API",
+                            'src-fsmpsl'         => "Software Load",
+                            'src-fsmrfs'         => "Root Filesystem",
+                            'src-ifddal'         => "FSMr2 DDAL Library API",
+                            'src-kernelsources'  => "Linux Kernel",
+                            'src-kernelsources3' => "Linux Kernel 3.x",
+                            'src-lrcbrm'         => "LRC U-Boot",
+                            'src-lrcddal'        => "LRC specific DDAL",
+                            'src-lrcddg'         => "LRC Kernel Drivers",
+                            'src-lrcifddg'       => "LRC Kernel Drivers Interface",
+                            'src-lrcpsl'         => "LRC Software Load",
+                            'src-mddg'           => "FSMr2 Kernel Drivers",
+                            'src-mrfs'           => "FSMr2 Root Filesystem",
+                            'src-psl'            => "FSMr2 Software Load",
+                            'src-rfs'            => "Common Root Filesystem",
+                            'src-tools'          => "Tools (LRC)",
+    };
+
     return $componentName->{$name} ? $componentName->{$name} : $name;
 }
 
@@ -1255,6 +1437,35 @@ sub filterComments {
     return $commentLine;
 }
 
+# ------------------------------------------------------------------------------------------------------------------
+## @brief 
+package Command::GetConfig;
+use strict;
+use warnings;
+
+use parent qw( -norequire Object );
+use Getopt::Std;
+use Data::Dumper;
+
+sub prepare {
+    my $self = shift;
+    getopts( "k:f:", \my %opts );
+    $self->{configFileName} = $opts{f} || $ENV{LFS_CI_CONFIG_FILE};
+    $self->{configKeyName}  = $opts{k} || die "no key";
+
+    return;
+}
+
+sub execute {
+    my $self = shift;
+
+    my $config = Singelton::config();
+    $config->loadData( configFileName => $self->{configFileName} );
+    
+    print $config->getConfig( name => $self->{configKeyName} );
+
+    return;
+}
 # ------------------------------------------------------------------------------------------------------------------
 ## @brief generate new tag
 package Command::GetNewTagName;
@@ -1415,6 +1626,90 @@ sub hint {
 }
 
 # ------------------------------------------------------------------------------------------------------------------
+package Config;
+
+use warnings;
+use strict;
+use parent qw( -norequire Object );
+
+use Data::Dumper;
+
+sub init {
+    my $self = shift;
+    $self->{configObjects} = [];
+    return;
+}
+
+sub getConfig {
+    my $self  = shift;
+    my $param = { @_ };
+    my $name  = $param->{name};
+
+    my @canidates = grep { $_->matches()       }
+                    grep { $_->name() eq $name }
+                    @{ $self->{configObjects} };
+
+    if( scalar( @canidates ) > 1 ) {
+        die "error: more than one canidate found...";
+    } elsif ( scalar( @canidates ) == 0 ) {
+        # we are only handling strings, no undefs!
+        # print "empty $name\n";
+        return "";
+    } else {
+        # print STDERR Dumper( $canidates[0] );
+
+        my $value = $canidates[0]->value();
+        $value =~ s:
+                       \$\{
+                            ( [^}]+ )
+                         \}
+                   :
+                         $self->getConfig( name => $1 ) || "\${$1}"
+                   :xgie;
+        return $value
+    } 
+    return;
+}
+
+sub loadData {
+    my $self  = shift;
+    my $param = { @_ };
+
+    my $fileName = $param->{configFileName};
+
+    my @dataList;
+    foreach my $store ( Store::Config::File->new( file => $fileName ),
+                        Store::Config::Environment->new(), 
+                        Store::Config::Date->new(), 
+                      ) {
+        push @dataList, @{ $store->readConfig() };
+    }
+
+
+    foreach my $cfg ( @dataList ) {
+        # handling tags in an extra section here
+        my @tags = ();
+        foreach my $tag (split( /\s*,\s*/, $cfg->{tags} ) ) {
+            if( $tag =~ m/(\w+):([^:\s]+)/ ) {
+                push @tags, Model::Config->new( handler => $self,
+                                                name    => $1, 
+                                                value   => $2, 
+                                              );
+            } else {
+                die "tag $tag does not match to syntax";
+            }
+        }
+        
+        push @{ $self->{configObjects} }, Model::Config->new(
+                                                             handler => $self,
+                                                             value   => $cfg->{value},
+                                                             name    => $cfg->{name},
+                                                             tags    => \@tags,
+                                                            );
+    }
+    return
+}
+# ------------------------------------------------------------------------------------------------------------------
 ## @fn    Singelton
 #  @brief class which just provide a singelton - just one instance of this class
 package Singelton;
@@ -1437,6 +1732,12 @@ sub hint {
     return $obj->{hint};
 }
 
+sub config {
+    if( not $obj->{config} ) {
+        $obj->{config} = Config->new();
+    }
+    return $obj->{config};
+}
 
 # ------------------------------------------------------------------------------------------------------------------
 ## @fn    main
@@ -1464,6 +1765,8 @@ if( $program eq "getDependencies" ) {
     $command = Command::GetNewTagName->new();
 } elsif ( $program eq "getReleaseNoteContent" ) {
     $command = Command::GetReleaseNoteContent->new();
+} elsif ( $program eq "getConfig" ) {
+    $command = Command::GetConfig->new();
 } else {
     die "command not defined";
 }
