@@ -93,7 +93,7 @@ getConfig() {
     # trace "productName/${productName}"
 
     export LFS_CI_CONFIG_FILE=${LFS_CI_ROOT}/etc/file.cfg
-    ${LFS_CI_ROOT}/bin/getConfig "${key}" ${file}
+    ${LFS_CI_ROOT}/bin/getConfig -k "${key}" -f ${file}
 
     return
 }
