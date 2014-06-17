@@ -1454,6 +1454,72 @@ sub filterComments {
 }
 
 # }}} ------------------------------------------------------------------------------------------------------------------
+package Command::GetReleaseNoteXML; # {{{
+## @brief generate release note content
+use strict;
+use warnings;
+
+use parent qw( -norequire Object );
+
+use XML::Simple;
+use Data::Dumper;
+
+sub prepare {
+    my $self = shift;
+    my $xml  = XMLin( "changelog.xml", ForceArray => 1 ) or die "can not open changelog.xml";
+
+    my $subsysHash;
+    foreach my $entry ( @{ $xml->{logentry} } ) {
+
+        my $msg = ref( $entry->{msg}->[0] ) eq "HASH" ?
+                  sprintf( "empty commit message (r%s) from %s at %s", $entry->{revision}, $entry->{author}->[0], $entry->{date}->[0] ) :
+                  $entry->{msg}->[0] ;
+
+        # jira stuff
+        if( $msg =~ m/^.*(BTS[A-Z]*-[0-9]*)\s*PR\s*([^:]*)(.*$)/  ) {
+            push @{ $self->{PR} }, { jira => $1,
+                                     nr   => $2,
+                                     text => $3,
+            };
+        }
+        # change note
+        if( $msg =~ m/^.*(BTS[A-Z]-[0-9]*)\s*CN\s*([^ :]*)(.*$)/ ) {
+            push @{ $self->{CN}}, { jira => $1,
+                                    nr   => $2,
+                                    text => $3,
+            };
+        }
+        # new feature
+        if( $msg =~ m/^.*(BTS[A-Z]-[0-9]*)\s*NF\s*([^ t:]*)(.*$)/ ) {
+            push @{ $self->{NF}}, { jira => $1,
+                                    nr   => $2,
+                                    text => $3,
+            };
+        }
+        # notes
+        if( $msg =~ m/Transport Drivers/ ) {
+            push @{ $self->{notes} }, { notes => "Change in Transport Drivers. Please update transport software also when testing this release." };
+        }
+
+        # %FIN PR=PR123456 foobar
+        if( $msg =~ m/^[#%]FIN\s+[%@](PR|NF|CN)=(\w+)(.*)/ ) {
+            push @{ $self->{ $1 } }, { nr   => $1,
+                                       text => $2
+            };
+        }
+    }
+    return;
+}
+
+sub execute {
+    my $self = shift;
+
+    print Dumper( $self );
+
+    return;
+}
+
+# }}} ------------------------------------------------------------------------------------------------------------------
 package Command::Template; # {{{
 use strict;
 use warnings;
@@ -1892,6 +1958,8 @@ if( $program eq "getDependencies" ) {
     $command = Command::GetNewTagName->new();
 } elsif ( $program eq "getReleaseNoteContent" ) {
     $command = Command::GetReleaseNoteContent->new();
+} elsif ( $program eq "getReleaseNoteXML" ) {
+    $command = Command::GetReleaseNoteXML->new();
 } elsif ( $program eq "sendReleaseNote" ) {
     $command = Command::SendReleaseNote->new();
 } elsif ( $program eq "getConfig" ) {
