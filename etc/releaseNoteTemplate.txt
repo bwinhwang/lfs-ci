@@ -2,9 +2,9 @@ Dear Colleagues,
 
 PS LFS Release __TAGNAME__ is available in Subversion
 
-__RELEASE_NOTE_CONTENT__
-
 __DELIVERY_REPOS__/tags/__TAGNAME__
+
+__RELEASE_NOTE_CONTENT__
 
 Best Regards,
 

@@ -1545,21 +1545,26 @@ use strict;
 use warnings;
 
 use parent qw( -norequire Object );
+use lib "$ENV{LFS_CI_ROOT}/lib/perl5/";
 
 use XML::Simple;
 use Data::Dumper;
+use Getopt::Std;
+use Mail::Sender;
 
 sub prepare {
     my $self = shift;
-
-    my $config = Singelton::config();
-    $config->loadData( configFileName => $self->{configFileName} );
     
     # t: := tag name
     # r: := release note template file
-    getopts( "r:t:", \my %opts );
+    getopts( "r:t:f:", \my %opts );
     $self->{releaseNoteFile} = $opts{r} || die "no r";
     $self->{tagName}         = $opts{t} || die "no t";
+    $self->{configFileName}  = $opts{f} || die "no f";
+
+    my $config = Singelton::config();
+    $config->loadData( configFileName => $self->{configFileName} );
+
     $self->{fromAddress}     = $config->getConfig( name => "LFS_PROD_ReleaseNote_FromAddress" );
     $self->{fakeFromAddress} = $config->getConfig( name => "LFS_PROD_ReleaseNote_FakeFromAddress" );
     $self->{fakeToAddress}   = $config->getConfig( name => "LFS_PROD_ReleaseNote_FakeToAddress" );
@@ -1570,13 +1575,13 @@ sub prepare {
     $self->{reposName}       = $config->getConfig( name => "lfsRelDeliveryRepos" );
 
     if( not -f $self->{releaseNoteFile} ) {
-        die "no file";
+        die "no release note file";
     }
     if( not -f $self->{templateFile} ) {
-        die "no file";
+        die "no template  file";
     }
 
-    open( TEMPLATE, $self->{releaseNoteFile} ) 
+    open( TEMPLATE, $self->{templateFile} ) 
         or die sprintf( "can not open template file %s", $self->{releaseNoteFile} );
     my $template = join( "", <TEMPLATE> );
     close TEMPLATE;
@@ -1586,11 +1591,11 @@ sub prepare {
     my $releaseNoteContent = join( "", <RELEASENOTE> );
     close RELEASENOTE;
 
-    $template =~ s/__TAGNAME__/$tagName/g;
+    $template =~ s/__TAGNAME__/$self->{tagName}/g;
     $template =~ s/__RELEASE_NOTE_CONTENT__/$releaseNoteContent/g;
     $template =~ s/__DELIVERY_REPOS__/$self->{reposName}/g;
 
-    $self->{subject}     =~ s/__TAGNAME__/$tagName/g;
+    $self->{subject}     =~ s/__TAGNAME__/$self->{tagName}/g;
     $self->{releaseNote} = $template;
 
     return;
@@ -1600,19 +1605,21 @@ sub execute {
     my $self = shift;
 
     print Dumper( $self );
-    die;
-
-    my $mua = Mail::Sender->new( smtp => $self->{smtpServer},
-                                 from => $self->{fromAddress}, 
+    my $mua = Mail::Sender->new(
+                                { smtp      => $self->{smtpServer},
+                                  from      => $self->{fromAddress}, 
+                                  to        => $self->{toAddress},
+                                  fake_from => $self->{fakeFromAddress},
+                                  fake_to   => $self->{fakeToAddress},
+                                  subject   => $self->{subject},
+                                }
                                );
-    my $rv = $mua->MailMsg( 
-        fake_from => $self->{fakeFromAddress},
-        fake_to   => $self->{fakeToAddress},
-        subject   => $self->{subject},
-        msg       => $self->{releaseNote},
-    );
-    if( $rv ) {
-        die "error in sending release note: rc $rc";
+
+    my $rv = $mua->MailMsg( $self->{fromAddress}, $self->{toAddress}, $self->{releaseNote} ); 
+    print Dumper( $rv );
+
+    if( ! $rv ) {
+        die "error in sending release note: rc $rv";
     }
 
     return;
