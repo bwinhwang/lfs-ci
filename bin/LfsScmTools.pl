@@ -1546,10 +1546,15 @@ sub execute {
                                   fake_from => $self->{fakeFromAddress},
                                   fake_to   => $self->{fakeToAddress},
                                   subject   => $self->{subject},
+                                  replyto   => "",
                                 }
                                );
 
-    my $rv = $mua->MailMsg( $self->{fromAddress}, $self->{toAddress}, $self->{releaseNote} ); 
+    my $rv = $mua->MailMsg( { from => $self->{fromAddress}, 
+                              to   => $self->{toAddress}, 
+                              msg  => $self->{releaseNote},
+                            }
+                          ); 
     print Dumper( $rv );
 
     if( ! $rv ) {
