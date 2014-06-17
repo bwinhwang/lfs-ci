@@ -1483,7 +1483,7 @@ use parent qw( -norequire Object );
 use XML::Simple;
 use Data::Dumper;
 use Getopt::Std;
-use Mail::Sender;
+# use Mail::Sender;
 
 sub prepare {
     my $self = shift;
