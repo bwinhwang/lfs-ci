@@ -1,6 +1,6 @@
 #!/usr/bin/env perl
 
-package Object;
+package Object; # {{{
 ## @fn    Object
 #  @brief base class of all other classes.
 
@@ -21,8 +21,8 @@ sub new {
     return $self;
 }
 
-# ------------------------------------------------------------------------------------------------------------------
-package Store::Config::Date;
+# }}} ------------------------------------------------------------------------------------------------------------------
+package Store::Config::Date; # {{{
 
 use warnings;
 use strict;
@@ -43,8 +43,8 @@ sub readConfig {
 
     return $data;
 }
-# ------------------------------------------------------------------------------------------------------------------
-package Store::Config::File;
+# }}} ------------------------------------------------------------------------------------------------------------------
+package Store::Config::File; # {{{
 
 use warnings;
 use strict;
@@ -77,8 +77,8 @@ sub readConfig {
     return $data;
 }
 
-# ------------------------------------------------------------------------------------------------------------------
-package Store::Config::Environment;
+# }}} ------------------------------------------------------------------------------------------------------------------
+package Store::Config::Environment; # {{{
 
 use warnings;
 use strict;
@@ -97,8 +97,8 @@ sub readConfig {
     }
     return $data;
 }
-# ------------------------------------------------------------------------------------------------------------------
-package Model;
+# }}} ------------------------------------------------------------------------------------------------------------------
+package Model; # {{{
 ## @fn     Model
 #  @brief  base class for all model classes. a model contains data from some sources.
 
@@ -106,8 +106,8 @@ use strict;
 use warnings;
 use parent qw( -norequire Object );
 
-# ------------------------------------------------------------------------------------------------------------------
-package Model::Config;
+# }}} ------------------------------------------------------------------------------------------------------------------
+package Model::Config; # {{{
 use warnings;
 use strict;
 use parent qw( -norequire Model );
@@ -154,8 +154,8 @@ sub matches {
 
     return scalar( @{ $self->{tags} } ) == $matches ? 1 : 0;
 }
-# ------------------------------------------------------------------------------------------------------------------
-package Model::Subdirectory;
+# }}} ------------------------------------------------------------------------------------------------------------------
+package Model::Subdirectory; # {{{
 ## @fn    Model::Subdirectory
 #  @brief this class represents a subdirectory of the build. It's a src- or a bld/bld- directory
 
@@ -402,8 +402,8 @@ sub checkout {
 
     return;
 }
-# ------------------------------------------------------------------------------------------------------------------
-package Svn;
+# }}} ------------------------------------------------------------------------------------------------------------------
+package Svn; # {{{
 ## @fn    Svn
 #  @brief class for subversion command line client
 
@@ -526,8 +526,8 @@ sub replaceMasterByUlmServer {
     return $url;
 }
 
-# ------------------------------------------------------------------------------------------------------------------
-package Parser::Replacer;
+# }}} ------------------------------------------------------------------------------------------------------------------
+package Parser::Replacer; # {{{
 
 ## @fn     Parser::Replacer
 #  @brief  replace some template
@@ -593,8 +593,8 @@ sub replace {
 }
 
 
-# ------------------------------------------------------------------------------------------------------------------
-package Parser;
+# }}} ------------------------------------------------------------------------------------------------------------------
+package Parser; # {{{
 ## @fn    parser
 #  @brief parent class for the parser
 
@@ -673,8 +673,8 @@ sub parse {
     return;
 }
 
-# ------------------------------------------------------------------------------------------------------------------
-package Parser::Model;
+# }}} ------------------------------------------------------------------------------------------------------------------
+package Parser::Model; # {{{
 
 # @brief generic class to store information from the parser
 
@@ -734,26 +734,26 @@ sub replaceLocations {
 }
 
 
-# ------------------------------------------------------------------------------------------------------------------
-package Parser::Locations::Models::SearchTag;
+# }}} ------------------------------------------------------------------------------------------------------------------
+package Parser::Locations::Models::SearchTag; # {{{
 use strict;
 use warnings;
 use parent qw( -norequire Parser::Model );
 
-# ------------------------------------------------------------------------------------------------------------------
-package Parser::Locations::Models::SearchTrunk;
+# }}} ------------------------------------------------------------------------------------------------------------------
+package Parser::Locations::Models::SearchTrunk; # {{{
 use strict;
 use warnings;
 use parent qw( -norequire Parser::Model );
 
-# ------------------------------------------------------------------------------------------------------------------
-package Parser::Locations::Models::PhysicalLocations;
+# }}} ------------------------------------------------------------------------------------------------------------------
+package Parser::Locations::Models::PhysicalLocations; # {{{
 use strict;
 use warnings;
 use parent qw( -norequire Parser::Model );
 
-# ------------------------------------------------------------------------------------------------------------------
-package Parser::Dependencies::Models::Target;
+# }}} ------------------------------------------------------------------------------------------------------------------
+package Parser::Dependencies::Models::Target; # {{{
 use strict;
 use warnings;
 use parent qw( -norequire Parser::Model );
@@ -812,8 +812,8 @@ sub targetsParameter {
     return;
 }
 
-# ------------------------------------------------------------------------------------------------------------------
-package Parser::Dependencies::Models::UseReadonly;
+# }}} ------------------------------------------------------------------------------------------------------------------
+package Parser::Dependencies::Models::UseReadonly; # {{{
 use strict;
 use warnings;
 use parent qw( -norequire Parser::Model );
@@ -865,8 +865,8 @@ sub cleanup {
 sub src { my $self = shift; return $self->{src}; }
 sub tag { my $self = shift; return $self->{dst}->[0]; }
 
-# ------------------------------------------------------------------------------------------------------------------
-package Parser::Locations;
+# }}} ------------------------------------------------------------------------------------------------------------------
+package Parser::Locations; # {{{
 use strict;
 use warnings;
 use Data::Dumper;
@@ -927,8 +927,8 @@ sub getReporitoryOrLocation {
     return;
 }
 
-# ------------------------------------------------------------------------------------------------------------------
-package Parser::Dependencies;
+# }}} ------------------------------------------------------------------------------------------------------------------
+package Parser::Dependencies; # {{{
 use strict;
 use warnings;
 use parent qw( -norequire Parser );
@@ -957,8 +957,8 @@ sub hint {
     return;
 }
 
-# ------------------------------------------------------------------------------------------------------------------
-package Command::SortBuildsFromDependencies;
+# }}} ------------------------------------------------------------------------------------------------------------------
+package Command::SortBuildsFromDependencies; # {{{
 use strict;
 use warnings;
 
@@ -1072,8 +1072,8 @@ SOURCES:
     return 0;
 }
 
-# ------------------------------------------------------------------------------------------------------------------
-package Command::GetDependencies;
+# }}} ------------------------------------------------------------------------------------------------------------------
+package Command::GetDependencies; # {{{
 use strict;
 use warnings;
 
@@ -1112,8 +1112,8 @@ sub execute {
     return;
 }
 
-# ------------------------------------------------------------------------------------------------------------------
-package Command::GetUpStreamProject;
+# }}} ------------------------------------------------------------------------------------------------------------------
+package Command::GetUpStreamProject; # {{{
 use strict;
 use warnings;
 
@@ -1192,8 +1192,8 @@ sub execute {
 
     return;
 }
-# ------------------------------------------------------------------------------------------------------------------
-package Command::GetDownStreamProjects;
+# }}} ------------------------------------------------------------------------------------------------------------------
+package Command::GetDownStreamProjects; # {{{
 use strict;
 use warnings;
 
@@ -1259,9 +1259,9 @@ sub execute {
     return;
 }
 
-# ------------------------------------------------------------------------------------------------------------------
+# }}} ------------------------------------------------------------------------------------------------------------------
+package Command::GetRevisionTxtFromDependencies; # {{{
 ## @brief this command creates a file with svn revisions and svn urls
-package Command::GetRevisionTxtFromDependencies;
 use strict;
 use warnings;
 
@@ -1305,9 +1305,9 @@ sub execute {
 
     return;
 }
-# ------------------------------------------------------------------------------------------------------------------
+# }}} ------------------------------------------------------------------------------------------------------------------
+package Command::GetReleaseNoteContent; # {{{
 ## @brief generate release note content
-package Command::GetReleaseNoteContent;
 use strict;
 use warnings;
 
@@ -1453,9 +1453,108 @@ sub filterComments {
     return $commentLine;
 }
 
-# ------------------------------------------------------------------------------------------------------------------
+# }}} ------------------------------------------------------------------------------------------------------------------
+package Command::Template; # {{{
+use strict;
+use warnings;
+
+use parent qw( -norequire Object );
+
+use XML::Simple;
+use Data::Dumper;
+
+sub prepare {
+    my $self = shift;
+    return;
+}
+
+sub execute {
+    my $self = shift;
+    return;
+}
+
+# }}} ------------------------------------------------------------------------------------------------------------------
+package Command::SendReleaseNote; # {{{
+use strict;
+use warnings;
+
+use parent qw( -norequire Object );
+
+use XML::Simple;
+use Data::Dumper;
+
+sub prepare {
+    my $self = shift;
+
+    my $config = Singelton::config();
+    $config->loadData( configFileName => $self->{configFileName} );
+    
+    # t: := tag name
+    # r: := release note template file
+    getopts( "r:t:", \my %opts );
+    $self->{releaseNoteFile} = $opts{r} || die "no r";
+    $self->{tagName}         = $opts{t} || die "no t";
+    $self->{fromAddress}     = $config->getConfig( name => "LFS_PROD_ReleaseNote_FromAddress" );
+    $self->{fakeFromAddress} = $config->getConfig( name => "LFS_PROD_ReleaseNote_FakeFromAddress" );
+    $self->{fakeToAddress}   = $config->getConfig( name => "LFS_PROD_ReleaseNote_FakeToAddress" );
+    $self->{toAddress}       = $config->getConfig( name => "LFS_PROD_ReleaseNote_ToAddress" );
+    $self->{subject}         = $config->getConfig( name => "LFS_PROD_ReleaseNote_Subject" );
+    $self->{smtpServer}      = $config->getConfig( name => "LFS_PROD_ReleaseNote_SmtpServer" );
+    $self->{templateFile}    = $config->getConfig( name => "LFS_PROD_ReleaseNote_TemplateFile" );
+    $self->{reposName}       = $config->getConfig( name => "lfsRelDeliveryRepos" );
+
+    if( not -f $self->{releaseNoteFile} ) {
+        die "no file";
+    }
+    if( not -f $self->{templateFile} ) {
+        die "no file";
+    }
+
+    open( TEMPLATE, $self->{releaseNoteFile} ) 
+        or die sprintf( "can not open template file %s", $self->{releaseNoteFile} );
+    my $template = join( "", <TEMPLATE> );
+    close TEMPLATE;
+
+    open( RELEASENOTE, $self->{releaseNoteFile} ) 
+        or die sprintf( "can not open release note content file %s", $self->{releaseNoteFile} );
+    my $releaseNoteContent = join( "", <RELEASENOTE> );
+    close RELEASENOTE;
+
+    $template =~ s/__TAGNAME__/$tagName/g;
+    $template =~ s/__RELEASE_NOTE_CONTENT__/$releaseNoteContent/g;
+    $template =~ s/__DELIVERY_REPOS__/$self->{reposName}/g;
+
+    $self->{subject}     =~ s/__TAGNAME__/$tagName/g;
+    $self->{releaseNote} = $template;
+
+    return;
+}
+
+sub execute {
+    my $self = shift;
+
+    print Dumper( $self );
+    die;
+
+    my $mua = Mail::Sender->new( smtp => $self->{smtpServer},
+                                 from => $self->{fromAddress}, 
+                               );
+    my $rv = $mua->MailMsg( 
+        fake_from => $self->{fakeFromAddress},
+        fake_to   => $self->{fakeToAddress},
+        subject   => $self->{subject},
+        msg       => $self->{releaseNote},
+    );
+    if( $rv ) {
+        die "error in sending release note: rc $rc";
+    }
+
+    return;
+}
+
+# }}} ------------------------------------------------------------------------------------------------------------------
+package Command::GetConfig; # {{{
 ## @brief 
-package Command::GetConfig;
 use strict;
 use warnings;
 
@@ -1482,9 +1581,9 @@ sub execute {
 
     return;
 }
-# ------------------------------------------------------------------------------------------------------------------
+# }}} ------------------------------------------------------------------------------------------------------------------
+package Command::GetNewTagName; # {{{
 ## @brief generate new tag
-package Command::GetNewTagName;
 use strict;
 use warnings;
 
@@ -1529,8 +1628,8 @@ sub execute {
 }
 
 
-# ------------------------------------------------------------------------------------------------------------------
-package Usecase::GetLocation;
+# }}} ------------------------------------------------------------------------------------------------------------------
+package Usecase::GetLocation; # {{{
 use strict;
 use warnings;
 
@@ -1616,10 +1715,10 @@ sub execute {
     return;
 }
 
-# ------------------------------------------------------------------------------------------------------------------
+# }}} ------------------------------------------------------------------------------------------------------------------
+package Hints; # {{{
 ## @fn    Hints
 #  @brief 
-package Hints;
 use strict;
 use warnings;
 use Data::Dumper;
@@ -1641,8 +1740,8 @@ sub hint {
     return exists $self->{$key} ? $self->{$key} : undef;
 }
 
-# ------------------------------------------------------------------------------------------------------------------
-package Config;
+# }}} ------------------------------------------------------------------------------------------------------------------
+package Config; # {{{
 
 use warnings;
 use strict;
@@ -1725,10 +1824,10 @@ sub loadData {
     }
     return
 }
-# ------------------------------------------------------------------------------------------------------------------
+# }}} ------------------------------------------------------------------------------------------------------------------
+package Singelton; # {{{
 ## @fn    Singelton
 #  @brief class which just provide a singelton - just one instance of this class
-package Singelton;
 use strict;
 use warnings;
 
@@ -1755,10 +1854,10 @@ sub config {
     return $obj->{config};
 }
 
-# ------------------------------------------------------------------------------------------------------------------
+# }}} ------------------------------------------------------------------------------------------------------------------
+package main; # {{{
 ## @fn    main
 #  @brief the main programm and dispatcher to the command objects.
-package main;
 use strict;
 use warnings;
 use Data::Dumper;
@@ -1781,6 +1880,8 @@ if( $program eq "getDependencies" ) {
     $command = Command::GetNewTagName->new();
 } elsif ( $program eq "getReleaseNoteContent" ) {
     $command = Command::GetReleaseNoteContent->new();
+} elsif ( $program eq "sendReleaseNote" ) {
+    $command = Command::SendReleaseNote->new();
 } elsif ( $program eq "getConfig" ) {
     $command = Command::GetConfig->new();
 } else {
