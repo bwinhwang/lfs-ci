@@ -1479,11 +1479,12 @@ use strict;
 use warnings;
 
 use parent qw( -norequire Object );
+use lib "$LFS_CI_ROOT/lib/perl5/";
 
 use XML::Simple;
 use Data::Dumper;
 use Getopt::Std;
-# use Mail::Sender;
+use Mail::Sender;
 
 sub prepare {
     my $self = shift;
