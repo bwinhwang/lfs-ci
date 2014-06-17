@@ -273,7 +273,7 @@ _createWorkspace() {
 
         local revision=
         if [[ -r "${WORKSPACE}/revisions.txt" ]] ; then
-            revision=$(grep "^${src} " ${WORKSPACE}/revisions.txt | cut -d" " -f1)
+            revision=$(grep "^${src} " ${WORKSPACE}/revisions.txt | cut -d" " -f3)
         fi
 
         counter=$( expr ${counter} + 1 )
