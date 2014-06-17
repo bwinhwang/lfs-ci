@@ -255,12 +255,14 @@ _createWorkspace() {
         buildTargets=${onlySourceDirectory}
     fi
 
-    local revision=
-    if [[ -r "${WORKSPACE}/revisions.txt" ]] ; then
-        info "using revision from revisions.txt file"
-        # TODO: demx2fk3 2014-04-08 add handling here
-        revision=
+    if [[ "${UPSTREAM_PROJECT}" && "${UPSTREAM_NUMBER}" ]] ; then
+        local dir=$(getBuildDirectoryOnMaster ${UPSTREAM_PROJECT} ${UPSTREAM_NUMBER})
+        local master=$(getConfig jenkinsMasterServerHostName)
+        mustHaveValue "${dir}" "build directory on master"
+        info "copy revision state file from master"
+        execute rsync -avP ssh ${master}:${dir}/revisionstate.xml ${WORKSPACE}/revisions.txt
     fi
+
 
     info "using src-dirs: ${buildTargets}"
 
@@ -269,8 +271,13 @@ _createWorkspace() {
 
     for src in ${buildTargets} ; do
 
+        local revision=
+        if [[ -r "${WORKSPACE}/revisions.txt" ]] ; then
+            revision=$(grep "^${src} " ${WORKSPACE}/revisions.txt | cut -d" " -f3)
+        fi
+
         counter=$( expr ${counter} + 1 )
-        info "(${counter}/${amountOfTargets}) checking out sources for ${src}"
+        info "(${counter}/${amountOfTargets}) checking out sources for ${src} rev ${revision:-latest}"
         checkoutSubprojectDirectories "${src}" "${revision}"
 
     done
