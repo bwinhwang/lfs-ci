@@ -94,7 +94,7 @@ copyAndExtractBuildArtifactsFromProject() {
     for file in ${files}
     do
         local base=$(basename ${file} .tar.gz)
-        local component=$(cut -d- <<< ${base})
+        local component=$(cut -d- -f2 <<< ${base})
 
         if [[ "${allowedComponentsFilter}" ]] ; then
             if ! grep -q " ${component} " <<< " ${allowedComponentsFilter} " ; then
