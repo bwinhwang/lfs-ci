@@ -151,6 +151,7 @@ sub matches {
             return 0;
         }
     }
+    $self->{matches} = $matches;
 
     return scalar( @{ $self->{tags} } ) == $matches ? 1 : 0;
 }
@@ -1838,30 +1839,29 @@ sub getConfig {
     my $param = { @_ };
     my $name  = $param->{name};
 
-    my @canidates = grep { $_->matches()       }
-                    grep { $_->name() eq $name }
-                    @{ $self->{configObjects} };
+    my @candidates = map  { $_->[0]               } # schwarzian transform
+                     sort { $b->[1] <=> $a->[1]   } 
+                     grep { $_->[1]               }
+                     map  { [ $_, $_->matches() ] }
+                     grep { $_->name() eq $name   }
+                     @{ $self->{configObjects} };
 
-    if( scalar( @canidates ) > 1 ) {
-        die "error: more than one canidate found...";
-    } elsif ( scalar( @canidates ) == 0 ) {
+    if( scalar( @candidates ) > 1 ) {
+        # TODO: demx2fk3 2014-06-18 warning -- die "error: more than one canidate found...";
+    } elsif ( scalar( @candidates ) == 0 ) {
         # we are only handling strings, no undefs!
         # print "empty $name\n";
         return "";
-    } else {
-        # print STDERR Dumper( $canidates[0] );
-
-        my $value = $canidates[0]->value();
-        $value =~ s:
-                       \$\{
-                            ( [^}]+ )
-                         \}
-                   :
-                         $self->getConfig( name => $1 ) || "\${$1}"
-                   :xgie;
-        return $value
     } 
-    return;
+    my $value = $candidates[0]->value();
+    $value =~ s:
+                    \$\{
+                        ( [^}]+ )
+                        \}
+                :
+                        $self->getConfig( name => $1 ) || "\${$1}"
+                :xgie;
+    return $value;
 }
 
 sub loadData {

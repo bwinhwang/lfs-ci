@@ -35,7 +35,7 @@ PS4='+(${BASH_SOURCE}:${LINENO}): ${FUNCNAME[0]:+${FUNCNAME[0]}(): }'
 export PS4
 
 
-LFS_CI_git_version=$(git describe ${LFS_CI_ROOT})
+LFS_CI_git_version=$(cd ${LFS_CI_ROOT} ; git describe)
 debug "used lfs ci git version ${LFS_CI_git_version}"
 
 JENKINS_SVN_REVISION=${SVN_REVISION}
