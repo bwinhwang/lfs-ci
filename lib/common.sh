@@ -314,6 +314,7 @@ mustHaveNextLabelName() {
     local repos=$(getConfig lfsOsDeliveryRepos)
 
     info "branch ${branch} has release label regex ${regex}"
+    info "using repos ${repos}"
 
     local label=$(${LFS_CI_ROOT}/bin/getNewTagName -u ${repos}/tags -r "${regex}" )
     mustHaveValue "${label}" "next release label name"
