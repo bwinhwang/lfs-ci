@@ -1503,8 +1503,8 @@ sub prepare {
 
         # %FIN PR=PR123456 foobar
         if( $msg =~ m/^[#%]FIN\s+[%@](PR|NF|CN)=(\w+)(.*)/ ) {
-            push @{ $self->{ $1 } }, { nr   => $1,
-                                       text => $2
+            push @{ $self->{ $1 } }, { nr   => $2,
+                                       text => $2 . $3,
             };
         }
     }
