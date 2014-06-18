@@ -28,13 +28,14 @@ ci_job_test() {
 
     local upstreamProject=${UPSTREAM_PROJECT}
     local upstreamBuildNumber=${UPSTREAM_BUILD}
+    local requiredArtifacts=$(getConfig LFS_CI_UC_test_required_artifacts)
 
     upstreamBuildNumber=lastSuccessfulBuild
     upstreamProject=$(sed "s/Test/Build/" <<< ${UPSTREAM_PROJECT})
 
     info "upstream is ${upstreamProject} / ${upstreamBuildNumber}"
 
-    copyArtifactsToWorkspace "${upstreamProject}" "${upstreamBuildNumber}"
+    copyArtifactsToWorkspace "${upstreamProject}" "${upstreamBuildNumber}" "${requiredArtifacts}"
 
     mustHaveNextCiLabelName
     local labelName=$(getNextCiLabelName)        

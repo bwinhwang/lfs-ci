@@ -76,6 +76,7 @@ mustHaveBuildArtifactsFromUpstream() {
 copyAndExtractBuildArtifactsFromProject() {
     local jobName=$1
     local buildNumber=$2
+    local allowedComponentsFilter="$3"
     local artifactesShare=$(getConfig artifactesShare)
     local artifactsPathOnMaster=${artifactesShare}/${jobName}/${buildNumber}/save/
     local serverName=$(getConfig linseeUlmServer)
@@ -93,6 +94,14 @@ copyAndExtractBuildArtifactsFromProject() {
     for file in ${files}
     do
         local base=$(basename ${file} .tar.gz)
+        local component=$(cut -d- <<< ${base})
+
+        if [[ "${allowedComponentsFilter}" ]] ; then
+            if ! grep -q " ${component} " <<< " ${allowedComponentsFilter} " ; then
+                debug "${component} / ${base} artifact was filtered out"
+                continue
+            fi
+        fi
 
         if [[ -d ${workspace}/bld/${base} ]] ; then
             trace "skipping ${file}, 'cause it's already transfered from another project"
@@ -124,6 +133,7 @@ copyAndExtractBuildArtifactsFromProject() {
 copyArtifactsToWorkspace() {
     local jobName=$1
     local buildNumber=$2
+    local allowedComponentsFilter="$3"
 
     requiredParameters LFS_CI_ROOT
 
@@ -161,7 +171,7 @@ copyArtifactsToWorkspace() {
             exit 1
         fi
 
-        copyAndExtractBuildArtifactsFromProject ${name} ${number}
+        copyAndExtractBuildArtifactsFromProject ${name} ${number} "${allowedComponentsFilter}"
     done
 
     return
