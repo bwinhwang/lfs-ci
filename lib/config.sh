@@ -78,7 +78,6 @@ getConfig() {
     local key=$1
     local file=$2
 
-    # echo 1>&2 "get config value for ${key} using ${file}"
 
     export productName=$(getProductNameFromJobName)
     export taskName=$(getTaskNameFromJobName)
@@ -86,11 +85,12 @@ getConfig() {
     export location=$(getLocationName)
     export config=$(getTargetBoardName)
 
-    # trace "config/${config}"
-    # trace "location/${location}"
-    # trace "subTaskName/${subTaskName}"
-    # trace "taskName/${taskName}"
-    # trace "productName/${productName}"
+    trace "get config value for ${key} using ${file}"
+    trace "config/${config}"
+    trace "location/${location}"
+    trace "subTaskName/${subTaskName}"
+    trace "taskName/${taskName}"
+    trace "productName/${productName}"
 
     export LFS_CI_CONFIG_FILE=${LFS_CI_ROOT}/etc/file.cfg
     ${LFS_CI_ROOT}/bin/getConfig -k "${key}" -f ${file}
