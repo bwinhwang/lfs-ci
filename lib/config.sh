@@ -85,12 +85,12 @@ getConfig() {
     export location=$(getLocationName)
     export config=$(getTargetBoardName)
 
-    echo 1>&2 "get config value for ${key} using ${file}"
-    echo 1>&2 "config/${config}"
-    echo 1>&2 "location/${location}"
-    echo 1>&2 "subTaskName/${subTaskName}"
-    echo 1>&2 "taskName/${taskName}"
-    echo 1>&2 "productName/${productName}"
+    # echo 1>&2 "get config value for ${key} using ${file}"
+    # echo 1>&2 "config/${config}"
+    # echo 1>&2 "location/${location}"
+    # echo 1>&2 "subTaskName/${subTaskName}"
+    # echo 1>&2 "taskName/${taskName}"
+    # echo 1>&2 "productName/${productName}"
 
     export LFS_CI_CONFIG_FILE=${LFS_CI_ROOT}/etc/file.cfg
     ${LFS_CI_ROOT}/bin/getConfig -k "${key}" -f ${file}
