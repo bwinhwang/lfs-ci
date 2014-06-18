@@ -1464,9 +1464,23 @@ use parent qw( -norequire Object );
 
 use XML::Simple;
 use Data::Dumper;
+use POSIX qw(strftime);
+use Getopt::Std;
 
 sub prepare {
     my $self = shift;
+
+    # t: := tag name
+    # r: := release note template file
+    getopts( "r:t:f:", \my %opts );
+    $self->{tagName}         = $opts{t} || die "no t";
+    $self->{configFileName}  = $opts{f} || die "no f";
+
+    my $config = Singelton::config();
+    $config->loadData( configFileName => $self->{configFileName} );
+
+    my $svn = Singelton::svn();
+
     my $xml  = XMLin( "changelog.xml", ForceArray => 1 ) or die "can not open changelog.xml";
 
     my $subsysHash;
@@ -1509,6 +1523,73 @@ sub prepare {
             };
         }
     }
+
+    $self->{templateFileName} = $config->getConfig( name => "LFS_PROD_ReleaseNote_TemplateFileXml" );
+    if( not -e $self->{templateFileName} ) {
+        die "template file does not exist";
+    }
+    open TEMPLATE, $self->{templateFileName} or die "can not open template file xml";
+    $self->{template} = join( "", <TEMPLATE> );
+    close TEMPLATE;
+
+    # collect data
+    # __TAGNAME__
+    $self->{data}{TAGNAME} = $self->{tagName};
+    # __DATE__
+    $self->{data}{DATE} = strftime( "%Y-%m-%d", localtime());
+    # __TIME__
+    $self->{data}{DATE} = strftime( "%H:%M:%S", localtime());
+    # __BASED_ON__
+    $self->{data}{BASED_ON} = "TODO";
+    # __BRANCH__
+    $self->{data}{BRANCH} = "Branch";
+    # __SVN_REPOS_URL__
+    $self->{data}{SVN_REPOS_URL} = $config->getConfig( name => "lfsOsDeliveryRepos" );
+    # __SVN_REVISION__
+    my $svnUrl = sprintf( "%s/tags/%s", 
+                            $self->{data}{SVN_REPOS_URL},
+                            $self->{data}{TAGNAME},
+                        );
+    $self->{data}{SVN_REVISION} = $svn->info( url => $svnUrl )->{entry}->{commit}->{revision};
+
+    # __SVN_TAGS_URL_WITH_REVISION__
+    $self->{data}{SVN_TAGS_URL_WITH_REVISION} = sprintf( "%s/tags/%s@%d",
+                                                            $self->{data}{SVN_REPOS_URL},
+                                                            $self->{data}{TAGNAME},
+                                                            $self->{data}{SVN_REVISION},
+                                                       );
+    # __CORRECTED_FAULTS__
+    $self->{data}{CORRECTED_FAULTS} = join( "\n        ", 
+                                            map { sprintf( "<fault %sid=\"%s\">%sPR %s</fault>",
+                                                            $_->{jira} ? sprintf( "info=\"jira issue number: \" ", $_->{jira} ) : "",
+                                                            $_->{nr},
+                                                            $_->{jira} ? sprintf( "%s: ", $_->{jira} ) : "",
+                                                            $_->{text},
+                                                        ) }
+                                            @{ $self->{PR} || [] }
+                                        );
+    # __FEATURES__
+    $self->{data}{FEATURES} = join( "\n        ", 
+                                    map { sprintf( "<feature id=\"%s\">%sNF %s</fault>",
+                                                    $_->{nr},
+                                                    $_->{jira} ? sprintf( "%s: ", $_->{jira} ) : "",
+                                                    $_->{text},
+                                                ) }
+                                    @{ $self->{NF} || [] }
+                                  );
+    # __BASELINES__
+    $self->{data}{SVN_REPOS_UR} = "";
+    # __CHANGENOTES__
+    $self->{data}{CHANGENOTES} = join( "\n        ", 
+                                        map { sprintf( "<changenote id=\"CN %s\">CN %s%s</fault>",
+                                                         $_->{nr},
+                                                         $_->{text},
+                                                     ) }
+                                         @{ $self->{CN} || [] }
+                                     );
+
+    $self->{template} =~ s/__([A-Z_]*)__/ $self->{data}{$1} || "" /ge;
+
     return;
 }
 

@@ -86,7 +86,7 @@ ci_job_release() {
         ;;
         create_releasenote_textfile)
             # TODO: demx2fk3 2014-06-05  is this correct?!?!
-            createReleaseNoteTextFile ${TESTED_BUILD_JOBNAME} ${TESTED_BUILD_NUMBER}
+            createReleaseNoteTextFile "${TESTED_BUILD_JOBNAME}" "${TESTED_BUILD_NUMBER}" "${buildJobName}" "${buildBuildNumber}"
         ;;
         create_release_tag)
             createReleaseTag ${buildJobName} ${buildBuildNumber}
@@ -178,35 +178,39 @@ copyToReleaseShareOnSite_copyToSite() {
 #  @param   <none>
 #  @return  <none>
 createReleaseNoteTextFile() {
-    local jobName=$1
-    local buildNumber=$2
+    local testedJobName=$1
+    local testedBuildNumber=$2
+    local buildJobName=$3
+    local buildBuildNumber=$4
 
-
-    # TODO: demx2fk3 2014-06-05  is this correct?!?!
     # get the change log file from master
-    local buildDirectory=$(getBuildDirectoryOnMaster ${jobName} ${buildNumber})
+    local buildDirectory=$(getBuildDirectoryOnMaster ${testedJobName} ${testedBuildNumber})
     local serverName=$(getConfig jenkinsMasterServerHostName)
 
     local workspace=$(getWorkspaceName)
     mustHaveWorkspaceName
     mustHaveCleanWorkspace
     mustHaveWritableWorkspace
+    mustHaveNextLabelName
+    local releaseLabel=$(getNextReleaseLabel)
 
     execute rsync -ae ssh ${serverName}:${buildDirectory}/changelog.xml ${workspace}
+
+    copyArtifactsToWorkspace "${buildJobName}" "${buildBuildNumber}" "externalComponents fsmpsl psl fsmci"
 
     # TODO: demx2fk3 2014-05-28 annotate with additonal informations
 
     # convert the changelog xml to a release note
     cd ${workspace}
 
-    echo -e "Hi all,\nThe LFS Release ${releaseLabel} is available in Subversion.\n\n"
-
-    ${LFS_CI_ROOT}/bin/getReleaseNoteContent > releasenote.txt
+    ${LFS_CI_ROOT}/bin/getReleaseNoteContent -t ${releaseLabel} -f ${LFS_CI_ROOT}/etc/file.cfg > releasenote.txt
     mustBeSuccessfull "$?" "getReleaseNoteContent"
+    ${LFS_CI_ROOT}/bin/getReleaseNoteXML  -t ${releaseLabel} -f ${LFS_CI_ROOT}/etc/file.cfg > releasenote.xml
+    mustBeSuccessfull "$?" "getReleaseNoteXML"
 
+    info "upload to wft"
 
-    # store release note as artifact
-    cat releasenote.txt
+    info "send release note"
 
     return
 }
