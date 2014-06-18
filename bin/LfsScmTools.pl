@@ -1051,7 +1051,7 @@ SOURCES:
 
                 }
                 printf "%s-%s: %s\n", $source->{directory}, $platform, join( " ", @filteredDeps );
-                printf "\t/usr/bin/time -v build -L \$@.log -C %s %s --label=\$(LABEL)\n\n", $source->{directory}, $platform;
+                printf "\t/usr/bin/time -v build -L \$@.log -C %s %s --label=\$(LABEL) JOBS=48\n\n", $source->{directory}, $platform;
             }
         } elsif( $self->{style} eq "legacy" ) {
             printf "%s %s - %s\n",
