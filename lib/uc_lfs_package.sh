@@ -24,7 +24,9 @@ ci_job_package() {
 
     debug "workspace is ${workspace}"
 
-    copyArtifactsToWorkspace ${UPSTREAM_PROJECT} ${UPSTREAM_BUILD}
+    local requiredArtifacts=$(getConfig LFS_CI_UC_package_required_artifacts)
+
+    copyArtifactsToWorkspace "${UPSTREAM_PROJECT}" "${UPSTREAM_BUILD}" "${requiredArtifacts}"
 
     mustHaveNextCiLabelName
     local label=$(getNextCiLabelName)

@@ -253,7 +253,8 @@ createTagOnSourceRepository() {
     local buildNumber=$2
 
     local workspace=$(getWorkspaceName)
-    mustHaveWorkspaceWithArtefactsFromUpstreamProjects ${jobName} ${buildNumber}
+    local requiredArtifacts=$(getConfig LFS_CI_UC_release_required_artifacts)
+    mustHaveWorkspaceWithArtefactsFromUpstreamProjects "${jobName}" "${buildNumber}" "${requiredArtifacts}"
 
     # get os label
     # no mustHaveNextLabelName, because it's already calculated
@@ -364,7 +365,8 @@ createReleaseTag() {
     local jobName=$1
     local buildNumber=$2
     local workspace=$(getWorkspaceName)
-    mustHaveWorkspaceWithArtefactsFromUpstreamProjects ${jobName} ${buildNumber}
+    local requiredArtifacts=$(getConfig LFS_CI_UC_release_required_artifacts)
+    mustHaveWorkspaceWithArtefactsFromUpstreamProjects "${jobName}" "${buildNumber}" "${requiredArtifacts}"
 
     # get os label
     # no mustHaveNextLabelName, because it's already calculated
