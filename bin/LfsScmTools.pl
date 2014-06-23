@@ -1,4 +1,5 @@
 #!/usr/bin/env perl
+# vim:foldmethod=marker 
 
 package Object; # {{{
 ## @fn    Object
@@ -1494,22 +1495,19 @@ sub prepare {
         if( $msg =~ m/^.*(BTS[A-Z]*-[0-9]*)\s*PR\s*([^:]*)(.*$)/  ) {
             push @{ $self->{PR} }, { jira => $1,
                                      nr   => $2,
-                                     text => $3,
-            };
+                                     text => $3, };
         }
         # change note
         if( $msg =~ m/^.*(BTS[A-Z]-[0-9]*)\s*CN\s*([^ :]*)(.*$)/ ) {
             push @{ $self->{CN}}, { jira => $1,
                                     nr   => $2,
-                                    text => $3,
-            };
+                                    text => $3, };
         }
         # new feature
         if( $msg =~ m/^.*(BTS[A-Z]-[0-9]*)\s*NF\s*([^ t:]*)(.*$)/ ) {
             push @{ $self->{NF}}, { jira => $1,
                                     nr   => $2,
-                                    text => $3,
-            };
+                                    text => $3, };
         }
         # notes
         if( $msg =~ m/Transport Drivers/ ) {
@@ -1517,10 +1515,9 @@ sub prepare {
         }
 
         # %FIN PR=PR123456 foobar
-        if( $msg =~ m/^[#%]FIN\s+[%@](PR|NF|CN)=(\w+)(.*)/ ) {
+        if( $msg =~ m/\s*[#%]FIN\s+[%@](PR|NF|CN)=(\w+)(.*)/ ) {
             push @{ $self->{ $1 } }, { nr   => $2,
-                                       text => $2 . $3,
-            };
+                                       text => $2 . $3, };
         }
     }
 
@@ -1536,9 +1533,9 @@ sub prepare {
     # __TAGNAME__
     $self->{data}{TAGNAME} = $self->{tagName};
     # __DATE__
-    $self->{data}{DATE} = strftime( "%Y-%m-%d", localtime());
+    $self->{data}{DATE} = strftime( "%Y-%m-%d", gmtime());
     # __TIME__
-    $self->{data}{DATE} = strftime( "%H:%M:%S", localtime());
+    $self->{data}{TIME} = strftime( "%H:%M:%SZ", gmtime());
     # __BASED_ON__
     $self->{data}{BASED_ON} = "TODO";
     # __BRANCH__
@@ -1578,7 +1575,32 @@ sub prepare {
                                     @{ $self->{NF} || [] }
                                   );
     # __BASELINES__
-    $self->{data}{SVN_REPOS_UR} = "";
+    my @baselineFiles = qw ( bld/bld-externalComponents-summary/externalComponents );
+    push @baselineFiles, glob( "bld/bld-fsmpsl-*/results/doc/versions/fpga_baselines.txt" );
+
+    foreach my $file ( @baselineFiles ) {
+        open FILE, $file or die "can not open file $file";
+        while( my $line = <FILE> ) {
+            chomp( $line );
+            if( $line =~ m/^(\w+).*\s*=\s*(.*)$/ ) {
+                push @{ $self->{baselines} }, { baseline => uc $1,
+                                                tag      => $2 };
+            }
+            if( $line =~ m/^((PS_LFS_FW)_.*)$/ ) {
+                push @{ $self->{baselines} }, { baseline => $2,
+                                                tag      => $1 };
+            }
+        }
+    }
+
+    $self->{data}{BASELINES} = join( "\n    ", 
+                                        map { sprintf( '<baseline name="%s" auto_create="true">%s</baseline>',
+                                                         $_->{baseline},
+                                                         $_->{tag},
+                                                     ) }
+                                         @{ $self->{baselines} || [] }
+                                     );
+
     # __CHANGENOTES__
     $self->{data}{CHANGENOTES} = join( "\n        ", 
                                         map { sprintf( "<changenote id=\"CN %s\">CN %s%s</fault>",
@@ -1595,9 +1617,7 @@ sub prepare {
 
 sub execute {
     my $self = shift;
-
-    print Dumper( $self );
-
+    print $self->{template};
     return;
 }
 
@@ -1627,7 +1647,8 @@ use strict;
 use warnings;
 
 use parent qw( -norequire Object );
-use lib "$ENV{LFS_CI_ROOT}/lib/perl5/";
+use lib sprintf( "%s/lib/perl5/", $ENV{LFS_CI_ROOT} || "." );
+
 
 use XML::Simple;
 use Data::Dumper;
@@ -1753,9 +1774,10 @@ use Data::Dumper;
 
 sub prepare {
     my $self = shift;
-    getopts( "r:u:", \my %opts );
+    getopts( "r:u:i:", \my %opts );
     $self->{regex} = $opts{r} || die "no regex";
     $self->{url}   = $opts{u} || die "no svn url";
+    $self->{incr}  = $opts{i} // 1;
 
     return;
 }
@@ -1780,7 +1802,7 @@ sub execute {
     if( scalar( @okList ) ) {
         $lastTagLastByte = pop @okList;
     }
-    my $newTagLastByte = sprintf( "%02d", $lastTagLastByte + 1 );
+    my $newTagLastByte = sprintf( "%02d", $lastTagLastByte + $self->{incr} );
     $newTag =~ s/\(.*\)/$newTagLastByte/g;
 
     printf $newTag;

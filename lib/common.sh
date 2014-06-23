@@ -246,7 +246,6 @@ createTempDirectory() {
 #  @return  <none>
 cleanupTempFiles() {
     [[ -d ${LFS_CI_TEMPDIR} ]] && rm -rf ${LFS_CI_TEMPDIR}
-    echo cleanup tmp dir ${LFS_CI_TEMPDIR}
     return
 }
 
@@ -329,6 +328,36 @@ mustHaveNextLabelName() {
     fi
 
     export LFS_CI_NEXT_LABEL_NAME="${label}"
+
+    return
+}
+
+mustHaveCurrentLabelName() {
+
+    local branch=$(getBranchName)
+    mustHaveBranchName
+
+    local regex=${branchToTagRegexMap["${branch}"]}
+    mustHaveValue "${regex}" "branch to tag regex map"
+
+    local repos=$(getConfig lfsOsDeliveryRepos)
+
+    info "branch ${branch} has release label regex ${regex}"
+    info "using repos ${repos}"
+
+    local label=$(${LFS_CI_ROOT}/bin/getNewTagName -u ${repos}/tags -r "${regex}" -i 0)
+    mustHaveValue "${label}" "next release label name"
+
+    local taskName=$(getProductNameFromJobName)
+    if [[ "${taskName}" == "UBOOT" ]] ; then
+        label=$(echo ${label} | sed -e 's/PS_LFS_OS_/LFS/' \
+                                    -e 's/PS_LFS_BT_/LBT/' \
+                                    -e 's/20//' \
+                                    -e 's/_//g')
+        info "reajusting label to ${label}"
+    fi
+
+    export LFS_CI_CURRENT_LABEL_NAME="${label}"
 
     return
 }

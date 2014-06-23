@@ -58,7 +58,7 @@ ci_job_release() {
     mustHaveValue ${releaseLabel}
     mustHaveValue "${productName}" "product name"
 
-    setBuildDescription "${JOB_NAME}" "${BUILD_NUMBER}" "${releaseLabel}"
+    # setBuildDescription "${JOB_NAME}" "${BUILD_NUMBER}" "${releaseLabel}"
 
     info "found package job: ${packageJobName} / ${packageBuildNumber}"
     info "found build   job: ${buildJobName} / ${buildBuildNumber}"
@@ -184,66 +184,65 @@ createReleaseNoteTextFile() {
     local buildBuildNumber=$4
 
     # get the change log file from master
-    local buildDirectory=$(getBuildDirectoryOnMaster ${testedJobName} ${testedBuildNumber})
+    local buildDirectory=$(getBuildDirectoryOnMaster ${JOB_NAME} ${BUILD_NUMBER})
     local serverName=$(getConfig jenkinsMasterServerHostName)
 
     local workspace=$(getWorkspaceName)
     mustHaveWorkspaceName
     mustHaveCleanWorkspace
     mustHaveWritableWorkspace
-    mustHaveNextLabelName
-    local releaseLabel=$(getNextReleaseLabel)
+
+    mustHaveCurrentLabelName
+    local releaseLabel=${LFS_CI_CURRENT_LABEL_NAME}
+    mustHaveValue "${releaseLabel}" "next release label name"
+
+    info "new release label is ${releaseLabel}"
 
     execute rsync -ae ssh ${serverName}:${buildDirectory}/changelog.xml ${workspace}
 
     copyArtifactsToWorkspace "${buildJobName}" "${buildBuildNumber}" "externalComponents fsmpsl psl fsmci"
 
-    # TODO: demx2fk3 2014-05-28 annotate with additonal informations
-
     # convert the changelog xml to a release note
     cd ${workspace}
+    execute rm -f releasenote.txt releasenote.xml
 
     ${LFS_CI_ROOT}/bin/getReleaseNoteContent -t ${releaseLabel} -f ${LFS_CI_ROOT}/etc/file.cfg > releasenote.txt
     mustBeSuccessfull "$?" "getReleaseNoteContent"
+
     ${LFS_CI_ROOT}/bin/getReleaseNoteXML  -t ${releaseLabel} -f ${LFS_CI_ROOT}/etc/file.cfg > releasenote.xml
     mustBeSuccessfull "$?" "getReleaseNoteXML"
 
-    info "upload to wft"
+    # check with wft
+    info "validating release note"
+    local wftApiKey=$(getConfig WORKFLOWTOOL_api_key)
+    local wftReleaseNoteValidate=$(getConfig WORKFLOWTOOL_url_releasenote_validation)
+    local wftReleaseNoteXsd=$(getConfig WORKFLOWTOOL_url_releasenote_xsd)
+
+    # local check first
+    execute rm -f releasenote.xsd
+    execute curl -k ${wftReleaseNoteXsd} --output releasenote.xsd
+    mustExistFile releasenote.xsd
+
+    execute xmllint --schema releasenote.xsd releasenote.xml
+
+    # remove check with wft next
+    execute curl -k ${wftReleaseNoteValidate} \
+                 -F access_key=${wftApiKey}   \
+                 -F file=@releasenote.xml                      
+
+    # upload to workflow tool
+    info "TODO: upload to wft"
+    local wftCreateRelease=$(getConfig WORKFLOWTOOL_url_create_release)
+    local wftUploadAttachment=$(getConfig WORKFLOWTOOL_url_upload_attachment)
 
     info "send release note"
+    execute ${LFS_CI_ROOT}/bin/sendReleaseNote  -r releasenote.txt             \
+                                                -t ${releaseLabel}             \
+                                                -f ${LFS_CI_ROOT}/etc/file.cfg
 
+    info "release is done."
     return
 }
-
-## @fn      createReleaseNoteXmlFile()
-#  @brief   create a release note in xml format
-#  @todo    not implemented
-#  @param   <none>
-#  @return  <none>
-createReleaseNoteXmlFile() {
-    requiredParameters JOB_NAME BUILD_NUMBER        
-
-    # get the change log file from master
-    local buildDirectory=$(getBuildDirectoryOnMaster)
-    local serverName=$(getConfig jenkinsMasterServerHostName)
-
-    local workspace=$(getWorkspaceName)
-    mustHaveWorkspaceName
-    mustHaveCleanWorkspace
-    mustHaveWritableWorkspace
-
-    execute rsync -ae ssh ${serverName}:${buildDirectory}/changelog.xml ${workspace}
-    
-    # convert changelog to release note xml file
-
-    return
-}
-
-releaseBuildToWorkFlowTool() {
-    requiredParameters JOB_NAME BUILD_NUMBER        
-    return
-}
-
 
 ## @fn      createTagOnSourceRepository( $jobName, $buildNumber )
 #  @brief   create a tag(s) on source repository 
