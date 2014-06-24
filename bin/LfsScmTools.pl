@@ -830,6 +830,7 @@ sub sourceParameter {
     my $self = shift;
 
     # check for --source
+    # TODO: demx2fk3 2014-06-24 fixme
     if( scalar( @{ $self->{dst} } ) > 1
         && $self->{dst}->[1] =~ m/^--source=(.*)/
       )
