@@ -831,6 +831,7 @@ sub sourceParameter {
 
     # check for --source
     # TODO: demx2fk3 2014-06-24 fixme
+#    if( $self->{src} =~ m/bld-
     if( scalar( @{ $self->{dst} } ) > 1
         && $self->{dst}->[1] =~ m/^--source=(.*)/
       )
