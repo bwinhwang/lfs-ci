@@ -256,6 +256,7 @@ _createWorkspace() {
         mustHaveValue "${dir}" "build directory on master"
         info "copy revision state file from master"
         execute rsync -avP ssh ${master}:${dir}/revisionstate.xml ${WORKSPACE}/revisions.txt
+        rawDebug ${WORKSPACE}/revisions.txt
     fi
 
     local revision=
