@@ -245,13 +245,27 @@ _createWorkspace() {
         preCheckoutPatchWorkspace
     fi
 
+    if [[ "${UPSTREAM_PROJECT}" && "${UPSTREAM_NUMBER}" ]] ; then
+        local dir=$(getBuildDirectoryOnMaster ${UPSTREAM_PROJECT} ${UPSTREAM_NUMBER})
+        local master=$(getConfig jenkinsMasterServerHostName)
+        mustHaveValue "${dir}" "build directory on master"
+        info "copy revision state file from master"
+        execute rsync -avP ssh ${master}:${dir}/revisionstate.xml ${WORKSPACE}/revisions.txt
+    fi
+
+    local revision=
+    if [[ -r "${WORKSPACE}/revisions.txt" ]] ; then
+        # TODO: demx2fk3 2014-06-25 stupid bug: adddir will not update to a higher revision, if the src-directory already exists...
+        # revision=$(grep "^${src} " ${WORKSPACE}/revisions.txt | cut -d" " -f3)
+        revision=$(cut -d" " -f 3 ${WORKSPACE}/revisions.txt | sort -n -u | tail -n 1)
+    fi
+
     info "checking out ${srcDirectory}"
-    execute cd ${workspace}
-    execute ${build} adddir ${srcDirectory}
+    checkoutSubprojectDirectories ${srcDirectory} ${revision}
 
     info "getting required src-directories for ${srcDirectory}"
     # local buildTargets=$(${LFS_CI_ROOT}/bin/getDependencies ${srcDirectory} 2>/dev/null )
-    local buildTargets=$(cd ${workspace} ; build -C src-project_${productName}_${subTaskName}) 
+    local buildTargets=$(${build} -C src-project_${productName}_${subTaskName}) 
     if [[ ! "${buildTargets}" ]] ; then
         error "no build targets configured"
         exit 1;
@@ -262,14 +276,6 @@ _createWorkspace() {
     local onlySourceDirectory=$(getConfig LFS_CI_UC_build_onlySourceDirectories)
     if [[ ${onlySourceDirectory} ]] ; then
         buildTargets=${onlySourceDirectory}
-    fi
-
-    if [[ "${UPSTREAM_PROJECT}" && "${UPSTREAM_NUMBER}" ]] ; then
-        local dir=$(getBuildDirectoryOnMaster ${UPSTREAM_PROJECT} ${UPSTREAM_NUMBER})
-        local master=$(getConfig jenkinsMasterServerHostName)
-        mustHaveValue "${dir}" "build directory on master"
-        info "copy revision state file from master"
-        execute rsync -avP ssh ${master}:${dir}/revisionstate.xml ${WORKSPACE}/revisions.txt
     fi
 
 
