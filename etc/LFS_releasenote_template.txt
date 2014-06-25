@@ -4,12 +4,12 @@ PS LFS Release __LFS_CI_PS_LFS_OS_TAG_NAME__ is available in Subversion
 
 __RELEASE_NOTE_CONTENT__
 
-__LFS_CI_PS_LFS_OS_TAG_NAME__
+=== __LFS_CI_PS_LFS_REL_TAG_NAME__ ===
 
 Download from Subversion:
 __DELIVERY_REPOS__/tags/__LFS_CI_PS_LFS_REL_TAG_NAME__
 
-__LFS_CI_PS_LFS_OS_TAG_NAME__
+=== __LFS_CI_PS_LFS_OS_TAG_NAME__ ===
 
 Download from Subversion:
 __SOURCE_REPOS__/tags/__LFS_CI_PS_LFS_OS_TAG_NAME__
