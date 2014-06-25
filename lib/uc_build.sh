@@ -207,6 +207,9 @@ _createWorkspace() {
     local target=$(getTargetBoardName)
     mustHaveTargetBoardName
 
+    local productName=$(getProductNameFromJobName)
+    mustHaveValue "${productName}" "productName"
+
     local workspace=$(getWorkspaceName)
     mustHaveWorkspaceName
     mustHaveCleanWorkspace
@@ -242,8 +245,9 @@ _createWorkspace() {
         preCheckoutPatchWorkspace
     fi
 
-    info "getting dependencies for ${srcDirectory}"
-    local buildTargets=$(${LFS_CI_ROOT}/bin/getDependencies ${srcDirectory} 2>/dev/null )
+    info "getting required src-directories for ${srcDirectory}"
+    # local buildTargets=$(${LFS_CI_ROOT}/bin/getDependencies ${srcDirectory} 2>/dev/null )
+    local buildTargets=$(${build} -C src-project_${productName}_${subTaskName}) 
     if [[ ! "${buildTargets}" ]] ; then
         error "no build targets configured"
         exit 1;
