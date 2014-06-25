@@ -51,6 +51,9 @@ requiredParameters LFS_CI_ROOT JOB_NAME HOSTNAME USER
 showAllEnvironmentVariables
 
 info "starting jenkins job \"${JOB_NAME}\" on ${HOSTNAME} as ${USER}"
+if [[ "${UPSTREAM_PROJECT}" && "${UPSTREAM_NUMBER}" ]] ; then
+    info "upstream job ${UPSTREAM_PROJECT} / ${UPSTREAM_NUMBER}"
+fi
 
 # first dispatcher, calling the correct script or function
 case "${JOB_NAME}" in
