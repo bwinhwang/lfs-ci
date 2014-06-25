@@ -205,7 +205,7 @@ createReleaseNoteTextFile() {
     mustHaveValue "${releaseLabel}" "next release label name"
 
     export LFS_CI_PS_LFS_OS_TAG_NAME=${LFS_CI_CURRENT_LABEL_NAME}
-    export LFS_CI_PS_LFS_REL_TAG_NAME=${LFS_CI_CURRENT_LABEL_NAME//PS_LFS_OS_/PS_LFS_REL_/}
+    export LFS_CI_PS_LFS_REL_TAG_NAME=${LFS_CI_CURRENT_LABEL_NAME//PS_LFS_OS_/PS_LFS_REL_}
 
     info "new release label is ${releaseLabel}"
 
