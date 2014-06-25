@@ -96,6 +96,7 @@ ci_job_release() {
         ;;
         summary)
             # no op
+            createReleaseNoteTextFile "${TESTED_BUILD_JOBNAME}" "${TESTED_BUILD_NUMBER}" "${buildJobName}" "${buildBuildNumber}"
         ;;
         *)
             error "subJob not known (${subJob})"

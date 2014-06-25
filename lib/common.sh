@@ -337,7 +337,7 @@ mustHaveCurrentLabelName() {
     local branch=$(getBranchName)
     mustHaveBranchName
 
-    local regex=${branchToTagRegexMap["${branch}"]}
+    local regex=$(getConfig LFS_PROD_branch_to_tag_regex)
     mustHaveValue "${regex}" "branch to tag regex map"
 
     local repos=$(getConfig lfsOsDeliveryRepos)
