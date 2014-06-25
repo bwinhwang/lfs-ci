@@ -73,6 +73,7 @@ ci_job_build_version() {
 
     newCiLabel="${label}-ci${postfix}"
 
+    info "new version is ${newCiLabel}"
     setBuildDescription "${JOB_NAME}" "${BUILD_NUMBER}" "${newCiLabel}"
 
     debug "writing new label file in workspace ${workspace}"
