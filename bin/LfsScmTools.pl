@@ -1289,8 +1289,8 @@ sub execute {
     my $svn = Singelton::svn();
 
     my $dependencies = $svn->cat(  url => $self->{url} );
-    # my $rev          = $svn->info( url => $self->{url} )->{entry}->{commit}->{revision};
-    my $rev          = $svn->info( url => $self->{url} )->{entry}->{revision};
+    my $rev          = $svn->info( url => $self->{url} )->{entry}->{commit}->{revision};
+    # my $rev          = $svn->info( url => $self->{url} )->{entry}->{revision};
 
     open FILE, sprintf( ">%s", $self->{fileName} ) or die "can not open temp file";
     print FILE $dependencies;
@@ -1479,6 +1479,7 @@ sub prepare {
     # r: := release note template file
     getopts( "r:t:f:", \my %opts );
     $self->{tagName}         = $opts{t} || die "no t";
+    $self->{repos}           = $opts{t} || die "no t";
     $self->{configFileName}  = $opts{f} || die "no f";
 
     my $config = Singelton::config();
