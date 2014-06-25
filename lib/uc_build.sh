@@ -250,8 +250,8 @@ _createWorkspace() {
         preCheckoutPatchWorkspace
     fi
 
-    if [[ "${UPSTREAM_PROJECT}" && "${UPSTREAM_NUMBER}" ]] ; then
-        local dir=$(getBuildDirectoryOnMaster ${UPSTREAM_PROJECT} ${UPSTREAM_NUMBER})
+    if [[ "${UPSTREAM_PROJECT}" && "${UPSTREAM_BUILD}" ]] ; then
+        local dir=$(getBuildDirectoryOnMaster ${UPSTREAM_PROJECT} ${UPSTREAM_BUILD})
         local master=$(getConfig jenkinsMasterServerHostName)
         mustHaveValue "${dir}" "build directory on master"
         info "copy revision state file from master"

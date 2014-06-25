@@ -16,6 +16,10 @@ source ${LFS_CI_ROOT}/lib/config.sh
 source ${LFS_CI_ROOT}/lib/jenkins.sh
 source ${LFS_CI_ROOT}/lib/subversion.sh
 
+# load the properties from the custom SCM jenkins plugin
+if [[ -f ${WORKSPACE}/.properties ]] ; then
+    source ${WORKSPACE}/.properties
+fi
 
 # start the logfile
 initTempDirectory
@@ -29,12 +33,6 @@ exit_add stopLogfile
 # for better debugging
 PS4='+(${BASH_SOURCE}:${LINENO}): ${FUNCNAME[0]:+${FUNCNAME[0]}(): }'
 export PS4
-
-# load the properties from the custom SCM jenkins plugin
-if [[ -f ${WORKSPACE}/.properties ]] ; then
-    source ${WORKSPACE}/.properties
-    info "sourcing ${WORKSPACE}/.propertie" 
-fi
 
 LFS_CI_git_version=$(cd ${LFS_CI_ROOT} ; git describe)
 debug "used lfs ci git version ${LFS_CI_git_version}"
@@ -52,8 +50,8 @@ requiredParameters LFS_CI_ROOT JOB_NAME HOSTNAME USER
 showAllEnvironmentVariables
 
 info "starting jenkins job \"${JOB_NAME}\" on ${HOSTNAME} as ${USER}"
-if [[ "${UPSTREAM_PROJECT}" && "${UPSTREAM_NUMBER}" ]] ; then
-    info "upstream job ${UPSTREAM_PROJECT} / ${UPSTREAM_NUMBER}"
+if [[ "${UPSTREAM_PROJECT}" && "${UPSTREAM_BUILD}" ]] ; then
+    info "upstream job ${UPSTREAM_PROJECT} / ${UPSTREAM_BUILD}"
 fi
 
 # first dispatcher, calling the correct script or function
