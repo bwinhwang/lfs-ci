@@ -1,8 +1,10 @@
 Dear Colleagues,
 
-PS LFS Release __TAGNAME__ is available in Subversion
+PS LFS Release __LFS_CI_PS_LFS_OS_TAG_NAME__ is available in Subversion
 
-__DELIVERY_REPOS__/tags/__TAGNAME__
+__DELIVERY_REPOS__/tags/__LFS_CI_PS_LFS_REL_TAG_NAME__
+
+__SOURCE_REPOS__/tags/__LFS_CI_PS_LFS_OS_TAG_NAME__
 
 __RELEASE_NOTE_CONTENT__
 

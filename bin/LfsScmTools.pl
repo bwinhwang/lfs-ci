@@ -1682,6 +1682,7 @@ sub prepare {
     $self->{templateFile}    = $config->getConfig( name => "LFS_PROD_ReleaseNote_TemplateFile" );
     $self->{reposName}       = $config->getConfig( name => "lfsRelDeliveryRepos" );
 
+
     if( not -f $self->{releaseNoteFile} ) {
         die "no release note file";
     }
@@ -1691,20 +1692,23 @@ sub prepare {
 
     open( TEMPLATE, $self->{templateFile} ) 
         or die sprintf( "can not open template file %s", $self->{releaseNoteFile} );
-    my $template = join( "", <TEMPLATE> );
+    $self->{releaseNote} = join( "", <TEMPLATE> );
     close TEMPLATE;
 
     open( RELEASENOTE, $self->{releaseNoteFile} ) 
         or die sprintf( "can not open release note content file %s", $self->{releaseNoteFile} );
-    my $releaseNoteContent = join( "", <RELEASENOTE> );
+    $self->{data}{RELEASE_NOTE_CONTENT} = join( "", <RELEASENOTE> );
     close RELEASENOTE;
 
-    $template =~ s/__TAGNAME__/$self->{tagName}/g;
-    $template =~ s/__RELEASE_NOTE_CONTENT__/$releaseNoteContent/g;
-    $template =~ s/__DELIVERY_REPOS__/$self->{reposName}/g;
 
-    $self->{subject}     =~ s/__TAGNAME__/$self->{tagName}/g;
-    $self->{releaseNote} = $template;
+    $self->{data}{DELIVERY_REPOS}       = $config->getConfig( name => "lfsRelDeliveryRepos" );
+    $self->{data}{SOURCE_REPOS}         = $config->getConfig( name => "lfsOsDeliveryRepos" );
+    $self->{data}{TAGNAME}              = $self->{tagName};
+
+    $template =~ s:__([A-Z_]*)__:  $self->{data}{$1} \\ $config->getConfig( name => $1 ) :xg;
+
+    $self->{subject}     =~ s:__([A-Z_]*)__:  $self->{data}{$1} \\ $config->getConfig( name => $1 ) :xg; 
+    $self->{releaseNote} =~ s:__([A-Z_]*)__:  $self->{data}{$1} \\ $config->getConfig( name => $1 ) :xg;  
 
     return;
 }
