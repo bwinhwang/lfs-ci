@@ -60,12 +60,10 @@ actionCheckout() {
 
     local server=$(getConfig jenkinsMasterServerHostName)
 
-    debug "get the old upstream project data..."
+    debug "get the old upstream project data... from ${OLD_REVISION_STATE_FILE}"
     { read oldUpstreamProjectName ; 
       read oldUpstreamBuildNumber ;  } < "${OLD_REVISION_STATE_FILE}"
     debug "old upstream project data are: ${oldUpstreamProjectName} / ${oldUpstreamBuildNumber}"
-
-    echo ${TESTED_BUILD}
 
     build=${UPSTREAM_BUILD}
     while [[ ${build} -gt ${oldUpstreamBuildNumber} ]] ; do
