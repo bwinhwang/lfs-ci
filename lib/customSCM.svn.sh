@@ -152,7 +152,7 @@ actionCheckout() {
             echo ------------------
 
             # check for an empty file 
-            if ${LFS_CI_ROOT}/bin/xpath -e '/log/entry/' ${tmpChangeLogFile} | grep -q "No nodes found" ; then
+            if [[ $(wc -l ${tmpChangeLogFile} ) -eq 3 ]] ; then
                 trace "empty xml file, skipping"
                 continue
             fi
