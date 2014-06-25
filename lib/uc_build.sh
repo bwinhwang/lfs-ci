@@ -255,7 +255,7 @@ _createWorkspace() {
         local master=$(getConfig jenkinsMasterServerHostName)
         mustHaveValue "${dir}" "build directory on master"
         info "copy revision state file from master"
-        execute rsync -avP ssh ${master}:${dir}/revisionstate.xml ${WORKSPACE}/revisions.txt
+        execute rsync -avPe ssh ${master}:${dir}/revisionstate.xml ${WORKSPACE}/revisions.txt
         rawDebug ${WORKSPACE}/revisions.txt
     fi
 
