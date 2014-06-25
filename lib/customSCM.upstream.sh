@@ -68,7 +68,7 @@ actionCheckout() {
     build=${UPSTREAM_BUILD}
     while [[ ${build} -gt ${oldUpstreamBuildNumber} ]] ; do
         # TODO: demx2fk3 2014-04-07 use configuration for this
-        buildDirectory=/var/fpwork/demx2fk3/lfs-jenkins/home/jobs/${UPSTREAM_PROJECT}/builds/${build}
+        local buildDirectory=/var/fpwork/demx2fk3/lfs-jenkins/home/jobs/${UPSTREAM_PROJECT}/builds/${build}
         # we must only concatenate non-empty logs; empty logs with a
         # single "<log/>" entry will break the concatenation:
         debug "checking ${UPSTREAM_PROJECT} / ${build}"
@@ -98,11 +98,12 @@ actionCheckout() {
     fi
 
     # copy revisions.txt from upstream
-    if runOnMaster test -f ${buildDirectory}/revisionstate.xml ; then
-        execute rsync -a ${server}:${buildDirectory}/revisionstate.xml ${WORKSPACE}/revisions.txt
-    else
-        touch ${WORKSPACE}/revisions.txt
-    fi
+#     local buildDirectory=/var/fpwork/demx2fk3/lfs-jenkins/home/jobs/${UPSTREAM_PROJECT}/builds/${UPSTREAM_BUILD}
+#     if runOnMaster test -f ${buildDirectory}/revisionstate.xml ; then
+#         execute rsync -a ${server}:${buildDirectory}/revisionstate.xml ${WORKSPACE}/revisions.txt
+#     else
+#         touch ${WORKSPACE}/revisions.txt
+#     fi
 
     return
 }
