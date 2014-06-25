@@ -120,6 +120,7 @@ actionCalculate() {
     echo ${UPSTREAM_BUILD}     >>  "${REVISION_STATE_FILE}"
 
     # upstream handling if missing
+    debug "storing upstream info in .properties"
     echo UPSTREAM_PROJECT=${UPSTREAM_PROJECT}   > ${WORKSPACE}/.properties
     echo UPSTREAM_BUILD=${UPSTREAM_BUILD}      >> ${WORKSPACE}/.properties
 
