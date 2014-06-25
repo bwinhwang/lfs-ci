@@ -147,6 +147,10 @@ _build() {
     local target=$(getTargetBoardName)
     mustHaveTargetBoardName
 
+    local subTaskName=$(getSubTaskNameFromJobName)
+    local productName=$(getProductNameFromJobName)
+    mustHaveValue "${productName}" "productName"
+
     mustHaveNextCiLabelName
     local label=$(getNextCiLabelName)
     mustHaveValue ${label}
@@ -164,7 +168,8 @@ _build() {
 
     rawDebug ${cfgFile}
 
-    local makeTarget=$(getConfig LFS_CI_UC_build_subsystem_to_build)-${target}
+    # local makeTarget=$(getConfig LFS_CI_UC_build_subsystem_to_build)-${target}
+    local makeTarget=$(build -C src-project final-build-target_${productName}_${subTaskName})-${target}
 
     info "executing all targets in parallel with ${makeTarget} and label=${label}"
     execute make -f ${cfgFile} ${makeTarget} 
