@@ -1705,8 +1705,8 @@ sub prepare {
     $self->{data}{SOURCE_REPOS}         = $config->getConfig( name => "lfsOsDeliveryRepos" );
     $self->{data}{TAGNAME}              = $self->{tagName};
 
-    $self->{subject}     =~ s:__([A-Z_]*)__:  $self->{data}{$1} // $config->getConfig( name => $1 ) :xg; 
-    $self->{releaseNote} =~ s:__([A-Z_]*)__:  $self->{data}{$1} // $config->getConfig( name => $1 ) :xg;  
+    $self->{subject}     =~ s:__([A-Z_]*)__:  $self->{data}{$1} // $config->getConfig( name => $1 ) :eg; 
+    $self->{releaseNote} =~ s:__([A-Z_]*)__:  $self->{data}{$1} // $config->getConfig( name => $1 ) :eg;  
 
     return;
 }
