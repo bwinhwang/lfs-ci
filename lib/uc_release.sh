@@ -187,6 +187,13 @@ createReleaseNoteTextFile() {
     # get the change log file from master
     local buildDirectory=$(getBuildDirectoryOnMaster ${JOB_NAME} ${BUILD_NUMBER})
     local serverName=$(getConfig jenkinsMasterServerHostName)
+    
+    # TODO: demx2fk3 2014-06-25 remove the export block and do it in a different way
+    export productName=$(getProductNameFromJobName)
+    export taskName=$(getTaskNameFromJobName)
+    export subTaskName=$(getSubTaskNameFromJobName)
+    export location=$(getLocationName)
+    export config=$(getTargetBoardName)
 
     local workspace=$(getWorkspaceName)
     mustHaveWorkspaceName

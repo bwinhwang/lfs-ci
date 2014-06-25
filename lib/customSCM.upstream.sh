@@ -65,6 +65,8 @@ actionCheckout() {
       read oldUpstreamBuildNumber ;  } < "${OLD_REVISION_STATE_FILE}"
     debug "old upstream project data are: ${oldUpstreamProjectName} / ${oldUpstreamBuildNumber}"
 
+    echo ${TESTED_BUILD}
+
     build=${UPSTREAM_BUILD}
     while [[ ${build} -gt ${oldUpstreamBuildNumber} ]] ; do
         # TODO: demx2fk3 2014-04-07 use configuration for this
