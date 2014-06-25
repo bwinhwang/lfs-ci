@@ -147,7 +147,15 @@ actionCheckout() {
                 exit 1
             fi
 
+            echo ------------------
             cat ${tmpChangeLogFile}
+            echo ------------------
+
+            # check for an empty file 
+            if ${LFS_CI_ROOT}/bin/xpath -e '/log/entry/' ${tmpChangeLogFile} | grep -q "No nodes found" ; then
+                trace "empty xml file, skipping"
+                continue
+            fi
 
             if [[ ! -s ${CHANGELOG} ]] ; then
                 debug "copy ${tmpChangeLogFile} to ${CHANGELOG}"
