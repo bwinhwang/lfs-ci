@@ -246,7 +246,7 @@ _createWorkspace() {
     fi
 
     info "checking out ${srcDirectory}"
-    execute $(build) adddir ${srcDirectory}
+    execute ${build} adddir ${srcDirectory}
 
     info "getting required src-directories for ${srcDirectory}"
     # local buildTargets=$(${LFS_CI_ROOT}/bin/getDependencies ${srcDirectory} 2>/dev/null )
