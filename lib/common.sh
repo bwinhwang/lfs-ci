@@ -165,6 +165,9 @@ switchToNewLocation() {
 #  @return  <none>
 setupNewWorkspace() {
     local workspace=$(getWorkspaceName) 
+
+    debug "creating a new workspace in \"${workspace}\""
+
     execute cd "${workspace}"
     execute build setup
     return
@@ -216,6 +219,8 @@ checkoutSubprojectDirectories() {
     if [[ ${revision} ]] ; then
         optRev="--revision=${revision}"
     fi
+
+    info "checking out ${project} with ${revision:-latest} revision"
     execute build adddir "${project}" ${optRev}
 
     return
@@ -506,6 +511,27 @@ getWorkspaceDirectoryOfBuild() {
 
     local pathName=$(getConfig jenkinsMasterServerPath)
     echo ${pathName}/jobs/${jobName}/workspace/workspace/
+
+    return
+}
+
+copyRevisionStateFileToWorkspace() {
+    local jobName=$1
+    local buildNumber=$2
+
+    requiredParameters WORKSPACE
+
+    if [[ ! "${jobName}" || ! "${buildNumber}" ]] ; then
+        return
+    fi
+    local dir=$(getBuildDirectoryOnMaster ${jobName} ${buildNumber})
+    local master=$(getConfig jenkinsMasterServerHostName)
+
+    mustHaveValue "${dir}" "build directory on master"
+    debug "copy revision state file from master"
+    execute rsync -avPe ssh ${master}:${dir}/revisionstate.xml ${WORKSPACE}/revisions.txt
+
+    rawDebug ${WORKSPACE}/revisions.txt
 
     return
 }
