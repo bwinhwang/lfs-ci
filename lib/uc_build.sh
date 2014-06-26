@@ -155,40 +155,17 @@ _build() {
     local label=$(getNextCiLabelName)
     mustHaveValue ${label}
 
-    cd ${workspace}
-
-    info "store used baselines (bld) information"
+    execute cd ${workspace}
     storeExternalComponentBaselines
-
-    info "store svn revision information"
     storeRevisions ${target}
 
     info "creating temporary makefile"
     ${LFS_CI_ROOT}/bin/sortBuildsFromDependencies ${target} makefile ${label} > ${cfgFile}
-
     rawDebug ${cfgFile}
 
-    # local makeTarget=$(getConfig LFS_CI_UC_build_subsystem_to_build)-${target}
-    info "build -C src-project final-build-target_${productName}_${subTaskName}"
-
     local makeTarget=$(build -C src-project final-build-target_${productName}_${subTaskName})-${target}
-
     info "executing all targets in parallel with ${makeTarget} and label=${label}"
     execute make -f ${cfgFile} ${makeTarget} 
-
-
-#     ${LFS_CI_ROOT}/bin/sortBuildsFromDependencies ${target} legacy ${label} > ${cfgFile}
-#     rawDebug ${cfgFile}
-# 
-#     local amountOfTargets=$(wc -l ${cfgFile} | cut -d" " -f1)
-#     local counter=0
-# 
-#     while read SRC CFG
-#     do
-#         counter=$( expr ${counter} + 1 )
-#         info "(${counter}/${amountOfTargets}) building ${CFG} from ${SRC}..."
-#         execute build -C ${SRC} ${CFG} 
-#     done <${cfgFile}
 
     return 0
 }
@@ -445,6 +422,8 @@ storeExternalComponentBaselines() {
 
     local externalComponentFile=${workspace}/bld/bld-externalComponents-summary/externalComponents
 
+    info "store used baselines (bld) information"
+
     execute mkdir -p ${workspace}/bld/bld-externalComponents-summary/
     execute rm -f ${externalComponentFile}
 
@@ -477,6 +456,8 @@ storeRevisions() {
     mustHaveWorkspaceName
 
     local revisionsFile=${workspace}/bld/bld-externalComponents-${targetName}/usedRevisions.txt
+
+    info "store svn revision information"
 
     execute mkdir -p ${workspace}/bld/bld-externalComponents-${targetName}/
     execute rm -f ${revisionsFile}
