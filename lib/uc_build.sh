@@ -168,10 +168,12 @@ _build() {
 
     rawDebug ${cfgFile}
 
+    set -x
     # local makeTarget=$(getConfig LFS_CI_UC_build_subsystem_to_build)-${target}
     info "build -C src-project final-build-target_${productName}_${subTaskName}"
 
     local makeTarget=$(build -C src-project final-build-target_${productName}_${subTaskName})-${target}
+    set +x
 
     info "executing all targets in parallel with ${makeTarget} and label=${label}"
     execute make -f ${cfgFile} ${makeTarget} 
