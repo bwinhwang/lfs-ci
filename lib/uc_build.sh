@@ -168,12 +168,10 @@ _build() {
 
     rawDebug ${cfgFile}
 
-    set -x
     # local makeTarget=$(getConfig LFS_CI_UC_build_subsystem_to_build)-${target}
     info "build -C src-project final-build-target_${productName}_${subTaskName}"
 
     local makeTarget=$(build -C src-project final-build-target_${productName}_${subTaskName})-${target}
-    set +x
 
     info "executing all targets in parallel with ${makeTarget} and label=${label}"
     execute make -f ${cfgFile} ${makeTarget} 
@@ -266,6 +264,7 @@ _createWorkspace() {
 
     info "getting required src-directories for ${srcDirectory}"
     # local buildTargets=$(${LFS_CI_ROOT}/bin/getDependencies ${srcDirectory} 2>/dev/null )
+    execute "${build} -C ${srcDirectory} src-list_${productName}_${subTaskName}"
     local buildTargets=$(${build} -C ${srcDirectory} src-list_${productName}_${subTaskName}) 
     mustHaveValue "${buildTargets}" "no build targets configured"
     buildTargets="$(getConfig LFS_CI_UC_build_additionalSourceDirectories) ${buildTargets}"
