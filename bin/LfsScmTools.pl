@@ -241,6 +241,7 @@ sub loadDependencyTree {
 
     my $dependencyParser;
     my $svn = Singelton::svn();
+    $self->{tag} =\ "";
 
     # hack
     if( $self->{directory} eq "src-bos" and $self->{tag} eq "EMPTY" ) {
@@ -832,12 +833,10 @@ sub sourceParameter {
 
     # check for --source
     # TODO: demx2fk3 2014-06-24 fixme
-#    if( $self->{src} =~ m/bld-
-    if( scalar( @{ $self->{dst} } ) > 1
-        && $self->{dst}->[1] =~ m/^--source=(.*)/
-      )
-    {
-        return $1;
+    if( $self->{src} =~ m:bld/bld-([a-z0-9]*)-.*: ) {
+        if( -d sprintf( "src-%s", $1 ) ) {
+            return sprintf( "src-%s", $1 );
+        }
     }
 
     return;
@@ -921,8 +920,8 @@ sub getReporitoryOrLocation {
 
     foreach my $model (
                            @{ $self->{data}->{searchBranch} },
-                           $tag ? @{ $self->{data}->{searchTag} } : (),
-                           @{ $self->{data}->{searchTrunk} }
+                    $tag ? @{ $self->{data}->{searchTag}    } : (),
+                           @{ $self->{data}->{searchTrunk}  }
                       ) {
         if( $model->match( $subDir ) ) {
             return $model;
