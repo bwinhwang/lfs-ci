@@ -220,7 +220,7 @@ checkoutSubprojectDirectories() {
         optRev="--revision=${revision}"
     fi
 
-    info "checking out ${project} with ${revision:-latest} revision"
+    debug "checking out ${project} with revision ${revision:-latest}"
     execute build adddir "${project}" ${optRev}
 
     return
