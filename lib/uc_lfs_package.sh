@@ -41,7 +41,7 @@ ci_job_package() {
     copySysroot
     copyFactoryZip
 
-    removeBrokenSymlinks ${workspace}/upload/
+    removeBrokenSymlinks ${workspace}/upload/sys-root/
 
     copyReleaseCandidateToShare
 
