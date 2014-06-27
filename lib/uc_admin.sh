@@ -5,10 +5,10 @@
 #  @param   <none>
 #  @return  <none>
 ci_job_admin() {
-    local subJob=$(getTaskNameFromJobName)
+    local taskName=$(getTaskNameFromJobName)
     # mustHaveTargetBoardName
 
-    case ${subJob} in
+    case ${taskName} in
         backupJenkins)               backupJenkinsMasterServerInstallation ;;
         cleanUpArtifactsShare)       cleanupArtifactsShare                 ;;
         cleanupBaselineShares)       cleanupBaselineShares                 ;;
@@ -16,7 +16,7 @@ ci_job_admin() {
         cleanupOrphanWorkspaces)     cleanupOrphanWorkspaces               ;;
         synchronizeShare)            synchronizeShare                      ;;
         *)
-            error "subjob not known (${subjob})"
+            error "subjob not known (${taskName})"
             exit 1;
         ;;
     esac
