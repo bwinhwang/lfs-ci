@@ -14,12 +14,26 @@ ci_job_admin() {
         cleanupBaselineShares)       cleanupBaselineShares                 ;;
         cleanupOrphanJobDirectories) cleanupOrphanJobDirectories           ;;
         cleanupOrphanWorkspaces)     cleanupOrphanWorkspaces               ;;
+        synchronizeShare)            synchronizeShare                      ;;
         *)
             error "subjob not known (${subjob})"
             exit 1;
         ;;
     esac
 
+    return
+}
+
+synchronizeShare() {
+
+    requiredParameters LOCAL_SHARE REMOTE_SHARE REMOTE_SERVER
+
+    local localPath=${LOCAL_SHARE}
+    local remotePath=${REMOTE_SHARE}
+    local remoteServer=${REMOTE_SERVER}
+
+    info "synchronize ${localPath} to  ${remoteServer}:${remotePath}"
+    execute rsync -avrPe ssh ${localPath} ${remoteServer}:${remotePath}
     return
 }
 
