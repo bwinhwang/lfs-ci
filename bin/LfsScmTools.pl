@@ -1571,7 +1571,7 @@ sub prepare {
                                         );
     # __FEATURES__
     $self->{data}{FEATURES} = join( "\n        ", 
-                                    map { sprintf( "<feature id=\"%s\">%sNF %s</fault>",
+                                    map { sprintf( "<feature id=\"%s\">%sNF %s</feature>",
                                                     $_->{nr},
                                                     $_->{jira} ? sprintf( "%s: ", $_->{jira} ) : "",
                                                     $_->{text},
@@ -1607,7 +1607,7 @@ sub prepare {
 
     # __CHANGENOTES__
     $self->{data}{CHANGENOTES} = join( "\n        ", 
-                                        map { sprintf( "<changenote id=\"CN %s\">CN %s%s</fault>",
+                                        map { sprintf( "<changenote id=\"CN %s\">CN %s%s</changenote>",
                                                          $_->{nr},
                                                          $_->{text},
                                                      ) }
