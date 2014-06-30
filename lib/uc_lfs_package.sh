@@ -15,7 +15,7 @@ ci_job_package() {
     # from Jenkins: there are some environment variables, which are pointing to the downstream jobs
     # which are execute within this jenkins jobs. So we collect the artifacts from those jobs
     # and untar them in the workspace directory.
-
+    requiredParameters UPSTREAM_PROJECT UPSTREAM_BUILD
 
     local workspace=$(getWorkspaceName)
     mustHaveWorkspaceName
@@ -43,7 +43,7 @@ ci_job_package() {
 
     removeBrokenSymlinks ${workspace}/upload/sys-root/
 
-    copyReleaseCandidateToShare
+    # copyReleaseCandidateToShare
 
     return 0
 }
@@ -164,25 +164,44 @@ copySysroot() {
             exit 1
         fi
 
+        # handling libddal stuff            
         case ${destinationsArchitecture} in
             i686-pc-linux-gnu)
-                execute ln -sf ${dst}/usr/lib/libDDAL.so.fcmd libDDAL_fcmd.so
+                execute tar -xvz -C ${dst}/usr --strip-components=1 -f ${workspace}/bld/bld-ddal-fcmd/results/include/ifddal.tgz
+                execute ln -sf libDDAL.so.fcmd ${dst}/usr/lib/libDDAL_fcmd.so
+                execute ln -sf libDDAL.so.fcmd ${dst}/usr/lib/libDDAL.so
             ;;
             powerpc-e500-linux-gnu)
-                execute ln -sf ${dst}/usr/lib/libDDAL.so.fcmd libDDAL_fcmd.so
-                execute ln -sf ${dst}/usr/lib/libDDAL.so.fcmd libDDAL_fspc.so
+                execute tar -xvz -C ${dst}/usr --strip-components=1 -f ${workspace}/bld/bld-ddal-fcmd/results/include/ifddal.tgz
+                execute ln -sf libDDAL.so.fcmd ${dst}/usr/lib/libDDAL_fcmd.so
+                execute ln -sf libDDAL.so.fcmd ${dst}/usr/lib/libDDAL.so
+                execute ln -sf libDDAL.so.fcmd ${dst}/usr/lib/libDDAL_fspc.so
             ;;
             x86_64-pc-linux-gnu)
-                execute ln -sf ${dst}/usr/lib/libFSMDDAL.so.fcmd libFSMDDAL_fspc.so
+                execute tar -xvz -C ${dst}/usr --strip-components=1 -f ${workspace}/bld/bld-ddal-fcmd/results/include/fsmifdd.tgz
+                execute ln -sf libFSMDDAL.so.fcmd ${dst}/usr/lib/libFSMDDAL_fspc.so
+                execute ln -sf libFSMDDAL.so.fcmd ${dst}/usr/lib/libFSMDDAL.so
             ;;
             mips64-octeon2-linux-gnu)
-                execute ln -sf ${dst}/usr/lib64/libFSMDDAL.so.fct libFSMDDAL_fsm3_octeon2.so
+                execute tar -xvz -C ${dst}/usr --strip-components=1 -f ${workspace}/bld/bld-fsmddal-fct/results/include/fsmifdd.tgz
+                execute ln -sf libFSMDDAL.so.fct ${dst}/usr/lib64/libFSMDDAL_fsm3_octeon2.so
+                execute ln -sf libFSMDDAL.so.fct ${dst}/usr/lib64/libFSMDDAL.so
             ;;
             mips64-octeon-linux-gnu)
-                execute ln -sf ${dst}/usr/lib64/libFSMDDAL.so.fct libFSMDDAL_fsm3_octeon.so
+                execute tar -xvz -C ${dst}/usr --strip-components=1 -f ${workspace}/bld/bld-fsmddal-fct/results/include/fsmifdd.tgz
+                execute ln -sf libFSMDDAL.so.fct ${dst}/usr/lib64/libFSMDDAL_fsm3_octeon.so
+                execute ln -sf libFSMDDAL.so.fct ${dst}/usr/lib64/libFSMDDAL.so
             ;;
             arm-cortexa15-linux-gnueabihf)
-                execute ln -sf ${dst}/usr/lib64/libFSMDDAL.so.fsm35_k2 libFSMDDAL_fsm4_k2.so
+                execute tar -xvz -C ${dst}/usr --strip-components=1 -f ${workspace}/bld/bld-fsmddal-fsm35_k2/results/include/fsmifdd.tgz
+
+                execute ln -sf libFSMDDAL.so.fsm4_arm ${dst}/usr/lib/libFSMDDAL.so
+                execute ln -sf libFSMDDAL.so.fsm4_arm ${dst}/usr/lib/libFSMDDAL_fsm4_arm.so
+
+                if [[ -e ${dst}/usr/lib/libFSMDDAL.so.fsm35_k2 ]] ; then
+                    warning "renaming libFSMDDAL.so.fsm35_k2 to libFSMDDAL.so.fsm4_arm, please fix this in src-fsmddal"
+                    execute mv ${dst}/usr/lib/libFSMDDAL.so.fsm35_k2 ${dst}/usr/lib/libFSMDDAL.so.fsm4_arm
+                fi
             ;;
             *)
                 error "architecture ${destinationsArchitecture} not supported"
