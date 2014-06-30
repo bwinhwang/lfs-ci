@@ -43,7 +43,7 @@ ci_job_package() {
 
     removeBrokenSymlinks ${workspace}/upload/sys-root/
 
-    # copyReleaseCandidateToShare
+    copyReleaseCandidateToShare
 
     return 0
 }
