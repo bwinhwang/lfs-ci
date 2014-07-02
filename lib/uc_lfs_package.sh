@@ -182,8 +182,8 @@ copySysroot() {
             ;;
             x86_64-pc-linux-gnu)
                 execute tar -xvz -C ${dst}/usr --strip-components=1 -f ${workspace}/bld/bld-fsmddal-qemu_x86_64/results/include/fsmifdd.tgz
-                execute ln -sf libFSMDDAL.so.qemu_x86_64 ${dst}/usr/lib/libFSMDDAL_qemu_x86_64.so
-                execute ln -sf libFSMDDAL.so.qemu_x86_64 ${dst}/usr/lib/libFSMDDAL.so
+                # execute ln -sf libFSMDDAL.so.qemu_x86_64 ${dst}/usr/lib/libFSMDDAL_qemu_x86_64.so
+                # execute ln -sf libFSMDDAL.so.qemu_x86_64 ${dst}/usr/lib/libFSMDDAL.so
             ;;
             mips64-octeon2-linux-gnu)
                 execute tar -xvz -C ${dst}/usr --strip-components=1 -f ${workspace}/bld/bld-fsmddal-fct/results/include/fsmifdd.tgz
