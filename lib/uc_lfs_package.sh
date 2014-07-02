@@ -171,8 +171,8 @@ copySysroot() {
         case ${destinationsArchitecture} in
             i686-pc-linux-gnu)
                 execute tar -xvz -C ${dst}/usr --strip-components=1 -f ${workspace}/bld/bld-ddal-qemu_i386/results/include/ifddal.tgz
-                execute ln -sf libDDAL.so.fcmd ${dst}/usr/lib/libDDAL_fcmd.so
-                execute ln -sf libDDAL.so.fcmd ${dst}/usr/lib/libDDAL.so
+                execute ln -sf libDDAL.so.qemu_i386 ${dst}/usr/lib/libDDAL_fcmd.so
+                execute ln -sf libDDAL.so.qemu_i386 ${dst}/usr/lib/libDDAL.so
             ;;
             powerpc-e500-linux-gnu)
                 execute tar -xvz -C ${dst}/usr --strip-components=1 -f ${workspace}/bld/bld-ddal-fcmd/results/include/ifddal.tgz
@@ -182,13 +182,14 @@ copySysroot() {
             ;;
             x86_64-pc-linux-gnu)
                 execute tar -xvz -C ${dst}/usr --strip-components=1 -f ${workspace}/bld/bld-fsmddal-qemu_x86_64/results/include/fsmifdd.tgz
-                execute ln -sf libFSMDDAL.so.fcmd ${dst}/usr/lib/libFSMDDAL_fspc.so
-                execute ln -sf libFSMDDAL.so.fcmd ${dst}/usr/lib/libFSMDDAL.so
+                execute ln -sf libFSMDDAL.so.qemu_x86_64 ${dst}/usr/lib/libFSMDDAL_qemu_x86_64.so
+                execute ln -sf libFSMDDAL.so.qemu_x86_64 ${dst}/usr/lib/libFSMDDAL.so
             ;;
             mips64-octeon2-linux-gnu)
                 execute tar -xvz -C ${dst}/usr --strip-components=1 -f ${workspace}/bld/bld-fsmddal-fct/results/include/fsmifdd.tgz
                 execute ln -sf libFSMDDAL.so.fct ${dst}/usr/lib64/libFSMDDAL_fsm3_octeon2.so
                 execute ln -sf libFSMDDAL.so.fct ${dst}/usr/lib64/libFSMDDAL.so
+                execute ln -sf libFSMDDAL.so.fct ${dst}/usr/lib64/libDDAL.so
             ;;
             mips64-octeon-linux-gnu)
                 execute tar -xvz -C ${dst}/usr --strip-components=1 -f ${workspace}/bld/bld-fsmddal-fct/results/include/fsmifdd.tgz
@@ -200,6 +201,7 @@ copySysroot() {
 
                 execute ln -sf libFSMDDAL.so.fsm4_arm ${dst}/usr/lib/libFSMDDAL.so
                 execute ln -sf libFSMDDAL.so.fsm4_arm ${dst}/usr/lib/libFSMDDAL_fsm4_arm.so
+                execute ln -sf libFSMDDAL.so.fsm4_arm ${dst}/usr/lib/libDDAL.so
 
                 if [[ -e ${dst}/usr/lib/libFSMDDAL.so.fsm35_k2 ]] ; then
                     warning "renaming libFSMDDAL.so.fsm35_k2 to libFSMDDAL.so.fsm4_arm, please fix this in src-fsmddal"
@@ -320,7 +322,6 @@ copyVersionFile() {
     mkdir -p ${dstDirectory}
 
     # TODO: demx2fk3 2014-04-01 implement this, fix in src-fsmpsl and src-psl is needed
-
     info "copy verson control file..."
 
     for file in ${workspace}/bld/bld-fsmpsl-fct/results/doc/versions/version_control.xml \
@@ -329,6 +330,7 @@ copyVersionFile() {
     do
         [[ -e ${file} ]] || continue
         execute cp ${file} ${dstDirectory}
+        execute cp ${file} ${dstDirectory}/..
     done
 
     return
