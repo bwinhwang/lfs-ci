@@ -64,14 +64,14 @@ ci_job_build_version() {
     local postfix="00"
 
     if [[ "${oldLabel}" != "" ]] ; then
-        local tmp=$(echo ${oldLabel} | sed "s/.*0*\(.*\)/\1/")
+        local tmp=$(echo ${oldLabel} | sed "s/.*-0*\(.*\)4/\1/")
         local newPostfix=$(( tmp + 1 ))
         postfix=$(printf "%03d" ${newPostfix})
 
         info "calculated new postfix for label ${postfix}"
     fi
 
-    newCiLabel="${label}${postfix}"
+    newCiLabel="${label}-${postfix}"
 
     info "new version is ${newCiLabel}"
     setBuildDescription "${JOB_NAME}" "${BUILD_NUMBER}" "${newCiLabel}"
