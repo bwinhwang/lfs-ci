@@ -62,6 +62,8 @@ copyAddons() {
     for bldDirectory in ${workspace}/bld/bld-*psl*-* ; do
         [[ -d ${bldDirectory} ]] || continue
         [[ -d ${bldDirectory}/results/addons ]] || continue
+        # TODO: demx2fk3 2014-07-02 remove this
+        grep -- -rootfs <<< ${bldDirectory} && continue
 
         local destinationsPlatform=$(getArchitectureFromDirectory ${bldDirectory})
         mustHaveArchitectureFromDirectory ${bldDirectory} ${destinationsPlatform}
