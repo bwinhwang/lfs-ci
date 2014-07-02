@@ -163,7 +163,8 @@ _build() {
     ${LFS_CI_ROOT}/bin/sortBuildsFromDependencies ${target} makefile ${label} > ${cfgFile}
     rawDebug ${cfgFile}
 
-    local makeTarget=$(build -C src-project final-build-target_${productName}_${subTaskName})-${target}
+    local makeTarget=$(build -C src-project final-build-target_${productName}_${subTaskName})
+    # -${target}
     info "executing all targets in parallel with ${makeTarget} and label=${label}"
     execute make -f ${cfgFile} ${makeTarget} 
 
