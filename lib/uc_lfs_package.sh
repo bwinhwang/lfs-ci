@@ -170,7 +170,7 @@ copySysroot() {
         # handling libddal stuff            
         case ${destinationsArchitecture} in
             i686-pc-linux-gnu)
-                execute tar -xvz -C ${dst}/usr --strip-components=1 -f ${workspace}/bld/bld-ddal-fcmd/results/include/ifddal.tgz
+                execute tar -xvz -C ${dst}/usr --strip-components=1 -f ${workspace}/bld/bld-ddal-qemu_i386/results/include/ifddal.tgz
                 execute ln -sf libDDAL.so.fcmd ${dst}/usr/lib/libDDAL_fcmd.so
                 execute ln -sf libDDAL.so.fcmd ${dst}/usr/lib/libDDAL.so
             ;;
@@ -181,7 +181,7 @@ copySysroot() {
                 execute ln -sf libDDAL.so.fcmd ${dst}/usr/lib/libDDAL_fspc.so
             ;;
             x86_64-pc-linux-gnu)
-                execute tar -xvz -C ${dst}/usr --strip-components=1 -f ${workspace}/bld/bld-ddal-fcmd/results/include/ifddal.tgz
+                execute tar -xvz -C ${dst}/usr --strip-components=1 -f ${workspace}/bld/bld-fsmddal-qemu_x86_64/results/include/fsmifdd.tgz
                 execute ln -sf libFSMDDAL.so.fcmd ${dst}/usr/lib/libFSMDDAL_fspc.so
                 execute ln -sf libFSMDDAL.so.fcmd ${dst}/usr/lib/libFSMDDAL.so
             ;;
