@@ -350,6 +350,11 @@ copyDocumentation() {
     info "copy doc..."
 
     # TODO: demx2fk3 2014-04-01 implement this, fix in src-fsmpsl and src-psl is needed
+    for bldDirectory in ${workspace}/bld/bld-*psl*-* ; do
+        [[ -d ${bldDirectory} ]] || continue
+        [[ -d ${bldDirectory}/results/doc ]] || continue
+        execute rsync -av --exclude=.svn ${bldDirectory}/results/doc/. ${dst}/
+    done
 
     for file in ${workspace}/bld/bld-fsmddal-doc/results/doc/results/{FSM,}DDAL.pdf ; do
         if [[ -f ${file} ]] ; then
