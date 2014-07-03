@@ -25,7 +25,7 @@ ci_job_admin() {
 }
 
 synchronizeShare() {
-    requiredParameters JOB_NAME BUILD_NUMBER LFS_CI_ROOT
+    requiredParameters JOB_NAME BUILD_NUMBER LFS_CI_ROOT WORKSPACE
 
     export subTaskName=$(getSubTaskNameFromJobName)
     local localPath=$(getConfig ADMIN_sync_share_local_directoryName)
@@ -38,7 +38,7 @@ synchronizeShare() {
 
     info "synchronize ${localPath} to  ${remoteServer}:${remotePath}"
     # TODO: demx2fk3 2014-07-03 add an execute
-    for entry in $(${LFS_CI_ROOT}/bin/xpath -q -e '/log/logentry/paths/path/node()')
+    for entry in $(${LFS_CI_ROOT}/bin/xpath -q -e '/log/logentry/paths/path/node()' ${WORKSPACE}/changelog.xml )
     do
         rsync -avrPe ssh ${entry} ${remoteServer}:${remotePath}
     done
