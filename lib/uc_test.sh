@@ -24,10 +24,8 @@ ci_job_test() {
     mustHaveWorkspaceName
     mustHaveWritableWorkspace
 
-    local upstreamProject=${UPSTREAM_PROJECT}
-    local upstreamBuildNumber=${UPSTREAM_BUILD}
-    local requiredArtifacts=$(getConfig LFS_CI_UC_test_required_artifacts)
-    local upstreamsFile=$(createTempFile)
+    local upstreamProject=$(sed "s/Test.*/Build/" <<< ${JOB_NAME})
+    local upstreamBuildNumber=lastSuccessfulBuild
 
     runOnMaster ${LFS_CI_ROOT}/bin/getUpStreamProject \
                     -j ${upstreamProject}        \
