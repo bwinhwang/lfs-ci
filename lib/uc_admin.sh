@@ -40,6 +40,7 @@ synchronizeShare() {
     # TODO: demx2fk3 2014-07-03 add an execute
     for entry in $(${LFS_CI_ROOT}/bin/xpath -q -e '/log/logentry/paths/path/node()' ${WORKSPACE}/changelog.xml )
     do
+        info "transferting ${entry} to ${remoteServer}:${remotePath}"
         rsync -avrPe ssh ${entry} ${remoteServer}:${remotePath}
     done
 
