@@ -63,7 +63,7 @@ actionCheckout() {
     cat ${newFileListing}                >> ${REVISION_STATE_FILE}
 
     local logEntries=$(createTempFile)
-    for path in $(diff ${oldFileListing} ${newFileListing} | grep '>' | cut -d" " -f 1 | grep -v "^${directoryNameToSynchronize}$")
+    for path in $(diff ${oldFileListing} ${newFileListing} | grep '>' | cut -d" " -f 2 | grep -v "^${directoryNameToSynchronize}$")
     do
         printf '<path kind="" action="M">%s</path>' ${path} >> ${logEntries}
     done
