@@ -25,15 +25,16 @@ ci_job_admin() {
 }
 
 synchronizeShare() {
+    requiredParameters JOB_NAME
 
-    requiredParameters LOCAL_SHARE REMOTE_SHARE REMOTE_SERVER
-
-    local localPath=${LOCAL_SHARE}
-    local remotePath=${REMOTE_SHARE}
-    local remoteServer=${REMOTE_SERVER}
+    export subTaskName=$(getSubTaskNameFromJobName)
+    local localPath=$(getConfig ADMIN_sync_share_local_directoryName)
+    local remotePath=$(getConfig ADMIN_sync_share_remote_directoryName)
+    local remoteServer=$(getConfig ADMIN_sync_share_remote_hostname)
 
     info "synchronize ${localPath} to  ${remoteServer}:${remotePath}"
-    execute rsync -avrPe ssh ${localPath} ${remoteServer}:${remotePath}
+    # TODO: demx2fk3 2014-07-03 add an execute
+    rsync -avrPe ssh ${localPath} ${remoteServer}:${remotePath}
     return
 }
 
