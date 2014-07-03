@@ -65,9 +65,11 @@ actionCheckout() {
     cat ${newFileListing}                >> ${REVISION_STATE_FILE}
 
     local logEntries=$(createTempFile)
+    local fileListString=
     for path in $(diff ${oldFileListing} ${newFileListing} | grep '>' | cut -d" " -f 2 | grep -v "^${directoryNameToSynchronize}$")
     do
         printf '<path kind="" action="M">%s</path>' ${path} >> ${logEntries}
+        fileListString="${fileListString} ${path}"
     done
 
     # create changelog:
@@ -79,13 +81,15 @@ actionCheckout() {
             <paths>
                 %s
             </paths>
-            <msg>updates</msg>
+            <msg>update in %s</msg>
             </logentry>
             </log>' \
     "$(date +%s)"                        \
     "${USER}"                            \
     "$(date +%Y-%m-%dT%H:%M:%S.000000Z)" \
-    "$(cat ${logEntries})"               > ${CHANGELOG}
+    "$(cat ${logEntries})"               \
+    "${fileListString}"                  \
+                                        > ${CHANGELOG}
 
     # Fix empty changelogs:
     if [ ! -s "${CHANGELOG}" ] ; then
