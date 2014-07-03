@@ -10,8 +10,6 @@
 #  @return  <none>
 ci_job_test() {
 
-    info "do nothing...."
-
     # TODO: demx2fk3 2014-04-16 add content here
 
     # get the package build job (upstream_project and upstream_build)
