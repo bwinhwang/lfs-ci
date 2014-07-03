@@ -28,12 +28,16 @@ fileBaseName=$(basename $0)
 
 case "${fileBaseName}" in 
     customSCM.sh)           source ${LFS_CI_ROOT}/lib/customSCM.upstream.sh  ;;
-    customSCM.svn.sh)       source ${LFS_CI_ROOT}/lib/customSCM.svn.sh       ;;
-    customSCM.upstream.sh)  source ${LFS_CI_ROOT}/lib/customSCM.upstream.sh  ;;
-    customSCM.nativesvn.sh) source ${LFS_CI_ROOT}/lib/customSCM.nativesvn.sh ;;
+#    customSCM.svn.sh)       source ${LFS_CI_ROOT}/lib/customSCM.svn.sh       ;;
+#    customSCM.upstream.sh)  source ${LFS_CI_ROOT}/lib/customSCM.upstream.sh  ;;
+#    customSCM.nativesvn.sh) source ${LFS_CI_ROOT}/lib/customSCM.nativesvn.sh ;;
     *)
-        echo "can not find ${LFS_CI_ROOT}/lib/${fileBaseName}. exit"
-        exit 1
+        if [[ -e ${LFS_CI_ROOT}/lib/${fileBaseName} ]] ; then
+            source ${LFS_CI_ROOT}/lib/${fileBaseName}
+        else 
+            echo "can not find ${LFS_CI_ROOT}/lib/${fileBaseName}. exit"
+            exit 1
+        fi                
     ;;
 esac
 
