@@ -43,7 +43,7 @@ ci_job_package() {
 
     removeBrokenSymlinks ${workspace}/upload/sys-root/
 
-    copyReleaseCandidateToShare
+    # copyReleaseCandidateToShare
 
     return 0
 }
@@ -77,6 +77,11 @@ copyAddons() {
         execute mkdir -p ${dstDirectory}
         execute find ${srcDirectory}/ -type f \
                     -exec cp -av {} ${dstDirectory} \;
+
+        if [[ "${destinationsPlatform}" == "powerpc-e500-linux-gnu" ]] ; then
+            info "removing tgz addons from powerpc-e500-linux-gnu"
+            execute find ${dstDirectory} -name \*.tgz -type f -exec rm -f {} \;
+        fi
     done
 
     return
@@ -171,25 +176,24 @@ copySysroot() {
         case ${destinationsArchitecture} in
             i686-pc-linux-gnu)
                 execute tar -xvz -C ${dst}/usr --strip-components=1 -f ${workspace}/bld/bld-ddal-qemu_i386/results/include/ifddal.tgz
-                execute ln -sf libDDAL.so.qemu_i386 ${dst}/usr/lib/libDDAL_fcmd.so
                 execute ln -sf libDDAL.so.qemu_i386 ${dst}/usr/lib/libDDAL.so
             ;;
             powerpc-e500-linux-gnu)
-                execute tar -xvz -C ${dst}/usr --strip-components=1 -f ${workspace}/bld/bld-ddal-fcmd/results/include/ifddal.tgz
+                # execute tar -xvz -C ${dst}/usr --strip-components=1 -f ${workspace}/bld/bld-ddal-fcmd/results/include/ifddal.tgz
                 execute ln -sf libDDAL.so.fcmd ${dst}/usr/lib/libDDAL_fcmd.so
                 execute ln -sf libDDAL.so.fcmd ${dst}/usr/lib/libDDAL.so
                 execute ln -sf libDDAL.so.fcmd ${dst}/usr/lib/libDDAL_fspc.so
             ;;
             x86_64-pc-linux-gnu)
-                execute tar -xvz -C ${dst}/usr --strip-components=1 -f ${workspace}/bld/bld-fsmddal-qemu_x86_64/results/include/fsmifdd.tgz
+                # execute tar -xvz -C ${dst}/usr --strip-components=1 -f ${workspace}/bld/bld-fsmddal-qemu_x86_64/results/include/fsmifdd.tgz
                 # execute ln -sf libFSMDDAL.so.qemu_x86_64 ${dst}/usr/lib/libFSMDDAL_qemu_x86_64.so
                 # execute ln -sf libFSMDDAL.so.qemu_x86_64 ${dst}/usr/lib/libFSMDDAL.so
             ;;
             mips64-octeon2-linux-gnu)
-                execute tar -xvz -C ${dst}/usr --strip-components=1 -f ${workspace}/bld/bld-fsmddal-fct/results/include/fsmifdd.tgz
-                execute ln -sf libFSMDDAL.so.fct ${dst}/usr/lib64/libFSMDDAL_fsm3_octeon2.so
-                execute ln -sf libFSMDDAL.so.fct ${dst}/usr/lib64/libFSMDDAL.so
-                execute ln -sf libFSMDDAL.so.fct ${dst}/usr/lib64/libDDAL.so
+#                execute tar -xvz -C ${dst}/usr --strip-components=1 -f ${workspace}/bld/bld-fsmddal-fct/results/include/fsmifdd.tgz
+#                execute ln -sf libFSMDDAL.so.fct ${dst}/usr/lib64/libFSMDDAL_fsm3_octeon2.so
+#                execute ln -sf libFSMDDAL.so.fct ${dst}/usr/lib64/libFSMDDAL.so
+#                execute ln -sf libFSMDDAL.so.fct ${dst}/usr/lib64/libDDAL.so
             ;;
             mips64-octeon-linux-gnu)
                 execute tar -xvz -C ${dst}/usr --strip-components=1 -f ${workspace}/bld/bld-fsmddal-fct/results/include/fsmifdd.tgz
