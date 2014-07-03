@@ -13,7 +13,7 @@ actionCompare() {
     fi
 
     export subTaskName=$(getSubTaskNameFromJobName)
-    local directoryNameToSynchronize=$(getConfig directoryNameToSynchronize)
+    local directoryNameToSynchronize=$(getConfig ADMIN_sync_share_directoryNameToSynchronize)
 
     # read the revision state file
     # format:
@@ -52,7 +52,7 @@ actionCheckout() {
     cat < /dev/null > "${CHANGELOG}"
 
     export subTaskName=$(getSubTaskNameFromJobName)
-    local directoryNameToSynchronize=$(getConfig directoryNameToSynchronize)
+    local directoryNameToSynchronize=$(getConfig ADMIN_sync_share_directoryNameToSynchronize)
     local oldFileListing=$(createTempFile)
     local newFileListing=$(createTempFile)
     local checksum=$(ls -lat ${directoryNameToSynchronize} | md5sum | cut -d" " -f 1)
