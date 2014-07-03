@@ -20,50 +20,30 @@ ci_job_test() {
 
     local serverPath=$(getConfig jenkinsMasterServerPath)
     local workspace=$(getWorkspaceName)
+    local ciBuildShare=$(getConfig lfsCiBuildsShare)
+    local productName=$(getProductNameFromJobName)
+    mustHaveValue "${productName}" "product name"
+
+    local location=$(getBranchName)
+    mustHaveBranchName
+
     mustHaveCleanWorkspace
     mustHaveWorkspaceName
     mustHaveWritableWorkspace
 
-    local upstreamProject=$(sed "s/Test.*/Build/" <<< ${JOB_NAME})
-    local upstreamBuildNumber=lastSuccessfulBuild
-
-    runOnMaster ${LFS_CI_ROOT}/bin/getUpStreamProject \
-                    -j ${upstreamProject}        \
-                    -b ${upstreamBuildNumber}         \
-                    -h ${serverPath} > ${upstreamsFile}
-
-    trace "output of getUpStreamProject" 
-    rawDebug ${upstreamsFile}
-
-    if ! grep -q Package ${upstreamsFile} ; then
-        error "cannot find upstream Package job"
-        exit 1
-    fi
-    if ! grep -q Build   ${upstreamsFile} ; then
-        error "cannot find upstream Build build"
-        exit 1
-    fi
-
-    local packageJobName=$(    grep Package ${upstreamsFile} | cut -d: -f1)
-    local packageBuildNumber=$(grep Package ${upstreamsFile} | cut -d: -f2)
-    local buildJobName=$(      grep Build   ${upstreamsFile} | cut -d: -f1)
-    local buildBuildNumber=$(  grep Build   ${upstreamsFile} | cut -d: -f2)
-    mustHaveValue ${packageJobName}
-    mustHaveValue ${packageBuildNumber}
-    mustHaveValue ${buildJobName}
-    mustHaveValue ${buildBuildNumber}
-    info "upstream is ${upstreamProject} / ${upstreamBuildNumber}"
-    info "build    is ${buildJobName} / ${buildBuildNumber}"
-    info "package  is ${packageJobName} / ${packageBuildNumber}"
+    local upstreamProject=$(sed "s/Test.*/Package_-_package/" <<< ${JOB_NAME})
+    local upstreamBuildNumber=$(readlink ${serverPath}/jobs/${upstreamProject}/builds/lastSuccessfulBuild)
+    info ${serverPath}/jobs/${upstreamProject}/builds/lastSuccessfulBuild
+    info "upstreamProject ${upstreamProject} ${upstreamBuildNumber}"
 
     # copyArtifactsToWorkspace "${upstreamProject}" "${upstreamBuildNumber}" "${requiredArtifacts}"
-    local workspace=${ciBuildShare}/${productName}/${location}/build_${packageBuildNumber}
+    local workspace=${ciBuildShare}/${productName}/${location}/build_${upstreamBuildNumber}
 
     echo "FUPPER_IMAGE=${workspace}/os/platforms/fsm3_octeon2/factory/fsm3_octeon2-fupper_images.sh" > ${WORKSPACE}/properties
     echo "FMON_TGZ=${workspace}/os/platforms/fsm3_octeon2/apps/fmon.tgz" >> ${WORKSPACE}/properties
 
-    mustHaveNextCiLabelName
-    local labelName=$(getNextCiLabelName)        
-    setBuildDescription "${JOB_NAME}" "${BUILD_NUMBER}" "${labelName}"
+    # mustHaveNextCiLabelName
+    # local labelName=$(getNextCiLabelName)        
+    # setBuildDescription "${JOB_NAME}" "${BUILD_NUMBER}" "${labelName}"
     return
 }
