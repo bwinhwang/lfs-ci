@@ -29,13 +29,42 @@ ci_job_test() {
     local upstreamProject=${UPSTREAM_PROJECT}
     local upstreamBuildNumber=${UPSTREAM_BUILD}
     local requiredArtifacts=$(getConfig LFS_CI_UC_test_required_artifacts)
+    local upstreamsFile=$(createTempFile)
 
-    upstreamBuildNumber=lastSuccessfulBuild
-    upstreamProject=$(sed "s/Test/Build/" <<< ${UPSTREAM_PROJECT})
+    runOnMaster ${LFS_CI_ROOT}/bin/getUpStreamProject \
+                    -j ${upstreamProject}        \
+                    -b ${upstreamBuildNumber}         \
+                    -h ${serverPath} > ${upstreamsFile}
 
+    trace "output of getUpStreamProject" 
+    rawDebug ${upstreamsFile}
+
+    if ! grep -q Package ${upstreamsFile} ; then
+        error "cannot find upstream Package job"
+        exit 1
+    fi
+    if ! grep -q Build   ${upstreamsFile} ; then
+        error "cannot find upstream Build build"
+        exit 1
+    fi
+
+    local packageJobName=$(    grep Package ${upstreamsFile} | cut -d: -f1)
+    local packageBuildNumber=$(grep Package ${upstreamsFile} | cut -d: -f2)
+    local buildJobName=$(      grep Build   ${upstreamsFile} | cut -d: -f1)
+    local buildBuildNumber=$(  grep Build   ${upstreamsFile} | cut -d: -f2)
+    mustHaveValue ${packageJobName}
+    mustHaveValue ${packageBuildNumber}
+    mustHaveValue ${buildJobName}
+    mustHaveValue ${buildBuildNumber}
     info "upstream is ${upstreamProject} / ${upstreamBuildNumber}"
+    info "build    is ${buildJobName} / ${buildBuildNumber}"
+    info "package  is ${packageJobName} / ${packageBuildNumber}"
 
-    copyArtifactsToWorkspace "${upstreamProject}" "${upstreamBuildNumber}" "${requiredArtifacts}"
+    # copyArtifactsToWorkspace "${upstreamProject}" "${upstreamBuildNumber}" "${requiredArtifacts}"
+    local workspace=${ciBuildShare}/${productName}/${location}/build_${packageBuildNumber}
+
+    echo "FUPPER_IMAGE=${workspace}/os/platforms/fsm3_octeon2/factory/fsm3_octeon2-fupper_images.sh" > ${WORKSPACE}/properties
+    echo "FMON_TGZ=${workspace}/os/platforms/fsm3_octeon2/apps/fmon.tgz" >> ${WORKSPACE}/properties
 
     mustHaveNextCiLabelName
     local labelName=$(getNextCiLabelName)        
