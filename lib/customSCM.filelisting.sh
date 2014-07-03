@@ -12,6 +12,7 @@ actionCompare() {
         exit 0
     fi
 
+    export subTaskName=$(getSubTaskNameFromJobName)
     local directoryNameToSynchronize=$(getConfig directoryNameToSynchronize)
 
     # read the revision state file
@@ -50,6 +51,7 @@ actionCheckout() {
     # create a new changelog file
     cat < /dev/null > "${CHANGELOG}"
 
+    export subTaskName=$(getSubTaskNameFromJobName)
     local directoryNameToSynchronize=$(getConfig directoryNameToSynchronize)
     local oldFileListing=$(createTempFile)
     local newFileListing=$(createTempFile)
