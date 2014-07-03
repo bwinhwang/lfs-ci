@@ -40,7 +40,7 @@ synchronizeShare() {
     for entry in $(${LFS_CI_ROOT}/bin/xpath -q -e '/log/logentry/paths/path/node()' ${WORKSPACE}/changelog.xml )
     do
         info "transferting ${entry} to ${remoteServer}:${remotePath}"
-        execute rsync -ave --stats ssh ${entry} ${remoteServer}:${remotePath}
+        execute rsync -ave ssh --stats ${entry} ${remoteServer}:${remotePath}
     done
 
     return
