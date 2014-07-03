@@ -56,14 +56,14 @@ actionCheckout() {
     local checksum=$(ls -lat ${directoryNameToSynchronize} | md5sum | cut -d" " -f 1)
 
     tail -n +3 ${OLD_REVISION_STATE_FILE} > ${oldFileListing}
-    find ${directoryNameToSynchronize} -maxdepth 1 -printf "%C@ %p\n" -maxdepth 1 | sort > ${newFileListing}
+    find ${directoryNameToSynchronize} -maxdepth 1 -printf "%p %C@\n" -maxdepth 1 | sort > ${newFileListing}
 
     echo "${directoryNameToSynchronize}" >  ${REVISION_STATE_FILE}
     echo "${checksum}"                   >> ${REVISION_STATE_FILE}
     cat ${newFileListing}                >> ${REVISION_STATE_FILE}
 
     local logEntries=$(createTempFile)
-    for path in $(diff ${oldFileListing} ${newFileListing} | grep '>' | cut -d" " -f 2 | grep -v "^${directoryNameToSynchronize}$")
+    for path in $(diff ${oldFileListing} ${newFileListing} | grep '>' | cut -d" " -f 1 | grep -v "^${directoryNameToSynchronize}$")
     do
         printf '<path kind="" action="M">%s</path>' ${path} >> ${logEntries}
     done
