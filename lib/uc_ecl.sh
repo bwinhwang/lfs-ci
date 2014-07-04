@@ -1,39 +1,44 @@
 #!/bin/bash
 
-## @fn      updateEnvironmentControlList( workspace )
+## @fn      ci_job_ecl()
 #  @brief   update the ECL file 
 #  @details «full description»
 #  @todo    add more doc
 #  @param   <none>
 #  @return  <none>
-updateEnvironmentControlList() {
+ci_job_ecl() {
+    requiredParameters JOB_NAME BUILD_NUMBER 
+
     local workspace=$(getWorkspaceName)
     mustHaveWorkspaceName
+    mustHaveCleanWorkspace
 
-    local eclUrl=$(getConfig eclUrl)
+    local eclUrl=$(getConfig LFS_CI_uc_update_ecl_url)
     mustHaveValue ${eclUrl}
 
-    # TODO: demx2fk3 2014-04-30 fixme
-    local eclKeysToUpdate=$(getConfig asdf)
+    local eclKeysToUpdate=$(getConfig LFS_CI_uc_update_ecl_key_names)
     mustHaveValue "${eclKeysToUpdate}"
 
     info "checkout ECL from ${eclUrl}"
-    svnCheckout ${eclUrl} ${workspace}
-    mustHaveWritableFile ${workspace}/ECL
+    svnCheckout ${eclUrl} ${workspace}/ecl_checkout
+    mustHaveWritableFile ${workspace}/ecl_checkout/ECL
 
     for eclKey in ${eclKeysToUpdate} ; do
 
-        local eclValue=$(getEclValue ${eclKey})
+        local oldEclValue=$(grep "^${eclKey}=" ${workspace}/ecl_checkout/ECL | cut -d= -f2)
+        local eclValue=$(getEclValue "${eclKey}" "${oldEclValue}")
         mustHaveValue "${eclKey}"
+        mustHaveValue "${eclValue}"
 
-        info "update ecl key ${eclKey} with value ${eclValue}"
-        execute perl -pi -e "s:^${eclKey}=.*:${eclValue}=${value}:" ECL
+        info "update ecl key ${eclKey} with value ${eclValue} (old: ${oldEclValue})"
+        execute perl -pi -e "s:^${eclKey}=.*:${eclValue}=${value}:" ${workspace}/ecl_checkout/ECL
 
     done
 
-    svnDiff ${workspace}/ECL
+    svnDiff ${workspace}/ecl_checkout/ECL
 
     # TODO: demx2fk3 2014-05-05 not fully implemented
+    info "TODO: commit new ECL"
 
     return
 }
@@ -45,9 +50,9 @@ updateEnvironmentControlList() {
 #  @return  value for the ecl key
 getEclValue() {
     local eclKey=$1
+    local oldValue=$2
 
     # TODO: demx2fk3 2014-04-30 implement this
-
     echo ${eclKey}_${BUILD_NUMBER}
     return
 }
