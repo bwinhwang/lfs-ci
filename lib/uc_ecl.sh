@@ -13,6 +13,7 @@ updateEnvironmentControlList() {
     local eclUrl=$(getConfig eclUrl)
     mustHaveValue ${eclUrl}
 
+
     # TODO: demx2fk3 2014-04-30 fixme
     local eclKeysToUpdate=$(getConfig asdf)
     mustHaveValue "${eclKeysToUpdate}"
