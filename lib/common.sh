@@ -556,3 +556,4 @@ copyChangelogToWorkspace() {
 
     return
 }
+

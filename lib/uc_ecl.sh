@@ -31,7 +31,7 @@ ci_job_ecl() {
         mustHaveValue "${eclValue}"
 
         info "update ecl key ${eclKey} with value ${eclValue} (old: ${oldEclValue})"
-        execute perl -pi -e "s:^${eclKey}=.*:${eclValue}=${value}:" ${workspace}/ecl_checkout/ECL
+        execute perl -pi -e "s:^${eclKey}=.*:${eclKey}=${eclValue}:" ${workspace}/ecl_checkout/ECL
 
     done
 
@@ -51,9 +51,21 @@ ci_job_ecl() {
 getEclValue() {
     local eclKey=$1
     local oldValue=$2
+    local newValue=
 
-    # TODO: demx2fk3 2014-04-30 implement this
-    echo ${eclKey}_${BUILD_NUMBER}
+    case ${eclKey} in
+        ECL_PS_LFS_REL)  ;;
+        ECL_PS_LFS_OS)   ;;
+        ECL_PS_LFS_SDK3) ;;
+        ECL_PS_LFS_INTERFACE_REV)
+            newValue=$((oldValue + 1))
+        ;;
+        *)
+            newValue="unsupported_key_${eclKey}"
+        ;;
+    esac
+
+    echo ${newValue}
     return
 }
 
