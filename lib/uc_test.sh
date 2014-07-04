@@ -42,6 +42,7 @@ ci_job_test() {
     echo "FUPPER_IMAGE=${workspace}/os/platforms/fsm3_octeon2/factory/fsm3_octeon2-fupper_images.sh" > ${WORKSPACE}/properties
     echo "FMON_TGZ=${workspace}/os/platforms/fsm3_octeon2/apps/fmon.tgz" >> ${WORKSPACE}/properties
     echo "EXECUTE_MANUAL=true" >> ${WORKSPACE}/properties
+    # echo "LABEL=<a href=https://lfs-ci.emea.nsn-net.net/job/${JOB_NAME}/${BUILD_NUMBER}/>triggered by ${JOB_NAME}/${BUILD_NUMBER}</a>" >> ${WORKSPACE}/properties
 
     # mustHaveNextCiLabelName
     # local labelName=$(getNextCiLabelName)        
