@@ -448,6 +448,15 @@ mustExistDirectory() {
     return
 }
 
+mustExistSymlink() {
+    local file=$1
+
+    if [[ ! -L ${file} ]] ; then
+        error "${file} is not a symlink"
+        exit 1
+    fi
+    return
+}
 mustExistFile() {
     local file=$1
 

@@ -35,6 +35,11 @@ ci_job_ecl() {
     local packageBuildNumber=$(grep Package ${upstreamsFile} | cut -d: -f2)
     local buildJobName=$(      grep Build   ${upstreamsFile} | cut -d: -f1)
     local buildBuildNumber=$(  grep Build   ${upstreamsFile} | cut -d: -f2)
+    if [[ -z ${buildJobName} ]] ; then
+        error "not trigger an ECL update without a build job name"
+        exit 1
+    fi
+
     info "upstream    is ${UPSTREAM_PROJECT} / ${UPSTREAM_BUILD}"
     info "build job   is ${buildJobName} / ${buildBuildNumber}"
     info "package job is ${packageJobName} / ${packageBuildNumber}"
@@ -61,16 +66,15 @@ ci_job_ecl() {
 
     svnDiff ${workspace}/ecl_checkout/ECL
 
-    # TODO: demx2fk3 2014-05-05 not fully implemented
     local canCommit=$(getConfig LFS_CI_uc_update_ecl_can_commit_ecl)
     if [[ $canCommit ]] ; then
-        info "TODO: commit new ECL"
+        svnCommit -m updating_ecl ${workspace}/ecl_checkout/ECL
     fi
 
     return
 }
 
-## @fn      getEclValue(  )
+## @fn      getEclValue()
 #  @brief   get the Value for the ECL for a specified key
 #  @todo    implement this
 #  @param   {eclKey}    name of the key from ECL
