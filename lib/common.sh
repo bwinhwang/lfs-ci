@@ -337,6 +337,11 @@ mustHaveNextLabelName() {
     return
 }
 
+## @fn      mustHaveCurrentLabelName()
+#  @brief   ensure, that there is a release label name
+#  @details to get the current release label name, it checks the svn repos
+#  @param   <none>
+#  @return  <none>
 mustHaveCurrentLabelName() {
 
     local branch=$(getBranchName)
@@ -432,7 +437,6 @@ mustHaveWritableFile() {
     return
 }
 
-
 ## @fn      mustExistDirectory( $directoryName )
 #  @brief   ensure, that the directory exists 
 #  @param   {directoryName}    nae of the directory
@@ -515,6 +519,11 @@ getWorkspaceDirectoryOfBuild() {
     return
 }
 
+## @fn      copyRevisionStateFileToWorkspace( $jobName, $buildNumber )
+#  @brief   copy the revision state file from the jenkins master build directory into the workspace
+#  @param   {jobName}       the name of the job
+#  @param   {buildNumber}   the number of the build job
+#  @return  <none>
 copyRevisionStateFileToWorkspace() {
     local jobName=$1
     local buildNumber=$2
@@ -524,6 +533,7 @@ copyRevisionStateFileToWorkspace() {
     if [[ ! "${jobName}" || ! "${buildNumber}" ]] ; then
         return
     fi
+
     local dir=$(getBuildDirectoryOnMaster ${jobName} ${buildNumber})
     local master=$(getConfig jenkinsMasterServerHostName)
 

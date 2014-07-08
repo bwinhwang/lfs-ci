@@ -104,11 +104,6 @@ getConfig() {
 # it must be also valid for all slaves and the master
 
 # ....
-declare -A sitesBuildShareMap=(  ["Ulm"]="ulling01:/build/home/${USER}/lfs/"                  \
-                                ["Oulu"]="ouling04.emea.nsn-net.net:/build/home/${USER}/lfs/" \
-)
-
-# ....
 declare -A platformMap=(         ["fct"]="fsm3_octeon2" \
                            ["qemu_i386"]="qemu"         \
                          ["qemu_x86_64"]="qemu_64"      \
@@ -139,16 +134,4 @@ declare -A locationToSubversionMap=( ["LFS_pronb-developer"]="PS_LFS_OS_MAINBRAN
                                      ["UBOOT_pronb-developer"]="PS_LFS_BT"          \
                                      ["UBOOT_FSM_R4_DEV"]="PS_LFS_BT_FSM_R4"        \
                                    )
-
-declare -a branchToLocationMap=( ["trunk"]="pronb-developer" \
-                                 ["fsmr4"]="FSM_R4_DEV" \
-                               )
-
-# define the mapping from branch to label/tag name
-labelPrefix=$(getConfig labelPrefix)
-declare -A branchToTagRegexMap=( ["pronb-developer"]="${labelPrefix}_$(date +%Y)_$(date +%m)_([0-9][0-9])" \
-                                      ["FSM_R4_DEV"]="FSMR4_${labelPrefix}_$(date +%Y)_$(date +%m)_([0-9][0-9])" \
-                                          ["FB1404"]="FB_${labelPrefix}_1404_04_([0-9][0-9])" \
-                                  ["KERNEL_3.x_DEV"]="KERNEL3x_${labelPrefix}_$(date +%Y)_$(date +%m)_([0-9][0-9])" \
-                               )
 
