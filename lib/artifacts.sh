@@ -19,10 +19,10 @@ createArtifactArchive() {
     local serverName=$(getConfig linseeUlmServer)
     mustHaveWorkspaceName
 
+    local artifactsPathOnShare=$(getConfig artifactesShare)/${JOB_NAME}/${BUILD_NUMBER}
+    executeOnMaster mkdir -p ${artifactsPathOnShare}/save
+    mustExistDirectory ${artifactsPathOnShare}
     mustExistDirectory "${workspace}/bld/"
-    local artifactesShare=$(getConfig artifactesShare)
-
-    local artifactsPathOnShare=${artifactesShare}/${JOB_NAME}/${BUILD_NUMBER}
 
     # TODO: demx2fk3 2014-03-31 remove cd - changing the current directory isn't a good idea!
     cd "${workspace}/bld/" 
@@ -30,7 +30,6 @@ createArtifactArchive() {
         [[ -d "${dir}" && ! -L "${dir}" ]] || continue
 
         local subsystem=$(cut -d- -f2 <<< ${dir})
-
         case ${subsystem} in
             kernelsources)
                 debug "skipping ${dir}"
