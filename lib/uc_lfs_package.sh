@@ -200,7 +200,7 @@ copySysroot() {
                 execute ln -sf libFSMDDAL.so.fct ${dst}/usr/lib64/libFSMDDAL.so
             ;;
             arm-cortexa15-linux-gnueabihf)
-                execute tar -xvz -C ${dst}/usr --strip-components=1 -f ${workspace}/bld/bld-fsmddal-fsm35_k2/results/include/fsmifdd.tgz
+                execute tar -xvz -C ${dst}/usr --strip-components=1 -f ${workspace}/bld/bld-fsmddal-fsm4_arm/results/include/fsmifdd.tgz
 
                 execute ln -sf libFSMDDAL.so.fsm4_arm ${dst}/usr/lib/libFSMDDAL.so
                 execute ln -sf libFSMDDAL.so.fsm4_arm ${dst}/usr/lib/libFSMDDAL_fsm4_arm.so
