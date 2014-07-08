@@ -21,11 +21,10 @@ createArtifactArchive() {
 
     mustExistDirectory "${workspace}/bld/"
 
+    local artifactsPathOnShare=${artifactesShare}/${JOB_NAME}/${BUILD_NUMBER}
+
     # TODO: demx2fk3 2014-03-31 remove cd - changing the current directory isn't a good idea!
     cd "${workspace}/bld/" 
-    local artifactsPathOnShare=${artifactesShare}/${JOB_NAME}/${BUILD_NUMBER}
-    createSymlinksToArtifactsOnShare ${artifactsPathOnShare}
-
     for dir in bld-*-* ; do
         [[ -d "${dir}" && ! -L "${dir}" ]] || continue
 
@@ -44,6 +43,8 @@ createArtifactArchive() {
             "${dir}.tar.gz"                                \
             ${serverName}:${artifactsPathOnShare}/save
     done
+
+    createSymlinksToArtifactsOnShare ${artifactsPathOnShare}
 
     return 
 }
