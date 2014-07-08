@@ -41,6 +41,7 @@ ci_job_test() {
     mustExistDirectory ${realDirectory}
     mustHaveValue "${labelName}" "label name from ${workspace}"
 
+    execute rm -rf ${WORKSPACE}/properties
     echo "LABEL=${labelName}"                  >> ${WORKSPACE}/properties
     echo "DELIVERY_DIRECTORY=${realDirectory}" >> ${WORKSPACE}/properties
     rawDebug ${WORKSPACE}/properties
