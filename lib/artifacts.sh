@@ -20,6 +20,7 @@ createArtifactArchive() {
     mustHaveWorkspaceName
 
     mustExistDirectory "${workspace}/bld/"
+    local artifactesShare=$(getConfig artifactesShare)
 
     local artifactsPathOnShare=${artifactesShare}/${JOB_NAME}/${BUILD_NUMBER}
 
