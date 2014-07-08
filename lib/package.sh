@@ -70,11 +70,14 @@ mustHavePlatformFromDirectory() {
 #  @param   <none>
 #  @return  <none>
 copyReleaseCandidateToShare() {
-
-# TODO: demx2fk3 2014-04-10 not working yet...
-
     local workspace=$(getWorkspaceName)
     mustHaveWorkspaceName
+
+    local shouldCopyToShare=$(getConfig LFS_CI_UC_package_copy_to_share_real_location)
+    if [[ ! ${shouldCopyToShare} ]] ; then
+        debug "will not copy this production to CI_LFS share"
+        return
+    fi
 
     mustHaveNextCiLabelName
     local label=$(getNextCiLabelName)
@@ -86,37 +89,51 @@ copyReleaseCandidateToShare() {
     local branch=$(getBranchName)
     mustHaveBranchName
 
-    local ciBuildShare=$(getConfig lfsCiBuildsShare)
-
+    local remoteDirectory=$(getConfig LFS_CI_UC_package_copy_to_share_real_location)/${label}
     local localDirectory=${workspace}/upload
-    # TODO: demx2fk3 2014-05-20 fixme. The os should be configurable
-    local remoteDirectory=${ciBuildShare}/${productName}/${branch}/data/${label}/os
+    mustExistDirectory ${localDirectory}
 
-    # TODO: demx2fk3 2014-05-20 fixme use lastSuccessfull build here (or empty)
-    local oldRemoteDirectory=${ciBuildShare}/${productName}/${branch}/data/$(ls ${ciBuildShare}/${productName}/${branch}/data/ | tail -n 1 )
-    local hardlink=""
+    info "copy build results from ${localDirectory} to ${remoteDirectory}/os/"
+    execute mkdir -p ${remoteDirectory}/os/
+    execute rsync -av --delete ${hardlink} ${localDirectory}/. ${remoteDirectory}/os/
+    execute cd ${remoteDirectory}
 
-    info "copy build results to ${remoteDirectory}"
-    info "based on ${oldRemoteDirectory}"
+    # PS SCM - which are responsible for syncing this share to the world wants the group writable
+    execute chmod -R g+w ${remoteDirectory}
 
-    execute mkdir -p ${remoteDirectory}
+    info "linking sdk"
+    local commonentsFile=${workspace}/bld/bld-externalComponents-summary/externalComponents 
+    mustExistFile ${commonentsFile}
+    for sdk in $(getConfig LFS_CI_UC_package_linking_component) ; do
+        local sdkValue=$(getConfig ${sdk} ${commonentsFile})
+        mustExistDirectory ../../../SDKs/${sdkValue}
+        execute ln -sf ../../../SDKs/${sdkValue} ${sdk}
+    done
 
-    if [[ -d ${oldRemoteDirectory} ]] ; then
-        hardlink="--link-dest=${oldRemoteDirectory}/os/"
-    fi
-    execute rsync -av --delete ${hardlink} ${localDirectory}/. ${remoteDirectory}
+    local linkDirectory=$(getConfig LFS_CI_UC_package_copy_to_share_link_location)
+    local pathToLink=../../$(getConfig LFS_CI_UC_package_copy_to_share_path_name)/${label}
+    # get the latest used revision in this build
+    local revision=$(cut -d" " -f 3 ${workspace}/bld/bld-externalComponents-*/usedRevisions.txt| sort -u | tail -n 1)
+    mustHaveValue "${revision}" "latest used revision"
 
-    # TODO: demx2fk3 2014-04-10 link sdks
-    executeOnMaster ln -sf ${ciBuildShare}/${productName}/${branch}/data/${label} ${ciBuildShare}/${productName}/${branch}/${label}
-    executeOnMaster ln -sf ${ciBuildShare}/${productName}/${branch}/data/${label} ${ciBuildShare}/${productName}/${branch}/build_${BUILD_NUMBER}
+    info "create link in RCversion to "
+    execute mkdir -p ${linkDirectory}
+    execute cd ${linkDirectory}
+    execute ln -sf ${pathToLink} ${label}
+    execute ln -sf ${pathToLink} "trunk@${revision}"
 
-    local serverPath=$(getConfig jenkinsMasterServerPath)
+    # this is only for internal use!
+    info "creating link for internal usage"
+    local internalLinkDirectory=$(getConfig LFS_CI_UC_package_internal_link)
+    execute mkdir -p ${internalLinkDirectory}
+    execute ln -sf ${remoteDirectory} ${internalLinkDirectory}/build_${BUILD_NUMBER}
+
+    info "create link to artifacts"
     local artifactesShare=$(getConfig artifactesShare)
     local artifactsPathOnShare=${artifactesShare}/${JOB_NAME}/${BUILD_NUMBER}
-    local artifactsPathOnMaster=${serverPath}/jobs/${JOB_NAME}/builds/${BUILD_NUMBER}/archive
+    local artifactsPathOnMaster=$(getBuildDirectoryOnMaster)/archive
     executeOnMaster mkdir -p  ${artifactsPathOnShare}/save
-    executeOnMaster ln    -sf ${ciBuildShare}/${productName}/${branch}/data/${label} ${artifactsPathOnMaster}
-
+    executeOnMaster ln    -sf ${remoteDirectory} ${artifactsPathOnMaster}
 
     return
 }

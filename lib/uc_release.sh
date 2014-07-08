@@ -63,9 +63,9 @@ ci_job_release() {
     info "found package job: ${packageJobName} / ${packageBuildNumber}"
     info "found build   job: ${buildJobName} / ${buildBuildNumber}"
     
-    local ciBuildShare=$(getConfig lfsCiBuildsShare)
-    local workspace=${ciBuildShare}/${productName}/${location}/build_${packageBuildNumber}
-    mustExistDirectory  ${workspace}
+    local ciBuildShare=$(getConfig LFS_CI_UC_package_internal_link)
+    local workspace=${ciBuildShare}/build_${packageBuildNumber}
+    mustExistSymlink ${workspace}
 
     debug "found results of package job on share: ${workspace}"
 
@@ -120,7 +120,7 @@ extractArtifactsOnReleaseShare() {
     local buildNumber=$2
     local workspace=$(getWorkspaceName)
     local server=$(getConfig jenkinsMasterServerHostName)
-    local ciBuildShare=$(getConfig lfsCiBuildsShare)
+    local resultBuildShare=$(getConfig LFS_PROD_UC_release_copy_build_to_share)
     mustHaveWorkspaceName
 
     mustHaveNextLabelName
@@ -134,7 +134,7 @@ extractArtifactsOnReleaseShare() {
         [[ -d ${dir} ]] || continue
         basename=$(basename ${dir})
 
-        local destination=${ciBuildShare}/buildresults/${basename}/${labelName}
+        local destination=${resultBuildShare}/${basename}/${labelName}
         info "copy ${basename} to buildresults share ${destination}"
 
         executeOnMaster mkdir -p ${destination}
@@ -159,7 +159,7 @@ copyToReleaseShareOnSite_copyToSite() {
 
     local siteName=${SITE_NAME}
     local labelName=${RELEASE_NAME}
-    local ciBuildShare=$(getConfig lfsCiBuildsShare)
+    local ciBuildShare=$(getConfig LFS_PROD_UC_release_copy_build_to_share)
 
     for subsystemDirectory in $(find ${ciBuildShare}/buildresults/ -maxdepth 2 -name ${labelName} ) ; do
         [[ -d ${subsystemDirectory} ]] || continue

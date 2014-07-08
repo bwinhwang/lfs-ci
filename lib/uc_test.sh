@@ -1,6 +1,5 @@
 #!/bin/bash
 
-[[ -z ${LFS_CI_SOURCE_artifacts} ]] && source ${LFS_CI_ROOT}/lib/artifacts.sh
 [[ -z ${LFS_CI_SOURCE_jenkins}   ]] && source ${LFS_CI_ROOT}/lib/jenkins.sh
 
 ## @fn      ci_job_test()
@@ -9,36 +8,48 @@
 #  @param   <none>
 #  @return  <none>
 ci_job_test() {
-
-    info "do nothing...."
-
-    # TODO: demx2fk3 2014-04-16 add content here
-
     # get the package build job (upstream_project and upstream_build)
     # prepare the workspace directory for all test builds
     # copy the files to a workspace directory
     # jobs will be executed by jenkins job, so we can exit very early
-    requiredParameters JOB_NAME 
+    requiredParameters JOB_NAME BUILD_NUMBER WORKSPACE
 
     local serverPath=$(getConfig jenkinsMasterServerPath)
+    local productName=$(getProductNameFromJobName)
+    mustHaveValue "${productName}" "product name"
+
+    local location=$(getBranchName)
+    mustHaveBranchName
+
     local workspace=$(getWorkspaceName)
     mustHaveCleanWorkspace
     mustHaveWorkspaceName
     mustHaveWritableWorkspace
 
-    local upstreamProject=${UPSTREAM_PROJECT}
-    local upstreamBuildNumber=${UPSTREAM_BUILD}
-    local requiredArtifacts=$(getConfig LFS_CI_UC_test_required_artifacts)
+    local upstreamProject=$(sed "s/Test.*/Package_-_package/" <<< ${JOB_NAME})
+    local upstreamBuildNumber=$(readlink ${serverPath}/jobs/${upstreamProject}/builds/lastSuccessfulBuild)
+    info "upstreamProject ${upstreamProject} ${upstreamBuildNumber}"
+    local buildDirectory=$(getBuildDirectoryOnMaster "${upstreamProject}" lastSuccessfulBuild)
+    mustExistDirectory ${buildDirectory}
 
-    upstreamBuildNumber=lastSuccessfulBuild
-    upstreamProject=$(sed "s/Test/Build/" <<< ${UPSTREAM_PROJECT})
+    local ciBuildShare=$(getConfig LFS_CI_UC_package_internal_link)
+    local workspace=${ciBuildShare}/build_${upstreamBuildNumber}
+    mustExistSymlink ${workspace}
 
-    info "upstream is ${upstreamProject} / ${upstreamBuildNumber}"
+    local realDirectory=$(readlink ${workspace})
+    local labelName=$(basename ${realDirectory})
+    mustExistDirectory ${realDirectory}
+    mustHaveValue "${labelName}" "label name from ${workspace}"
 
-    copyArtifactsToWorkspace "${upstreamProject}" "${upstreamBuildNumber}" "${requiredArtifacts}"
+    echo "LABEL=${labelName}"                  >> ${WORKSPACE}/properties
+    echo "DELIVERY_DIRECTORY=${realDirectory}" >> ${WORKSPACE}/properties
+    rawDebug ${WORKSPACE}/properties
 
-    mustHaveNextCiLabelName
-    local labelName=$(getNextCiLabelName)        
-    setBuildDescription "${JOB_NAME}" "${BUILD_NUMBER}" "${labelName}"
+    # echo "FUPPER_IMAGE=${workspace}/os/platforms/fsm3_octeon2/factory/fsm3_octeon2-fupper_images.sh" > ${WORKSPACE}/properties
+    # echo "FMON_TGZ=${workspace}/os/platforms/fsm3_octeon2/apps/fmon.tgz" >> ${WORKSPACE}/properties
+    # echo "EXECUTE_MANUAL=true" >> ${WORKSPACE}/properties
+    # echo "LABEL=<a href=https://lfs-ci.emea.nsn-net.net/job/${JOB_NAME}/${BUILD_NUMBER}/>triggered by ${JOB_NAME}/${BUILD_NUMBER}</a>" >> ${WORKSPACE}/properties
+
+    setBuildDescription "${JOB_NAME}" "${BUILD_NUMBER}" "${label}"
     return
 }

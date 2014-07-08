@@ -25,15 +25,24 @@ ci_job_admin() {
 }
 
 synchronizeShare() {
+    requiredParameters JOB_NAME BUILD_NUMBER LFS_CI_ROOT WORKSPACE
 
-    requiredParameters LOCAL_SHARE REMOTE_SHARE REMOTE_SERVER
+    export subTaskName=$(getSubTaskNameFromJobName)
+    local localPath=$(getConfig ADMIN_sync_share_local_directoryName)
+    local remotePath=$(getConfig ADMIN_sync_share_remote_directoryName)
+    local remoteServer=$(getConfig ADMIN_sync_share_remote_hostname)
 
-    local localPath=${LOCAL_SHARE}
-    local remotePath=${REMOTE_SHARE}
-    local remoteServer=${REMOTE_SERVER}
+    copyChangelogToWorkspace ${JOB_NAME} ${BUILD_NUMBER}
 
-    info "synchronize ${localPath} to  ${remoteServer}:${remotePath}"
-    execute rsync -avrPe ssh ${localPath} ${remoteServer}:${remotePath}
+    execute ssh ${remoteServer} mkdir -p ${remotePath}
+
+    info "synchronize ${localPath} to ${remoteServer}:${remotePath}"
+    for entry in $(${LFS_CI_ROOT}/bin/xpath -q -e '/log/logentry/paths/path/node()' ${WORKSPACE}/changelog.xml )
+    do
+        info "transferting ${entry} to ${remoteServer}:${remotePath}"
+        execute rsync -ave ssh --stats ${entry} ${remoteServer}:${remotePath}
+    done
+
     return
 }
 

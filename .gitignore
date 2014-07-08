@@ -5,3 +5,4 @@ log/ci*.log
 *.sw?
 tags
 TAGS
+log

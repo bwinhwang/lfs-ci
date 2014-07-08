@@ -452,6 +452,15 @@ mustExistDirectory() {
     return
 }
 
+mustExistSymlink() {
+    local file=$1
+
+    if [[ ! -L ${file} ]] ; then
+        error "${file} is not a symlink"
+        exit 1
+    fi
+    return
+}
 mustExistFile() {
     local file=$1
 
@@ -545,3 +554,25 @@ copyRevisionStateFileToWorkspace() {
 
     return
 }
+
+copyChangelogToWorkspace() {
+    local jobName=$1
+    local buildNumber=$2
+
+    requiredParameters WORKSPACE
+
+    if [[ ! "${jobName}" || ! "${buildNumber}" ]] ; then
+        return
+    fi
+    local dir=$(getBuildDirectoryOnMaster ${jobName} ${buildNumber})
+    local master=$(getConfig jenkinsMasterServerHostName)
+
+    mustHaveValue "${dir}" "build directory on master"
+    debug "copy changelog.xml from master"
+    execute rsync -avPe ssh ${master}:${dir}/changelog.xml ${WORKSPACE}/changelog.xml
+
+    rawDebug ${WORKSPACE}/changelog.xml
+
+    return
+}
+

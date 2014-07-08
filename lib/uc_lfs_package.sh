@@ -25,7 +25,6 @@ ci_job_package() {
     debug "workspace is ${workspace}"
 
     local requiredArtifacts=$(getConfig LFS_CI_UC_package_required_artifacts)
-
     copyArtifactsToWorkspace "${UPSTREAM_PROJECT}" "${UPSTREAM_BUILD}" "${requiredArtifacts}"
 
     mustHaveNextCiLabelName
@@ -59,6 +58,9 @@ copyAddons() {
     local workspace=$(getWorkspaceName)
     mustHaveWorkspaceName
 
+    # TODO: demx2fk3 2014-07-02 remove this - do it in a different way
+    rm -rf ${workspace}/bld/bld-psl-rootfs
+
     for bldDirectory in ${workspace}/bld/bld-*psl*-* ; do
         [[ -d ${bldDirectory} ]] || continue
         [[ -d ${bldDirectory}/results/addons ]] || continue
@@ -74,6 +76,11 @@ copyAddons() {
         execute mkdir -p ${dstDirectory}
         execute find ${srcDirectory}/ -type f \
                     -exec cp -av {} ${dstDirectory} \;
+
+        if [[ "${destinationsPlatform}" == "powerpc-e500-linux-gnu" ]] ; then
+            info "removing tgz addons from powerpc-e500-linux-gnu"
+            execute find ${dstDirectory} -name \*.tgz -type f -exec rm -f {} \;
+        fi
     done
 
     return
@@ -167,25 +174,25 @@ copySysroot() {
         # handling libddal stuff            
         case ${destinationsArchitecture} in
             i686-pc-linux-gnu)
-                execute tar -xvz -C ${dst}/usr --strip-components=1 -f ${workspace}/bld/bld-ddal-fcmd/results/include/ifddal.tgz
-                execute ln -sf libDDAL.so.fcmd ${dst}/usr/lib/libDDAL_fcmd.so
-                execute ln -sf libDDAL.so.fcmd ${dst}/usr/lib/libDDAL.so
+                execute tar -xvz -C ${dst}/usr --strip-components=1 -f ${workspace}/bld/bld-ddal-qemu_i386/results/include/ifddal.tgz
+                execute ln -sf libDDAL.so.qemu_i386 ${dst}/usr/lib/libDDAL.so
             ;;
             powerpc-e500-linux-gnu)
-                execute tar -xvz -C ${dst}/usr --strip-components=1 -f ${workspace}/bld/bld-ddal-fcmd/results/include/ifddal.tgz
+                # execute tar -xvz -C ${dst}/usr --strip-components=1 -f ${workspace}/bld/bld-ddal-fcmd/results/include/ifddal.tgz
                 execute ln -sf libDDAL.so.fcmd ${dst}/usr/lib/libDDAL_fcmd.so
                 execute ln -sf libDDAL.so.fcmd ${dst}/usr/lib/libDDAL.so
                 execute ln -sf libDDAL.so.fcmd ${dst}/usr/lib/libDDAL_fspc.so
             ;;
             x86_64-pc-linux-gnu)
-                execute tar -xvz -C ${dst}/usr --strip-components=1 -f ${workspace}/bld/bld-ddal-fcmd/results/include/fsmifdd.tgz
-                execute ln -sf libFSMDDAL.so.fcmd ${dst}/usr/lib/libFSMDDAL_fspc.so
-                execute ln -sf libFSMDDAL.so.fcmd ${dst}/usr/lib/libFSMDDAL.so
+                # execute tar -xvz -C ${dst}/usr --strip-components=1 -f ${workspace}/bld/bld-fsmddal-qemu_x86_64/results/include/fsmifdd.tgz
+                # execute ln -sf libFSMDDAL.so.qemu_x86_64 ${dst}/usr/lib/libFSMDDAL_qemu_x86_64.so
+                # execute ln -sf libFSMDDAL.so.qemu_x86_64 ${dst}/usr/lib/libFSMDDAL.so
             ;;
             mips64-octeon2-linux-gnu)
-                execute tar -xvz -C ${dst}/usr --strip-components=1 -f ${workspace}/bld/bld-fsmddal-fct/results/include/fsmifdd.tgz
-                execute ln -sf libFSMDDAL.so.fct ${dst}/usr/lib64/libFSMDDAL_fsm3_octeon2.so
-                execute ln -sf libFSMDDAL.so.fct ${dst}/usr/lib64/libFSMDDAL.so
+#                execute tar -xvz -C ${dst}/usr --strip-components=1 -f ${workspace}/bld/bld-fsmddal-fct/results/include/fsmifdd.tgz
+#                execute ln -sf libFSMDDAL.so.fct ${dst}/usr/lib64/libFSMDDAL_fsm3_octeon2.so
+#                execute ln -sf libFSMDDAL.so.fct ${dst}/usr/lib64/libFSMDDAL.so
+#                execute ln -sf libFSMDDAL.so.fct ${dst}/usr/lib64/libDDAL.so
             ;;
             mips64-octeon-linux-gnu)
                 execute tar -xvz -C ${dst}/usr --strip-components=1 -f ${workspace}/bld/bld-fsmddal-fct/results/include/fsmifdd.tgz
@@ -197,6 +204,7 @@ copySysroot() {
 
                 execute ln -sf libFSMDDAL.so.fsm4_arm ${dst}/usr/lib/libFSMDDAL.so
                 execute ln -sf libFSMDDAL.so.fsm4_arm ${dst}/usr/lib/libFSMDDAL_fsm4_arm.so
+                execute ln -sf libFSMDDAL.so.fsm4_arm ${dst}/usr/lib/libDDAL.so
 
                 if [[ -e ${dst}/usr/lib/libFSMDDAL.so.fsm35_k2 ]] ; then
                     warning "renaming libFSMDDAL.so.fsm35_k2 to libFSMDDAL.so.fsm4_arm, please fix this in src-fsmddal"
@@ -317,7 +325,6 @@ copyVersionFile() {
     mkdir -p ${dstDirectory}
 
     # TODO: demx2fk3 2014-04-01 implement this, fix in src-fsmpsl and src-psl is needed
-
     info "copy verson control file..."
 
     for file in ${workspace}/bld/bld-fsmpsl-fct/results/doc/versions/version_control.xml \
@@ -326,6 +333,7 @@ copyVersionFile() {
     do
         [[ -e ${file} ]] || continue
         execute cp ${file} ${dstDirectory}
+        execute cp ${file} ${dstDirectory}/..
     done
 
     return
@@ -345,6 +353,11 @@ copyDocumentation() {
     info "copy doc..."
 
     # TODO: demx2fk3 2014-04-01 implement this, fix in src-fsmpsl and src-psl is needed
+    for bldDirectory in ${workspace}/bld/bld-*psl*-* ; do
+        [[ -d ${bldDirectory} ]] || continue
+        [[ -d ${bldDirectory}/results/doc ]] || continue
+        execute rsync -av --exclude=.svn ${bldDirectory}/results/doc/. ${dst}/
+    done
 
     for file in ${workspace}/bld/bld-fsmddal-doc/results/doc/results/{FSM,}DDAL.pdf ; do
         if [[ -f ${file} ]] ; then
@@ -356,4 +369,5 @@ copyDocumentation() {
 
     return
 }
+
 
