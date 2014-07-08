@@ -11,8 +11,7 @@ LFS_CI_SOURCE_subversion='$Id$'
 #  @param   {commitMessage}   commit message
 #  @return  <none>
 uploadToSubversion() {
-
-    requiredParameters LFS_CI_ROOT
+    requiredParameters LFS_CI_ROOT TMPDIR
 
     local pathToUpload=$1
     local branchToUpload=$2

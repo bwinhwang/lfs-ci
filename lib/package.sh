@@ -2,6 +2,8 @@
 
 LFS_CI_SOURCE_package='$Id$'
 
+[[ -z ${LFS_CI_SOURCE_artifacts} ]] && source ${LFS_CI_ROOT}/lib/artifacts.sh
+
 ## @fn      getArchitectureFromDirectory( $dir )
 #  @brief   get the arcitecture from the bld directory
 #  @details maps e.g. fct to mips64-octeon2-linux-gnu
@@ -128,12 +130,8 @@ copyReleaseCandidateToShare() {
     execute mkdir -p ${internalLinkDirectory}
     execute ln -sf ${remoteDirectory} ${internalLinkDirectory}/build_${BUILD_NUMBER}
 
-    info "create link to artifacts"
-    local artifactesShare=$(getConfig artifactesShare)
-    local artifactsPathOnShare=${artifactesShare}/${JOB_NAME}/${BUILD_NUMBER}
-    local artifactsPathOnMaster=$(getBuildDirectoryOnMaster)/archive
-    executeOnMaster mkdir -p  ${artifactsPathOnShare}/save
-    executeOnMaster ln    -sf ${remoteDirectory} ${artifactsPathOnMaster}
+    createSymlinksToArtifactsOnShare ${remoteDirectory}
 
     return
 }
+

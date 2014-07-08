@@ -12,8 +12,8 @@ LFS_CI_SOURCE_artifacts='$Id$'
 #  @param   <none>
 #  @return  <none>
 createArtifactArchive() {
-
     requiredParameters JOB_NAME BUILD_NUMBER
+
     local workspace=$(getWorkspaceName)
     local serverPath=$(getConfig jenkinsMasterServerPath)
     local serverName=$(getConfig linseeUlmServer)
@@ -21,13 +21,10 @@ createArtifactArchive() {
 
     mustExistDirectory "${workspace}/bld/"
 
-    # TODO: demx2fk3 2014-03-31 remove cd - dont change the current directory
+    # TODO: demx2fk3 2014-03-31 remove cd - changing the current directory isn't a good idea!
     cd "${workspace}/bld/" 
-    local artifactesShare=$(getConfig artifactesShare)
     local artifactsPathOnShare=${artifactesShare}/${JOB_NAME}/${BUILD_NUMBER}
-    local artifactsPathOnMaster=${serverPath}/jobs/${JOB_NAME}/builds/${BUILD_NUMBER}/archive
-    executeOnMaster mkdir -p  ${artifactsPathOnShare}/save
-    executeOnMaster ln    -sf ${artifactsPathOnShare}      ${artifactsPathOnMaster}
+    createSymlinksToArtifactsOnShare ${artifactsPathOnShare}
 
     for dir in bld-*-* ; do
         [[ -d "${dir}" && ! -L "${dir}" ]] || continue
@@ -177,3 +174,17 @@ copyArtifactsToWorkspace() {
     return
 }
 
+createSymlinksToArtifactsOnShare() {
+    requiredParameters JOB_NAME BUILD_NUMBER
+
+    local artifactsDirectoryOnShare=$1
+    mustExistDirectory ${artifactsDirectoryOnShare}
+
+    info "create link to artifacts"
+    local artifactesShare=$(getConfig artifactesShare)
+    local artifactsPathOnMaster=$(getBuildDirectoryOnMaster)/archive
+    executeOnMaster mkdir -p  ${artifactsDirectoryOnShare}/save
+    executeOnMaster ln    -sf ${artifactsDirectoryOnShare} ${artifactsPathOnMaster}
+
+    return
+}

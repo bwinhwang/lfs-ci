@@ -439,9 +439,9 @@ mustHaveWritableFile() {
 
 ## @fn      mustExistDirectory( $directoryName )
 #  @brief   ensure, that the directory exists 
-#  @param   {directoryName}    nae of the directory
+#  @param   {directoryName}    name of the directory
 #  @return  <none>
-#  @throws  raise an error, if the directory is nit exists
+#  @throws  raise an error, if the directory does not exist
 mustExistDirectory() {
     local directory=$1
 
@@ -452,6 +452,11 @@ mustExistDirectory() {
     return
 }
 
+## @fn      mustExistSymlink( $link )
+#  @brief   ensure, that the link is a symlink and exists
+#  @param   {link}    name of the symlink
+#  @return  <none>
+#  @throws  raise an error, if the symlink does not exist
 mustExistSymlink() {
     local file=$1
 
@@ -461,6 +466,12 @@ mustExistSymlink() {
     fi
     return
 }
+
+## @fn      mustExistFile( $file )
+#  @brief   ensure, that the file exists
+#  @param   {file}    name of the file
+#  @return  <none>
+#  @throws  raise an error, if the file does not exist
 mustExistFile() {
     local file=$1
 
@@ -555,6 +566,11 @@ copyRevisionStateFileToWorkspace() {
     return
 }
 
+## @fn      copyChangelogToWorkspace( $jobName, $buildNumber )
+#  @brief   copy the changelog from the master into the workspace
+#  @param   {jobName}        name of the job
+#  @param   {buildNumber}    number of the build
+#  @return  <none>
 copyChangelogToWorkspace() {
     local jobName=$1
     local buildNumber=$2
@@ -575,4 +591,7 @@ copyChangelogToWorkspace() {
 
     return
 }
+
+
+
 

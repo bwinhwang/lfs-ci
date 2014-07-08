@@ -177,12 +177,20 @@ deleteJenkinsJob() {
     return
 }
 
+## @fn      disableJob( $jobName )
+#  @brief   disable the jenkins job
+#  @param   {jobName}    name of the job
+#  @return  <none>
 disableJob() {
     local jobName=$1
     executeJenkinsCli disable-job "${jobName}"
     return
 }
 
+## @fn      enableJob( $jobName )
+#  @brief   enable the jenkins job
+#  @param   {jobName}    name of the job
+#  @return  <none>
 enableJob() {
     local jobName=$1
     executeJenkinsCli enable-job "${jobName}"

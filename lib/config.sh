@@ -78,7 +78,6 @@ getConfig() {
     local key=$1
     local file=$2
 
-
     export productName=$(getProductNameFromJobName)
     export taskName=$(getTaskNameFromJobName)
     export subTaskName=$(getSubTaskNameFromJobName)
@@ -135,3 +134,21 @@ declare -A locationToSubversionMap=( ["LFS_pronb-developer"]="PS_LFS_OS_MAINBRAN
                                      ["UBOOT_FSM_R4_DEV"]="PS_LFS_BT_FSM_R4"        \
                                    )
 
+## @fn      getDeliveryRepositoryName( tagName )
+#  @brief   get the subversion binary delivery repos name based on the defined regex
+#  @param   {tagName}    name of the tag
+#  @return  repos name
+getDeliveryRepositoryName() {
+    local tagName=$1
+    mustHaveValue "${tagName}" "name of the tag"
+
+    local reposName=$(sed 's/^.*PS_LFS_OS_\([^_]\+_[^_]\+\)_.*$/BTS_D_SC_LFS_\1/' <<< ${tagName} )
+    if [[ ${tagName} = ${reposName} ]] ; then
+        error "regex to get SVN delivery repos name didn't match to ${tagName}"
+        exit 1
+    fi
+    debug "svn delivery repos name for ${tagName} is ${reposName}"
+
+    echo ${reposName}
+    return
+}
