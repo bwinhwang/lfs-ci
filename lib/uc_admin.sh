@@ -34,9 +34,20 @@ synchronizeShare() {
     requiredParameters JOB_NAME BUILD_NUMBER LFS_CI_ROOT WORKSPACE
 
     export subTaskName=$(getSubTaskNameFromJobName)
-    local localPath=$(getConfig ADMIN_sync_share_local_directoryName)
-    local remotePath=$(getConfig ADMIN_sync_share_remote_directoryName)
+    # syntax is <share>_to_<site>
+    export shareType=$(cut -d_ -f 1 <<< ${subTaskName})
+    export siteName=$(cut -d_ -f 3 <<< ${subTaskName})
+    
+    local localPath=$(getConfig    ADMIN_sync_share_local_directoryName)
+    local remotePath=$(getConfig   ADMIN_sync_share_remote_directoryName)
     local remoteServer=$(getConfig ADMIN_sync_share_remote_hostname)
+    mustHaveValue "${remoteServer}" "remote server"
+    mustHaveValue "${remotePath}"   "remote path"
+    mustHaveValue "${localPath}"    "local path"
+
+    local rsyncOptions=$(getConfig RSYNC_options)
+
+    unset shareType siteName
 
     copyChangelogToWorkspace ${JOB_NAME} ${BUILD_NUMBER}
 
@@ -46,8 +57,10 @@ synchronizeShare() {
     for entry in $(${LFS_CI_ROOT}/bin/xpath -q -e '/log/logentry/paths/path/node()' ${WORKSPACE}/changelog.xml )
     do
         info "transferting ${entry} to ${remoteServer}:${remotePath}"
-        execute rsync -ave ssh --stats ${entry} ${remoteServer}:${remotePath}
+        execute rsync ${rsyncOptions} -e ssh --stats ${entry} ${remoteServer}:${remotePath}
     done
+
+    info "synchronizing is done."
 
     return
 }
