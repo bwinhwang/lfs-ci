@@ -13,8 +13,17 @@ actionCompare() {
     fi
 
     export subTaskName=$(getSubTaskNameFromJobName)
+    # syntax is <share>_to_<site>
+    export shareType=$(cut -d_ -f 1 <<< ${subTaskName})
+    export siteName=$(cut -d_ -f 3 <<< ${subTaskName})
     local directoryNameToSynchronize=$(getConfig ADMIN_sync_share_local_directoryName)
+    local findDepth=$(getConfig ADMIN_sync_share_check_depth)
+    unset shareType siteName
 
+    # remove this
+    if [[ -z ${findDepth} ]] ; then
+        findDepth=1
+    fi
     # read the revision state file
     # format:
     # projectName
@@ -22,7 +31,7 @@ actionCompare() {
     { read oldDirectoryNameToSynchronize ; 
       read oldChecksum ; } < "${REVISION_STATE_FILE}"
 
-    trace "old revision state data are ${oldDirectoryNameToSynchronize} / ${oldChecksum}"
+    info "old revision state data are ${oldDirectoryNameToSynchronize} / ${oldChecksum}"
 
     # comparing to new state
     if [[ "${directoryNameToSynchronize}" != "${oldDirectoryNameToSynchronize}" ]] ; then
@@ -30,7 +39,9 @@ actionCompare() {
         exit 0
     fi
 
-    local checksum=$(ls -lat ${directoryNameToSynchronize} | md5sum | cut -d" " -f 1)
+    local checksum=$(find ${directoryNameToSynchronize} -maxdepth ${findDepth} -printf "%p %C@\n" | sort | md5sum | cut -d" " -f 1)
+
+    info "new revision state data are ${directoryNameToSynchronize} / ${checksum}"
 
     if [[ "${checksum}" != "${oldChecksum}" ]] ; then
         info "checksum has changed, trigger build"
@@ -52,13 +63,24 @@ actionCheckout() {
     cat < /dev/null > "${CHANGELOG}"
 
     export subTaskName=$(getSubTaskNameFromJobName)
+    # syntax is <share>_to_<site>
+    export shareType=$(cut -d_ -f 1 <<< ${subTaskName})
+    export siteName=$(cut -d_ -f 3 <<< ${subTaskName})
     local directoryNameToSynchronize=$(getConfig ADMIN_sync_share_local_directoryName)
+    local findDepth=$(getConfig ADMIN_sync_share_check_depth)
+    unset shareType siteName
+    # remove this
+    if [[ -z ${findDepth} ]] ; then
+        findDepth=1
+    fi
+
     local oldFileListing=$(createTempFile)
     local newFileListing=$(createTempFile)
-    local checksum=$(ls -lat ${directoryNameToSynchronize} | md5sum | cut -d" " -f 1)
 
+    info "create filelist from ${directoryNameToSynchronize} with depth = ${findDepth}"
     tail -n +3 ${OLD_REVISION_STATE_FILE} > ${oldFileListing}
-    find ${directoryNameToSynchronize} -maxdepth 1 -printf "%p %C@\n" -maxdepth 1 | sort > ${newFileListing}
+    find ${directoryNameToSynchronize} -maxdepth ${findDepth} -printf "%p %C@\n" | sort > ${newFileListing}
+    local checksum=$(md5sum ${newFileListing} | cut -d" " -f 1 )
 
     echo "${directoryNameToSynchronize}" >  ${REVISION_STATE_FILE}
     echo "${checksum}"                   >> ${REVISION_STATE_FILE}
