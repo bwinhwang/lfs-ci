@@ -145,8 +145,13 @@ sub matches {
     my $matches = 0;
 
     foreach my $tag ( @{ $self->{tags} } ) {
-        if( $tag->value() eq $self->{handler}->getConfig( name => $tag->name() ) ) {
-            # printf STDERR "matching tag %s / %s found...\n", $tag->name(), $tag->value();
+        my $value = $tag->value();
+        if( $tag->operator() eq "eq" 
+            and $value eq $self->{handler}->getConfig( name => $tag->name() ) ) {
+            # printf STDERR "matching tag %s / %s found...\n", $tag->name(), $value;
+            $matches ++;
+        } elsif ( $tag->operator() eq "regex" and $self->{handler}->getConfig( name => $tag->name()) =~ m/$value/ ) {
+            # printf STDERR "matching tag %s / %s via regex found...\n", $tag->name(), $value;
             $matches ++;
         } else {
             # printf STDERR "NOT matching tag %s / %s found...\n", $tag->name(), $tag->value();
@@ -1763,7 +1768,7 @@ sub execute {
 
     my $config = Singelton::config();
     $config->loadData( configFileName => $self->{configFileName} );
-    
+
     print $config->getConfig( name => $self->{configKeyName} );
 
     return;
@@ -1966,7 +1971,7 @@ sub getConfig {
     $value =~ s:
                     \$\{
                         ( [^}]+ )
-                        \}
+                      \}
                 :
                         $self->getConfig( name => $1 ) || "\${$1}"
                 :xgie;
@@ -1993,9 +1998,16 @@ sub loadData {
         my @tags = ();
         foreach my $tag (split( /\s*,\s*/, $cfg->{tags} ) ) {
             if( $tag =~ m/(\w+):([^:\s]+)/ ) {
-                push @tags, Model::Config->new( handler => $self,
-                                                name    => $1, 
-                                                value   => $2, 
+                push @tags, Model::Config->new( handler  => $self,
+                                                name     => $1, 
+                                                value    => $2, 
+                                                operator => "eq"
+                                              );
+            } elsif( $tag =~ m/(\w+)~([^:\s]+)/ ) {
+                push @tags, Model::Config->new( handler  => $self,
+                                                name     => $1, 
+                                                value    => $2, 
+                                                operator => "regex"
                                               );
             } else {
                 die "tag $tag does not match to syntax";

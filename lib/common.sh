@@ -592,6 +592,84 @@ copyChangelogToWorkspace() {
     return
 }
 
+getUpstreamProjects() {
+    local jobName=$1
+    local buildNumber=$2
+    local upstreamsFile=$3
 
+    requiredParameters LFS_CI_ROOT 
 
+    local serverPath=$(getConfig jenkinsMasterServerPath)
+    mustHaveValue "${serverPath}" "server path"
+    mustExistDirectory ${serverPath}
+
+    # find the related jobs of the build
+    runOnMaster ${LFS_CI_ROOT}/bin/getUpStreamProject \
+                    -j ${jobName}                     \
+                    -b ${buildNumber}                 \
+                    -h ${serverPath} > ${upstreamsFile}
+
+    trace "output of getUpStreamProject" 
+    rawDebug ${upstreamsFile}
+
+    return
+}
+
+_getJobInformationFromUpstreamProject() {
+    local jobName=$1
+    local buildNumber=$2
+    local jobNamePart=$3
+    local fieldNumber=$4
+
+    local upstreamsFile=$(createTempFile)
+
+    _getUpstreamProjects ${jobName} ${buildNumber} ${upstreamsFile}
+    local resultValue=$(grep ${jobNamePart} ${upstreamsFile} | cut -d: -f${fieldNumber})
+    mustHaveValue ${resultValue} "requested info / ${jobNamePart} / ${fieldNumber}"
+
+    echo ${resultValue}
+    return
+}
+
+getTestBuildNumberFromUpstreamProject() {
+    local jobName=$1
+    local buildNumber=$2
+    _getJobInformationFromUpstreamProject ${jobName} ${buildNumber} Test 2
+    return
+}
+
+getTestJobNameFromUpstreamProject() {
+    local jobName=$1
+    local buildNumber=$2
+    _getJobInformationFromUpstreamProject ${jobName} ${buildNumber} Test 1
+    return
+}
+
+getBuildBuildNumberFromUpstreamProject() {
+    local jobName=$1
+    local buildNumber=$2
+    _getJobInformationFromUpstreamProject ${jobName} ${buildNumber} Build 2
+    return
+}
+
+getBuildJobNameFromUpstreamProject() {
+    local jobName=$1
+    local buildNumber=$2
+    _getJobInformationFromUpstreamProject ${jobName} ${buildNumber} Build 1
+    return
+}
+
+getPackageBuildNumberFromUpstreamProject() {
+    local jobName=$1
+    local buildNumber=$2
+    _getJobInformationFromUpstreamProject ${jobName} ${buildNumber} Package 2
+    return
+}
+
+getPackageJobNameFromUpstreamProject() {
+    local jobName=$1
+    local buildNumber=$2
+    _getJobInformationFromUpstreamProject ${jobName} ${buildNumber} Package 1
+    return
+}
 

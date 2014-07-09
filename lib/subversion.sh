@@ -200,6 +200,16 @@ mustExistInSubversion() {
 
     return 0
 }
+mustExistBranchInSubversion() {
+    local url=$1
+    local branch=$2
+
+    if ! existsInSubversion ${url} ${branch} ; then
+        svnMkdir -m new_branch ${url}/${branch}
+    fi
+
+    return 0
+}
 
 ## @fn      getSvnUrl( $url )
 #  @brief   get the svn url for a svn url

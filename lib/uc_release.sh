@@ -19,37 +19,18 @@ ci_job_release() {
     local location=$(getLocationName)
     local product=$(getProductNameFromJobName)
     local branch=${locationToSubversionMap["${product}_${location}"]}
-
     mustHaveBranchName
-
-    local upstreamsFile=$(createTempFile)
 
     info "promoted build is ${TESTED_BUILD_JOBNAME} / ${TESTED_BUILD_NUMBER}"
 
     # find the related jobs of the build
-    runOnMaster ${LFS_CI_ROOT}/bin/getUpStreamProject \
-                    -j ${TESTED_BUILD_JOBNAME}        \
-                    -b ${TESTED_BUILD_NUMBER}         \
-                    -h ${serverPath} > ${upstreamsFile}
-
-    trace "output of getUpStreamProject" 
-    rawDebug ${upstreamsFile}
-
-    if ! grep -q Package ${upstreamsFile} ; then
-        error "cannot find upstream Package job"
-        exit 1
-    fi
-    if ! grep -q Build   ${upstreamsFile} ; then
-        error "cannot find upstream Build build"
-        exit 1
-    fi
-
     mustHaveNextLabelName
     local releaseLabel=$(getNextReleaseLabel)
-    local packageJobName=$(    grep Package ${upstreamsFile} | cut -d: -f1)
-    local packageBuildNumber=$(grep Package ${upstreamsFile} | cut -d: -f2)
-    local buildJobName=$(      grep Build   ${upstreamsFile} | cut -d: -f1)
-    local buildBuildNumber=$(  grep Build   ${upstreamsFile} | cut -d: -f2)
+    local packageJobName=$(getPackageJobNameFromUpstreamProject ${TESTED_BUILD_JOBNAME} ${TESTED_BUILD_NUMBER})
+    local packageBuildNumber=$(getPackageBuildNumberFromUpstreamProject ${TESTED_BUILD_JOBNAME} ${TESTED_BUILD_NUMBER})
+    local buildJobName=$(getBuildJobNameFromUpstreamProject ${TESTED_BUILD_JOBNAME} ${TESTED_BUILD_NUMBER})
+    local buildBuildNumber=$(getBuildBuildNumberFromUpstreamProject ${TESTED_BUILD_JOBNAME} ${TESTED_BUILD_NUMBER})
+
     local productName=$(getProductNameFromJobName)
     mustHaveValue ${packageJobName}
     mustHaveValue ${packageBuildNumber}
@@ -81,9 +62,6 @@ ci_job_release() {
         build_results_to_share)
             extractArtifactsOnReleaseShare "${buildJobName}" "${buildBuildNumber}"
         ;;
-        build_results_to_share_on_site)
-            copyToReleaseShareOnSite "${buildJobName}" "${buildBuildNumber}"
-        ;;
         create_releasenote_textfile)
             # TODO: demx2fk3 2014-06-05  is this correct?!?!
             createReleaseNoteTextFile "${TESTED_BUILD_JOBNAME}" "${TESTED_BUILD_NUMBER}" "${buildJobName}" "${buildBuildNumber}"
@@ -95,7 +73,6 @@ ci_job_release() {
             createTagOnSourceRepository ${buildJobName} ${buildBuildNumber}
         ;;
         summary)
-            # no op
             createReleaseNoteTextFile "${TESTED_BUILD_JOBNAME}" "${TESTED_BUILD_NUMBER}" "${buildJobName}" "${buildBuildNumber}"
         ;;
         *)
@@ -143,33 +120,6 @@ extractArtifactsOnReleaseShare() {
 
     info "clean up workspace"
     execute rm -rf ${workspace}/bld
-
-    return
-}
-
-## @fn      copyToReleaseShareOnSite()
-#  @brief   copy the released version from the build share to the other sites
-#  @details «full description»
-#  @todo    more doc
-#  @param   <none>
-#  @return  <none>
-copyToReleaseShareOnSite_copyToSite() {
-
-    requiredParameters SITE_NAME RELEASE_NAME
-
-    local siteName=${SITE_NAME}
-    local labelName=${RELEASE_NAME}
-    local ciBuildShare=$(getConfig LFS_PROD_UC_release_copy_build_to_share)
-
-    for subsystemDirectory in $(find ${ciBuildShare}/buildresults/ -maxdepth 2 -name ${labelName} ) ; do
-        [[ -d ${subsystemDirectory} ]] || continue
-
-        local sourceDirectory=${subsystemDirectory}
-        info "copy ${sourceDirectory} to ${siteName}"
-
-        # TODO: demx2fk3 2014-05-05 not fully implemented
-
-    done
 
     return
 }
@@ -275,12 +225,10 @@ createTagOnSourceRepository() {
     local osLabelName=$(getNextReleaseLabel)
     mustHaveValue "${osLabelName}" "no os label name"
 
-
     # get artifacts
-    revisionFile=${workspace}/bld//bld-externalComponents-summary/usedRevisions.txt
+    revisionFile=${workspace}/bld/bld-externalComponents-summary/usedRevisions.txt
     cat ${workspace}/bld//bld-externalComponents-*/usedRevisions.txt | sort -u > ${revisionFile}
     rawDebug ${revisionFile}
-
 
     # TODO: demx2fk3 2014-06-06 CLEAN UP!!!!
     #
@@ -296,8 +244,8 @@ createTagOnSourceRepository() {
     rawDebug ${revisionFile}
 
     # check for branch
-    local svnUrl=$(getConfig lfsSourceRepos)
-    local svnUrlOs=${svnUrl}/os
+    local svnUrl=$(getConfig LFS_PROD_svn_delivery_os_repos_url)
+    local svnUrlOs=${svnUrl}
     local branch=pre_${osLabelName}
 
     svnUrlOs=$(normalizeSvnUrl ${svnUrlOs})
@@ -338,7 +286,6 @@ createTagOnSourceRepository() {
 
         case ${src} in 
             src-*)
-                # TODO continue here
                 svnCopy -m tag_for_package_src_${src} ${svnUrlOs}/branches/${branch} \
                     ${svnUrl}/subsystems/${src}/${osLabelName}
             ;;
@@ -359,7 +306,7 @@ createTagOnSourceRepository() {
     info "svn repos url is ${svnUrl}/branches/${branch}"
 
     svnCopy -m create_new_tag_${osLabelName} \
-        ${svnUrl}/os/branches/${branch}             \
+        ${svnUrl}/os/branches/${branch}      \
         ${svnUrl}/os/tags/${osLabelName}
 
     info "branch ${branch} no longer required, removing branch"
@@ -389,12 +336,18 @@ createReleaseTag() {
     mustHaveValue "${osLabelName}" "no os label name"
 
     # check for branch
-    local svnUrl=$(getConfig lfsRelDeliveryRepos)
+    # TODO: demx2fk3 2014-07-08 this is not a nice way to do this, but there
+    # is no other way at the moment
+    # better: getConfig kayName -t tagName=${osLabelName}
+    export tagName=${osLabelName}
+    local svnUrl=$(getConfig LFS_PROD_svn_delivery_release_repos_url)
+    unset tagName
+
     local branch=$(getBranchName)
     mustHaveBranchName
 
     # get sdk label
-    commonentsFile=${workspace}/bld//bld-externalComponents-summary/externalComponents   
+    commonentsFile=${workspace}/bld/bld-externalComponents-summary/externalComponents   
     mustExistFile ${commonentsFile}
 
     local sdk2=$(getConfig sdk2 ${commonentsFile})
@@ -414,6 +367,7 @@ createReleaseTag() {
     fi
 
     # update svn:externals
+    # TODO: demx2fk3 2014-07-09 fixme do this in a different way - more configurable
     local svnExternalsFile=$(createTempFile)
     echo "^/os/tags/${osLabelName}/os os " >> ${svnExternalsFile}
 
@@ -457,6 +411,47 @@ mustHaveWorkspaceWithArtefactsFromUpstreamProjects() {
     info "workspace is ${workspace}"
 
     copyArtifactsToWorkspace "${jobName}" "${buildNumber}"
+
+    return
+}
+
+## @fn      createProxyReleaseTag()
+#  @brief   «brief description»
+#  @warning «anything important»
+#  @details «full description»
+#  @todo    «description of incomplete business»
+#  @param   {tagName}    name of the tag
+#  @param   {reposName}  name of the svn repos
+#  @return  <none>
+createProxyReleaseTag() {
+    # something like /path/to/release/tag
+    # param
+    local tagName=$1
+    local reposName=$2
+    local proxySvnUrl=$(getConfig LFS_PROD_svn_delivery_proxy_repos_url)
+    local branchName=proxyBranchForCreateTag
+    local externals=$(createTempFile)
+
+    local workspace=$(getWorkspaceName)
+    mustHaveWorkspaceName
+    mustHaveCleanWorkspace
+
+    mustExistBranchInSubversion ${proxySvnUrl} ${branchName}
+
+    svnCheckout ${proxySvnUrl}/${branchName} ${workspace}
+
+    svn pg svn:externals ${svnServer}/${releaseTagPath} > ${externals}
+    mustBeSuccessfull "$?" "svn pg svn:externals command"
+    rawDebug ${externals}
+
+    # example: echo "^/os/tags/${osLabelName}/os os " >> ${svnExternalsFile}
+    perl -p -ie "s:\^:/isource/svnroot/${reposName}:" ${externals}
+
+    svn ps svn:externals -F ${externals} ${workspace}
+    mustBeSuccessfull "$?" "svn pg svn:externals command"
+
+    svnCommit -m createProxyTagFor${tagName} ${workspace}
+    svnCopy ${proxySvnUrl}/${branchName} ${proxySvnUrl}/tags/${tagName}
 
     return
 }
