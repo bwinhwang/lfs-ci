@@ -315,7 +315,7 @@ mustHaveNextLabelName() {
     local regex=$(getConfig LFS_PROD_branch_to_tag_regex)
     mustHaveValue "${regex}" "branch to tag regex map"
 
-    local repos=$(getConfig lfsOsDeliveryRepos)
+    local repos=$(getConfig LFS_PROD_svn_delivery_proxy_repos_url)
 
     info "branch ${branch} has release label regex ${regex}"
     info "using repos ${repos}"
@@ -350,7 +350,7 @@ mustHaveCurrentLabelName() {
     local regex=$(getConfig LFS_PROD_branch_to_tag_regex)
     mustHaveValue "${regex}" "branch to tag regex map"
 
-    local repos=$(getConfig lfsOsDeliveryRepos)
+    local repos=$(getConfig LFS_PROD_svn_delivery_proxy_repos_url)
 
     info "branch ${branch} has release label regex ${regex}"
     info "using repos ${repos}"
