@@ -39,7 +39,7 @@ actionCompare() {
         exit 0
     fi
 
-    local checksum=$(find ${directoryNameToSynchronize} -maxdepth ${findDepth} -printf "%p %C@\n" | sort | md5sum | cut -d" " -f 1)
+    local checksum=$(find ${directoryNameToSynchronize} -mindepth ${findDepth} -maxdepth ${findDepth} -printf "%p %C@\n" | sort | md5sum | cut -d" " -f 1)
 
     info "new revision state data are ${directoryNameToSynchronize} / ${checksum}"
 
@@ -79,7 +79,7 @@ actionCheckout() {
 
     info "create filelist from ${directoryNameToSynchronize} with depth = ${findDepth}"
     tail -n +3 ${OLD_REVISION_STATE_FILE} > ${oldFileListing}
-    find ${directoryNameToSynchronize} -maxdepth ${findDepth} -printf "%p %C@\n" | sort > ${newFileListing}
+    find ${directoryNameToSynchronize} -mindepth ${findDepth} -maxdepth ${findDepth} -printf "%p %C@\n" | sort > ${newFileListing}
     local checksum=$(md5sum ${newFileListing} | cut -d" " -f 1 )
 
     echo "${directoryNameToSynchronize}" >  ${REVISION_STATE_FILE}
