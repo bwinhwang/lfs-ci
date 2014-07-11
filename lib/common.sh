@@ -603,7 +603,7 @@ copyFileFromWorkspaceToBuildDirectory() {
     return        
 }
 
-getUpstreamProjects() {
+_getUpstreamProjects() {
     local jobName=$1
     local buildNumber=$2
     local upstreamsFile=$3
