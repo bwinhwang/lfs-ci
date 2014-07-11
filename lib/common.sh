@@ -548,19 +548,7 @@ copyRevisionStateFileToWorkspace() {
     local jobName=$1
     local buildNumber=$2
 
-    requiredParameters WORKSPACE
-
-    if [[ ! "${jobName}" || ! "${buildNumber}" ]] ; then
-        return
-    fi
-
-    local dir=$(getBuildDirectoryOnMaster ${jobName} ${buildNumber})
-    local master=$(getConfig jenkinsMasterServerHostName)
-
-    mustHaveValue "${dir}" "build directory on master"
-    debug "copy revision state file from master"
-    execute rsync -avPe ssh ${master}:${dir}/revisionstate.xml ${WORKSPACE}/revisions.txt
-
+    copyFileFromBuildDirectoryToWorkspace ${jobName} ${buildNumber} revisions.txt
     rawDebug ${WORKSPACE}/revisions.txt
 
     return
@@ -574,22 +562,45 @@ copyRevisionStateFileToWorkspace() {
 copyChangelogToWorkspace() {
     local jobName=$1
     local buildNumber=$2
+    
+    copyFileFromBuildDirectoryToWorkspace ${jobName} ${buildNumber} changelog.xml
+    rawDebug ${WORKSPACE}/changelog.xml
+
+    return
+}
+
+copyFileFromBuildDirectoryToWorkspace() {
+    local jobName=$1
+    local buildNumber=$2
+    local fileName=$3
 
     requiredParameters WORKSPACE
 
-    if [[ ! "${jobName}" || ! "${buildNumber}" ]] ; then
-        return
-    fi
     local dir=$(getBuildDirectoryOnMaster ${jobName} ${buildNumber})
     local master=$(getConfig jenkinsMasterServerHostName)
 
     mustHaveValue "${dir}" "build directory on master"
-    debug "copy changelog.xml from master"
-    execute rsync -avPe ssh ${master}:${dir}/changelog.xml ${WORKSPACE}/changelog.xml
+    debug "copy file ${file} from master:${dir} to ${WORKSPACE}"
+    execute rsync -avPe ssh ${master}:${dir}/${file} ${WORKSPACE}/${file}
 
-    rawDebug ${WORKSPACE}/changelog.xml
+    return        
+}
 
-    return
+copyFileFromWorkspaceToBuildDirectory() {
+    local jobName=$1
+    local buildNumber=$2
+    local fileName=$3
+
+    requiredParameters WORKSPACE
+
+    local dir=$(getBuildDirectoryOnMaster ${jobName} ${buildNumber})
+    local master=$(getConfig jenkinsMasterServerHostName)
+
+    mustHaveValue "${dir}" "build directory on master"
+    debug "copy file ${file} from ${WORKSPACE} to master:${dir}"
+    execute rsync -avPe ssh ${WORKSPACE}/${file} ${master}:${dir}/$(basename ${file})
+
+    return        
 }
 
 getUpstreamProjects() {
