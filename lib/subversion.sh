@@ -78,7 +78,9 @@ svnCommand() {
 #  @param   {args}  args for the svn co command
 #  @return  <none>
 svnCheckout() {
-    svnCommand checkout $@
+    local args=
+    while [[ ! -z $@ ]] ; do args="${args} '$1'" ; shift; done
+    svnCommand checkout ${args}
     return
 }
 
@@ -87,7 +89,9 @@ svnCheckout() {
 #  @param   {args}    args for the svn commit command
 #  @return  <none>
 svnCommit() {
-    svnCommand commit $@
+    local args=
+    while [[ ! -z $@ ]] ; do args="${args} '$1'" ; shift; done
+    svnCommand commit ${args}
     return
 }
 
@@ -96,7 +100,9 @@ svnCommit() {
 #  @param   {args}    args for the svn mkdir command
 #  @return  <none>
 svnMkdir() {
-    svnCommand mkdir $@
+    local args=
+    while [[ ! -z $@ ]] ; do args="${args} '$1'" ; shift; done
+    svnCommand mkdir ${args}
     return
 }
 
@@ -105,7 +111,9 @@ svnMkdir() {
 #  @param   {args}    args for the svn copy command
 #  @return  <none>
 svnCopy() {
-    svnCommand copy $@
+    local args=
+    while [[ ! -z $@ ]] ; do args="${args} '$1'" ; shift; done
+    svnCommand copy ${args}
     return
 }
 
@@ -114,7 +122,9 @@ svnCopy() {
 #  @param   {args}    args for the svn diff command
 #  @return  <none>
 svnDiff() {
-    svnCommand diff $@
+    local args=
+    while [[ ! -z $@ ]] ; do args="${args} '$1'" ; shift; done
+    svnCommand diff ${args}
     return
 }
 
@@ -123,7 +133,9 @@ svnDiff() {
 #  @param   {args}    args for the svn propset command
 #  @return  <none>
 svnPropSet() {
-    svnCommand propset $@
+    local args=
+    while [[ ! -z $@ ]] ; do args="${args} '$1'" ; shift; done
+    svnCommand propset ${args}
     return
 }
 
@@ -132,7 +144,9 @@ svnPropSet() {
 #  @param   {args}    args for the svn remove command
 #  @return  <none>
 svnRemove() {
-    svnCommand rm $@
+    local args=
+    while [[ ! -z $@ ]] ; do args="${args} '$1'" ; shift; done
+    svnCommand rm ${args}
     return
 }
 

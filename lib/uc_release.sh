@@ -2,6 +2,7 @@
 
 [[ -z ${LFS_CI_SOURCE_artifacts}  ]] && source ${LFS_CI_ROOT}/lib/artifacts.sh
 [[ -z ${LFS_CI_SOURCE_subversion} ]] && source ${LFS_CI_ROOT}/lib/subversion.sh
+[[ -z ${LFS_CI_SOURCE_subversion} ]] && source ${LFS_CI_ROOT}/lib/jenkins.sh
 
 ## @fn      ci_job_release()
 #  @brief   dispatcher for the release jobs
@@ -9,35 +10,45 @@
 #  @return  <none>
 ci_job_release() {
 
-    # requiredParameters TESTED_BUILD_JOBNAME TESTED_BUILD_NUMBER
+    requiredParameters TESTED_BUILD_JOBNAME TESTED_BUILD_NUMBER
     requiredParameters JOB_NAME BUILD_NUMBER
 
+    info "promoted build is ${TESTED_BUILD_JOBNAME} / ${TESTED_BUILD_NUMBER}"
+
+    local workspace=$(getWorkspaceName)
+    mustHaveCleanWorkspace
+    mustHaveWorkspaceName
+
     local serverPath=$(getConfig jenkinsMasterServerPath)
+    mustHaveValue "${serverPath}" "server path"
+    mustExistDirectory ${serverPath}
+
     local subJob=$(getTargetBoardName)
     mustHaveTargetBoardName
 
     local location=$(getLocationName)
-    local product=$(getProductNameFromJobName)
-    local branch=${locationToSubversionMap["${product}_${location}"]}
-    mustHaveBranchName
+    mustHaveLocationName
 
-    info "promoted build is ${TESTED_BUILD_JOBNAME} / ${TESTED_BUILD_NUMBER}"
+    local productName=$(getProductNameFromJobName)
+    mustHaveValue "${productName}" "product name"
+
+    # TODO: demx2fk3 2014-07-11 replace this with getConfig
+    local branch=${locationToSubversionMap["${productName}_${location}"]}
+    mustHaveValue "${branch}" "branch name"
 
     # find the related jobs of the build
     mustHaveNextLabelName
     local releaseLabel=$(getNextReleaseLabel)
+    mustHaveValue "${releaseLabel}"       "release label"
+
     local packageJobName=$(getPackageJobNameFromUpstreamProject ${TESTED_BUILD_JOBNAME} ${TESTED_BUILD_NUMBER})
     local packageBuildNumber=$(getPackageBuildNumberFromUpstreamProject ${TESTED_BUILD_JOBNAME} ${TESTED_BUILD_NUMBER})
     local buildJobName=$(getBuildJobNameFromUpstreamProject ${TESTED_BUILD_JOBNAME} ${TESTED_BUILD_NUMBER})
     local buildBuildNumber=$(getBuildBuildNumberFromUpstreamProject ${TESTED_BUILD_JOBNAME} ${TESTED_BUILD_NUMBER})
-
-    local productName=$(getProductNameFromJobName)
-    mustHaveValue ${packageJobName}
-    mustHaveValue ${packageBuildNumber}
-    mustHaveValue ${buildJobName}
-    mustHaveValue ${buildBuildNumber}
-    mustHaveValue ${releaseLabel}
-    mustHaveValue "${productName}" "product name"
+    mustHaveValue "${packageJobName}"     "package job name"
+    mustHaveValue "${packageBuildNumber}" "package build name"
+    mustHaveValue "${buildJobName}"       "build job name"
+    mustHaveValue "${buildBuildNumber}"   "build build number"
 
     setBuildDescription "${JOB_NAME}" "${BUILD_NUMBER}" "${releaseLabel}"
 
@@ -50,11 +61,24 @@ ci_job_release() {
 
     debug "found results of package job on share: ${workspace}"
 
-    local subJob=$(getTargetBoardName)
-    mustHaveTargetBoardName
+    # storing new and old label name into files for later use and archive
+    execute mkdir -p ${workspace}/bld/bld-lfs-release/
+    echo ${releaseLabel} > ${workspace}/bld/bld-lfs-release/label
+    copyFileFromWorkspaceToBuildDirectory ${JOB_NAME} ${BUILD_NUMBER} \
+            ${workspace}/bld/bld-lfs-release/label
 
-    info "sub task is ${subJob}"
+    copyFileFromBuildDirectoryToWorkspace ${JOB_NAME} lastSuccessfulBuild label
+    execute mv ${WORKSPACE}/label ${workspace}/bld/bld-lfs-release/oldLabel
+
+    export LFS_PROD_RELEASE_CURRENT_TAG_NAME=$(cat ${workspace}/bld/bld-lfs-release/label)
+    export LFS_PROD_RELEASE_PREVIOUS_TAG_NAME=$(cat ${workspace}/bld/bld-lfs-release/oldLabel)
+    info "LFS release ${LFS_PROD_RELEASE_CURRENT_TAG_NAME} is based on ${LFS_PROD_RELEASE_PREVIOUS_TAG_NAME}"
+
+    info "task is ${subJob}"
     case ${subJob} in
+        update_dependency_files)
+            updateDependencyFiles "${buildJobName}" "${buildBuildNumber}"
+        ;;
         upload_to_subversion)
             # from subversion.sh
             uploadToSubversion "${workspace}" "${branch}" "upload of build ${JOB_NAME} / ${BUILD_NUMBER}"
@@ -64,16 +88,23 @@ ci_job_release() {
         ;;
         create_releasenote_textfile)
             # TODO: demx2fk3 2014-06-05  is this correct?!?!
-            createReleaseNoteTextFile "${TESTED_BUILD_JOBNAME}" "${TESTED_BUILD_NUMBER}" "${buildJobName}" "${buildBuildNumber}"
+            # not longer in use
+#             createReleaseNoteTextFile "${TESTED_BUILD_JOBNAME}" "${TESTED_BUILD_NUMBER}" \
+#                                       "${buildJobName}"         "${buildBuildNumber}"
         ;;
         create_release_tag)
             createReleaseTag ${buildJobName} ${buildBuildNumber}
+        ;;
+        create_proxy_release_tag) 
+            createProxyReleaseTag ${buildJobName} ${buildBuildNumber}
         ;;
         create_source_tag) 
             createTagOnSourceRepository ${buildJobName} ${buildBuildNumber}
         ;;
         summary)
-            createReleaseNoteTextFile "${TESTED_BUILD_JOBNAME}" "${TESTED_BUILD_NUMBER}" "${buildJobName}" "${buildBuildNumber}"
+            createReleaseNoteTextFile "${TESTED_BUILD_JOBNAME}" "${TESTED_BUILD_NUMBER}" \
+                                      "${buildJobName}"         "${buildBuildNumber}"
+            createArtifactArchive
         ;;
         *)
             error "subJob not known (${subJob})"
@@ -95,13 +126,17 @@ ci_job_release() {
 extractArtifactsOnReleaseShare() {
     local jobName=$1
     local buildNumber=$2
+
+    requiredParameters ${LFS_PROD_RELEASE_PREVIOUS_TAG_NAME} ${LFS_PROD_RELEASE_CURRENT_TAG_NAME}
+
     local workspace=$(getWorkspaceName)
     local server=$(getConfig jenkinsMasterServerHostName)
     local resultBuildShare=$(getConfig LFS_PROD_UC_release_copy_build_to_share)
     mustHaveWorkspaceName
 
-    mustHaveNextLabelName
-    local labelName=$(getNextReleaseLabel)
+    local canStoreArtifactsOnShare=$(getConfig LFS_CI_uc_release_can_store_build_results_on_share)
+
+    local labelName=${LFS_PROD_RELEASE_CURRENT_TAG_NAME}
     mustHaveValue "${labelName}"
 
     copyArtifactsToWorkspace "${jobName}" "${buildNumber}"
@@ -114,8 +149,12 @@ extractArtifactsOnReleaseShare() {
         local destination=${resultBuildShare}/${basename}/${labelName}
         info "copy ${basename} to buildresults share ${destination}"
 
-        executeOnMaster mkdir -p ${destination}
-        execute rsync -av --exclude=.svn ${workspace}/bld/${basename}/. ${server}:${destination}
+        if [[ ${canStoreArtifactsOnShare} ]] ; then
+            executeOnMaster mkdir -p ${destination}
+            execute rsync -av --exclude=.svn ${workspace}/bld/${basename}/. ${server}:${destination}
+        else
+            info "storing artifacts on share is disabled in config"
+        fi
     done
 
     info "clean up workspace"
@@ -145,14 +184,16 @@ createReleaseNoteTextFile() {
     export location=$(getLocationName)
     export config=$(getTargetBoardName)
 
+    local canSendReleaseNote=$(getConfig LFS_CI_uc_release_can_send_release_note)
+
     local workspace=$(getWorkspaceName)
     mustHaveWorkspaceName
-    mustHaveCleanWorkspace
     mustHaveWritableWorkspace
 
-    mustHaveCurrentLabelName
-    local releaseLabel=${LFS_CI_CURRENT_LABEL_NAME}
+    local releaseLabel=${LFS_PROD_RELEASE_CURRENT_TAG_NAME}
     mustHaveValue "${releaseLabel}" "next release label name"
+
+    local oldReleaseLabel=${LFS_PROD_RELEASE_PREVIOUS_TAG_NAME}
 
     export LFS_CI_PS_LFS_OS_TAG_NAME=${LFS_CI_CURRENT_LABEL_NAME}
     export LFS_CI_PS_LFS_REL_TAG_NAME=${LFS_CI_CURRENT_LABEL_NAME//PS_LFS_OS_/PS_LFS_REL_}
@@ -197,9 +238,16 @@ createReleaseNoteTextFile() {
     local wftUploadAttachment=$(getConfig WORKFLOWTOOL_url_upload_attachment)
 
     info "send release note"
-    execute ${LFS_CI_ROOT}/bin/sendReleaseNote  -r releasenote.txt             \
-                                                -t ${releaseLabel}             \
-                                                -f ${LFS_CI_ROOT}/etc/file.cfg
+    if [[ ${canSendReleaseNote} ]] ; then
+        execute ${LFS_CI_ROOT}/bin/sendReleaseNote  -r releasenote.txt             \
+                                                    -t ${releaseLabel}             \
+                                                    -f ${LFS_CI_ROOT}/etc/file.cfg
+    else
+        info "sending the release note is disabled in config"
+    fi
+
+    execute mv releasenote.txt ${workflow}/bld/bld-lfs-release/
+    execute mv releasenote.xml ${workflow}/bld/bld-lfs-release/
 
     info "release is done."
     return
@@ -221,13 +269,12 @@ createTagOnSourceRepository() {
     mustHaveWorkspaceWithArtefactsFromUpstreamProjects "${jobName}" "${buildNumber}" "${requiredArtifacts}"
 
     # get os label
-    # no mustHaveNextLabelName, because it's already calculated
-    local osLabelName=$(getNextReleaseLabel)
+    local osLabelName=${LFS_PROD_RELEASE_CURRENT_TAG_NAME}
     mustHaveValue "${osLabelName}" "no os label name"
 
     # get artifacts
     revisionFile=${workspace}/bld/bld-externalComponents-summary/usedRevisions.txt
-    cat ${workspace}/bld//bld-externalComponents-*/usedRevisions.txt | sort -u > ${revisionFile}
+    cat ${workspace}/bld/bld-externalComponents-*/usedRevisions.txt | sort -u > ${revisionFile}
     rawDebug ${revisionFile}
 
     # TODO: demx2fk3 2014-06-06 CLEAN UP!!!!
@@ -247,6 +294,8 @@ createTagOnSourceRepository() {
     local svnUrl=$(getConfig LFS_PROD_svn_delivery_os_repos_url)
     local svnUrlOs=${svnUrl}
     local branch=pre_${osLabelName}
+
+    local canCreateSourceTag=$(getConfig LFS_CI_uc_release_can_create_source_tag)
 
     svnUrlOs=$(normalizeSvnUrl ${svnUrlOs})
     svnUrl=$(normalizeSvnUrl ${svnUrl})
@@ -296,21 +345,31 @@ createTagOnSourceRepository() {
         esac
 
         info "copy ${src} to ${branch}"
+        if [[ ${canCreateSourceTag} ]] ; then
         svnCopy -r ${rev} -m branching_src_${src}_to_${branch} \
             ${normalizedUrl}                                   \
             ${svnUrlOs}/branches/${branch}/${dirname}
+        else
+            info "creating a source tag is disabled in config"
+        fi
+
 
     done < ${revisionFile}
 
     # check for the branch
     info "svn repos url is ${svnUrl}/branches/${branch}"
 
-    svnCopy -m create_new_tag_${osLabelName} \
-        ${svnUrl}/os/branches/${branch}      \
-        ${svnUrl}/os/tags/${osLabelName}
+    if [[ ${canCreateSourceTag} ]] ; then
 
-    info "branch ${branch} no longer required, removing branch"
-    svnRemove -m removing_branch_for_production ${svnUrlOs}/branches/${branch} 
+        svnCopy -m create_new_tag_${osLabelName} \
+            ${svnUrl}/os/branches/${branch}      \
+            ${svnUrl}/os/tags/${osLabelName}
+
+        info "branch ${branch} no longer required, removing branch"
+        svnRemove -m removing_branch_for_production ${svnUrlOs}/branches/${branch} 
+    else
+        info "creating a source tag is disabled in config"
+    fi
 
     info "tagging done"
 
@@ -325,13 +384,18 @@ createTagOnSourceRepository() {
 createReleaseTag() {
     local jobName=$1
     local buildNumber=$2
+
     local workspace=$(getWorkspaceName)
+    mustHaveWorkspaceName 
+
     local requiredArtifacts=$(getConfig LFS_CI_UC_release_required_artifacts)
     mustHaveWorkspaceWithArtefactsFromUpstreamProjects "${jobName}" "${buildNumber}" "${requiredArtifacts}"
 
+    local canCreateReleaseTag=$(getConfig LFS_CI_uc_release_can_create_release_tag)
+
     # get os label
     # no mustHaveNextLabelName, because it's already calculated
-    local osLabelName=$(getNextReleaseLabel)
+    local osLabelName=${LFS_PROD_RELEASE_CURRENT_TAG_NAME}
     local osReleaseLabelName=$(sed "s/_LFS_OS_/_LFS_REL_/" <<< ${osLabelName} )
     mustHaveValue "${osLabelName}" "no os label name"
 
@@ -385,11 +449,15 @@ createReleaseTag() {
 
     cd ${workspace}/svn
     svnPropSet svn:externals -F ${svnExternalsFile} .
-    svnCommit -m updating_svn:externals_for_${osReleaseLabelName} .
+    svnCommit -m "updating svn:externals for ${osReleaseLabelName}" .
 
     # make a tag
     info "create tag ${osReleaseLabelName}"
-    svnCopy -m create_new_tag ${svnUrl}/branches/${branch} ${svnUrl}/tags/${osReleaseLabelName}
+    if [[ ${canCreateReleaseTag} ]] ; then
+        svnCopy -m "create new tag" ${svnUrl}/branches/${branch} ${svnUrl}/tags/${osReleaseLabelName}
+    else
+        info "creating the release tag is disabled in config"
+    fi
 
     info "tag created."
     return
@@ -406,7 +474,6 @@ mustHaveWorkspaceWithArtefactsFromUpstreamProjects() {
 
     local workspace=$(getWorkspaceName)
     mustHaveWorkspaceName
-    mustHaveCleanWorkspace
     mustHaveWritableWorkspace
     info "workspace is ${workspace}"
 
@@ -424,17 +491,17 @@ mustHaveWorkspaceWithArtefactsFromUpstreamProjects() {
 #  @param   {reposName}  name of the svn repos
 #  @return  <none>
 createProxyReleaseTag() {
-    # something like /path/to/release/tag
-    # param
-    local tagName=$1
-    local reposName=$2
+    export tagName=${LFS_PROD_RELEASE_CURRENT_TAG_NAME}
+    local reposName=$(getConfig LFS_PROD_svn_delivery_repos_name)
     local proxySvnUrl=$(getConfig LFS_PROD_svn_delivery_proxy_repos_url)
-    local branchName=proxyBranchForCreateTag
+    local branchName=branches/proxyBranchForCreateTag
     local externals=$(createTempFile)
+    local canCreateProxyTag=$(getConfig LFS_CI_uc_release_can_create_proxy_tag)
 
     local workspace=$(getWorkspaceName)
     mustHaveWorkspaceName
-    mustHaveCleanWorkspace
+
+    info "create proxy tag ${tagName} in ${proxySvnUrl}"
 
     mustExistBranchInSubversion ${proxySvnUrl} ${branchName}
 
@@ -450,8 +517,65 @@ createProxyReleaseTag() {
     svn ps svn:externals -F ${externals} ${workspace}
     mustBeSuccessfull "$?" "svn pg svn:externals command"
 
-    svnCommit -m createProxyTagFor${tagName} ${workspace}
-    svnCopy ${proxySvnUrl}/${branchName} ${proxySvnUrl}/tags/${tagName}
+    svnCommit -m "updating svn:externals for proxy tag" ${workspace}
+    if [[ ${canCreateProxyTag} ]] ; then
+        svnCopy -m "create new proxy tag ${tagName}" \
+            ${proxySvnUrl}/${branchName} ${proxySvnUrl}/tags/${tagName}
+    else
+        info "creating a proxy tag is disabled in config"
+    fi
+
+    info "creating proxy tag done."
+
+    return
+}
+
+updateDependencyFiles() {
+    local jobName=$1
+    local buildNumber=$2
+
+    local workspace=$(getWorkspaceName)
+    mustHaveWorkspaceName
+    mustHaveWorkspaceWithArtefactsFromUpstreamProjects ${jobName} ${buildNumber}
+
+    local commonentsFile=$(createTempFile)
+    sort -u ${workspace}/bld/bld-externalComponents-*/usedRevisions.txt > ${componentsFile}
+
+    local releaseLabelName=${LFS_PROD_RELEASE_CURRENT_TAG_NAME}
+    local oldReleaseLabelName=${LFS_PROD_RELEASE_PREVIOUS_TAG_NAME}
+    local canCommitDependencies=$(getConfig LFS_CI_uc_release_can_commit_depencencies)
+
+    while read name url rev ; do
+
+        info "updating Dependencies and Revisions for ${name} "
+        debug "from file: ${name} ${url} ${rev}"
+
+        svnCheckout ${url} ${workspace}/${name}
+        local dependenciesFile=${workspace}/${name}/Dependencies
+        [[ ! -e ${dependenciesFile} ]] ; continue
+        
+#         local revisionFile=${workspace}/${name}/Revisions
+#         if [[ ! -e ${revisionFile} ]] ; then
+#             touch ${revisionFile}
+#             svnAdd ${revisionFile}
+#         fi
+#         debug "update ${name}/Revisions"
+#         printf "%s:%d\n" ${label} ${rev} >> ${revisionFile}
+#         svnDiff ${revisionFile}
+
+        debug "update ${name}/Dependencies"
+        perl -p -i -e 's/${oldReleaseLabelName}/${releaseLabelName}/g' ${name}/Dependencies
+        svnDiff ${dependenciesFile}
+        if [[ ${canCommitDependencies} ]] ; then 
+        svnCommit -m "BTSPS-1657 IN psulm: DESCRIPTION: set Dependencies for Release ${releaseLabelName} r${rev} NOJCHK" \
+            ${dependenciesFile}
+        else
+            info "committing of dependencies is disabled in config"
+        fi
+        
+    done < ${componentsFile}
+
+    info "update done."
 
     return
 }
