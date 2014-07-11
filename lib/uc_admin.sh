@@ -1,5 +1,7 @@
 #!/bin/bash
 
+[[ -z ${LFS_CI_SOURCE_artifacts} ]] && source ${LFS_CI_ROOT}/lib/jenkins.sh
+
 ## @fn      ci_job_admin()
 #  @brief   dispatcher for admin jobs, detailed jobs is in seperated functions
 #  @param   <none>
@@ -51,13 +53,22 @@ synchronizeShare() {
 
     copyChangelogToWorkspace ${JOB_NAME} ${BUILD_NUMBER}
 
+    execute ssh ${remoteServer} chmod u+w $(dirname ${remotePath})
     execute ssh ${remoteServer} mkdir -p ${remotePath}
 
     info "synchronize ${localPath} to ${remoteServer}:${remotePath}"
-    for entry in $(${LFS_CI_ROOT}/bin/xpath -q -e '/log/logentry/paths/path/node()' ${WORKSPACE}/changelog.xml )
+    local pathToSyncFile=$(createTempFile)
+    ${LFS_CI_ROOT}/bin/xpath -q -e '/log/logentry/paths/path/node()' ${WORKSPACE}/changelog.xml  > ${pathToSyncFile}
+    mustBeSuccessfull "$?" "xpath changelog.xml"
+
+    local buildDescription=$(perl -p -e 's:.*/::g' ${pathToSyncFile} | sort -u)
+    setBuildDescription "${JOB_NAME}" "${BUILD_NUMBER}" "${buildDescription:-no change}"
+
+    for entry in $(cat ${pathToSyncFile})
     do
-        info "transferting ${entry} to ${remoteServer}:${remotePath}"
-        execute rsync ${rsyncOptions} -e ssh --stats ${entry} ${remoteServer}:${remotePath}
+        basePartOfEntry=${entry//${remotePath}}
+        info "transferting ${entry} to ${remoteServer}:${remotePath}/${basePartOfEntry}"
+        execute rsync ${rsyncOptions} -e ssh --stats ${entry}/ ${remoteServer}:${remotePath}/${basePartOfEntry}
     done
 
     info "synchronizing is done."
