@@ -108,7 +108,7 @@ ci_job_release() {
             createTagOnSourceRepository ${buildJobName} ${buildBuildNumber}
         ;;
         summary)
-            createReleaseNoteTextFile "${TESTED_BUILD_JOBNAME}" "${TESTED_BUILD_NUMBER}" \
+            sendReleaseNote           "${TESTED_BUILD_JOBNAME}" "${TESTED_BUILD_NUMBER}" \
                                       "${buildJobName}"         "${buildBuildNumber}"
             createArtifactArchive
         ;;
@@ -169,11 +169,11 @@ extractArtifactsOnReleaseShare() {
     return
 }
 
-## @fn      createReleaseNoteTextFile()
-#  @brief   create a release note in txt format
+## @fn      sendReleaseNote()
+#  @brief   create a release note and send it to the community
 #  @param   <none>
 #  @return  <none>
-createReleaseNoteTextFile() {
+sendReleaseNote() {
     local testedJobName=$1
     local testedBuildNumber=$2
     local buildJobName=$3
@@ -545,6 +545,11 @@ createProxyReleaseTag() {
     return
 }
 
+## @fn      updateDependencyFiles( $jobName, $buildNumber )
+#  @brief   update the dependency files for all components of a build
+#  @param   {jobName}        name of the build job
+#  @param   {buildNumber}    numfer of the build job
+#  @return  <none>
 updateDependencyFiles() {
     local jobName=$1
     local buildNumber=$2
@@ -569,16 +574,9 @@ updateDependencyFiles() {
         local dependenciesFile=${workspace}/${name}/Dependencies
         [[ ! -e ${dependenciesFile} ]] ; continue
         
-#         local revisionFile=${workspace}/${name}/Revisions
-#         if [[ ! -e ${revisionFile} ]] ; then
-#             touch ${revisionFile}
-#             svnAdd ${revisionFile}
-#         fi
-#         debug "update ${name}/Revisions"
-#         printf "%s:%d\n" ${label} ${rev} >> ${revisionFile}
-#         svnDiff ${revisionFile}
-
         debug "update ${name}/Dependencies"
+        # TODO: demx2fk3 2014-07-14 we should also check the word boundary
+        # perl -p -i -e 's/\b${oldReleaseLabelName}\b/${releaseLabelName}/g' ${name}/Dependencies
         perl -p -i -e 's/${oldReleaseLabelName}/${releaseLabelName}/g' ${name}/Dependencies
         svnDiff ${dependenciesFile}
         if [[ ${canCommitDependencies} ]] ; then 

@@ -1338,6 +1338,7 @@ sub prepare {
                   $entry->{msg}->[0] ;
         
         if( $msg =~ m/set Dependencies, Revisions for Release/i or
+            $msg =~ m/set Dependencies for Release/i or
             $msg =~ m/new Version files for Release/i or
             $msg =~ m/INTERNAL COMMENT/ )
         {
@@ -1413,6 +1414,8 @@ sub mapComponentName {
     my $self = shift;
     my $name = shift;
 
+    # TODO: demx2fk3 2014-07-14 move this into a config file
+    # LFS_PROD_uc_release_component_title < componentName:src:bos > = Linux Kernel Config
     my $componentName = { 
                             'src-bos'            => "Linux Kernel Config",
                             'src-cvmxsources'    => "CVMX Sources",
