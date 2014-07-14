@@ -597,8 +597,8 @@ copyFileFromWorkspaceToBuildDirectory() {
     local master=$(getConfig jenkinsMasterServerHostName)
 
     mustHaveValue "${dir}" "build directory on master"
-    debug "copy file ${file} from ${WORKSPACE} to master:${dir}"
-    execute rsync -avPe ssh ${WORKSPACE}/${file} ${master}:${dir}/$(basename ${file})
+    debug "copy file ${fileName} to master:${dir}"
+    execute rsync -avPe ssh ${fileName} ${master}:${dir}/$(basename ${fileName})
 
     return        
 }

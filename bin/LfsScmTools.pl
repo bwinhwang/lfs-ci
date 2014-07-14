@@ -1550,7 +1550,7 @@ sub prepare {
     # __BRANCH__
     $self->{data}{BRANCH} = "Branch";
     # __SVN_REPOS_URL__
-    $self->{data}{SVN_REPOS_URL} = $config->getConfig( name => "lfsOsDeliveryRepos" );
+    $self->{data}{SVN_REPOS_URL} = $config->getConfig( name => "LFS_PROD_svn_delivery_os_repos_url" );
     # __SVN_REVISION__
     my $svnUrl = sprintf( "%s/tags/%s", 
                             $self->{data}{SVN_REPOS_URL},
@@ -1684,7 +1684,7 @@ sub prepare {
     $self->{subject}         = $config->getConfig( name => "LFS_PROD_ReleaseNote_Subject" );
     $self->{smtpServer}      = $config->getConfig( name => "LFS_PROD_ReleaseNote_SmtpServer" );
     $self->{templateFile}    = $config->getConfig( name => "LFS_PROD_ReleaseNote_TemplateFile" );
-    $self->{reposName}       = $config->getConfig( name => "lfsRelDeliveryRepos" );
+    $self->{reposName}       = $config->getConfig( name => "LFS_PROD_svn_delivery_release_repos_url" );
 
 
     if( not -f $self->{releaseNoteFile} ) {
@@ -1705,8 +1705,8 @@ sub prepare {
     close RELEASENOTE;
 
 
-    $self->{data}{DELIVERY_REPOS}       = $config->getConfig( name => "lfsRelDeliveryRepos" );
-    $self->{data}{SOURCE_REPOS}         = $config->getConfig( name => "lfsOsDeliveryRepos" );
+    $self->{data}{DELIVERY_REPOS}       = $config->getConfig( name => "LFS_PROD_svn_delivery_release_repos_url" );
+    $self->{data}{SOURCE_REPOS}         = $config->getConfig( name => "LFS_PROD_svn_delivery_os_repos_url" );
     $self->{data}{TAGNAME}              = $self->{tagName};
 
     $self->{subject}     =~ s:__([A-Z_]*)__:  $self->{data}{$1} // $config->getConfig( name => $1 ) :eg; 

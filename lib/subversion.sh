@@ -78,9 +78,7 @@ svnCommand() {
 #  @param   {args}  args for the svn co command
 #  @return  <none>
 svnCheckout() {
-    local args=
-    while [[ ! -z $@ ]] ; do args="${args} '$1'" ; shift; done
-    svnCommand checkout ${args}
+    svnCommand checkout $@
     return
 }
 
@@ -89,9 +87,7 @@ svnCheckout() {
 #  @param   {args}    args for the svn commit command
 #  @return  <none>
 svnCommit() {
-    local args=
-    while [[ ! -z $@ ]] ; do args="${args} '$1'" ; shift; done
-    svnCommand commit ${args}
+    svnCommand commit $@
     return
 }
 
@@ -100,9 +96,7 @@ svnCommit() {
 #  @param   {args}    args for the svn mkdir command
 #  @return  <none>
 svnMkdir() {
-    local args=
-    while [[ ! -z $@ ]] ; do args="${args} '$1'" ; shift; done
-    svnCommand mkdir ${args}
+    svnCommand mkdir $@
     return
 }
 
@@ -111,9 +105,7 @@ svnMkdir() {
 #  @param   {args}    args for the svn copy command
 #  @return  <none>
 svnCopy() {
-    local args=
-    while [[ ! -z $@ ]] ; do args="${args} '$1'" ; shift; done
-    svnCommand copy ${args}
+    svnCommand copy $@
     return
 }
 
@@ -133,9 +125,7 @@ svnDiff() {
 #  @param   {args}    args for the svn propset command
 #  @return  <none>
 svnPropSet() {
-    local args=
-    while [[ ! -z $@ ]] ; do args="${args} '$1'" ; shift; done
-    svnCommand propset ${args}
+    svnCommand propset $@
     return
 }
 
@@ -217,9 +207,14 @@ mustExistInSubversion() {
 mustExistBranchInSubversion() {
     local url=$1
     local branch=$2
+    local logMessage=$(createTempFile)
 
+    info "checking for branch ${url} / ${branch}"
+
+    echo "creating a new branch: ${branch}" > ${logMessage}
     if ! existsInSubversion ${url} ${branch} ; then
-        svnMkdir -m new_branch ${url}/${branch}
+        info "create dir ${url}/${branch}"
+        svnMkdir -F ${logMessage} ${url}/${branch}
     fi
 
     return 0

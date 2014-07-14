@@ -56,10 +56,10 @@ ci_job_release() {
     info "found build   job: ${buildJobName} / ${buildBuildNumber}"
     
     local ciBuildShare=$(getConfig LFS_CI_UC_package_internal_link)
-    local workspace=${ciBuildShare}/build_${packageBuildNumber}
-    mustExistSymlink ${workspace}
+    local releaseDirectory=${ciBuildShare}/build_${packageBuildNumber}
+    mustExistSymlink ${releaseDirectory}
 
-    debug "found results of package job on share: ${workspace}"
+    debug "found results of package job on share: ${releaseDirectory}"
 
     # storing new and old label name into files for later use and archive
     execute mkdir -p ${workspace}/bld/bld-lfs-release/
@@ -67,11 +67,17 @@ ci_job_release() {
     copyFileFromWorkspaceToBuildDirectory ${JOB_NAME} ${BUILD_NUMBER} \
             ${workspace}/bld/bld-lfs-release/label
 
-    copyFileFromBuildDirectoryToWorkspace ${JOB_NAME} lastSuccessfulBuild label
-    execute mv ${WORKSPACE}/label ${workspace}/bld/bld-lfs-release/oldLabel
+    local lastSuccessfulBuildDirectory=$(getBuildDirectoryOnMaster ${JOB_NAME} lastSuccessfulBuild)
+    if [[ -e ${lastSuccessfulBuildDirectory} ]] ; then
+        copyFileFromBuildDirectoryToWorkspace ${JOB_NAME} lastSuccessfulBuild label
+        execute mv ${WORKSPACE}/label ${workspace}/bld/bld-lfs-release/oldLabel
+    else
+        touch ${workspace}/bld/bld-lfs-release/oldLabel            
+    fi
 
     export LFS_PROD_RELEASE_CURRENT_TAG_NAME=$(cat ${workspace}/bld/bld-lfs-release/label)
     export LFS_PROD_RELEASE_PREVIOUS_TAG_NAME=$(cat ${workspace}/bld/bld-lfs-release/oldLabel)
+    export LFS_PROD_RELEASE_CURRENT_TAG_NAME_REL=${LFS_PROD_RELEASE_CURRENT_TAG_NAME//PS_LFS_OS_/PS_LFS_REL_}
     info "LFS release ${LFS_PROD_RELEASE_CURRENT_TAG_NAME} is based on ${LFS_PROD_RELEASE_PREVIOUS_TAG_NAME}"
 
     info "task is ${subJob}"
@@ -81,7 +87,7 @@ ci_job_release() {
         ;;
         upload_to_subversion)
             # from subversion.sh
-            uploadToSubversion "${workspace}" "${branch}" "upload of build ${JOB_NAME} / ${BUILD_NUMBER}"
+            uploadToSubversion "${releaseDirectory}" "${branch}" "upload of build ${JOB_NAME} / ${BUILD_NUMBER}"
         ;;
         build_results_to_share)
             extractArtifactsOnReleaseShare "${buildJobName}" "${buildBuildNumber}"
@@ -220,12 +226,14 @@ createReleaseNoteTextFile() {
     local wftReleaseNoteValidate=$(getConfig WORKFLOWTOOL_url_releasenote_validation)
     local wftReleaseNoteXsd=$(getConfig WORKFLOWTOOL_url_releasenote_xsd)
 
-    # local check first
-    execute rm -f releasenote.xsd
-    execute curl -k ${wftReleaseNoteXsd} --output releasenote.xsd
-    mustExistFile releasenote.xsd
+    if [[ ${wftReleaseNoteXsd} ]] ; then
+        # local check first
+        execute rm -f releasenote.xsd
+        execute curl -k ${wftReleaseNoteXsd} --output releasenote.xsd
+        mustExistFile releasenote.xsd
 
-    execute xmllint --schema releasenote.xsd releasenote.xml
+        execute xmllint --schema releasenote.xsd releasenote.xml
+    fi
 
     # remove check with wft next
     execute curl -k ${wftReleaseNoteValidate} \
@@ -246,8 +254,8 @@ createReleaseNoteTextFile() {
         info "sending the release note is disabled in config"
     fi
 
-    execute mv releasenote.txt ${workflow}/bld/bld-lfs-release/
-    execute mv releasenote.xml ${workflow}/bld/bld-lfs-release/
+    execute mv releasenote.txt ${workspace}/bld/bld-lfs-release/
+    execute mv releasenote.xml ${workspace}/bld/bld-lfs-release/
 
     info "release is done."
     return
@@ -294,6 +302,7 @@ createTagOnSourceRepository() {
     local svnUrl=$(getConfig LFS_PROD_svn_delivery_os_repos_url)
     local svnUrlOs=${svnUrl}
     local branch=pre_${osLabelName}
+    local logMessage=$(createTempFile)
 
     local canCreateSourceTag=$(getConfig LFS_CI_uc_release_can_create_source_tag)
 
@@ -318,7 +327,8 @@ createTagOnSourceRepository() {
     fi
 
     info "creating branch ${branch}"
-    svnMkdir -m creating_new_branch_${branch} ${svnUrlOs}/branches/${branch}
+    echo "create a new pre release branch ${branch}" > ${logMessage}
+    svnMkdir -F ${logMessage} ${svnUrlOs}/branches/${branch}
 
     while read src url rev ; do
         mustHaveValue "${url}" "svn url"
@@ -340,7 +350,8 @@ createTagOnSourceRepository() {
             ;;
             *)
                 dirname=$(dirname ${src})
-                svnMkdir -m mkdir_for_${src} ${svnUrlOs}/branches/${branch}/${dirname}
+                echo "create a new src directory ${dirname} for ${src}" > ${logMessage}
+                svnMkdir -F ${logMessage} ${svnUrlOs}/branches/${branch}/${dirname}
             ;;
         esac
 
@@ -427,7 +438,9 @@ createReleaseTag() {
     shouldNotExistsInSubversion ${svnUrl}/tags/ "${osReleaseLabelName}"
 
     if ! existsInSubversion ${svnUrl}/branches ${branch} ; then
-        svnMkdir -m creating_branch_for_${branch} ${svnUrl}/branches/${branch} 
+        local logMessage=$(createTempFile)
+        echo "creating a new branch ${branch}" > ${logMessage}
+        svnMkdir -F ${logMessage} ${svnUrl}/branches/${branch} 
     fi
 
     # update svn:externals
@@ -492,35 +505,37 @@ mustHaveWorkspaceWithArtefactsFromUpstreamProjects() {
 #  @return  <none>
 createProxyReleaseTag() {
     export tagName=${LFS_PROD_RELEASE_CURRENT_TAG_NAME}
+    local relTagName=${LFS_PROD_RELEASE_CURRENT_TAG_NAME_REL}
     local reposName=$(getConfig LFS_PROD_svn_delivery_repos_name)
     local proxySvnUrl=$(getConfig LFS_PROD_svn_delivery_proxy_repos_url)
-    local branchName=branches/proxyBranchForCreateTag
-    local externals=$(createTempFile)
+    local deliverySvnUrl=$(getConfig LFS_PROD_svn_delivery_release_repos_url)
+    local branchName=proxyBranchForCreateTag
     local canCreateProxyTag=$(getConfig LFS_CI_uc_release_can_create_proxy_tag)
+    local externals=$(createTempFile)
+    local logMessage=$(createTempFile)
 
     local workspace=$(getWorkspaceName)
     mustHaveWorkspaceName
 
-    info "create proxy tag ${tagName} in ${proxySvnUrl}"
+    info "create proxy tag ${relTagName} in ${proxySvnUrl}"
+    info "using ${deliverySvnUrl}"
 
-    mustExistBranchInSubversion ${proxySvnUrl} ${branchName}
+    mustExistBranchInSubversion ${proxySvnUrl} branches 
+    mustExistBranchInSubversion ${proxySvnUrl}/branches ${branchName}
 
-    svnCheckout ${proxySvnUrl}/${branchName} ${workspace}
-
-    svn pg svn:externals ${svnServer}/${releaseTagPath} > ${externals}
+    svn pg svn:externals ${deliverySvnUrl}/tags/${relTagName} > ${externals}
     mustBeSuccessfull "$?" "svn pg svn:externals command"
     rawDebug ${externals}
 
-    # example: echo "^/os/tags/${osLabelName}/os os " >> ${svnExternalsFile}
-    perl -p -ie "s:\^:/isource/svnroot/${reposName}:" ${externals}
+    svnCheckout --ignore-externals ${proxySvnUrl}/branches/${branchName} ${workspace}/proxyTag
+    svnPropSet svn:externals -F ${externals} ${workspace}/proxyTag
 
-    svn ps svn:externals -F ${externals} ${workspace}
-    mustBeSuccessfull "$?" "svn pg svn:externals command"
+    echo "updating svn:externals using extnerals from ${deliverySvnUrl}/tags/${relTagName}" > ${logMessage}
+    svnCommit -F ${logMessage} ${workspace}/proxyTag
 
-    svnCommit -m "updating svn:externals for proxy tag" ${workspace}
     if [[ ${canCreateProxyTag} ]] ; then
-        svnCopy -m "create new proxy tag ${tagName}" \
-            ${proxySvnUrl}/${branchName} ${proxySvnUrl}/tags/${tagName}
+        echo "creating new proxy tag ${tagName}" > ${logMessage}
+        svnCopy -F ${logMessage} ${proxySvnUrl}/branches/${branchName} ${proxySvnUrl}/tags/${relTagName}
     else
         info "creating a proxy tag is disabled in config"
     fi
