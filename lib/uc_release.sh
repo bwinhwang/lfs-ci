@@ -37,9 +37,6 @@ ci_job_release() {
     mustHaveValue "${branch}" "branch name"
 
     # find the related jobs of the build
-    mustHaveNextLabelName
-    local releaseLabel=$(getNextReleaseLabel)
-    mustHaveValue "${releaseLabel}"       "release label"
 
     local packageJobName=$(getPackageJobNameFromUpstreamProject ${TESTED_BUILD_JOBNAME} ${TESTED_BUILD_NUMBER})
     local packageBuildNumber=$(getPackageBuildNumberFromUpstreamProject ${TESTED_BUILD_JOBNAME} ${TESTED_BUILD_NUMBER})
@@ -49,6 +46,12 @@ ci_job_release() {
     mustHaveValue "${packageBuildNumber}" "package build name"
     mustHaveValue "${buildJobName}"       "build job name"
     mustHaveValue "${buildBuildNumber}"   "build build number"
+
+    # release label is stored in the artifacts of fsmci of the build job
+    copyArtifactsToWorkspace "${buildJobName}" "${buildBuildNumber}" "fsmci"
+    mustHaveNextLabelName
+    local releaseLabel=$(getNextReleaseLabel)
+    mustHaveValue "${releaseLabel}" "release label"
 
     setBuildDescription "${JOB_NAME}" "${BUILD_NUMBER}" "${releaseLabel}"
 

@@ -36,6 +36,7 @@ uploadToSubversion() {
     rm -rf ${TMPDIR}
     mkdir -p ${TMPDIR}
 
+    # fsmci artifact file is already copied to workspace by upper function
     mustHaveNextLabelName
     local tagName=$(getNextReleaseLabel)
 

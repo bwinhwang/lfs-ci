@@ -15,7 +15,7 @@ ci_job_package() {
     # from Jenkins: there are some environment variables, which are pointing to the downstream jobs
     # which are execute within this jenkins jobs. So we collect the artifacts from those jobs
     # and untar them in the workspace directory.
-    requiredParameters UPSTREAM_PROJECT UPSTREAM_BUILD
+    requiredParameters UPSTREAM_PROJECT UPSTREAM_BUILD JOB_NAME BUILD_NUMBER
 
     local workspace=$(getWorkspaceName)
     mustHaveWorkspaceName
@@ -28,7 +28,7 @@ ci_job_package() {
     copyArtifactsToWorkspace "${UPSTREAM_PROJECT}" "${UPSTREAM_BUILD}" "${requiredArtifacts}"
 
     mustHaveNextCiLabelName
-    local label=$(getNextCiLabelName)
+    local label=$(getNextReleaseLabel)
 
     setBuildDescription "${JOB_NAME}" "${BUILD_NUMBER}" "${label}"
 

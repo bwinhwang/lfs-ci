@@ -1785,10 +1785,10 @@ use Data::Dumper;
 
 sub prepare {
     my $self = shift;
-    getopts( "r:u:i:", \my %opts );
-    $self->{regex} = $opts{r} || die "no regex";
-    $self->{url}   = $opts{u} || die "no svn url";
-    $self->{incr}  = $opts{i} // 1;
+    getopts( "r:i:o:", \my %opts );
+    $self->{regex}  = $opts{r} || die "no regex";
+    $self->{incr}   = $opts{i} // 1;
+    $self->{oldTag} = $opts{o} || die "no old tag";
 
     return;
 }
@@ -1796,24 +1796,15 @@ sub prepare {
 sub execute {
     my $self = shift;
 
-    my $svn   = Singelton::svn();
-    my $xml   = $svn->ls( url => $self->{url} );
-
     my $regex = $self->{regex};
+    my $oldTag = $self->{oldTag};
 
-    my $lastTag         = ();
-    my $newTag          = $regex;
-    my $lastTagLastByte = "00";
+    my $newTag         = $regex;
+    my $newTagLastByte = "0001";
 
-    my @okList = map  { m/^${regex}$/; $1 }
-                 grep { m/^${regex}$/;    }
-                 map  { $_->{name}->[0]   }
-                 @{ $xml->{list}->[0]->{entry} };
-
-    if( scalar( @okList ) ) {
-        $lastTagLastByte = pop @okList;
+    if( $oldTag =~ m/^$regex$/ ) {
+        $newTagLastByte = sprintf( "%04d", $1 + $self->{incr} );
     }
-    my $newTagLastByte = sprintf( "%02d", $lastTagLastByte + $self->{incr} );
     $newTag =~ s/\(.*\)/$newTagLastByte/g;
 
     printf $newTag;

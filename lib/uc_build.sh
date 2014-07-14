@@ -9,6 +9,8 @@
 #  @return  <none>
 ci_job_build() {
 
+    requiredParameters UPSTREAM_PROJECT UPSTREAM_BUILD JOB_NAME BUILD_NUMBER
+
     info "creating the workspace..."
     _createWorkspace
 
@@ -16,17 +18,24 @@ ci_job_build() {
     local subTaskName=$(getSubTaskNameFromJobName)
     mustHaveValue "${subTaskName}"
 
-    mustHaveNextCiLabelName
-    local label=$(getNextCiLabelName)
-    mustHaveValue ${label}
+    
+    case ${subTaskName} in
+        *Summary*) ;;
+        *)
+            # release label is stored in the artifacts of fsmci of the build job
+            copyArtifactsToWorkspace "${UPSTREAM_PROJECT}" "${UPSTREAM_BUILD}" "fsmci"
+            mustHaveNextCiLabelName
+            local label=$(getNextCiLabelName)
+            mustHaveValue ${label} "label name"
+            setBuildDescription "${JOB_NAME}" "${BUILD_NUMBER}" "${label}"
+        ;;
+    esac
 
-    setBuildDescription "${JOB_NAME}" "${BUILD_NUMBER}" "${label}"
 
     info "subTaskName is ${subTaskName}"
-
     case ${subTaskName} in
-        *FSMDDALpdf*) _build_fsmddal_pdf ;;
         *Summary*)    _build_version     ;;
+        *FSMDDALpdf*) _build_fsmddal_pdf ;;
         *)            _build             ;;
     esac
 
@@ -49,42 +58,42 @@ ci_job_build_version() {
     mustHaveCleanWorkspace
     mustHaveWorkspaceName
 
-    local serverPath=$(getConfig jenkinsMasterServerPath)
-
     info "workspace is ${workspace}"
 
-    mustHaveNextLabelName
-    local label=$(getNextReleaseLabel)
-    mustHaveValue ${label}
+    local jobDirectory=$(getBuildDirectoryOnMaster)
+    local lastSuccessfulJobDirectory=$(getBuildDirectoryOnMaster ${JOB_NAME} lastSuccessful)
+    local oldLabel=$(runOnMaster "test -d ${lastSuccessfulJobDirectory} && cat ${lastSuccessfulJobDirectory}/label 2>/dev/null")
+    info "old label ${oldLabel} from ${lastSuccessfulJobDirectory} on master"
 
-    local jobDirectory=${serverPath}/jobs/${JOB_NAME}/lastSuccessful/ 
-    local oldLabel=$(runOnMaster "test -d ${jobDirectory} && grep ${label} ${jobDirectory}/label 2>/dev/null")
-
-    info "old label ${oldLabel} from ${jobDirectory} on master"
-    local postfix="00"
-
-    if [[ "${oldLabel}" != "" ]] ; then
-        local tmp=$(echo ${oldLabel} | sed "s/.*-0*\(.*\)$/\1/")
-        local newPostfix=$(( tmp + 1 ))
-        postfix=$(printf "%03d" ${newPostfix})
-
-        info "calculated new postfix for label ${postfix}"
+    if [[ -z ${oldLabel} ]] ; then
+        oldLabel="invalid_string_which_will_not_match_do_regex"
     fi
 
-    newCiLabel="${label}-${postfix}"
+    local branch=$(getBranchName)
+    mustHaveBranchName
 
-    info "new version is ${newCiLabel}"
-    setBuildDescription "${JOB_NAME}" "${BUILD_NUMBER}" "${newCiLabel}"
+    local regex=$(getConfig LFS_PROD_branch_to_tag_regex)
+    mustHaveValue "${regex}" "branch to tag regex map"
+
+    info "using regex ${regex} for branch ${branch}"
+
+    local label=$(${LFS_CI_ROOT}/bin/getNewTagName -o "${oldLabel}" -r "${regex}" )
+    mustHaveValue "${label}" "next release label name"
+
+    info "new version is ${label}"
+    setBuildDescription "${JOB_NAME}" "${BUILD_NUMBER}" "${label}"
 
     debug "writing new label file in workspace ${workspace}"
-    execute mkdir -p     ${workspace}/bld/bld-fsmci-summary
-    echo ${newCiLabel} > ${workspace}/bld/bld-fsmci-summary/label
+    execute mkdir -p ${workspace}/bld/bld-fsmci-summary
+    echo ${label}  > ${workspace}/bld/bld-fsmci-summary/label
 
-    debug "writing new label file in ${serverPath}/jobs/${JOB_NAME}/builds/${BUILD_NUMBER}/label"
-    executeOnMaster "echo ${newCiLabel} > ${serverPath}/jobs/${JOB_NAME}/builds/${BUILD_NUMBER}/label"
+    debug "writing new label file in ${jobDirectory}/label"
+    executeOnMaster "echo ${label} > ${jobDirectory}/label"
 
     info "upload results to artifakts share."
     createArtifactArchive
+
+    setBuildDescription "${JOB_NAME}" "${BUILD_NUMBER}" "${label}"
 
     return
 }
@@ -102,7 +111,7 @@ _build_fsmddal_pdf() {
 
     mustHaveNextCiLabelName
     local label=$(getNextCiLabelName)
-    mustHaveValue ${label}
+    mustHaveValue ${label} "label name"
 
     setBuildDescription "${JOB_NAME}" "${BUILD_NUMBER}" "${newCiLabel}"
 
