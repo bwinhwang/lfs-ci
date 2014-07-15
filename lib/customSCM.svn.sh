@@ -139,8 +139,10 @@ actionCheckout() {
         fi
         if [[ "${oldRev}" != "${newRev}" ]] ; then
             # get the changes
-            trace "get changelog for ${subSystem}"
             local tmpChangeLogFile=$(createTempFile)
+
+            oldRev=$(( oldRev + 1))
+            debug "get svn changelog ${subSystem} ${oldRev}:${newRev} ${newUrl}"
             svn log -v --xml -r${oldRev}:${newRev} ${newUrl} > ${tmpChangeLogFile}
             mustBeSuccessfull "$?" "svn log -v --xml -r${oldRev}:${newRev} ${newUrl}"
 
