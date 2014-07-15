@@ -299,7 +299,8 @@ getNextReleaseLabel() {
 #  @param   <none>
 #  @return  next ci label name
 getNextCiLabelName() {
-    echo ${LFS_CI_NEXT_CI_LABEL_NAME}
+    # echo ${LFS_CI_NEXT_CI_LABEL_NAME}
+    getNextReleaseLabel
 }
 
 ## @fn      mustHaveNextLabelName()
@@ -309,83 +310,29 @@ getNextCiLabelName() {
 #  @return  <none>
 mustHaveNextLabelName() {
 
-    local branch=$(getBranchName)
-    mustHaveBranchName
+    local workspace=$(getWorkspaceName)
+    mustHaveWorkspaceName
 
-    local regex=$(getConfig LFS_PROD_branch_to_tag_regex)
-    mustHaveValue "${regex}" "branch to tag regex map"
+    if [[ ! -e ${workspace}/bld/bld-fsmci-summary/label ]] ; then
+        error "label artifacts file does not exist"
+        exit 1
+    fi            
 
-    local repos=$(getConfig LFS_PROD_svn_delivery_proxy_repos_url)
-
-    info "branch ${branch} has release label regex ${regex}"
-    info "using repos ${repos}"
-
-    local label=$(${LFS_CI_ROOT}/bin/getNewTagName -u ${repos}/tags -r "${regex}" )
-    mustHaveValue "${label}" "next release label name"
-
-    local taskName=$(getProductNameFromJobName)
-    if [[ "${taskName}" == "UBOOT" ]] ; then
-        label=$(echo ${label} | sed -e 's/PS_LFS_OS_/LFS/' \
-                                    -e 's/PS_LFS_BT_/LBT/' \
-                                    -e 's/20//' \
-                                    -e 's/_//g')
-        info "reajusting label to ${label}"
+    if [[ -z "${LFS_CI_NEXT_CI_LABEL_NAME}" ]] ; then
+        local label=$(cat ${workspace}/bld/bld-fsmci-summary/label 2>/dev/null)
+        mustHaveValue "${label}" "next ci label name"
     fi
 
-    export LFS_CI_NEXT_LABEL_NAME="${label}"
+    export LFS_CI_NEXT_LABEL_NAME=${label}
 
     return
 }
-
-## @fn      mustHaveCurrentLabelName()
-#  @brief   ensure, that there is a release label name
-#  @details to get the current release label name, it checks the svn repos
-#  @param   <none>
-#  @return  <none>
-mustHaveCurrentLabelName() {
-
-    local branch=$(getBranchName)
-    mustHaveBranchName
-
-    local regex=$(getConfig LFS_PROD_branch_to_tag_regex)
-    mustHaveValue "${regex}" "branch to tag regex map"
-
-    local repos=$(getConfig LFS_PROD_svn_delivery_proxy_repos_url)
-
-    info "branch ${branch} has release label regex ${regex}"
-    info "using repos ${repos}"
-
-    local label=$(${LFS_CI_ROOT}/bin/getNewTagName -u ${repos}/tags -r "${regex}" -i 0)
-    mustHaveValue "${label}" "next release label name"
-
-    local taskName=$(getProductNameFromJobName)
-    if [[ "${taskName}" == "UBOOT" ]] ; then
-        label=$(echo ${label} | sed -e 's/PS_LFS_OS_/LFS/' \
-                                    -e 's/PS_LFS_BT_/LBT/' \
-                                    -e 's/20//' \
-                                    -e 's/_//g')
-        info "reajusting label to ${label}"
-    fi
-
-    export LFS_CI_CURRENT_LABEL_NAME="${label}"
-
-    return
-}
-
 ## @fn      mustHaveNextCiLabelName()
 #  @brief   ensure, that there is a ci label name for this build
 #  @param   <none>
 #  @return  <none>
 mustHaveNextCiLabelName() {
-    local workspace=$(getWorkspaceName)
-    mustHaveWorkspaceName
-
-    if [[ ! "${LFS_CI_NEXT_CI_LABEL_NAME}" ]] ; then
-        local label=$(cat ${workspace}/bld/bld-fsmci-summary/label 2>/dev/null)
-        mustHaveValue "${label}" "next ci label name"
-    fi
-
-    export LFS_CI_NEXT_CI_LABEL_NAME=${label}
+    mustHaveNextLabelName
     return
 }
 
@@ -548,7 +495,8 @@ copyRevisionStateFileToWorkspace() {
     local jobName=$1
     local buildNumber=$2
 
-    copyFileFromBuildDirectoryToWorkspace ${jobName} ${buildNumber} revisions.txt
+    copyFileFromBuildDirectoryToWorkspace ${jobName} ${buildNumber} revisionstate.xml
+    mv ${WORKSPACE}/revisionstate.xml ${WORKSPACE}/revisions.txt
     rawDebug ${WORKSPACE}/revisions.txt
 
     return
@@ -580,8 +528,8 @@ copyFileFromBuildDirectoryToWorkspace() {
     local master=$(getConfig jenkinsMasterServerHostName)
 
     mustHaveValue "${dir}" "build directory on master"
-    debug "copy file ${file} from master:${dir} to ${WORKSPACE}"
-    execute rsync -avPe ssh ${master}:${dir}/${file} ${WORKSPACE}/${file}
+    debug "copy file ${fileName} from master:${dir} to ${WORKSPACE}"
+    execute rsync -avPe ssh ${master}:${dir}/${fileName} ${WORKSPACE}/${fileName}
 
     return        
 }
@@ -597,13 +545,13 @@ copyFileFromWorkspaceToBuildDirectory() {
     local master=$(getConfig jenkinsMasterServerHostName)
 
     mustHaveValue "${dir}" "build directory on master"
-    debug "copy file ${file} from ${WORKSPACE} to master:${dir}"
-    execute rsync -avPe ssh ${WORKSPACE}/${file} ${master}:${dir}/$(basename ${file})
+    debug "copy file ${fileName} to master:${dir}"
+    execute rsync -avPe ssh ${fileName} ${master}:${dir}/$(basename ${fileName})
 
     return        
 }
 
-getUpstreamProjects() {
+_getUpstreamProjects() {
     local jobName=$1
     local buildNumber=$2
     local upstreamsFile=$3

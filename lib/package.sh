@@ -130,7 +130,10 @@ copyReleaseCandidateToShare() {
     execute mkdir -p ${internalLinkDirectory}
     execute ln -sf ${remoteDirectory} ${internalLinkDirectory}/build_${BUILD_NUMBER}
 
-    createSymlinksToArtifactsOnShare ${remoteDirectory}
+    # TODO: demx2fk3 2014-07-15 FIXME : createSymlinksToArtifactsOnShare ${remoteDirectory}
+    local artifactesShare=$(getConfig artifactesShare)
+    local artifactsPathOnMaster=$(getBuildDirectoryOnMaster)/archive
+    executeOnMaster ln    -sf ${artifactsDirectoryOnShare} ${artifactsPathOnMaster}
 
     return
 }

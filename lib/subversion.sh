@@ -11,13 +11,17 @@ LFS_CI_SOURCE_subversion='$Id$'
 #  @param   {commitMessage}   commit message
 #  @return  <none>
 uploadToSubversion() {
-    requiredParameters LFS_CI_ROOT TMPDIR
+    requiredParameters LFS_CI_ROOT 
 
     local pathToUpload=$1
     local branchToUpload=$2
     local commitMessage="$3"
 
-    local svnReposUrl=$(getConfig lfsOsDeliveryRepos)
+    # fsmci artifact file is already copied to workspace by upper function
+    mustHaveNextLabelName
+    export tagName=$(getNextReleaseLabel)
+
+    local svnReposUrl=$(getConfig LFS_PROD_svn_delivery_release_repos_url)
 
     info "upload local path ${pathToUpload} to ${branchToUpload}"
 
@@ -30,14 +34,11 @@ uploadToSubversion() {
 
     info "upload to ${branch}"
 
-    local oldTemp=${TMPDIR}
-    export TMPDIR=${WORKSPACE}/tmp/
+    local oldTemp=${TMPDIR:-/tmp}
+    export TMPDIR=${WORKSPACE}/tmp
     debug "cleanup tmp directory"
     rm -rf ${TMPDIR}
     mkdir -p ${TMPDIR}
-
-    mustHaveNextLabelName
-    local tagName=$(getNextReleaseLabel)
 
     local branchPath=$(getConfig SVN_branch_path_name)
     local tagPath=$(getConfig SVN_tag_path_name)
@@ -50,6 +51,7 @@ uploadToSubversion() {
                 -v                                     \
                 -t ${tagPath}/${tagName}               \
                 -no_user_input                         \
+                -no_diff_tag                           \
                 -glob_ignores="#.#"                    \
                 ${svnReposUrl} ${branchPath}/${branch} \
                 ${pathToUpload} 
@@ -67,7 +69,6 @@ uploadToSubversion() {
 #  @param   {args}    command and arguments of the svn command
 #  @return  <none>
 svnCommand() {
-    local args=$@
     debug "executing svn $@"
     execute svn --non-interactive --trust-server-cert $@
     return
@@ -78,9 +79,7 @@ svnCommand() {
 #  @param   {args}  args for the svn co command
 #  @return  <none>
 svnCheckout() {
-    local args=
-    while [[ ! -z $@ ]] ; do args="${args} '$1'" ; shift; done
-    svnCommand checkout ${args}
+    svnCommand checkout $@
     return
 }
 
@@ -89,9 +88,7 @@ svnCheckout() {
 #  @param   {args}    args for the svn commit command
 #  @return  <none>
 svnCommit() {
-    local args=
-    while [[ ! -z $@ ]] ; do args="${args} '$1'" ; shift; done
-    svnCommand commit ${args}
+    svnCommand commit $@
     return
 }
 
@@ -100,9 +97,7 @@ svnCommit() {
 #  @param   {args}    args for the svn mkdir command
 #  @return  <none>
 svnMkdir() {
-    local args=
-    while [[ ! -z $@ ]] ; do args="${args} '$1'" ; shift; done
-    svnCommand mkdir ${args}
+    svnCommand mkdir $@
     return
 }
 
@@ -111,9 +106,7 @@ svnMkdir() {
 #  @param   {args}    args for the svn copy command
 #  @return  <none>
 svnCopy() {
-    local args=
-    while [[ ! -z $@ ]] ; do args="${args} '$1'" ; shift; done
-    svnCommand copy ${args}
+    svnCommand copy $@
     return
 }
 
@@ -122,9 +115,7 @@ svnCopy() {
 #  @param   {args}    args for the svn diff command
 #  @return  <none>
 svnDiff() {
-    local args=
-    while [[ ! -z $@ ]] ; do args="${args} '$1'" ; shift; done
-    svnCommand diff ${args}
+    svnCommand diff $@
     return
 }
 
@@ -133,9 +124,7 @@ svnDiff() {
 #  @param   {args}    args for the svn propset command
 #  @return  <none>
 svnPropSet() {
-    local args=
-    while [[ ! -z $@ ]] ; do args="${args} '$1'" ; shift; done
-    svnCommand propset ${args}
+    svnCommand propset $@
     return
 }
 
@@ -144,9 +133,7 @@ svnPropSet() {
 #  @param   {args}    args for the svn remove command
 #  @return  <none>
 svnRemove() {
-    local args=
-    while [[ ! -z $@ ]] ; do args="${args} '$1'" ; shift; done
-    svnCommand rm ${args}
+    svnCommand rm $@
     return
 }
 
@@ -217,9 +204,14 @@ mustExistInSubversion() {
 mustExistBranchInSubversion() {
     local url=$1
     local branch=$2
+    local logMessage=$(createTempFile)
 
+    info "checking for branch ${url} / ${branch}"
+
+    echo "creating a new branch: ${branch}" > ${logMessage}
     if ! existsInSubversion ${url} ${branch} ; then
-        svnMkdir -m new_branch ${url}/${branch}
+        info "create dir ${url}/${branch}"
+        svnMkdir -F ${logMessage} ${url}/${branch}
     fi
 
     return 0

@@ -1550,7 +1550,7 @@ sub prepare {
     # __BRANCH__
     $self->{data}{BRANCH} = "Branch";
     # __SVN_REPOS_URL__
-    $self->{data}{SVN_REPOS_URL} = $config->getConfig( name => "lfsOsDeliveryRepos" );
+    $self->{data}{SVN_REPOS_URL} = $config->getConfig( name => "LFS_PROD_svn_delivery_os_repos_url" );
     # __SVN_REVISION__
     my $svnUrl = sprintf( "%s/tags/%s", 
                             $self->{data}{SVN_REPOS_URL},
@@ -1684,7 +1684,7 @@ sub prepare {
     $self->{subject}         = $config->getConfig( name => "LFS_PROD_ReleaseNote_Subject" );
     $self->{smtpServer}      = $config->getConfig( name => "LFS_PROD_ReleaseNote_SmtpServer" );
     $self->{templateFile}    = $config->getConfig( name => "LFS_PROD_ReleaseNote_TemplateFile" );
-    $self->{reposName}       = $config->getConfig( name => "lfsRelDeliveryRepos" );
+    $self->{reposName}       = $config->getConfig( name => "LFS_PROD_svn_delivery_release_repos_url" );
 
 
     if( not -f $self->{releaseNoteFile} ) {
@@ -1705,8 +1705,8 @@ sub prepare {
     close RELEASENOTE;
 
 
-    $self->{data}{DELIVERY_REPOS}       = $config->getConfig( name => "lfsRelDeliveryRepos" );
-    $self->{data}{SOURCE_REPOS}         = $config->getConfig( name => "lfsOsDeliveryRepos" );
+    $self->{data}{DELIVERY_REPOS}       = $config->getConfig( name => "LFS_PROD_svn_delivery_release_repos_url" );
+    $self->{data}{SOURCE_REPOS}         = $config->getConfig( name => "LFS_PROD_svn_delivery_os_repos_url" );
     $self->{data}{TAGNAME}              = $self->{tagName};
 
     $self->{subject}     =~ s:__([A-Z_]*)__:  $self->{data}{$1} // $config->getConfig( name => $1 ) :eg; 
@@ -1785,10 +1785,10 @@ use Data::Dumper;
 
 sub prepare {
     my $self = shift;
-    getopts( "r:u:i:", \my %opts );
-    $self->{regex} = $opts{r} || die "no regex";
-    $self->{url}   = $opts{u} || die "no svn url";
-    $self->{incr}  = $opts{i} // 1;
+    getopts( "r:i:o:", \my %opts );
+    $self->{regex}  = $opts{r} || die "no regex";
+    $self->{incr}   = $opts{i} // 1;
+    $self->{oldTag} = $opts{o} || die "no old tag";
 
     return;
 }
@@ -1796,24 +1796,15 @@ sub prepare {
 sub execute {
     my $self = shift;
 
-    my $svn   = Singelton::svn();
-    my $xml   = $svn->ls( url => $self->{url} );
-
     my $regex = $self->{regex};
+    my $oldTag = $self->{oldTag};
 
-    my $lastTag         = ();
-    my $newTag          = $regex;
-    my $lastTagLastByte = "00";
+    my $newTag         = $regex;
+    my $newTagLastByte = "0001";
 
-    my @okList = map  { m/^${regex}$/; $1 }
-                 grep { m/^${regex}$/;    }
-                 map  { $_->{name}->[0]   }
-                 @{ $xml->{list}->[0]->{entry} };
-
-    if( scalar( @okList ) ) {
-        $lastTagLastByte = pop @okList;
+    if( $oldTag =~ m/^$regex$/ ) {
+        $newTagLastByte = sprintf( "%04d", $1 + $self->{incr} );
     }
-    my $newTagLastByte = sprintf( "%02d", $lastTagLastByte + $self->{incr} );
     $newTag =~ s/\(.*\)/$newTagLastByte/g;
 
     printf $newTag;

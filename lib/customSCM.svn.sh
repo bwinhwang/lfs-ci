@@ -86,7 +86,7 @@ _createRevisionsTxtFile() {
     # can not use execute here, so we have to do the error handling by hande
     # do the magic for all dir
     ${LFS_CI_ROOT}/bin/getRevisionTxtFromDependencies -u ${dependenciesFileUrl} \
-                                                      -f ${dependenciesFile} > ${newRevisionsFile} 
+                                                      -f ${dependenciesFile} | sort -u > ${newRevisionsFile} 
     if [[ $? != 0 ]] ; then
         error "reported an error..."
         exit 1
@@ -142,17 +142,12 @@ actionCheckout() {
             trace "get changelog for ${subSystem}"
             local tmpChangeLogFile=$(createTempFile)
             svn log -v --xml -r${oldRev}:${newRev} ${newUrl} > ${tmpChangeLogFile}
-            if [[ $? != 0 ]] ; then
-                error "svn log -v --xml -r${oldRev}:${newRev} ${newUrl} failed"
-                exit 1
-            fi
+            mustBeSuccessfull "$?" "svn log -v --xml -r${oldRev}:${newRev} ${newUrl}"
 
-            echo ------------------
-            cat ${tmpChangeLogFile}
-            echo ------------------
+            rawDebug ${tmpChangeLogFile}
 
             # check for an empty file 
-            if [[ $(wc -l ${tmpChangeLogFile} ) -eq 3 ]] ; then
+            if [[ $(wc -l ${tmpChangeLogFile} | cut -d" " -f1 ) -eq 3 ]] ; then
                 trace "empty xml file, skipping"
                 continue
             fi
@@ -181,6 +176,8 @@ actionCheckout() {
     if [ ! -s "$CHANGELOG" ] ; then
         echo -n "<log/>" >"$CHANGELOG"
     fi
+
+    exit 1
 
     exit 0
 }

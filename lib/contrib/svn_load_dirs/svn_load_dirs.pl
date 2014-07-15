@@ -77,6 +77,8 @@ my $opt_glob_ignores;
 # Message to use for the final commit.
 my $opt_final_commit_msg;
 
+my $opt_no_diff_tag = 0;
+
 # This is the character used to separate regular expressions occuring
 # in the tag directory path from the path itself.
 my $REGEX_SEP_CHAR = '@';
@@ -87,6 +89,7 @@ my $REGEX_SEP_CHAR = '@';
 my $property_config_filename;
 
 GetOptions('no_user_input'           => \$opt_no_user_input,
+           'no_diff_tag'             => \$opt_no_diff_tag,
            'no_auto_exe'             => \$opt_no_auto_exe,
            'property_cfg_filename=s' => \$property_config_filename,
            'svn_password=s'          => \$opt_svn_password,
@@ -1307,24 +1310,27 @@ while (defined (my $load_dir = &get_next_load_dir))
         # Now check out the tag and run a recursive diff between the
         # original source directory and the tag for a consistency
         # check.
-        my $checkout_dir_name = "my_tag_wc_named_$load_tag";
-        print "Checking out $to_url into $temp_dir/$checkout_dir_name\n";
+        if (not $opt_no_diff_tag) 
+          {
+            my $checkout_dir_name = "my_tag_wc_named_$load_tag";
+            print "Checking out $to_url into $temp_dir/$checkout_dir_name\n";
 
-        chdir($temp_dir)
-          or die "$0: cannot chdir '$temp_dir': $!\n";
+            chdir($temp_dir)
+            or die "$0: cannot chdir '$temp_dir': $!\n";
 
-        read_from_process($svn, 'checkout',
-                          @svn_use_repos_cmd_opts,
-                          $to_url, $checkout_dir_name);
+            read_from_process($svn, 'checkout',
+                            @svn_use_repos_cmd_opts,
+                            $to_url, $checkout_dir_name);
 
-        chdir($checkout_dir_name)
-          or die "$0: cannot chdir '$checkout_dir_name': $!\n";
+            chdir($checkout_dir_name)
+            or die "$0: cannot chdir '$checkout_dir_name': $!\n";
 
-        chdir($orig_cwd)
-          or die "$0: cannot chdir '$orig_cwd': $!\n";
-        read_from_process('diff', '-u', @diff_ignore_space_changes,
-                          '-x', '.svn',
-                          '-r', $load_dir, "$temp_dir/$checkout_dir_name");
+            chdir($orig_cwd)
+            or die "$0: cannot chdir '$orig_cwd': $!\n";
+            read_from_process('diff', '-u', @diff_ignore_space_changes,
+                            '-x', '.svn',
+                            '-r', $load_dir, "$temp_dir/$checkout_dir_name");
+          }
       }
   }
 
