@@ -177,8 +177,6 @@ actionCheckout() {
         echo -n "<log/>" >"$CHANGELOG"
     fi
 
-    exit 1
-
     exit 0
 }
 
