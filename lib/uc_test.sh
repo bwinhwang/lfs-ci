@@ -51,6 +51,6 @@ ci_job_test() {
     # echo "EXECUTE_MANUAL=true" >> ${WORKSPACE}/properties
     # echo "LABEL=<a href=https://lfs-ci.emea.nsn-net.net/job/${JOB_NAME}/${BUILD_NUMBER}/>triggered by ${JOB_NAME}/${BUILD_NUMBER}</a>" >> ${WORKSPACE}/properties
 
-    setBuildDescription "${JOB_NAME}" "${BUILD_NUMBER}" "${label}"
+    setBuildDescription "${JOB_NAME}" "${BUILD_NUMBER}" "${labelName}"
     return
 }

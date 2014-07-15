@@ -284,7 +284,7 @@ createTagOnSourceRepository() {
     mustHaveValue "${osLabelName}" "no os label name"
 
     # get artifacts
-    revisionFile=${workspace}/bld/bld-externalComponents-summary/usedRevisions.txt
+    local revisionFile=${workspace}/bld/bld-externalComponents-summary/usedRevisions.txt
     cat ${workspace}/bld/bld-externalComponents-*/usedRevisions.txt | sort -u > ${revisionFile}
     rawDebug ${revisionFile}
 
@@ -302,8 +302,9 @@ createTagOnSourceRepository() {
     rawDebug ${revisionFile}
 
     # check for branch
+    export tagName=${osLabelName}
     local svnUrl=$(getConfig LFS_PROD_svn_delivery_os_repos_url)
-    local svnUrlOs=${svnUrl}
+    local svnUrlOs=${svnUrl}/os
     local branch=pre_${osLabelName}
     local logMessage=$(createTempFile)
 
@@ -354,15 +355,17 @@ createTagOnSourceRepository() {
             *)
                 dirname=$(dirname ${src})
                 echo "create a new src directory ${dirname} for ${src}" > ${logMessage}
-                svnMkdir -F ${logMessage} ${svnUrlOs}/branches/${branch}/${dirname}
+                if ! existsInSubversion ${svnUrlOs}/branches/${branch}/ ${dirname} ; then
+                    svnMkdir -F ${logMessage} ${svnUrlOs}/branches/${branch}/${dirname}
+                fi
             ;;
         esac
 
         info "copy ${src} to ${branch}"
         if [[ ${canCreateSourceTag} ]] ; then
-        svnCopy -r ${rev} -m branching_src_${src}_to_${branch} \
-            ${normalizedUrl}                                   \
-            ${svnUrlOs}/branches/${branch}/${dirname}
+            svnCopy -r ${rev} -m branching_src_${src}_to_${branch} \
+                ${normalizedUrl}                                   \
+                ${svnUrlOs}/branches/${branch}/${dirname}
         else
             info "creating a source tag is disabled in config"
         fi

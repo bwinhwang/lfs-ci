@@ -22,25 +22,27 @@ ci_job_test_on_target() {
     execute build setup
     execute build adddir src-test
 
+    local make=make TESTTARGET=${targetName}    
+
     cd ${workspace}/src-test/src/unittest/tests/common/checkuname
     info "installing software on the target"
-    execute make install WORKSPACE=${DELIVERY_DIRECTORY}
+    execute ${make} install WORKSPACE=${DELIVERY_DIRECTORY} 
 
     info "powercycle target"
-    execute make powercycle
+    execute ${make} powercycle
 
     info "wait for prompt"
-    execute make waitprompt
+    execute ${make} waitprompt
     sleep 60
 
     info "executing checks"
-    execute make test
+    execute ${make} test
 
     info "show uptime"
-    execute make invoke_console_cmd CMD=uptime
+    execute ${make} invoke_console_cmd CMD=uptime
 
     info "show kernel version"
-    make invoke_console_cmd CMD="uname -a"
+    ${make} invoke_console_cmd CMD="uname -a"
 
     info "testing done."
 
