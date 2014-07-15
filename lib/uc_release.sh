@@ -71,7 +71,7 @@ ci_job_release() {
             ${workspace}/bld/bld-lfs-release/label
 
     local lastSuccessfulBuildDirectory=$(getBuildDirectoryOnMaster ${JOB_NAME} lastSuccessfulBuild)
-    if [[ -e ${lastSuccessfulBuildDirectory} ]] ; then
+    if runOnMaster test -e ${lastSuccessfulBuildDirectory}/label ; then
         copyFileFromBuildDirectoryToWorkspace ${JOB_NAME} lastSuccessfulBuild label
         execute mv ${WORKSPACE}/label ${workspace}/bld/bld-lfs-release/oldLabel
     else
@@ -90,7 +90,7 @@ ci_job_release() {
         ;;
         upload_to_subversion)
             # from subversion.sh
-            uploadToSubversion "${releaseDirectory}" "${branch}" "upload of build ${JOB_NAME} / ${BUILD_NUMBER}"
+            uploadToSubversion "${releaseDirectory}/os" "${branch}" "upload of build ${JOB_NAME} / ${BUILD_NUMBER}"
         ;;
         build_results_to_share)
             extractArtifactsOnReleaseShare "${buildJobName}" "${buildBuildNumber}"
@@ -136,7 +136,7 @@ extractArtifactsOnReleaseShare() {
     local jobName=$1
     local buildNumber=$2
 
-    requiredParameters ${LFS_PROD_RELEASE_PREVIOUS_TAG_NAME} ${LFS_PROD_RELEASE_CURRENT_TAG_NAME}
+    requiredParameters LFS_PROD_RELEASE_PREVIOUS_TAG_NAME LFS_PROD_RELEASE_CURRENT_TAG_NAME
 
     local workspace=$(getWorkspaceName)
     local server=$(getConfig jenkinsMasterServerHostName)
@@ -425,11 +425,11 @@ createReleaseTag() {
     mustHaveBranchName
 
     # get sdk label
-    commonentsFile=${workspace}/bld/bld-externalComponents-summary/externalComponents   
-    mustExistFile ${commonentsFile}
+    componentsFile=${workspace}/bld/bld-externalComponents-summary/externalComponents   
+    mustExistFile ${componentsFile}
 
-    local sdk2=$(getConfig sdk2 ${commonentsFile})
-    local sdk3=$(getConfig sdk3 ${commonentsFile})
+    local sdk2=$(getConfig sdk2 ${componentsFile})
+    local sdk3=$(getConfig sdk3 ${componentsFile})
 
     info "using sdk2 ${sdk2}"
     info "using sdk3 ${sdk3}"
@@ -470,7 +470,9 @@ createReleaseTag() {
     # make a tag
     info "create tag ${osReleaseLabelName}"
     if [[ ${canCreateReleaseTag} ]] ; then
-        svnCopy -m "create new tag" ${svnUrl}/branches/${branch} ${svnUrl}/tags/${osReleaseLabelName}
+        local logMessage=$(createTempFile)
+        echo "create new tag" > ${logMessage}
+        svnCopy -F ${svnUrl}/branches/${branch} ${svnUrl}/tags/${osReleaseLabelName}
     else
         info "creating the release tag is disabled in config"
     fi
@@ -556,7 +558,7 @@ updateDependencyFiles() {
     mustHaveWorkspaceName
     mustHaveWorkspaceWithArtefactsFromUpstreamProjects ${jobName} ${buildNumber}
 
-    local commonentsFile=$(createTempFile)
+    local componentsFile=$(createTempFile)
     sort -u ${workspace}/bld/bld-externalComponents-*/usedRevisions.txt > ${componentsFile}
 
     local releaseLabelName=${LFS_PROD_RELEASE_CURRENT_TAG_NAME}
@@ -565,10 +567,16 @@ updateDependencyFiles() {
 
     while read name url rev ; do
 
+        case ${name} in
+            src-*) :        ;; # ok
+            *)     continue ;; # not ok, skip
+        esac
+
         info "updating Dependencies and Revisions for ${name} "
         debug "from file: ${name} ${url} ${rev}"
 
-        svnCheckout ${url} ${workspace}/${name}
+        execute rm -rf ${workspace}/${name}
+        svnCheckout --ignore-externals ${url} ${workspace}/${name}
         local dependenciesFile=${workspace}/${name}/Dependencies
         [[ ! -e ${dependenciesFile} ]] ; continue
         
@@ -585,11 +593,12 @@ updateDependencyFiles() {
         perl -p -i -e 's/${oldReleaseLabelName}/${releaseLabelName}/g' ${name}/Dependencies
         svnDiff ${dependenciesFile}
         if [[ ${canCommitDependencies} ]] ; then 
-        svnCommit -m "BTSPS-1657 IN psulm: DESCRIPTION: set Dependencies for Release ${releaseLabelName} r${rev} NOJCHK" \
+            svnCommit -m "BTSPS-1657 IN psulm: DESCRIPTION: set Dependencies for Release ${releaseLabelName} r${rev} NOJCHK" \
             ${dependenciesFile}
         else
             info "committing of dependencies is disabled in config"
         fi
+
         
     done < ${componentsFile}
 

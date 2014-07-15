@@ -299,7 +299,8 @@ getNextReleaseLabel() {
 #  @param   <none>
 #  @return  next ci label name
 getNextCiLabelName() {
-    echo ${LFS_CI_NEXT_CI_LABEL_NAME}
+    # echo ${LFS_CI_NEXT_CI_LABEL_NAME}
+    getNextReleaseLabel
 }
 
 ## @fn      mustHaveNextLabelName()
@@ -494,7 +495,8 @@ copyRevisionStateFileToWorkspace() {
     local jobName=$1
     local buildNumber=$2
 
-    copyFileFromBuildDirectoryToWorkspace ${jobName} ${buildNumber} revisions.txt
+    copyFileFromBuildDirectoryToWorkspace ${jobName} ${buildNumber} revisionstate.xml
+    mv ${WORKSPACE}/revisionstate.xml ${WORKSPACE}/revisions.txt
     rawDebug ${WORKSPACE}/revisions.txt
 
     return
@@ -526,8 +528,8 @@ copyFileFromBuildDirectoryToWorkspace() {
     local master=$(getConfig jenkinsMasterServerHostName)
 
     mustHaveValue "${dir}" "build directory on master"
-    debug "copy file ${file} from master:${dir} to ${WORKSPACE}"
-    execute rsync -avPe ssh ${master}:${dir}/${file} ${WORKSPACE}/${file}
+    debug "copy file ${fileName} from master:${dir} to ${WORKSPACE}"
+    execute rsync -avPe ssh ${master}:${dir}/${fileName} ${WORKSPACE}/${fileName}
 
     return        
 }

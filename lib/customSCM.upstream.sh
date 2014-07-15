@@ -71,10 +71,11 @@ actionCheckout() {
         local buildDirectory=/var/fpwork/demx2fk3/lfs-jenkins/home/jobs/${UPSTREAM_PROJECT}/builds/${build}
         # we must only concatenate non-empty logs; empty logs with a
         # single "<log/>" entry will break the concatenation:
-        debug "checking ${UPSTREAM_PROJECT} / ${build}"
+        debug "checking ${UPSTREAM_PROJECT} / ${build} "
 
         # TODO: demx2fk3 2014-04-07 use configuration for this
         local tmpChangeLogFile=$(createTempFile)
+        debug "changelog ${buildDirectory}/changelog.xml"
         ssh ${server} "test -f ${buildDirectory}/changelog.xml && grep -q logentry ${buildDirectory}/changelog.xml && cat ${buildDirectory}/changelog.xml" > ${tmpChangeLogFile}
         if [[ ! -s ${CHANGELOG} ]] ; then
             debug "copy ${tmpChangeLogFile} to ${CHANGELOG}"

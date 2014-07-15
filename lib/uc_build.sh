@@ -18,23 +18,16 @@ ci_job_build() {
     local subTaskName=$(getSubTaskNameFromJobName)
     mustHaveValue "${subTaskName}"
 
-    
-    case ${subTaskName} in
-        *Summary*) ;;
-        *)
-            # release label is stored in the artifacts of fsmci of the build job
-            copyArtifactsToWorkspace "${UPSTREAM_PROJECT}" "${UPSTREAM_BUILD}" "fsmci"
-            mustHaveNextCiLabelName
-            local label=$(getNextCiLabelName)
-            mustHaveValue ${label} "label name"
-            setBuildDescription "${JOB_NAME}" "${BUILD_NUMBER}" "${label}"
-        ;;
-    esac
-
+    # release label is stored in the artifacts of fsmci of the build job
+    # TODO: demx2fk3 2014-07-15 fix me - wrong function
+    copyArtifactsToWorkspace "${UPSTREAM_PROJECT}" "${UPSTREAM_BUILD}" "fsmci"
+    mustHaveNextCiLabelName
+    local label=$(getNextCiLabelName)
+    mustHaveValue ${label} "label name"
+    setBuildDescription "${JOB_NAME}" "${BUILD_NUMBER}" "${label}"
 
     info "subTaskName is ${subTaskName}"
     case ${subTaskName} in
-        *Summary*)    _build_version     ;;
         *FSMDDALpdf*) _build_fsmddal_pdf ;;
         *)            _build             ;;
     esac
@@ -61,7 +54,7 @@ ci_job_build_version() {
     info "workspace is ${workspace}"
 
     local jobDirectory=$(getBuildDirectoryOnMaster)
-    local lastSuccessfulJobDirectory=$(getBuildDirectoryOnMaster ${JOB_NAME} lastSuccessful)
+    local lastSuccessfulJobDirectory=$(getBuildDirectoryOnMaster ${JOB_NAME} lastSuccessfulBuild)
     local oldLabel=$(runOnMaster "test -d ${lastSuccessfulJobDirectory} && cat ${lastSuccessfulJobDirectory}/label 2>/dev/null")
     info "old label ${oldLabel} from ${lastSuccessfulJobDirectory} on master"
 

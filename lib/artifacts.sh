@@ -153,6 +153,7 @@ copyArtifactsToWorkspace() {
     fi
 
     local triggeredJobData=$(cat ${downStreamprojectsFile})
+    # mustHaveValue "${triggeredJobData}" "triggered job data"
 
     trace "triggered job names are: ${triggeredJobNames}"
     execute mkdir -p ${workspace}/bld/
