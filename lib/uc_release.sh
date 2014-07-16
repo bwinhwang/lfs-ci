@@ -53,7 +53,7 @@ ci_job_release() {
     local releaseLabel=$(getNextReleaseLabel)
     mustHaveValue "${releaseLabel}" "release label"
 
-    setBuildDescription "${JOB_NAME}" "${BUILD_NUMBER}" "${releaseLabel}"
+    setBuildDescription "${JOB_NAME}" "${BUILD_NUMBER}" "${releaseLabel}<br>${LFS_PROD_RELEASE_CURRENT_TAG_NAME_REL}"
 
     info "found package job: ${packageJobName} / ${packageBuildNumber}"
     info "found build   job: ${buildJobName} / ${buildBuildNumber}"
@@ -286,10 +286,12 @@ _createLfsOsReleaseNote() {
     execute rsync -ae ssh ${serverName}:${buildDirectory}/changelog.xml ${workspace}/os/
     mustExistFile ${workspace}/os/changelog.xml
 
+
     copyArtifactsToWorkspace "${buildJobName}" "${buildBuildNumber}" "externalComponents fsmpsl psl fsmci"
 
     # convert the changelog xml to a release note
     cd ${workspace}/os/
+    execute ln -sf ../bld .
     execute rm -f releasenote.txt releasenote.xml
 
     ${LFS_CI_ROOT}/bin/getReleaseNoteContent -t ${LFS_PROD_RELEASE_CURRENT_TAG_NAME} \
@@ -318,6 +320,10 @@ _createLfsRelReleaseNoteXml() {
 
     info "creating release note xml for ${LFS_PROD_RELEASE_CURRENT_TAG_NAME_REL}"
     cd ${workspace}
+
+    # no changes here, just a dummy changelog is required
+    echo '<log />' > changelog.xml 
+
     ${LFS_CI_ROOT}/bin/getReleaseNoteXML -t ${LFS_PROD_RELEASE_CURRENT_TAG_NAME_REL}  \
                                          -o ${LFS_PROD_RELEASE_PREVIOUS_TAG_NAME_REL} \
                                          -r http://foobar/asdf/ \
