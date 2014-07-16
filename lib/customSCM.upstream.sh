@@ -68,7 +68,7 @@ actionCheckout() {
     local upstreamProjectName=${UPSTREAM_PROJECT:-${TESTED_BUILD_JOBNAME}}
     local upstreamBuildNumber=${UPSTREAM_BUILD:-${TESTED_BUILD_NUMBER}}
 
-    if [[ -z ${upstreamProjectName} -o -z ${upstreamBuildNumber} ]] ; then
+    if [[ -z ${upstreamProjectName} || -z ${upstreamBuildNumber} ]] ; then
         error "didn't find the upstream build"
         exit 1
     fi
