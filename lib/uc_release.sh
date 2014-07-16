@@ -81,7 +81,9 @@ ci_job_release() {
     export LFS_PROD_RELEASE_CURRENT_TAG_NAME=$(cat ${workspace}/bld/bld-lfs-release/label)
     export LFS_PROD_RELEASE_PREVIOUS_TAG_NAME=$(cat ${workspace}/bld/bld-lfs-release/oldLabel)
     export LFS_PROD_RELEASE_CURRENT_TAG_NAME_REL=${LFS_PROD_RELEASE_CURRENT_TAG_NAME//PS_LFS_OS_/PS_LFS_REL_}
-    info "LFS release ${LFS_PROD_RELEASE_CURRENT_TAG_NAME} is based on ${LFS_PROD_RELEASE_PREVIOUS_TAG_NAME}"
+    export LFS_PROD_RELEASE_PREVIOUS_TAG_NAME_REL=${LFS_PROD_RELEASE_PREVIOUS_TAG_NAME//PS_LFS_OS_/PS_LFS_REL_}
+    info "LFS os release ${LFS_PROD_RELEASE_CURRENT_TAG_NAME} is based on ${LFS_PROD_RELEASE_PREVIOUS_TAG_NAME}"
+    info "LFS release ${LFS_PROD_RELEASE_CURRENT_TAG_NAME_REL} is based on ${LFS_PROD_RELEASE_PREVIOUS_TAG_NAME_REL}"
 
     info "task is ${subJob}"
     case ${subJob} in
@@ -181,10 +183,6 @@ createReleaseNoteTextFile() {
     local testedBuildNumber=$2
     local buildJobName=$3
     local buildBuildNumber=$4
-
-    # get the change log file from master
-    local buildDirectory=$(getBuildDirectoryOnMaster ${JOB_NAME} ${BUILD_NUMBER})
-    local serverName=$(getConfig jenkinsMasterServerHostName)
     
     # TODO: demx2fk3 2014-06-25 remove the export block and do it in a different way
     export productName=$(getProductNameFromJobName)
@@ -203,25 +201,46 @@ createReleaseNoteTextFile() {
     mustHaveValue "${releaseLabel}" "next release label name"
 
     local oldReleaseLabel=${LFS_PROD_RELEASE_PREVIOUS_TAG_NAME}
+    mustHaveValue ${oldReleaseLabel}
 
-    export LFS_CI_PS_LFS_OS_TAG_NAME=${LFS_CI_CURRENT_LABEL_NAME}
-    export LFS_CI_PS_LFS_REL_TAG_NAME=${LFS_CI_CURRENT_LABEL_NAME//PS_LFS_OS_/PS_LFS_REL_}
+    info "new release label is ${releaseLabel} based on ${oldReleaseLabel}"
+    _createLfsOsReleaseNote ${buildJobName} ${buildBuildNumber}
+    _uploadToWorkflowTool ${workspace}/os/releasenote.xml
 
-    info "new release label is ${releaseLabel}"
+    _createLfsRelReleaseNoteXml 
+    _uploadToWorkflowTool ${workspace}/releasenote.xml
 
-    execute rsync -ae ssh ${serverName}:${buildDirectory}/changelog.xml ${workspace}
+    info "send release note"
+    if [[ ${canSendReleaseNote} ]] ; then
+        execute ${LFS_CI_ROOT}/bin/sendReleaseNote  -r ${workspace}/os/releasenote.txt \
+                                                    -t ${releaseLabel}                 \
+                                                    -f ${LFS_CI_ROOT}/etc/file.cfg
+    else
+        info "sending the release note is disabled in config"
+    fi
 
-    copyArtifactsToWorkspace "${buildJobName}" "${buildBuildNumber}" "externalComponents fsmpsl psl fsmci"
+    execute mv ${workspace}/os/releasenote.txt ${workspace}/bld/bld-lfs-release/lfs_os_releasenote.txt
+    execute mv ${workspace}/os/releasenote.xml ${workspace}/bld/bld-lfs-release/lfs_os_releasenote.xml
+    execute mv ${workspace}/os/changelog.xml   ${workspace}/bld/bld-lfs-release/lfs_os_changelog.xml
+    execute mv ${workspace}/releasenote.xml    ${workspace}/bld/bld-lfs-release/lfs_rel_releasenote.xml
 
-    # convert the changelog xml to a release note
-    cd ${workspace}
-    execute rm -f releasenote.txt releasenote.xml
+    info "release is done."
+    return
+}
 
-    ${LFS_CI_ROOT}/bin/getReleaseNoteContent -t ${releaseLabel} -f ${LFS_CI_ROOT}/etc/file.cfg > releasenote.txt
-    mustBeSuccessfull "$?" "getReleaseNoteContent"
+_uploadToWorkflowTool() {
+    # upload to workflow tool
+    info "TODO: upload to wft"
+    local wftCreateRelease=$(getConfig WORKFLOWTOOL_url_create_release)
+    local wftUploadAttachment=$(getConfig WORKFLOWTOOL_url_upload_attachment)
 
-    ${LFS_CI_ROOT}/bin/getReleaseNoteXML  -t ${releaseLabel} -f ${LFS_CI_ROOT}/etc/file.cfg > releasenote.xml
-    mustBeSuccessfull "$?" "getReleaseNoteXML"
+    info "not implemented"
+
+    return
+}
+
+_validateReleaseNoteXml() {
+    local releaseNoteXml=$1
 
     # check with wft
     info "validating release note"
@@ -235,34 +254,80 @@ createReleaseNoteTextFile() {
         execute curl -k ${wftReleaseNoteXsd} --output releasenote.xsd
         mustExistFile releasenote.xsd
 
-        execute xmllint --schema releasenote.xsd releasenote.xml
+        execute xmllint --schema releasenote.xsd ${releaseNoteXml}
     fi
 
     # remove check with wft next
     execute curl -k ${wftReleaseNoteValidate} \
                  -F access_key=${wftApiKey}   \
-                 -F file=@releasenote.xml                      
+                 -F file=@${releaseNoteXml}
 
-    # upload to workflow tool
-    info "TODO: upload to wft"
-    local wftCreateRelease=$(getConfig WORKFLOWTOOL_url_create_release)
-    local wftUploadAttachment=$(getConfig WORKFLOWTOOL_url_upload_attachment)
-
-    info "send release note"
-    if [[ ${canSendReleaseNote} ]] ; then
-        execute ${LFS_CI_ROOT}/bin/sendReleaseNote  -r releasenote.txt             \
-                                                    -t ${releaseLabel}             \
-                                                    -f ${LFS_CI_ROOT}/etc/file.cfg
-    else
-        info "sending the release note is disabled in config"
-    fi
-
-    execute mv releasenote.txt ${workspace}/bld/bld-lfs-release/
-    execute mv releasenote.xml ${workspace}/bld/bld-lfs-release/
-
-    info "release is done."
     return
 }
+
+_createLfsOsReleaseNote() {
+    local buildJobName=$1
+    local buildBuildNumber=$2
+
+    requiredParameters LFS_PROD_RELEASE_CURRENT_TAG_NAME LFS_PROD_RELEASE_PREVIOUS_TAG_NAME LFS_CI_ROOT \
+                       JOB_NAME BUILD_NUMBER
+
+    local workspace=$(getWorkspaceName)
+    mustHaveWorkspaceName 
+
+    # get the change log file from master
+    local buildDirectory=$(getBuildDirectoryOnMaster ${JOB_NAME} ${BUILD_NUMBER})
+    local serverName=$(getConfig jenkinsMasterServerHostName)
+
+    info "creating release note for ${LFS_PROD_RELEASE_CURRENT_TAG_NAME}"
+    
+    execute mkdir -p ${workspace}/os
+    mustExistDirectory ${workspace}/os
+    execute rsync -ae ssh ${serverName}:${buildDirectory}/changelog.xml ${workspace}/os/
+    mustExistFile ${workspace}/os/changelog.xml
+
+    copyArtifactsToWorkspace "${buildJobName}" "${buildBuildNumber}" "externalComponents fsmpsl psl fsmci"
+
+    # convert the changelog xml to a release note
+    cd ${workspace}/os/
+    execute rm -f releasenote.txt releasenote.xml
+
+    ${LFS_CI_ROOT}/bin/getReleaseNoteContent -t ${LFS_PROD_RELEASE_CURRENT_TAG_NAME} \
+                                             -f ${LFS_CI_ROOT}/etc/file.cfg > releasenote.txt
+    mustBeSuccessfull "$?" "getReleaseNoteContent"
+    rawDebug ${workspace}/os/releasenote.txt
+
+    ${LFS_CI_ROOT}/bin/getReleaseNoteXML -t ${LFS_PROD_RELEASE_CURRENT_TAG_NAME}  \
+                                         -o ${LFS_PROD_RELEASE_PREVIOUS_TAG_NAME} \
+                                         -r http://foobar/asdf/ \
+                                         -f ${LFS_CI_ROOT}/etc/file.cfg > releasenote.xml
+    mustBeSuccessfull "$?" "getReleaseNoteXML"
+    rawDebug ${workspace}/os/releasenote.xml
+
+    _validateReleaseNoteXml ${workspace}/os/releasenote.xml
+
+    return
+}
+
+_createLfsRelReleaseNoteXml() {
+    local workspace=$(getWorkspaceName)
+    mustHaveWorkspaceName
+
+    requiredParameters LFS_PROD_RELEASE_PREVIOUS_TAG_NAME_REL LFS_PROD_RELEASE_CURRENT_TAG_NAME_REL \
+                       LFS_CI_ROOT
+
+    info "creating release note xml for ${LFS_PROD_RELEASE_CURRENT_TAG_NAME_REL}"
+    cd ${workspace}
+    ${LFS_CI_ROOT}/bin/getReleaseNoteXML -t ${LFS_PROD_RELEASE_CURRENT_TAG_NAME_REL}  \
+                                         -o ${LFS_PROD_RELEASE_PREVIOUS_TAG_NAME_REL} \
+                                         -r http://foobar/asdf/ \
+                                         -f ${LFS_CI_ROOT}/etc/file.cfg > releasenote.xml
+    mustBeSuccessfull "$?" "getReleaseNoteXML"
+    rawDebug ${workspace}/releasenote.xml
+
+    return
+}
+
 
 ## @fn      createTagOnSourceRepository( $jobName, $buildNumber )
 #  @brief   create a tag(s) on source repository 
@@ -275,33 +340,14 @@ createTagOnSourceRepository() {
     local jobName=$1
     local buildNumber=$2
 
+    requiredParameters LFS_PROD_RELEASE_CURRENT_TAG_NAME
+
     local workspace=$(getWorkspaceName)
     local requiredArtifacts=$(getConfig LFS_CI_UC_release_required_artifacts)
-    mustHaveWorkspaceWithArtefactsFromUpstreamProjects "${jobName}" "${buildNumber}" "${requiredArtifacts}"
+    mustHaveWorkspaceWithArtefactsFromUpstreamProjects "${jobName}" "${buildNumber}" "externalComponents"
 
-    # get os label
     local osLabelName=${LFS_PROD_RELEASE_CURRENT_TAG_NAME}
-    mustHaveValue "${osLabelName}" "no os label name"
 
-    # get artifacts
-    local revisionFile=${workspace}/bld/bld-externalComponents-summary/usedRevisions.txt
-    cat ${workspace}/bld/bld-externalComponents-*/usedRevisions.txt | sort -u > ${revisionFile}
-    rawDebug ${revisionFile}
-
-    # TODO: demx2fk3 2014-06-06 CLEAN UP!!!!
-    #
-    #       _                                _ 
-    #   ___| | ___  __ _ _ __    _   _ _ __ | |
-    #  / __| |/ _ \/ _` | '_ \  | | | | '_ \| |
-    # | (__| |  __/ (_| | | | | | |_| | |_) |_|
-    #  \___|_|\___|\__,_|_| |_|  \__,_| .__/(_)
-    #                                 |_|      
-
-    # TODO: demx2fk3 2014-06-06 add check: ensure, that locataions are unque
-    mustExistFile ${revisionFile}
-    rawDebug ${revisionFile}
-
-    # check for branch
     export tagName=${osLabelName}
     local svnUrl=$(getConfig LFS_PROD_svn_delivery_os_repos_url)
     local svnUrlOs=${svnUrl}/os
@@ -315,10 +361,46 @@ createTagOnSourceRepository() {
     mustHaveValue "${svnUrl}" "svnUrl"
     mustHaveValue "${svnUrlOs}" "svnUrlOs"
 
+    #                          _                                
+    #                      ___| | ___  __ _ _ __    _   _ _ __  
+    #                     / __| |/ _ \/ _` | '_ \  | | | | '_ \ 
+    #                    | (__| |  __/ (_| | | | | | |_| | |_) |
+    #                     \___|_|\___|\__,_|_| |_|  \__,_| .__/ 
+    #                                                    |_|    
+    # TODO cleanup this part of the code
+    # * it's do long
+    # * it is not clean
+
     info "using lfs os ${osLabelName}"
     info "using repos ${svnUrlOs}/branches/${branch}"
     info "using repos for new tag ${svnUrlOs}/tags/${osLabelName}"
     info "using repos for package ${svnUrl}/subsystems/"
+
+    # get os label
+    local osLabelName=${LFS_PROD_RELEASE_CURRENT_TAG_NAME}
+    mustHaveValue "${osLabelName}" "no os label name"
+
+    execute mkdir -p ${workspace}/rev/
+
+    for revisionFile in ${workspace}/bld/bld-externalComponents-*/usedRevisions.txt ; do
+        [[ -e ${revisionFile} ]] || continue
+
+        rawDebug "${revisionFile}"
+
+        local dirName=$(basename $(dirname ${revisionFile}))
+        export cfg=$(cut -d- -f3 <<< ${dirName})
+        local tagDirectory=$(getConfig LFS_PROD_uc_release_source_tag_directory)
+        info "using tag dir ${tagDirectory} for cfg ${cfg}"
+        unset cfg ; export cfg
+
+
+        sort -u ${revisionFile} ${workspace}/rev/${tagDirectory} > ${workspace}/rev/${tagDirectory}
+        mustBeSuccessfull "$?" "sort -u"
+
+        rawDebug ${workspace}/rev/${tagDirectory}
+    done
+
+    # check for branch
 
     if existsInSubversion ${svnUrlOs}/tags ${osLabelName} ; then
         error "tag ${osLabelName} already exists"
@@ -330,48 +412,51 @@ createTagOnSourceRepository() {
         svnRemove -m removing_branch_for_production ${svnUrlOs}/branches/${branch} 
     fi
 
-    info "creating branch ${branch}"
-    echo "create a new pre release branch ${branch}" > ${logMessage}
-    svnMkdir -F ${logMessage} ${svnUrlOs}/branches/${branch}
+    mustExistBranchInSubversion ${svnUrlOs}/branches ${branch}
 
-    while read src url rev ; do
-        mustHaveValue "${url}" "svn url"
-        mustHaveValue "${rev}" "svn revision"
-        mustHaveValue "${src}" "src"
+    for revisionFile in ${workspace}/rev/* ; do
+        [[ -e ${revisionFile} ]] || continue
 
-        info "src ${src}"
-        info "rev ${rev}"
-        info "url ${url}"
+        export target=$(basename ${revisionFile})
+        local tagPrefix=$(getConfig LFS_PROD_uc_release_source_tag_prefix)
 
-        local dirname=
+        mustExistBranchInSubversion ${svnUrlOs}/branches/${branch} ${target}
 
-        local normalizedUrl=$(normalizeSvnUrl ${url})
+        while read src url rev ; do
+            mustHaveValue "${url}" "svn url"
+            mustHaveValue "${rev}" "svn revision"
+            mustHaveValue "${src}" "src"
 
-        case ${src} in 
-            src-*)
-                svnCopy -m tag_for_package_src_${src} ${svnUrlOs}/branches/${branch} \
-                    ${svnUrl}/subsystems/${src}/${osLabelName}
-            ;;
-            *)
-                dirname=$(dirname ${src})
-                echo "create a new src directory ${dirname} for ${src}" > ${logMessage}
-                if ! existsInSubversion ${svnUrlOs}/branches/${branch}/ ${dirname} ; then
-                    svnMkdir -F ${logMessage} ${svnUrlOs}/branches/${branch}/${dirname}
-                fi
-            ;;
-        esac
+            info "src ${src}"
+            info "rev ${rev}"
+            info "url ${url}"
 
-        info "copy ${src} to ${branch}"
-        if [[ ${canCreateSourceTag} ]] ; then
+            local dirname=
+            local normalizedUrl=$(normalizeSvnUrl ${url})
+
+            case ${src} in 
+                src-*) : ;;
+                *) dirname=$(dirname ${src})
+                   mustExistBranchInSubversion ${svnUrlOs}/branches/${branch}/${target} ${dirname}
+                ;;
+            esac
+
+            info "copy ${src} to ${branch}/${target}/${dirname}"
             svnCopy -r ${rev} -m branching_src_${src}_to_${branch} \
                 ${normalizedUrl}                                   \
-                ${svnUrlOs}/branches/${branch}/${dirname}
-        else
-            info "creating a source tag is disabled in config"
-        fi
+                ${svnUrlOs}/branches/${branch}/${target}/${dirname}
 
+            case ${src} in
+                src-*)
+                    svnCopy -m tag_for_package_src_${src} ${svnUrlOs}/branches/${branch} \
+                        ${svnUrl}/subsystems/${src}/${tagPrefix}${osLabelName}
+                    trace "CLEANUP svn rm -m cleanup ${svnUrl}/subsystems/${src}/${tagPrefix}${osLabelName}"
+                ;;
+            esac
 
-    done < ${revisionFile}
+        done < ${revisionFile}
+    done
+
 
     # check for the branch
     info "svn repos url is ${svnUrl}/branches/${branch}"
@@ -492,13 +577,14 @@ createReleaseTag() {
 mustHaveWorkspaceWithArtefactsFromUpstreamProjects() {
     local jobName=$1
     local buildNumber=$2
+    local allowedComponents=$3
 
     local workspace=$(getWorkspaceName)
     mustHaveWorkspaceName
     mustHaveWritableWorkspace
     info "workspace is ${workspace}"
 
-    copyArtifactsToWorkspace "${jobName}" "${buildNumber}"
+    copyArtifactsToWorkspace "${jobName}" "${buildNumber}" "${allowedComponents}"
 
     return
 }

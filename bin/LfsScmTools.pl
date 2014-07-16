@@ -1482,9 +1482,10 @@ sub prepare {
 
     # t: := tag name
     # r: := release note template file
-    getopts( "r:t:f:", \my %opts );
+    getopts( "r:t:f:o:", \my %opts );
     $self->{tagName}         = $opts{t} || die "no t";
-    $self->{repos}           = $opts{t} || die "no t";
+    $self->{basedOn}         = $opts{o} || die "no o";
+    $self->{repos}           = $opts{r} || die "no r";
     $self->{configFileName}  = $opts{f} || die "no f";
 
     my $config = Singelton::config();
@@ -1547,7 +1548,7 @@ sub prepare {
     # __TIME__
     $self->{data}{TIME} = strftime( "%H:%M:%SZ", gmtime());
     # __BASED_ON__
-    $self->{data}{BASED_ON} = "TODO";
+    $self->{data}{BASED_ON} = $self->{basedOn};
     # __BRANCH__
     $self->{data}{BRANCH} = "Branch";
     # __SVN_REPOS_URL__
@@ -1673,6 +1674,7 @@ sub prepare {
     getopts( "r:t:f:", \my %opts );
     $self->{releaseNoteFile} = $opts{r} || die "no r";
     $self->{tagName}         = $opts{t} || die "no t";
+#     $self->{oldTagName}      = $opts{o} || die "no o";
     $self->{configFileName}  = $opts{f} || die "no f";
 
     my $config = Singelton::config();
@@ -1704,7 +1706,6 @@ sub prepare {
         or die sprintf( "can not open release note content file %s", $self->{releaseNoteFile} );
     $self->{data}{RELEASE_NOTE_CONTENT} = join( "", <RELEASENOTE> );
     close RELEASENOTE;
-
 
     $self->{data}{DELIVERY_REPOS}       = $config->getConfig( name => "LFS_PROD_svn_delivery_release_repos_url" );
     $self->{data}{SOURCE_REPOS}         = $config->getConfig( name => "LFS_PROD_svn_delivery_os_repos_url" );

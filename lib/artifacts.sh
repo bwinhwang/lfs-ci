@@ -135,6 +135,8 @@ copyArtifactsToWorkspace() {
 
     requiredParameters LFS_CI_ROOT
 
+    info "copy artifacts to workspace for ${jobName} / ${buildNumber} with filter ${allowedComponentsFilter}"
+
     local file=""
     local downStreamprojectsFile=$(createTempFile)
     local serverPath=$(getConfig jenkinsMasterServerPath)

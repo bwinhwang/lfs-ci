@@ -62,7 +62,7 @@ synchronizeShare() {
     if [[ -z ${findDepth} ]] ; then
         findDepth=1
     fi
-    ssh ${remoteServer} "find ${remotePath} -mindepth ${findDepth} -maxdepth ${findDepth} -exec chmod u+w {} \; " 
+    ssh ${remoteServer} "find ${remotePath} -maxdepth $(( findDepth - 1 )) -exec chmod -v u+w {} \; " 
     mustBeSuccessfull $? "ssh chmod command"
 
     info "synchronize ${localPath} to ${remoteServer}:${remotePath}"
