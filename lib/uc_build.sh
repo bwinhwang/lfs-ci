@@ -78,7 +78,8 @@ ci_job_build_version() {
 
     debug "writing new label file in workspace ${workspace}"
     execute mkdir -p ${workspace}/bld/bld-fsmci-summary
-    echo ${label}  > ${workspace}/bld/bld-fsmci-summary/label
+    echo ${label}    > ${workspace}/bld/bld-fsmci-summary/label
+    echo ${oldLabel} > ${workspace}/bld/bld-fsmci-summary/oldLabel
 
     debug "writing new label file in ${jobDirectory}/label"
     executeOnMaster "echo ${label} > ${jobDirectory}/label"

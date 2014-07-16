@@ -83,7 +83,11 @@ copyReleaseCandidateToShare() {
 
     mustHaveNextCiLabelName
     local label=$(getNextCiLabelName)
-    mustHaveValue "${label}"
+    mustHaveValue "${label}" "next label name"
+
+    mustHavePreviousLabelName
+    local oldLabel=${LFS_CI_PREV_CI_LABEL_NAME}
+    mustHaveValue "${oldLabel}" "old label name"
 
     local productName=$(getProductNameFromJobName)
     mustHaveValue "${productName}" "product name"
@@ -96,8 +100,18 @@ copyReleaseCandidateToShare() {
     mustExistDirectory ${localDirectory}
 
     info "copy build results from ${localDirectory} to ${remoteDirectory}/os/"
+    local hardlink=
+    local basedOn=$(getConfig LFS_CI_UC_package_copy_to_share_real_location)/${oldLabel}/os/
+
+    if [[ -d ${basedOn} ]] ; then
+        info "based on ${basedOn}"
+        hardlink="--link-dest=${basedOn}"
+    fi
+
+    local rsyncOpts=$(getConfig RSYNC_options)
+
     execute mkdir -p ${remoteDirectory}/os/
-    execute rsync -av --delete ${hardlink} ${localDirectory}/. ${remoteDirectory}/os/
+    execute rsync -avH --delete ${hardlink} ${localDirectory}/. ${remoteDirectory}/os/
     execute cd ${remoteDirectory}
 
     # PS SCM - which are responsible for syncing this share to the world wants the group writable

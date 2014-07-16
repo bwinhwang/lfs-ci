@@ -90,7 +90,7 @@ actionCheckout() {
     local fileListString=
     for path in $(diff ${oldFileListing} ${newFileListing} | grep '>' | cut -d" " -f 2 | grep -v "^${directoryNameToSynchronize}$")
     do
-        printf '<path kind="" action="M">%s</path>' ${path} >> ${logEntries}
+        printf "<path kind=\"\" action=\"M\">%s</path>\n" ${path} >> ${logEntries}
         fileListString="${fileListString} ${path}"
     done
 

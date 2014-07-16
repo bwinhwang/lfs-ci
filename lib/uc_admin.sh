@@ -140,7 +140,7 @@ backupJenkinsMasterServerInstallation() {
     mustHaveValue ${serverPath}
 
     execute mkdir -p ${backupPath}
-    execute rm -rf ${backupPath}/backup.11
+    execute rm -rf ${backupPath}/backup.101
 
     for i in $(seq 0 100 | tac) ; do
         [[ -d ${backupPath}/backup.${i} ]] || continue

@@ -303,6 +303,31 @@ getNextCiLabelName() {
     getNextReleaseLabel
 }
 
+## @fn      mustHavePreviousLabelName()
+#  @brief   ensure, that there is a release label name
+#  @details to get the next release label name, it checks the svn repos
+#  @param   <none>
+#  @return  <none>
+mustHavePreviousLabelName() {
+
+    local workspace=$(getWorkspaceName)
+    mustHaveWorkspaceName
+
+    if [[ ! -e ${workspace}/bld/bld-fsmci-summary/oldLabel ]] ; then
+        error "label artifacts file does not exist"
+        exit 1
+    fi            
+
+    if [[ -z "${LFS_CI_PREV_CI_LABEL_NAME}" ]] ; then
+        local label=$(cat ${workspace}/bld/bld-fsmci-summary/oldLabel 2>/dev/null)
+        mustHaveValue "${label}" "old ci label name"
+    fi
+
+    export LFS_CI_PREV_CI_LABEL_NAME=${label}
+
+    return
+}
+
 ## @fn      mustHaveNextLabelName()
 #  @brief   ensure, that there is a release label name
 #  @details to get the next release label name, it checks the svn repos

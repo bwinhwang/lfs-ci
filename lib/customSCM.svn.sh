@@ -44,6 +44,13 @@ actionCompare() {
     local newRevisionsFile=$(createTempFile)
     _createRevisionsTxtFile ${newRevisionsFile}
 
+    debug "old revision state file"
+    rawDebug ${oldRevisionsFile}
+    debug "new revision state file"
+    rawDebug ${newRevisionsFile}
+
+    execute diff -rub ${oldRevisionsFile} ${newRevisionsFile}
+
     # now we have both files, we can compare them
     if cmp --silent ${oldRevisionsFile} ${newRevisionsFile} ; then
         info "no changes in revision files, no build required"
