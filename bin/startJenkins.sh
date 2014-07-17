@@ -17,6 +17,7 @@ main() {
     local jenkinsMasterServerHttpsPort=$(getConfig jenkinsMasterServerHttpsPort)
 
     export JENKINS_HOME JENKINS_ROOT LFS_CI_ROOT
+    export TZ=UTC+0
 
     unset CI_LOGGING_LOGFILENAME
     unset CI_LOGGING_DURATION_START_DATE

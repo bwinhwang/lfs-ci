@@ -106,7 +106,6 @@ mustHaveWritableWorkspace() {
 #  @param   <none>
 #  @return  <none>
 mustHaveCleanWorkspace() {
-
     local workspace=$(getWorkspaceName) 
     mustHaveWorkspaceName
 
