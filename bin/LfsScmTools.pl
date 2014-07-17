@@ -1351,6 +1351,9 @@ sub prepare {
         $msg =~ s/^[\%\#]TBC  *[\%\#](\w+)=(\S+)\s*(.*)/$1 $2 $3 (to be continued)/;
         $msg =~ s/^[\%\#]TPC  *[\%\#](\w+)=(\S+)\s*(.*)/$1 $2 $3 (work in progress)/;
         $msg =~ s/^[\%\#]REM /Remark: /;
+#        $msg =~ s/\s*commit [0-9a-f]+\s*//g;
+#        $msg =~ s/\s*Author: .*[@].+//g;
+#        $msg =~ s/\s*Date: .* [0-9]+:[0-9]+:[0-9]+ .*//g;
         $msg =~ s/\s+/ /g;
         $msg =~ s/^\s+//;
         $msg =~ s/\s+$//;

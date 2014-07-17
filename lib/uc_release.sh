@@ -294,6 +294,8 @@ _createLfsOsReleaseNote() {
     execute ln -sf ../bld .
     execute rm -f releasenote.txt releasenote.xml
 
+    export tagName=LFS_PROD_RELEASE_CURRENT_TAG_NAME
+
     ${LFS_CI_ROOT}/bin/getReleaseNoteContent -t ${LFS_PROD_RELEASE_CURRENT_TAG_NAME} \
                                              -f ${LFS_CI_ROOT}/etc/file.cfg > releasenote.txt
     mustBeSuccessfull "$?" "getReleaseNoteContent"
@@ -323,6 +325,8 @@ _createLfsRelReleaseNoteXml() {
 
     # no changes here, just a dummy changelog is required
     echo '<log />' > changelog.xml 
+
+    export tagName=LFS_PROD_RELEASE_CURRENT_TAG_NAME
 
     ${LFS_CI_ROOT}/bin/getReleaseNoteXML -t ${LFS_PROD_RELEASE_CURRENT_TAG_NAME_REL}  \
                                          -o ${LFS_PROD_RELEASE_PREVIOUS_TAG_NAME_REL} \
@@ -559,14 +563,16 @@ createReleaseTag() {
 
     cd ${workspace}/svn
     svnPropSet svn:externals -F ${svnExternalsFile} .
-    svnCommit -m "updating svn:externals for ${osReleaseLabelName}" .
+    local logMessage=$(createTempFile)
+    echo "updating svn:externals for ${osReleaseLabelName}" > ${logMessage}
+    svnCommit -F ${logMessage} .
 
     # make a tag
     info "create tag ${osReleaseLabelName}"
     if [[ ${canCreateReleaseTag} ]] ; then
         local logMessage=$(createTempFile)
         echo "create new tag" > ${logMessage}
-        svnCopy -F ${svnUrl}/branches/${branch} ${svnUrl}/tags/${osReleaseLabelName}
+        svnCopy -F ${logMessage} ${svnUrl}/branches/${branch} ${svnUrl}/tags/${osReleaseLabelName}
     else
         info "creating the release tag is disabled in config"
     fi
