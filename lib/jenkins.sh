@@ -166,6 +166,14 @@ createJenkinsJob() {
     return
 }
 
+updateJenkinsJob() {
+    local jobName=$1
+    local xmlConfigFile=$2
+
+    executeJenkinsCli update-job "${jobName}" < ${xmlConfigFile}
+    return
+}
+
 ## @fn      deleteJenkinsJob( $jobName )
 #  @brief   delete a jenkins job with the specified name
 #  @param   {jobName}     name of the jenkins project
