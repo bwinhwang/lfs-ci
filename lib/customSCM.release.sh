@@ -95,8 +95,8 @@ actionCalculate() {
 
     # upstream handling if missing
     debug "storing upstream info in .properties"
-    echo UPSTREAM_PROJECT=${upstreamProjectName} > ${WORKSPACE}/.properties
-    echo UPSTREAM_BUILD=${upstreamBuildNumber}   >> ${WORKSPACE}/.properties
+    echo TESTED_BUILD_JOBNAME=${upstreamProjectName} > ${WORKSPACE}/.properties
+    echo TESTED_BUILD_NUMBER=${upstreamBuildNumber}   >> ${WORKSPACE}/.properties
 
     return 
 }
@@ -141,24 +141,26 @@ _createChangelog() {
 
 _getUpstream() {
 
-    requiredParameters JOB_NAME BUILD_CAUSE_MANUALTRIGGER LFS_CI_ROOT
+    requiredParameters JOB_NAME LFS_CI_ROOT
 
-    if [[ "${BUILD_CAUSE_MANUALTRIGGER}" == true ]] ; then
+    upstreamProjectName=${UPSTREAM_PROJECT}
+    upstreamBuildNumber=${UPSTREAM_BUILD}
+
+    if [[ -z ${UPSTREAM_PROJECT} || -z ${UPSTREAM_BUILD} ]] ; then
+
         debug "build was triggered manually, get last promoted upstream"
         upstreamProjectName=$(sed 's/\(.*\)_Prod_-_\(.*\)_-_Releasing_-_summary/\1_CI_-_\2_-_Test/' <<< ${JOB_NAME} )
-        # TODO: demx2fk3 2014-07-17 get build number of last promoted job
+
         copyFileFromBuildDirectoryToWorkspace "${upstreamProjectName}/promotions/Test_ok" "lastStableBuild" build.xml
-        mustExistFile build.xml
+        mustExistFile ${WORKSPACE}/build.xml
 
         local xml='hudson.plugins.promoted__builds.Promotion/actions/hudson.plugins.promoted__builds.PromotionTargetAction/number/node()' 
-        upstreamBuildNumber=$(${LFS_CI_ROOT}/bin/xpath -q -e ${xml} build.xml)
+        upstreamBuildNumber=$(${LFS_CI_ROOT}/bin/xpath -q -e ${xml} ${WORKSPACE}/build.xml)
 
-        execute rm -rf build.xml
+        execute rm -rf ${WORKSPACE}/build.xml
         
     else
         debug "build was triggered by upstream"
-
-        requiredParameters UPSTREAM_PROJECT UPSTREAM_BUILD
 
         upstreamProjectName=${UPSTREAM_PROJECT}
         upstreamBuildNumber=${UPSTREAM_BUILD}
