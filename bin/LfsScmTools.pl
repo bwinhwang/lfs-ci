@@ -1596,7 +1596,7 @@ sub prepare {
         open FILE, $file or die "can not open file $file";
         while( my $line = <FILE> ) {
             chomp( $line );
-            if( $line =~ m/^(\w+).*\s*=\s*(.*)$/ ) {
+            if( $line =~ m/^([\w-]+).*\s*=\s*(.*)$/ ) {
                 push @{ $self->{baselines} }, { baseline => uc $1,
                                                 tag      => $2 };
             }
@@ -1605,6 +1605,10 @@ sub prepare {
                                                 tag      => $1 };
             }
         }
+    }
+    foreach my $hash ( @{ $self->{baselines} } ) {
+           print "ok"; 
+
     }
 
     $self->{data}{BASELINES} = join( "\n    ", 

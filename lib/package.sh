@@ -111,7 +111,7 @@ copyReleaseCandidateToShare() {
     local rsyncOpts=$(getConfig RSYNC_options)
 
     execute mkdir -p ${remoteDirectory}/os/
-    execute rsync -avH --delete ${hardlink} ${localDirectory}/. ${remoteDirectory}/os/
+    execute rsync -av --delete ${hardlink} ${localDirectory}/. ${remoteDirectory}/os/
     execute cd ${remoteDirectory}
 
     # PS SCM - which are responsible for syncing this share to the world wants the group writable

@@ -26,11 +26,9 @@ ci_job_test() {
     mustHaveWorkspaceName
     mustHaveWritableWorkspace
 
-    local upstreamProject=$(sed "s/Test.*/Package_-_package/" <<< ${JOB_NAME})
-    local upstreamBuildNumber=$(readlink ${serverPath}/jobs/${upstreamProject}/builds/lastSuccessfulBuild)
+    local upstreamProject=${UPSTREAM_PROJECT}
+    local upstreamBuildNumber=${UPSTREAM_BUILD}
     info "upstreamProject ${upstreamProject} ${upstreamBuildNumber}"
-    local buildDirectory=$(getBuildDirectoryOnMaster "${upstreamProject}" lastSuccessfulBuild)
-    mustExistDirectory ${buildDirectory}
 
     local ciBuildShare=$(getConfig LFS_CI_UC_package_internal_link)
     local workspace=${ciBuildShare}/build_${upstreamBuildNumber}
@@ -45,11 +43,6 @@ ci_job_test() {
     echo "LABEL=${labelName}"                  >> ${WORKSPACE}/properties
     echo "DELIVERY_DIRECTORY=${realDirectory}" >> ${WORKSPACE}/properties
     rawDebug ${WORKSPACE}/properties
-
-    # echo "FUPPER_IMAGE=${workspace}/os/platforms/fsm3_octeon2/factory/fsm3_octeon2-fupper_images.sh" > ${WORKSPACE}/properties
-    # echo "FMON_TGZ=${workspace}/os/platforms/fsm3_octeon2/apps/fmon.tgz" >> ${WORKSPACE}/properties
-    # echo "EXECUTE_MANUAL=true" >> ${WORKSPACE}/properties
-    # echo "LABEL=<a href=https://lfs-ci.emea.nsn-net.net/job/${JOB_NAME}/${BUILD_NUMBER}/>triggered by ${JOB_NAME}/${BUILD_NUMBER}</a>" >> ${WORKSPACE}/properties
 
     setBuildDescription "${JOB_NAME}" "${BUILD_NUMBER}" "${labelName}"
     return
