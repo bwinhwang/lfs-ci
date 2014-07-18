@@ -43,6 +43,7 @@ synchronizeShare() {
     local localPath=$(getConfig    ADMIN_sync_share_local_directoryName)
     local remotePath=$(getConfig   ADMIN_sync_share_remote_directoryName)
     local remoteServer=$(getConfig ADMIN_sync_share_remote_hostname)
+    local findDepth=$(getConfig ADMIN_sync_share_check_depth)
     mustHaveValue "${remoteServer}" "remote server"
     mustHaveValue "${remotePath}"   "remote path"
     mustHaveValue "${localPath}"    "local path"
@@ -55,6 +56,14 @@ synchronizeShare() {
 
     execute ssh ${remoteServer} chmod u+w $(dirname ${remotePath})
     execute ssh ${remoteServer} mkdir -p ${remotePath}
+
+    # TODO: demx2fk3 2014-07-15 remove this later - temp solution
+    # remove this
+    if [[ -z ${findDepth} ]] ; then
+        findDepth=1
+    fi
+    ssh ${remoteServer} "find ${remotePath} -maxdepth $(( findDepth - 1 )) -exec chmod -v u+w {} \; " 
+    mustBeSuccessfull $? "ssh chmod command"
 
     info "synchronize ${localPath} to ${remoteServer}:${remotePath}"
     local pathToSyncFile=$(createTempFile)
@@ -131,7 +140,7 @@ backupJenkinsMasterServerInstallation() {
     mustHaveValue ${serverPath}
 
     execute mkdir -p ${backupPath}
-    execute rm -rf ${backupPath}/backup.11
+    execute rm -rf ${backupPath}/backup.101
 
     for i in $(seq 0 100 | tac) ; do
         [[ -d ${backupPath}/backup.${i} ]] || continue

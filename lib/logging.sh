@@ -20,8 +20,13 @@ startLogfile() {
         local userName=${USER}
 
         local counter=0
+        local prefix=
 
-        CI_LOGGING_LOGFILENAME=${LFS_CI_ROOT}/log/ci.${dateString}.${hostName}.${userName}.${jobName}.${counter}.log
+        if [[ ! -z ${LFS_CI_LOGGING_PREFIX} ]] ; then
+            prefix=${LFS_CI_LOGGING_PREFIX}.
+        fi
+
+        CI_LOGGING_LOGFILENAME=${LFS_CI_ROOT}/log/ci.${dateString}.${hostName}.${userName}.${jobName}.${prefix}${counter}.log
 
         while [[ -e ${CI_LOGGING_LOGFILENAME}    ||
                  -e ${CI_LOGGING_LOGFILENAME}.gz ]] ; do

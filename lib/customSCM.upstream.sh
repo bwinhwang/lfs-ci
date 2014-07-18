@@ -65,16 +65,25 @@ actionCheckout() {
       read oldUpstreamBuildNumber ;  } < "${OLD_REVISION_STATE_FILE}"
     debug "old upstream project data are: ${oldUpstreamProjectName} / ${oldUpstreamBuildNumber}"
 
-    build=${UPSTREAM_BUILD}
+    local upstreamProjectName=${UPSTREAM_PROJECT:-${TESTED_BUILD_JOBNAME}}
+    local upstreamBuildNumber=${UPSTREAM_BUILD:-${TESTED_BUILD_NUMBER}}
+
+    if [[ -z ${upstreamProjectName} || -z ${upstreamBuildNumber} ]] ; then
+        error "didn't find the upstream build"
+        exit 1
+    fi
+
+    build=${upstreamBuildNumber}
     while [[ ${build} -gt ${oldUpstreamBuildNumber} ]] ; do
         # TODO: demx2fk3 2014-04-07 use configuration for this
-        local buildDirectory=/var/fpwork/demx2fk3/lfs-jenkins/home/jobs/${UPSTREAM_PROJECT}/builds/${build}
+        local buildDirectory=$(getBuildDirectoryOnMaster ${upstreamProjectName} ${build})
         # we must only concatenate non-empty logs; empty logs with a
         # single "<log/>" entry will break the concatenation:
-        debug "checking ${UPSTREAM_PROJECT} / ${build}"
+        debug "checking ${upstreamProjectName} / ${build} "
 
         # TODO: demx2fk3 2014-04-07 use configuration for this
         local tmpChangeLogFile=$(createTempFile)
+        debug "changelog ${buildDirectory}/changelog.xml"
         ssh ${server} "test -f ${buildDirectory}/changelog.xml && grep -q logentry ${buildDirectory}/changelog.xml && cat ${buildDirectory}/changelog.xml" > ${tmpChangeLogFile}
         if [[ ! -s ${CHANGELOG} ]] ; then
             debug "copy ${tmpChangeLogFile} to ${CHANGELOG}"
@@ -98,7 +107,7 @@ actionCheckout() {
     fi
 
     # copy revisions.txt from upstream
-#     local buildDirectory=/var/fpwork/demx2fk3/lfs-jenkins/home/jobs/${UPSTREAM_PROJECT}/builds/${UPSTREAM_BUILD}
+#     local buildDirectory=/var/fpwork/demx2fk3/lfs-jenkins/home/jobs/${upstreamProjectName}/builds/${upstreamBuildNumber}
 #     if runOnMaster test -f ${buildDirectory}/revisionstate.xml ; then
 #         execute rsync -a ${server}:${buildDirectory}/revisionstate.xml ${WORKSPACE}/revisions.txt
 #     else
@@ -115,14 +124,22 @@ actionCheckout() {
 #  @return  <none>
 actionCalculate() {
 
+    local upstreamProjectName=${UPSTREAM_PROJECT:-${TESTED_BUILD_JOBNAME}}
+    local upstreamBuildNumber=${UPSTREAM_BUILD:-${TESTED_BUILD_NUMBER}}
+
+    if [[ -z ${upstreamProjectName} || -z ${upstreamBuildNumber} ]] ; then
+        error "didn't find the upstream build"
+        exit 1
+    fi
+
     debug "creating revision state file ${REVISION_STATE_FILE}"
-    echo ${UPSTREAM_PROJECT}   >   "${REVISION_STATE_FILE}"
-    echo ${UPSTREAM_BUILD}     >>  "${REVISION_STATE_FILE}"
+    echo ${upstreamProjectName} >  "${REVISION_STATE_FILE}"
+    echo ${upstreamBuildNumber} >> "${REVISION_STATE_FILE}"
 
     # upstream handling if missing
     debug "storing upstream info in .properties"
-    echo UPSTREAM_PROJECT=${UPSTREAM_PROJECT}   > ${WORKSPACE}/.properties
-    echo UPSTREAM_BUILD=${UPSTREAM_BUILD}      >> ${WORKSPACE}/.properties
+    echo UPSTREAM_PROJECT=${upstreamProjectName} > ${WORKSPACE}/.properties
+    echo UPSTREAM_BUILD=${upstreamBuildNumber}   >> ${WORKSPACE}/.properties
 
     return 
 }

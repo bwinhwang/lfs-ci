@@ -13,6 +13,11 @@
 
 # * checkout
 #   see web page
+
+action=$1
+
+export LFS_CI_LOGGING_PREFIX=$(basename $0).${action}
+
 export PATH=${LFS_CI_ROOT}/bin:${PATH}
 
 source ${LFS_CI_ROOT}/lib/logging.sh
@@ -27,10 +32,7 @@ initTempDirectory
 fileBaseName=$(basename $0)
 
 case "${fileBaseName}" in 
-    customSCM.sh)           source ${LFS_CI_ROOT}/lib/customSCM.upstream.sh  ;;
-#    customSCM.svn.sh)       source ${LFS_CI_ROOT}/lib/customSCM.svn.sh       ;;
-#    customSCM.upstream.sh)  source ${LFS_CI_ROOT}/lib/customSCM.upstream.sh  ;;
-#    customSCM.nativesvn.sh) source ${LFS_CI_ROOT}/lib/customSCM.nativesvn.sh ;;
+    customSCM.sh) source ${LFS_CI_ROOT}/lib/customSCM.upstream.sh  ;;
     *)
         if [[ -e ${LFS_CI_ROOT}/lib/${fileBaseName} ]] ; then
             source ${LFS_CI_ROOT}/lib/${fileBaseName}
@@ -46,7 +48,6 @@ startLogfile
 # and end it, if the script exited in some way
 exit_add stopLogfile
 
-action=$1
 trace "===== action = ${action} ====="
 
 # TODO: demx2fk3 2014-04-08 for debugging

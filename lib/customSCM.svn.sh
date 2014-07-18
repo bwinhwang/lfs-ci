@@ -44,6 +44,13 @@ actionCompare() {
     local newRevisionsFile=$(createTempFile)
     _createRevisionsTxtFile ${newRevisionsFile}
 
+    debug "old revision state file"
+    rawDebug ${oldRevisionsFile}
+    debug "new revision state file"
+    rawDebug ${newRevisionsFile}
+
+    # execute diff -rub ${oldRevisionsFile} ${newRevisionsFile}
+
     # now we have both files, we can compare them
     if cmp --silent ${oldRevisionsFile} ${newRevisionsFile} ; then
         info "no changes in revision files, no build required"
@@ -86,7 +93,7 @@ _createRevisionsTxtFile() {
     # can not use execute here, so we have to do the error handling by hande
     # do the magic for all dir
     ${LFS_CI_ROOT}/bin/getRevisionTxtFromDependencies -u ${dependenciesFileUrl} \
-                                                      -f ${dependenciesFile} > ${newRevisionsFile} 
+                                                      -f ${dependenciesFile} | sort -u > ${newRevisionsFile} 
     if [[ $? != 0 ]] ; then
         error "reported an error..."
         exit 1
@@ -139,20 +146,17 @@ actionCheckout() {
         fi
         if [[ "${oldRev}" != "${newRev}" ]] ; then
             # get the changes
-            trace "get changelog for ${subSystem}"
             local tmpChangeLogFile=$(createTempFile)
-            svn log -v --xml -r${oldRev}:${newRev} ${newUrl} > ${tmpChangeLogFile}
-            if [[ $? != 0 ]] ; then
-                error "svn log -v --xml -r${oldRev}:${newRev} ${newUrl} failed"
-                exit 1
-            fi
 
-            echo ------------------
-            cat ${tmpChangeLogFile}
-            echo ------------------
+            oldRev=$(( oldRev + 1))
+            debug "get svn changelog ${subSystem} ${oldRev}:${newRev} ${newUrl}"
+            svn log -v --xml -r${oldRev}:${newRev} ${newUrl} > ${tmpChangeLogFile}
+            mustBeSuccessfull "$?" "svn log -v --xml -r${oldRev}:${newRev} ${newUrl}"
+
+            rawDebug ${tmpChangeLogFile}
 
             # check for an empty file 
-            if [[ $(wc -l ${tmpChangeLogFile} ) -eq 3 ]] ; then
+            if [[ $(wc -l ${tmpChangeLogFile} | cut -d" " -f1 ) -eq 3 ]] ; then
                 trace "empty xml file, skipping"
                 continue
             fi

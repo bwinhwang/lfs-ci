@@ -41,7 +41,7 @@ ci_job_package() {
         local dstDirectory=${workspace}/upload/bld/${baseNameBldDir}
 
         execute mkdir -p ${dstDirectory}
-        execute rsync -av ${srcDirectory}/. ${dstDirectory}/
+        execute rsync -av --delete ${srcDirectory}/. ${dstDirectory}/
 
     done
 

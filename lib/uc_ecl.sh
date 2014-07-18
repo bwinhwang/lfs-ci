@@ -2,6 +2,7 @@
 
 [[ -z ${LFS_CI_SOURCE_artifacts}  ]] && source ${LFS_CI_ROOT}/lib/artifacts.sh
 [[ -z ${LFS_CI_SOURCE_subversion} ]] && source ${LFS_CI_ROOT}/lib/subversion.sh
+[[ -z ${LFS_CI_SOURCE_jenkins}    ]] && source ${LFS_CI_ROOT}/lib/jenkins.sh
 
 ## @fn      ci_job_ecl()
 #  @brief   update the ECL file 
@@ -46,6 +47,9 @@ ci_job_ecl() {
 
     local requiredArtifacts=$(getConfig LFS_CI_UC_update_ecl_required_artifacts)
     copyArtifactsToWorkspace "${buildJobName}" "${buildBuildNumber}" "${requiredArtifacts}"
+
+    mustHaveNextLabelName
+    setBuildDescription ${JOB_NAME} ${BUILD_NUMBER} ${LFS_CI_NEXT_CI_LABEL_NAME}
 
     info "checkout ECL from ${eclUrl}"
     svnCheckout ${eclUrl} ${workspace}/ecl_checkout
