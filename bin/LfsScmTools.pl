@@ -1610,8 +1610,15 @@ sub prepare {
         }
     }
     foreach my $hash ( @{ $self->{baselines} } ) {
-           print "ok"; 
-
+        if( $hash->{baseline} =~ m/brm/ ) {
+            $hash->{baseline} =  "PS_LFS_BT";
+            # LBT140602-ci1
+            # FSMR4LBT140601
+            $hash->{tag}      =~ s/^(.*)LBT(\d\d)(\d\d)(\d*).*$/PS_LFS_BT_FSMR4_20${1}_${2}_${3}/;
+        }
+        if( $hash->{baseline} eq "pkgpool" ) {
+            $hash->{baseline} = "PS_LFS_PKG";
+        }
     }
 
     $self->{data}{BASELINES} = join( "\n    ", 
