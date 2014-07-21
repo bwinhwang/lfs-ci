@@ -471,6 +471,23 @@ sub cat {
     return $self->{cached}{svnCat}{$cmd};
 }
 
+sub propget {
+    my $self = shift;
+    my $param= { @_ };
+    my $url      = replaceMasterByUlmServer( $param->{url} );
+    my $property = $param->{property};
+
+    my $cmd = sprintf( "%s pg %s %s|",
+                        $self->{svnCli},
+                        $property,
+                        $url );
+    open SVN_CAT, $cmd || die "can not execute $cmd";
+    my $ret = join( "", <SVN_CAT> );
+    close SVN_CAT;
+
+    return $ret;
+}
+
 ## @fn     info( %param )
 #  @brief  runs the svn info command on a specified url (or the current directory)
 #  @param  {url} a svn url (optional)
@@ -1341,6 +1358,7 @@ sub prepare {
         if( $msg =~ m/set Dependencies, Revisions for Release/i or
             $msg =~ m/set Dependencies for Release/i or
             $msg =~ m/new Version files for Release/i or
+            $msg =~ m/empty commit message/i or
             $msg =~ m/INTERNAL COMMENT/ )
         {
             # skip this type of comments.
@@ -1352,9 +1370,9 @@ sub prepare {
         $msg =~ s/^[\%\#]TBC  *[\%\#](\w+)=(\S+)\s*(.*)/$1 $2 $3 (to be continued)/;
         $msg =~ s/^[\%\#]TPC  *[\%\#](\w+)=(\S+)\s*(.*)/$1 $2 $3 (work in progress)/;
         $msg =~ s/^[\%\#]REM /Remark: /;
-#        $msg =~ s/\s*commit [0-9a-f]+\s*//g;
-#        $msg =~ s/\s*Author: .*[@].+//g;
-#        $msg =~ s/\s*Date: .* [0-9]+:[0-9]+:[0-9]+ .*//g;
+        $msg =~ s/\s*commit [0-9a-f]+\s*//g;
+        $msg =~ s/\s*Author: .*[@].+//g;
+        $msg =~ s/\s*Date: .* [0-9]+:[0-9]+:[0-9]+ .*//g;
         $msg =~ s/\s+/ /g;
         $msg =~ s/^\s+//;
         $msg =~ s/\s+$//;
@@ -1491,7 +1509,6 @@ sub prepare {
     getopts( "r:t:f:o:", \my %opts );
     $self->{tagName}         = $opts{t} || die "no t";
     $self->{basedOn}         = $opts{o} || die "no o";
-    $self->{repos}           = $opts{r} || die "no r";
     $self->{configFileName}  = $opts{f} || die "no f";
 
     my $config = Singelton::config();
@@ -1558,7 +1575,7 @@ sub prepare {
     # __BRANCH__
     $self->{data}{BRANCH} = "Branch";
     # __SVN_REPOS_URL__
-    $self->{data}{SVN_REPOS_URL} = $config->getConfig( name => "LFS_PROD_svn_delivery_os_repos_url" );
+    $self->{data}{SVN_REPOS_URL} = $config->getConfig( name => "LFS_PROD_svn_delivery_os_repos_url" ) . "/os";
     # __SVN_REVISION__
     my $svnUrl = sprintf( "%s/tags/%s", 
                             $self->{data}{SVN_REPOS_URL},
@@ -1610,22 +1627,33 @@ sub prepare {
         }
     }
     foreach my $hash ( @{ $self->{baselines} } ) {
-        if( $hash->{baseline} =~ m/brm/ ) {
+        if( $hash->{baseline} =~ m/brm35/i ) {
+            $hash->{baseline} =  "PS_LFS_BT";
+            # FSMR4LBT140601
+            $hash->{tag}      =~ s/^(.*)LBT(\d\d)(\d\d)(\d*).*$/PS_LFS_BT_FSMR4_20${2}_${3}_${4}/;
+        }
+        elsif( $hash->{baseline} =~ m/brm/i ) {
             $hash->{baseline} =  "PS_LFS_BT";
             # LBT140602-ci1
             # FSMR4LBT140601
-            $hash->{tag}      =~ s/^(.*)LBT(\d\d)(\d\d)(\d*).*$/PS_LFS_BT_FSMR4_20${1}_${2}_${3}/;
+            $hash->{tag}      =~ s/^(.*)LBT(\d\d)(\d\d)(\d*).*$/PS_LFS_BT_20${2}_${3}_${4}/;
         }
-        if( $hash->{baseline} eq "pkgpool" ) {
+        if( $hash->{baseline} eq "PKGPOOL" ) {
             $hash->{baseline} = "PS_LFS_PKG";
+        }
+        if( $hash->{baseline} =~ m/sdk/i ) {
+            $hash->{baseline} = "PS_LFS_SDK";
         }
     }
 
+    my %duplicates;
     $self->{data}{BASELINES} = join( "\n    ", 
                                         map { sprintf( '<baseline name="%s" auto_create="true">%s</baseline>',
                                                          $_->{baseline},
                                                          $_->{tag},
                                                      ) }
+                                        grep { not $duplicates{ $self->{baselines} . $_->{tag} } ++ }
+                                        grep { $_->{tag} !~ m/SDK_2/ } 
                                          @{ $self->{baselines} || [] }
                                      );
 
@@ -1727,6 +1755,11 @@ sub prepare {
     $self->{data}{DELIVERY_REPOS}       = $config->getConfig( name => "LFS_PROD_svn_delivery_release_repos_url" );
     $self->{data}{SOURCE_REPOS}         = $config->getConfig( name => "LFS_PROD_svn_delivery_os_repos_url" );
     $self->{data}{TAGNAME}              = $self->{tagName};
+    $self->{data}{SVN_EXTERNALS}        = Singelton::svn()->propget( property => "svn:externals",
+                                                                   url      => sprintf( "%s/tags/%s",
+                                                                                  $self->{data}{DELIVERY_REPOS},
+                                                                                  $self->{data}{TAGNAME} ) );
+
 
     $self->{subject}     =~ s:__([A-Z_]*)__:  $self->{data}{$1} // $config->getConfig( name => $1 ) :eg; 
     $self->{releaseNote} =~ s:__([A-Z_]*)__:  $self->{data}{$1} // $config->getConfig( name => $1 ) :eg;  

@@ -129,7 +129,7 @@ actionCalculate() {
 
     if [[ -z ${upstreamProjectName} || -z ${upstreamBuildNumber} ]] ; then
         error "didn't find the upstream build"
-        exit 1
+        # exit 1
     fi
 
     debug "creating revision state file ${REVISION_STATE_FILE}"

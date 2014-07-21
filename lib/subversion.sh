@@ -34,6 +34,10 @@ uploadToSubversion() {
 
     info "upload to ${branch}"
 
+    mustExistBranchInSubversion ${svnReposUrl} os
+    mustExistBranchInSubversion ${svnReposUrl}/os branches
+    mustExistBranchInSubversion ${svnReposUrl}/os/branches "${branch}"
+
     local oldTemp=${TMPDIR:-/tmp}
     export TMPDIR=${WORKSPACE}/tmp
     debug "cleanup tmp directory"
