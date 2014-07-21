@@ -77,7 +77,7 @@ synchronizeShare() {
     do
         basePartOfEntry=${entry//${remotePath}}
         info "transferting ${entry} to ${remoteServer}:${remotePath}/${basePartOfEntry}"
-        execute ssh ${remoteServer} mkdir -p ${remotePath}
+        execute ssh ${remoteServer} mkdir -p ${remotePath}/${basePartOfEntry}
         execute rsync -aHz -e ssh --stats ${entry}/ ${remoteServer}:${remotePath}/${basePartOfEntry}
     done
 

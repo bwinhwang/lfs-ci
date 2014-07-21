@@ -564,7 +564,7 @@ createReleaseTag() {
 
     if ! existsInSubversion ${svnUrl}/branches ${branch} ; then
         local logMessage=$(createTempFile)
-        echo "creating a new branch ${branch}" > ${logMessage}
+        echo "BTSPS-1657 IN rh: DESRIPTION: NOJCHK creating a new branch ${branch}" > ${logMessage}
         svnMkdir -F ${logMessage} ${svnUrl}/branches/${branch} 
     fi
 
@@ -588,14 +588,14 @@ createReleaseTag() {
     cd ${workspace}/svn
     svnPropSet svn:externals -F ${svnExternalsFile} .
     local logMessage=$(createTempFile)
-    echo "updating svn:externals for ${osReleaseLabelName}" > ${logMessage}
+    echo "BTSPS-1657 IN rh: DESRIPTION: NOJCHK : updating svn:externals for ${osReleaseLabelName}" > ${logMessage}
     svnCommit -F ${logMessage} .
 
     # make a tag
     info "create tag ${osReleaseLabelName}"
     if [[ ${canCreateReleaseTag} ]] ; then
         local logMessage=$(createTempFile)
-        echo "create new tag" > ${logMessage}
+        echo "BTSPS-1657 IN rh: DESRIPTION: NOJCHK : create new tag ${osReleaseLabelName}" > ${logMessage}
         svnCopy -F ${logMessage} ${svnUrl}/branches/${branch} ${svnUrl}/tags/${osReleaseLabelName}
     else
         info "creating the release tag is disabled in config"
@@ -662,11 +662,11 @@ createProxyReleaseTag() {
     svnCheckout --ignore-externals ${proxySvnUrl}/branches/${branchName} ${workspace}/proxyTag
     svnPropSet svn:externals -F ${externals} ${workspace}/proxyTag
 
-    echo "updating svn:externals using extnerals from ${deliverySvnUrl}/tags/${relTagName}" > ${logMessage}
+    echo "upBTSPS-1657 IN rh: DESRIPTION: NOJCHK : updating svn:externals using extnerals from ${deliverySvnUrl}/tags/${relTagName}" > ${logMessage}
     svnCommit -F ${logMessage} ${workspace}/proxyTag
 
     if [[ ${canCreateProxyTag} ]] ; then
-        echo "creating new proxy tag ${tagName}" > ${logMessage}
+        echo "BTSPS-1657 IN rh: DESRIPTION: NOJCHK : creating new proxy tag ${tagName}" > ${logMessage}
         svnCopy -F ${logMessage} ${proxySvnUrl}/branches/${branchName} ${proxySvnUrl}/tags/${relTagName}
     else
         info "creating a proxy tag is disabled in config"

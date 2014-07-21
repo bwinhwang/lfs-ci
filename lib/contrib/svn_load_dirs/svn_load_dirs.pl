@@ -67,6 +67,10 @@ my $opt_svn_password;
 # Verbosity level.
 my $opt_verbose;
 
+# Sleep time in sec between svn commit and svn update after the commit.
+# Our very nice and well maintained infrastructure needs this kind.
+my $opt_sleep = 0;
+
 # Path to already checked-out working copy.
 my $opt_existing_wc_dir;
 
@@ -97,6 +101,7 @@ GetOptions('no_user_input'           => \$opt_no_user_input,
            'tag_location=s'          => \$opt_import_tag_location,
            'verbose+'                => \$opt_verbose,
            'wc=s'                    => \$opt_existing_wc_dir,
+           'sleep=s'                 => \$opt_sleep,
            'glob_ignores=s'          => \$opt_glob_ignores,
            'message=s'               => \$opt_final_commit_msg)
   or &usage;
@@ -1274,6 +1279,13 @@ while (defined (my $load_dir = &get_next_load_dir))
     read_from_process($svn, 'commit',
                       @svn_use_repos_cmd_opts,
                       '-m', $message);
+
+    if ($opt_sleep) 
+      {
+        # add a sleep timer due to our f*cking infrastructure.
+        print "sleep for $opt_sleep s....";
+        sleep $opt_sleep;
+      }
 
     # If an update is not run now after a commit, then some file and
     # directory paths will have an older revisions associated with

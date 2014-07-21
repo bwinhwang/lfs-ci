@@ -126,6 +126,7 @@ copyReleaseCandidateToShare() {
         execute ln -sf ../../../SDKs/${sdkValue} ${sdk}
     done
 
+    # move this in to a seperate section / function
     local linkDirectory=$(getConfig LFS_CI_UC_package_copy_to_share_link_location)
     local pathToLink=../../$(getConfig LFS_CI_UC_package_copy_to_share_path_name)/${label}
     # get the latest used revision in this build
@@ -147,7 +148,7 @@ copyReleaseCandidateToShare() {
     # TODO: demx2fk3 2014-07-15 FIXME : createSymlinksToArtifactsOnShare ${remoteDirectory}
     local artifactesShare=$(getConfig artifactesShare)
     local artifactsPathOnMaster=$(getBuildDirectoryOnMaster)/archive
-    executeOnMaster ln    -sf ${artifactsDirectoryOnShare} ${artifactsPathOnMaster}
+    executeOnMaster ln -sf ${remoteDirectory} ${artifactsPathOnMaster}
 
     return
 }
