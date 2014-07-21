@@ -129,7 +129,7 @@ copyReleaseCandidateToShare() {
     local linkDirectory=$(getConfig LFS_CI_UC_package_copy_to_share_link_location)
     local pathToLink=../../$(getConfig LFS_CI_UC_package_copy_to_share_path_name)/${label}
     # get the latest used revision in this build
-    local revision=$(cut -d" " -f 3 ${workspace}/bld/bld-externalComponents-*/usedRevisions.txt| sort -u | tail -n 1)
+    local revision=$(cut -d" " -f 3 ${workspace}/bld/bld-externalComponents-*/usedRevisions.txt | sort -u | tail -n 1)
     mustHaveValue "${revision}" "latest used revision"
 
     info "create link in RCversion to "
@@ -147,7 +147,7 @@ copyReleaseCandidateToShare() {
     # TODO: demx2fk3 2014-07-15 FIXME : createSymlinksToArtifactsOnShare ${remoteDirectory}
     local artifactesShare=$(getConfig artifactesShare)
     local artifactsPathOnMaster=$(getBuildDirectoryOnMaster)/archive
-    executeOnMaster ln    -sf ${artifactsDirectoryOnShare} ${artifactsPathOnMaster}
+    executeOnMaster ln -sf ${artifactsDirectoryOnShare} ${artifactsPathOnMaster}
 
     return
 }

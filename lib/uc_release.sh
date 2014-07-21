@@ -201,23 +201,30 @@ sendReleaseNote() {
     mustHaveWorkspaceName
     mustHaveWritableWorkspace
 
-    local releaseLabel=${LFS_PROD_RELEASE_CURRENT_TAG_NAME}
-    mustHaveValue "${releaseLabel}" "next release label name"
+    local releaseTagName=${LFS_PROD_RELEASE_CURRENT_TAG_NAME_REL}
+    local oldReleaseTagName=${LFS_PROD_RELEASE_PREVIOUS_TAG_NAME}
+    local osTagName=${LFS_PROD_RELEASE_CURRENT_TAG_NAME}
+    mustHaveValue "${releaseTagName}" "next release tag name"
+    mustHaveValue "${osTagName}" "next os tag name"
+    mustHaveValue "${oldReleaseTagName}" "old release tag name"
 
-    local oldReleaseLabel=${LFS_PROD_RELEASE_PREVIOUS_TAG_NAME}
-    mustHaveValue ${oldReleaseLabel}
-
-    info "new release label is ${releaseLabel} based on ${oldReleaseLabel}"
+    info "new release label is ${releaseTagName} based on ${oldReleaseTagName}"
     _createLfsOsReleaseNote ${buildJobName} ${buildBuildNumber}
-    _uploadToWorkflowTool ${workspace}/os/releasenote.xml
+    _createReleaseInWorkflowTool ${osTagName} ${workspace}/os/releasenote.xml
+    _uploadToWorkflowTool        ${osTagName} ${workspace}/os/releasenote.xml
+    _uploadToWorkflowTool        ${osTagName} ${workspace}/os/releasenote.txt
+    _uploadToWorkflowTool        ${osTagName} ${workspace}/os/changelog.xml
 
-    _createLfsRelReleaseNoteXml 
-    _uploadToWorkflowTool ${workspace}/releasenote.xml
+    _createLfsRelReleaseNoteXml ${releaseTagName} ${workspace}/rel/releasenote.xml
+    _uploadToWorkflowTool       ${releaseTagName} ${workspace}/rel/releasenote.xml
+    _uploadToWorkflowTool       ${releaseTagName} ${workspace}/os/releasenote.xml
+    _uploadToWorkflowTool       ${releaseTagName} ${workspace}/os/releasenote.txt
+    _uploadToWorkflowTool       ${releaseTagName} ${workspace}/os/changelog.xml
 
     info "send release note"
     if [[ ${canSendReleaseNote} ]] ; then
         execute ${LFS_CI_ROOT}/bin/sendReleaseNote  -r ${workspace}/os/releasenote.txt \
-                                                    -t ${releaseLabel}                 \
+                                                    -t ${releaseTagName}                 \
                                                     -f ${LFS_CI_ROOT}/etc/file.cfg
     else
         info "sending the release note is disabled in config"
@@ -232,13 +239,36 @@ sendReleaseNote() {
     return
 }
 
-_uploadToWorkflowTool() {
-    # upload to workflow tool
-    info "TODO: upload to wft"
-    local wftCreateRelease=$(getConfig WORKFLOWTOOL_url_create_release)
-    local wftUploadAttachment=$(getConfig WORKFLOWTOOL_url_upload_attachment)
+_createReleaseInWorkflowTool() {
+    local tagName=$1
+    local fileName=$2
+    mustExistFile ${fileName}
 
-    info "not implemented"
+    local wftApiKey=$(getConfig WORKFLOWTOOL_api_key)
+    local wftCreateRelease=$(getConfig WORKFLOWTOOL_url_create_release)
+    local wftBuildContent=$(getConfig WORKFLOWTOOL_url_build_content)
+    local curl="curl -k ${wftCreateRelease} -F access_key=${wftApiKey} -F update=${update:-fase}" 
+
+    info "creating release based on ${fileName} in wft"
+    execute ${curl} -F file=@${fileName}
+
+    # check, if creation in WFT was successful. this will raise an error, if ${tagName} does not exist
+    execute curl -sf -k ${wftBuildContent}/${tagName}
+
+    return
+}
+
+_uploadToWorkflowTool() {
+    local tagName=$1
+    local fileName=$2
+    mustExistFile ${fileName}
+
+    local wftApiKey=$(getConfig WORKFLOWTOOL_api_key)
+    local wftUploadAttachment=$(getConfig WORKFLOWTOOL_url_upload_attachment)
+    local curl="curl -k ${wftUploadAttachment}/${tagName} -F access_key=${wftApiKey} -F update=${update:-fase}" 
+
+    info "uploading ${fileName} to wft"
+    execute ${curl} -F file=@${fileName}
 
     return
 }

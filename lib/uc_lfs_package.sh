@@ -40,6 +40,8 @@ ci_job_package() {
     copySysroot
     copyFactoryZip
 
+    # there are some symlinks in other directories, which are broken at the moment
+    # so we are just removing / fixing symlinks in sys-root
     removeBrokenSymlinks ${workspace}/upload/sys-root/
 
     copyReleaseCandidateToShare
@@ -101,11 +103,12 @@ copyArchs() {
 
         local destinationsArchitecture=$(getArchitectureFromDirectory ${bldDirectory})
         info "handling archs for ${destinationsArchitecture}"
-        # todo
+        # TODO: demx2fk3 2014-07-21 fixme
         # mustHavePlatformFromDirectory ${bldDirectory} ${destinationsArchitecture} 
         local dst=${workspace}/upload/archs/${destinationsArchitecture}
         execute mkdir -p ${dst}
 
+        # TODO: demx2fk3 2014-07-21 fixme - what's about sdk without 3
         execute ln -sf ../../../sdk3/bld-tools                    ${dst}/bld-tools
         execute ln -sf ../../../sdk3/dbg-tools                    ${dst}/dbg-tools
         execute ln -sf ../../sys-root/${destinationsArchitecture} ${dst}/sys-root
@@ -189,10 +192,10 @@ copySysroot() {
                 # execute ln -sf libFSMDDAL.so.qemu_x86_64 ${dst}/usr/lib/libFSMDDAL.so
             ;;
             mips64-octeon2-linux-gnu)
-#                execute tar -xvz -C ${dst}/usr --strip-components=1 -f ${workspace}/bld/bld-fsmddal-fct/results/include/fsmifdd.tgz
-#                execute ln -sf libFSMDDAL.so.fct ${dst}/usr/lib64/libFSMDDAL_fsm3_octeon2.so
-#                execute ln -sf libFSMDDAL.so.fct ${dst}/usr/lib64/libFSMDDAL.so
-#                execute ln -sf libFSMDDAL.so.fct ${dst}/usr/lib64/libDDAL.so
+               # execute tar -xvz -C ${dst}/usr --strip-components=1 -f ${workspace}/bld/bld-fsmddal-fct/results/include/fsmifdd.tgz
+               # execute ln -sf libFSMDDAL.so.fct ${dst}/usr/lib64/libFSMDDAL_fsm3_octeon2.so
+               # execute ln -sf libFSMDDAL.so.fct ${dst}/usr/lib64/libFSMDDAL.so
+               # execute ln -sf libFSMDDAL.so.fct ${dst}/usr/lib64/libDDAL.so
             ;;
             mips64-octeon-linux-gnu)
                 execute tar -xvz -C ${dst}/usr --strip-components=1 -f ${workspace}/bld/bld-fsmddal-fct/results/include/fsmifdd.tgz
@@ -222,7 +225,7 @@ copySysroot() {
     return
 }
 
-## @fn      copyFactoryZip( «param» )
+## @fn      copyFactoryZip()
 #  @brief   create the factory.zip file out of platforms/fsm3_octeon2
 #  @warning side effect: change the current directory (and change it back!)
 #  @param   <none>
@@ -324,9 +327,7 @@ copyVersionFile() {
     local dstDirectory=${workspace}/upload/versions
     mkdir -p ${dstDirectory}
 
-    # TODO: demx2fk3 2014-04-01 implement this, fix in src-fsmpsl and src-psl is needed
     info "copy verson control file..."
-
     for file in ${workspace}/bld/bld-fsmpsl-fct/results/doc/versions/version_control.xml \
                 ${workspace}/bld/bld-fsmpsl-fct/results/doc/versions/ptsw_fsmr3_version_control.xml \
                 ${workspace}/bld/bld-fsmpsl-fct/results/doc/versions/ptsw_urec_version_control.xml
