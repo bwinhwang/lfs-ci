@@ -1,0 +1,16 @@
+#!/bin/bash
+
+source ${LFS_CI_ROOT}/lib/common.sh
+source ${LFS_CI_ROOT}/lib/logging.sh
+source ${LFS_CI_ROOT}/lib/jenkins.sh
+
+for jobName in LFS_Prod_-_trunk_-_Releasing_-_build_results_to_share LFS_Prod_-_trunk_-_Releasing_-_create_proxy_release_tag LFS_Prod_-_trunk_-_Releasing_-_create_release_tag LFS_Prod_-_trunk_-_Releasing_-_create_source_tag LFS_Prod_-_trunk_-_Releasing_-_update_dependency_files LFS_Prod_-_trunk_-_Releasing_-_upload_to_subversion  ; do
+    if existsJenkinsJob ${jobName} ; then
+        disableJob ${jobName}
+    else 
+        error "job ${jobName} does not exist"
+        exit 1
+    fi
+done
+
+exit 0
