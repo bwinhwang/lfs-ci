@@ -80,6 +80,10 @@ case "${JOB_NAME}" in
         source ${LFS_CI_ROOT}/lib/uc_test.sh
         ci_job_test    || exit 1 
     ;;
+    *_CI_*_Test)
+        source ${LFS_CI_ROOT}/lib/uc_test.sh
+        ci_job_test_summary || exit 1 
+    ;;
     LFS_CI_*_ECL_*) 
         source ${LFS_CI_ROOT}/lib/uc_ecl.sh
         ci_job_ecl || exit 1 

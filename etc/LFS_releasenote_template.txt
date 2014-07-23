@@ -5,14 +5,17 @@ PS LFS Release __LFS_PROD_RELEASE_CURRENT_TAG_NAME_REL__ is available in Subvers
 __RELEASE_NOTE_CONTENT__
 
 === __LFS_PROD_RELEASE_CURRENT_TAG_NAME_REL__ ===
+This is a collection of external links only
 
-Download from Subversion:
+__SVN_EXTERNALS__
+
+SVN externals for SDK and OS from Subversion:
 __DELIVERY_REPOS__/tags/__LFS_PROD_RELEASE_CURRENT_TAG_NAME_REL__
 
 === __LFS_PROD_RELEASE_CURRENT_TAG_NAME__ ===
 
 Download from Subversion:
-__SOURCE_REPOS__/tags/__LFS_PROD_RELEASE_CURRENT_TAG_NAME__
+__SOURCE_REPOS__/os/tags/__LFS_PROD_RELEASE_CURRENT_TAG_NAME__
 
 Best Regards,
 

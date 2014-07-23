@@ -77,7 +77,8 @@ synchronizeShare() {
     do
         basePartOfEntry=${entry//${remotePath}}
         info "transferting ${entry} to ${remoteServer}:${remotePath}/${basePartOfEntry}"
-        execute rsync ${rsyncOptions} -e ssh --stats ${entry}/ ${remoteServer}:${remotePath}/${basePartOfEntry}
+        execute ssh ${remoteServer} mkdir -p ${remotePath}
+        execute rsync -aHz -e ssh --stats ${entry}/ ${remoteServer}:${remotePath}/${basePartOfEntry}
     done
 
     info "synchronizing is done."
@@ -139,10 +140,9 @@ backupJenkinsMasterServerInstallation() {
     mustHaveValue ${backupPath}
     mustHaveValue ${serverPath}
 
-    execute mkdir -p ${backupPath}
-    execute rm -rf ${backupPath}/backup.101
+    execute rm -rf ${backupPath}/backup.1001
 
-    for i in $(seq 0 100 | tac) ; do
+    for i in $(seq 0 1000 | tac) ; do
         [[ -d ${backupPath}/backup.${i} ]] || continue
         old=$(( i + 1 ))
         execute mv -f ${backupPath}/backup.${i} ${backupPath}/backup.${old}
@@ -150,6 +150,8 @@ backupJenkinsMasterServerInstallation() {
 
     if [[ -d ${backupPath}/backup.1 ]] ; then
         execute cp -rl ${backupPath}/backup.1 ${backupPath}/backup.0
+    else
+        execute mkdir -p ${backupPath}/backup.0/
     fi
 
     execute rsync -av --delete --exclude=workspace ${serverPath}/. ${backupPath}/backup.0/.

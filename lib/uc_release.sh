@@ -161,8 +161,12 @@ extractArtifactsOnReleaseShare() {
         info "copy ${basename} to buildresults share ${destination}"
 
         if [[ ${canStoreArtifactsOnShare} ]] ; then
+            executeOnMaster chmod u+w ${resultBuildShare}/
+            executeOnMaster mkdir -p ${resultBuildShare}/${basename}/
+            executeOnMaster chmod u+w ${resultBuildShare}/${basename}/
             executeOnMaster mkdir -p ${destination}
             execute rsync -av --exclude=.svn ${workspace}/bld/${basename}/. ${server}:${destination}
+            touch ${destination}
         else
             info "storing artifacts on share is disabled in config"
         fi
@@ -197,44 +201,74 @@ sendReleaseNote() {
     mustHaveWorkspaceName
     mustHaveWritableWorkspace
 
-    local releaseLabel=${LFS_PROD_RELEASE_CURRENT_TAG_NAME}
-    mustHaveValue "${releaseLabel}" "next release label name"
+    local releaseTagName=${LFS_PROD_RELEASE_CURRENT_TAG_NAME_REL}
+    local oldReleaseTagName=${LFS_PROD_RELEASE_PREVIOUS_TAG_NAME}
+    local osTagName=${LFS_PROD_RELEASE_CURRENT_TAG_NAME}
+    mustHaveValue "${releaseTagName}" "next release tag name"
+    mustHaveValue "${osTagName}" "next os tag name"
+    mustHaveValue "${oldReleaseTagName}" "old release tag name"
 
-    local oldReleaseLabel=${LFS_PROD_RELEASE_PREVIOUS_TAG_NAME}
-    mustHaveValue ${oldReleaseLabel}
-
-    info "new release label is ${releaseLabel} based on ${oldReleaseLabel}"
+    info "new release label is ${releaseTagName} based on ${oldReleaseTagName}"
     _createLfsOsReleaseNote ${buildJobName} ${buildBuildNumber}
-    _uploadToWorkflowTool ${workspace}/os/releasenote.xml
+    _createReleaseInWorkflowTool ${osTagName} ${workspace}/os/releasenote.xml
+    _uploadToWorkflowTool        ${osTagName} ${workspace}/os/releasenote.xml
+    _uploadToWorkflowTool        ${osTagName} ${workspace}/os/releasenote.txt
+    _uploadToWorkflowTool        ${osTagName} ${workspace}/os/changelog.xml
 
-    _createLfsRelReleaseNoteXml 
-    _uploadToWorkflowTool ${workspace}/releasenote.xml
+    _createLfsRelReleaseNoteXml ${releaseTagName} ${workspace}/rel/releasenote.xml
+    _uploadToWorkflowTool       ${releaseTagName} ${workspace}/rel/releasenote.xml
+    _uploadToWorkflowTool       ${releaseTagName} ${workspace}/os/releasenote.xml
+    _uploadToWorkflowTool       ${releaseTagName} ${workspace}/os/releasenote.txt
+    _uploadToWorkflowTool       ${releaseTagName} ${workspace}/os/changelog.xml
 
     info "send release note"
     if [[ ${canSendReleaseNote} ]] ; then
         execute ${LFS_CI_ROOT}/bin/sendReleaseNote  -r ${workspace}/os/releasenote.txt \
-                                                    -t ${releaseLabel}                 \
+                                                    -t ${releaseTagName}                 \
                                                     -f ${LFS_CI_ROOT}/etc/file.cfg
     else
         info "sending the release note is disabled in config"
     fi
 
-    execute mv ${workspace}/os/releasenote.txt ${workspace}/bld/bld-lfs-release/lfs_os_releasenote.txt
-    execute mv ${workspace}/os/releasenote.xml ${workspace}/bld/bld-lfs-release/lfs_os_releasenote.xml
-    execute mv ${workspace}/os/changelog.xml   ${workspace}/bld/bld-lfs-release/lfs_os_changelog.xml
-    execute mv ${workspace}/releasenote.xml    ${workspace}/bld/bld-lfs-release/lfs_rel_releasenote.xml
+    execute cp -f ${workspace}/os/releasenote.txt  ${workspace}/bld/bld-lfs-release/lfs_os_releasenote.txt
+    execute cp -f ${workspace}/os/releasenote.xml  ${workspace}/bld/bld-lfs-release/lfs_os_releasenote.xml
+    execute cp -f ${workspace}/os/changelog.xml    ${workspace}/bld/bld-lfs-release/lfs_os_changelog.xml
+    execute cp -f ${workspace}/rel/releasenote.xml ${workspace}/bld/bld-lfs-release/lfs_rel_releasenote.xml
 
     info "release is done."
     return
 }
 
-_uploadToWorkflowTool() {
-    # upload to workflow tool
-    info "TODO: upload to wft"
-    local wftCreateRelease=$(getConfig WORKFLOWTOOL_url_create_release)
-    local wftUploadAttachment=$(getConfig WORKFLOWTOOL_url_upload_attachment)
+_createReleaseInWorkflowTool() {
+    local tagName=$1
+    local fileName=$2
+    mustExistFile ${fileName}
 
-    info "not implemented"
+    local wftApiKey=$(getConfig WORKFLOWTOOL_api_key)
+    local wftCreateRelease=$(getConfig WORKFLOWTOOL_url_create_release)
+    local wftBuildContent=$(getConfig WORKFLOWTOOL_url_build_content)
+    local curl="curl -k ${wftCreateRelease} -F access_key=${wftApiKey} -F update=${update:-fase}" 
+
+    info "creating release based on ${fileName} in wft"
+    execute ${curl} -F file=@${fileName}
+
+    # check, if creation in WFT was successful. this will raise an error, if ${tagName} does not exist
+    execute curl -sf -k ${wftBuildContent}/${tagName}
+
+    return
+}
+
+_uploadToWorkflowTool() {
+    local tagName=$1
+    local fileName=$2
+    mustExistFile ${fileName}
+
+    local wftApiKey=$(getConfig WORKFLOWTOOL_api_key)
+    local wftUploadAttachment=$(getConfig WORKFLOWTOOL_url_upload_attachment)
+    local curl="curl -k ${wftUploadAttachment}/${tagName} -F access_key=${wftApiKey} -F update=${update:-fase}" 
+
+    info "uploading ${fileName} to wft"
+    execute ${curl} -F file=@${fileName}
 
     return
 }
@@ -258,10 +292,18 @@ _validateReleaseNoteXml() {
     fi
 
     # remove check with wft next
+    local outputFile=$(createTempFile)
     execute curl -k ${wftReleaseNoteValidate} \
                  -F access_key=${wftApiKey}   \
-                 -F file=@${releaseNoteXml}
+                 -F file=@${releaseNoteXml} \
+                 --output ${outputFile}
+    rawDebug ${outputFile}
 
+    if ! grep -q "XML valid" ${outputFile} ; then
+        error "release note xml ${releaseNoteXml} is not valid"
+        exit 1
+    fi
+        
     return
 }
 
@@ -294,12 +336,14 @@ _createLfsOsReleaseNote() {
     execute ln -sf ../bld .
     execute rm -f releasenote.txt releasenote.xml
 
-    export tagName=LFS_PROD_RELEASE_CURRENT_TAG_NAME
+    export tagName=${LFS_PROD_RELEASE_CURRENT_TAG_NAME}
 
     ${LFS_CI_ROOT}/bin/getReleaseNoteContent -t ${LFS_PROD_RELEASE_CURRENT_TAG_NAME} \
                                              -f ${LFS_CI_ROOT}/etc/file.cfg > releasenote.txt
     mustBeSuccessfull "$?" "getReleaseNoteContent"
     rawDebug ${workspace}/os/releasenote.txt
+
+    export type=OS
 
     ${LFS_CI_ROOT}/bin/getReleaseNoteXML -t ${LFS_PROD_RELEASE_CURRENT_TAG_NAME}  \
                                          -o ${LFS_PROD_RELEASE_PREVIOUS_TAG_NAME} \
@@ -307,6 +351,9 @@ _createLfsOsReleaseNote() {
                                          -f ${LFS_CI_ROOT}/etc/file.cfg > releasenote.xml
     mustBeSuccessfull "$?" "getReleaseNoteXML"
     rawDebug ${workspace}/os/releasenote.xml
+
+    unset type
+    export type
 
     _validateReleaseNoteXml ${workspace}/os/releasenote.xml
 
@@ -318,22 +365,29 @@ _createLfsRelReleaseNoteXml() {
     mustHaveWorkspaceName
 
     requiredParameters LFS_PROD_RELEASE_PREVIOUS_TAG_NAME_REL LFS_PROD_RELEASE_CURRENT_TAG_NAME_REL \
-                       LFS_CI_ROOT
+                       LFS_PROD_RELEASE_PREVIOUS_TAG_NAME LFS_CI_ROOT
 
     info "creating release note xml for ${LFS_PROD_RELEASE_CURRENT_TAG_NAME_REL}"
-    cd ${workspace}
+    execute mkdir -p ${workspace}/rel/bld/bld-externalComponents-summary
+    cd ${workspace}/rel/
+    grep sdk ${workspace}/bld/bld-externalComponents-summary/externalComponents \
+            > ${workspace}/rel/bld/bld-externalComponents-summary/externalComponents
+    mustBeSuccessfull "$?" "grep sdk ok"
+
+    echo " PS_LFS_OS = ${LFS_PROD_RELEASE_PREVIOUS_TAG_NAME}" >> ${workspace}/rel/bld/bld-externalComponents-summary/externalComponents
 
     # no changes here, just a dummy changelog is required
     echo '<log />' > changelog.xml 
 
-    export tagName=LFS_PROD_RELEASE_CURRENT_TAG_NAME
-
+    export tagName=${LFS_PROD_RELEASE_CURRENT_TAG_NAME}
+    export type=REL
     ${LFS_CI_ROOT}/bin/getReleaseNoteXML -t ${LFS_PROD_RELEASE_CURRENT_TAG_NAME_REL}  \
                                          -o ${LFS_PROD_RELEASE_PREVIOUS_TAG_NAME_REL} \
-                                         -r http://foobar/asdf/ \
                                          -f ${LFS_CI_ROOT}/etc/file.cfg > releasenote.xml
     mustBeSuccessfull "$?" "getReleaseNoteXML"
     rawDebug ${workspace}/releasenote.xml
+    unset type
+    export type
 
     return
 }
@@ -550,12 +604,12 @@ createReleaseTag() {
     echo "^/os/tags/${osLabelName}/os os " >> ${svnExternalsFile}
 
     if [[ ${sdk3} ]] ; then 
-        echo "/isource/svnroot/BTS_D_SC_LFS/sdk/tags/${sdk3} sdk3" >> ${svnExternalsFile}
+        echo "/isource/svnroot/BTS_D_SC_LFS_SDK_1/sdk/tags/${sdk3} sdk3" >> ${svnExternalsFile}
     fi
 
-    if [[ ${sdk2} ]] ; then 
-        echo "/isource/svnroot/BTS_D_SC_LFS/sdk/tags/${sdk2} sdk2" >> ${svnExternalsFile}
-    fi
+#    if [[ ${sdk2} ]] ; then 
+#        echo "/isource/svnroot/BTS_D_SC_LFS/sdk/tags/${sdk2} sdk2" >> ${svnExternalsFile}
+#    fi
 
     # commit
     info "updating svn:externals"
@@ -619,6 +673,8 @@ createProxyReleaseTag() {
     local canCreateProxyTag=$(getConfig LFS_CI_uc_release_can_create_proxy_tag)
     local externals=$(createTempFile)
     local logMessage=$(createTempFile)
+
+    export tagName=${LFS_PROD_RELEASE_CURRENT_TAG_NAME}
 
     local workspace=$(getWorkspaceName)
     mustHaveWorkspaceName
