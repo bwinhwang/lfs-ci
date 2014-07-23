@@ -57,6 +57,7 @@ uploadToSubversion() {
                 -no_user_input                         \
                 -no_diff_tag                           \
                 -glob_ignores="#.#"                    \
+                -sleep 60                              \
                 ${svnReposUrl} ${branchPath}/${branch} \
                 ${pathToUpload} 
 
@@ -214,7 +215,7 @@ mustExistBranchInSubversion() {
 
     echo "creating a new branch: ${branch}" > ${logMessage}
     if ! existsInSubversion ${url} ${branch} ; then
-        info "create dir ${url}/${branch}"
+        info "BTSPS-1657 IN rh: DESRIPTION: NOJCHK : create dir ${url}/${branch}"
         svnMkdir -F ${logMessage} ${url}/${branch}
     fi
 
