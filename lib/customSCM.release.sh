@@ -98,7 +98,7 @@ actionCalculate() {
     echo TESTED_BUILD_JOBNAME=${upstreamProjectName} > ${WORKSPACE}/.properties
     echo TESTED_BUILD_NUMBER=${upstreamBuildNumber}   >> ${WORKSPACE}/.properties
 
-    return 
+    return 0
 }
 
 

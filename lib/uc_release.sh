@@ -201,23 +201,31 @@ sendReleaseNote() {
     mustHaveWorkspaceName
     mustHaveWritableWorkspace
 
-    local releaseLabel=${LFS_PROD_RELEASE_CURRENT_TAG_NAME}
-    mustHaveValue "${releaseLabel}" "next release label name"
+    local releaseTagName=${LFS_PROD_RELEASE_CURRENT_TAG_NAME_REL}
+    local oldReleaseTagName=${LFS_PROD_RELEASE_PREVIOUS_TAG_NAME}
+    local osTagName=${LFS_PROD_RELEASE_CURRENT_TAG_NAME}
+    mustHaveValue "${releaseTagName}" "next release tag name"
+    mustHaveValue "${osTagName}" "next os tag name"
+    mustHaveValue "${oldReleaseTagName}" "old release tag name"
 
-    local oldReleaseLabel=${LFS_PROD_RELEASE_PREVIOUS_TAG_NAME}
-    mustHaveValue ${oldReleaseLabel}
-
-    info "new release label is ${releaseLabel} based on ${oldReleaseLabel}"
+    info "new release label is ${releaseTagName} based on ${oldReleaseTagName}"
     _createLfsOsReleaseNote ${buildJobName} ${buildBuildNumber}
-    _uploadToWorkflowTool ${workspace}/os/releasenote.xml
+    _createReleaseInWorkflowTool ${osTagName} ${workspace}/os/releasenote.xml
+    _uploadToWorkflowTool        ${osTagName} ${workspace}/os/releasenote.xml
+    _uploadToWorkflowTool        ${osTagName} ${workspace}/os/releasenote.txt
+    _uploadToWorkflowTool        ${osTagName} ${workspace}/os/changelog.xml
 
-    _createLfsRelReleaseNoteXml 
-    _uploadToWorkflowTool ${workspace}/releasenote.xml
+    _createLfsRelReleaseNoteXml  ${releaseTagName} ${workspace}/rel/releasenote.xml
+    _createReleaseInWorkflowTool ${releaseTagName} ${workspace}/rel/releasenote.xml
+    _uploadToWorkflowTool        ${releaseTagName} ${workspace}/rel/releasenote.xml
+    _uploadToWorkflowTool        ${releaseTagName} ${workspace}/os/releasenote.xml
+    _uploadToWorkflowTool        ${releaseTagName} ${workspace}/os/releasenote.txt
+    _uploadToWorkflowTool        ${releaseTagName} ${workspace}/os/changelog.xml
 
     info "send release note"
     if [[ ${canSendReleaseNote} ]] ; then
         execute ${LFS_CI_ROOT}/bin/sendReleaseNote  -r ${workspace}/os/releasenote.txt \
-                                                    -t ${releaseLabel}                 \
+                                                    -t ${releaseTagName}                 \
                                                     -f ${LFS_CI_ROOT}/etc/file.cfg
     else
         info "sending the release note is disabled in config"
@@ -232,13 +240,54 @@ sendReleaseNote() {
     return
 }
 
-_uploadToWorkflowTool() {
-    # upload to workflow tool
-    info "TODO: upload to wft"
-    local wftCreateRelease=$(getConfig WORKFLOWTOOL_url_create_release)
-    local wftUploadAttachment=$(getConfig WORKFLOWTOOL_url_upload_attachment)
+_createReleaseInWorkflowTool() {
+    local tagName=$1
+    local fileName=$2
+    mustExistFile ${fileName}
 
-    info "not implemented"
+    local wftApiKey=$(getConfig WORKFLOWTOOL_api_key)
+    local wftCreateRelease=$(getConfig WORKFLOWTOOL_url_create_release)
+    local wftBuildContent=$(getConfig WORKFLOWTOOL_url_build_content)
+    local curl="curl -k ${wftCreateRelease} -F access_key=${wftApiKey}" 
+
+    # check, if wft already knows about the release
+    curl -sf -k ${wftBuildContent}/${tagName}
+    local update=""
+    case $? in 
+        0)  update="-F update=true" ;; # does exist
+        22) update="-F update=false" ;; # does not exist 
+        *)  error "unknown error from curl $?"; exit 1 ;;
+    esac
+
+    info "creating release based on ${fileName} in wft"
+    execute ${curl} ${update} -F file=@${fileName}
+
+    # check, if creation in WFT was successful. this will raise an error, if ${tagName} does not exist
+    execute curl -sf -k ${wftBuildContent}/${tagName} 
+
+    return
+}
+
+_uploadToWorkflowTool() {
+    local tagName=$1
+    local fileName=$2
+    mustExistFile ${fileName}
+
+    local wftApiKey=$(getConfig WORKFLOWTOOL_api_key)
+    local wftUploadAttachment=$(getConfig WORKFLOWTOOL_url_upload_attachment)
+    local curl="curl -k ${wftUploadAttachment}/${tagName} -F access_key=${wftApiKey} "
+
+    # check, if wft already knows about the release
+    curl -sf -k ${wftBuildContent}/${tagName}
+    local update=""
+    case $? in 
+        0)  update="-F update=true" ;; # does exist
+        22) update="-F update=false" ;; # does not exist 
+        *)  error "unknown error from curl $?"; exit 1 ;;
+    esac
+
+    info "uploading ${fileName} to wft"
+    execute ${curl} ${update} -F file=@${fileName}
 
     return
 }
@@ -261,11 +310,21 @@ _validateReleaseNoteXml() {
         execute xmllint --schema releasenote.xsd ${releaseNoteXml}
     fi
 
+    # check, if wft already knows about the release
+    curl -sf -k ${wftBuildContent}/${tagName}
+    local update=""
+    case $? in 
+        0)  update="-F update=true" ;; # does exist
+        22) update="-F update=false" ;; # does not exist 
+        *)  error "unknown error from curl $?"; exit 1 ;;
+    esac
+
     # remove check with wft next
     local outputFile=$(createTempFile)
     execute curl -k ${wftReleaseNoteValidate} \
                  -F access_key=${wftApiKey}   \
-                 -F file=@${releaseNoteXml} \
+                 -F file=@${releaseNoteXml}   \
+                 ${update}                    \
                  --output ${outputFile}
     rawDebug ${outputFile}
 
@@ -541,6 +600,7 @@ createReleaseTag() {
     # better: getConfig kayName -t tagName=${osLabelName}
     export tagName=${osLabelName}
     local svnUrl=$(getConfig LFS_PROD_svn_delivery_release_repos_url)
+    local svnRepoName=$(getConfig LFS_PROD_svn_delivery_repos_name)
     unset tagName
 
     local branch=$(getBranchName)
@@ -571,7 +631,7 @@ createReleaseTag() {
     # update svn:externals
     # TODO: demx2fk3 2014-07-09 fixme do this in a different way - more configurable
     local svnExternalsFile=$(createTempFile)
-    echo "^/os/tags/${osLabelName}/os os " >> ${svnExternalsFile}
+    echo "/isource/svnroot/${svnRepoName}/os/tags/${osLabelName} os " >> ${svnExternalsFile}
 
     if [[ ${sdk3} ]] ; then 
         echo "/isource/svnroot/BTS_D_SC_LFS_SDK_1/sdk/tags/${sdk3} sdk3" >> ${svnExternalsFile}
@@ -715,11 +775,14 @@ updateDependencyFiles() {
         debug "update ${name}/Dependencies"
         # TODO: demx2fk3 2014-07-14 we should also check the word boundary
         # perl -p -i -e 's/\b${oldReleaseLabelName}\b/${releaseLabelName}/g' ${name}/Dependencies
-        perl -p -i -e 's/${oldReleaseLabelName}/${releaseLabelName}/g' ${name}/Dependencies
+        perl -p -i -e 's/${oldReleaseLabelName}/${releaseLabelName}/g' ${dependenciesFile}
+        mustBeSuccessfull "$?" "perl -pie s/... ${dependenciesFile}"
+
         svnDiff ${dependenciesFile}
         if [[ ${canCommitDependencies} ]] ; then 
-            svnCommit -m "BTSPS-1657 IN psulm: DESCRIPTION: set Dependencies for Release ${releaseLabelName} r${rev} NOJCHK" \
-            ${dependenciesFile}
+            local logMessage=$(createTempFile)
+            echo "BTSPS-1657 IN psulm: DESCRIPTION: set Dependencies for Release ${releaseLabelName} r${rev} NOJCHK"  > ${logMessage}
+            svnCommit -F ${logMessage} ${dependenciesFile}
         else
             info "committing of dependencies is disabled in config"
         fi

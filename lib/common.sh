@@ -344,10 +344,10 @@ mustHaveNextLabelName() {
 
     if [[ -z "${LFS_CI_NEXT_CI_LABEL_NAME}" ]] ; then
         local label=$(cat ${workspace}/bld/bld-fsmci-summary/label 2>/dev/null)
+        debug "labelName is ${label}"
         mustHaveValue "${label}" "next ci label name"
+        export LFS_CI_NEXT_LABEL_NAME=${label}
     fi
-
-    export LFS_CI_NEXT_LABEL_NAME=${label}
 
     return
 }
@@ -541,6 +541,13 @@ copyChangelogToWorkspace() {
     return
 }
 
+## @fn      copyFileFromBuildDirectoryToWorkspace( $jobName, $buildNumber, $fileName )
+#  @brief   copy a specified file from the build directory on the jenkins master to the
+#           workspace directory (on the slave)
+#  @param   {jobName}        name of the job
+#  @param   {buildNumber}    build number of the job
+#  @param   {fileName}       name of the file, which should be copied
+#  @return  <none>
 copyFileFromBuildDirectoryToWorkspace() {
     local jobName=$1
     local buildNumber=$2
@@ -553,11 +560,18 @@ copyFileFromBuildDirectoryToWorkspace() {
 
     mustHaveValue "${dir}" "build directory on master"
     debug "copy file ${fileName} from master:${dir} to ${WORKSPACE}"
-    execute rsync -avPe ssh ${master}:${dir}/${fileName} ${WORKSPACE}/${fileName}
+    execute rsync -avPe ssh ${master}:${dir}/${fileName} ${WORKSPACE}/$(basename ${fileName})
 
     return        
 }
 
+## @fn      copyFileFromWorkspaceToBuildDirectory( $jobName, $buildNumber, $fileName )
+#  @brief   copy a specified file from the workspace to the build directory on the
+#           jenkins master server
+#  @param   {jobName}        name of the job
+#  @param   {buildNumber}    build number of the job
+#  @param   {fileName}       name of the file, which should be copied
+#  @return  <none>
 copyFileFromWorkspaceToBuildDirectory() {
     local jobName=$1
     local buildNumber=$2
@@ -575,6 +589,13 @@ copyFileFromWorkspaceToBuildDirectory() {
     return        
 }
 
+## @fn      _getUpstreamProjects( $jobName, $buildNumber, $upstreamsFile )
+#  @brief   get the information about a finished upstream job. 
+#  @warning internal function
+#  @param   {jobName}          name of the job
+#  @param   {buildNumber}      build number of the job
+#  @param   {upstreamsFile}    file where to store the information
+#  @return  <none>
 _getUpstreamProjects() {
     local jobName=$1
     local buildNumber=$2
@@ -598,6 +619,14 @@ _getUpstreamProjects() {
     return
 }
 
+## @fn      _getJobInformationFromUpstreamProject( $jobName, $buildNumber, $jobNamePart, $fieldNumber  )
+#  @brief   get the information about a job from a finished upstream job
+#  @warning internal function
+#  @param   {jobName}       name of the job
+#  @param   {buildNumber}    build number of the job
+#  @param   {jobNamePart}    part of the job name, which we are looking for
+#  @param   {fieldNumber}    field number (interal)
+#  @return  requested information about the job
 _getJobInformationFromUpstreamProject() {
     local jobName=$1
     local buildNumber=$2
@@ -614,6 +643,11 @@ _getJobInformationFromUpstreamProject() {
     return
 }
 
+## @fn      getTestBuildNumberFromUpstreamProject( $jobName, $buildNumber )
+#  @brief   get the test job build number from specified, finished upstream project
+#  @param   {jobName}        name of the job
+#  @param   {buildNumber}    build number of the job
+#  @return  test job build number
 getTestBuildNumberFromUpstreamProject() {
     local jobName=$1
     local buildNumber=$2
@@ -621,6 +655,11 @@ getTestBuildNumberFromUpstreamProject() {
     return
 }
 
+## @fn      getTestJobNameFromUpstreamProject( $jobName, $buildNumber )
+#  @brief   get the test job name from specified, finished upstream project
+#  @param   {jobName}        name of the job
+#  @param   {buildNumber}    build number of the job
+#  @return  test job name 
 getTestJobNameFromUpstreamProject() {
     local jobName=$1
     local buildNumber=$2
@@ -628,6 +667,11 @@ getTestJobNameFromUpstreamProject() {
     return
 }
 
+## @fn      getBuildBuildNumberFromUpstreamProject( $jobName, $buildNumber )
+#  @brief   get the build build number from specified, finished upstream project
+#  @param   {jobName}        name of the job
+#  @param   {buildNumber}    build number of the job
+#  @return  build job build number
 getBuildBuildNumberFromUpstreamProject() {
     local jobName=$1
     local buildNumber=$2
@@ -635,6 +679,11 @@ getBuildBuildNumberFromUpstreamProject() {
     return
 }
 
+## @fn      getBuildJobNameFromUpstreamProject( $jobName, $buildNumber )
+#  @brief   get the build name from specified, finished upstream project
+#  @param   {jobName}        name of the job
+#  @param   {buildNumber}    build number of the job
+#  @return  build job name
 getBuildJobNameFromUpstreamProject() {
     local jobName=$1
     local buildNumber=$2
@@ -642,6 +691,11 @@ getBuildJobNameFromUpstreamProject() {
     return
 }
 
+## @fn      getPackageBuildNumberFromUpstreamProject( $jobName, $buildNumber )
+#  @brief   get the package build number from specified, finished upstream project
+#  @param   {jobName}        name of the job
+#  @param   {buildNumber}    build number of the job
+#  @return  package build number
 getPackageBuildNumberFromUpstreamProject() {
     local jobName=$1
     local buildNumber=$2
@@ -649,6 +703,11 @@ getPackageBuildNumberFromUpstreamProject() {
     return
 }
 
+## @fn      getPackageJobNameFromUpstreamProject( $jobName, $buildNumber )
+#  @brief   get the package build name from specified, finished upstream project
+#  @param   {jobName}        name of the job
+#  @param   {buildNumber}    build number of the job
+#  @return  package job name
 getPackageJobNameFromUpstreamProject() {
     local jobName=$1
     local buildNumber=$2

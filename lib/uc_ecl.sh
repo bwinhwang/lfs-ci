@@ -49,7 +49,45 @@ ci_job_ecl() {
     copyArtifactsToWorkspace "${buildJobName}" "${buildBuildNumber}" "${requiredArtifacts}"
 
     mustHaveNextLabelName
-    setBuildDescription ${JOB_NAME} ${BUILD_NUMBER} ${LFS_CI_NEXT_CI_LABEL_NAME}
+    local labelName=$(getNextReleaseLabel)
+    setBuildDescription ${JOB_NAME} ${BUILD_NUMBER} ${labelName}
+
+    # TODO: demx2fk3 2014-07-22 remove this, if PS SCM can handle the load of LFSes...
+    if [[ $(( BUILD_NUMBER % 4 )) != 0 ]] ; then
+        # as agreement with PS SCM, we are just promoting every 4th build.
+        # otherwise, we will spam ECL
+        warning "not promoting this build. ONLY EVERY 4th build will be promoted"
+        setBuildDescription ${JOB_NAME} ${BUILD_NUMBER} "${labelName}<br>not promoted"
+        exit 0
+    fi
+
+
+    local linkDirectory=$(getConfig LFS_CI_UC_package_copy_to_share_link_location)
+    local pathToLink=../../$(getConfig LFS_CI_UC_package_copy_to_share_path_name)/${labelName}
+    local relTagName=${labelName//PS_LFS_OS_/PS_LFS_REL_}
+    info "creating link in CI_LFS RCversion ${relTagName}"
+    execute mkdir -p ${linkDirectory}
+    execute cd ${linkDirectory}
+    execute ln -sf ${pathToLink} ${relTagName}
+    # TODO: demx2fk3 2014-07-22 disabled, bis jemand schreit...
+    # execute ln -sf ${pathToLink} "trunk@${revision}"
+
+    # TODO: demx2fk3 2014-07-22 fixme hack - cleanup
+    # TODO: demx2fk3 2014-07-23 is/was required for lfs2cloud by Rainer Schiele
+#     local buildResultsShare=$(getConfig LFS_PROD_UC_ecl_update_buildresults_share)/${labelName}
+#     execute mkdir -p ${buildResultsShare}/bld
+#     cd ${buildResultsShare}/bld/
+#     for key in $(cut -d" " -f 1 ${workspace}/bld/bld-externalComponents-summary ) ; do
+#         value=$(getConfig ${key} -f ${workspace}/bld/bld-externalComponents-summary)
+#         
+#         case ${key} in
+#             sdk*) execute ln -sf ../../../sdk/tags/${value} ${key} ;;
+#             bld*) execute ln -sf ./../../releases/bld/${value} ${key} ;;
+#             pkgpool) execute ln -sf ../../../pkgpool/${value} ${key} ;;
+#             *) error "do not support ${key} / ${value} for ${buildResultsShare}" ; exit 1 ;;
+#         esac
+#     done
+    # end of hack
 
     info "checkout ECL from ${eclUrl}"
     svnCheckout ${eclUrl} ${workspace}/ecl_checkout
@@ -72,7 +110,9 @@ ci_job_ecl() {
 
     local canCommit=$(getConfig LFS_CI_uc_update_ecl_can_commit_ecl)
     if [[ $canCommit ]] ; then
-        svnCommit -m updating_ecl ${workspace}/ecl_checkout/ECL
+        local logMessage=$(createTempFile)
+        echo "updating ECL" > ${logMessage} 
+        svnCommit -F ${logMessage} ${workspace}/ecl_checkout/ECL
     fi
 
     return
@@ -108,8 +148,10 @@ getEclValue() {
         ECL_LFS)
             local branchNameInSubversion=$(getConfig SVN_lfs_branch_name)
             local rev=$(cut -d" " -f 3 ${workspace}/bld/bld-externalComponents-*/usedRevisions.txt| sort -u | tail -n 1
+            mustHaveNextCiLabelName "${rev}" "revision"
+            debug "branch ${branchNameInSubversion} rev ${rev}"
 )
-            newValue=$(printf "%s@%d" "${branchNameInSubversion}" ${rev})
+            newValue=$(printf "%s\@%d" "${branchNameInSubversion}" ${rev})
         ;;
         ECL_PS_LFS_INTERFACE_REV)
             newValue=$((oldValue + 1))

@@ -215,7 +215,7 @@ mustExistBranchInSubversion() {
 
     echo "creating a new branch: ${branch}" > ${logMessage}
     if ! existsInSubversion ${url} ${branch} ; then
-        info "BTSPS-1657 IN rh: DESRIPTION: NOJCHK : create dir ${url}/${branch}"
+        echo "BTSPS-1657 IN rh: DESRIPTION: NOJCHK : create dir ${url}/${branch}" > ${logMessage}
         svnMkdir -F ${logMessage} ${url}/${branch}
     fi
 
