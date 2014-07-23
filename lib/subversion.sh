@@ -23,7 +23,7 @@ uploadToSubversion() {
 
     local svnReposUrl=$(getConfig LFS_PROD_svn_delivery_release_repos_url)
 
-    info "upload local path ${pathToUpload} to ${branchToUpload}"
+    info "upload local path ${pathToUpload} to ${branchToUpload} as ${tagName}"
 
     local branch=${locationToSubversionMap["${branchToUpload}"]}
     # local branch=$(getConfig LFS_PROD_subversion_upload_branch_name)

@@ -5,7 +5,7 @@
   <releaseTime>__TIME__</releaseTime>
   <authorEmail>psulm-admin@mlist.emea.nsn-intra.net</authorEmail>
   <basedOn>__BASED_ON__</basedOn>
-  <branchFor><branch>__BRANCH__</branch></branchFor>
+  <branchFor><branch>PS_Basic</branch></branchFor> 
   <importantNotes>
   </importantNotes>
   <repositoryUrl>__SVN_REPOS_URL__</repositoryUrl>
