@@ -28,15 +28,9 @@ createArtifactArchive() {
     cd "${workspace}/bld/" 
     for dir in bld-*-* ; do
         [[ -d "${dir}" && ! -L "${dir}" ]] || continue
+        # [[ -f "${dir}.tar.gz" ]] || continue
 
         local subsystem=$(cut -d- -f2 <<< ${dir})
-        case ${subsystem} in
-            kernelsources)
-                debug "skipping ${dir}"
-                continue
-            ;;
-        esac
-
         info "creating artifact archive for ${dir}"
         execute tar --create --auto-compress --file "${dir}.tar.gz" "${dir}"
         execute rsync --archive --verbose --rsh=ssh -P     \

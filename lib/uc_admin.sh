@@ -86,6 +86,63 @@ synchronizeShare() {
     return
 }
 
+genericShareCleanup() {
+    requiredParameters JOB_NAME BUILD_NUMBER LFS_CI_ROOT WORKSPACE
+
+    copyChangelogToWorkspace ${JOB_NAME} ${BUILD_NUMBER}
+    mustExistFile ${WORKSPACE}/changelog.xml
+
+    # ADMIN_-_genericShareCleanup_-_Ul
+    export siteName=$(getSubTaskNameFromJobName)
+
+    local remoteServer=$(getConfig ADMIN_sync_share_remote_hostname)
+    mustHaveValue "${remoteServer}" "remote server name"
+    mustHaveAccessableServer ${remoteServer}
+
+    # TODO: demx2fk3 2014-07-25 remove me -- for debugging
+    local execute=info
+
+    # we are handeling "old" pathes first:
+    local tmpFile=$(createTempFile)
+    ${LFS_CI_ROOT}/bin/xpath -q -e '/log/logentry/paths/path[@action="D"]/node()' ${WORKSPACE}/changelog.xml \
+        > ${tmpFile}
+
+    for entry in $(cat ${tmpFile}) ; do
+        info "removing ${entry}"
+
+        debug "fixing permissions on parent directory"
+        $execute ssh ${remoteServer} chmod u+w $(dirname ${entry})
+
+        debug "fixing permissions of removal candidate ${entry}"
+        $execute ssh ${remoteServer} chmod -R u+w ${entry}
+
+        debug "removing ${entry}"
+        $execute ssh ${remoteServer} rm -rf ${entry}
+    done
+
+    # next: modified and added stuff
+    ${LFS_CI_ROOT}/bin/xpath -q -e '/log/logentry/paths/path[@action="M"]/node()' ${WORKSPACE}/changelog.xml \
+        > ${tmpFile}
+    ${LFS_CI_ROOT}/bin/xpath -q -e '/log/logentry/paths/path[@action="M"]/node()' ${WORKSPACE}/changelog.xml \
+        >> ${tmpFile}
+
+    for entry in $(cat ${tmpFile}) ; do
+        info "transferting ${entry} to ${remoteServer}"
+
+        debug "fixing permissions on parent directory"
+        $execute ssh ${remoteServer} chmod u+w $(dirname ${entry})
+
+        debug "creating new directory"
+        $execute ssh ${remoteServer} mkdir -p ${remotePath}/${entry}
+
+        debug "rsyncing ${entry}"
+        $execute rsync -aHz -e ssh --stats ${entry}/ ${remoteServer}:${entry}/
+    done
+
+    info "synchronizing is done."
+}
+
+
 ## @fn      cleanupArtifactsShare()
 #  @brief   clean up the artifcats from share, if a build of a job was removed / delete from the jenkins master
 #  @details the jenkins server removes the builds from ${JENKINS_HOME}/jobs/<job>/builds/ directory after some

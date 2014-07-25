@@ -715,3 +715,7 @@ getPackageJobNameFromUpstreamProject() {
     return
 }
 
+
+mustHaveAccessableServer() {
+    return
+}

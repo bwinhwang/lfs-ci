@@ -39,7 +39,7 @@ uploadToSubversion() {
     mustExistBranchInSubversion ${svnReposUrl}/os/branches "${branch}"
 
     local oldTemp=${TMPDIR:-/tmp}
-    export TMPDIR=${WORKSPACE}/tmp
+    export TMPDIR=/dev/shm/${JOB_NAME}.${USER}/tmp
     debug "cleanup tmp directory"
     rm -rf ${TMPDIR}
     mkdir -p ${TMPDIR}
@@ -63,6 +63,7 @@ uploadToSubversion() {
 
 #                -message "upload"                      \
 
+    execute rm -rf /dev/shm/${JOB_NAME}.${USER}
     export TMPDIR=${oldTemp}
     info "upload done";
 

@@ -22,7 +22,8 @@ ci_job_test_on_target() {
     execute build setup
     execute build adddir src-test
 
-    local make="make TESTTARGET=${targetName}"    
+    # Note: TESTTARGET lowercase with ,,
+    local make="make TESTTARGET=${targetName,,}"    
 
     cd ${workspace}/src-test/src/unittest/tests/common/checkuname
     info "installing software on the target"

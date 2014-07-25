@@ -146,7 +146,8 @@ _getUpstream() {
     upstreamProjectName=${UPSTREAM_PROJECT}
     upstreamBuildNumber=${UPSTREAM_BUILD}
 
-    if [[ -z ${UPSTREAM_PROJECT} || -z ${UPSTREAM_BUILD} ]] ; then
+    # TODO: demx2fk3 2014-07-25 FIXME 
+#     if [[ -z ${UPSTREAM_PROJECT} || -z ${UPSTREAM_BUILD} ]] ; then
 
         debug "build was triggered manually, get last promoted upstream"
         upstreamProjectName=$(sed 's/\(.*\)_Prod_-_\(.*\)_-_Releasing_-_summary/\1_CI_-_\2_-_Test/' <<< ${JOB_NAME} )
@@ -159,13 +160,13 @@ _getUpstream() {
 
         execute rm -rf ${WORKSPACE}/build.xml
         
-    else
-        debug "build was triggered by upstream"
-
-        upstreamProjectName=${UPSTREAM_PROJECT}
-        upstreamBuildNumber=${UPSTREAM_BUILD}
-
-    fi
+#     else
+#         debug "build was triggered by upstream"
+# 
+#         upstreamProjectName=${UPSTREAM_PROJECT}
+#         upstreamBuildNumber=${UPSTREAM_BUILD}
+# 
+#     fi
 
     return
 }
