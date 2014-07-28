@@ -58,7 +58,7 @@ ci_job_ecl() {
         # otherwise, we will spam ECL
         warning "not promoting this build. ONLY EVERY 4th build will be promoted"
         setBuildDescription ${JOB_NAME} ${BUILD_NUMBER} "${labelName}<br>not promoted"
-        exit 0
+        exit 1
     fi
 
 

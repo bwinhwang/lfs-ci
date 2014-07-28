@@ -23,7 +23,7 @@ uploadToSubversion() {
 
     local svnReposUrl=$(getConfig LFS_PROD_svn_delivery_release_repos_url)
 
-    info "upload local path ${pathToUpload} to ${branchToUpload}"
+    info "upload local path ${pathToUpload} to ${branchToUpload} as ${tagName}"
 
     local branch=${locationToSubversionMap["${branchToUpload}"]}
     # local branch=$(getConfig LFS_PROD_subversion_upload_branch_name)
@@ -39,7 +39,7 @@ uploadToSubversion() {
     mustExistBranchInSubversion ${svnReposUrl}/os/branches "${branch}"
 
     local oldTemp=${TMPDIR:-/tmp}
-    export TMPDIR=${WORKSPACE}/tmp
+    export TMPDIR=/dev/shm/${JOB_NAME}.${USER}/tmp
     debug "cleanup tmp directory"
     execute rm -rf ${TMPDIR}
     execute mkdir -p ${TMPDIR}
@@ -65,6 +65,9 @@ uploadToSubversion() {
                 ${pathToUpload} 
 
 #                -wc ${localCheckoutDirectory}          \
+#                -message "upload"                      \
+
+    execute rm -rf /dev/shm/${JOB_NAME}.${USER}
     export TMPDIR=${oldTemp}
     info "upload done";
 

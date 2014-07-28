@@ -83,6 +83,8 @@ my $opt_final_commit_msg;
 
 my $opt_no_diff_tag = 0;
 
+my $opt_no_svn_up_in_existing_wc = 1;
+
 # This is the character used to separate regular expressions occuring
 # in the tag directory path from the path itself.
 my $REGEX_SEP_CHAR = '@';
@@ -95,6 +97,7 @@ my $property_config_filename;
 GetOptions('no_user_input'           => \$opt_no_user_input,
            'no_diff_tag'             => \$opt_no_diff_tag,
            'no_auto_exe'             => \$opt_no_auto_exe,
+           'no_svn_up_on_wc'         => \$opt_no_svn_up_in_existing_wc,
            'property_cfg_filename=s' => \$property_config_filename,
            'svn_password=s'          => \$opt_svn_password,
            'svn_username=s'          => \$opt_svn_username,
@@ -171,16 +174,22 @@ if (defined $opt_existing_wc_dir)
   {
     unless (-e $opt_existing_wc_dir)
       {
-        die "$0: working copy '$opt_existing_wc_dir' does not exist.\n";
+        # TODO: demx2fk3 2014-07-24 dont die, just undefine it
+        $opt_existing_wc_dir = undef;
+        # die "$0: working copy '$opt_existing_wc_dir' does not exist.\n";
       }
 
     unless (-d _)
       {
-        die "$0: working copy '$opt_existing_wc_dir' is not a directory.\n";
+        # TODO: demx2fk3 2014-07-24 don't die, just undefine it.
+        $opt_existing_wc_dir = undef;
+        # die "$0: working copy '$opt_existing_wc_dir' is not a directory.\n";
+
       }
 
     unless (-d "$opt_existing_wc_dir/.svn")
       {
+        # TODO: demx2fk3 2014-07-24 we should delete it
         die "$0: working copy '$opt_existing_wc_dir' does not have .svn ",
             "directory.\n";
       }
@@ -511,7 +520,9 @@ if (defined $opt_existing_wc_dir)
     chdir($opt_existing_wc_dir)
       or die "$0: cannot chdir '$opt_existing_wc_dir': $!\n";
 
-    read_from_process($svn, 'update', @svn_use_repos_cmd_opts);
+    if( not $opt_no_svn_up_in_existing_wc ) {
+        read_from_process($svn, 'update', @svn_use_repos_cmd_opts);
+    }
   }
 else
   {

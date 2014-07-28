@@ -143,6 +143,7 @@ extractArtifactsOnReleaseShare() {
     local workspace=$(getWorkspaceName)
     local server=$(getConfig jenkinsMasterServerHostName)
     local resultBuildShare=$(getConfig LFS_PROD_UC_release_copy_build_to_share)
+    local resultBuildShareLinuxKernel=$(getConfig LFS_PROD_UC_release_copy_build_to_share_linux_kernel)
     mustHaveWorkspaceName
 
     local canStoreArtifactsOnShare=$(getConfig LFS_CI_uc_release_can_store_build_results_on_share)
@@ -158,6 +159,10 @@ extractArtifactsOnReleaseShare() {
         basename=$(basename ${dir})
 
         local destination=${resultBuildShare}/${basename}/${labelName}
+        if [[ ${basename} =~ linuxkernel ]] ; then
+            destination=${resultBuildShareLinuxKernel}/${basename}/${labelName}
+        fi
+
         info "copy ${basename} to buildresults share ${destination}"
 
         if [[ ${canStoreArtifactsOnShare} ]] ; then
@@ -210,17 +215,22 @@ sendReleaseNote() {
 
     info "new release label is ${releaseTagName} based on ${oldReleaseTagName}"
     _createLfsOsReleaseNote ${buildJobName} ${buildBuildNumber}
-    _createReleaseInWorkflowTool ${osTagName} ${workspace}/os/releasenote.xml
-    _uploadToWorkflowTool        ${osTagName} ${workspace}/os/releasenote.xml
-    _uploadToWorkflowTool        ${osTagName} ${workspace}/os/releasenote.txt
-    _uploadToWorkflowTool        ${osTagName} ${workspace}/os/changelog.xml
 
-    _createLfsRelReleaseNoteXml  ${releaseTagName} ${workspace}/rel/releasenote.xml
-    _createReleaseInWorkflowTool ${releaseTagName} ${workspace}/rel/releasenote.xml
-    _uploadToWorkflowTool        ${releaseTagName} ${workspace}/rel/releasenote.xml
-    _uploadToWorkflowTool        ${releaseTagName} ${workspace}/os/releasenote.xml
-    _uploadToWorkflowTool        ${releaseTagName} ${workspace}/os/releasenote.txt
-    _uploadToWorkflowTool        ${releaseTagName} ${workspace}/os/changelog.xml
+    if [[ ${productName} == "LFS" ]] ; then
+        _createReleaseInWorkflowTool ${osTagName} ${workspace}/os/releasenote.xml
+        _uploadToWorkflowTool        ${osTagName} ${workspace}/os/releasenote.xml
+        _uploadToWorkflowTool        ${osTagName} ${workspace}/os/releasenote.txt
+        _uploadToWorkflowTool        ${osTagName} ${workspace}/os/changelog.xml
+
+        _createLfsRelReleaseNoteXml  ${releaseTagName} ${workspace}/rel/releasenote.xml
+        _createReleaseInWorkflowTool ${releaseTagName} ${workspace}/rel/releasenote.xml
+        _uploadToWorkflowTool        ${releaseTagName} ${workspace}/rel/releasenote.xml
+        _uploadToWorkflowTool        ${releaseTagName} ${workspace}/os/releasenote.xml
+        _uploadToWorkflowTool        ${releaseTagName} ${workspace}/os/releasenote.txt
+        _uploadToWorkflowTool        ${releaseTagName} ${workspace}/os/changelog.xml
+
+        execute cp -f ${workspace}/rel/releasenote.xml ${workspace}/bld/bld-lfs-release/lfs_rel_releasenote.xml
+    fi
 
     info "send release note"
     if [[ ${canSendReleaseNote} ]] ; then
@@ -234,7 +244,9 @@ sendReleaseNote() {
     execute cp -f ${workspace}/os/releasenote.txt  ${workspace}/bld/bld-lfs-release/lfs_os_releasenote.txt
     execute cp -f ${workspace}/os/releasenote.xml  ${workspace}/bld/bld-lfs-release/lfs_os_releasenote.xml
     execute cp -f ${workspace}/os/changelog.xml    ${workspace}/bld/bld-lfs-release/lfs_os_changelog.xml
-    execute cp -f ${workspace}/rel/releasenote.xml ${workspace}/bld/bld-lfs-release/lfs_rel_releasenote.xml
+
+    info "creating approval file on moritz for ${osTagName}"
+    execute ssh moritz touch /lvol2/production_jenkins/tmp/approved/${osTagName}
 
     info "release is done."
     return
@@ -357,7 +369,6 @@ _createLfsOsReleaseNote() {
     execute rsync -ae ssh ${serverName}:${buildDirectory}/changelog.xml ${workspace}/os/
     mustExistFile ${workspace}/os/changelog.xml
 
-
     copyArtifactsToWorkspace "${buildJobName}" "${buildBuildNumber}" "externalComponents fsmpsl psl fsmci"
 
     # convert the changelog xml to a release note
@@ -403,7 +414,7 @@ _createLfsRelReleaseNoteXml() {
             > ${workspace}/rel/bld/bld-externalComponents-summary/externalComponents
     mustBeSuccessfull "$?" "grep sdk ok"
 
-    echo " PS_LFS_OS = ${LFS_PROD_RELEASE_PREVIOUS_TAG_NAME}" >> ${workspace}/rel/bld/bld-externalComponents-summary/externalComponents
+    echo "PS_LFS_OS <> = ${LFS_PROD_RELEASE_PREVIOUS_TAG_NAME}" >> ${workspace}/rel/bld/bld-externalComponents-summary/externalComponents
 
     # no changes here, just a dummy changelog is required
     echo '<log />' > changelog.xml 

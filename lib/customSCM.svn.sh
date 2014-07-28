@@ -166,7 +166,6 @@ actionCheckout() {
                 execute cp -f ${tmpChangeLogFile} ${CHANGELOG}
             else
                 debug "using xsltproc to create new ${CHANGELOG}"
-                local tmpChangeLogFile=$(createTempFile)
                 execute xsltproc                                          \
                             --stringparam file ${tmpChangeLogFile}        \
                             --output ${CHANGELOG}                         \

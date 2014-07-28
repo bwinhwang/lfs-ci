@@ -26,14 +26,15 @@ ci_job_test() {
     mustHaveWorkspaceName
     mustHaveWritableWorkspace
 
-    # local upstreamProject=${UPSTREAM_PROJECT}
-    # local upstreamBuildNumber=${UPSTREAM_BUILD}
-    # info "upstreamProject ${upstreamProject} ${upstreamBuildNumber}"
+    local upstreamProject=${UPSTREAM_PROJECT}
+    local upstreamBuildNumber=${UPSTREAM_BUILD}
+    info "upstreamProject ${upstreamProject} ${upstreamBuildNumber}"
 
     # TODO fixme
-    local upstreamProject=$(sed "s/Test.*/Package_-_package/" <<< ${JOB_NAME})
-    local upstreamBuildNumber=$(readlink ${serverPath}/jobs/${upstreamProject}/builds/lastSuccessfulBuild)
-    info "upstreamProject ${upstreamProject} ${upstreamBuildNumber}"
+    # local upstreamProject=$(sed "s/Test.*/Package_-_package/" <<< ${JOB_NAME})
+    # local upstreamBuildNumber=$(readlink ${serverPath}/jobs/${upstreamProject}/builds/lastSuccessfulBuild)
+    # info "upstreamProject ${upstreamProject} ${upstreamBuildNumber}"
+    source /var/fpwork/psulm/lfs-jenkins/home/jobs/${upstreamProject}/workspace/upstream
 
     local ciBuildShare=$(getConfig LFS_CI_UC_package_internal_link)
     local workspace=${ciBuildShare}/build_${upstreamBuildNumber}
