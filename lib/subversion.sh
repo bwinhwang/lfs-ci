@@ -41,8 +41,11 @@ uploadToSubversion() {
     local oldTemp=${TMPDIR:-/tmp}
     export TMPDIR=${WORKSPACE}/tmp
     debug "cleanup tmp directory"
-    rm -rf ${TMPDIR}
-    mkdir -p ${TMPDIR}
+    execute rm -rf ${TMPDIR}
+    execute mkdir -p ${TMPDIR}
+
+    local localCheckoutDirectory=${WORKSPACE}/checkout
+    execute mkdir -p ${localCheckoutDirectory}
 
     local branchPath=$(getConfig SVN_branch_path_name)
     local tagPath=$(getConfig SVN_tag_path_name)
@@ -61,8 +64,7 @@ uploadToSubversion() {
                 ${svnReposUrl} ${branchPath}/${branch} \
                 ${pathToUpload} 
 
-#                -message "upload"                      \
-
+#                -wc ${localCheckoutDirectory}          \
     export TMPDIR=${oldTemp}
     info "upload done";
 
