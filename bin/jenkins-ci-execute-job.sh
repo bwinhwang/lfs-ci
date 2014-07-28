@@ -84,10 +84,6 @@ case "${JOB_NAME}" in
         source ${LFS_CI_ROOT}/lib/uc_test.sh
         ci_job_test_summary || exit 1 
     ;;
-    LFS_CI_*_ECL_*) 
-        source ${LFS_CI_ROOT}/lib/uc_ecl.sh
-        ci_job_ecl || exit 1 
-    ;;
     Test-*)
         source ${LFS_CI_ROOT}/lib/uc_test_on_target.sh
         ci_job_test_on_target || exit 1 
@@ -99,9 +95,6 @@ case "${JOB_NAME}" in
     LFS_Prod_*_Releasing_*|UBOOT_Prod_*_Releasing_*)
         source ${LFS_CI_ROOT}/lib/uc_release.sh
         ci_job_release || exit 1 
-    ;;
-    listJobs)
-        listJobs
     ;;
     *)
 

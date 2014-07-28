@@ -17,6 +17,7 @@ ci_job_admin() {
         cleanupOrphanJobDirectories) cleanupOrphanJobDirectories           ;;
         cleanupOrphanWorkspaces)     cleanupOrphanWorkspaces               ;;
         synchronizeShare)            synchronizeShare                      ;;
+        genericShareCleanup)         genericShareCleanup                   ;;
         *)
             error "subjob not known (${taskName})"
             exit 1;
@@ -114,14 +115,14 @@ genericShareCleanup() {
         $execute ssh ${remoteServer} chmod u+w $(dirname ${entry})
 
         debug "fixing permissions of removal candidate ${entry}"
-        $execute ssh ${remoteServer} chmod -R u+w ${entry}
+        $execute "ssh ${remoteServer} chmod -R u+w ${entry}"
 
         debug "removing ${entry}"
-        $execute ssh ${remoteServer} rm -rf ${entry}
+        $execute "ssh ${remoteServer} rm -rf ${entry}"
     done
 
     # next: modified and added stuff
-    ${LFS_CI_ROOT}/bin/xpath -q -e '/log/logentry/paths/path[@action="M"]/node()' ${WORKSPACE}/changelog.xml \
+    ${LFS_CI_ROOT}/bin/xpath -q -e '/log/logentry/paths/path[@action="A"]/node()' ${WORKSPACE}/changelog.xml \
         > ${tmpFile}
     ${LFS_CI_ROOT}/bin/xpath -q -e '/log/logentry/paths/path[@action="M"]/node()' ${WORKSPACE}/changelog.xml \
         >> ${tmpFile}
@@ -139,7 +140,7 @@ genericShareCleanup() {
         $execute rsync -aHz -e ssh --stats ${entry}/ ${remoteServer}:${entry}/
     done
 
-    info "synchronizing is done."
+    info "cleanup is done."
 }
 
 

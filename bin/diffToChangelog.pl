@@ -31,6 +31,7 @@ while( <CMD> ) {
     }
 }
 close CMD;
+print STDERR Dumper( \%changes );
 
 printf( "<?xml version=\"1.0\"?>
 <log>
@@ -40,7 +41,7 @@ printf( "<?xml version=\"1.0\"?>
         <paths>
             %s
         </paths>
-        <msg>update in %s</msg>
+        <msg>%s</msg>
     </logentry>
 </log>
 ",
@@ -50,7 +51,7 @@ printf( "<?xml version=\"1.0\"?>
     join( "            \n", 
         map { sprintf( '<path kind="" action="%s">%s</path>', $changes{ $_ }, $_, ) } 
         keys %changes ),
-    join( "\n", map { sprintf( "change in %s (%s)", $_, $types{ $changes{ $_ } }, ) } keys %changes ),
+    join( "\n", map { sprintf( "%s %s ", $types{ $changes{ $_ } }, $_, ) } sort keys %changes ),
 );
 
 exit 0;
