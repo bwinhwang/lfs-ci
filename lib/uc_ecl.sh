@@ -48,6 +48,13 @@ ci_job_ecl() {
     local requiredArtifacts=$(getConfig LFS_CI_UC_update_ecl_required_artifacts)
     copyArtifactsToWorkspace "${buildJobName}" "${buildBuildNumber}" "${requiredArtifacts}"
 
+    local ciBuildShare=$(getConfig LFS_CI_UC_package_internal_link)
+    local releaseDirectory=${ciBuildShare}/build_${packageBuildNumber}
+    mustExistSymlink ${releaseDirectory}
+
+    local releaseDirectoryLinkDestination=$(readlink -f ${releaseDirectory})
+    mustExistDirectory ${releaseDirectoryLinkDestination}
+
     mustHaveNextLabelName
     local labelName=$(getNextReleaseLabel)
     setBuildDescription ${JOB_NAME} ${BUILD_NUMBER} ${labelName}

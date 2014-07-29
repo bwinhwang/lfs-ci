@@ -1211,18 +1211,28 @@ sub readBuildXml {
     my $upstream = $xml->{actions}->[0]->{'hudson.model.CauseAction'}->[0]->{causes}->[0]->{'hudson.model.Cause_-UpstreamCause'};
 
     # print STDERR Dumper( $xml->{actions}->[0]->{'hudson.model.CauseAction'}->[0] );
-    push @results, sprintf( "%s:%s", $upstream->[0]->{upstreamProject}->[0],
-                                     $upstream->[0]->{upstreamBuild}->[0],   );
+    foreach my $up ( @{ $upstream } ) {
+        push @results, _getUpstream( $up );
 
-    while ( exists $upstream->[0]->{upstreamCauses} and
-            exists $upstream->[0]->{upstreamCauses}->[0]->{'hudson.model.Cause_-UpstreamCause'} ) {
-
-        $upstream = $upstream->[0]->{upstreamCauses}->[0]->{'hudson.model.Cause_-UpstreamCause'};
-        push @results, sprintf( "%s:%s", $upstream->[0]->{upstreamProject}->[0],
-                                         $upstream->[0]->{upstreamBuild}->[0],   );
     }
 
     return @results;
+}
+
+sub _getUpstream {
+    my $upstream = shift;
+    my @result;
+
+    if( exists $upstream->{upstreamCauses} and
+        ref $upstream->{upstreamCauses} eq "ARRAY" ) {
+        my @array = @{ $upstream->{upstreamCauses}->[0]->{'hudson.model.Cause_-UpstreamCause'} };
+        foreach my $up ( @array ) {
+            push @result, _getUpstream( $up );
+        }
+    }
+    push @result, sprintf( "%s:%s", $upstream->{upstreamProject}->[0], $upstream->{upstreamBuild}->[0], );
+
+    return @result;
 }
 
 sub prepare {

@@ -636,7 +636,7 @@ _getJobInformationFromUpstreamProject() {
     local upstreamsFile=$(createTempFile)
 
     _getUpstreamProjects ${jobName} ${buildNumber} ${upstreamsFile}
-    local resultValue=$(grep ${jobNamePart} ${upstreamsFile} | cut -d: -f${fieldNumber})
+    local resultValue=$(grep ${jobNamePart} ${upstreamsFile} | cut -d: -f${fieldNumber}) | sort -n | tail -n 1
     mustHaveValue ${resultValue} "requested info / ${jobNamePart} / ${fieldNumber}"
 
     echo ${resultValue}

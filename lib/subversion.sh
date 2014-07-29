@@ -41,6 +41,7 @@ uploadToSubversion() {
     local oldTemp=${TMPDIR:-/tmp}
     export TMPDIR=/dev/shm/${JOB_NAME}.${USER}/tmp
     debug "cleanup tmp directory"
+
     rm -rf ${TMPDIR}
     mkdir -p ${TMPDIR}
     
