@@ -61,6 +61,8 @@ ci_job_release() {
     local ciBuildShare=$(getConfig LFS_CI_UC_package_internal_link)
     local releaseDirectory=${ciBuildShare}/build_${packageBuildNumber}
     mustExistSymlink ${releaseDirectory}
+    local releaseDirectoryLinkDestination=$(readlink -f ${releaseDirectory})
+    mustExistDirectory ${releaseDirectoryLinkDestination}
 
     debug "found results of package job on share: ${releaseDirectory}"
 
