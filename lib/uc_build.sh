@@ -416,7 +416,7 @@ synchroniceToLocalPath() {
 ## @fn      storeExternalComponentBaselines()
 #  @brief   store externals components baseline into a artifacts file
 #  @details The information is used during the releasing later for tagging.
-#           Externals components can be configured in config LFS_BUILD_externalsComponents.
+#           Externals components can be configured in config LFS_CI_UC_build_externalsComponents.
 #           Externals components are baselines like sdk{1,2,3,} or pkgpool.  
 #  @param   <none>
 #  @return  <none>
@@ -432,7 +432,7 @@ storeExternalComponentBaselines() {
     execute rm -f ${externalComponentFile}
 
     # storing sdk labels for later use in a artifact file.
-    for component in $(getConfig LFS_BUILD_externalsComponents) ; do
+    for component in $(getConfig LFS_CI_UC_build_externalsComponents) ; do
         [[ -e ${workspace}/bld/${component} ]] || continue
         local baselineLink=$(readlink ${workspace}/bld/${component})
         local baseline=$(basename ${baselineLink})
