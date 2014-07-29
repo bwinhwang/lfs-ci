@@ -43,6 +43,16 @@ uploadToSubversion() {
     debug "cleanup tmp directory"
     rm -rf ${TMPDIR}
     mkdir -p ${TMPDIR}
+    
+    info "copy baseline to upload on local disk"
+    local uploadDirectoryOnLocalDisk=${TMPDIR}/upload
+    execute mkdir -p ${uploadDirectoryOnLocalDisk}
+    execute rsync -av ${pathToUpload} ${uploadDirectoryOnLocalDisk}
+
+    info "checkout svn workspace for upload preparation"
+    local workspace=${TMPDIR}/workspace
+    execute mkdir -p ${workspace}
+    svnCheckout ${svnReposUrl}/${branchPath}/${branch} ${workspace}
 
     local branchPath=$(getConfig SVN_branch_path_name)
     local tagPath=$(getConfig SVN_tag_path_name)
@@ -54,14 +64,13 @@ uploadToSubversion() {
     execute ${LFS_CI_ROOT}/bin/svn_load_dirs.pl        \
                 -v                                     \
                 -t ${tagPath}/${tagName}               \
+                -wc ${workspace}                       \
                 -no_user_input                         \
                 -no_diff_tag                           \
                 -glob_ignores="#.#"                    \
                 -sleep 60                              \
                 ${svnReposUrl} ${branchPath}/${branch} \
-                ${pathToUpload} 
-
-#                -message "upload"                      \
+                ${uploadDirectoryOnLocalDisk} 
 
     execute rm -rf /dev/shm/${JOB_NAME}.${USER}
     export TMPDIR=${oldTemp}

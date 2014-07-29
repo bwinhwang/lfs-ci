@@ -110,12 +110,12 @@ copyReleaseCandidateToShare() {
 
     local rsyncOpts=$(getConfig RSYNC_options)
 
+    # PS SCM - which are responsible for syncing this share to the world wants the group writable
+    execute chmod -R g+w ${localDirectory}
+
     execute mkdir -p ${remoteDirectory}/os/
     execute rsync -av --delete ${hardlink} ${localDirectory}/ ${remoteDirectory}/os/
     execute cd ${remoteDirectory}
-
-    # PS SCM - which are responsible for syncing this share to the world wants the group writable
-    execute chmod -R g+w ${remoteDirectory}
 
     info "linking sdk"
     local commonentsFile=${workspace}/bld/bld-externalComponents-summary/externalComponents 

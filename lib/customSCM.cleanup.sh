@@ -96,6 +96,7 @@ actionCheckout() {
         echo -n "<log/>" >"${CHANGELOG}"
     fi
 
+
     return
 }
 
@@ -123,7 +124,7 @@ _notReleasedBuilds() {
     find ${directoryToCleanup} -maxdepth 2 -mtime +60 -type d -printf "%p\n" | sort > ${tmpFileB}
 
     # release candidates, which are older than 60 days and are not released
-    diff ${tmpFileA} ${tmpFileB} | grep "^<" | sed "s/^./1/" > ${resultFile}
+    diff ${tmpFileA} ${tmpFileB} | grep "^>" | sed "s/^./1/" > ${resultFile}
 
     return
 }
@@ -134,6 +135,7 @@ _notReleasedBuilds() {
 #  @param   <none>
 #  @return  <none>
 actionCalculate() {
+    touch ${REVISION_STATE_FILE}
     return 
 }
 

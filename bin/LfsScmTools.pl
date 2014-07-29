@@ -1170,6 +1170,42 @@ sub readBuildXml {
 #         </hudson.model.Cause_-UpstreamCause>
 #       </causes>
 
+#   <hudson.model.CauseAction>
+#       <causes>
+#         <hudson.model.Cause_-UpstreamCause>
+#           <upstreamProject>LFS_CI_-_trunk_-_Test</upstreamProject>
+#           <upstreamUrl>job/LFS_CI_-_trunk_-_Test/</upstreamUrl>
+#           <upstreamBuild>858</upstreamBuild>
+#           <upstreamCauses>
+#             <hudson.model.Cause_-UpstreamCause>
+#               <upstreamProject>LFS_CI_-_trunk_-_Package_-_package</upstreamProject>
+#               <upstreamUrl>job/LFS_CI_-_trunk_-_Package_-_package/</upstreamUrl>
+#               <upstreamBuild>1070</upstreamBuild>
+#               <upstreamCauses>
+#                 <hudson.model.Cause_-UpstreamCause>
+#                   <upstreamProject>LFS_CI_-_trunk_-_Build</upstreamProject>
+#                   <upstreamUrl>job/LFS_CI_-_trunk_-_Build/</upstreamUrl>
+#                   <upstreamBuild>1881</upstreamBuild>
+#                   <upstreamCauses>
+#                     <hudson.triggers.SCMTrigger_-SCMTriggerCause/>
+#                   </upstreamCauses>
+#                 </hudson.model.Cause_-UpstreamCause>
+#                 <hudson.model.Cause_-UpstreamCause>
+#                   <upstreamProject>LFS_CI_-_trunk_-_Build</upstreamProject>
+#                   <upstreamUrl>job/LFS_CI_-_trunk_-_Build/</upstreamUrl>
+#                   <upstreamBuild>1882</upstreamBuild>
+#                   <upstreamCauses>
+#                     <hudson.triggers.SCMTrigger_-SCMTriggerCause/>
+#                   </upstreamCauses>
+#                 </hudson.model.Cause_-UpstreamCause>
+#               </upstreamCauses>
+#             </hudson.model.Cause_-UpstreamCause>
+#           </upstreamCauses>
+#         </hudson.model.Cause_-UpstreamCause>
+#       </causes>
+#     </hudson.model.CauseAction>
+
+
     my @results;
     my $xml = XMLin( $file, ForceArray => 1 );
     my $upstream = $xml->{actions}->[0]->{'hudson.model.CauseAction'}->[0]->{causes}->[0]->{'hudson.model.Cause_-UpstreamCause'};
