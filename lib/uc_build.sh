@@ -169,7 +169,7 @@ _build() {
     local makeTarget=$(build -C src-project final-build-target_${productName}_${subTaskName})
     # -${target}
     info "executing all targets in parallel with ${makeTarget} and label=${label}"
-    execute make -f ${cfgFile} ${makeTarget} 
+    execute make -f ${cfgFile} ${makeTarget} JOBS=32
 
     return 0
 }

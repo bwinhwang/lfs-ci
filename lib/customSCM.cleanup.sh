@@ -80,6 +80,19 @@ actionCheckout() {
         ;;
         CI_LFS_in_Ulm_Phase_3)
         ;;
+        SC_LFS_in_Ulm_Phase_2)
+            _scLfsOldReleasesOnBranches ${tmpFileA}
+            execute touch ${tmpFileB}
+        ;;
+        SC_LFS_in_*_Phase_4)
+            case ${subTaskName} in
+                *Oulu*)    _scLfsRemoteSites ousync ${tmpFileA} ;;
+                *Wrozlaw*) _scLfsRemoteSites wrsync ${tmpFileA} ;;
+                *Ulm*)     _scLfsRemoteSites ulsync ${tmpFileA} ;;
+            esac
+
+            _scLfsRemoteSites ulsync ${tmpFileB}
+        ;;
     esac
 
     if [[ -e ${LFS_CI_ROOT}/etc/baselineExclutionList.sed ]] ; then
@@ -131,14 +144,29 @@ _ciLfsNotReleasedBuilds() {
 
 _scLfsOldReleasesOnBranches() {
     local resultFile=$1
-
     local tmpFileA=$(createTempFile)
+    local tmpFileB=$(createTempFile)
+    local directoryToCleanup=/build/home/SC_LFS/releases/bld/
+    local days=1400
+
+    info "check for baselines older than ${days} days in ${directoryToCleanup}"
+    find ${directoryToCleanup} -mindepth 2 -maxdepth 2 -mtime +${days} -type d -printf "%p\n" \
+        | sort -u > ${tmpFileA}
+
+    ${LFS_CI_ROOT}/bin/removalCanidates.pl  < ${tmpFileA} > ${tmpFileB}
+
+    grep -f ${tmpFileB} ${tmpFileA} | sed "s/^/1 /g" > ${resultFile}
+
+    return
+}
+
+_scLfsRemoteSites() {
+    local resultFile=$2
+    local siteName=$1
     local directoryToCleanup=/build/home/SC_LFS/releases/bld/
 
-    find ${directoryToCleanup} -mindepth 2 -maxdepth 2 -mtime +60 -type d -printf "%p\n" \
-        | sort -u \
-        | ${LFS_CI_ROOT}/bin/removalCanidates.pl \
-        | sed "s/^/1 ${directoryToCleanup}/g" | sort -u > ${resultFile}
+    ssh ${siteName} "find ${directoryToCleanup} -mindepth 2 -maxdepth 2 -type d -printf \"1 %p\n\" " | sort -u > ${resultFile} 
+    mustBeSuccessfull "$?" "ssh find ${siteName}"
 
     return
 }
@@ -152,7 +180,7 @@ _ciLfsOldReleasesOnBranches() {
     find ${directoryToCleanup} -mindepth 2 -maxdepth 2 -mtime +60 -type d -printf "%p\n" \
         | sort -u \
         | ${LFS_CI_ROOT}/bin/removalCanidates.pl \
-        | sed "s/^/1 /g" > ${resultFile}
+        | sed "s/^/1 ${directoryToCleanup}/g" | sort -u > ${resultFile}
 
     return
 }
