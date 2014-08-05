@@ -34,6 +34,11 @@ uploadToSubversion() {
 
     info "upload to ${branch}"
 
+    local branchPath=os/branches
+    local tagPath=os/tags
+    mustHaveValue "${tagPath}" "tag path"
+    mustHaveValue "${branchPath}" "branch path"
+
     mustExistBranchInSubversion ${svnReposUrl} os
     mustExistBranchInSubversion ${svnReposUrl}/os branches
     mustExistBranchInSubversion ${svnReposUrl}/os/branches "${branch}"
@@ -55,10 +60,6 @@ uploadToSubversion() {
     execute mkdir -p ${workspace}
     svnCheckout ${svnReposUrl}/${branchPath}/${branch} ${workspace}
 
-    local branchPath=$(getConfig SVN_branch_path_name)
-    local tagPath=$(getConfig SVN_tag_path_name)
-    mustHaveValue "${tagPath}" "tag path"
-    mustHaveValue "${branchPath}" "branch path"
 
     info "upload to svn and create copy (${tagName})"
 

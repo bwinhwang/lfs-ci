@@ -155,7 +155,7 @@ _scLfsOldReleasesOnBranches() {
 
     ${LFS_CI_ROOT}/bin/removalCanidates.pl  < ${tmpFileA} > ${tmpFileB}
 
-    grep -f ${tmpFileB} ${tmpFileA} | sed "s/^/1 /g" > ${resultFile}
+    grep -w -f ${tmpFileB} ${tmpFileA} | sed "s/^/1 /g" > ${resultFile}
 
     return
 }
