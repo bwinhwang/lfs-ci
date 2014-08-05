@@ -1,35 +1,48 @@
+#!/bin/bash
+
 source ${LFS_CI_ROOT}/lib/common.sh
 source ${LFS_CI_ROOT}/lib/jenkins.sh
 
+branchName=FB1407
+branchDisplayName="FB1407"
 
-# ls /var/fpwork/demx2fk3/lfs-jenkins/home/jobs/*/promotions
-
-branchName=fsmr4
-branchDisplayName="FSM-r4 trunk"
-
-for job in $(listJobNames | grep trunk)
+for job in $(cat jobList)
 do
+    if [[ -e ${job}.xml ]] ; then
+        info "delete ${job}.xml"
+        rm -rf ${job}.xml
+    fi
 
-    info "delete ${job}"
-    rm -rf ${job}.xml
+    continue
+
+    info "get configuration of ${job}"
     getJob "${job}" ${job}.xml
 
     newJobName=$(echo ${job} | sed "s/_-_trunk_-_/_-_${branchName}_-_/")
     if existsJenkinsJob "${newJobName}" ; then
         info "delete new job ${newJobName} first, because it exists"
-        deleteJenkinsJob "${newJobName}"
+        echo deleteJenkinsJob "${newJobName}"
     fi
 done
 
-for job in $(listJobNames | grep trunk)
+for job in $(cat jobList)
 do
     info "${job}"
-    rm -rf ${job}.xml
+
+    if [[ -e ${job}.xml ]] ; then
+        info "delete ${job}.xml"
+        rm -rf ${job}.xml
+    fi
+
     getJob "${job}" ${job}.xml
 
     newJobName=$(echo ${job} | sed "s/_-_trunk_-_/_-_${branchName}_-_/")
     displayName=$(       xpath -q -e '/project/displayName/node()' ${job}.xml)
-    downStreamProjects=$(xpath -q -e '/project/builders/hudson.plugins.parameterizedtrigger.TriggerBuilder/configs/hudson.plugins.parameterizedtrigger.BlockableBuildTriggerConfig/projects/node()' ${job}.xml)
+    if [[ ${newJobName} =~ Build$ ]] ; then
+        downStreamProjects=$(cat jobList | grep ${job}_ | tr "\n" "," )
+    else
+        downStreamProjects=$(xpath -q -e '/project/builders/hudson.plugins.parameterizedtrigger.TriggerBuilder/configs/hudson.plugins.parameterizedtrigger.BlockableBuildTriggerConfig/projects/node()' ${job}.xml)
+    fi
     upStreamProjects=$(  xpath -q -e '/project/publishers//hudson.tasks.BuildTrigger/childProjects/node()' ${job}.xml)
 
     newDownStreamProjects=$(echo ${downStreamProjects} | sed "s/_-_trunk_-_/_-_${branchName}_-_/g")
@@ -46,19 +59,23 @@ do
     info "new down stream projects ${newDownStreamProjects}"
     info "new up stream projects   ${newUpStreamProjects}"
 
-    cat ${job}.xml | xmlsubst.pl "/project/displayName:=fix(${newDisplayName})" > a
-    mv a ${job}.xml
-    cat ${job}.xml | xmlsubst.pl "/project/builders/hudson.plugins.parameterizedtrigger.TriggerBuilder/configs/hudson.plugins.parameterizedtrigger.BlockableBuildTriggerConfig/projects:=fix(${newDownStreamProjects})" > a
-    mv a ${job}.xml
-    cat ${job}.xml | xmlsubst.pl "/project/publishers/hudson.tasks.BuildTrigger/childProjects:=fix(${newUpStreamProjects})" > a
-    mv a ${job}.xml
-    cat ${job}.xml | xmlsubst.pl "/project/publishers/hudson.plugins.parameterizedtrigger.BuildTrigger/configs/hudson.plugins.parameterizedtrigger.BuildTriggerConfig/projects:=fix(${newUpStreamProjects})" > a
-    mv a ${job}.xml
+    cat ${job}.xml | xmlsubst.pl "/project/displayName:=fix(${newDisplayName})"  \
+                   | xmlsubst.pl "/project/builders/hudson.plugins.parameterizedtrigger.TriggerBuilder/configs/hudson.plugins.parameterizedtrigger.BlockableBuildTriggerConfig/projects:=fix(${newDownStreamProjects})"  \
+                   | xmlsubst.pl "/project/publishers/hudson.tasks.BuildTrigger/childProjects:=fix(${newUpStreamProjects})" \
+                   | xmlsubst.pl "/project/publishers/hudson.plugins.parameterizedtrigger.BuildTrigger/configs/hudson.plugins.parameterizedtrigger.BuildTriggerConfig/projects:=fix(${newUpStreamProjects})" \
+        > a
+    execute mv -f a ${job}.xml
 
+    info "get promotion"
 
-    createJenkinsJob "${newJobName}" ${job}.xml
+    for promotion in $( xmlsubst.pl "project/properties/hudson.plugins.promoted__builds.JobPropertyImpl/activeProcessNames/string:=print()" < ${job}.xml ) ; do
+        info "promotion found ${promotion}"
+        execute mkdir -p $(getConfig jenkinsMasterServerPath)/home/jobs/${newJobName}/promotions/${promotion}
+    done
+
+    # createJenkinsJob "${newJobName}" ${job}.xml
     info "job ${newJobName} created."
 
-    disableJob "${newJobName}"
+    # disableJob "${newJobName}"
 
 done
