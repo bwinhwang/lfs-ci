@@ -60,7 +60,7 @@ ci_job_ecl() {
     setBuildDescription ${JOB_NAME} ${BUILD_NUMBER} ${labelName}
 
     # TODO: demx2fk3 2014-07-22 remove this, if PS SCM can handle the load of LFSes...
-    if [[ $(( BUILD_NUMBER % 4 )) != 0 ]] ; then
+    if [[ $(( BUILD_NUMBER % 3 )) != 0 ]] ; then
         # as agreement with PS SCM, we are just promoting every 4th build.
         # otherwise, we will spam ECL
         warning "not promoting this build. ONLY EVERY 4th build will be promoted"

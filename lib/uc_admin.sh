@@ -112,7 +112,7 @@ genericShareCleanup() {
         info "removing ${entry}"
 
         debug "fixing permissions on parent directory"
-        $execute ssh ${remoteServer} chmod u+w $(dirname ${entry})
+        $execute "ssh ${remoteServer} chmod u+w $(dirname ${entry})"
 
         debug "fixing permissions of removal candidate ${entry}"
         $execute "ssh ${remoteServer} chmod -R u+w ${entry}"
