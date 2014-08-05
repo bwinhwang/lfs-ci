@@ -2126,8 +2126,8 @@ sub loadData {
 
     my @dataList;
     foreach my $store ( Store::Config::File->new( file => $fileName ),
-#                        Store::Config::Environment->new(), 
-#                        Store::Config::Date->new(), 
+                        Store::Config::Environment->new(), 
+                        Store::Config::Date->new(), 
                         Singelton::configStore( "cache" ),
                       ) {
         push @dataList, @{ $store->readConfig() };
@@ -2150,6 +2150,8 @@ sub loadData {
                                                 value    => $2, 
                                                 operator => "regex"
                                               );
+            } elsif( $tag =~ m/^\s*$/ ) {
+                # skip empty string
             } else {
                 die "tag $tag does not match to syntax";
             }

@@ -78,12 +78,13 @@ getConfig() {
     local key=$1
     local file=$2
 
-    export productName=$(getProductNameFromJobName)
-    export taskName=$(getTaskNameFromJobName)
-    export subTaskName=$(getSubTaskNameFromJobName)
-    export location=$(getLocationName)
-    export config=$(getTargetBoardName)
+    local productName=$(getProductNameFromJobName)
+    local taskName=$(getTaskNameFromJobName)
+    local subTaskName=$(getSubTaskNameFromJobName)
+    local location=$(getLocationName)
+    local config=$(getTargetBoardName)
 
+    # TODO: demx2fk3 2014-08-05 this should be always commented out, only required for debugging
     # echo 1>&2 "get config value for ${key} using ${file}"
     # echo 1>&2 "config/${config}"
     # echo 1>&2 "location/${location}"
@@ -91,8 +92,15 @@ getConfig() {
     # echo 1>&2 "taskName/${taskName}"
     # echo 1>&2 "productName/${productName}"
 
-    export LFS_CI_CONFIG_FILE=${LFS_CI_ROOT}/etc/file.cfg
-    ${LFS_CI_ROOT}/bin/getConfig -k "${key}" -f ${file}
+    if [[ ! -e ${file} ]] ; then
+        file=${LFS_CI_ROOT}/etc/file.cfg
+    fi
+
+    ${LFS_CI_ROOT}/bin/getConfig -k "${key}" -f ${file} \
+        -t productName:${productName} \
+        -t taskName:${taskName}       \
+        -t location:${location}       \
+        -t config:${config}          
 
     return
 }
