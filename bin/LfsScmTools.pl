@@ -59,6 +59,19 @@ sub readConfig {
 
     return if not -e $file;
 
+    my $tagsRE  = qr/ \s*
+                       < (?<tags>[^>]*) >
+                       \s*
+                    /x;
+    my $nameRE  = qr/ \s* 
+                      (?<name>[\w_]+) 
+                      \s* 
+                    /x;
+    my $valueRE = qr/ \s* 
+                      (?<value>.*)
+                      \s* 
+                    /x;
+
     my $data = [];
     open FILE, $file or die "can not open file";
     while ( my $line = <FILE> ) {
@@ -66,11 +79,11 @@ sub readConfig {
         next if $line =~ m/^#/;
         next if $line =~ m/^\s*$/;
 
-        if( $line =~ /^(\w+)\s+\<\s*([^>]*)\s*\>\s*=\s*(.*)$/ ) {
+        if( $line =~ /^ $nameRE (?: $tagsRE | ) = $valueRE $/x ) {
             push @{ $data }, {
-                                name  => $1 || "",
-                                tags  => $2 || "",
-                                value => $3 || "",
+                                name  => $+{name}  || "",
+                                value => $+{value} || "",
+                                tags  => $+{tags}  || "",
                              }
         }
     }
@@ -79,6 +92,32 @@ sub readConfig {
     return $data;
 }
 
+# }}} ------------------------------------------------------------------------------------------------------------------
+package Store::Config::Cache; # {{{
+
+use warnings;
+use strict;
+use parent qw( -norequire Object );
+
+sub init {
+    my $self = shift;
+    $self->{data} = {};
+    return;
+}
+
+sub readConfig {
+    my $self = shift;
+    my $data = [];
+
+    foreach my $key ( keys %{ $self->{data} || {} } ) {
+        push @{ $data }, {
+                            name  => $key,
+                            value => $self->{data}{$key} || "",
+                            tags  => "",
+                            }
+    }
+    return $data;
+}
 # }}} ------------------------------------------------------------------------------------------------------------------
 package Store::Config::Environment; # {{{
 
@@ -142,10 +181,12 @@ sub DESTROY {
 
 sub matches {
     my $self    = shift;
-    my $matches = 0;
+    my $matches = 1;
 
+    # printf STDERR "CHECK START - %s %s\n", $self->name(), $self->value();
     foreach my $tag ( @{ $self->{tags} } ) {
         my $value = $tag->value();
+        # printf STDERR "check %s -- %s %s\n", $tag->name(), $value, $tag->operator();
         if( $tag->operator() eq "eq" 
             and $value eq $self->{handler}->getConfig( name => $tag->name() ) ) {
             # printf STDERR "matching tag %s / %s found...\n", $tag->name(), $value;
@@ -160,7 +201,9 @@ sub matches {
     }
     $self->{matches} = $matches;
 
-    return scalar( @{ $self->{tags} } ) == $matches ? 1 : 0;
+    # printf STDERR "CHECK END   - %s %s %s\n", $self->name(), $self->value(), $matches;
+
+    return $matches;
 }
 # }}} ------------------------------------------------------------------------------------------------------------------
 package Model::Subdirectory; # {{{
@@ -1780,7 +1823,6 @@ sub prepare {
 sub execute {
     my $self = shift;
 
-    print Dumper( $self );
     my $mua = Mail::Sender->new(
                                 { smtp      => $self->{smtpServer},
                                   from      => $self->{fromAddress}, 
@@ -1797,8 +1839,6 @@ sub execute {
                               msg  => $self->{releaseNote},
                             }
                           ); 
-    print Dumper( $rv );
-
     if( ! $rv ) {
         die "error in sending release note: rc $rv";
     }
@@ -1813,25 +1853,36 @@ use strict;
 use warnings;
 
 use parent qw( -norequire Object );
-use Getopt::Std;
+use Getopt::Long;
 use Data::Dumper;
 
 sub prepare {
     my $self = shift;
-    getopts( "k:f:", \my %opts );
-    $self->{configFileName} = $opts{f} || $ENV{LFS_CI_CONFIG_FILE};
-    $self->{configKeyName}  = $opts{k} || die "no key";
+    my $opt_f = $ENV{LFS_CI_CONFIG_FILE};
+    my $opt_k = undef;
+    my $opt_t = [];
+    GetOptions( 'k=s',  \$opt_k,
+                'f=s',  \$opt_f,
+                't=s@', \$opt_t,
+                );
 
+    $self->{configFileName} = $opt_f;
+    $self->{configKeyName}  = $opt_k || die "no key";
+
+
+    foreach my $value ( @{ $opt_t } ) {
+        if( $value =~ m/([\w_]+):(.*)/ ) {
+            Singelton::configStore( "cache" )->{data}->{ $1 } = $2;
+        }
+    }
     return;
 }
 
 sub execute {
     my $self = shift;
 
-    my $config = Singelton::config();
-    $config->loadData( configFileName => $self->{configFileName} );
-
-    print $config->getConfig( name => $self->{configKeyName} );
+    Singelton::config()->loadData( configFileName => $self->{configFileName} );
+    print Singelton::config()->getConfig( name => $self->{configKeyName} );
 
     return;
 }
@@ -2039,8 +2090,9 @@ sub loadData {
 
     my @dataList;
     foreach my $store ( Store::Config::File->new( file => $fileName ),
-                        Store::Config::Environment->new(), 
-                        Store::Config::Date->new(), 
+#                        Store::Config::Environment->new(), 
+#                        Store::Config::Date->new(), 
+                        Singelton::configStore( "cache" ),
                       ) {
         push @dataList, @{ $store->readConfig() };
     }
@@ -2099,11 +2151,21 @@ sub hint {
     return $obj->{hint};
 }
 
-sub config {
-    if( not $obj->{config} ) {
-        $obj->{config} = Config->new();
+sub configStore {
+    my $storeName = shift;
+    if( not $obj->{config}{ $storeName } ) {
+        if( $storeName eq "cache" ) {
+            $obj->{config}{ $storeName } = Store::Config::Cache->new();
+        }
     }
-    return $obj->{config};
+    return $obj->{config}{ $storeName };
+}
+
+sub config {
+    if( not $obj->{config}{handler} ) {
+        $obj->{config}{handler} = Config->new();
+    }
+    return $obj->{config}{handler};
 }
 
 # }}} ------------------------------------------------------------------------------------------------------------------
