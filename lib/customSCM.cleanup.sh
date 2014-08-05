@@ -62,28 +62,38 @@ actionCheckout() {
     # create a new changelog file
     cat < /dev/null > "${CHANGELOG}"
 
-#     export subTaskName=$(getSubTaskNameFromJobName)
-#     # syntax is <share>_to_<site>
-#     export shareType=$(cut -d_ -f 1 <<< ${subTaskName})
-#     export siteName=$(cut -d_ -f 3 <<< ${subTaskName})
-#     local directoryNameToSynchronize=$(getConfig ADMIN_sync_share_local_directoryName)
-#     local findDepth=$(getConfig ADMIN_sync_share_check_depth)
-#     unset shareType siteName
-#     # remove this
-#     if [[ -z ${findDepth} ]] ; then
-#         findDepth=1
-#     fi
-# 
-#     local oldFileListing=$(createTempFile)
-#     local newFileListing=$(createTempFile)
-
     local tmpFileA=$(createTempFile)
     local tmpFileB=$(createTempFile)
 
     # TODO: demx2fk3 2014-07-28 cleanup
 
-    _notReleasedBuilds ${tmpFileA}
-    execute touch ${tmpFileB}
+    local subTaskName=$(getSubTaskNameFromJobName)
+
+    case ${subTaskName} in 
+        CI_LFS_in_Ulm_Phase_1)
+            _ciLfsNotReleasedBuilds ${tmpFileA}
+            execute touch ${tmpFileB}
+        ;;
+        CI_LFS_in_Ulm_Phase_2)
+            _ciLfsOldReleasesOnBranches ${tmpFileA}
+            execute touch ${tmpFileB}
+        ;;
+        CI_LFS_in_Ulm_Phase_3)
+        ;;
+        SC_LFS_in_Ulm_Phase_2)
+            _scLfsOldReleasesOnBranches ${tmpFileA}
+            execute touch ${tmpFileB}
+        ;;
+        SC_LFS_in_*_Phase_4)
+            case ${subTaskName} in
+                *Oulu*)    _scLfsRemoteSites ousync ${tmpFileA} ;;
+                *Wrozlaw*) _scLfsRemoteSites wrsync ${tmpFileA} ;;
+                *Ulm*)     _scLfsRemoteSites ulsync ${tmpFileA} ;;
+            esac
+
+            _scLfsRemoteSites ulsync ${tmpFileB}
+        ;;
+    esac
 
     if [[ -e ${LFS_CI_ROOT}/etc/baselineExclutionList.sed ]] ; then
         execute sed -i -f ${LFS_CI_ROOT}/etc/baselineExclutionList.sed ${tmpFileA}
@@ -96,11 +106,10 @@ actionCheckout() {
         echo -n "<log/>" >"${CHANGELOG}"
     fi
 
-
     return
 }
 
-_notReleasedBuilds() {
+_ciLfsNotReleasedBuilds() {
 
     # format of the result file is
     # <time stamp> <pathName>
@@ -109,22 +118,69 @@ _notReleasedBuilds() {
     # TODO: demx2fk3 2014-07-28 cleanup
 
     local directoryToCleanup=/build/home/CI_LFS/Release_Candidates
-    local rcVersions=/build/home/CI_LFS/RCversion/os/
+    local rcVersions=/build/home/CI_LFS/RCversion/os
 
     local tmpFileA=$(createTempFile)
     local tmpFileB=$(createTempFile)
     local tmpFile=$(createTempFile)
 
     for link in ${rcVersions}/* ; do
-        [[ -L ${link} ]] || continue 
+        echo test ${link}
+        [[ ! -L ${link}     ]] && continue 
+        [[ ${link} =~ -ci   ]] && continue
+        [[ ${link} =~ trunk ]] && continue
+        echo ${link} ok
         readlink -f ${link} >> ${tmpFile}
     done
 
-    sort ${tmpFile} > ${tmpFileA}
-    find ${directoryToCleanup} -maxdepth 2 -mtime +60 -type d -printf "%p\n" | sort > ${tmpFileB}
+    sort -u ${tmpFile} > ${tmpFileA}
+    find ${directoryToCleanup} -mindepth 2 -maxdepth 2 -mtime +60 -type d -printf "%p\n" | sort -u > ${tmpFileB}
 
     # release candidates, which are older than 60 days and are not released
-    diff ${tmpFileA} ${tmpFileB} | grep "^>" | sed "s/^./1/" > ${resultFile}
+    grep -v -f ${tmpFileA} ${tmpFileB} | sed "s/^/1 /g" > ${resultFile}
+
+    return
+}
+
+_scLfsOldReleasesOnBranches() {
+    local resultFile=$1
+    local tmpFileA=$(createTempFile)
+    local tmpFileB=$(createTempFile)
+    local directoryToCleanup=/build/home/SC_LFS/releases/bld/
+    local days=1400
+
+    info "check for baselines older than ${days} days in ${directoryToCleanup}"
+    find ${directoryToCleanup} -mindepth 2 -maxdepth 2 -mtime +${days} -type d -printf "%p\n" \
+        | sort -u > ${tmpFileA}
+
+    ${LFS_CI_ROOT}/bin/removalCanidates.pl  < ${tmpFileA} > ${tmpFileB}
+
+    grep -w -f ${tmpFileB} ${tmpFileA} | sed "s/^/1 /g" > ${resultFile}
+
+    return
+}
+
+_scLfsRemoteSites() {
+    local resultFile=$2
+    local siteName=$1
+    local directoryToCleanup=/build/home/SC_LFS/releases/bld/
+
+    ssh ${siteName} "find ${directoryToCleanup} -mindepth 2 -maxdepth 2 -type d -printf \"1 %p\n\" " | sort -u > ${resultFile} 
+    mustBeSuccessfull "$?" "ssh find ${siteName}"
+
+    return
+}
+
+_ciLfsOldReleasesOnBranches() {
+    local resultFile=$1
+
+    local tmpFileA=$(createTempFile)
+    local directoryToCleanup=/build/home/CI_LFS/Release_Candidates
+
+    find ${directoryToCleanup} -mindepth 2 -maxdepth 2 -mtime +60 -type d -printf "%p\n" \
+        | sort -u \
+        | ${LFS_CI_ROOT}/bin/removalCanidates.pl \
+        | sed "s/^/1 ${directoryToCleanup}/g" | sort -u > ${resultFile}
 
     return
 }

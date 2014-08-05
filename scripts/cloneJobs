@@ -6,6 +6,8 @@ source ${LFS_CI_ROOT}/lib/jenkins.sh
 branchName=FB1407
 branchDisplayName="FB1407"
 
+# ls /var/fpwork/demx2fk3/lfs-jenkins/home/jobs/*/promotions
+
 for job in $(cat jobList)
 do
     if [[ -e ${job}.xml ]] ; then

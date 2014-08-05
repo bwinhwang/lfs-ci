@@ -44,6 +44,9 @@ ci_job_package() {
     # so we are just removing / fixing symlinks in sys-root
     removeBrokenSymlinks ${workspace}/upload/sys-root/
 
+    # creates a file under doc/ with all delivered files of a LFS OS release
+    createOsFileList
+
     copyReleaseCandidateToShare
 
     return 0
@@ -371,4 +374,17 @@ copyDocumentation() {
     return
 }
 
+## @fn      createOsFileList()
+#  @brief   creates a file list file in subdir doc including all file names below os/ of a LFS OS delivery
+#  @param   <none>
+#  @return  <none>
+createOsFileList() {
+    info "create OS file list of all files delivered by LFS in subdir doc ..."
+    local workspace=$(getWorkspaceName)
+    mustHaveWorkspaceName
 
+    local dst=${workspace}/upload
+    find ${dst} -not -type d | sort | xargs md5sum 2>/dev/null | sed "s,${dst}/,,g" > ${dst}/doc/list_all_os_files
+
+    return
+}

@@ -1225,7 +1225,7 @@ sub _getUpstream {
 
     if( exists $upstream->{upstreamCauses} and
         ref $upstream->{upstreamCauses} eq "ARRAY" ) {
-        my @array = @{ $upstream->{upstreamCauses}->[0]->{'hudson.model.Cause_-UpstreamCause'} };
+        my @array = @{ $upstream->{upstreamCauses}->[0]->{'hudson.model.Cause_-UpstreamCause'} || [] };
         foreach my $up ( @array ) {
             push @result, _getUpstream( $up );
         }
