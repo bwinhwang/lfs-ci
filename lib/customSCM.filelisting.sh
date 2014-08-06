@@ -93,6 +93,9 @@ actionCheckout() {
     for path in $(diff ${oldFileListing} ${newFileListing} | grep '>' | cut -d" " -f 3 | grep -v "^${directoryNameToSynchronize}$")
     do
         info "path ${path} has changed"
+        if [[ ${path} =~ deleted ]] ; then
+            debug "skip ${path}"
+        fi
         printf "<path kind=\"\" action=\"M\">%s</path>\n" ${path} >> ${logEntries}
         fileListString="${fileListString} ${path}"
     done
