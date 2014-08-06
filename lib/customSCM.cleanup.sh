@@ -85,13 +85,19 @@ actionCheckout() {
             execute touch ${tmpFileB}
         ;;
         SC_LFS_in_*_Phase_4)
+            _scLfsRemoteSites ul ${tmpFileB}
+
             case ${subTaskName} in
-                *Oulu*)    _scLfsRemoteSites ousync ${tmpFileA} ;;
-                *Wrozlaw*) _scLfsRemoteSites wrsync ${tmpFileA} ;;
-                *Ulm*)     _scLfsRemoteSites ulsync ${tmpFileA} ;;
+                *Oulu*)    _scLfsRemoteSites ou ${tmpFileA} ;;
+                *Wrozlaw*) _scLfsRemoteSites wr ${tmpFileA} ;;
+                *Ulm*)     _scLfsRemoteSites ul ${tmpFileA} ;;
+                *_in_bh_*) _scLfsRemoteSites bh ${tmpFileA} ;;
+                *_in_du_*) 
+                    execute sed -i "s:/build/home/SC_LFS/releases/bld:/usrd9/build/home/SC_LFS/releases/bld:g" ${tmpFileB}
+                    _scLfsRemoteSites du ${tmpFileA} 
+                ;;
             esac
 
-            _scLfsRemoteSites ulsync ${tmpFileB}
         ;;
     esac
 
@@ -155,17 +161,24 @@ _scLfsOldReleasesOnBranches() {
 
     ${LFS_CI_ROOT}/bin/removalCanidates.pl  < ${tmpFileA} > ${tmpFileB}
 
-    grep -w -f ${tmpFileB} ${tmpFileA} | sed "s/^/1 /g" > ${resultFile}
+    info "grep DDAP"
+    grep -w -f ${tmpFileB} ${tmpFileA} | grep PS1 | sed "s/^/1 /g" > ${resultFile}
 
     return
 }
 
 _scLfsRemoteSites() {
-    local resultFile=$2
     local siteName=$1
-    local directoryToCleanup=/build/home/SC_LFS/releases/bld/
+    local resultFile=$2
 
-    ssh ${siteName} "find ${directoryToCleanup} -mindepth 2 -maxdepth 2 -type d -printf \"1 %p\n\" " | sort -u > ${resultFile} 
+    export siteName
+    export shareType=bld
+    local directoryToCleanup=$(getConfig ADMIN_sync_share_remote_directoryName)
+    local find=$(getConfig ADMIN_sync_share_find_command)
+
+    info "directoryToCleanup is ${directoryToCleanup}"
+    ssh ${siteName}sync "${find} ${directoryToCleanup} -mindepth 2 -maxdepth 2 -type d -printf \"1 %p\n\" " \
+        | sort -u | grep PS1 > ${resultFile} 
     mustBeSuccessfull "$?" "ssh find ${siteName}"
 
     return
