@@ -455,8 +455,8 @@ createTagOnSourceRepository() {
     local osLabelName=${LFS_PROD_RELEASE_CURRENT_TAG_NAME}
 
     export tagName=${osLabelName}
-    local svnUrl=$(getConfig LFS_PROD_svn_delivery_os_repos_url)
-    local svnUrlOs=${svnUrl}
+    local svnUrl=$(getConfig lfsSourceRepos)
+    local svnUrlOs=${svnUrl}/os
     local branch=pre_${osLabelName}
     local logMessage=$(createTempFile)
 

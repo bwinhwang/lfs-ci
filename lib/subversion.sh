@@ -53,13 +53,14 @@ uploadToSubversion() {
     info "copy baseline to upload on local disk"
     local uploadDirectoryOnLocalDisk=${TMPDIR}/upload
     execute mkdir -p ${uploadDirectoryOnLocalDisk}
-    execute rsync -av ${pathToUpload} ${uploadDirectoryOnLocalDisk}
+    execute rsync --delete -av ${pathToUpload}/ ${uploadDirectoryOnLocalDisk}/
 
-    info "checkout svn workspace for upload preparation"
     local workspace=${TMPDIR}/workspace
-    execute mkdir -p ${workspace}
-    svnCheckout ${svnReposUrl}/${branchPath}/${branch} ${workspace}
-
+    if [[ ! -d ${workspace} ]] ; then
+        info "checkout svn workspace for upload preparation"
+        execute mkdir -p ${workspace}
+        svnCheckout ${svnReposUrl}/${branchPath}/${branch} ${workspace}
+    fi
 
     info "upload to svn and create copy (${tagName})"
 
