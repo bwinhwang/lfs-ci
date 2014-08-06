@@ -134,6 +134,7 @@ declare -A archMap=(         ["fct"]="mips64-octeon2-linux-gnu"      \
                              ["axm"]="arm-cortexa15-linux-gnueabihf" \
                        ["keystone2"]="arm-cortexa15-linux-gnueabihf" \
                         ["fsm4_axm"]="arm-cortexa15-linux-gnueabihf" \
+                        ["fsm4_arm"]="arm-cortexa15-linux-gnueabihf" \
                          ["fsm4_k2"]="arm-cortexa15-linux-gnueabihf" \
 )
 

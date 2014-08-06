@@ -167,7 +167,7 @@ copySysroot() {
         local sysroot_tgz
         case ${platform} in
             lrc-*)   sysroot_tgz=${workspace}/bld/bld-rfs-lcpa/results/sysroot.tar.gz ;;
-            fsm4-*)  sysroot_tgz=${workspace}/bld/bld-rfs-arm/results/sysroot.tar.gz  ;;
+            fsm4_*)  sysroot_tgz=${workspace}/bld/bld-rfs-arm/results/sysroot.tar.gz  ;;
             qemu_64) sysroot_tgz=${bldDirectory}/results/rfs.init_sys-root.tar.gz  
                      [[ $(getBranchName) =~ "LRC" ]] && \
                      sysroot_tgz=${workspace}/bld/bld-rfs-qemu_x86_64/results/sysroot.tar.gz ;;
