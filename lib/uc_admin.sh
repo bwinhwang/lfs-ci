@@ -85,6 +85,7 @@ synchronizeShare() {
     for entry in $(cat ${pathToSyncFile})
     do
         basePartOfEntry=${entry//${localPath}}
+       [[ -d ${entry} ]] || continue
         info "transferting ${entry} to ${remoteServer}:${remotePath}/${basePartOfEntry}"
         execute ssh ${remoteServer} mkdir -p ${remotePath}/${basePartOfEntry}
         execute rsync -aHz -e ssh --stats ${rsyncOpts} ${entry}/ ${remoteServer}:${remotePath}/${basePartOfEntry}
@@ -98,7 +99,7 @@ synchronizeShare() {
 genericShareCleanup() {
     requiredParameters JOB_NAME BUILD_NUMBER LFS_CI_ROOT WORKSPACE
 
-    copyChangelogToWorkspace ${JOB_NAME} ${BUILD_NUMBER}
+    copyChangelogToWorkspace ${UPSTREAM_PROJECT} ${UPSTREAM_BUILD}
     mustExistFile ${WORKSPACE}/changelog.xml
 
     # ADMIN_-_genericShareCleanup_-_Ul
@@ -113,7 +114,9 @@ genericShareCleanup() {
     ${LFS_CI_ROOT}/bin/xpath -q -e '/log/logentry/paths/path[@action="D"]/node()' ${WORKSPACE}/changelog.xml \
         > ${tmpFile}
 
-    local execute=info
+    setBuildDescription ${JOB_NAME} ${BUILD_NUMBER} "triggered by ${UPSTREAM_PROJECT}/${UPSTREAM_BUILD}"
+
+    local execute=execute
     local max=$(wc -l ${tmpFile} | cut -d" " -f1)
     local cnt=0
     for entry in $(cat ${tmpFile}) ; do
@@ -138,23 +141,24 @@ genericShareCleanup() {
     done
 
     # next: modified and added stuff
-    ${LFS_CI_ROOT}/bin/xpath -q -e '/log/logentry/paths/path[@action="A"]/node()' ${WORKSPACE}/changelog.xml \
-        > ${tmpFile}
-    ${LFS_CI_ROOT}/bin/xpath -q -e '/log/logentry/paths/path[@action="M"]/node()' ${WORKSPACE}/changelog.xml \
-        >> ${tmpFile}
-
-    for entry in $(cat ${tmpFile}) ; do
-        info "transferting ${entry} to ${remoteServer}"
-
-        debug "fixing permissions on parent directory"
-        $execute ssh ${remoteServer} chmod u+w $(dirname ${entry})
-
-        debug "creating new directory"
-        $execute ssh ${remoteServer} mkdir -p ${remotePath}/${entry}
-
-        debug "rsyncing ${entry}"
-        info execute rsync -aHz -e ssh --stats ${entry}/ ${remoteServer}:${entry}/
-    done
+    # TODO: demx2fk3 2014-08-07 disabled, we dont want to put stuff to the remote site
+#     ${LFS_CI_ROOT}/bin/xpath -q -e '/log/logentry/paths/path[@action="A"]/node()' ${WORKSPACE}/changelog.xml \
+#         > ${tmpFile}
+#     ${LFS_CI_ROOT}/bin/xpath -q -e '/log/logentry/paths/path[@action="M"]/node()' ${WORKSPACE}/changelog.xml \
+#         >> ${tmpFile}
+# 
+#     for entry in $(cat ${tmpFile}) ; do
+#         info "transferting ${entry} to ${remoteServer}"
+# 
+#         debug "fixing permissions on parent directory"
+#         $execute ssh ${remoteServer} chmod u+w $(dirname ${entry})
+# 
+#         debug "creating new directory"
+#         $execute ssh ${remoteServer} mkdir -p ${remotePath}/${entry}
+# 
+#         debug "rsyncing ${entry}"
+#         info execute rsync -aHz -e ssh --stats ${entry}/ ${remoteServer}:${entry}/
+#     done
 
     info "cleanup is done."
 }
@@ -214,9 +218,9 @@ backupJenkinsMasterServerInstallation() {
     mustHaveValue ${backupPath}
     mustHaveValue ${serverPath}
 
-    execute rm -rf ${backupPath}/backup.1001
+    execute rm -rf ${backupPath}/backup.112
 
-    for i in $(seq 0 1000 | tac) ; do
+    for i in $(seq 0 111 | tac) ; do
         [[ -d ${backupPath}/backup.${i} ]] || continue
         old=$(( i + 1 ))
         execute mv -f ${backupPath}/backup.${i} ${backupPath}/backup.${old}
