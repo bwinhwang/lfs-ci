@@ -121,6 +121,8 @@ declare -A platformMap=(         ["fct"]="fsm3_octeon2" \
                                  ["axm"]="fsm4_axm"     \
                             ["fsm4_axm"]="fsm4_axm"     \
                              ["fsm4_k2"]="fsm4_k2"      \
+                            ["fsm4_arm"]="fsm4_k2"      \
+                                 ["arm"]="fsm4_k2"      \
                                 ["lcpa"]="lrc-octeon2"  \
 )
 
@@ -135,6 +137,7 @@ declare -A archMap=(         ["fct"]="mips64-octeon2-linux-gnu"      \
                        ["keystone2"]="arm-cortexa15-linux-gnueabihf" \
                         ["fsm4_axm"]="arm-cortexa15-linux-gnueabihf" \
                         ["fsm4_arm"]="arm-cortexa15-linux-gnueabihf" \
+                             ["arm"]="arm-cortexa15-linux-gnueabihf" \
                          ["fsm4_k2"]="arm-cortexa15-linux-gnueabihf" \
 )
 

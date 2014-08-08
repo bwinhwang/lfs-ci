@@ -241,20 +241,22 @@ copySysroot() {
 
     done
 
-    for bldDirectory in ${workspace}/bld/bld-*-*/ ; do
-        [[ -d ${bldDirectory}                   ]] || continue
-        [[ -d ${bldDirectory}/results/sys-root/ ]] || continue
+    if [[ $(getBranchName) =~ "LRC" ]] ; then
+        for bldDirectory in ${workspace}/bld/bld-*-*/ ; do
+            [[ -d ${bldDirectory}                   ]] || continue
+            [[ -d ${bldDirectory}/results/sys-root/ ]] || continue
 
-        local destinationsArchitecture=$(getArchitectureFromDirectory ${bldDirectory})
-        mustHavePlatformFromDirectory ${bldDirectory} ${destinationsArchitecture} 
+            local destinationsArchitecture=$(getArchitectureFromDirectory ${bldDirectory})
+            mustHavePlatformFromDirectory ${bldDirectory} ${destinationsArchitecture} 
 
-        local platform=$(getPlatformFromDirectory ${bldDirectory})
-        mustHaveValue "${platform}" "platform from directory"
+            local platform=$(getPlatformFromDirectory ${bldDirectory})
+            mustHaveValue "${platform}" "platform from directory from ${bldDirectory}"
 
-        info "copy sys-root for ${destinationsArchitecture} from ${bldDirectory}"
-        local dst=${workspace}/upload/
-        execute rsync -av --exclude=.svn ${bldDirectory}/results/sys-root/ ${dst}/sys-root/
-    done
+            info "copy sys-root for ${destinationsArchitecture} from ${bldDirectory}"
+            local dst=${workspace}/upload/
+            execute rsync -av --exclude=.svn ${bldDirectory}/results/sys-root/ ${dst}/sys-root/
+        done
+    fi
 
     return
 }
@@ -432,6 +434,7 @@ copyDocumentation() {
 
 ## @fn      createOsFileList()
 #  @brief   creates a file list file in subdir doc including all file names below os/ of a LFS OS delivery
+#           This was requested by PS-SCM (Wolfgang Adlassnig), because all SC will deliver such a list.
 #  @param   <none>
 #  @return  <none>
 createOsFileList() {
