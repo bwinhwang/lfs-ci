@@ -104,6 +104,16 @@ _createRevisionsTxtFile() {
     local rev=$(svn info --xml ${bldToolsUrl}| ${LFS_CI_ROOT}/bin/xpath -q -e '/info/entry/commit/@revision'  | cut -d'"' -f 2)
     printf "%s %s %s" bld-buildtools "${bldToolsUrl}" "${rev}" >> ${newRevisionsFile}
 
+    local filterFile=$(getConfig CUSTOM_SCM_svn_filter_components_file)
+    if [[ -e ${filterFile} ]] ; then
+        info "using custom SCM filter ${filterFile}"
+        local tmpFile=$(createTempFile)
+        grep -w -f ${filterFile} ${newRevisionsFile} > ${tmpFile}
+        execute mv -f ${tmpFile} ${newRevisionsFile}
+
+        rawDebug ${newRevisionsFile}
+    fi
+
     return
 }
 

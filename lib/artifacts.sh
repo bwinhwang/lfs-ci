@@ -15,32 +15,46 @@ createArtifactArchive() {
     requiredParameters JOB_NAME BUILD_NUMBER
 
     local workspace=$(getWorkspaceName)
-    local serverPath=$(getConfig jenkinsMasterServerPath)
     local serverName=$(getConfig linseeUlmServer)
     mustHaveWorkspaceName
 
-    local artifactsPathOnShare=$(getConfig artifactesShare)/${JOB_NAME}/${BUILD_NUMBER}
-    executeOnMaster mkdir -p ${artifactsPathOnShare}/save
-    mustExistDirectory ${artifactsPathOnShare}
     mustExistDirectory "${workspace}/bld/"
 
     # TODO: demx2fk3 2014-03-31 remove cd - changing the current directory isn't a good idea!
     cd "${workspace}/bld/" 
     for dir in bld-*-* ; do
         [[ -d "${dir}" && ! -L "${dir}" ]] || continue
+
+        # TODO: demx2fk3 2014-08-08 fixme - does not work
         # [[ -f "${dir}.tar.gz" ]] || continue
 
         local subsystem=$(cut -d- -f2 <<< ${dir})
         info "creating artifact archive for ${dir}"
         execute tar --create --auto-compress --file "${dir}.tar.gz" "${dir}"
-        execute rsync --archive --verbose --rsh=ssh -P     \
-            "${dir}.tar.gz"                                \
-            ${serverName}:${artifactsPathOnShare}/save
+        copyFileToArtifactDirectory ${dir}.tar.gz
     done
 
+    local artifactsPathOnShare=$(getConfig artifactesShare)/${JOB_NAME}/${BUILD_NUMBER}
     createSymlinksToArtifactsOnShare ${artifactsPathOnShare}
 
     return 
+}
+
+copyFileToArtifactDirectory() {
+    requiredParameters JOB_NAME BUILD_NUMBER
+    local fileName=$1
+
+    local serverName=$(getConfig linseeUlmServer)
+    local artifactsPathOnShare=$(getConfig artifactesShare)/${JOB_NAME}/${BUILD_NUMBER}
+    executeOnMaster mkdir -p ${artifactsPathOnShare}/save
+    # TODO: demx2fk3 2014-08-07 FIXME - this must be run on master
+    # mustExistDirectory ${artifactsPathOnShare}
+
+    execute rsync --archive --verbose --rsh=ssh -P  \
+        ${fileName}                                 \
+        ${serverName}:${artifactsPathOnShare}/save
+
+    return
 }
 
 ## @fn      mustHaveBuildArtifactsFromUpstream()
@@ -176,7 +190,8 @@ createSymlinksToArtifactsOnShare() {
     requiredParameters JOB_NAME BUILD_NUMBER
 
     local artifactsDirectoryOnShare=$1
-    mustExistDirectory ${artifactsDirectoryOnShare}
+    # TODO: demx2fk3 2014-08-07 fixme should run on master
+    # mustExistDirectory ${artifactsDirectoryOnShare}
 
     info "create link to artifacts"
     local artifactesShare=$(getConfig artifactesShare)

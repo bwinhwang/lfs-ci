@@ -206,6 +206,55 @@ sub matches {
     return $matches;
 }
 # }}} ------------------------------------------------------------------------------------------------------------------
+package Model::ReleaseNote; # {{{
+use warnings;
+use strict;
+use parent qw( -norequire Model );
+
+use File::Slurp;
+
+sub releaseName {
+    my $self = shift;
+    return $self->{releaseName};
+}
+
+sub commentForRevision {
+    my $self     = shift;
+    my $revision = shift;
+
+    $self->mustHaveFileData( "revisions" );
+
+    foreach my $line ( @{ $self->{revisions} } ) {
+        next if $line =~ m/^\s*#/;
+        next if $line =~ m/^\s*$/;
+        if( $line =~ m/^(\d+)\s+(.*)/ ) {
+            if( $1 == $revision ) {
+                return $2;
+            }
+        }
+    }
+    return;
+}
+
+sub importantNote {
+    my $self = shift;
+    $self->mustHaveFileData( "importantNote" );
+    return join( "\n", @{ $self->{importantNote} } );
+}
+
+sub mustHaveFileData {
+    my $self     = shift;
+    my $fileType = shift;
+    if( not exists $self->{ $fileType } ) {
+        my $file = sprintf( "%s/releaseNotes/%s/%s.txt", $ENV{HOME}, $self->releaseName(), $fileType );
+        if ( -e $file ) {
+            $self->{ $fileType } = [ read_file( $file ) ];
+        }
+    }
+    return
+}
+
+# }}} ------------------------------------------------------------------------------------------------------------------
 package Model::Subdirectory; # {{{
 ## @fn    Model::Subdirectory
 #  @brief this class represents a subdirectory of the build. It's a src- or a bld/bld- directory
@@ -1432,17 +1481,29 @@ use parent qw( -norequire Object );
 
 use XML::Simple;
 use Data::Dumper;
+use Getopt::Std;
 
 sub prepare {
     my $self = shift;
+
+    getopts( "t:", \my %opts );
+    $self->{tagName} = $opts{t} || die "no t";
+
     my $xml  = XMLin( "changelog.xml", ForceArray => 1 ) or die "can not open changelog.xml";
+
+    $self->{releaseNote} = Model::ReleaseNote->new( releaseName => $self->{tagName} );
 
     my $subsysHash;
     foreach my $entry ( @{ $xml->{logentry} } ) {
 
-        my $msg = ref( $entry->{msg}->[0] ) eq "HASH" ?
-                  sprintf( "empty commit message (r%s) from %s at %s", $entry->{revision}, $entry->{author}->[0], $entry->{date}->[0] ) :
-                  $entry->{msg}->[0] ;
+        my $overrideMessage= $self->{releaseNote}->commentForRevision( $entry->{revision} );
+
+        my $msg = $overrideMessage 
+                    ?  $overrideMessage
+                    :  ref( $entry->{msg}->[0] ) eq "HASH" 
+                        ? sprintf( "empty commit message (r%s) from %s at %s", $entry->{revision}, $entry->{author}->[0], $entry->{date}->[0] ) 
+                        : $entry->{msg}->[0] ;
+
         
         if( $msg =~ m/set Dependencies, Revisions for Release/i or
             $msg =~ m/set Dependencies for Release/i or
@@ -1458,10 +1519,11 @@ sub prepare {
         $msg =~ s/^[\%\#]FIN  *[\%\#](\w+)=(\S+)\s*(.*)/$1 $2 $3 (completed)/;
         $msg =~ s/^[\%\#]TBC  *[\%\#](\w+)=(\S+)\s*(.*)/$1 $2 $3 (to be continued)/;
         $msg =~ s/^[\%\#]TPC  *[\%\#](\w+)=(\S+)\s*(.*)/$1 $2 $3 (work in progress)/;
-        $msg =~ s/^[\%\#]REM /Remark: /;
+        $msg =~ s/[\%\#]REM /Remark: /;
         $msg =~ s/\s*commit [0-9a-f]+\s*//g;
         $msg =~ s/\s*Author: .*[@].+//g;
         $msg =~ s/\s*Date: .* [0-9]+:[0-9]+:[0-9]+ .*//g;
+        $msg =~ s/\n/\\n/g;
         $msg =~ s/\s+/ /g;
         $msg =~ s/^\s+//;
         $msg =~ s/\s+$//;
@@ -1473,6 +1535,7 @@ sub prepare {
         $msg =~ s/^BTSPS-\d+\s+IN\s*//;
         $msg =~ s/  */ /g;
         $msg =~ s/^fk\s*:\s*//;
+        $msg =~ s/\\n/\n/g;
         $msg =~ s/^\s+//;
         $msg =~ s/\s+$//;
 
@@ -1504,6 +1567,13 @@ sub prepare {
 
 sub execute {
     my $self = shift;
+
+    my $importantNote = $self->{releaseNote}->importantNote();
+    if( $importantNote ) {
+        printf "--- Important Note ---\n\n";
+        printf "%s\n", $importantNote;
+        printf "--- Important Note ---\n\n";
+    }
 
     foreach my $component ( keys %{ $self->{changeLog} } ) {
         my @list = $self->{changeLog}->{$component};
@@ -2126,8 +2196,8 @@ sub loadData {
 
     my @dataList;
     foreach my $store ( Store::Config::File->new( file => $fileName ),
-#                        Store::Config::Environment->new(), 
-#                        Store::Config::Date->new(), 
+                        Store::Config::Environment->new(), 
+                        Store::Config::Date->new(), 
                         Singelton::configStore( "cache" ),
                       ) {
         push @dataList, @{ $store->readConfig() };
@@ -2150,6 +2220,8 @@ sub loadData {
                                                 value    => $2, 
                                                 operator => "regex"
                                               );
+            } elsif( $tag =~ m/^\s*$/ ) {
+                # skip empty string
             } else {
                 die "tag $tag does not match to syntax";
             }

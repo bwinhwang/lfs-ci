@@ -1,0 +1,171 @@
+#!/bin/bash
+
+test "$RELEASEPREFIX" || RELEASEPREFIX=PS_LFS_PKG
+test "$SVNTAGDIR" || SVNTAGDIR="
+	https://svne1.access.nokiasiemensnetworks.com/isource/svnroot/BTS_SC_LFS/os/trunk/main/src-project
+    file:///build/home/foobar/
+	"
+# test "$SVNKERNELDIR" || SVNKERNELDIR=https://svne1.access.nokiasiemensnetworks.com/isource/svnroot/BTS_SC_LFS/os/trunk/main/src-kernelsources
+
+test "$SVNTAGDIR" = NONE && SVNTAGDIR=
+
+set -eu
+
+cd $WORKSPACE
+rm -rf bld
+mkdir bld
+cd src
+rm -rf src
+git reset --hard                                                                                   
+./bootstrap                                                                               
+cd ../bld                                                         
+../src/build --prepopulate --release="$RELEASEPREFIX" | tee ../buildlog
+RELSTR="$(sed -ne 's,^release \([^ ]*\) complete$,\1,p' ../buildlog)"
+if test -z "$RELSTR"; then
+    cat logs/*.log
+    exit 1
+fi
+touch /build/home/SC_LFS/pkgpool/.hashpool
+java -jar "$JENKINS_ROOT/jenkins-cli.jar" set-build-description "$JOB_NAME" "$BUILD_NUMBER" "$RELSTR"
+
+cd ../src
+
+DATETIME=$(date -u +'%F/%T')
+BASED_ON=$(git describe --abbrev=0)
+
+git tag -a -m $RELSTR $RELSTR
+git push origin $RELSTR
+
+cd ..
+
+cat > relnote.xml <<EOT
+<releasenote version="9">
+  <name>$RELSTR</name>
+  <system>PS_LFS</system>
+  <releaseDate>${DATETIME/\/*}</releaseDate>
+  <releaseTime>${DATETIME/*\/}Z</releaseTime>
+  <authorEmail>robert.schiele@nsn.com</authorEmail>
+  <basedOn>$BASED_ON</basedOn>
+  <branchFor><branch>PS_Basic</branch></branchFor>
+  <importantNotes>
+    <note name="PS_LFS_PKG">
+    </note>
+  </importantNotes>
+  <repositoryUrl>/build/home/SC_LFS/pkgpool</repositoryUrl>
+  <repositoryBranch></repositoryBranch>
+  <repositoryRevision>$RELSTR</repositoryRevision>
+  <correctedFaults>
+    <module name="$RELSTR">
+    </module>
+  </correctedFaults>
+  <baselines>
+EOT
+
+sed -ne 's|^src [^ ]* \(.*\)$|<baseline name="PS_LFS_PKG" auto_create="true">\1</baseline>|p' bld/pool/*.meta |
+sort -u >> relnote.xml
+
+cat >> relnote.xml <<EOT
+  </baselines>
+  <download>
+    <downloadItem storage="FILE" name="SC_LFS">/build/home/SC_LFS/pkgpool/$RELSTR</downloadItem>
+  </download>
+  <features>
+  </features>
+</releasenote>
+EOT
+
+curl -k https://wft.inside.nsn.com/ext/api/xml -F "access_key=lL0CWZcUtyAFu7yRhmStEhTlJOd7LLbReA5RcGo4" -F "file=@relnote.xml"
+
+for ONESVNTAGDIR in $SVNTAGDIR; do
+    SVNDIR=${ONESVNTAGDIR//[\/:]/_}
+    GITREVISION=src/gitrevision
+    case "$ONESVNTAGDIR" in
+        */src-rfs)
+	    RELFILE=Buildfile
+	    ;;
+        */src-project)
+	    RELFILE=Dependencies
+	    ;;
+        *)
+	    echo "SVNTAGDIR incorrect: $ONESVNTAGDIR"
+	    break
+	    ;;
+    esac
+    test -d $SVNDIR || svn co "$ONESVNTAGDIR" $SVNDIR
+    cd $SVNDIR
+    svn up
+    COMMITBEFORE=$(cat $GITREVISION)
+    cd ../src
+    git rev-parse HEAD > ../$SVNDIR/$GITREVISION
+    COMMITAFTER=$(cat ../$SVNDIR/$GITREVISION)
+    git log $COMMITBEFORE..$COMMITAFTER | sed -e 's,^    %,%,' > ../$SVNDIR/gitlog
+    cd ../$SVNDIR
+    sed -i -e "
+	s|^PKGLABEL *?=.*|PKGLABEL ?= $RELSTR|
+	s|^LRCPKGLABEL *?=.*|LRCPKGLABEL ?= $RELSTR|
+	s|^hint *bld/pkgpool .*|hint bld/pkgpool $RELSTR|
+	" $RELFILE
+    if ! svn commit -F gitlog $RELFILE $GITREVISION 2> stderr; then
+        java -jar "$JENKINS_ROOT/jenkins-cli.jar" set-build-result unstable
+        NUM=$(sed -ne 's,^Error in line \([0-9]\+\) : .*,\1,p' stderr)
+        if test -z "$NUM"; then
+	    cd ..
+	    echo "SVN rejected our commit message for a reason we didn't understand:"
+	    echo
+	    cat stderr
+	    break
+        fi
+        for ANUM in $NUM; do
+	    sed -i -e "$ANUM{s,%,o/o,g;s,^,SVN REJECTED: ,}" gitlog
+        done
+        echo "SVN rejected some of your commit notes for the release notes."
+        echo "If you need them in the release note please do another commit"
+        echo "with corrected syntax:"
+        echo
+        cat stderr
+        echo
+        echo "We try to submit now:"
+        echo
+        cat gitlog
+        svn commit -F gitlog $RELFILE $GITREVISION
+    fi
+    cd ..
+done
+
+exit 0
+
+cd ../src
+if test "$SVNKERNELDIR" && ! git diff --quiet $COMMITBEFORE $COMMITAFTER src/linux; then
+    cd ..
+    test -d svnkernel || svn co "$SVNKERNELDIR" svnkernel
+    cd svnkernel
+    svn up
+    cd ../src
+    git log $COMMITBEFORE..$COMMITAFTER src/linux | sed -e 's,^    %,%,' > ../svnkernel/gitlog
+    cd ../svnkernel
+    sed -i -e "s|^use-readonly bld/pkgpool .*$|use-readonly bld/pkgpool $RELSTR|" Dependencies
+    if ! svn commit -F gitlog Dependencies 2> stderr; then
+	NUM=$(sed -ne 's,^Error in line \([0-9]\+\) : .*,\1,p' stderr)
+	    if test -z "$NUM"; then
+	    echo "SVN rejected our commit message for a reason we didn't understand:"
+	    echo
+	    cat stderr
+	    exit 0
+	fi
+	for ANUM in $NUM; do
+	    sed -i -e "$ANUM{s,%,o/o,g;s,^,SVN REJECTED: ,}" gitlog
+	done
+	echo "SVN rejected some of your commit notes for the release notes."
+	echo "If you need them in the release note please do another commit"
+	echo "with corrected syntax:"
+	echo
+	cat stderr
+	echo
+	echo "We try to submit now:"
+	echo
+	cat gitlog
+	svn commit -F gitlog Dependencies
+    fi
+fi
+
+exit 0

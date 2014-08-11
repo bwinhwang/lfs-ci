@@ -26,7 +26,7 @@ my $platformRE    = qr / (?<platform>
                        /x;
 my $splitRE       = qr / _-_ /x;
 
-my $productRE     = qr / (?<productName>(Admin | LFS | UBOOT)) /x;
+my $productRE     = qr / (?<productName>(Admin | LFS | UBOOT | PKGPOOL)) /x;
 
 my $regex1 = qr /
                     ^

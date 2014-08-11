@@ -6,7 +6,7 @@
 
 ## @fn      ci_job_ecl()
 #  @brief   update the ECL file 
-#  @details «full description»
+#  @details 
 #  @todo    add more doc
 #  @param   <none>
 #  @return  <none>
@@ -60,10 +60,11 @@ ci_job_ecl() {
     setBuildDescription ${JOB_NAME} ${BUILD_NUMBER} ${labelName}
 
     # TODO: demx2fk3 2014-07-22 remove this, if PS SCM can handle the load of LFSes...
-    if [[ $(( BUILD_NUMBER % 3 )) != 0 ]] ; then
+    local number=$(getConfig LFS_CI_uc_update_ecl_update_promote_every_xth_release)
+    if [[ $(( BUILD_NUMBER % ${number} )) != 0 ]] ; then
         # as agreement with PS SCM, we are just promoting every 4th build.
         # otherwise, we will spam ECL
-        warning "not promoting this build. ONLY EVERY 4th build will be promoted"
+        warning "not promoting this build. ONLY EVERY ${number} build will be promoted"
         setBuildDescription ${JOB_NAME} ${BUILD_NUMBER} "${labelName}<br>not promoted"
         exit 1
     fi
@@ -154,10 +155,9 @@ getEclValue() {
         ;;
         ECL_LFS)
             local branchNameInSubversion=$(getConfig SVN_lfs_branch_name)
-            local rev=$(cut -d" " -f 3 ${workspace}/bld/bld-externalComponents-*/usedRevisions.txt| sort -u | tail -n 1
+            local rev=$(cut -d" " -f 3 ${workspace}/bld/bld-externalComponents-*/usedRevisions.txt| sort -u | tail -n 1 )
             mustHaveNextCiLabelName "${rev}" "revision"
             debug "branch ${branchNameInSubversion} rev ${rev}"
-)
             newValue=$(printf "%s\@%d" "${branchNameInSubversion}" ${rev})
         ;;
         ECL_PS_LFS_INTERFACE_REV)

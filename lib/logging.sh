@@ -129,7 +129,8 @@ fatal() {
 #  @return  <none>
 message() {
     local logType=$1
-    local logMessage=$2
+    shift
+    local logMessage=$@
 
     if [[ ${CI_LOGGING_ENABLE_COLORS} ]] ; then
         YELLOW="\033[33m"

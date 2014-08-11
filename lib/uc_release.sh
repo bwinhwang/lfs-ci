@@ -68,20 +68,26 @@ ci_job_release() {
 
     # storing new and old label name into files for later use and archive
     execute mkdir -p ${workspace}/bld/bld-lfs-release/
-    echo ${releaseLabel} > ${workspace}/bld/bld-lfs-release/label
+    echo ${releaseLabel} > ${workspace}/bld/bld-lfs-release/label.txt
     copyFileFromWorkspaceToBuildDirectory ${JOB_NAME} ${BUILD_NUMBER} \
-            ${workspace}/bld/bld-lfs-release/label
+            ${workspace}/bld/bld-lfs-release/label.txt
 
-    local lastSuccessfulBuildDirectory=$(getBuildDirectoryOnMaster ${JOB_NAME} lastSuccessfulBuild)
-    if runOnMaster test -e ${lastSuccessfulBuildDirectory}/label ; then
-        copyFileFromBuildDirectoryToWorkspace ${JOB_NAME} lastSuccessfulBuild label
-        execute mv ${WORKSPACE}/label ${workspace}/bld/bld-lfs-release/oldLabel
+    local releaseSummaryJobName=${JOB_NAME//${subJob}/summary}
+    info "release job name is ${releaseSummaryJobName}"
+
+    # TODO: demx2fk3 2014-08-08 this does not work for reRelease a build. In reReleas usecase, we need
+    # the build before the last successful build.
+    local lastSuccessfulBuildDirectory=$(getBuildDirectoryOnMaster ${releaseSummaryJobName} lastSuccessfulBuild)
+    if runOnMaster test -e ${lastSuccessfulBuildDirectory}/label.txt ; then
+        copyFileFromBuildDirectoryToWorkspace ${releaseSummaryJobName} lastSuccessfulBuild label.txt
+        execute mv ${WORKSPACE}/label.txt ${workspace}/bld/bld-lfs-release/oldLabel.txt
     else
-        touch ${workspace}/bld/bld-lfs-release/oldLabel            
+        # TODO: demx2fk3 2014-08-08 this should be an error message.
+        touch ${workspace}/bld/bld-lfs-release/oldLabel.txt
     fi
 
-    export LFS_PROD_RELEASE_CURRENT_TAG_NAME=$(cat ${workspace}/bld/bld-lfs-release/label)
-    export LFS_PROD_RELEASE_PREVIOUS_TAG_NAME=$(cat ${workspace}/bld/bld-lfs-release/oldLabel)
+    export LFS_PROD_RELEASE_CURRENT_TAG_NAME=$(cat ${workspace}/bld/bld-lfs-release/label.txt)
+    export LFS_PROD_RELEASE_PREVIOUS_TAG_NAME=$(cat ${workspace}/bld/bld-lfs-release/oldLabel.txt)
     export LFS_PROD_RELEASE_CURRENT_TAG_NAME_REL=${LFS_PROD_RELEASE_CURRENT_TAG_NAME//PS_LFS_OS_/PS_LFS_REL_}
     export LFS_PROD_RELEASE_PREVIOUS_TAG_NAME_REL=${LFS_PROD_RELEASE_PREVIOUS_TAG_NAME//PS_LFS_OS_/PS_LFS_REL_}
     info "LFS os release ${LFS_PROD_RELEASE_CURRENT_TAG_NAME} is based on ${LFS_PROD_RELEASE_PREVIOUS_TAG_NAME}"
@@ -99,12 +105,6 @@ ci_job_release() {
         build_results_to_share)
             extractArtifactsOnReleaseShare "${buildJobName}" "${buildBuildNumber}"
         ;;
-        create_releasenote_textfile)
-            # TODO: demx2fk3 2014-06-05  is this correct?!?!
-            # not longer in use
-#             createReleaseNoteTextFile "${TESTED_BUILD_JOBNAME}" "${TESTED_BUILD_NUMBER}" \
-#                                       "${buildJobName}"         "${buildBuildNumber}"
-        ;;
         create_release_tag)
             createReleaseTag ${buildJobName} ${buildBuildNumber}
         ;;
@@ -113,6 +113,9 @@ ci_job_release() {
         ;;
         create_source_tag) 
             createTagOnSourceRepository ${buildJobName} ${buildBuildNumber}
+        ;;
+        pre_release_checks)
+            prereleaseChecks
         ;;
         summary)
             sendReleaseNote           "${TESTED_BUILD_JOBNAME}" "${TESTED_BUILD_NUMBER}" \
@@ -126,6 +129,23 @@ ci_job_release() {
     esac
 
     return
+}
+
+prereleaseChecks() {
+
+    local exitCode=0
+    if ! _existsBaselineInWorkflowTool ${LFS_PROD_RELEASE_PREVIOUS_TAG_NAME} ; then
+        error "previous Version ${LFS_PROD_RELEASE_PREVIOUS_TAG_NAME} does not exist in WFT"
+        exitCode=1
+    fi
+    if [[ $(getProductNameFromJobName) =~ LFS ]] ; then
+        if ! _existsBaselineInWorkflowTool ${LFS_PROD_RELEASE_CURRENT_TAG_NAME_REL} ; then
+            error "previous Release Version ${LFS_PROD_RELEASE_CURRENT_TAG_NAME_REL} does not exist in WFT"
+            exitCode=1
+        fi                
+    fi
+
+    exit ${exitCode}
 }
 
 ## @fn      extractArtifactsOnReleaseShare( $jobName, $buildNumber )
@@ -161,8 +181,13 @@ extractArtifactsOnReleaseShare() {
         basename=$(basename ${dir})
 
         local destination=${resultBuildShare}/${basename}/${labelName}
-        if [[ ${basename} =~ linuxkernel ]] ; then
-            destination=${resultBuildShareLinuxKernel}/${basename}/${labelName}
+        if [[ ${basename} =~ kernelsources ]] ; then
+            # TODO: demx2fk3 2014-08-07 use different dir for fsmr4
+            if [[ ${basename} =~ fsm4_ ]] ; then
+                destination=${resultBuildShareLinuxKernel}/${basename}/FSMR4_${labelName}
+            else
+                destination=${resultBuildShareLinuxKernel}/${basename}/${labelName}
+            fi
         fi
 
         info "copy ${basename} to buildresults share ${destination}"
@@ -215,27 +240,38 @@ sendReleaseNote() {
     mustHaveValue "${osTagName}" "next os tag name"
     mustHaveValue "${oldReleaseTagName}" "old release tag name"
 
+
+    # create the os or uboot release note
     info "new release label is ${releaseTagName} based on ${oldReleaseTagName}"
     _createLfsOsReleaseNote ${buildJobName} ${buildBuildNumber}
 
-    if [[ ${productName} == "LFS" ]] ; then
-        _createReleaseInWorkflowTool ${osTagName} ${workspace}/os/releasenote.xml
-        _uploadToWorkflowTool        ${osTagName} ${workspace}/os/releasenote.xml
-        _uploadToWorkflowTool        ${osTagName} ${workspace}/os/releasenote.txt
-        _uploadToWorkflowTool        ${osTagName} ${workspace}/os/changelog.xml
+    info "collect revisions from all sub build jobs"
+    sort -u ${workspace}/bld/bld-externalComponents-*/usedRevisions.txt > ${workspace}/revisions.txt
 
+    _createReleaseInWorkflowTool ${osTagName} ${workspace}/os/os_releasenote.xml
+    _uploadToWorkflowTool        ${osTagName} ${workspace}/os/os_releasenote.xml
+    _uploadToWorkflowTool        ${osTagName} ${workspace}/os/releasenote.txt
+    _uploadToWorkflowTool        ${osTagName} ${workspace}/os/changelog.xml
+    _uploadToWorkflowTool        ${osTagName} ${workspace}/revisions.txt
+
+    execute cp -f ${workspace}/os/os_releasenote.xml ${workspace}/bld/bld-lfs-release/lfs_os_releasenote.xml
+    execute cp -f ${workspace}/os/releasenote.txt    ${workspace}/bld/bld-lfs-release/lfs_os_releasenote.txt
+    execute cp -f ${workspace}/os/changelog.xml      ${workspace}/bld/bld-lfs-release/lfs_os_changelog.xml
+    execute cp -f ${workspace}/revisions.txt         ${workspace}/bld/bld-lfs-release/revisions.txt
+
+    if [[ ${productName} == "LFS" ]] ; then
         _createLfsRelReleaseNoteXml  ${releaseTagName} ${workspace}/rel/releasenote.xml
         _createReleaseInWorkflowTool ${releaseTagName} ${workspace}/rel/releasenote.xml
         _uploadToWorkflowTool        ${releaseTagName} ${workspace}/rel/releasenote.xml
-        _uploadToWorkflowTool        ${releaseTagName} ${workspace}/os/releasenote.xml
+        _uploadToWorkflowTool        ${releaseTagName} ${workspace}/os/os_releasenote.xml
         _uploadToWorkflowTool        ${releaseTagName} ${workspace}/os/releasenote.txt
         _uploadToWorkflowTool        ${releaseTagName} ${workspace}/os/changelog.xml
 
         execute cp -f ${workspace}/rel/releasenote.xml ${workspace}/bld/bld-lfs-release/lfs_rel_releasenote.xml
     fi
 
-    info "send release note"
     if [[ ${canSendReleaseNote} ]] ; then
+        info "send release note"
         execute ${LFS_CI_ROOT}/bin/sendReleaseNote  -r ${workspace}/os/releasenote.txt \
                                                     -t ${releaseTagName}                 \
                                                     -f ${LFS_CI_ROOT}/etc/file.cfg
@@ -243,9 +279,10 @@ sendReleaseNote() {
         info "sending the release note is disabled in config"
     fi
 
-    execute cp -f ${workspace}/os/releasenote.txt  ${workspace}/bld/bld-lfs-release/lfs_os_releasenote.txt
-    execute cp -f ${workspace}/os/releasenote.xml  ${workspace}/bld/bld-lfs-release/lfs_os_releasenote.xml
-    execute cp -f ${workspace}/os/changelog.xml    ${workspace}/bld/bld-lfs-release/lfs_os_changelog.xml
+    for file in ${workspace}/bld/bld-lfs-release/* ; do
+        [[ -f ${file} ]] || continue
+        copyFileToArtifactDirectory ${file}
+    done
 
     info "creating approval file on moritz for ${osTagName}"
     execute ssh moritz touch /lvol2/production_jenkins/tmp/approved/${osTagName}
@@ -261,23 +298,23 @@ _createReleaseInWorkflowTool() {
 
     local wftApiKey=$(getConfig WORKFLOWTOOL_api_key)
     local wftCreateRelease=$(getConfig WORKFLOWTOOL_url_create_release)
-    local wftBuildContent=$(getConfig WORKFLOWTOOL_url_build_content)
     local curl="curl -k ${wftCreateRelease} -F access_key=${wftApiKey}" 
 
     # check, if wft already knows about the release
-    curl -sf -k ${wftBuildContent}/${tagName}
     local update=""
-    case $? in 
-        0)  update="-F update=true" ;; # does exist
-        22) update="-F update=false" ;; # does not exist 
-        *)  error "unknown error from curl $?"; exit 1 ;;
-    esac
+    if _existsBaselineInWorkflowTool ${tagName} ; then
+        update="-F update=true"  # does exist
+    else
+        update="-F update=false" # does not exist 
+    fi
 
     info "creating release based on ${fileName} in wft"
     execute ${curl} ${update} -F file=@${fileName}
 
-    # check, if creation in WFT was successful. this will raise an error, if ${tagName} does not exist
-    execute curl -sf -k ${wftBuildContent}/${tagName} 
+    if ! _existsBaselineInWorkflowTool ${tagName} ; then
+        error "just created baseline ${tagName} does not exist in WFT"
+        exit 1
+    fi
 
     return
 }
@@ -291,19 +328,42 @@ _uploadToWorkflowTool() {
     local wftUploadAttachment=$(getConfig WORKFLOWTOOL_url_upload_attachment)
     local curl="curl -k ${wftUploadAttachment}/${tagName} -F access_key=${wftApiKey} "
 
-    # check, if wft already knows about the release
-    curl -sf -k ${wftBuildContent}/${tagName}
+    if [[ ! -s ${fileName} ]] ; then
+        debug "file ${fileName} is empty"
+        return
+    fi
+
     local update=""
-    case $? in 
-        0)  update="-F update=true" ;; # does exist
-        22) update="-F update=false" ;; # does not exist 
-        *)  error "unknown error from curl $?"; exit 1 ;;
-    esac
+    if _existsBaselineInWorkflowTool ${tagName} ; then
+        update="-F update=true"  # does exist
+    else
+        update="-F update=false" # does not exist 
+    fi
 
     info "uploading ${fileName} to wft"
     execute ${curl} ${update} -F file=@${fileName}
 
     return
+}
+
+_existsBaselineInWorkflowTool() {
+    local tagName=$1
+
+    local wftApiKey=$(getConfig WORKFLOWTOOL_api_key)
+    local wftBuildContent=$(getConfig WORKFLOWTOOL_url_build_content)
+    local curl="curl -k ${wftUploadAttachment}/${tagName} -F access_key=${wftApiKey} "
+
+    # check, if wft already knows about the release
+    curl -sf -k ${wftBuildContent}/${tagName} >/dev/null 
+    case $? in 
+        # reverse logic due to exit code logic: 1 == failure, 0 == ok
+        0)  return 0 ;; # does exist
+        22) return 1 ;; # does not exist 
+        *)  error "unknown error from curl $?"; exit 1 ;;
+    esac
+
+    # not reachable
+    exit 1
 }
 
 _validateReleaseNoteXml() {
@@ -393,11 +453,12 @@ _createLfsOsReleaseNote() {
                                          -f ${LFS_CI_ROOT}/etc/file.cfg > releasenote.xml
     mustBeSuccessfull "$?" "getReleaseNoteXML"
     rawDebug ${workspace}/os/releasenote.xml
+    execute mv -f ${workspace}/os/releasenote.xml ${workspace}/os/os_releasenote.xml
+
+    _validateReleaseNoteXml ${workspace}/os/os_releasenote.xml
 
     unset type
     export type
-
-    _validateReleaseNoteXml ${workspace}/os/releasenote.xml
 
     return
 }
@@ -416,7 +477,7 @@ _createLfsRelReleaseNoteXml() {
             > ${workspace}/rel/bld/bld-externalComponents-summary/externalComponents
     mustBeSuccessfull "$?" "grep sdk ok"
 
-    echo "PS_LFS_OS <> = ${LFS_PROD_RELEASE_PREVIOUS_TAG_NAME}" >> ${workspace}/rel/bld/bld-externalComponents-summary/externalComponents
+    echo "PS_LFS_OS <> = ${LFS_PROD_RELEASE_CURRENT_TAG_NAME}" >> ${workspace}/rel/bld/bld-externalComponents-summary/externalComponents
 
     # no changes here, just a dummy changelog is required
     echo '<log />' > changelog.xml 
@@ -455,7 +516,7 @@ createTagOnSourceRepository() {
     local osLabelName=${LFS_PROD_RELEASE_CURRENT_TAG_NAME}
 
     export tagName=${osLabelName}
-    local svnUrl=$(getConfig LFS_PROD_svn_delivery_os_repos_url)
+    local svnUrl=$(getConfig lfsSourceRepos)
     local svnUrlOs=${svnUrl}/os
     local branch=pre_${osLabelName}
     local logMessage=$(createTempFile)
@@ -737,6 +798,9 @@ createProxyReleaseTag() {
 
     echo "upBTSPS-1657 IN rh: DESRIPTION: NOJCHK : updating svn:externals using extnerals from ${deliverySvnUrl}/tags/${relTagName}" > ${logMessage}
     svnCommit -F ${logMessage} ${workspace}/proxyTag
+
+    # TODO: demx2fk3 2014-08-08 add a check for svn:externals
+    sleep 60
 
     if [[ ${canCreateProxyTag} ]] ; then
         echo "BTSPS-1657 IN rh: DESRIPTION: NOJCHK : creating new proxy tag ${tagName}" > ${logMessage}

@@ -44,9 +44,12 @@ ci_job_package() {
     # so we are just removing / fixing symlinks in sys-root
     removeBrokenSymlinks ${workspace}/upload/sys-root/
 
+    execute rm -rf ${workspace}/upload/psl_merge
+
     # creates a file under doc/ with all delivered files of a LFS OS release
     createOsFileList
 
+    # TODO: demx2fk3 2014-08-05 reenable me
     copyReleaseCandidateToShare
 
     return 0
@@ -135,13 +138,15 @@ copySysroot() {
     local workspace=$(getWorkspaceName)
     mustHaveWorkspaceName
 
-
     for bldDirectory in ${workspace}/bld/bld-*psl*-* ; do
 
         [[ -d ${bldDirectory} ]] || continue
 
         local destinationsArchitecture=$(getArchitectureFromDirectory ${bldDirectory})
         mustHavePlatformFromDirectory ${bldDirectory} ${destinationsArchitecture} 
+
+        local platform=$(getPlatformFromDirectory ${bldDirectory})
+        mustHaveValue "${platform}" "platform from directory"
 
         info "copy sys-root for ${destinationsArchitecture}"
 
@@ -159,14 +164,17 @@ copySysroot() {
             # copy lib
             # untar debug.tgz
             # copy some other sysroo dirs
-        case ${destinationsArchitecture} in
-            arm-cortexa15-linux-gnueabihf)
-                local sysroot_tgz=${workspace}/bld/bld-rfs-arm/results/sysroot.tar.gz
-            ;;
-            *)
-                local sysroot_tgz=${bldDirectory}/results/rfs.init_sys-root.tar.gz
-            ;;
+        local sysroot_tgz
+        case ${platform} in
+            lrc-*)   sysroot_tgz=${workspace}/bld/bld-rfs-lcpa/results/sysroot.tar.gz ;;
+            fsm4_*)  sysroot_tgz=${workspace}/bld/bld-rfs-arm/results/sysroot.tar.gz  ;;
+            qemu_64) sysroot_tgz=${bldDirectory}/results/rfs.init_sys-root.tar.gz  
+                     [[ $(getBranchName) =~ "LRC" ]] && \
+                     sysroot_tgz=${workspace}/bld/bld-rfs-qemu_x86_64/results/sysroot.tar.gz ;;
+            *)       sysroot_tgz=${bldDirectory}/results/rfs.init_sys-root.tar.gz     ;;
         esac
+
+        info "using sysroot for ${platform} ${sysroot_tgz}"
 
         if [[ -e ${sysroot_tgz} ]] ; then
             debug "untar ${sysroot_tgz}"
@@ -193,12 +201,20 @@ copySysroot() {
                 # execute tar -xvz -C ${dst}/usr --strip-components=1 -f ${workspace}/bld/bld-fsmddal-qemu_x86_64/results/include/fsmifdd.tgz
                 # execute ln -sf libFSMDDAL.so.qemu_x86_64 ${dst}/usr/lib/libFSMDDAL_qemu_x86_64.so
                 # execute ln -sf libFSMDDAL.so.qemu_x86_64 ${dst}/usr/lib/libFSMDDAL.so
+                [[ $(getBranchName) =~ "LRC" ]] && \
+                    execute tar -xv -C ${dst}/usr --strip-components=1 -f ${workspace}/bld/bld-lrcpsl-lcpa/results/lrcddal/fsmifdd.tgz
+                [[ $(getBranchName) =~ "LRC" ]] && \
+                    execute rm -f ${dst}/usr/lib/libFSMDDAL* 
             ;;
             mips64-octeon2-linux-gnu)
                # execute tar -xvz -C ${dst}/usr --strip-components=1 -f ${workspace}/bld/bld-fsmddal-fct/results/include/fsmifdd.tgz
                # execute ln -sf libFSMDDAL.so.fct ${dst}/usr/lib64/libFSMDDAL_fsm3_octeon2.so
                # execute ln -sf libFSMDDAL.so.fct ${dst}/usr/lib64/libFSMDDAL.so
                # execute ln -sf libFSMDDAL.so.fct ${dst}/usr/lib64/libDDAL.so
+                [[ $(getBranchName) =~ "LRC" ]] && \
+                    execute tar -xv -C ${dst}/usr --strip-components=1 -f ${workspace}/bld/bld-lrcpsl-lcpa/results/lrcddal/fsmifdd.tgz
+                [[ $(getBranchName) =~ "LRC" ]] && \
+                    execute mv ${dst}/usr/lib/libFSMDDAL* ${dst}/usr/lib64/
             ;;
             mips64-octeon-linux-gnu)
                 execute tar -xvz -C ${dst}/usr --strip-components=1 -f ${workspace}/bld/bld-fsmddal-fct/results/include/fsmifdd.tgz
@@ -224,6 +240,23 @@ copySysroot() {
         esac            
 
     done
+
+    if [[ $(getBranchName) =~ "LRC" ]] ; then
+        for bldDirectory in ${workspace}/bld/bld-*-*/ ; do
+            [[ -d ${bldDirectory}                   ]] || continue
+            [[ -d ${bldDirectory}/results/sys-root/ ]] || continue
+
+            local destinationsArchitecture=$(getArchitectureFromDirectory ${bldDirectory})
+            mustHavePlatformFromDirectory ${bldDirectory} ${destinationsArchitecture} 
+
+            local platform=$(getPlatformFromDirectory ${bldDirectory})
+            mustHaveValue "${platform}" "platform from directory from ${bldDirectory}"
+
+            info "copy sys-root for ${destinationsArchitecture} from ${bldDirectory}"
+            local dst=${workspace}/upload/
+            execute rsync -av --exclude=.svn ${bldDirectory}/results/sys-root/ ${dst}/sys-root/
+        done
+    fi
 
     return
 }
@@ -274,7 +307,22 @@ copyPlatform() {
         info "copy platform for ${platform} / ${architecture} ..."
 
         # TODO: demx2fk3 2014-04-07 expand the short parameter names
-        execute rsync -avr --exclude=addons --exclude=sys-root --exclude=rfs.init_sys-root.tar.gz ${bldDirectory}/results/. ${dst}
+        if [[ $(getBranchName) =~ "LRC" ]] ; then
+            case ${platform} in 
+                qemu_64)
+                    execute rsync -avr --exclude=.svn --exclude=addons --exclude=sys-root --exclude=rfs.init_sys-root.tar.gz ${bldDirectory}/results/. ${workspace}/upload/
+                    execute mv -f ${workspace}/upload/platforms/qemu_x86_64/* ${dst}
+                    execute rmdir ${workspace}/upload/platforms/qemu_x86_64                                                                                 
+
+                ;;
+                lrc-octeon2)
+                    execute rsync -avr --exclude=addons --exclude=sys-root --exclude=rfs.init_sys-root.tar.gz ${bldDirectory}/results/. ${workspace}/upload/
+                ;;
+            esac
+        else
+            execute rsync -avr --exclude=addons --exclude=sys-root --exclude=rfs.init_sys-root.tar.gz ${bldDirectory}/results/. ${dst}
+        fi
+
 
         debug "symlink addons"
         execute ln -sf ../../addons/${architecture} ${dst}/addons
@@ -288,15 +336,20 @@ copyPlatform() {
             qemu)        : ;;  # no op
             fcmd | fspc) : ;;  # no op
             qemu_64)
-                    mkdir ${dst}/devel
-                    for file in ${dst}/config     \
-                                ${dst}/System.map \
-                                ${dst}/vmlinux.*  \
-                                ${dst}/uImage.nfs
-                    do
-                        [[ -f ${file} ]] || continue
-                        execute mv -f ${file} ${dst}/devel
-                    done
+                    if [[ $(getBranchName) =~ "LRC" ]] ; then
+                        info "copy platforms/qemu_x86_64/rfs.init_sys-root.tar.gz to ${dst}"
+                        execute cp ${bldDirectory}/results/platforms/qemu_x86_64/rfs.init_sys-root.tar.gz ${dst}
+                    else
+                        mkdir ${dst}/devel
+                        for file in ${dst}/config     \
+                                    ${dst}/System.map \
+                                    ${dst}/vmlinux.*  \
+                                    ${dst}/uImage.nfs
+                        do
+                            [[ -f ${file} ]] || continue
+                            execute mv -f ${file} ${dst}/devel
+                        done
+                    fi                            
             ;;
             fsm3_octeon2|fsm35_k2|fsm35_axm|fsm4_axm|fsm4_k2|keystone2|axm)
                     ln -fs factory/u-boot.uim ${dst}/u-boot.uim
@@ -313,6 +366,11 @@ copyPlatform() {
                     rm -f ${dst}/bzImage
             ;;
         esac
+
+        if [[ -d ${bldDirectory}/results/psl_merge/ ]] ; then
+            info "adding psl_merge from ${bldDirectory}"
+            execute rsync -avr ${bldDirectory}/results/psl_merge/. ${workspace}/upload/
+        fi
 
     done
 
@@ -376,6 +434,7 @@ copyDocumentation() {
 
 ## @fn      createOsFileList()
 #  @brief   creates a file list file in subdir doc including all file names below os/ of a LFS OS delivery
+#           This was requested by PS-SCM (Wolfgang Adlassnig), because all SC will deliver such a list.
 #  @param   <none>
 #  @return  <none>
 createOsFileList() {

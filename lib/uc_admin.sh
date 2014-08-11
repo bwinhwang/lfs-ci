@@ -44,7 +44,9 @@ synchronizeShare() {
     local localPath=$(getConfig    ADMIN_sync_share_local_directoryName)
     local remotePath=$(getConfig   ADMIN_sync_share_remote_directoryName)
     local remoteServer=$(getConfig ADMIN_sync_share_remote_hostname)
-    local findDepth=$(getConfig ADMIN_sync_share_check_depth)
+    local findDepth=$(getConfig    ADMIN_sync_share_check_depth)
+    local find=$(getConfig         ADMIN_sync_share_find_command)
+    local rsyncOpts=$(getConfig    ADMIN_sync_share_rsync_opts)
     mustHaveValue "${remoteServer}" "remote server"
     mustHaveValue "${remotePath}"   "remote path"
     mustHaveValue "${localPath}"    "local path"
@@ -63,23 +65,30 @@ synchronizeShare() {
     if [[ -z ${findDepth} ]] ; then
         findDepth=1
     fi
-    ssh ${remoteServer} "find ${remotePath} -maxdepth $(( findDepth - 1 )) -exec chmod -v u+w {} \; " 
-    mustBeSuccessfull $? "ssh chmod command"
 
     info "synchronize ${localPath} to ${remoteServer}:${remotePath}"
     local pathToSyncFile=$(createTempFile)
     ${LFS_CI_ROOT}/bin/xpath -q -e '/log/logentry/paths/path/node()' ${WORKSPACE}/changelog.xml  > ${pathToSyncFile}
     mustBeSuccessfull "$?" "xpath changelog.xml"
 
+    if [[ -f ${pathToSyncFile} && ! -s ${pathToSyncFile} ]] ; then
+        warning "nothing to sync"
+        return
+    fi         
+
     local buildDescription=$(perl -p -e 's:.*/::g' ${pathToSyncFile} | sort -u)
     setBuildDescription "${JOB_NAME}" "${BUILD_NUMBER}" "${buildDescription:-no change}"
 
+    ssh ${remoteServer} "${find} ${remotePath} -maxdepth $(( findDepth - 1 )) -exec chmod u+w {} \; " 
+    mustBeSuccessfull $? "ssh chmod command"
+
     for entry in $(cat ${pathToSyncFile})
     do
-        basePartOfEntry=${entry//${remotePath}}
+        basePartOfEntry=${entry//${localPath}}
+       [[ -d ${entry} ]] || continue
         info "transferting ${entry} to ${remoteServer}:${remotePath}/${basePartOfEntry}"
         execute ssh ${remoteServer} mkdir -p ${remotePath}/${basePartOfEntry}
-        execute rsync -aHz -e ssh --stats ${entry}/ ${remoteServer}:${remotePath}/${basePartOfEntry}
+        execute rsync -aHz -e ssh --stats ${rsyncOpts} ${entry}/ ${remoteServer}:${remotePath}/${basePartOfEntry}
     done
 
     info "synchronizing is done."
@@ -90,7 +99,7 @@ synchronizeShare() {
 genericShareCleanup() {
     requiredParameters JOB_NAME BUILD_NUMBER LFS_CI_ROOT WORKSPACE
 
-    copyChangelogToWorkspace ${JOB_NAME} ${BUILD_NUMBER}
+    copyChangelogToWorkspace ${UPSTREAM_PROJECT} ${UPSTREAM_BUILD}
     mustExistFile ${WORKSPACE}/changelog.xml
 
     # ADMIN_-_genericShareCleanup_-_Ul
@@ -100,45 +109,56 @@ genericShareCleanup() {
     mustHaveValue "${remoteServer}" "remote server name"
     mustHaveAccessableServer ${remoteServer}
 
-    # TODO: demx2fk3 2014-07-25 remove me -- for debugging
-    local execute=info
-
     # we are handeling "old" pathes first:
     local tmpFile=$(createTempFile)
     ${LFS_CI_ROOT}/bin/xpath -q -e '/log/logentry/paths/path[@action="D"]/node()' ${WORKSPACE}/changelog.xml \
         > ${tmpFile}
 
+    setBuildDescription ${JOB_NAME} ${BUILD_NUMBER} "triggered by ${UPSTREAM_PROJECT}/${UPSTREAM_BUILD}"
+
+    local execute=info
+    local max=$(wc -l ${tmpFile} | cut -d" " -f1)
+    local cnt=0
     for entry in $(cat ${tmpFile}) ; do
-        info "removing ${entry}"
-
-        debug "fixing permissions on parent directory"
-        $execute "ssh ${remoteServer} chmod u+w $(dirname ${entry})"
-
-        debug "fixing permissions of removal candidate ${entry}"
-        $execute "ssh ${remoteServer} chmod -R u+w ${entry}"
-
-        debug "removing ${entry}"
-        $execute "ssh ${remoteServer} rm -rf ${entry}"
-    done
-
-    # next: modified and added stuff
-    ${LFS_CI_ROOT}/bin/xpath -q -e '/log/logentry/paths/path[@action="A"]/node()' ${WORKSPACE}/changelog.xml \
-        > ${tmpFile}
-    ${LFS_CI_ROOT}/bin/xpath -q -e '/log/logentry/paths/path[@action="M"]/node()' ${WORKSPACE}/changelog.xml \
-        >> ${tmpFile}
-
-    for entry in $(cat ${tmpFile}) ; do
-        info "transferting ${entry} to ${remoteServer}"
+        cnt=$(( cnt + 1 ))
+        info "[${cnt}/${max}] removing ${entry}"
 
         debug "fixing permissions on parent directory"
         $execute ssh ${remoteServer} chmod u+w $(dirname ${entry})
 
-        debug "creating new directory"
-        $execute ssh ${remoteServer} mkdir -p ${remotePath}/${entry}
+        debug "fixing permissions of removal candidate ${entry}"
+        $execute ssh ${remoteServer} chmod -R u+w ${entry}
 
-        debug "rsyncing ${entry}"
-        $execute rsync -aHz -e ssh --stats ${entry}/ ${remoteServer}:${entry}/
+        debug "removing ${entry}"
+        if [[ -e ${entry} ]] ; then
+            local tar=$(echo ${entry} | sed "s:/:_:g").tar.gz
+            $execute tar cfz /build/home/${USER}/genericCleanup/${tar} ${entry}
+        fi
+
+        local randomValue=${RANDOM}
+        $execute ssh ${remoteServer} mv -f ${entry} ${entry}.deleted.${randomValue}
+        $execute ssh ${remoteServer} rm -rf ${entry}.deleted.${randomValue}
     done
+
+    # next: modified and added stuff
+    # TODO: demx2fk3 2014-08-07 disabled, we dont want to put stuff to the remote site
+#     ${LFS_CI_ROOT}/bin/xpath -q -e '/log/logentry/paths/path[@action="A"]/node()' ${WORKSPACE}/changelog.xml \
+#         > ${tmpFile}
+#     ${LFS_CI_ROOT}/bin/xpath -q -e '/log/logentry/paths/path[@action="M"]/node()' ${WORKSPACE}/changelog.xml \
+#         >> ${tmpFile}
+# 
+#     for entry in $(cat ${tmpFile}) ; do
+#         info "transferting ${entry} to ${remoteServer}"
+# 
+#         debug "fixing permissions on parent directory"
+#         $execute ssh ${remoteServer} chmod u+w $(dirname ${entry})
+# 
+#         debug "creating new directory"
+#         $execute ssh ${remoteServer} mkdir -p ${remotePath}/${entry}
+# 
+#         debug "rsyncing ${entry}"
+#         info execute rsync -aHz -e ssh --stats ${entry}/ ${remoteServer}:${entry}/
+#     done
 
     info "cleanup is done."
 }
@@ -198,9 +218,9 @@ backupJenkinsMasterServerInstallation() {
     mustHaveValue ${backupPath}
     mustHaveValue ${serverPath}
 
-    execute rm -rf ${backupPath}/backup.1001
+    execute rm -rf ${backupPath}/backup.112
 
-    for i in $(seq 0 1000 | tac) ; do
+    for i in $(seq 0 111 | tac) ; do
         [[ -d ${backupPath}/backup.${i} ]] || continue
         old=$(( i + 1 ))
         execute mv -f ${backupPath}/backup.${i} ${backupPath}/backup.${old}

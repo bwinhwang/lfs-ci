@@ -84,14 +84,29 @@ actionCheckout() {
             _scLfsOldReleasesOnBranches ${tmpFileA}
             execute touch ${tmpFileB}
         ;;
-        SC_LFS_in_*_Phase_4)
+        CI_LFS_in_*_Phase_4)
+            _ciLfsRemoteSites ul ${tmpFileB}
+
             case ${subTaskName} in
-                *Oulu*)    _scLfsRemoteSites ousync ${tmpFileA} ;;
-                *Wrozlaw*) _scLfsRemoteSites wrsync ${tmpFileA} ;;
-                *Ulm*)     _scLfsRemoteSites ulsync ${tmpFileA} ;;
+                *_in_ou_*) _ciLfsRemoteSites ou ${tmpFileA} ;;
+                *_in_wr_*) _ciLfsRemoteSites wr ${tmpFileA} ;;
+                *) exit 1 ;;
+            esac
+        ;;
+        SC_LFS_in_*_Phase_4)
+            _scLfsRemoteSites ul ${tmpFileB}
+
+            case ${subTaskName} in
+                *Oulu*)    _scLfsRemoteSites ou ${tmpFileA} ;;
+                *Wrozlaw*) _scLfsRemoteSites wr ${tmpFileA} ;;
+                *_in_bh_*) _scLfsRemoteSites bh ${tmpFileA} ;;
+                *_in_du_*) 
+                    execute sed -i "s:/build/home/SC_LFS/releases/bld:/usrd9/build/home/SC_LFS/releases/bld:g" ${tmpFileB}
+                    _scLfsRemoteSites du ${tmpFileA} 
+                ;;
+                *) exit 1 ;;
             esac
 
-            _scLfsRemoteSites ulsync ${tmpFileB}
         ;;
     esac
 
@@ -134,10 +149,12 @@ _ciLfsNotReleasedBuilds() {
     done
 
     sort -u ${tmpFile} > ${tmpFileA}
-    find ${directoryToCleanup} -mindepth 2 -maxdepth 2 -mtime +60 -type d -printf "%p\n" | sort -u > ${tmpFileB}
+    find ${directoryToCleanup} -mindepth 2 -maxdepth 2 -mtime +30 -type d -printf "%p\n" | sort -u > ${tmpFileB}
 
+#        |  egrep -e 'PS_LFS_OS_[0-9]{4}_[0-9]{2}_[0-9]{4}' \
     # release candidates, which are older than 60 days and are not released
-    grep -v -f ${tmpFileA} ${tmpFileB} | sed "s/^/1 /g" > ${resultFile}
+    grep -v -f ${tmpFileA} ${tmpFileB} | sed "s/^/1 /g"    \
+        > ${resultFile}
 
     return
 }
@@ -147,7 +164,7 @@ _scLfsOldReleasesOnBranches() {
     local tmpFileA=$(createTempFile)
     local tmpFileB=$(createTempFile)
     local directoryToCleanup=/build/home/SC_LFS/releases/bld/
-    local days=1400
+    local days=1150
 
     info "check for baselines older than ${days} days in ${directoryToCleanup}"
     find ${directoryToCleanup} -mindepth 2 -maxdepth 2 -mtime +${days} -type d -printf "%p\n" \
@@ -160,12 +177,33 @@ _scLfsOldReleasesOnBranches() {
     return
 }
 
-_scLfsRemoteSites() {
-    local resultFile=$2
+_ciLfsRemoteSites() {
     local siteName=$1
-    local directoryToCleanup=/build/home/SC_LFS/releases/bld/
+    local resultFile=$2
 
-    ssh ${siteName} "find ${directoryToCleanup} -mindepth 2 -maxdepth 2 -type d -printf \"1 %p\n\" " | sort -u > ${resultFile} 
+    export siteName
+    local directoryToCleanup=/build/home/CI_LFS/Release_Candidates/
+    local find=$(getConfig ADMIN_sync_share_find_command)
+
+    info "directoryToCleanup is ${directoryToCleanup}"
+    ssh ${siteName}sync "${find} ${directoryToCleanup} -mindepth 2 -maxdepth 2 -type d -printf \"1 %p\n\" " \
+        | sort -u > ${resultFile} 
+    mustBeSuccessfull "$?" "ssh find ${siteName}"
+
+    return
+}
+_scLfsRemoteSites() {
+    local siteName=$1
+    local resultFile=$2
+
+    export siteName
+    export shareType=bld
+    local directoryToCleanup=$(getConfig ADMIN_sync_share_remote_directoryName)
+    local find=$(getConfig ADMIN_sync_share_find_command)
+
+    info "directoryToCleanup is ${directoryToCleanup}"
+    ssh ${siteName}sync "${find} ${directoryToCleanup} -mindepth 2 -maxdepth 2 -type d -printf \"1 %p\n\" " \
+        | sort -u > ${resultFile} 
     mustBeSuccessfull "$?" "ssh find ${siteName}"
 
     return
