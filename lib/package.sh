@@ -133,9 +133,9 @@ copyReleaseCandidateToShare() {
     local revision=$(cut -d" " -f 3 ${workspace}/bld/bld-externalComponents-*/usedRevisions.txt | sort -u | tail -n 1)
     mustHaveValue "${revision}" "latest used revision"
 
-    info "create link in RCversion to "
-    execute mkdir -p ${linkDirectory}
-    execute cd ${linkDirectory}
+    # info "create link in RCversion to "
+    # execute mkdir -p ${linkDirectory}
+    # execute cd ${linkDirectory}
     # TODO: demx2fk3 2014-07-22 disabled at the moment (see ecl promotion)
     # execute ln -sf ${pathToLink} ${label}
     # TODO: demx2fk3 2014-07-22 disabled, bis jemand schreit...
