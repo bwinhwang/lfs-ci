@@ -272,7 +272,10 @@ rawDebug() {
     local fileToLog=$1
 
     # file is empty
-    [[ ! -s ${fileToLog} ]] && return
+    if [[ ! -s ${fileToLog} ]] ; then
+        trace "file ${fileToLog} is empty"
+        return
+    fi            
 
     trace "{{{ adding content of file ${fileToLog} to logfile"
     trace     "----------------------------------------------"
