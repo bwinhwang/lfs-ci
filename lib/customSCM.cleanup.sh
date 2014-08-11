@@ -149,7 +149,7 @@ _ciLfsNotReleasedBuilds() {
     done
 
     sort -u ${tmpFile} > ${tmpFileA}
-    find ${directoryToCleanup} -mindepth 2 -maxdepth 2 -mtime +40 -type d -printf "%p\n" | sort -u > ${tmpFileB}
+    find ${directoryToCleanup} -mindepth 2 -maxdepth 2 -mtime +30 -type d -printf "%p\n" | sort -u > ${tmpFileB}
 
 #        |  egrep -e 'PS_LFS_OS_[0-9]{4}_[0-9]{2}_[0-9]{4}' \
     # release candidates, which are older than 60 days and are not released
@@ -164,7 +164,7 @@ _scLfsOldReleasesOnBranches() {
     local tmpFileA=$(createTempFile)
     local tmpFileB=$(createTempFile)
     local directoryToCleanup=/build/home/SC_LFS/releases/bld/
-    local days=1250
+    local days=1150
 
     info "check for baselines older than ${days} days in ${directoryToCleanup}"
     find ${directoryToCleanup} -mindepth 2 -maxdepth 2 -mtime +${days} -type d -printf "%p\n" \
