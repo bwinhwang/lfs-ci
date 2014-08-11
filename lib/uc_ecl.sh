@@ -6,7 +6,7 @@
 
 ## @fn      ci_job_ecl()
 #  @brief   update the ECL file 
-#  @details «full description»
+#  @details 
 #  @todo    add more doc
 #  @param   <none>
 #  @return  <none>
