@@ -50,3 +50,122 @@ ci_job_test_on_target() {
     return 0
 }
 
+makingTest_testLRC() {
+
+    local workspace=$(getWorkspaceName)
+    mustHaveCleanWorkspace
+    mustHaveWorkspaceName
+
+    execute cd ${workspace}
+    execute build setup
+    execute build adddir src-test
+
+    local testBuildDirectory=${DELIVERY_DIRECTORY}
+    mustExistDirectory ${testBuildDirectory}
+
+    local xmlOutputDirectory=${workspace}/xml-output
+    execute mkdir -p ${xmlOutputDirectory}
+    mustExistDirectory ${xmlOutputDirectory}
+
+    local testTargetName=lcpa878 # TODO $(getConfig LFS_CI_uc_test_testTargetName)
+    mustHaveValue "${testTargetName}" "test target name"
+
+    local testSuiteDirectory=${workspace}/src-test/src/unittest/testsuites/continousintegration/production_ci_LRC
+    local testSuiteDirectory_SHP=${testSuiteDirectory}_shp
+    local testSuiteDirectory_AHP=${testSuiteDirectory}_ahp
+    mustExistDirectory ${testSuiteDirectory}
+    mustExistDirectory ${testSuiteDirectory_SHP}
+    mustExistDirectory ${testSuiteDirectory_AHP}
+
+    execute make -C ${testSuiteDirectory} testconfig-overwrite TESTBUILD=${testBuildDirectory}
+
+    makingTest_install ${testSuiteDirectory}
+    makingTest_check   ${testSuiteDirectory}
+    makingTest_check   ${testSuiteDirectory_SHP}
+    makingTest_check   ${testSuiteDirectory_AHP}
+
+    makingTest_testLRC_subBoard ${testSuiteDirectory_SHP} ${testBuildDirectory} ${testTargetName}_shp ${workspace}/xml-output/shp
+    makingTest_testLRC_subBoard ${testSuiteDirectory}     ${testBuildDirectory} ${testTargetName}_shp ${workspace}/xml-output/shp-common
+
+    execute make -C ${testSuiteDirectory_AHP} waitssh
+    execute make -C ${testSuiteDirectory_AHP} setup
+    execute make -C ${testSuiteDirectory_AHP} check
+
+    makingTest_testLRC_subBoard ${testSuiteDirectory_AHP} ${testBuildDirectory} ${testTargetName}_ahp ${workspace}/xml-output/ahp
+    makingTest_testLRC_subBoard ${testSuiteDirectory}     ${testBuildDirectory} ${testTargetName}_ahp ${workspace}/xml-output/ahp-common
+
+    find ${workspace}/xml-output -name '*.xml' | while read file
+    do
+        cat -v ${file} > ${file}.tmp && mv ${file}.tmp ${file}
+    done
+    # exit $E
+
+    return
+}
+
+makingTest_testLRC_subBoard() {
+    local testSuiteDirectory=$1
+    mustExistDirectory ${testSuiteDirectory}
+
+    local testBuildDirectory=$2
+    mustExistDirectory ${testBuildDirectory}
+
+    local testTargetName=$3
+    mustHaveValue "${testTargetName}" "test target name"
+
+    local xmlReportDirectory=$4
+    mustExistDirectory ${xmlReportDirectory}
+
+    local workspace=$(getWorkspaceName)
+    mustHaveWorkspaceName
+
+    local make="make -C ${testSuiteDirectory}"
+
+    execute ${make} clean
+    execute ${make} testconfig-overwrite TESTBUILD=${testBuildDirectory} TESTTARGET=${testTargetName}
+            ${make} test-xmloutput       || E=0 # also true
+
+    execute mkdir -p ${xmlReportDirectory}
+    execute cp -rf ${testSuiteDirectory}/xml-reports ${xmlReportDirectory}
+    execute sed -i -s 's/name=/name=ahp_common_/g' ${xmlReportDirectory}/xml-reports/*.xml
+
+    return
+}
+
+makingTest_check() {
+    local testSuiteDirectory=$1
+    mustExistDirectory ${testSuiteDirectory}
+
+    local make="make -C ${testSuiteDirectory}"
+    execute ${make} waitprompt
+    execute ${make} waitssh
+    execute ${make} setup
+    execute ${make} check
+
+    return
+}
+
+makingTest_install() {
+    local testSuiteDirectory=$1
+    mustExistDirectory ${testSuiteDirectory}
+
+    local make="make -C ${testSuiteDirectory}"
+
+    execute ${make} setup
+
+    # currently install does show wrong (old) version after reboot and
+    # SHP sometimes fails to be up when install is retried.
+    # We try installation up to 4 times
+
+    for i in $(seq 1 4) ; do
+        ${make} install FORCE=yes || { sleep 20 ; continue ; }
+        ${make} waitprompt
+        ${make} powercycle FORCE=yes
+        ${make} waitprompt
+        ${make} waitsetup
+        ${make} setup || continue
+        ${make} check || continue
+    done
+
+    return
+}

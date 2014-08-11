@@ -3,8 +3,9 @@
 test "$RELEASEPREFIX" || RELEASEPREFIX=PS_LFS_PKG
 test "$SVNTAGDIR" || SVNTAGDIR="
 	https://svne1.access.nokiasiemensnetworks.com/isource/svnroot/BTS_SC_LFS/os/trunk/main/src-project
+    file:///build/home/foobar/
 	"
-test "$SVNKERNELDIR" || SVNKERNELDIR=https://svne1.access.nokiasiemensnetworks.com/isource/svnroot/BTS_SC_LFS/os/trunk/main/src-kernelsources
+# test "$SVNKERNELDIR" || SVNKERNELDIR=https://svne1.access.nokiasiemensnetworks.com/isource/svnroot/BTS_SC_LFS/os/trunk/main/src-kernelsources
 
 test "$SVNTAGDIR" = NONE && SVNTAGDIR=
 

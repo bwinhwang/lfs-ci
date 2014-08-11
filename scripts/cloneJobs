@@ -5,6 +5,7 @@ source ${LFS_CI_ROOT}/lib/jenkins.sh
 
 branchName=FB1407
 branchDisplayName="FB1407"
+lastReleaseName="PS_LFS_OS_2014_08_0001"
 
 # ls /var/fpwork/demx2fk3/lfs-jenkins/home/jobs/*/promotions
 
@@ -15,15 +16,13 @@ do
         rm -rf ${job}.xml
     fi
 
-    continue
-
     info "get configuration of ${job}"
     getJob "${job}" ${job}.xml
 
     newJobName=$(echo ${job} | sed "s/_-_trunk_-_/_-_${branchName}_-_/")
     if existsJenkinsJob "${newJobName}" ; then
         info "delete new job ${newJobName} first, because it exists"
-        echo deleteJenkinsJob "${newJobName}"
+        deleteJenkinsJob "${newJobName}"
     fi
 done
 
@@ -72,12 +71,16 @@ do
 
     for promotion in $( xmlsubst.pl "project/properties/hudson.plugins.promoted__builds.JobPropertyImpl/activeProcessNames/string:=print()" < ${job}.xml ) ; do
         info "promotion found ${promotion}"
-        execute mkdir -p $(getConfig jenkinsMasterServerPath)/home/jobs/${newJobName}/promotions/${promotion}
+        promotionDir=$(getConfig jenkinsMasterServerPath)/jobs/${newJobName}/promotions/${promotion}
+        oldPromotionDir=$(getConfig jenkinsMasterServerPath)/jobs/${job}/promotions/${promotion}
+        execute ssh psulm@maxi mkdir -p ${promotionDir}
+        # todo fix config xml
+        execute ssh psulm@maxi cp -f ${oldPromotionDir}/config.xml ${promotionDir}
     done
 
-    # createJenkinsJob "${newJobName}" ${job}.xml
+    createJenkinsJob "${newJobName}" ${job}.xml
     info "job ${newJobName} created."
 
-    # disableJob "${newJobName}"
+    disableJob "${newJobName}"
 
 done
