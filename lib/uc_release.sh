@@ -188,6 +188,7 @@ extractArtifactsOnReleaseShare() {
             else
                 destination=${resultBuildShareLinuxKernel}/${labelName}
             fi
+            executeOnMaster chmod u+w ${resultBuildShareLinuxKernel}/
         fi
 
         info "copy ${basename} to buildresults share ${destination}"
