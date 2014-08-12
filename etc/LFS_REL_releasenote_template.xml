@@ -7,8 +7,7 @@
   <authorEmail>psulm-admin@mlist.emea.nsn-intra.net</authorEmail>
   <basedOn>__BASED_ON__</basedOn>
   <importantNotes>
-    <note name="__TAGNAME__">
-     </note>
+    <note name="__TAGNAME__">__IMPORTANT_NOTE__</note>
   </importantNotes>
   <repositoryUrl>__SVN_REPOS_URL__</repositoryUrl>
   <repositoryBranch>tags</repositoryBranch>
