@@ -22,6 +22,30 @@ ci_job_test_on_target() {
     execute build setup
     execute build adddir src-test
 
+    export testTargetName=${targetName}
+    local testType=$(getConfig LFS_CI_uc_test_making_test_type)
+
+    case ${testType} in
+        checkUname)
+            makingTest_checkUname
+        ;;
+        testProductionLRC)
+            makingTest_testLRC
+        ;;
+    esac
+
+    return
+
+}
+makingTest_checkUname() {
+    requiredParameters JOB_NAME BUILD_NUMBER LABEL DELIVERY_DIRECTORY
+
+    local targetName=$(sed "s/^Test-//" <<< ${JOB_NAME})
+    mustHaveValue ${targetName} "target name"
+    info "testing on target ${targetName}"
+
+    local workspace=$(getWorkspaceName)
+
     # Note: TESTTARGET lowercase with ,,
     local make="make TESTTARGET=${targetName,,}"    
 
@@ -53,12 +77,7 @@ ci_job_test_on_target() {
 makingTest_testLRC() {
 
     local workspace=$(getWorkspaceName)
-    mustHaveCleanWorkspace
     mustHaveWorkspaceName
-
-    execute cd ${workspace}
-    execute build setup
-    execute build adddir src-test
 
     local testBuildDirectory=${DELIVERY_DIRECTORY}
     mustExistDirectory ${testBuildDirectory}
