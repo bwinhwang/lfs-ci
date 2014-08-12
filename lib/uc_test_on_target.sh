@@ -147,9 +147,9 @@ makingTest_testLRC_subBoard() {
 
     local make="make -C ${testSuiteDirectory}"
 
-    execute ${make} clean
-    execute ${make} testconfig-overwrite TESTBUILD=${testBuildDirectory} TESTTARGET=${testTargetName}
-            ${make} test-xmloutput       || E=0 # also true
+    execute   ${make} clean
+    execute   ${make} testconfig-overwrite TESTBUILD=${testBuildDirectory} TESTTARGET=${testTargetName}
+    runAndLog ${make} test-xmloutput       || E=0 # also true
 
     execute mkdir -p ${xmlReportDirectory}
     execute cp -rf ${testSuiteDirectory}/xml-reports ${xmlReportDirectory}
