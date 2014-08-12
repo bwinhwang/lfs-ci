@@ -241,20 +241,22 @@ _stackTrace() {
     done 
 }
 
-## @fn      logCommand()
+## @fn      runAndLog()
 #  @brief   execute a command and put the output into the logfile
 #  @param   <command>    command, which should be logged
 #  @return  <none>
-logCommand() {
+runAndLog() {
     local command=$@
-    local outputFile=$(mktemp)
+    local outputFile=$(createTempFile)
+
+    debug "execute command ${command}"
 
     ${command} 1>${outputFile} 2>&1 
+    rc=$?
 
     debug "logging output of command \"${command}\""
 
-    CI_LOGGING_CONFIG="PREFIX SPACE MESSAGE"
-    CI_LOGGING_PREFIX=">"
+    CI_LOGGING_CONFIG="MESSAGE"
 
     while read LINE
     do
@@ -262,6 +264,9 @@ logCommand() {
     done <${outputFile}
 
     unset CI_LOGGING_CONFIG
+    debug "end of output"
+
+    return ${rc}
 }
 
 ## @fn      rawDebug( $fileName )

@@ -76,6 +76,8 @@ makingTest_checkUname() {
 
 makingTest_testLRC() {
 
+    requiredParameters DELIVERY_DIRECTORY
+
     local workspace=$(getWorkspaceName)
     mustHaveWorkspaceName
 
@@ -96,9 +98,13 @@ makingTest_testLRC() {
     mustExistDirectory ${testSuiteDirectory_SHP}
     mustExistDirectory ${testSuiteDirectory_AHP}
 
-    execute make -C ${testSuiteDirectory} testconfig-overwrite TESTBUILD=${testBuildDirectory}
+    info "create testconfig for ${testSuiteDirectory}"
+    execute make -C ${testSuiteDirectory} testconfig-overwrite \
+                TESTBUILD=${testBuildDirectory} \
+                TESTTARGET=${testTargetName}
 
     makingTest_install ${testSuiteDirectory}
+
     makingTest_check   ${testSuiteDirectory}
     makingTest_check   ${testSuiteDirectory_SHP}
     makingTest_check   ${testSuiteDirectory_AHP}
@@ -133,6 +139,7 @@ makingTest_testLRC_subBoard() {
     mustHaveValue "${testTargetName}" "test target name"
 
     local xmlReportDirectory=$4
+    execute mkdir -p ${xmlReportDirectory}
     mustExistDirectory ${xmlReportDirectory}
 
     local workspace=$(getWorkspaceName)
@@ -156,9 +163,20 @@ makingTest_check() {
     mustExistDirectory ${testSuiteDirectory}
 
     local make="make -C ${testSuiteDirectory}"
+
+    info "recreating testconfig for ${testSuiteDirectory} / ${testBuildDirectory} / ${testTargetName}"
+    execute ${make} testconfig-overwrite TESTBUILD=${testBuildDirectory} TESTTARGET=${testTargetName}
+
+    info "waiting for prompt"
     execute ${make} waitprompt
+
+    info "waiting for ssh"
     execute ${make} waitssh
+
+    info "running setup"
     execute ${make} setup
+
+    info "running check"
     execute ${make} check
 
     return
@@ -170,20 +188,42 @@ makingTest_install() {
 
     local make="make -C ${testSuiteDirectory}"
 
+    info "installing software on target"
     execute ${make} setup
 
     # currently install does show wrong (old) version after reboot and
     # SHP sometimes fails to be up when install is retried.
     # We try installation up to 4 times
-
     for i in $(seq 1 4) ; do
-        ${make} install FORCE=yes || { sleep 20 ; continue ; }
-        ${make} waitprompt
-        ${make} powercycle FORCE=yes
-        ${make} waitprompt
-        ${make} waitsetup
-        ${make} setup || continue
-        ${make} check || continue
+        info "install loop ${i}"
+
+        # please note: difference between execute and runAndLog.
+        # runAndLog will return the RC of the command. execute will fail, if command fails
+
+        # TODO: demx2fk3 2014-08-12 remove me
+        info "running check"
+        runAndLog ${make} check && break
+
+        runAndLog ${make} install FORCE=yes || { sleep 20 ; continue ; }
+        execute ${make} waitprompt
+
+        info "rebooting target..."
+        execute ${make} powercycle FORCE=yes
+
+        info "wait for prompt"
+        execute ${make} waitprompt
+
+        info "wait for setup"
+        execute ${make} waitssh
+
+        info "running setup"
+        runAndLog ${make} setup || continue
+
+        info "running check"
+        runAndLog ${make} check || continue
+
+        info "install was successful"
+        break
     done
 
     return
