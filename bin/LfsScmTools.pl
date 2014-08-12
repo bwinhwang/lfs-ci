@@ -239,7 +239,7 @@ sub commentForRevision {
 sub importantNote {
     my $self = shift;
     $self->mustHaveFileData( "importantNote" );
-    return join( "\n", @{ $self->{importantNote} } );
+    return join( "\n", @{ $self->{importantNote} || [] } );
 }
 
 sub mustHaveFileData {
@@ -1662,6 +1662,7 @@ use Getopt::Std;
 
 sub prepare {
     my $self = shift;
+    my %duplicates;
 
     # t: := tag name
     # r: := release note template file
@@ -1673,6 +1674,8 @@ sub prepare {
     my $config = Singelton::config();
     $config->loadData( configFileName => $self->{configFileName} );
 
+    $self->{releaseNote} = Model::ReleaseNote->new( releaseName => $self->{tagName} );
+
     my $svn = Singelton::svn();
 
     my $xml  = XMLin( "changelog.xml", ForceArray => 1 ) or die "can not open changelog.xml";
@@ -1680,9 +1683,13 @@ sub prepare {
     my $subsysHash;
     foreach my $entry ( @{ $xml->{logentry} } ) {
 
-        my $msg = ref( $entry->{msg}->[0] ) eq "HASH" ?
-                  sprintf( "empty commit message (r%s) from %s at %s", $entry->{revision}, $entry->{author}->[0], $entry->{date}->[0] ) :
-                  $entry->{msg}->[0] ;
+        my $overrideMessage= $self->{releaseNote}->commentForRevision( $entry->{revision} );
+
+        my $msg = $overrideMessage 
+                    ?  $overrideMessage
+                    :  ref( $entry->{msg}->[0] ) eq "HASH" 
+                        ? sprintf( "empty commit message (r%s) from %s at %s", $entry->{revision}, $entry->{author}->[0], $entry->{date}->[0] ) 
+                        : $entry->{msg}->[0] ;
 
         # jira stuff
         if( $msg =~ m/^.*(BTS[A-Z]*-[0-9]*)\s*PR\s*([^:]*)(.*$)/  ) {
@@ -1716,7 +1723,7 @@ sub prepare {
 
     $self->{templateFileName} = $config->getConfig( name => "LFS_PROD_ReleaseNote_TemplateFileXml" );
     if( not -e $self->{templateFileName} ) {
-        die "template file does not exist";
+        die sprintf( "template file %s does not exist", $self->{templateFileName} );
     }
     open TEMPLATE, $self->{templateFileName} or die "can not open template file xml";
     $self->{template} = join( "", <TEMPLATE> );
@@ -1733,6 +1740,8 @@ sub prepare {
     $self->{data}{BASED_ON} = $self->{basedOn};
     # __BRANCH__
     $self->{data}{BRANCH} = "Branch";
+    # __IMPORTANT_NOTE__
+    $self->{data}{IMPORTANT_NOTE} = $self->{releaseNote}->importantNote();
     # __SVN_REPOS_URL__
     $self->{data}{SVN_REPOS_URL} = $config->getConfig( name => "LFS_PROD_svn_delivery_os_repos_url" ) . "/os";
     # __SVN_REVISION__
@@ -1756,6 +1765,7 @@ sub prepare {
                                                             $_->{jira} ? sprintf( "%s: ", $_->{jira} ) : "",
                                                             $_->{text},
                                                         ) }
+                                            grep { not $duplicates{ $_->{nr} } ++ }
                                             @{ $self->{PR} || [] }
                                         );
     # __FEATURES__
@@ -1765,6 +1775,7 @@ sub prepare {
                                                     $_->{jira} ? sprintf( "%s: ", $_->{jira} ) : "",
                                                     $_->{text},
                                                 ) }
+                                     grep { not $duplicates{ $_->{nr} } ++ }
                                     @{ $self->{NF} || [] }
                                   );
     # __BASELINES__
@@ -1805,7 +1816,6 @@ sub prepare {
         }
     }
 
-    my %duplicates;
     $self->{data}{BASELINES} = join( "\n    ", 
                                         map { sprintf( '<baseline name="%s" auto_create="true">%s</baseline>',
                                                          $_->{baseline},
