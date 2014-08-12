@@ -139,8 +139,8 @@ prereleaseChecks() {
         exitCode=1
     fi
     if [[ $(getProductNameFromJobName) =~ LFS ]] ; then
-        if ! _existsBaselineInWorkflowTool ${LFS_PROD_RELEASE_CURRENT_TAG_NAME_REL} ; then
-            error "previous Release Version ${LFS_PROD_RELEASE_CURRENT_TAG_NAME_REL} does not exist in WFT"
+        if ! _existsBaselineInWorkflowTool ${LFS_PROD_RELEASE_PREVIOUS_TAG_NAME_REL} ; then
+            error "previous Release Version ${LFS_PROD_RELEASE_PREVIOUS_TAG_NAME_REL} does not exist in WFT"
             exitCode=1
         fi                
     fi
@@ -184,9 +184,9 @@ extractArtifactsOnReleaseShare() {
         if [[ ${basename} =~ kernelsources ]] ; then
             # TODO: demx2fk3 2014-08-07 use different dir for fsmr4
             if [[ ${basename} =~ fsm4_ ]] ; then
-                destination=${resultBuildShareLinuxKernel}/${basename}/FSMR4_${labelName}
+                destination=${resultBuildShareLinuxKernel}/FSMR4_${labelName}
             else
-                destination=${resultBuildShareLinuxKernel}/${basename}/${labelName}
+                destination=${resultBuildShareLinuxKernel}/${labelName}
             fi
         fi
 
@@ -296,6 +296,9 @@ _createReleaseInWorkflowTool() {
     local fileName=$2
     mustExistFile ${fileName}
 
+    local workspace=$(getWorkspaceName)
+    mustHaveWorkspaceName
+
     local wftApiKey=$(getConfig WORKFLOWTOOL_api_key)
     local wftCreateRelease=$(getConfig WORKFLOWTOOL_url_create_release)
     local curl="curl -k ${wftCreateRelease} -F access_key=${wftApiKey}" 
@@ -310,6 +313,7 @@ _createReleaseInWorkflowTool() {
 
     info "creating release based on ${fileName} in wft"
     execute ${curl} ${update} -F file=@${fileName}
+    echo "${curl} ${update} -F file=@${fileName}" >> ${workspace}/redo.sh
 
     if ! _existsBaselineInWorkflowTool ${tagName} ; then
         error "just created baseline ${tagName} does not exist in WFT"
@@ -323,6 +327,9 @@ _uploadToWorkflowTool() {
     local tagName=$1
     local fileName=$2
     mustExistFile ${fileName}
+
+    local workspace=$(getWorkspaceName)
+    mustHaveWorkspaceName
 
     local wftApiKey=$(getConfig WORKFLOWTOOL_api_key)
     local wftUploadAttachment=$(getConfig WORKFLOWTOOL_url_upload_attachment)
@@ -342,6 +349,7 @@ _uploadToWorkflowTool() {
 
     info "uploading ${fileName} to wft"
     execute ${curl} ${update} -F file=@${fileName}
+    echo "${curl} ${update} -F file=@${fileName}" >> ${workspace}/redo.sh
 
     return
 }
