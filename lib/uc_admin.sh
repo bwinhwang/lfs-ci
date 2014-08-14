@@ -116,7 +116,7 @@ genericShareCleanup() {
 
     setBuildDescription ${JOB_NAME} ${BUILD_NUMBER} "triggered by ${UPSTREAM_PROJECT}/${UPSTREAM_BUILD}"
 
-    local execute=info
+    local execute=execute
     local max=$(wc -l ${tmpFile} | cut -d" " -f1)
     local cnt=0
     for entry in $(cat ${tmpFile}) ; do
@@ -124,15 +124,16 @@ genericShareCleanup() {
         info "[${cnt}/${max}] removing ${entry}"
 
         debug "fixing permissions on parent directory"
-        $execute ssh ${remoteServer} chmod u+w $(dirname ${entry})
+        $execute ssh ${remoteServer} "[[ -w $(dirname ${entry}) ]] && chmod u+w $(dirname ${entry})"
 
         debug "fixing permissions of removal candidate ${entry}"
         $execute ssh ${remoteServer} chmod -R u+w ${entry}
 
         debug "removing ${entry}"
         if [[ -e ${entry} ]] ; then
-            local tar=$(echo ${entry} | sed "s:/:_:g").tar.gz
-            $execute tar cfz /build/home/${USER}/genericCleanup/${tar} ${entry}
+            local destination=$(echo ${entry} | sed "s:/:_:g")
+            $execute mv -f ${entry} /build/home/${USER}/genericCleanup/${destination}
+            $execute touch ${entry}
         fi
 
         local randomValue=${RANDOM}

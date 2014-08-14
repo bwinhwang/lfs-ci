@@ -69,6 +69,7 @@ ci_job_test_summary() {
     local realDirectory=$(readlink ${workspace})
     local labelName=$(basename ${realDirectory})
 
+    info "creating upstream file in workspace"
     echo "upstreamProject=${UPSTREAM_PROJECT}"   > ${WORKSPACE}/upstream
     echo "upstreamBuildNumber=${UPSTREAM_BUILD}" > ${WORKSPACE}/upstream
 

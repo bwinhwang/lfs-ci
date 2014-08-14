@@ -1743,7 +1743,7 @@ sub prepare {
     # __IMPORTANT_NOTE__
     $self->{data}{IMPORTANT_NOTE} = $self->{releaseNote}->importantNote();
     # __SVN_REPOS_URL__
-    $self->{data}{SVN_REPOS_URL} = $config->getConfig( name => "LFS_PROD_svn_delivery_os_repos_url" ) . "/os";
+    $self->{data}{SVN_REPOS_URL} = $config->getConfig( name => "LFS_PROD_svn_delivery_os_repos_url" );
     # __SVN_REVISION__
     my $svnUrl = sprintf( "%s/tags/%s", 
                             $self->{data}{SVN_REPOS_URL},

@@ -56,6 +56,10 @@ fi
 
 # first dispatcher, calling the correct script or function
 case "${JOB_NAME}" in
+
+    # hack
+    Test-lcpa878) ${LFS_CI_ROOT}/scripts/CLRC02_Test_Release_Candidate_LRC || exit 1 ;;
+    
     *_CI_*_Build) 
         source ${LFS_CI_ROOT}/lib/uc_build.sh
         ci_job_build_version || exit 1 

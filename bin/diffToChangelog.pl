@@ -12,9 +12,8 @@ my $msg = "";
 my @pathes;
 my %changes;
 
+getopts( "a:b:d", \my %opts );
 my %types = ( "A" => "added", "M" => "modified", "D" => "deleted" );
-
-getopts( "a:b:", \my %opts );
 
 open CMD, sprintf( "diff %s %s|", $opts{a}, $opts{b} ) or die "can not execute diff";
 while( <CMD> ) {
@@ -25,9 +24,12 @@ while( <CMD> ) {
     if( $op eq "<" ) {
         $changes{ $path } = "D";
     } elsif( $op eq ">"  and exists $changes{ $path } and $changes{ $path } eq "D" ) {
-        $changes{ $path } = "M";
+        # TODO: demx2fk3 2014-08-12 fix me - make this configureable
+        # $changes{ $path } = "M";
+        delete $changes{ $path };
     } else {
-        $changes{ $path } = "A";
+        # noop
+        # $changes{ $path } = "A";
     }
 }
 close CMD;

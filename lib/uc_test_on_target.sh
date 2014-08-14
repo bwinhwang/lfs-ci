@@ -32,6 +32,9 @@ ci_job_test_on_target() {
         testProductionLRC)
             makingTest_testLRC
         ;;
+        *) 
+            fatal "unknown testType";
+        ;;
     esac
 
     return
@@ -103,27 +106,42 @@ makingTest_testLRC() {
                 TESTBUILD=${testBuildDirectory} \
                 TESTTARGET=${testTargetName}
 
+    # TODO: demx2fk3 2014-08-13 remove me
+    info "powercycle the target to get it in a defined state"
+    execute make -C ${testSuiteDirectory} powercycle
+    info "waiting for prompt"
+    execute make -C ${testSuiteDirectory} waitprompt
+    sleep 120 
+
+    info "installing software"
     makingTest_install ${testSuiteDirectory}
 
+    info "checking the board for correct software"
     makingTest_check   ${testSuiteDirectory}
+    info "checking the board for correct software SHP"
     makingTest_check   ${testSuiteDirectory_SHP}
+    info "checking the board for correct software AHP"
     makingTest_check   ${testSuiteDirectory_AHP}
 
-    makingTest_testLRC_subBoard ${testSuiteDirectory_SHP} ${testBuildDirectory} ${testTargetName}_shp ${workspace}/xml-output/shp
-    makingTest_testLRC_subBoard ${testSuiteDirectory}     ${testBuildDirectory} ${testTargetName}_shp ${workspace}/xml-output/shp-common
+    export LFS_CI_ERROR_CODE=0
+    makingTest_testLRC_subBoard ${testSuiteDirectory_SHP} ${testBuildDirectory} ${testTargetName}_shp shp        ${workspace}/xml-output/shp
+    makingTest_testLRC_subBoard ${testSuiteDirectory}     ${testBuildDirectory} ${testTargetName}_shp shp-common ${workspace}/xml-output/shp-common
 
     execute make -C ${testSuiteDirectory_AHP} waitssh
     execute make -C ${testSuiteDirectory_AHP} setup
     execute make -C ${testSuiteDirectory_AHP} check
 
-    makingTest_testLRC_subBoard ${testSuiteDirectory_AHP} ${testBuildDirectory} ${testTargetName}_ahp ${workspace}/xml-output/ahp
-    makingTest_testLRC_subBoard ${testSuiteDirectory}     ${testBuildDirectory} ${testTargetName}_ahp ${workspace}/xml-output/ahp-common
+    makingTest_testLRC_subBoard ${testSuiteDirectory_AHP} ${testBuildDirectory} ${testTargetName}_ahp ahp        ${workspace}/xml-output/ahp
+    makingTest_testLRC_subBoard ${testSuiteDirectory}     ${testBuildDirectory} ${testTargetName}_ahp ahp-common ${workspace}/xml-output/ahp-common
 
     find ${workspace}/xml-output -name '*.xml' | while read file
     do
         cat -v ${file} > ${file}.tmp && mv ${file}.tmp ${file}
     done
-    # exit $E
+    if [[ ${LFS_CI_ERROR_CODE} ]] ; then
+        error "some errors in test cases. please see logfile"
+        exit 1
+    fi
 
     return
 }
@@ -138,7 +156,10 @@ makingTest_testLRC_subBoard() {
     local testTargetName=$3
     mustHaveValue "${testTargetName}" "test target name"
 
-    local xmlReportDirectory=$4
+    local xmlNamePrefix=$4
+    mustHaveValue "${xmlNamePrefix}" "xml name prefix"
+
+    local xmlReportDirectory=$5
     execute mkdir -p ${xmlReportDirectory}
     mustExistDirectory ${xmlReportDirectory}
 
@@ -147,13 +168,14 @@ makingTest_testLRC_subBoard() {
 
     local make="make -C ${testSuiteDirectory}"
 
+    info "testing on target ${testTargetName} in testsuite ${testSuiteDirectory}"
     execute   ${make} clean
     execute   ${make} testconfig-overwrite TESTBUILD=${testBuildDirectory} TESTTARGET=${testTargetName}
-    runAndLog ${make} test-xmloutput       || E=0 # also true
+    runAndLog ${make} test-xmloutput       || LFS_CI_ERROR_CODE=0 # also true
 
     execute mkdir -p ${xmlReportDirectory}
-    execute cp -rf ${testSuiteDirectory}/xml-reports ${xmlReportDirectory}
-    execute sed -i -s 's/name=/name=ahp_common_/g' ${xmlReportDirectory}/xml-reports/*.xml
+    execute cp -rf ${testSuiteDirectory}/xml-reports/* ${xmlReportDirectory}/
+    execute sed -i -s "s/name=\"/name=\"${xmlNamePrefix}_/g" ${xmlReportDirectory}/*.xml
 
     return
 }
@@ -200,10 +222,7 @@ makingTest_install() {
         # please note: difference between execute and runAndLog.
         # runAndLog will return the RC of the command. execute will fail, if command fails
 
-        # TODO: demx2fk3 2014-08-12 remove me
-        info "running check"
-        runAndLog ${make} check && break
-
+        info "running install"
         runAndLog ${make} install FORCE=yes || { sleep 20 ; continue ; }
         execute ${make} waitprompt
 

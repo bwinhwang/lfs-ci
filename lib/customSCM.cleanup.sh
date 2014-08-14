@@ -70,37 +70,43 @@ actionCheckout() {
     local subTaskName=$(getSubTaskNameFromJobName)
 
     case ${subTaskName} in 
-        CI_LFS_in_Ulm_Phase_1)
+        phase_1_CI_LFS_in_Ulm)
             _ciLfsNotReleasedBuilds ${tmpFileA}
             execute touch ${tmpFileB}
         ;;
-        CI_LFS_in_Ulm_Phase_2)
+        phase_2_CI_LFS_in_Ulm)
             _ciLfsOldReleasesOnBranches ${tmpFileA}
             execute touch ${tmpFileB}
         ;;
-        CI_LFS_in_Ulm_Phase_3)
+        phase_3_SC_LFS_in_Ulm)
+            fatal "not implemented"
         ;;
-        SC_LFS_in_Ulm_Phase_2)
+        phase_3_CI_LFS_in_Ulm)
+            fatal "not implemented"
+        ;;
+        phase_2_SC_LFS_in_Ulm)
             _scLfsOldReleasesOnBranches ${tmpFileA}
             execute touch ${tmpFileB}
         ;;
-        CI_LFS_in_*_Phase_4)
+        phase_4_CI_LFS_in_*)
             _ciLfsRemoteSites ul ${tmpFileB}
 
             case ${subTaskName} in
-                *_in_ou_*) _ciLfsRemoteSites ou ${tmpFileA} ;;
-                *_in_wr_*) _ciLfsRemoteSites wr ${tmpFileA} ;;
-                *) exit 1 ;;
+                *_in_ou) _ciLfsRemoteSites ou ${tmpFileA} ;;
+                *_in_wr) _ciLfsRemoteSites wr ${tmpFileA} ;;
+                *_in_ch) _ciLfsRemoteSites ch ${tmpFileA} ;;
+                *_in_es) _ciLfsRemoteSites es ${tmpFileA} ;;
+                *)       fatal "subTaskName ${subTaskName} not implemented" ;;
             esac
         ;;
-        SC_LFS_in_*_Phase_4)
+        phase_4_SC_LFS_in_*)
             _scLfsRemoteSites ul ${tmpFileB}
 
             case ${subTaskName} in
-                *Oulu*)    _scLfsRemoteSites ou ${tmpFileA} ;;
-                *Wrozlaw*) _scLfsRemoteSites wr ${tmpFileA} ;;
-                *_in_bh_*) _scLfsRemoteSites bh ${tmpFileA} ;;
-                *_in_du_*) 
+                *_in_ou) _scLfsRemoteSites ou ${tmpFileA} ;;
+                *_in_wr) _scLfsRemoteSites wr ${tmpFileA} ;;
+                *_in_bh) _scLfsRemoteSites bh ${tmpFileA} ;;
+                *_in_du) 
                     execute sed -i "s:/build/home/SC_LFS/releases/bld:/usrd9/build/home/SC_LFS/releases/bld:g" ${tmpFileB}
                     _scLfsRemoteSites du ${tmpFileA} 
                 ;;
@@ -114,7 +120,7 @@ actionCheckout() {
         execute sed -i -f ${LFS_CI_ROOT}/etc/baselineExclutionList.sed ${tmpFileA}
     fi
 
-    ${LFS_CI_ROOT}/bin/diffToChangelog.pl -a ${tmpFileA} -b ${tmpFileB} > ${CHANGELOG}
+    ${LFS_CI_ROOT}/bin/diffToChangelog.pl -d -a ${tmpFileA} -b ${tmpFileB} > ${CHANGELOG}
 
     # Fix empty changelogs:
     if [ ! -s "${CHANGELOG}" ] ; then

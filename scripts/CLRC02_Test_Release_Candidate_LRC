@@ -1,0 +1,131 @@
+#!/bin/bash
+set -a
+
+
+rm -rf ${WORKSPACE}/workspace/
+mkdir -p ${WORKSPACE}/workspace/
+cd ${WORKSPACE}/workspace/
+build setup
+build adddir src-test
+TEST_NAME=production_ci_LRC
+RELEASELABEL_LRC=${LABEL}
+# RELEASELABEL_LRC=LRC_LCP_PS_LFS_OS_2014_08_0118
+# ======================================================================
+TEST_NAME=production_ci_LRC
+TESTSUITE_DIR="$WORKSPACE/src-test/src/unittest/testsuites/continousintegration/$TEST_NAME"
+TESTSUITE_DIR_AHP="$WORKSPACE/src-test/src/unittest/testsuites/continousintegration/${TEST_NAME}_ahp"
+TESTSUITE_DIR_SHP="$WORKSPACE/src-test/src/unittest/testsuites/continousintegration/${TEST_NAME}_shp"
+
+TESTROOT_DIR="$WORKSPACE/src-test/src/unittest"
+MAKE=make
+TESTTARGET_BOTH=lcpa878
+TESTTARGET_AHP=lcpa878_ahp
+TESTTARGET_SHP=lcpa878_shp
+# TESTBUILD="/build/home/psulm/CI_LFS/Release_Candidates/LRC/${RELEASELABEL_LRC}"
+TESTBUILD="${DELIVERY_DIRECTORY}"
+# TESTBUILD=${TESTBUILD/_OS_/_REL_}
+
+XML_REPORTS_TEST="$TESTSUITE_DIR/xml-reports"
+XML_REPORTS_TEST_AHP="$TESTSUITE_DIR_AHP/xml-reports"
+XML_REPORTS_TEST_SHP="$TESTSUITE_DIR_SHP/xml-reports"
+XML_REPORTS_WORKSPACE="$WORKSPACE/xml-reports"
+
+# ======================================================================
+# subshell to catch errors
+set +e
+(
+
+set -e
+
+# ======================================================================
+# heading make everything clean
+# ======================================================================
+"$MAKE" -C "$TESTSUITE_DIR" clean 
+rm -rf "$XML_REPORTS_WORKSPACE"
+
+TESTTARGET="$TESTTARGET_BOTH" ; "$MAKE" -C "$TESTSUITE_DIR"     testconfig-overwrite TESTBUILD="$TESTBUILD" TESTTARGET=${TESTTARGET_BOTH}
+TESTTARGET="$TESTTARGET_SHP"  ; "$MAKE" -C "$TESTSUITE_DIR_SHP" testconfig-overwrite TESTBUILD="$TESTBUILD" TESTTARGET=$TESTTARGET_SHP
+TESTTARGET="$TESTTARGET_AHP"  ; "$MAKE" -C "$TESTSUITE_DIR_AHP" testconfig-overwrite TESTBUILD="$TESTBUILD" TESTTARGET=$TESTTARGET_AHP
+unset TESTTARGET
+
+# ======================================================================
+# heading powercycle and setup target
+# ======================================================================
+
+# currently install does show wrong (old) version after reboot and
+# SHP sometimes fails to be up when install is retried.
+# We try installation up to 4 times
+
+"$MAKE" -C "$TESTSUITE_DIR" setup
+for i in 1 2 3 4
+do
+"$MAKE" -C "$TESTSUITE_DIR" install FORCE=yes || { sleep 20 ; continue ; }
+"$MAKE" -C "$TESTSUITE_DIR" waitprompt
+"$MAKE" -C "$TESTSUITE_DIR" powercycle FORCE=yes
+"$MAKE" -C "$TESTSUITE_DIR" waitprompt
+"$MAKE" -C "$TESTSUITE_DIR" waitssh
+"$MAKE" -C "$TESTSUITE_DIR" setup || continue
+"$MAKE" -C "$TESTSUITE_DIR" check || continue
+break
+done
+set -x
+"$MAKE" -C "$TESTSUITE_DIR"     waitprompt 
+"$MAKE" -C "$TESTSUITE_DIR_SHP" waitssh   
+"$MAKE" -C "$TESTSUITE_DIR_AHP" waitssh  
+"$MAKE" -C "$TESTSUITE_DIR_SHP" setup   
+"$MAKE" -C "$TESTSUITE_DIR_AHP" setup  
+"$MAKE" -C "$TESTSUITE_DIR_SHP" check 
+"$MAKE" -C "$TESTSUITE_DIR_AHP" check
+
+# ======================================================================
+# heading run the testsuite '(using test-xmloutput)'
+# ======================================================================
+E=0
+
+"$MAKE" -C "$TESTSUITE_DIR_SHP" clean                
+"$MAKE" -C "$TESTSUITE_DIR_SHP" test-xmloutput       || E=0 # also true
+mkdir -p "$XML_REPORTS_WORKSPACE"/shp
+cp -rf "$XML_REPORTS_TEST_SHP" "$XML_REPORTS_WORKSPACE"/shp
+sed -i -s 's/name="/name="shp_/g' "$XML_REPORTS_WORKSPACE"/shp/xml-reports/*.xml
+
+"$MAKE" -C "$TESTSUITE_DIR" clean                
+"$MAKE" -C "$TESTSUITE_DIR" testconfig-overwrite TESTBUILD="$TESTBUILD" TESTTARGET="$TESTTARGET_SHP"
+"$MAKE" -C "$TESTSUITE_DIR" test-xmloutput       || E=0 # also true
+mkdir -p "$XML_REPORTS_WORKSPACE"/shp-common
+cp -rf "$XML_REPORTS_TEST" "$XML_REPORTS_WORKSPACE/shp-common"
+sed -i -s 's/name="/name="shp_common_/g' "$XML_REPORTS_WORKSPACE"/shp-common/xml-reports/*.xml
+
+"$MAKE" -C "$TESTSUITE_DIR_AHP" waitssh  
+"$MAKE" -C "$TESTSUITE_DIR_AHP" setup   
+"$MAKE" -C "$TESTSUITE_DIR_AHP" check
+
+"$MAKE" -C "$TESTSUITE_DIR_AHP" clean    
+"$MAKE" -C "$TESTSUITE_DIR_AHP" test-xmloutput       || E=0 # also true
+mkdir -p "$XML_REPORTS_WORKSPACE"/ahp
+cp -rf "$XML_REPORTS_TEST_AHP" "$XML_REPORTS_WORKSPACE"/ahp
+sed -i -s 's/name="/name="ahp_/g' "$XML_REPORTS_WORKSPACE"/ahp/xml-reports/*.xml
+
+"$MAKE" -C "$TESTSUITE_DIR" clean                
+"$MAKE" -C "$TESTSUITE_DIR" testconfig-overwrite TESTBUILD="$TESTBUILD" TESTTARGET="$TESTTARGET_AHP"
+"$MAKE" -C "$TESTSUITE_DIR" test-xmloutput       || E=0 # also true
+mkdir -p "$XML_REPORTS_WORKSPACE"/ahp-common
+cp -rf "$XML_REPORTS_TEST" "$XML_REPORTS_WORKSPACE/ahp-common"
+sed -i -s 's/name="/name="ahp_common_/g' "$XML_REPORTS_WORKSPACE"/ahp-common/xml-reports/*.xml
+
+find "$XML_REPORTS_WORKSPACE" -name '*.xml' | while read FILE
+do
+	cat -v "$FILE" > "$FILE.tmp" && mv "$FILE.tmp" "$FILE"
+done
+exit $E
+
+# ======================================================================
+# heading mutex end
+# ======================================================================
+)
+EXCODE=$?
+set -e
+# project_subtask Mutex/End MUTEXNAME=lcpa981
+# project_subtask Test/StoreUsedTestenvironmentInfo JOB_NAME="$JOB_NAME" RELEASE="$RELEASELABEL_LRC" EXCODE="$EXCODE"
+
+exit $EXCODE
+
