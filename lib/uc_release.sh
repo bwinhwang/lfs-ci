@@ -312,9 +312,9 @@ _createReleaseInWorkflowTool() {
     # check, if wft already knows about the release
     local update=""
     if _existsBaselineInWorkflowTool ${tagName} ; then
-        update="-F update=true"  # does exist
+        update="-F update=yes"  # does exist
     else
-        update="-F update=false" # does not exist 
+        update="-F update=no" # does not exist 
     fi
 
     info "creating release based on ${fileName} in wft"
@@ -354,9 +354,9 @@ _uploadToWorkflowTool() {
 
     local update=""
     if _existsBaselineInWorkflowTool ${tagName} ; then
-        update="-F update=true"  # does exist
+        update="-F update=yes"  # does exist
     else
-        update="-F update=false" # does not exist 
+        update="-F update=no" # does not exist 
     fi
 
     info "uploading ${fileName} to wft"
@@ -413,8 +413,8 @@ _validateReleaseNoteXml() {
     curl -sf -k ${wftBuildContent}/${tagName}
     local update=""
     case $? in 
-        0)  update="-F update=true" ;; # does exist
-        22) update="-F update=false" ;; # does not exist 
+        0)  update="-F update=yes" ;; # does exist
+        22) update="-F update=no" ;; # does not exist 
         *)  error "unknown error from curl $?"; exit 1 ;;
     esac
 

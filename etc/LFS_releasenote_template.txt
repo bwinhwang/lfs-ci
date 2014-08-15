@@ -2,8 +2,6 @@ Dear Colleagues,
 
 PS LFS Release __LFS_PROD_RELEASE_CURRENT_TAG_NAME_REL__ is available in Subversion
 
-Restriction: This release it not usable for FlexiLite, microREC and Crockett.
-
 __RELEASE_NOTE_CONTENT__
 
 === __LFS_PROD_RELEASE_CURRENT_TAG_NAME_REL__ ===

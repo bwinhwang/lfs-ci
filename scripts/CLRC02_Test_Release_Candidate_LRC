@@ -2,9 +2,10 @@
 set -a
 
 
-rm -rf ${WORKSPACE}/workspace/
-mkdir -p ${WORKSPACE}/workspace/
-cd ${WORKSPACE}/workspace/
+export WORKSPACE=${WORKSPACE}/workspace/
+rm -rf ${WORKSPACE}
+mkdir -p ${WORKSPACE}
+cd ${WORKSPACE}
 build setup
 build adddir src-test
 TEST_NAME=production_ci_LRC

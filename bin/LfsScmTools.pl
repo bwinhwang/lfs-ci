@@ -1745,7 +1745,7 @@ sub prepare {
     # __SVN_REPOS_URL__
     $self->{data}{SVN_REPOS_URL} = $config->getConfig( name => "LFS_PROD_svn_delivery_os_repos_url" );
     # __SVN_REVISION__
-    my $svnUrl = sprintf( "%s/tags/%s", 
+    my $svnUrl = sprintf( "%s/os/tags/%s", 
                             $self->{data}{SVN_REPOS_URL},
                             $self->{data}{TAGNAME},
                         );
