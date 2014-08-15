@@ -409,21 +409,11 @@ _validateReleaseNoteXml() {
         execute xmllint --schema releasenote.xsd ${releaseNoteXml}
     fi
 
-    # check, if wft already knows about the release
-    curl -sf -k ${wftBuildContent}/${tagName}
-    local update=""
-    case $? in 
-        0)  update="-F update=yes" ;; # does exist
-        22) update="-F update=no" ;; # does not exist 
-        *)  error "unknown error from curl $?"; exit 1 ;;
-    esac
-
     # remove check with wft next
     local outputFile=$(createTempFile)
     execute curl -k ${wftReleaseNoteValidate} \
                  -F access_key=${wftApiKey}   \
                  -F file=@${releaseNoteXml}   \
-                 ${update}                    \
                  --output ${outputFile}
     rawDebug ${outputFile}
 
