@@ -170,7 +170,7 @@ _scLfsOldReleasesOnBranches() {
     local tmpFileA=$(createTempFile)
     local tmpFileB=$(createTempFile)
     local directoryToCleanup=/build/home/SC_LFS/releases/bld/
-    local days=700
+    local days=600
 
     info "check for baselines older than ${days} days in ${directoryToCleanup}"
     find ${directoryToCleanup} -mindepth 2 -maxdepth 2 -mtime +${days} -type d -printf "%p\n" \
