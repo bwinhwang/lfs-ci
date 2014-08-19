@@ -133,10 +133,14 @@ actionCheckout() {
     cat < /dev/null > "${CHANGELOG}"
 
     local oldRevisionsFile=${OLD_REVISION_STATE_FILE}
+    debug "old revision file"
+    rawDebug ${oldRevisionsFile}
 
     debug "generate the new revision file"
     local newRevisionsFile=${REVISION_STATE_FILE}
     _createRevisionsTxtFile ${newRevisionsFile}
+    debug "new revision state file"
+    rawDebug ${newRevisionsFile}
 
     # check the revision from old state file and current state file
     for subSystem in $(cut -d" " -f 1 ${newRevisionsFile}) ; do
