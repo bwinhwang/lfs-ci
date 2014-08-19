@@ -16,6 +16,7 @@ startLogfile() {
 
         local jobName=${JOB_NAME:-unknownJobName}
         local dateString=$(date +%Y%m%d%H%M%S)
+        local datePath=$(date +%Y/%m/%d)
         local hostName=$(hostname -s)
         local userName=${USER}
 
@@ -26,12 +27,13 @@ startLogfile() {
             prefix=${LFS_CI_LOGGING_PREFIX}.
         fi
 
-        CI_LOGGING_LOGFILENAME=${LFS_CI_ROOT}/log/ci.${dateString}.${hostName}.${userName}.${jobName}.${prefix}${counter}.log
+        CI_LOGGING_LOGFILENAME=${LFS_CI_ROOT}/log/${datePath}/ci.${dateString}.${hostName}.${userName}.${jobName}.${prefix}${counter}.log
+        mkdir -p ${LFS_CI_ROOT}/log/${datePath}/ 
 
         while [[ -e ${CI_LOGGING_LOGFILENAME}    ||
                  -e ${CI_LOGGING_LOGFILENAME}.gz ]] ; do
             counter=$(( counter + 1 ))
-            CI_LOGGING_LOGFILENAME=${LFS_CI_ROOT}/log/ci.${dateString}.${hostName}.${userName}.${jobName}.${counter}.log
+            CI_LOGGING_LOGFILENAME=${LFS_CI_ROOT}/log/${datePath}/ci.${dateString}.${hostName}.${userName}.${jobName}.${counter}.log
         done
 
         export CI_LOGGING_LOGFILENAME
