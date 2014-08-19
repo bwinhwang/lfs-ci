@@ -121,7 +121,6 @@ ci_job_release() {
         summary)
             sendReleaseNote           "${TESTED_BUILD_JOBNAME}" "${TESTED_BUILD_NUMBER}" \
                                       "${buildJobName}"         "${buildBuildNumber}"
-            createArtifactArchive
         ;;
         *)
             error "subJob not known (${subJob})"
@@ -257,10 +256,11 @@ sendReleaseNote() {
     _uploadToWorkflowTool        ${osTagName} ${workspace}/os/changelog.xml
     _uploadToWorkflowTool        ${osTagName} ${workspace}/revisions.txt
 
-    execute cp -f ${workspace}/os/os_releasenote.xml ${workspace}/bld/bld-lfs-release/lfs_os_releasenote.xml
-    execute cp -f ${workspace}/os/releasenote.txt    ${workspace}/bld/bld-lfs-release/lfs_os_releasenote.txt
-    execute cp -f ${workspace}/os/changelog.xml      ${workspace}/bld/bld-lfs-release/lfs_os_changelog.xml
-    execute cp -f ${workspace}/revisions.txt         ${workspace}/bld/bld-lfs-release/revisions.txt
+    execute cp -f ${workspace}/os/os_releasenote.xml                             ${workspace}/bld/bld-lfs-release/lfs_os_releasenote.xml
+    execute cp -f ${workspace}/os/releasenote.txt                                ${workspace}/bld/bld-lfs-release/lfs_os_releasenote.txt
+    execute cp -f ${workspace}/os/changelog.xml                                  ${workspace}/bld/bld-lfs-release/lfs_os_changelog.xml
+    execute cp -f ${workspace}/revisions.txt                                     ${workspace}/bld/bld-lfs-release/revisions.txt
+    execute cp -f ${workspace}/bld-externalComponents-summary/externalComponents ${workspace}/bld/bld-lfs-release/externalComponents.txt
 
     if [[ ${productName} == "LFS" ]] ; then
         _createLfsRelReleaseNoteXml  ${releaseTagName} ${workspace}/rel/releasenote.xml
@@ -284,8 +284,16 @@ sendReleaseNote() {
         copyFileToArtifactDirectory ${file}
     done
 
+    # TODO: demx2fk3 2014-08-19 fixme - parameter should not be required
+    local artifactsPathOnShare=$(getConfig artifactesShare)/${JOB_NAME}/${BUILD_NUMBER}
+    createSymlinksToArtifactsOnShare ${artifactsPathOnShare}
+
+    # TODO: demx2fk3 2014-08-19 fixme - make this in a nicer way
+
     info "creating approval file on moritz for ${osTagName}"
     execute ssh moritz touch /lvol2/production_jenkins/tmp/approved/${osTagName}
+    local remoteDirectory=$(getConfig LFS_CI_UC_package_copy_to_share_real_location)/${osTagName}
+    executeOnMaster ln -sf ${remoteDirectory} ${artifactsPathOnMaster}/release
 
     info "release is done."
     return
