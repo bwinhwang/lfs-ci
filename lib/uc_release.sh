@@ -256,11 +256,11 @@ sendReleaseNote() {
     _uploadToWorkflowTool        ${osTagName} ${workspace}/os/changelog.xml
     _uploadToWorkflowTool        ${osTagName} ${workspace}/revisions.txt
 
-    execute cp -f ${workspace}/os/os_releasenote.xml                             ${workspace}/bld/bld-lfs-release/lfs_os_releasenote.xml
-    execute cp -f ${workspace}/os/releasenote.txt                                ${workspace}/bld/bld-lfs-release/lfs_os_releasenote.txt
-    execute cp -f ${workspace}/os/changelog.xml                                  ${workspace}/bld/bld-lfs-release/lfs_os_changelog.xml
-    execute cp -f ${workspace}/revisions.txt                                     ${workspace}/bld/bld-lfs-release/revisions.txt
-    execute cp -f ${workspace}/bld-externalComponents-summary/externalComponents ${workspace}/bld/bld-lfs-release/externalComponents.txt
+    execute cp -f ${workspace}/os/os_releasenote.xml                                 ${workspace}/bld/bld-lfs-release/lfs_os_releasenote.xml
+    execute cp -f ${workspace}/os/releasenote.txt                                    ${workspace}/bld/bld-lfs-release/lfs_os_releasenote.txt
+    execute cp -f ${workspace}/os/changelog.xml                                      ${workspace}/bld/bld-lfs-release/lfs_os_changelog.xml
+    execute cp -f ${workspace}/revisions.txt                                         ${workspace}/bld/bld-lfs-release/revisions.txt
+    execute cp -f ${workspace}/bld/bld-externalComponents-summary/externalComponents ${workspace}/bld/bld-lfs-release/externalComponents.txt
 
     if [[ ${productName} == "LFS" ]] ; then
         _createLfsRelReleaseNoteXml  ${releaseTagName} ${workspace}/rel/releasenote.xml
