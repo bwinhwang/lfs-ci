@@ -170,7 +170,7 @@ _scLfsOldReleasesOnBranches() {
     local tmpFileA=$(createTempFile)
     local tmpFileB=$(createTempFile)
     local directoryToCleanup=/build/home/SC_LFS/releases/bld/
-    local days=600
+    local days=200
 
     info "check for baselines older than ${days} days in ${directoryToCleanup}"
     find ${directoryToCleanup} -mindepth 2 -maxdepth 2 -mtime +${days} -type d -printf "%p\n" \
@@ -224,7 +224,7 @@ _ciLfsOldReleasesOnBranches() {
     find ${directoryToCleanup} -mindepth 2 -maxdepth 2 -mtime +60 -type d -printf "%p\n" \
         | sort -u \
         | ${LFS_CI_ROOT}/bin/removalCanidates.pl \
-        | sed "s/^/1 ${directoryToCleanup}/g" | sort -u > ${resultFile}
+        | sed "s:^:1 ${directoryToCleanup}:g" | sort -u > ${resultFile}
 
     return
 }

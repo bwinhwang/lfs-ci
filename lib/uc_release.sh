@@ -119,8 +119,8 @@ ci_job_release() {
             prereleaseChecks
         ;;
         summary)
-            sendReleaseNote           "${TESTED_BUILD_JOBNAME}" "${TESTED_BUILD_NUMBER}" \
-                                      "${buildJobName}"         "${buildBuildNumber}"
+            sendReleaseNote "${TESTED_BUILD_JOBNAME}" "${TESTED_BUILD_NUMBER}" \
+                            "${buildJobName}"         "${buildBuildNumber}"
         ;;
         *)
             error "subJob not known (${subJob})"
@@ -289,9 +289,10 @@ sendReleaseNote() {
     createSymlinksToArtifactsOnShare ${artifactsPathOnShare}
 
     # TODO: demx2fk3 2014-08-19 fixme - make this in a nicer way
-
     info "creating approval file on moritz for ${osTagName}"
     execute ssh moritz touch /lvol2/production_jenkins/tmp/approved/${osTagName}
+
+    local artifactsPathOnMaster=$(getBuildDirectoryOnMaster)/archive
     local remoteDirectory=$(getConfig LFS_CI_UC_package_copy_to_share_real_location)/${osTagName}
     executeOnMaster ln -sf ${remoteDirectory} ${artifactsPathOnMaster}/release
 
@@ -627,7 +628,7 @@ createTagOnSourceRepository() {
             local normalizedUrl=$(normalizeSvnUrl ${url})
 
             case ${src} in 
-                src-*) : ;;
+                src-*) dirname=${src} ;;
                 *) dirname=$(dirname ${src})
                    mustExistBranchInSubversion ${svnUrlOs}/branches/${branch}/${target} ${dirname}
                 ;;
@@ -640,7 +641,7 @@ createTagOnSourceRepository() {
 
             case ${src} in
                 src-*)
-                    svnCopy -m tag_for_package_src_${src} ${svnUrlOs}/branches/${branch} \
+                    svnCopy -m tag_for_package_src_${src} ${svnUrlOs}/branches/${branch}/${target}/${src} \
                         ${svnUrl}/subsystems/${src}/${tagPrefix}${osLabelName}
                     trace "CLEANUP svn rm -m cleanup ${svnUrl}/subsystems/${src}/${tagPrefix}${osLabelName}"
                 ;;
@@ -711,9 +712,11 @@ createReleaseTag() {
 
     local sdk2=$(getConfig sdk2 ${componentsFile})
     local sdk3=$(getConfig sdk3 ${componentsFile})
+    local sdk=$(getConfig sdk ${componentsFile})
 
     info "using sdk2 ${sdk2}"
     info "using sdk3 ${sdk3}"
+    info "using sdk ${sdk}"
     info "using lfs os ${osLabelName}"
     info "using lfs rel ${osReleaseLabelName}"
 
@@ -736,6 +739,8 @@ createReleaseTag() {
 
     if [[ ${sdk3} ]] ; then 
         echo "/isource/svnroot/BTS_D_SC_LFS_SDK_1/sdk/tags/${sdk3} sdk3" >> ${svnExternalsFile}
+    elif [[ ${sdk} ]] ; then
+        echo "/isource/svnroot/BTS_D_SC_LFS_SDK_1/sdk/tags/${sdk} sdk3" >> ${svnExternalsFile}
     fi
 
 #    if [[ ${sdk2} ]] ; then 
@@ -800,7 +805,12 @@ createProxyReleaseTag() {
     local reposName=$(getConfig LFS_PROD_svn_delivery_repos_name)
     local proxySvnUrl=$(getConfig LFS_PROD_svn_delivery_proxy_repos_url)
     local deliverySvnUrl=$(getConfig LFS_PROD_svn_delivery_release_repos_url)
-    local branchName=proxyBranchForCreateTag
+
+    # TODO: demx2fk3 2014-07-11 replace this with getConfig
+    local branch=${locationToSubversionMap["${productName}_${location}"]}
+    mustHaveValue "${branch}" "branch name"
+
+    local branchName=${branch}_proxyBranchForCreateTag
     local canCreateProxyTag=$(getConfig LFS_CI_uc_release_can_create_proxy_tag)
     local externals=$(createTempFile)
     local logMessage=$(createTempFile)
