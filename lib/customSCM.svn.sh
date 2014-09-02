@@ -164,7 +164,7 @@ actionCheckout() {
 
             oldRev=$(( oldRev + 1))
             debug "get svn changelog ${subSystem} ${oldRev}:${newRev} ${newUrl}"
-            svn log -v --xml -r${oldRev}:${newRev} ${newUrl} > ${tmpChangeLogFile}
+            svn log -g -v --xml -r${oldRev}:${newRev} ${newUrl} > ${tmpChangeLogFile}
             mustBeSuccessfull "$?" "svn log -v --xml -r${oldRev}:${newRev} ${newUrl}"
 
             rawDebug ${tmpChangeLogFile}
@@ -204,7 +204,6 @@ actionCheckout() {
 
 ## @fn      actionCalculate()
 #  @brief   action ...
-#  @details «full description»
 #  @param   <none>
 #  @return  <none>
 actionCalculate() {

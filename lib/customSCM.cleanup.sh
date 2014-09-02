@@ -69,6 +69,8 @@ actionCheckout() {
 
     local subTaskName=$(getSubTaskNameFromJobName)
 
+    info "subtask name is ${subTaskName}"
+
     case ${subTaskName} in 
         phase_1_CI_LFS_in_Ulm)
             _ciLfsNotReleasedBuilds ${tmpFileA}
@@ -113,6 +115,9 @@ actionCheckout() {
                 *) exit 1 ;;
             esac
 
+        ;;
+        lfsArtifacts)
+            _lfsArtifactsRemoveOldArtifacts ${tmpFileA}
         ;;
     esac
 
@@ -170,7 +175,7 @@ _scLfsOldReleasesOnBranches() {
     local tmpFileA=$(createTempFile)
     local tmpFileB=$(createTempFile)
     local directoryToCleanup=/build/home/SC_LFS/releases/bld/
-    local days=200
+    local days=150
 
     info "check for baselines older than ${days} days in ${directoryToCleanup}"
     find ${directoryToCleanup} -mindepth 2 -maxdepth 2 -mtime +${days} -type d -printf "%p\n" \
@@ -225,6 +230,20 @@ _ciLfsOldReleasesOnBranches() {
         | sort -u \
         | ${LFS_CI_ROOT}/bin/removalCanidates.pl \
         | sed "s:^:1 ${directoryToCleanup}:g" | sort -u > ${resultFile}
+
+    return
+}
+
+_lfsArtifactsRemoveOldArtifacts() {
+    local resultFile=$1
+
+    local directoryToCleanup=/build/home/psulm/LFS_internal/artifacts
+
+    for jobName in ${directoryToCleanup}/* 
+    do 
+        [[ -d ${jobName} ]] || continue
+        find $jobName -mindepth 1 -maxdepth 1 -ctime +10 -type d | head -n -10 | sed "s:^:1 :" >> ${resultFile}
+    done
 
     return
 }
