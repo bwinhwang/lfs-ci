@@ -161,6 +161,7 @@ _build() {
     execute cd ${workspace}
     storeExternalComponentBaselines
     storeRevisions ${target}
+    createRebuildScript_svnLinks ${target}
 
     info "creating temporary makefile"
     ${LFS_CI_ROOT}/bin/sortBuildsFromDependencies ${target} makefile ${label} > ${cfgFile}
@@ -273,7 +274,9 @@ _createWorkspace() {
         info "(${counter}/${amountOfTargets}) checking out sources for ${src} rev ${revision:-latest}"
         checkoutSubprojectDirectories "${src}" "${revision}"
 
-    done
+    done 
+
+    createRebuildScript_bldLinks ${target}
 
     mustHaveLocalSdks
     mustHaveBuildArtifactsFromUpstream
@@ -342,6 +345,7 @@ mustHaveLocalSdks() {
     for bld in ${workspace}/bld/*
     do
         [[ -e ${bld} ]] || continue
+        [[ -d ${bld} ]] || continue
         local pathToSdk=$(readlink ${bld})
         local tag=$(basename ${pathToSdk})
         local subsystem=$(basename ${bld})
@@ -444,6 +448,69 @@ storeExternalComponentBaselines() {
     rawDebug ${externalComponentFile}
 
     return
+}
+
+createRebuildScript_bldLinks() {
+
+    return 
+    local workspace=$(getWorkspaceName)
+    mustHaveWorkspaceName
+    info "create script for rebuilding"
+
+    local targetName=$(sed "s/-//g" <<< ${1})
+    mustHaveValue "${targetName}" "target name"
+
+    local script=${workspace}/bld/bld-externalComponents-${targetName}/workdir.sh
+    execute mkdir -p $(dirname ${script})
+    execute rm -f ${script}
+
+    echo "#!/bin/bash"                                                                     >> ${script}
+    echo "# script was automatically created by jenkins job ${JOB_NAME} / ${BUILD_NUMBER}" >> ${script}
+    echo "# for details ask PS LFS SCM"                                                    >> ${script}
+    echo                                                                                   >> ${script}
+    echo "set -eau"                                                                        >> ${script}
+    echo "mkdir workdir-${tagName}"                                                        >> ${script}
+    echo "cd workdir-${tagName}"                                                           >> ${script}
+    echo "mkdir -p bld bldtools locations .build_workdir"                                  >> ${script}
+    for bld in $(find ${workspace}/bld/ -maxdepth 1 -type l) ; do
+        [[ -e ${bld} ]] || continue
+        [[ ! -d ${bld} ]] || continue
+
+        local realPath=$(readlink ${bld})
+        local linkName=$(basename ${bld})
+        echo "ln -sf ${realPath} bld/${linkName}"                                          >> ${script}
+    done
+
+    echo                                                                                   >> ${script}
+    return 
+}
+
+createRebuildScript_svnLinks() {
+
+    return 
+
+    local workspace=$(getWorkspaceName)
+    mustHaveWorkspaceName
+    info "adding svn commands to rebuilding script"
+
+    local targetName=$(sed "s/-//g" <<< ${1})
+    mustHaveValue "${targetName}" "target name"
+
+    local script=${workspace}/bld/bld-externalComponents-${targetName}/workdir.sh
+    mustExistFile ${script}
+
+    while read src url rev ; do
+        if [[ ${src} =~ src- ]] ; then
+            echo "svn export   -r ${rev} ${url} ${src}" >> ${script}
+        else
+            echo "svn checkout -r ${rev} ${url} ${src}" >> ${script}
+        fi
+    done < ${workspace}/bld/bld-externalComponents-${targetName}/usedRevisions.txt
+
+    echo "echo done" >> ${script}
+    echo "exit 0"    >> ${script}
+
+    return 
 }
 
 ## @fn      storeRevisions()

@@ -16,6 +16,7 @@ startLogfile() {
 
         local jobName=${JOB_NAME:-unknownJobName}
         local dateString=$(date +%Y%m%d%H%M%S)
+        local datePath=$(date +%Y/%m/%d)
         local hostName=$(hostname -s)
         local userName=${USER}
 
@@ -26,12 +27,13 @@ startLogfile() {
             prefix=${LFS_CI_LOGGING_PREFIX}.
         fi
 
-        CI_LOGGING_LOGFILENAME=${LFS_CI_ROOT}/log/ci.${dateString}.${hostName}.${userName}.${jobName}.${prefix}${counter}.log
+        CI_LOGGING_LOGFILENAME=${LFS_CI_ROOT}/log/${datePath}/ci.${dateString}.${hostName}.${userName}.${jobName}.${prefix}${counter}.log
+        mkdir -p ${LFS_CI_ROOT}/log/${datePath}/ 
 
         while [[ -e ${CI_LOGGING_LOGFILENAME}    ||
                  -e ${CI_LOGGING_LOGFILENAME}.gz ]] ; do
             counter=$(( counter + 1 ))
-            CI_LOGGING_LOGFILENAME=${LFS_CI_ROOT}/log/ci.${dateString}.${hostName}.${userName}.${jobName}.${counter}.log
+            CI_LOGGING_LOGFILENAME=${LFS_CI_ROOT}/log/${datePath}/ci.${dateString}.${hostName}.${userName}.${jobName}.${counter}.log
         done
 
         export CI_LOGGING_LOGFILENAME
@@ -241,20 +243,22 @@ _stackTrace() {
     done 
 }
 
-## @fn      logCommand()
+## @fn      runAndLog()
 #  @brief   execute a command and put the output into the logfile
 #  @param   <command>    command, which should be logged
 #  @return  <none>
-logCommand() {
+runAndLog() {
     local command=$@
-    local outputFile=$(mktemp)
+    local outputFile=$(createTempFile)
+
+    debug "execute command ${command}"
 
     ${command} 1>${outputFile} 2>&1 
+    rc=$?
 
     debug "logging output of command \"${command}\""
 
-    CI_LOGGING_CONFIG="PREFIX SPACE MESSAGE"
-    CI_LOGGING_PREFIX=">"
+    CI_LOGGING_CONFIG="MESSAGE"
 
     while read LINE
     do
@@ -262,6 +266,9 @@ logCommand() {
     done <${outputFile}
 
     unset CI_LOGGING_CONFIG
+    debug "end of output"
+
+    return ${rc}
 }
 
 ## @fn      rawDebug( $fileName )

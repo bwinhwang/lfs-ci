@@ -22,6 +22,33 @@ ci_job_test_on_target() {
     execute build setup
     execute build adddir src-test
 
+    export testTargetName=${targetName}
+    local testType=$(getConfig LFS_CI_uc_test_making_test_type)
+
+    case ${testType} in
+        checkUname)
+            makingTest_checkUname
+        ;;
+        testProductionLRC)
+            makingTest_testLRC
+        ;;
+        *) 
+            fatal "unknown testType";
+        ;;
+    esac
+
+    return
+
+}
+makingTest_checkUname() {
+    requiredParameters JOB_NAME BUILD_NUMBER LABEL DELIVERY_DIRECTORY
+
+    local targetName=$(sed "s/^Test-//" <<< ${JOB_NAME})
+    mustHaveValue ${targetName} "target name"
+    info "testing on target ${targetName}"
+
+    local workspace=$(getWorkspaceName)
+
     # Note: TESTTARGET lowercase with ,,
     local make="make TESTTARGET=${targetName,,}"    
 
@@ -52,13 +79,10 @@ ci_job_test_on_target() {
 
 makingTest_testLRC() {
 
-    local workspace=$(getWorkspaceName)
-    mustHaveCleanWorkspace
-    mustHaveWorkspaceName
+    requiredParameters DELIVERY_DIRECTORY
 
-    execute cd ${workspace}
-    execute build setup
-    execute build adddir src-test
+    local workspace=$(getWorkspaceName)
+    mustHaveWorkspaceName
 
     local testBuildDirectory=${DELIVERY_DIRECTORY}
     mustExistDirectory ${testBuildDirectory}
@@ -77,28 +101,47 @@ makingTest_testLRC() {
     mustExistDirectory ${testSuiteDirectory_SHP}
     mustExistDirectory ${testSuiteDirectory_AHP}
 
-    execute make -C ${testSuiteDirectory} testconfig-overwrite TESTBUILD=${testBuildDirectory}
+    info "create testconfig for ${testSuiteDirectory}"
+    execute make -C ${testSuiteDirectory} testconfig-overwrite \
+                TESTBUILD=${testBuildDirectory} \
+                TESTTARGET=${testTargetName}
 
+    # TODO: demx2fk3 2014-08-13 remove me
+    info "powercycle the target to get it in a defined state"
+    execute make -C ${testSuiteDirectory} powercycle
+    info "waiting for prompt"
+    execute make -C ${testSuiteDirectory} waitprompt
+    sleep 120 
+
+    info "installing software"
     makingTest_install ${testSuiteDirectory}
+
+    info "checking the board for correct software"
     makingTest_check   ${testSuiteDirectory}
+    info "checking the board for correct software SHP"
     makingTest_check   ${testSuiteDirectory_SHP}
+    info "checking the board for correct software AHP"
     makingTest_check   ${testSuiteDirectory_AHP}
 
-    makingTest_testLRC_subBoard ${testSuiteDirectory_SHP} ${testBuildDirectory} ${testTargetName}_shp ${workspace}/xml-output/shp
-    makingTest_testLRC_subBoard ${testSuiteDirectory}     ${testBuildDirectory} ${testTargetName}_shp ${workspace}/xml-output/shp-common
+    export LFS_CI_ERROR_CODE=0
+    makingTest_testLRC_subBoard ${testSuiteDirectory_SHP} ${testBuildDirectory} ${testTargetName}_shp shp        ${workspace}/xml-output/shp
+    makingTest_testLRC_subBoard ${testSuiteDirectory}     ${testBuildDirectory} ${testTargetName}_shp shp-common ${workspace}/xml-output/shp-common
 
     execute make -C ${testSuiteDirectory_AHP} waitssh
     execute make -C ${testSuiteDirectory_AHP} setup
     execute make -C ${testSuiteDirectory_AHP} check
 
-    makingTest_testLRC_subBoard ${testSuiteDirectory_AHP} ${testBuildDirectory} ${testTargetName}_ahp ${workspace}/xml-output/ahp
-    makingTest_testLRC_subBoard ${testSuiteDirectory}     ${testBuildDirectory} ${testTargetName}_ahp ${workspace}/xml-output/ahp-common
+    makingTest_testLRC_subBoard ${testSuiteDirectory_AHP} ${testBuildDirectory} ${testTargetName}_ahp ahp        ${workspace}/xml-output/ahp
+    makingTest_testLRC_subBoard ${testSuiteDirectory}     ${testBuildDirectory} ${testTargetName}_ahp ahp-common ${workspace}/xml-output/ahp-common
 
     find ${workspace}/xml-output -name '*.xml' | while read file
     do
         cat -v ${file} > ${file}.tmp && mv ${file}.tmp ${file}
     done
-    # exit $E
+    if [[ ${LFS_CI_ERROR_CODE} ]] ; then
+        error "some errors in test cases. please see logfile"
+        exit 1
+    fi
 
     return
 }
@@ -113,7 +156,11 @@ makingTest_testLRC_subBoard() {
     local testTargetName=$3
     mustHaveValue "${testTargetName}" "test target name"
 
-    local xmlReportDirectory=$4
+    local xmlNamePrefix=$4
+    mustHaveValue "${xmlNamePrefix}" "xml name prefix"
+
+    local xmlReportDirectory=$5
+    execute mkdir -p ${xmlReportDirectory}
     mustExistDirectory ${xmlReportDirectory}
 
     local workspace=$(getWorkspaceName)
@@ -121,13 +168,14 @@ makingTest_testLRC_subBoard() {
 
     local make="make -C ${testSuiteDirectory}"
 
-    execute ${make} clean
-    execute ${make} testconfig-overwrite TESTBUILD=${testBuildDirectory} TESTTARGET=${testTargetName}
-            ${make} test-xmloutput       || E=0 # also true
+    info "testing on target ${testTargetName} in testsuite ${testSuiteDirectory}"
+    execute   ${make} clean
+    execute   ${make} testconfig-overwrite TESTBUILD=${testBuildDirectory} TESTTARGET=${testTargetName}
+    runAndLog ${make} test-xmloutput       || LFS_CI_ERROR_CODE=0 # also true
 
     execute mkdir -p ${xmlReportDirectory}
-    execute cp -rf ${testSuiteDirectory}/xml-reports ${xmlReportDirectory}
-    execute sed -i -s 's/name=/name=ahp_common_/g' ${xmlReportDirectory}/xml-reports/*.xml
+    execute cp -rf ${testSuiteDirectory}/xml-reports/* ${xmlReportDirectory}/
+    execute sed -i -s "s/name=\"/name=\"${xmlNamePrefix}_/g" ${xmlReportDirectory}/*.xml
 
     return
 }
@@ -137,9 +185,20 @@ makingTest_check() {
     mustExistDirectory ${testSuiteDirectory}
 
     local make="make -C ${testSuiteDirectory}"
+
+    info "recreating testconfig for ${testSuiteDirectory} / ${testBuildDirectory} / ${testTargetName}"
+    execute ${make} testconfig-overwrite TESTBUILD=${testBuildDirectory} TESTTARGET=${testTargetName}
+
+    info "waiting for prompt"
     execute ${make} waitprompt
+
+    info "waiting for ssh"
     execute ${make} waitssh
+
+    info "running setup"
     execute ${make} setup
+
+    info "running check"
     execute ${make} check
 
     return
@@ -151,20 +210,39 @@ makingTest_install() {
 
     local make="make -C ${testSuiteDirectory}"
 
+    info "installing software on target"
     execute ${make} setup
 
     # currently install does show wrong (old) version after reboot and
     # SHP sometimes fails to be up when install is retried.
     # We try installation up to 4 times
-
     for i in $(seq 1 4) ; do
-        ${make} install FORCE=yes || { sleep 20 ; continue ; }
-        ${make} waitprompt
-        ${make} powercycle FORCE=yes
-        ${make} waitprompt
-        ${make} waitsetup
-        ${make} setup || continue
-        ${make} check || continue
+        info "install loop ${i}"
+
+        # please note: difference between execute and runAndLog.
+        # runAndLog will return the RC of the command. execute will fail, if command fails
+
+        info "running install"
+        runAndLog ${make} install FORCE=yes || { sleep 20 ; continue ; }
+        execute ${make} waitprompt
+
+        info "rebooting target..."
+        execute ${make} powercycle FORCE=yes
+
+        info "wait for prompt"
+        execute ${make} waitprompt
+
+        info "wait for setup"
+        execute ${make} waitssh
+
+        info "running setup"
+        runAndLog ${make} setup || continue
+
+        info "running check"
+        runAndLog ${make} check || continue
+
+        info "install was successful"
+        break
     done
 
     return

@@ -3,8 +3,8 @@
 source ${LFS_CI_ROOT}/lib/common.sh
 source ${LFS_CI_ROOT}/lib/jenkins.sh
 
-branchName=FB1407
-branchDisplayName="FB1407"
+branchName=FB1408
+branchDisplayName="FB1408"
 lastReleaseName="PS_LFS_OS_2014_08_0001"
 
 # ls /var/fpwork/demx2fk3/lfs-jenkins/home/jobs/*/promotions
@@ -84,3 +84,12 @@ do
     disableJob "${newJobName}"
 
 done
+
+for job in $(cat jobList)
+do
+    newJobName=$(echo ${job} | sed "s/_-_trunk_-_/_-_${branchName}_-_/")
+    info "updating ${newJobName}"
+    updateJenkinsJob  ${newJobName} ${job}.xml
+    disableJob "${newJobName}"
+done
+

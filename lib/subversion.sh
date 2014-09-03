@@ -41,6 +41,7 @@ uploadToSubversion() {
 
     mustExistBranchInSubversion ${svnReposUrl} os
     mustExistBranchInSubversion ${svnReposUrl}/os branches
+    mustExistBranchInSubversion ${svnReposUrl}/os tags
     mustExistBranchInSubversion ${svnReposUrl}/os/branches "${branch}"
 
     local oldTemp=${TMPDIR:-/tmp}

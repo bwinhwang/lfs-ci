@@ -32,10 +32,10 @@ ci_job_ecl() {
                     -b ${UPSTREAM_BUILD}         \
                     -h ${serverPath} > ${upstreamsFile}
 
-    local packageJobName=$(    grep Package ${upstreamsFile} | cut -d: -f1)
-    local packageBuildNumber=$(grep Package ${upstreamsFile} | cut -d: -f2)
-    local buildJobName=$(      grep Build   ${upstreamsFile} | cut -d: -f1)
-    local buildBuildNumber=$(  grep Build   ${upstreamsFile} | cut -d: -f2)
+    local packageJobName=$(    grep Package ${upstreamsFile} | cut -d: -f1 | sort -n | tail -n 1)
+    local packageBuildNumber=$(grep Package ${upstreamsFile} | cut -d: -f2 | sort -n | tail -n 1)
+    local buildJobName=$(      grep Build   ${upstreamsFile} | cut -d: -f1 | sort -n | tail -n 1)
+    local buildBuildNumber=$(  grep Build   ${upstreamsFile} | cut -d: -f2 | sort -n | tail -n 1)
     if [[ -z ${buildJobName} ]] ; then
         error "not trigger an ECL update without a build job name"
         exit 1
@@ -140,11 +140,11 @@ getEclValue() {
     local workspace=$(getWorkspaceName)
 
     case ${eclKey} in
-        ECL_PS_LFS_REL)  
+        ECL_PS_LFS_REL|ECL_PS_LRC_LCP_LFS_REL)
             mustHaveNextCiLabelName
             newValue=$(getNextCiLabelName | sed "s/PS_LFS_OS_/PS_LFS_REL_/")
         ;;
-        ECL_PS_LFS_OS)   
+        ECL_PS_LFS_OS|ECL_PS_LRC_LCP_LFS_OS)
             mustHaveNextCiLabelName
             newValue=$(getNextCiLabelName)
         ;;
@@ -165,6 +165,7 @@ getEclValue() {
         ;;
         *)
             newValue="unsupported_key_${eclKey}"
+            fatal "unknown ECL key ${eclKey}"
         ;;
     esac
 
