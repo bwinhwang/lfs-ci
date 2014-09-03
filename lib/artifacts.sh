@@ -201,3 +201,19 @@ createSymlinksToArtifactsOnShare() {
 
     return
 }
+
+archiveLogfile() {
+    requiredParameters JOB_NAME BUILD_NUMBER
+
+    local artifactsDirectoryOnShare=$1
+    # TODO: demx2fk3 2014-08-07 fixme should run on master
+    # mustExistDirectory ${artifactsDirectoryOnShare}
+
+    [[ -f ${CI_LOGGING_LOGFILENAME} ]] || return
+
+    local artifactsPathOnMaster=$(getBuildDirectoryOnMaster)/archive
+    executeOnMaster mkdir -p  ${artifactsDirectoryOnShare}
+    executeOnMaster ln    -sf ${CI_LOGGING_LOGFILENAME}.gz ${artifactsPathOnMaster}/logfile.txt.gz
+
+    return
+}

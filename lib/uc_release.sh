@@ -605,7 +605,7 @@ createTagOnSourceRepository() {
     fi
 
     mustExistBranchInSubversion ${svnUrlOs}/branches ${branch}
-    mustExistBranchInSubversion ${svnUrlOs}/tags ${branch}
+    # mustExistBranchInSubversion ${svnUrlOs}/tags ${branch}
 
     for revisionFile in ${workspace}/rev/* ; do
         [[ -e ${revisionFile} ]] || continue

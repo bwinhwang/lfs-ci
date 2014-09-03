@@ -80,15 +80,19 @@ actionCheckout() {
             _ciLfsOldReleasesOnBranches ${tmpFileA}
             execute touch ${tmpFileB}
         ;;
-        phase_3_SC_LFS_in_Ulm)
-            fatal "not implemented"
-        ;;
         phase_3_CI_LFS_in_Ulm)
             fatal "not implemented"
+        ;;
+        phase_2_SC_LFS_linuxKernel_in_Ulm)
+            _scLfsLinuxKernelOldReleasesOnBranches ${tmpFileA}
+            execute touch ${tmpFileB}
         ;;
         phase_2_SC_LFS_in_Ulm)
             _scLfsOldReleasesOnBranches ${tmpFileA}
             execute touch ${tmpFileB}
+        ;;
+        phase_3_SC_LFS_in_Ulm)
+            fatal "not implemented"
         ;;
         phase_4_CI_LFS_in_*)
             _ciLfsRemoteSites ul ${tmpFileB}
@@ -175,7 +179,7 @@ _scLfsOldReleasesOnBranches() {
     local tmpFileA=$(createTempFile)
     local tmpFileB=$(createTempFile)
     local directoryToCleanup=/build/home/SC_LFS/releases/bld/
-    local days=150
+    local days=60
 
     info "check for baselines older than ${days} days in ${directoryToCleanup}"
     find ${directoryToCleanup} -mindepth 2 -maxdepth 2 -mtime +${days} -type d -printf "%p\n" \
@@ -188,6 +192,23 @@ _scLfsOldReleasesOnBranches() {
     return
 }
 
+_scLfsLinuxKernelOldReleasesOnBranches() {
+    local resultFile=$1
+    local tmpFileA=$(createTempFile)
+    local tmpFileB=$(createTempFile)
+    local directoryToCleanup=/build/home/SC_LFS/linuxkernels
+    local days=1500
+
+    info "check for baselines older than ${days} days in ${directoryToCleanup}"
+    find ${directoryToCleanup} -mindepth 1 -maxdepth 1 -mtime +${days} -type d -printf "%p\n" \
+        | sort -u > ${tmpFileA}
+
+    ${LFS_CI_ROOT}/bin/removalCanidates.pl  < ${tmpFileA} > ${tmpFileB}
+
+    grep -w -f ${tmpFileB} ${tmpFileA} | sed "s/^/1 /g" > ${resultFile}
+
+    return
+}
 _ciLfsRemoteSites() {
     local siteName=$1
     local resultFile=$2
@@ -224,12 +245,14 @@ _ciLfsOldReleasesOnBranches() {
     local resultFile=$1
 
     local tmpFileA=$(createTempFile)
-    local directoryToCleanup=/build/home/CI_LFS/Release_Candidates
+    local tmpFileB=$(createTempFile)
+    local directoryToCleanup=/build/home/CI_LFS/Release_Candidates/
 
     find ${directoryToCleanup} -mindepth 2 -maxdepth 2 -mtime +60 -type d -printf "%p\n" \
-        | sort -u \
-        | ${LFS_CI_ROOT}/bin/removalCanidates.pl \
-        | sed "s:^:1 ${directoryToCleanup}:g" | sort -u > ${resultFile}
+        | sort -u > ${tmpFileA}
+
+    ${LFS_CI_ROOT}/bin/removalCanidates.pl  < ${tmpFileA} > ${tmpFileB}
+    grep -w -f ${tmpFileB} ${tmpFileA} | sed "s/^/1 /g" > ${resultFile}
 
     return
 }
@@ -245,6 +268,11 @@ _lfsArtifactsRemoveOldArtifacts() {
         find $jobName -mindepth 1 -maxdepth 1 -ctime +10 -type d | head -n -10 | sed "s:^:1 :" >> ${resultFile}
     done
 
+    return
+}
+_lfsCiLogfiles() {
+    local resultFile=$1
+    find /ps/lfs/ci/log/ -type f -ctime +60 | sed "s:^:1 :" > ${resultFile}
     return
 }
 

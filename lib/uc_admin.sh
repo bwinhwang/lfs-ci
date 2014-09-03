@@ -116,7 +116,7 @@ genericShareCleanup() {
 
     setBuildDescription ${JOB_NAME} ${BUILD_NUMBER} "triggered by ${UPSTREAM_PROJECT}/${UPSTREAM_BUILD}"
 
-    local execute=info
+    local execute=execute
     local max=$(wc -l ${tmpFile} | cut -d" " -f1)
     local cnt=0
     for entry in $(cat ${tmpFile}) ; do
@@ -219,9 +219,9 @@ backupJenkinsMasterServerInstallation() {
     mustHaveValue ${backupPath}
     mustHaveValue ${serverPath}
 
-    execute rm -rf ${backupPath}/backup.112
+    execute rm -rf ${backupPath}/backup.11
 
-    for i in $(seq 0 111 | tac) ; do
+    for i in $(seq 0 10 | tac) ; do
         [[ -d ${backupPath}/backup.${i} ]] || continue
         old=$(( i + 1 ))
         execute mv -f ${backupPath}/backup.${i} ${backupPath}/backup.${old}
