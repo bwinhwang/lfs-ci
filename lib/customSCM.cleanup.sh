@@ -248,7 +248,7 @@ _ciLfsOldReleasesOnBranches() {
     local tmpFileB=$(createTempFile)
     local directoryToCleanup=/build/home/CI_LFS/Release_Candidates/
 
-    find ${directoryToCleanup} -mindepth 2 -maxdepth 2 -mtime +60 -type d -printf "%p\n" \
+    find ${directoryToCleanup} -mindepth 2 -maxdepth 2 -mtime +360 -type d -printf "%p\n" \
         | sort -u > ${tmpFileA}
 
     ${LFS_CI_ROOT}/bin/removalCanidates.pl  < ${tmpFileA} > ${tmpFileB}
@@ -265,7 +265,9 @@ _lfsArtifactsRemoveOldArtifacts() {
     for jobName in ${directoryToCleanup}/* 
     do 
         [[ -d ${jobName} ]] || continue
-        find $jobName -mindepth 1 -maxdepth 1 -ctime +10 -type d | head -n -10 | sed "s:^:1 :" >> ${resultFile}
+        find ${jobName} -mindepth 1 -maxdepth 1 -ctime +10 -type d -printf "%C@ %p\n" \
+            | sort -n \
+            | cut -d" " -f2 >> ${resultFile}
     done
 
     return
