@@ -122,6 +122,10 @@ copyReleaseCandidateToShare() {
     mustExistFile ${commonentsFile}
     for sdk in $(getConfig LFS_CI_UC_package_linking_component) ; do
         local sdkValue=$(getConfig ${sdk} ${commonentsFile})
+        # TODO: demx2fk3 2014-08-26 hack place make this different
+        if [[ ${sdk} = sdk3 && -z ${sdkValue} ]] ; then
+            sdkValue=$(getConfig sdk ${commonentsFile})
+        fi
         mustExistDirectory ../../../SDKs/${sdkValue}
         execute ln -sf ../../../SDKs/${sdkValue} ${sdk}
     done

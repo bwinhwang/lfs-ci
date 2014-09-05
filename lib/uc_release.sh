@@ -1,8 +1,9 @@
 #!/bin/bash
 
-[[ -z ${LFS_CI_SOURCE_artifacts}  ]] && source ${LFS_CI_ROOT}/lib/artifacts.sh
-[[ -z ${LFS_CI_SOURCE_subversion} ]] && source ${LFS_CI_ROOT}/lib/subversion.sh
-[[ -z ${LFS_CI_SOURCE_subversion} ]] && source ${LFS_CI_ROOT}/lib/jenkins.sh
+[[ -z ${LFS_CI_SOURCE_artifacts}    ]] && source ${LFS_CI_ROOT}/lib/artifacts.sh
+[[ -z ${LFS_CI_SOURCE_subversion}   ]] && source ${LFS_CI_ROOT}/lib/subversion.sh
+[[ -z ${LFS_CI_SOURCE_subversion}   ]] && source ${LFS_CI_ROOT}/lib/jenkins.sh
+[[ -z ${LFS_CI_SOURCE_workflowtool} ]] && source ${LFS_CI_ROOT}/lib/workflowtool.sh
 
 ## @fn      ci_job_release()
 #  @brief   dispatcher for the release jobs
@@ -250,22 +251,22 @@ sendReleaseNote() {
     info "collect revisions from all sub build jobs"
     sort -u ${workspace}/bld/bld-externalComponents-*/usedRevisions.txt > ${workspace}/revisions.txt
 
-    _createReleaseInWorkflowTool ${osTagName} ${workspace}/os/os_releasenote.xml
-    _uploadToWorkflowTool        ${osTagName} ${workspace}/os/os_releasenote.xml
-    _uploadToWorkflowTool        ${osTagName} ${workspace}/os/releasenote.txt
-    _uploadToWorkflowTool        ${osTagName} ${workspace}/os/changelog.xml
-    _uploadToWorkflowTool        ${osTagName} ${workspace}/revisions.txt
+    createReleaseInWorkflowTool ${osTagName} ${workspace}/os/os_releasenote.xml
+    uploadToWorkflowTool        ${osTagName} ${workspace}/os/os_releasenote.xml
+    uploadToWorkflowTool        ${osTagName} ${workspace}/os/releasenote.txt
+    uploadToWorkflowTool        ${osTagName} ${workspace}/os/changelog.xml
+    uploadToWorkflowTool        ${osTagName} ${workspace}/revisions.txt
 
-    execute cp -f ${workspace}/os/os_releasenote.xml                             ${workspace}/bld/bld-lfs-release/lfs_os_releasenote.xml
-    execute cp -f ${workspace}/os/releasenote.txt                                ${workspace}/bld/bld-lfs-release/lfs_os_releasenote.txt
-    execute cp -f ${workspace}/os/changelog.xml                                  ${workspace}/bld/bld-lfs-release/lfs_os_changelog.xml
-    execute cp -f ${workspace}/revisions.txt                                     ${workspace}/bld/bld-lfs-release/revisions.txt
-    execute cp -f ${workspace}/bld-externalComponents-summary/externalComponents ${workspace}/bld/bld-lfs-release/externalComponents.txt
+    execute cp -f ${workspace}/os/os_releasenote.xml                                 ${workspace}/bld/bld-lfs-release/lfs_os_releasenote.xml
+    execute cp -f ${workspace}/os/releasenote.txt                                    ${workspace}/bld/bld-lfs-release/lfs_os_releasenote.txt
+    execute cp -f ${workspace}/os/changelog.xml                                      ${workspace}/bld/bld-lfs-release/lfs_os_changelog.xml
+    execute cp -f ${workspace}/revisions.txt                                         ${workspace}/bld/bld-lfs-release/revisions.txt
+    execute cp -f ${workspace}/bld/bld-externalComponents-summary/externalComponents ${workspace}/bld/bld-lfs-release/externalComponents.txt
 
     if [[ ${productName} == "LFS" ]] ; then
         _createLfsRelReleaseNoteXml  ${releaseTagName} ${workspace}/rel/releasenote.xml
-        _createReleaseInWorkflowTool ${releaseTagName} ${workspace}/rel/releasenote.xml
-        _uploadToWorkflowTool        ${releaseTagName} ${workspace}/rel/releasenote.xml
+        createReleaseInWorkflowTool ${releaseTagName} ${workspace}/rel/releasenote.xml
+        uploadToWorkflowTool        ${releaseTagName} ${workspace}/rel/releasenote.xml
 
         execute cp -f ${workspace}/rel/releasenote.xml ${workspace}/bld/bld-lfs-release/lfs_rel_releasenote.xml
     fi
@@ -286,153 +287,23 @@ sendReleaseNote() {
 
     # TODO: demx2fk3 2014-08-19 fixme - parameter should not be required
     local artifactsPathOnShare=$(getConfig artifactesShare)/${JOB_NAME}/${BUILD_NUMBER}
-    createSymlinksToArtifactsOnShare ${artifactsPathOnShare}
+    linkFileToArtifactsDirectory ${artifactsPathOnShare}
 
-    # TODO: demx2fk3 2014-08-19 fixme - make this in a nicer way
+    appproveReleaseForPsScm ${osTagName}
 
-    info "creating approval file on moritz for ${osTagName}"
-    execute ssh moritz touch /lvol2/production_jenkins/tmp/approved/${osTagName}
     local remoteDirectory=$(getConfig LFS_CI_UC_package_copy_to_share_real_location)/${osTagName}
+    local artifactsPathOnMaster=$(getBuildDirectoryOnMaster)/archive
     executeOnMaster ln -sf ${remoteDirectory} ${artifactsPathOnMaster}/release
 
     info "release is done."
     return
 }
 
-_createReleaseInWorkflowTool() {
-    local tagName=$1
-    local fileName=$2
-    mustExistFile ${fileName}
-
-    local workspace=$(getWorkspaceName)
-    mustHaveWorkspaceName
-
-    local wftApiKey=$(getConfig WORKFLOWTOOL_api_key)
-    local wftCreateRelease=$(getConfig WORKFLOWTOOL_url_create_release)
-    local curl="curl -k ${wftCreateRelease} -F access_key=${wftApiKey}" 
-
-    local canCreateReleaseInWorkflowTool=$(getConfig LFS_CI_uc_release_can_create_release_in_wft)
-    if [[ ! ${canCreateReleaseInWorkflowTool} ]] ; then
-        warning "creating release in WFT is disabled via config"
-        return
-    fi
-
-    # check, if wft already knows about the release
-    local update=""
-    if _existsBaselineInWorkflowTool ${tagName} ; then
-        update="-F update=yes"  # does exist
-    else
-        update="-F update=no" # does not exist 
-    fi
-
-    info "creating release based on ${fileName} in wft"
-    execute ${curl} ${update} -F file=@${fileName}
-    echo "${curl} ${update} -F file=@${fileName}" >> ${workspace}/redo.sh
-
-    if ! _existsBaselineInWorkflowTool ${tagName} ; then
-        error "just created baseline ${tagName} does not exist in WFT"
-        exit 1
-    fi
-
-    return
-}
-
-_uploadToWorkflowTool() {
-    local tagName=$1
-    local fileName=$2
-    mustExistFile ${fileName}
-
-    local workspace=$(getWorkspaceName)
-    mustHaveWorkspaceName
-
-    local wftApiKey=$(getConfig WORKFLOWTOOL_api_key)
-    local wftUploadAttachment=$(getConfig WORKFLOWTOOL_url_upload_attachment)
-    local curl="curl -k ${wftUploadAttachment}/${tagName} -F access_key=${wftApiKey} "
-
-    local canCreateReleaseInWorkflowTool=$(getConfig LFS_CI_uc_release_can_create_release_in_wft)
-    if [[ ! ${canCreateReleaseInWorkflowTool} ]] ; then
-        warning "uploading release note / file in WFT is disabled via config"
-        return
-    fi
-
-    if [[ ! -s ${fileName} ]] ; then
-        debug "file ${fileName} is empty"
-        return
-    fi
-
-    local update=""
-    if _existsBaselineInWorkflowTool ${tagName} ; then
-        update="-F update=yes"  # does exist
-    else
-        update="-F update=no" # does not exist 
-    fi
-
-    info "uploading ${fileName} to wft"
-    execute ${curl} ${update} -F file=@${fileName}
-    echo "${curl} ${update} -F file=@${fileName}" >> ${workspace}/redo.sh
-
-    return
-}
-
-_existsBaselineInWorkflowTool() {
-    local tagName=$1
-
-    local wftApiKey=$(getConfig WORKFLOWTOOL_api_key)
-    local wftBuildContent=$(getConfig WORKFLOWTOOL_url_build_content)
-    local curl="curl -k ${wftUploadAttachment}/${tagName} -F access_key=${wftApiKey} "
-
-    # check, if wft already knows about the release
-    curl -sf -k ${wftBuildContent}/${tagName} >/dev/null 
-    case $? in 
-        # reverse logic due to exit code logic: 1 == failure, 0 == ok
-        0)  return 0 ;; # does exist
-        22) return 1 ;; # does not exist 
-        *)  error "unknown error from curl $?"; exit 1 ;;
-    esac
-
-    # not reachable
-    exit 1
-}
-
-_validateReleaseNoteXml() {
-    local releaseNoteXml=$1
-
-    # check with wft
-    info "validating release note"
-    local wftApiKey=$(getConfig WORKFLOWTOOL_api_key)
-    local wftReleaseNoteValidate=$(getConfig WORKFLOWTOOL_url_releasenote_validation)
-    local wftReleaseNoteXsd=$(getConfig WORKFLOWTOOL_url_releasenote_xsd)
-
-#    if [[ ! ${canCreateReleaseInWorkflowTool} ]] ; then
-#        warning "validating release note xml in WFT is disabled via config"
-#        return
-#    fi
-
-    if [[ ${wftReleaseNoteXsd} ]] ; then
-        # local check first
-        execute rm -f releasenote.xsd
-        execute curl -k ${wftReleaseNoteXsd} --output releasenote.xsd
-        mustExistFile releasenote.xsd
-
-        execute xmllint --schema releasenote.xsd ${releaseNoteXml}
-    fi
-
-    # remove check with wft next
-    local outputFile=$(createTempFile)
-    execute curl -k ${wftReleaseNoteValidate} \
-                 -F access_key=${wftApiKey}   \
-                 -F file=@${releaseNoteXml}   \
-                 --output ${outputFile}
-    rawDebug ${outputFile}
-
-    if ! grep -q "XML valid" ${outputFile} ; then
-        error "release note xml ${releaseNoteXml} is not valid"
-        exit 1
-    fi
-        
-    return
-}
-
+## @fn      _createLfsOsReleaseNote( $buildJobName, $buildBuildNumber )
+#  @brief   create an PS_LFS_OS release note 
+#  @param   {buildJobName}     project name of the build job
+#  @param   {buildBuildNumber} build number of the build job   
+#  @return  <none>
 _createLfsOsReleaseNote() {
     local buildJobName=$1
     local buildBuildNumber=$2
@@ -463,23 +334,18 @@ _createLfsOsReleaseNote() {
 
     export tagName=${LFS_PROD_RELEASE_CURRENT_TAG_NAME}
 
-    debug "${LFS_CI_ROOT}/bin/getReleaseNoteContent -t ${LFS_PROD_RELEASE_CURRENT_TAG_NAME} > releasenote.txt"
-    ${LFS_CI_ROOT}/bin/getReleaseNoteContent -t ${LFS_PROD_RELEASE_CURRENT_TAG_NAME} > releasenote.txt
-    mustBeSuccessfull "$?" "getReleaseNoteContent"
+    execute -n ${LFS_CI_ROOT}/bin/getReleaseNoteContent -t ${LFS_PROD_RELEASE_CURRENT_TAG_NAME} > releasenote.txt
     rawDebug ${workspace}/os/releasenote.txt
 
     export type=OS
 
-    debug " ${LFS_CI_ROOT}/bin/getReleaseNoteXML -t ${LFS_PROD_RELEASE_CURRENT_TAG_NAME} -o ${LFS_PROD_RELEASE_PREVIOUS_TAG_NAME} -r http://foobar/asdf/ -f ${LFS_CI_ROOT}/etc/file.cfg > releasenote.xml"
-    ${LFS_CI_ROOT}/bin/getReleaseNoteXML -t ${LFS_PROD_RELEASE_CURRENT_TAG_NAME}  \
-                                         -o ${LFS_PROD_RELEASE_PREVIOUS_TAG_NAME} \
-                                         -r http://foobar/asdf/ \
-                                         -f ${LFS_CI_ROOT}/etc/file.cfg > releasenote.xml
-    mustBeSuccessfull "$?" "getReleaseNoteXML"
+    execute -n ${LFS_CI_ROOT}/bin/getReleaseNoteXML -t ${LFS_PROD_RELEASE_CURRENT_TAG_NAME}  \
+                                                    -o ${LFS_PROD_RELEASE_PREVIOUS_TAG_NAME} \
+                                                    -f ${LFS_CI_ROOT}/etc/file.cfg > releasenote.xml
     rawDebug ${workspace}/os/releasenote.xml
     execute mv -f ${workspace}/os/releasenote.xml ${workspace}/os/os_releasenote.xml
 
-    _validateReleaseNoteXml ${workspace}/os/os_releasenote.xml
+    mustBeValidXmlReleaseNote ${workspace}/os/os_releasenote.xml
 
     unset type
     export type
@@ -487,6 +353,11 @@ _createLfsOsReleaseNote() {
     return
 }
 
+## @fn      _createLfsRelReleaseNote( $buildJobName, $buildBuildNumber )
+#  @brief   create an PSLFS_REL release note 
+#  @param   {buildJobName}     project name of the build job
+#  @param   {buildBuildNumber} build number of the build job   
+#  @return  <none>
 _createLfsRelReleaseNoteXml() {
     local workspace=$(getWorkspaceName)
     mustHaveWorkspaceName
@@ -497,9 +368,8 @@ _createLfsRelReleaseNoteXml() {
     info "creating release note xml for ${LFS_PROD_RELEASE_CURRENT_TAG_NAME_REL}"
     execute mkdir -p ${workspace}/rel/bld/bld-externalComponents-summary
     cd ${workspace}/rel/
-    grep sdk ${workspace}/bld/bld-externalComponents-summary/externalComponents \
-            > ${workspace}/rel/bld/bld-externalComponents-summary/externalComponents
-    mustBeSuccessfull "$?" "grep sdk ok"
+    execute -n grep sdk ${workspace}/bld/bld-externalComponents-summary/externalComponents \
+                      > ${workspace}/rel/bld/bld-externalComponents-summary/externalComponents
 
     echo "PS_LFS_OS <> = ${LFS_PROD_RELEASE_CURRENT_TAG_NAME}" >> ${workspace}/rel/bld/bld-externalComponents-summary/externalComponents
 
@@ -508,10 +378,9 @@ _createLfsRelReleaseNoteXml() {
 
     export tagName=${LFS_PROD_RELEASE_CURRENT_TAG_NAME}
     export type=REL
-    ${LFS_CI_ROOT}/bin/getReleaseNoteXML -t ${LFS_PROD_RELEASE_CURRENT_TAG_NAME_REL}  \
-                                         -o ${LFS_PROD_RELEASE_PREVIOUS_TAG_NAME_REL} \
-                                         -f ${LFS_CI_ROOT}/etc/file.cfg > releasenote.xml
-    mustBeSuccessfull "$?" "getReleaseNoteXML"
+    execute -n ${LFS_CI_ROOT}/bin/getReleaseNoteXML -t ${LFS_PROD_RELEASE_CURRENT_TAG_NAME_REL}  \
+                                                    -o ${LFS_PROD_RELEASE_PREVIOUS_TAG_NAME_REL} \
+                                                    -f ${LFS_CI_ROOT}/etc/file.cfg > releasenote.xml
     rawDebug ${workspace}/releasenote.xml
     unset type
     export type
@@ -584,9 +453,7 @@ createTagOnSourceRepository() {
         info "using tag dir ${tagDirectory} for cfg ${cfg}"
         unset cfg ; export cfg
 
-
-        sort -u ${revisionFile} ${workspace}/rev/${tagDirectory} > ${workspace}/rev/${tagDirectory}
-        mustBeSuccessfull "$?" "sort -u"
+        execute -n sort -u ${revisionFile} ${workspace}/rev/${tagDirectory} > ${workspace}/rev/${tagDirectory}
 
         rawDebug ${workspace}/rev/${tagDirectory}
     done
@@ -604,7 +471,7 @@ createTagOnSourceRepository() {
     fi
 
     mustExistBranchInSubversion ${svnUrlOs}/branches ${branch}
-    mustExistBranchInSubversion ${svnUrlOs}/tags ${branch}
+    # mustExistBranchInSubversion ${svnUrlOs}/tags ${branch}
 
     for revisionFile in ${workspace}/rev/* ; do
         [[ -e ${revisionFile} ]] || continue
@@ -627,9 +494,9 @@ createTagOnSourceRepository() {
             local normalizedUrl=$(normalizeSvnUrl ${url})
 
             case ${src} in 
-                src-*) : ;;
-                *) dirname=$(dirname ${src})
-                   mustExistBranchInSubversion ${svnUrlOs}/branches/${branch}/${target} ${dirname}
+                src-*) dirname=${src} ;;
+                *)     dirname=$(dirname ${src})
+                       mustExistBranchInSubversion ${svnUrlOs}/branches/${branch}/${target} ${dirname}
                 ;;
             esac
 
@@ -640,7 +507,7 @@ createTagOnSourceRepository() {
 
             case ${src} in
                 src-*)
-                    svnCopy -m tag_for_package_src_${src} ${svnUrlOs}/branches/${branch} \
+                    svnCopy -m tag_for_package_src_${src} ${svnUrlOs}/branches/${branch}/${target}/${src} \
                         ${svnUrl}/subsystems/${src}/${tagPrefix}${osLabelName}
                     trace "CLEANUP svn rm -m cleanup ${svnUrl}/subsystems/${src}/${tagPrefix}${osLabelName}"
                 ;;
@@ -687,6 +554,7 @@ createReleaseTag() {
 
     local canCreateReleaseTag=$(getConfig LFS_CI_uc_release_can_create_release_tag)
 
+
     # get os label
     # no mustHaveNextLabelName, because it's already calculated
     local osLabelName=${LFS_PROD_RELEASE_CURRENT_TAG_NAME}
@@ -700,6 +568,7 @@ createReleaseTag() {
     export tagName=${osLabelName}
     local svnUrl=$(getConfig LFS_PROD_svn_delivery_release_repos_url)
     local svnRepoName=$(getConfig LFS_PROD_svn_delivery_repos_name)
+    local svnCommitMessagePrefix=$(getConfig LFS_PROD_uc_release_svn_message_prefix)
     unset tagName
 
     local branch=$(getBranchName)
@@ -711,9 +580,11 @@ createReleaseTag() {
 
     local sdk2=$(getConfig sdk2 ${componentsFile})
     local sdk3=$(getConfig sdk3 ${componentsFile})
+    local sdk=$(getConfig sdk ${componentsFile})
 
     info "using sdk2 ${sdk2}"
     info "using sdk3 ${sdk3}"
+    info "using sdk  ${sdk}"
     info "using lfs os ${osLabelName}"
     info "using lfs rel ${osReleaseLabelName}"
 
@@ -725,7 +596,7 @@ createReleaseTag() {
 
     if ! existsInSubversion ${svnUrl}/branches ${branch} ; then
         local logMessage=$(createTempFile)
-        echo "BTSPS-1657 IN rh: DESRIPTION: NOJCHK creating a new branch ${branch}" > ${logMessage}
+        echo "${svnCommitMessagePrefix} : creating a new branch ${branch}" > ${logMessage}
         svnMkdir -F ${logMessage} ${svnUrl}/branches/${branch} 
     fi
 
@@ -736,11 +607,14 @@ createReleaseTag() {
 
     if [[ ${sdk3} ]] ; then 
         echo "/isource/svnroot/BTS_D_SC_LFS_SDK_1/sdk/tags/${sdk3} sdk3" >> ${svnExternalsFile}
+    elif [[ ${sdk} ]] ; then
+        echo "/isource/svnroot/BTS_D_SC_LFS_SDK_1/sdk/tags/${sdk} sdk3" >> ${svnExternalsFile}
     fi
 
-#    if [[ ${sdk2} ]] ; then 
-#        echo "/isource/svnroot/BTS_D_SC_LFS/sdk/tags/${sdk2} sdk2" >> ${svnExternalsFile}
-#    fi
+    # TODO: demx2fk3 2014-09-04 only required for very old stuff...
+    # if [[ ${sdk2} ]] ; then 
+    #     echo "/isource/svnroot/BTS_D_SC_LFS/sdk/tags/${sdk2} sdk2" >> ${svnExternalsFile}
+    # fi
 
     # commit
     info "updating svn:externals"
@@ -749,14 +623,14 @@ createReleaseTag() {
     cd ${workspace}/svn
     svnPropSet svn:externals -F ${svnExternalsFile} .
     local logMessage=$(createTempFile)
-    echo "BTSPS-1657 IN rh: DESRIPTION: NOJCHK : updating svn:externals for ${osReleaseLabelName}" > ${logMessage}
+    echo "${svnCommitMessagePrefix} : updating svn:externals for ${osReleaseLabelName}" > ${logMessage}
     svnCommit -F ${logMessage} .
 
     # make a tag
     info "create tag ${osReleaseLabelName}"
     if [[ ${canCreateReleaseTag} ]] ; then
         local logMessage=$(createTempFile)
-        echo "BTSPS-1657 IN rh: DESRIPTION: NOJCHK : create new tag ${osReleaseLabelName}" > ${logMessage}
+        echo "${svnCommitMessagePrefix} : create new tag ${osReleaseLabelName}" > ${logMessage}
         svnCopy -F ${logMessage} ${svnUrl}/branches/${branch} ${svnUrl}/tags/${osReleaseLabelName}
     else
         warning "creating the release tag is disabled in config"
@@ -800,7 +674,13 @@ createProxyReleaseTag() {
     local reposName=$(getConfig LFS_PROD_svn_delivery_repos_name)
     local proxySvnUrl=$(getConfig LFS_PROD_svn_delivery_proxy_repos_url)
     local deliverySvnUrl=$(getConfig LFS_PROD_svn_delivery_release_repos_url)
-    local branchName=proxyBranchForCreateTag
+    local svnCommitMessagePrefix=$(getConfig LFS_PROD_uc_release_svn_message_prefix)
+
+    # TODO: demx2fk3 2014-07-11 replace this with getConfig
+    local branch=${locationToSubversionMap["${productName}_${location}"]}
+    mustHaveValue "${branch}" "branch name"
+
+    local branchName=${branch}_proxyBranchForCreateTag
     local canCreateProxyTag=$(getConfig LFS_CI_uc_release_can_create_proxy_tag)
     local externals=$(createTempFile)
     local logMessage=$(createTempFile)
@@ -817,21 +697,20 @@ createProxyReleaseTag() {
     mustExistBranchInSubversion ${proxySvnUrl} tags 
     mustExistBranchInSubversion ${proxySvnUrl}/branches ${branchName}
 
-    svn pg svn:externals ${deliverySvnUrl}/tags/${relTagName} > ${externals}
-    mustBeSuccessfull "$?" "svn pg svn:externals command"
+    execute -n svn pg svn:externals ${deliverySvnUrl}/tags/${relTagName} > ${externals}
     rawDebug ${externals}
 
     svnCheckout --ignore-externals ${proxySvnUrl}/branches/${branchName} ${workspace}/proxyTag
     svnPropSet svn:externals -F ${externals} ${workspace}/proxyTag
 
-    echo "upBTSPS-1657 IN rh: DESRIPTION: NOJCHK : updating svn:externals using extnerals from ${deliverySvnUrl}/tags/${relTagName}" > ${logMessage}
+    echo "${svnCommitMessagePrefix} : updating svn:externals using extnerals from ${deliverySvnUrl}/tags/${relTagName}" > ${logMessage}
     svnCommit -F ${logMessage} ${workspace}/proxyTag
 
     # TODO: demx2fk3 2014-08-08 add a check for svn:externals
     sleep 60
 
     if [[ ${canCreateProxyTag} ]] ; then
-        echo "BTSPS-1657 IN rh: DESRIPTION: NOJCHK : creating new proxy tag ${tagName}" > ${logMessage}
+        echo "${svnCommitMessagePrefix} : creating new proxy tag ${tagName}" > ${logMessage}
         svnCopy -F ${logMessage} ${proxySvnUrl}/branches/${branchName} ${proxySvnUrl}/tags/${relTagName}
     else
         warning "creating a proxy tag is disabled in config"
@@ -856,11 +735,12 @@ updateDependencyFiles() {
     mustHaveWorkspaceWithArtefactsFromUpstreamProjects ${jobName} ${buildNumber} "externalComponents"
 
     local componentsFile=$(createTempFile)
-    sort -u ${workspace}/bld/bld-externalComponents-*/usedRevisions.txt > ${componentsFile}
+    execute -n sort -u ${workspace}/bld/bld-externalComponents-*/usedRevisions.txt > ${componentsFile}
 
     local releaseLabelName=${LFS_PROD_RELEASE_CURRENT_TAG_NAME}
     local oldReleaseLabelName=${LFS_PROD_RELEASE_PREVIOUS_TAG_NAME}
     local canCommitDependencies=$(getConfig LFS_CI_uc_release_can_commit_depencencies)
+    local svnCommitMessagePrefix=$(getConfig LFS_PROD_uc_release_svn_message_prefix)
 
     info "using values: old value: ${oldReleaseLabelName} new value: ${releaseLabelName}"
     while read name url rev ; do
@@ -889,7 +769,7 @@ updateDependencyFiles() {
         if [[ ${canCommitDependencies} ]] ; then 
             info "running svn commit"
             local logMessage=$(createTempFile)
-            echo "BTSPS-1657 IN psulm: DESCRIPTION: set Dependencies for Release ${releaseLabelName} r${rev} NOJCHK"  > ${logMessage}
+            echo "${svnCommitMessagePrefix} : set Dependencies for Release ${releaseLabelName} r${rev} NOJCHK"  > ${logMessage}
             svnCommit -F ${logMessage} ${dependenciesFile}
         else
             warning "committing of dependencies is disabled in config"
@@ -899,6 +779,20 @@ updateDependencyFiles() {
     done < ${componentsFile}
 
     info "update done."
+
+    return
+}
+
+## @fn      appproveReleaseForPsScm( $tagName )
+#  @brief   approves the release for Platform Services SCM team
+#  @param   {tagName}    name of the release
+#  @return  <none>
+appproveReleaseForPsScm() {
+    local tagName=$1
+
+    # TODO: demx2fk3 2014-08-19 fixme - make this in a nicer way
+    info "creating approval file on moritz for ${tagName}"
+    execute ssh moritz touch /lvol2/production_jenkins/tmp/approved/${tagName}
 
     return
 }

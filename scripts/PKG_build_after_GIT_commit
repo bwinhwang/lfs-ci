@@ -11,6 +11,15 @@ test "$SVNTAGDIR" = NONE && SVNTAGDIR=
 
 set -eu
 
+local RELEASEPREFIX=$(getConfig LFS_PROD_uc_pkgpool_release_prefix)
+mustHaveValue "${RELEASEPREFIX}" "release prefix"
+
+local SVNTAGDIR=$(getConfig LFS_PROD_uc_pkgpool_svn_tag_directories)
+mustHaveValue "${SVNTAGDIR}" "svn tag diretories"
+
+requiredParameters WORKSPACE
+
+
 cd $WORKSPACE
 rm -rf bld
 mkdir bld
@@ -26,7 +35,8 @@ if test -z "$RELSTR"; then
     exit 1
 fi
 touch /build/home/SC_LFS/pkgpool/.hashpool
-java -jar "$JENKINS_ROOT/jenkins-cli.jar" set-build-description "$JOB_NAME" "$BUILD_NUMBER" "$RELSTR"
+
+setBuildDescription "${JOB_NAME}" "${BUILD_NUMBER}" "${RELSTR}"
 
 cd ../src
 

@@ -34,8 +34,8 @@ exit_handler() {
 	exit ${rc:-3}
 } 
 
-trap "exit_handler 'normal exit $?'   0 0" EXIT
-trap "exit_handler 'error occured' 1 1" ERR
-trap "exit_handler 'terminated'    1 2" SIGTERM
-trap "exit_handler 'interrupted'   1 3" SIGINT
+trap "exit_handler 'normal exit $?' 0 0" EXIT
+trap "exit_handler 'error occured'  1 1" ERR
+trap "exit_handler 'terminated'     1 2" SIGTERM
+trap "exit_handler 'interrupted'    1 3" SIGINT
 

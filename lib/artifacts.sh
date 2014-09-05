@@ -35,27 +35,11 @@ createArtifactArchive() {
     done
 
     local artifactsPathOnShare=$(getConfig artifactesShare)/${JOB_NAME}/${BUILD_NUMBER}
-    createSymlinksToArtifactsOnShare ${artifactsPathOnShare}
+    linkFileToArtifactsDirectory ${artifactsPathOnShare}
 
     return 
 }
 
-copyFileToArtifactDirectory() {
-    requiredParameters JOB_NAME BUILD_NUMBER
-    local fileName=$1
-
-    local serverName=$(getConfig linseeUlmServer)
-    local artifactsPathOnShare=$(getConfig artifactesShare)/${JOB_NAME}/${BUILD_NUMBER}
-    executeOnMaster mkdir -p ${artifactsPathOnShare}/save
-    # TODO: demx2fk3 2014-08-07 FIXME - this must be run on master
-    # mustExistDirectory ${artifactsPathOnShare}
-
-    execute rsync --archive --verbose --rsh=ssh -P  \
-        ${fileName}                                 \
-        ${serverName}:${artifactsPathOnShare}/save
-
-    return
-}
 
 ## @fn      mustHaveBuildArtifactsFromUpstream()
 #  @brief   ensure, that the job has the artifacts from the upstream projekt, if exists
@@ -186,18 +170,53 @@ copyArtifactsToWorkspace() {
     return
 }
 
-createSymlinksToArtifactsOnShare() {
+## @fn      copyFileToArtifactDirectory( $fileName )
+#  @brief   copy a file to the artifacts directory of the current build
+#  @param   {fileName}    path and name of the file
+#  @detail  see also linkFileToArtifactsDirectory
+#  @return  <none>
+copyFileToArtifactDirectory() {
     requiredParameters JOB_NAME BUILD_NUMBER
+    local fileName=$1
 
-    local artifactsDirectoryOnShare=$1
-    # TODO: demx2fk3 2014-08-07 fixme should run on master
-    # mustExistDirectory ${artifactsDirectoryOnShare}
+    local serverName=$(getConfig linseeUlmServer)
+    local artifactsPathOnShare=$(getConfig artifactesShare)/${JOB_NAME}/${BUILD_NUMBER}
+    executeOnMaster mkdir -p ${artifactsPathOnShare}/save
+
+    execute rsync --archive --verbose --rsh=ssh -P  \
+        ${fileName}                                 \
+        ${serverName}:${artifactsPathOnShare}/save
+
+    return
+}
+
+## @fn      linkFileToArtifactsDirectory( $fileName )
+#  @brief   create a symlkink from the given name to the artifacts folder on the master.
+#  @warning the given fileName must be accessable via nfs from the master. otherwise, the
+#           link will not work in jenkins
+#  @param   {fileName}    name of the file
+#  @param   {linkName}    name of the link (can be empty)
+#  @return  <none>
+linkFileToArtifactsDirectory() {
+    local linkSource=$1
+    local linkDestination=$2
 
     info "create link to artifacts"
     local artifactesShare=$(getConfig artifactesShare)
     local artifactsPathOnMaster=$(getBuildDirectoryOnMaster)/archive
-    executeOnMaster mkdir -p  ${artifactsDirectoryOnShare}/save
-    executeOnMaster ln    -sf ${artifactsDirectoryOnShare} ${artifactsPathOnMaster}
+    executeOnMaster mkdir -p  ${artifactsPathOnMaster}
+    executeOnMaster ln    -sf ${linkSource} ${artifactsPathOnMaster}
 
     return
 }
+
+## @fn      archiveLogfile()
+#  @brief   add a link to the artifacts archive for the current logfile
+#  @param   <none>
+#  @return  <none>
+archiveLogfile() {
+    [[ -f ${CI_LOGGING_LOGFILENAME} ]] || return
+    linkFileToArtifactsDirectory ${CI_LOGGING_LOGFILENAME}.gz logfile.txt.gz
+    return
+}
+

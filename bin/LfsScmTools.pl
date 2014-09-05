@@ -1118,7 +1118,7 @@ SOURCES:
         next if not $source;
 
         my @deps = map  { $_->{directory} }
-                   grep { $_->{sourceExistsInFileSystem} }
+                   # grep { $_->{sourceExistsInFileSystem} }
                    $source->getDependencies();
 
         foreach my $dep ( sort @deps ) {
@@ -1142,7 +1142,6 @@ SOURCES:
 
         if( $self->{style} eq "makefile" ) {
 
-
             # print label information for different components
             my $label = $self->{label};
             if( grep { $_ eq $source->{directory} } qw ( src-bos src-fsmbos src-fsmbos35 src-mbrm src-fsmbrm src-fsmbrm35 ) ) {
@@ -1155,6 +1154,7 @@ SOURCES:
             printf "%s: LABEL := %s\n\n", $source->{directory}, $label;
 
             if( grep { $_ eq $goal } $source->platforms() ) {
+                printf ".PHONY: %s\n\n", $source->{directory};
                 printf "%s: ", $source->{directory};
                 foreach my $platform ( sort grep { $_ eq $goal } $source->platforms() ) {
                     printf "%s-%s ", $source->{directory}, $platform;
@@ -1165,7 +1165,9 @@ SOURCES:
             foreach my $target ( sort $source->targets() ) {
                 my $platform = $target->platform();
                 foreach my $p ( $target->targetsParameter() ) {
-                    printf "%s-%s: %s-%s\n\n", $source->{directory}, $p, $source->{directory}, $platform;
+                    if( $p ne $platform ) {
+                        printf "%s-%s: %s-%s\n\n", $source->{directory}, $p, $source->{directory}, $platform;
+                    }
 
                 }
                 printf "%s-%s: %s\n", $source->{directory}, $platform, join( " ", @filteredDeps );
@@ -1514,30 +1516,39 @@ sub prepare {
             # skip this type of comments.
             next;
         }
+        my @newMessage;
+        foreach my $line ( split( /[\n\r]+/, $msg ) ) {
 
-        # cleanup the message a little bit
-        $msg =~ s/^[\%\#]FIN  *[\%\#](\w+)=(\S+)\s*(.*)/$1 $2 $3 (completed)/;
-        $msg =~ s/^[\%\#]TBC  *[\%\#](\w+)=(\S+)\s*(.*)/$1 $2 $3 (to be continued)/;
-        $msg =~ s/^[\%\#]TPC  *[\%\#](\w+)=(\S+)\s*(.*)/$1 $2 $3 (work in progress)/;
-        $msg =~ s/[\%\#]REM /Remark: /;
-        $msg =~ s/\s*commit [0-9a-f]+\s*//g;
-        $msg =~ s/\s*Author: .*[@].+//g;
-        $msg =~ s/\s*Date: .* [0-9]+:[0-9]+:[0-9]+ .*//g;
-        $msg =~ s/\n/\\n/g;
-        $msg =~ s/\s+/ /g;
-        $msg =~ s/^\s+//;
-        $msg =~ s/\s+$//;
-        $msg =~ s/\(ros\)/ /;
-        $msg =~ s/\s*NOJCHK\s*//;
-        $msg =~ s/\bDESCRIPTION:\s*/ /;
-        $msg =~ s/\bREADINESS\s*:\s*COMPLETED\s*/ /;
-        $msg =~ s/^BTSPS-\d+\s+IN[^:]+:\s*//;
-        $msg =~ s/^BTSPS-\d+\s+IN\s*//;
-        $msg =~ s/  */ /g;
-        $msg =~ s/^fk\s*:\s*//;
-        $msg =~ s/\\n/\n/g;
-        $msg =~ s/^\s+//;
-        $msg =~ s/\s+$//;
+            # cleanup the message a little bit
+            $line =~ s/[\%\#]FIN  *[\%\#](\w+)=(\S+)\s*(.*)/$1 $2 $3 (completed)/g;
+            $line =~ s/[\%\#]TBC  *[\%\#](\w+)=(\S+)\s*(.*)/$1 $2 $3 (to be continued)/g;
+            $line =~ s/[\%\#]TPC  *[\%\#](\w+)=(\S+)\s*(.*)/$1 $2 $3 (work in progress)/g;
+            $line =~ s/[\%\#]REM /Remark: /g;
+            $line =~ s/[\%[#]RB=\d+//g;
+            $line =~ s/\s*commit [0-9a-f]+\s*//g;
+            $line =~ s/\s*Author: .*[@].+//g;
+            $line =~ s/\s*Date: .* [0-9]+:[0-9]+:[0-9]+ .*//g;
+            $line =~ s/\n/\\n/g;
+            $line =~ s/\s+/ /g;
+            $line =~ s/^\s+//;
+            $line =~ s/\s+$//;
+            $line =~ s/\(ros\)/ /;
+            $line =~ s/\s*NOJCHK\s*//;
+            $line =~ s/\bDESCRIPTION:\s*/ /;
+            $line =~ s/\bREADINESS\s*:\s*COMPLETED\s*/ /;
+            $line =~ s/^BTSPS-\d+\s+IN[^:]+:\s*//;
+            $line =~ s/^BTSPS-\d+\s+IN\s*//;
+            $line =~ s/  */ /g;
+            $line =~ s/^fk\s*:\s*//;
+            $line =~ s/\\n/\n/g;
+            $line =~ s/^\s+//;
+            $line =~ s/\s+$//;
+            next if $line =~ m/^\s*$/;
+
+            push @newMessage, $line;
+        }
+
+        $msg = join( "\n", @newMessage );
 
         my @pathes = map { $_->{content} }
                     @{ $entry->{paths}->[0]->{path} };

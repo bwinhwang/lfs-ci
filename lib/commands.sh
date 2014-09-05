@@ -14,20 +14,35 @@ LFS_CI_SOURCE_commands='$Id$'
 #  @return  <none>
 #  @throws  raise an error, if the command exits with an exit code != 0
 execute() {
+    local opt=$1
+    local noRedirect=
+    if [[ ${opt} = "-n" ]] ; then
+        # we found an -n as the first parameter, so the user
+        # want to redirect the stuff by himself.
+        trace "user requested own redirection via -n"
+        shift
+        noRedirect=1
+    fi
+ 
     local command=$@
-    local output=$(createTempFile)
-
     trace "execute command: \"${command}\""
 
-    ${command} >${output} 2>&1
+    if [[ ${noRedirect} ]] ; then
+        # in case that the user forgot to redirect stderr to stdout, we are doing it for him...
+        # this is called real service!!
+        ${command} 2>&1 
+        exitCode=$?
+    else
+        local output=$(createTempFile)
+        ${command} >${output} 2>&1
+        exitCode=$?
+        rawDebug ${output}
+    fi
 
-    exitCode=$?
     trace "exit code of \"${command}\" was ${exitCode}"
 
-    rawDebug ${output}
-
     if [[ ${exitCode} -gt 0 ]] ; then
-        rawOutput ${output}
+        [[ -e ${output} ]] && rawOutput ${output}
         error "error occoured in \"${command}\""
         exit ${exitCode}
     fi

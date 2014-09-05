@@ -164,7 +164,7 @@ _build() {
     createRebuildScript_svnLinks ${target}
 
     info "creating temporary makefile"
-    ${LFS_CI_ROOT}/bin/sortBuildsFromDependencies ${target} makefile ${label} > ${cfgFile}
+    execute -n ${LFS_CI_ROOT}/bin/sortBuildsFromDependencies ${target} makefile ${label} > ${cfgFile}
     rawDebug ${cfgFile}
 
     local makeTarget=$(build -C src-project final-build-target_${productName}_${subTaskName})
@@ -468,7 +468,9 @@ createRebuildScript_bldLinks() {
     echo "# script was automatically created by jenkins job ${JOB_NAME} / ${BUILD_NUMBER}" >> ${script}
     echo "# for details ask PS LFS SCM"                                                    >> ${script}
     echo                                                                                   >> ${script}
-    echo "set -eau"                                                                        >> ${script}
+    echo "set -o errexit"                                                                  >> ${script}
+    echo "set -o allexport"                                                                >> ${script}
+    echo "set -o nounset"                                                                  >> ${script}
     echo "mkdir workdir-${tagName}"                                                        >> ${script}
     echo "cd workdir-${tagName}"                                                           >> ${script}
     echo "mkdir -p bld bldtools locations .build_workdir"                                  >> ${script}

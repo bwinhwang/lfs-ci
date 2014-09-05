@@ -68,8 +68,7 @@ synchronizeShare() {
 
     info "synchronize ${localPath} to ${remoteServer}:${remotePath}"
     local pathToSyncFile=$(createTempFile)
-    ${LFS_CI_ROOT}/bin/xpath -q -e '/log/logentry/paths/path/node()' ${WORKSPACE}/changelog.xml  > ${pathToSyncFile}
-    mustBeSuccessfull "$?" "xpath changelog.xml"
+    execute -n ${LFS_CI_ROOT}/bin/xpath -q -e '/log/logentry/paths/path/node()' ${WORKSPACE}/changelog.xml > ${pathToSyncFile}
 
     if [[ -f ${pathToSyncFile} && ! -s ${pathToSyncFile} ]] ; then
         warning "nothing to sync"
@@ -79,8 +78,7 @@ synchronizeShare() {
     local buildDescription=$(perl -p -e 's:.*/::g' ${pathToSyncFile} | sort -u)
     setBuildDescription "${JOB_NAME}" "${BUILD_NUMBER}" "${buildDescription:-no change}"
 
-    ssh ${remoteServer} "${find} ${remotePath} -maxdepth $(( findDepth - 1 )) -exec chmod u+w {} \; " 
-    mustBeSuccessfull $? "ssh chmod command"
+    execute ssh ${remoteServer} "${find} ${remotePath} -maxdepth $(( findDepth - 1 )) -exec chmod u+w {} \; " 
 
     for entry in $(cat ${pathToSyncFile})
     do
@@ -111,8 +109,9 @@ genericShareCleanup() {
 
     # we are handeling "old" pathes first:
     local tmpFile=$(createTempFile)
-    ${LFS_CI_ROOT}/bin/xpath -q -e '/log/logentry/paths/path[@action="D"]/node()' ${WORKSPACE}/changelog.xml \
-        > ${tmpFile}
+    execute -n ${LFS_CI_ROOT}/bin/xpath -q                \
+        -e '/log/logentry/paths/path[@action="D"]/node()' \
+        ${WORKSPACE}/changelog.xml > ${tmpFile}
 
     setBuildDescription ${JOB_NAME} ${BUILD_NUMBER} "triggered by ${UPSTREAM_PROJECT}/${UPSTREAM_BUILD}"
 
@@ -143,9 +142,9 @@ genericShareCleanup() {
 
     # next: modified and added stuff
     # TODO: demx2fk3 2014-08-07 disabled, we dont want to put stuff to the remote site
-#     ${LFS_CI_ROOT}/bin/xpath -q -e '/log/logentry/paths/path[@action="A"]/node()' ${WORKSPACE}/changelog.xml \
+#     execute -n ${LFS_CI_ROOT}/bin/xpath -q -e '/log/logentry/paths/path[@action="A"]/node()' ${WORKSPACE}/changelog.xml \
 #         > ${tmpFile}
-#     ${LFS_CI_ROOT}/bin/xpath -q -e '/log/logentry/paths/path[@action="M"]/node()' ${WORKSPACE}/changelog.xml \
+#     execute -n ${LFS_CI_ROOT}/bin/xpath -q -e '/log/logentry/paths/path[@action="M"]/node()' ${WORKSPACE}/changelog.xml \
 #         >> ${tmpFile}
 # 
 #     for entry in $(cat ${tmpFile}) ; do
@@ -219,9 +218,9 @@ backupJenkinsMasterServerInstallation() {
     mustHaveValue ${backupPath}
     mustHaveValue ${serverPath}
 
-    execute rm -rf ${backupPath}/backup.112
+    execute rm -rf ${backupPath}/backup.11
 
-    for i in $(seq 0 111 | tac) ; do
+    for i in $(seq 0 10 | tac) ; do
         [[ -d ${backupPath}/backup.${i} ]] || continue
         old=$(( i + 1 ))
         execute mv -f ${backupPath}/backup.${i} ${backupPath}/backup.${old}
