@@ -588,10 +588,18 @@ sub info {
     my $self  = shift;
     my $param = { @_ } ;
     my $url   = replaceMasterByUlmServer( $param->{url} || "" );
+    my $xml   = "";
+    my $count = 0;
 
-    open SVN_INFO, sprintf( "%s --xml info %s|", $self->{svnCli}, $url ) || die "can not open svn info: %!";
-    my $xml = join( "", <SVN_INFO> );
-    close SVN_INFO;
+    while ( $xml eq "" || $count < 4 ) {
+        open SVN_INFO, sprintf( "%s --xml info %s|", $self->{svnCli}, $url ) || die "can not open svn info: %!";
+        $xml = join( "", <SVN_INFO> );
+        close SVN_INFO;
+        $count++;
+    }
+    if( $xml eq "" ) {
+        die "svn info --xml failed";
+    }
 
     return XMLin( $xml );
 }

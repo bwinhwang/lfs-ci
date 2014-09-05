@@ -95,7 +95,7 @@ _createRevisionsTxtFile() {
     ${LFS_CI_ROOT}/bin/getRevisionTxtFromDependencies -u ${dependenciesFileUrl} \
                                                       -f ${dependenciesFile} | sort -u > ${newRevisionsFile} 
     if [[ $? != 0 ]] ; then
-        error "reported an error..."
+        error "getRevisionTxtFromDependencies failed to generate ${newRevisionsFile}"
         exit 1
     fi
 
@@ -164,7 +164,7 @@ actionCheckout() {
 
             oldRev=$(( oldRev + 1))
             debug "get svn changelog ${subSystem} ${oldRev}:${newRev} ${newUrl}"
-            svn log -g -v --xml -r${oldRev}:${newRev} ${newUrl} > ${tmpChangeLogFile}
+            svn log -v --xml -r${oldRev}:${newRev} ${newUrl} > ${tmpChangeLogFile}
             mustBeSuccessfull "$?" "svn log -v --xml -r${oldRev}:${newRev} ${newUrl}"
 
             rawDebug ${tmpChangeLogFile}
@@ -204,7 +204,6 @@ actionCheckout() {
 
 ## @fn      actionCalculate()
 #  @brief   action ...
-#  @details 
 #  @param   <none>
 #  @return  <none>
 actionCalculate() {

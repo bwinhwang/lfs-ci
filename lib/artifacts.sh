@@ -219,4 +219,3 @@ archiveLogfile() {
     linkFileToArtifactsDirectory ${CI_LOGGING_LOGFILENAME}.gz logfile.txt.gz
     return
 }
-

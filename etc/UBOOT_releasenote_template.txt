@@ -2,7 +2,7 @@ Dear Colleagues,
 
 PS LFS UBOOT Release __TAGNAME__ is available in Subversion
 
-__DELIVERY_REPOS__/tags/__TAGNAME__
+__DELIVERY_REPOS__/os/tags/__TAGNAME__
 
 __RELEASE_NOTE_CONTENT__
 

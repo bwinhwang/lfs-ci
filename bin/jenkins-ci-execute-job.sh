@@ -24,6 +24,7 @@ fi
 # start the logfile
 initTempDirectory
 startLogfile
+# archiveLogfile
 # and end it, if the script exited in some way
 exit_add stopLogfile
 
