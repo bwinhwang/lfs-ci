@@ -7,4 +7,4 @@
 /PS_LFS_OS_2014_08_0025/d
 /FB_PS_LFS_REL_2013_12_06/d
 /PS_LFS_OS_2013_07_05-ci3/d
-/LBT130709-ci1/d
+/.*Release.*/d
