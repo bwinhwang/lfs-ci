@@ -42,7 +42,9 @@ actionCompare() {
     local oldRevisionsFile=${REVISION_STATE_FILE}
 
     local newRevisionsFile=$(createTempFile)
+    execute rm -rf ${WORKSPACE}/revision_state.txt
     _createRevisionsTxtFile ${newRevisionsFile}
+    execute cp ${newRevisionsFile} ${WORKSPACE}/revision_state.txt
 
     debug "old revision state file"
     rawDebug ${oldRevisionsFile}
@@ -79,6 +81,12 @@ _createRevisionsTxtFile() {
     
     locationName=$(getLocationName)
     mustHaveLocationName
+
+    if [[ -f ${WORKSPACE}/revision_state.txt ]] ; then
+        info "using ${WORKSPACE}/revision_state.txt from compare"
+        # cat ${WORKSPACE}/revision_state.txt > ${newRevisionsFile}
+        # return
+    fi
 
     local srcRepos=$(getConfig lfsSourceRepos)
 

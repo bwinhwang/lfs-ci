@@ -588,7 +588,7 @@ sub propget {
 sub info {
     my $self  = shift;
     my $param = { @_ } ;
-    my $url   = $param->{url} || "";
+    my $url   = replaceMasterByUlmServer( $param->{url} || "" );
     my $xml   = "";
     my $count = 0;
 

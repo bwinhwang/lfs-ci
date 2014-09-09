@@ -129,7 +129,14 @@ actionCheckout() {
         execute sed -i -f ${LFS_CI_ROOT}/etc/baselineExclutionList.sed ${tmpFileA}
     fi
 
+    debug "tmpFile A"
+    rawDebug ${tmpFileA}
+    debug "tmpFile B"
+    rawDebug ${tmpFileB}
     ${LFS_CI_ROOT}/bin/diffToChangelog.pl -d -a ${tmpFileA} -b ${tmpFileB} > ${CHANGELOG}
+
+    debug "changelog"
+    rawDebug ${CHANGELOG}
 
     # Fix empty changelogs:
     if [ ! -s "${CHANGELOG}" ] ; then
@@ -166,10 +173,15 @@ _ciLfsNotReleasedBuilds() {
     sort -u ${tmpFile} > ${tmpFileA}
     find ${directoryToCleanup} -mindepth 2 -maxdepth 2 -mtime +7 -type d -printf "%p\n" | sort -u > ${tmpFileB}
 
-#        |  egrep -e 'PS_LFS_OS_[0-9]{4}_[0-9]{2}_[0-9]{4}' \
-    # release candidates, which are older than 60 days and are not released
+    debug "list from find"
+    rawDebug ${tmpFileB}
+    debug "list from rcVersions"
+    rawDebug ${tmpFileA}
+
     grep -v -f ${tmpFileA} ${tmpFileB} | sed "s/^/1 /g"    \
         > ${resultFile}
+
+    rawDebug ${resultFile}
 
     return
 }
