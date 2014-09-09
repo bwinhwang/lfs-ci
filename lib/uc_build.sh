@@ -161,14 +161,14 @@ _build() {
     execute cd ${workspace}
     storeExternalComponentBaselines
     storeRevisions ${target}
-    createRebuildScript_svnLinks ${target}
+    createRebuildScript ${target}
 
     info "creating temporary makefile"
     execute -n ${LFS_CI_ROOT}/bin/sortBuildsFromDependencies ${target} makefile ${label} > ${cfgFile}
     rawDebug ${cfgFile}
 
     local makeTarget=$(build -C src-project final-build-target_${productName}_${subTaskName})
-    # -${target}
+    mustHaveValue "${makeTarget}" "make target name from src-project/Buildfile"
     info "executing all targets in parallel with ${makeTarget} and label=${label}"
     execute make -f ${cfgFile} ${makeTarget} JOBS=32
 
@@ -275,8 +275,6 @@ _createWorkspace() {
         checkoutSubprojectDirectories "${src}" "${revision}"
 
     done 
-
-    createRebuildScript_bldLinks ${target}
 
     mustHaveLocalSdks
     mustHaveBuildArtifactsFromUpstream
@@ -441,6 +439,7 @@ storeExternalComponentBaselines() {
         local baselineLink=$(readlink ${workspace}/bld/${component})
         local baseline=$(basename ${baselineLink})
 
+        # TODO: demx2fk3 2014-09-08 if you are change the format, please change also createRebuildScript 
         trace "component ${component} exists with link to ${baselineLink} and ${baseline}"
         printf "%s <> = %s\n" "${component}" "${baseline:-undef}" >> ${externalComponentFile}
     done
@@ -450,47 +449,11 @@ storeExternalComponentBaselines() {
     return
 }
 
-createRebuildScript_bldLinks() {
-
-    return 
-    local workspace=$(getWorkspaceName)
-    mustHaveWorkspaceName
-    info "create script for rebuilding"
-
-    local targetName=$(sed "s/-//g" <<< ${1})
-    mustHaveValue "${targetName}" "target name"
-
-    local script=${workspace}/bld/bld-externalComponents-${targetName}/workdir.sh
-    execute mkdir -p $(dirname ${script})
-    execute rm -f ${script}
-
-    echo "#!/bin/bash"                                                                     >> ${script}
-    echo "# script was automatically created by jenkins job ${JOB_NAME} / ${BUILD_NUMBER}" >> ${script}
-    echo "# for details ask PS LFS SCM"                                                    >> ${script}
-    echo                                                                                   >> ${script}
-    echo "set -o errexit"                                                                  >> ${script}
-    echo "set -o allexport"                                                                >> ${script}
-    echo "set -o nounset"                                                                  >> ${script}
-    echo "mkdir workdir-${tagName}"                                                        >> ${script}
-    echo "cd workdir-${tagName}"                                                           >> ${script}
-    echo "mkdir -p bld bldtools locations .build_workdir"                                  >> ${script}
-    for bld in $(find ${workspace}/bld/ -maxdepth 1 -type l) ; do
-        [[ -e ${bld} ]] || continue
-        [[ ! -d ${bld} ]] || continue
-
-        local realPath=$(readlink ${bld})
-        local linkName=$(basename ${bld})
-        echo "ln -sf ${realPath} bld/${linkName}"                                          >> ${script}
-    done
-
-    echo                                                                                   >> ${script}
-    return 
-}
-
-createRebuildScript_svnLinks() {
-
-    return 
-
+## @fn      createRebuildScript()
+#  @brief   create the rebuild script workdir.sh for a specific target
+#  @param   {targetName}    name of the target
+#  @return  <none>
+createRebuildScript() {
     local workspace=$(getWorkspaceName)
     mustHaveWorkspaceName
     info "adding svn commands to rebuilding script"
@@ -498,19 +461,52 @@ createRebuildScript_svnLinks() {
     local targetName=$(sed "s/-//g" <<< ${1})
     mustHaveValue "${targetName}" "target name"
 
-    local script=${workspace}/bld/bld-externalComponents-${targetName}/workdir.sh
-    mustExistFile ${script}
+    local script=${workspace}/bld/bld-externalComponents-${targetName}/workdir_${targetName}.sh
+    mustExistFile ${workspace}/bld/bld-externalComponents-summary/externalComponents
+    mustExistFile ${workspace}/bld/bld-externalComponents-${targetName}/usedRevisions.txt
 
-    while read src url rev ; do
-        if [[ ${src} =~ src- ]] ; then
-            echo "svn export   -r ${rev} ${url} ${src}" >> ${script}
+    echo "#!/bin/bash"                                                                     >> ${script}
+    echo "# script was automatically created by jenkins job ${JOB_NAME} / ${BUILD_NUMBER}" >> ${script}
+    echo "# for details ask PS LFS SCM"                                                    >> ${script}
+    echo "# This script is for ${targetName}"                                              >> ${script}
+    echo                                                                                   >> ${script}
+    echo "set -o errexit"                                                                  >> ${script}
+    echo "set -o allexport"                                                                >> ${script}
+    echo "set -o nounset"                                                                  >> ${script}
+    echo "mkdir workdir-${tagName}"                                                        >> ${script}
+    echo "cd workdir-${tagName}"                                                           >> ${script}
+    echo "mkdir -p bld bldtools locations .build_workdir"                                  >> ${script}
+   
+    # reading the external components file and create the lines for linking them 
+    # into the workspace
+    local tag=
+    local name=
+    local junk1=
+    local junk2=
+    while read name junk1 junk2 tag ; do
+
+        # TODO: demx2fk3 2014-09-08 make the pathnames configurable
+        if [[ ${name} =~ sdk ]] ; then
+            echo "ln -sf /build/home/SC_LFS/sdk/tags/${tag} bld/${name}"                   >> ${script}
+        elif [[ ${name} =~ pkgpool ]] ; then
+            echo "ln -sf /build/home/SC_LFS/pkgpool/${tag} bld/${name}"                    >> ${script}
+        elif [[ ${name} =~ bld- ]] ; then
+            echo "ln -sf /build/home/SC_LFS/releases/bld/${name}/${tag} bld/${name}"       >> ${script}
         else
-            echo "svn checkout -r ${rev} ${url} ${src}" >> ${script}
+            fatal "component in bld ${name} not supported in creation of workdir.sh"
         fi
+    done < ${workspace}/bld/bld-externalComponents-summary/externalComponents
+
+    # create the lines for the svn co commands...
+    while read src url rev ; do
+        echo "svn checkout -r ${rev} ${url} ${src}"                                        >> ${script}
     done < ${workspace}/bld/bld-externalComponents-${targetName}/usedRevisions.txt
 
-    echo "echo done" >> ${script}
-    echo "exit 0"    >> ${script}
+    echo "echo done"                                                                       >> ${script}
+    echo "exit 0"                                                                          >> ${script} 
+
+    debug "workdir.sh for ${targetNme} was created successfully"
+    rawDebug ${script}
 
     return 
 }

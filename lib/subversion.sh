@@ -188,11 +188,8 @@ existsInSubversion() {
     local tag=$2
     local tmp=$(createTempFile)
 
-    svn ls --xml ${url} | ${LFS_CI_ROOT}/bin/xpath -q -e /lists/list/entry/name > ${tmp}
-    if [[ $? != 0 ]] ; then
-        error "svn ls failed"
-        exit 1
-    fi
+    execute -n svn ls --xml ${url} \
+        | execute -n ${LFS_CI_ROOT}/bin/xpath -q -e /lists/list/entry/name > ${tmp}
 
     if grep -q "<name>${tag}</name>" ${tmp} ; then
         return 0
@@ -279,11 +276,8 @@ getSvnInfo() {
     local xmlPath=$2
     local tmpFile=$(createTempFile)
 
-    svn info --xml ${url} > ${tmpFile}
-    mustBeSuccessfull "$?" "svn info ${url}"
-
-    ${LFS_CI_ROOT}/bin/xpath -q -e ${xmlPath} ${tmpFile}
-    mustBeSuccessfull "$?" "xmlPath -q -e ${xmlPath}"
+    execute -n svn info --xml ${url} > ${tmpFile}
+    execute -n ${LFS_CI_ROOT}/bin/xpath -q -e ${xmlPath} ${tmpFile}
 
     return
 }
@@ -295,7 +289,6 @@ getSvnInfo() {
 normalizeSvnUrl() {
     local url=$1
     local masterHostname=$(getConfig svnMasterServerHostName)
-
     local currentHostname=$(cut -d/ -f3 <<< ${url})
 
     if [[ ${currentHostname} ]] ; then
@@ -303,6 +296,5 @@ normalizeSvnUrl() {
     fi
 
     echo ${url}
-
     return
 }

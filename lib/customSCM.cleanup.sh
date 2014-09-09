@@ -6,52 +6,19 @@
 #  @param   <none>
 #  @return  1 if if a build is not required, 0 otherwise
 actionCompare() {
-
-#     if [[ -z "${REVISION_STATE_FILE}" ]] ; then
-#         info "no old revision state file found"
-#         exit 0
-#     fi
-# 
-#     export subTaskName=$(getSubTaskNameFromJobName)
-#     # syntax is <share>_to_<site>
-#     export shareType=$(cut -d_ -f 1 <<< ${subTaskName})
-#     export siteName=$(cut -d_ -f 3 <<< ${subTaskName})
-#     local directoryNameToSynchronize=$(getConfig ADMIN_sync_share_local_directoryName)
-#     local findDepth=$(getConfig ADMIN_sync_share_check_depth)
-#     unset shareType siteName
-# 
-#     # remove this
-#     if [[ -z ${findDepth} ]] ; then
-#         findDepth=1
-#     fi
-#     # read the revision state file
-#     # format:
-#     # projectName
-#     # buildNumber
-#     { read oldDirectoryNameToSynchronize ; 
-#       read oldChecksum ; } < "${REVISION_STATE_FILE}"
-# 
-#     info "old revision state data are ${oldDirectoryNameToSynchronize} / ${oldChecksum}"
-# 
-#     # comparing to new state
-#     if [[ "${directoryNameToSynchronize}" != "${oldDirectoryNameToSynchronize}" ]] ; then
-#         info "directory name changed, trigger build"
-#         exit 0
-#     fi
-# 
-#     local checksum=$(find ${directoryNameToSynchronize} -mindepth ${findDepth} -maxdepth ${findDepth} -printf "%C@ %p\n" | sort | md5sum | cut -d" " -f 1)
-# 
-#     info "new revision state data are ${directoryNameToSynchronize} / ${checksum}"
-# 
-#     if [[ "${checksum}" != "${oldChecksum}" ]] ; then
-#         info "checksum has changed, trigger build"
-#         exit 0
-#     fi
-# 
-    info "no change in ${directoryNameToSynchronize} / ${checksum}"
+    info "always triggering a build..."
     exit 1
 }
 
+## @fn      actionCalculate()
+#  @brief   action ...
+#  @details «full description»
+#  @param   <none>
+#  @return  <none>
+actionCalculate() {
+    touch ${REVISION_STATE_FILE}
+    return 
+}
 
 ## @fn      actionCheckout()
 #  @brief   action which is called by custom scm jenkins plugin to create or update a workspace and create the changelog
@@ -140,12 +107,7 @@ actionCheckout() {
 }
 
 _ciLfsNotReleasedBuilds() {
-
-    # format of the result file is
-    # <time stamp> <pathName>
     local resultFile=$1
-
-    # TODO: demx2fk3 2014-07-28 cleanup
 
     local directoryToCleanup=/build/home/CI_LFS/Release_Candidates
     local rcVersions=/build/home/CI_LFS/RCversion/os
@@ -154,112 +116,80 @@ _ciLfsNotReleasedBuilds() {
     local tmpFileB=$(createTempFile)
     local tmpFile=$(createTempFile)
 
+    
     for link in ${rcVersions}/* ; do
-        echo test ${link}
+        # we are skiping all entries, which are not a link, contains trunk and -ci
         [[ ! -L ${link}     ]] && continue 
         [[ ${link} =~ -ci   ]] && continue
         [[ ${link} =~ trunk ]] && continue
-        echo ${link} ok
-        readlink -f ${link} >> ${tmpFile}
+        execute -n readlink -f ${link} >> ${tmpFile}
     done
 
-    sort -u ${tmpFile} > ${tmpFileA}
-    find ${directoryToCleanup} -mindepth 2 -maxdepth 2 -mtime +7 -type d -printf "%p\n" | sort -u > ${tmpFileB}
-
-#        |  egrep -e 'PS_LFS_OS_[0-9]{4}_[0-9]{2}_[0-9]{4}' \
     # release candidates, which are older than 60 days and are not released
-    grep -v -f ${tmpFileA} ${tmpFileB} | sed "s/^/1 /g"    \
-        > ${resultFile}
+    execute -n sort -u ${tmpFile} > ${tmpFileA}
+    execute -n find ${directoryToCleanup} -mindepth 2 -maxdepth 2 -mtime +7 -type d -printf "%p\n" \
+        | execute -n sort -u > ${tmpFileB}
+    execute -n grep -v -f ${tmpFileA} ${tmpFileB} \
+        | execute -n sed "s/^/1 /g" > ${resultFile}
 
     return
 }
 
 _scLfsOldReleasesOnBranches() {
+    # CUSTOM_SCM_cleanup_find_max_depth       = 2
+    # CUSTOM_SCM_cleanup_find_min_depth       = 2
+    # CUSTOM_SCM_cleanup_baseline_age         = 60
+    # CUSTOM_SCM_cleanup_directory_to_cleanup = /build/home/SC_LFS/releases/bld
+
     local resultFile=$1
-    local tmpFileA=$(createTempFile)
-    local tmpFileB=$(createTempFile)
-    local directoryToCleanup=/build/home/SC_LFS/releases/bld/
-    local days=60
-
-    info "check for baselines older than ${days} days in ${directoryToCleanup}"
-    find ${directoryToCleanup} -mindepth 2 -maxdepth 2 -mtime +${days} -type d -printf "%p\n" \
-        | sort -u > ${tmpFileA}
-
-    ${LFS_CI_ROOT}/bin/removalCanidates.pl  < ${tmpFileA} > ${tmpFileB}
-
-    grep -w -f ${tmpFileB} ${tmpFileA} | sed "s/^/1 /g" > ${resultFile}
-
+    _genericOldReleasesOnBranch ${resultFile}
     return
 }
 
 _scLfsLinuxKernelOldReleasesOnBranches() {
+    # CUSTOM_SCM_cleanup_find_max_depth       = 1
+    # CUSTOM_SCM_cleanup_find_min_depth       = 1
+    # CUSTOM_SCM_cleanup_baseline_age         = 1500
+    # CUSTOM_SCM_cleanup_directory_to_cleanup = /build/home/SC_LFS/linuxkernels
+
     local resultFile=$1
-    local tmpFileA=$(createTempFile)
-    local tmpFileB=$(createTempFile)
-    local directoryToCleanup=/build/home/SC_LFS/linuxkernels
-    local days=1500
-
-    info "check for baselines older than ${days} days in ${directoryToCleanup}"
-    find ${directoryToCleanup} -mindepth 1 -maxdepth 1 -mtime +${days} -type d -printf "%p\n" \
-        | sort -u > ${tmpFileA}
-
-    ${LFS_CI_ROOT}/bin/removalCanidates.pl  < ${tmpFileA} > ${tmpFileB}
-
-    grep -w -f ${tmpFileB} ${tmpFileA} | sed "s/^/1 /g" > ${resultFile}
-
+    _genericOldReleasesOnBranch ${resultFile}
     return
 }
+
 _ciLfsRemoteSites() {
+    # CUSTOM_SCM_cleanup_find_max_depth = 2
+    # CUSTOM_SCM_cleanup_find_min_depth = 2
+    # ADMIN_sync_share_remote_directoryName = /build/home/CI_LFS/Release_Candidates/
     local siteName=$1
     local resultFile=$2
-
-    export siteName
-    local directoryToCleanup=/build/home/CI_LFS/Release_Candidates/
-    local find=$(getConfig ADMIN_sync_share_find_command)
-
-    info "directoryToCleanup is ${directoryToCleanup}"
-    ssh ${siteName}sync "${find} ${directoryToCleanup} -mindepth 2 -maxdepth 2 -type d -printf \"1 %p\n\" " \
-        | sort -u > ${resultFile} 
-    mustBeSuccessfull "$?" "ssh find ${siteName}"
-
+    _genericRemoteSites ${siteName} ${resultFile}
     return
 }
+
 _scLfsRemoteSites() {
+    # CUSTOM_SCM_cleanup_find_max_depth = 2
+    # CUSTOM_SCM_cleanup_find_min_depth = 2
+
     local siteName=$1
     local resultFile=$2
-
-    export siteName
-    export shareType=bld
-    local directoryToCleanup=$(getConfig ADMIN_sync_share_remote_directoryName)
-    local find=$(getConfig ADMIN_sync_share_find_command)
-
-    info "directoryToCleanup is ${directoryToCleanup}"
-    ssh ${siteName}sync "${find} ${directoryToCleanup} -mindepth 2 -maxdepth 2 -type d -printf \"1 %p\n\" " \
-        | sort -u > ${resultFile} 
-    mustBeSuccessfull "$?" "ssh find ${siteName}"
-
+    _genericRemoteSites ${siteName} ${resultFile}
     return
 }
 
 _ciLfsOldReleasesOnBranches() {
+    # CUSTOM_SCM_cleanup_find_max_depth       = 2
+    # CUSTOM_SCM_cleanup_find_min_depth       = 2
+    # CUSTOM_SCM_cleanup_baseline_age         = 60
+    # CUSTOM_SCM_cleanup_directory_to_cleanup = /build/home/CI_LFS/Release_Candidates
+
     local resultFile=$1
-
-    local tmpFileA=$(createTempFile)
-    local tmpFileB=$(createTempFile)
-    local directoryToCleanup=/build/home/CI_LFS/Release_Candidates/
-
-    find ${directoryToCleanup} -mindepth 2 -maxdepth 2 -mtime +60 -type d -printf "%p\n" \
-        | sort -u > ${tmpFileA}
-
-    ${LFS_CI_ROOT}/bin/removalCanidates.pl  < ${tmpFileA} > ${tmpFileB}
-    grep -w -f ${tmpFileB} ${tmpFileA} | sed "s/^/1 /g" > ${resultFile}
-
+    _genericOldReleasesOnBranch ${resultFile}
     return
 }
 
 _lfsArtifactsRemoveOldArtifacts() {
     local resultFile=$1
-
     local directoryToCleanup=/build/home/psulm/LFS_internal/artifacts
 
     for jobName in ${directoryToCleanup}/* 
@@ -272,19 +202,53 @@ _lfsArtifactsRemoveOldArtifacts() {
 
     return
 }
+
 _lfsCiLogfiles() {
     local resultFile=$1
     find /ps/lfs/ci/log/ -type f -ctime +60 | sed "s:^:1 :" > ${resultFile}
     return
 }
 
-## @fn      actionCalculate()
-#  @brief   action ...
-#  @details «full description»
-#  @param   <none>
-#  @return  <none>
-actionCalculate() {
-    touch ${REVISION_STATE_FILE}
-    return 
+_genericRemoteSites() {
+    local siteName=$1
+    local resultFile=$2
+
+    export siteName
+
+    local directoryToCleanup=$(getConfig ADMIN_sync_share_remote_directoryName)
+    local find=$(getConfig ADMIN_sync_share_find_command)
+    local maxdepth=$(getConfig CUSTOM_SCM_cleanup_find_max_depth)
+    local mindepth=$(getConfig CUSTOM_SCM_cleanup_find_min_depth)
+
+    info "directoryToCleanup is ${directoryToCleanup}"
+    execute -n ssh ${siteName}sync "${find} ${directoryToCleanup} -mindepth ${mindepth} -maxdepth ${maxdepth} -type d -printf \"1 %p\n\" " \
+        | execute -n sort -u > ${resultFile} 
+
+    return
+}
+
+_genericOldReleasesOnBranch() {
+    local resultFile=$1
+    local tmpFileA=$(createTempFile)
+    local tmpFileB=$(createTempFile)
+    local directoryToCleanup=$(getConfig CUSTOM_SCM_cleanup_directory_to_cleanup)
+    local days=$(getConfig CUSTOM_SCM_cleanup_baseline_age)
+    local mindepth=$(getConfig CUSTOM_SCM_cleanup_find_min_depth)
+    local maxdepth=$(getConfig CUSTOM_SCM_cleanup_find_max_depth)
+
+    info "check for baselines older than ${days} days in ${directoryToCleanup}"
+    execute -n find ${directoryToCleanup} \
+                    -mindepth ${mindepth} \
+                    -maxdepth ${maxdepth} \
+                    -mtime +${days}       \
+                    -type d               \
+                    -printf "%p\n"        \
+        | execute -n sort -u > ${tmpFileA}
+
+    execute -n ${LFS_CI_ROOT}/bin/removalCanidates.pl  < ${tmpFileA} > ${tmpFileB}
+    execute -n grep -w -f ${tmpFileB} ${tmpFileA} \
+        | execute -n sed "s/^/1 /g" > ${resultFile}
+
+    return
 }
 

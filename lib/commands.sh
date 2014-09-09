@@ -9,7 +9,7 @@ LFS_CI_SOURCE_commands='$Id$'
 #           The output is not shown on the console.
 #           If there is an error (exit code != 0) in the command, an
 #           error will be raised and logged. The scripting ends here!
-#  @todo    «description of incomplete business»
+#  @param   {opt}    -n flag - turn the default redirection of stdout off
 #  @param   {command}    a command string
 #  @return  <none>
 #  @throws  raise an error, if the command exits with an exit code != 0

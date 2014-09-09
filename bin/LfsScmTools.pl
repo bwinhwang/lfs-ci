@@ -30,6 +30,11 @@ use strict;
 use parent qw( -norequire Object );
 use Data::Dumper;
 
+## @fn      readConfig()
+#  @brief   read the "configuration" file for this config store
+#  @details this store has no configuration file, it just generate all possible configuration values
+#           and store it in a array 
+#  @return  ref array with all possible configuration values for this store
 sub readConfig {
     my $self  = shift;
 
@@ -52,6 +57,15 @@ use warnings;
 use strict;
 use parent qw( -norequire Object );
 
+## @fn      readConfig()
+#  @brief   read the configuration file for this config store
+#  @details the format of the configuration file is:
+#           name = value
+#           name <> = value
+#           name < tagName:tagValue > = value
+#           name < tagName~tagRegex > = value
+#           name < tagName:tagValue, tagName:tagValue > = value
+#  @return  ref array with all possible configuratoin values for this store
 sub readConfig {
     my $self  = shift;
     my $param = { @_ };
@@ -99,12 +113,17 @@ use warnings;
 use strict;
 use parent qw( -norequire Object );
 
-sub init {
-    my $self = shift;
-    $self->{data} = {};
-    return;
-}
+# sub init {
+#     my $self = shift;
+#     $self->{data} = {};
+#     return;
+# }
 
+## @fn      readConfig()
+#  @brief   read the "configuration" file for this config store
+#  @details this store has no configuration file, it just generate all possible configuration values
+#           and store it in a array 
+#  @return  ref array with all possible configuration values for this store
 sub readConfig {
     my $self = shift;
     my $data = [];
@@ -125,6 +144,11 @@ use warnings;
 use strict;
 use parent qw( -norequire Object );
 
+## @fn      readConfig()
+#  @brief   read the "configuration" file for this config store
+#  @details this store has no configuration file, it just generate all possible configuration values
+#           and store it in a array 
+#  @return  ref array with all possible configuration values for this store
 sub readConfig {
     my $self = shift;
     my $data;
@@ -138,6 +162,7 @@ sub readConfig {
     }
     return $data;
 }
+
 # }}} ------------------------------------------------------------------------------------------------------------------
 package Model; # {{{
 ## @fn     Model
@@ -148,6 +173,9 @@ use warnings;
 use parent qw( -norequire Object );
 
 # }}} ------------------------------------------------------------------------------------------------------------------
+## @fn     Model::Config
+#  @brief  model for a configuration value
+
 package Model::Config; # {{{
 use warnings;
 use strict;
@@ -155,6 +183,11 @@ use parent qw( -norequire Model );
 
 our $AUTOLOAD;
 
+## @fn      AUTOLOAD( $value )
+#  @brief   generic method to get/set a value form the configuration model
+#  @warning It is possible that AUTOLOAD is a little bit inefficent and cause a performance problem
+#  @param   {value}    value to set for this member
+#  @return  value of the member
 sub AUTOLOAD {
     my $self = shift;
     my $type = ref($self)
@@ -179,6 +212,10 @@ sub DESTROY {
     return;
 }
 
+## @fn      matches()
+#  @brief   checks, if all tags of the model are matching.
+#  @param   <none>
+#  @return  number of matches of tags. 0 means, that no tag is matching
 sub matches {
     my $self    = shift;
     my $matches = 1;
@@ -213,11 +250,21 @@ use parent qw( -norequire Model );
 
 use File::Slurp;
 
+## @fn      releaseName()
+#  @brief   get the name of the release
+#  @param   <none>
+#  @return  release name
 sub releaseName {
     my $self = shift;
     return $self->{releaseName};
 }
 
+## @fn      commentForRevision( $param )
+#  @brief   get the replacement comment of a given revision
+#  @details idea: you can replace a comment from svn with a comment from a text file.
+#           So you can change something in the release note without any change in svn.
+#  @param   {revision}    revision number
+#  @return  new comment
 sub commentForRevision {
     my $self     = shift;
     my $revision = shift;
@@ -236,12 +283,20 @@ sub commentForRevision {
     return;
 }
 
+## @fn      importantNote()
+#  @brief   get the important note for the release from a text file
+#  @param   <none>
+#  @return  important note
 sub importantNote {
     my $self = shift;
     $self->mustHaveFileData( "importantNote" );
     return join( "\n", @{ $self->{importantNote} || [] } );
 }
 
+## @fn      mustHaveFileData( $fileType )
+#  @brief   ensure, that the data of the file were read.
+#  @param   {fileType}    type of the file which should be read. valid values: importantNotes, revisions
+#  @return  <none>
 sub mustHaveFileData {
     my $self     = shift;
     my $fileType = shift;
@@ -277,6 +332,10 @@ sub isSubversion {
     return 0;
 }
 
+## @fn      getHeadRevision()
+#  @brief   get the head revision
+#  @param   <none>
+#  @return  head revision
 sub getHeadRevision {
     my $self = shift;
     if( $self->isSubversion() ) {
@@ -421,11 +480,20 @@ sub getSourceDirectoriesFromDependencies {
     return sort keys %tmp;
 }
 
+## @fn      getDependencies()
+#  @brief   get dependencies for this dependencies entry
+#  @param   <none>
+#  @return  list of dependencies
 sub getDependencies {
     my $self = shift;
     return @{ $self->{dependencies} || [] };
 }
 
+
+## @fn      matchesPlatform( $value )
+#  @brief   checks, if the platform is matching to the given one 
+#  @param   {platform}    name of the platform to match
+#  @return  1 if platform matches, 0 otherwise
 sub matchesPlatform {
     my $self     = shift;
     my $platform = shift;
@@ -436,11 +504,19 @@ sub matchesPlatform {
     return scalar( @matches ) > 0 ? 1 : 0;
 }
 
+## @fn      platforms()
+#  @brief   get the list of platforms
+#  @param   <none>
+#  @return  list of platforms
 sub platforms {
     my $self = shift;
     return map { $_->platforms() } @{ $self->{targets} };
 }
 
+## @fn      targets()
+#  @brief   get the list of targets
+#  @param   <none>
+#  @return  list of targets
 sub targets {
     my $self = shift;
     return @{ $self->{targets} || [] };
@@ -507,7 +583,6 @@ sub checkout {
 package Svn; # {{{
 ## @fn    Svn
 #  @brief class for subversion command line client
-
 use strict;
 use warnings;
 
@@ -515,6 +590,7 @@ use parent qw( -norequire Object );
 
 use XML::Simple;
 use Data::Dumper;
+use Log::Log4perl qw(:easy);
 
 ## @fn     init()
 #  @brief  initialize the Svn Object with data
@@ -563,6 +639,11 @@ sub cat {
     return $self->{cached}{svnCat}{$cmd};
 }
 
+## @fn      propget( $param )
+#  @brief   get the svn properties for a svn URL
+#  @param   {url}         svn url
+#  @param   {property}    name of the svn property
+#  @return  value of the svn property
 sub propget {
     my $self = shift;
     my $param= { @_ };
@@ -592,6 +673,9 @@ sub info {
     my $count = 0;
 
     while ( $xml eq "" || $count < 4 ) {
+
+        TRACE "reexecuting svn --xml info $url" if $count > 0;
+
         open SVN_INFO, sprintf( "%s --xml info %s|", $self->{svnCli}, $url ) || die "can not open svn info: %!";
         $xml = join( "", <SVN_INFO> );
         close SVN_INFO;
@@ -604,6 +688,10 @@ sub info {
     return XMLin( $xml );
 }
 
+## @fn      ls( $param )
+#  @brief   get the svn list output of a svn url as xml
+#  @param   {url}    a svn url
+#  @return  output of svn list command
 sub ls {
     my $self  = shift;
     my $param = { @_ };
@@ -645,6 +733,11 @@ sub command {
     return;
 }
 
+## @fn      normalizeSvnUrl( $url )
+#  @brief   normalize the svn url
+#  @details the normalized format is ths ulscmi.inside.nsn.com
+#  @param   {url}    svn url
+#  @return  normalized svn url
 sub replaceMasterByUlmServer {
     my $url = shift;
     $url =~ s/svne1.access.nokiasiemensnetworks.com/ulscmi.inside.nsn.com/g;
@@ -824,6 +917,10 @@ sub match {
     return $string =~ m/$regex/ ? 1 : 0
 }
 
+## @fn      replaceLocations( $param )
+#  @brief   replace the placeholders in the location with the real value
+#  @param   {locations}    list of all locations
+#  @return  <none>
 sub replaceLocations {
     my $self = shift;
     my $param = { @_ };
@@ -1613,45 +1710,7 @@ sub execute {
 sub mapComponentName {
     my $self = shift;
     my $name = shift;
-
-    # TODO: demx2fk3 2014-07-14 move this into a config file
-    # LFS_PROD_uc_release_component_title < componentName:src:bos > = Linux Kernel Config
-    my $componentName = { 
-                            'src-bos'            => "Linux Kernel Config",
-                            'src-cvmxsources'    => "CVMX Sources",
-                            'src-cvmxsources3'   => "CVMX Sources 3.x",
-                            'src-ddal'           => "FSMr2 DDAL",
-                            'src-ddg'            => "Kernel Drivers",
-                            'src-ifddg'          => "Intreface Kernel Drivers",
-                            'src-firmware'       => "Firmware",
-                            'src-fsmbos'         => "Linux Kernel Config",
-                            'src-fsmbrm'         => "FSMr3 U-Boot",
-                            'src-fsmbrm35'       => "FSMr4 U-Boot",
-                            'src-fsmddal'        => "DDAL Library",
-                            'src-fsmddg'         => "Kernel Drivers",
-                            'src-fsmdtg'         => "Transport Drivers",
-                            'src-fsmfirmware'    => "Firmware",
-                            'src-fsmfmon'        => "FMON",
-                            'src-fsmifdd'        => "DDAL Library API",
-                            'src-fsmpsl'         => "Software Load",
-                            'src-fsmrfs'         => "Root Filesystem",
-                            'src-ifddal'         => "FSMr2 DDAL Library API",
-                            'src-kernelsources'  => "Linux Kernel",
-                            'src-kernelsources3' => "Linux Kernel 3.x",
-                            'src-lrcbrm'         => "LRC U-Boot",
-                            'src-lrcddal'        => "LRC specific DDAL",
-                            'src-lrcddg'         => "LRC Kernel Drivers",
-                            'src-lrcifddg'       => "LRC Kernel Drivers Interface",
-                            'src-lrcpsl'         => "LRC Software Load",
-                            'src-mddg'           => "FSMr2 Kernel Drivers",
-                            'src-mrfs'           => "FSMr2 Root Filesystem",
-                            'src-psl'            => "FSMr2 Software Load",
-                            'src-rfs'            => "Common Root Filesystem",
-                            'src-test'           => "Testing",
-                            'src-tools'          => "Tools (LRC)",
-    };
-
-    return $componentName->{$name} ? $componentName->{$name} : $name;
+    return Singelton::config->getConfig( $name );
 }
 
 sub filterComments {
@@ -1661,6 +1720,10 @@ sub filterComments {
     # remove new lines at the end
     $commentLine =~ s/\n$//g;
 
+    my $jiraComment = Singelton::config->getConfig( "LFS_PROD_uc_release_svn_message_prefix" )
+    return if $commentLine =~ m/$jiraComment/;
+
+    # TODO: demx2fk3 2014-09-08 remove this line, if legacy CI is switched off
     return if $commentLine =~ m/BTSPS-1657 IN psulm: DESCRIPTION: set Dependencies, Revisions for Release .* r\d+ NOJCHK/;
 
     return $commentLine;
@@ -1800,6 +1863,7 @@ sub prepare {
     # __BASELINES__
     my @baselineFiles = qw ( bld/bld-externalComponents-summary/externalComponents );
     push @baselineFiles, glob( "bld/bld-fsmpsl-*/results/doc/versions/fpga_baselines.txt" );
+    push @baselineFiles, glob( "bld/pkgpool*.txt" );
 
     foreach my $file ( @baselineFiles ) {
         open FILE, $file or die "can not open file $file";
@@ -2313,6 +2377,22 @@ use strict;
 use warnings;
 use Data::Dumper;
 use File::Basename;
+use Log::Log4perl qw( :easy );
+
+my %l4p_config = (
+    'log4perl.category'                                  => 'TRACE, Screen, Logfile',
+    'log4perl.category.Sysadm.Install'                   => 'OFF',
+    'log4perl.appender.Logfile'                          => 'Log::Log4perl::Appender::File',
+    'log4perl.appender.Logfile.filename'                 => 'youtube.log',
+    'log4perl.appender.Logfile.layout'                   => 'Log::Log4perl::Layout::PatternLayout',
+    'log4perl.appender.Logfile.layout.ConversionPattern' => '%p %d{ISO8601} %r [%M] %m%n',
+    'log4perl.appender.Screen'                           => 'Log::Log4perl::Appender::Screen',
+    'log4perl.appender.Screen.stderr'                    => '0',
+    'log4perl.appender.Screen.Threshold'                 => 'INFO',
+    'log4perl.appender.Screen.layout'                    => 'Log::Log4perl::Layout::SimpleLayout',
+);
+
+Log::Log4perl::init( \%l4p_config );
 
 my $program = basename( $0 );
 my $command;
