@@ -590,7 +590,7 @@ use parent qw( -norequire Object );
 
 use XML::Simple;
 use Data::Dumper;
-use Log::Log4perl qw(:easy);
+use Log::Log4perl qw( :easy );
 
 ## @fn     init()
 #  @brief  initialize the Svn Object with data
@@ -668,14 +668,12 @@ sub propget {
 sub info {
     my $self  = shift;
     my $param = { @_ } ;
-    my $url   = replaceMasterByUlmServer( $param->{url} || "" );
+    my $url   = $param->{url} || "";
     my $xml   = "";
     my $count = 0;
 
-    while ( $xml eq "" || $count < 4 ) {
-
-        TRACE "reexecuting svn --xml info $url" if $count > 0;
-
+    while ( $xml eq "" && $count < 4 ) {
+        TRACE "running svn info --xml ${url}";
         open SVN_INFO, sprintf( "%s --xml info %s|", $self->{svnCli}, $url ) || die "can not open svn info: %!";
         $xml = join( "", <SVN_INFO> );
         close SVN_INFO;
@@ -685,7 +683,10 @@ sub info {
         die "svn info --xml failed";
     }
 
-    return XMLin( $xml );
+    my $xmlDataHash = XMLin( $xml );
+    TRACE "got data from svn info " . Dumper( $xmlDataHash );
+
+    return $xmlDataHash;
 }
 
 ## @fn      ls( $param )
@@ -2394,8 +2395,29 @@ my %l4p_config = (
 
 Log::Log4perl::init( \%l4p_config );
 
+use Log::Log4perl qw( :easy );
+
+my %l4p_config = (
+    'log4perl.category'                                  => 'TRACE, Logfile',
+    'log4perl.category.Sysadm.Install'                   => 'OFF',
+    'log4perl.appender.Logfile'                          => 'Log::Log4perl::Appender::File',
+    'log4perl.appender.Logfile.filename'                 => $ENV{CI_LOGGING_LOGFILENAME}, 
+    'log4perl.appender.Logfile.layout'                   => 'Log::Log4perl::Layout::PatternLayout',
+    'log4perl.appender.Logfile.layout.ConversionPattern' => '%d{ISO8601}       UTC [%9r] [%-8p] %M -- %m%n',
+    'log4perl.appender.Screen'                           => 'Log::Log4perl::Appender::Screen',
+    'log4perl.appender.Screen.stderr'                    => '1',
+    'log4perl.appender.Screen.Threshold'                 => 'INFO',
+    'log4perl.appender.Screen.layout'                    => 'Log::Log4perl::Layout::SimpleLayout',
+);
+
+if( $ENV{CI_LOGGING_LOGFILENAME} ) {
+    Log::Log4perl::init( \%l4p_config );
+}
+
 my $program = basename( $0 );
 my $command;
+
+INFO "welcome to $program";
 
 if( $program eq "getDependencies" ) {
     $command = Command::GetDependencies->new();
@@ -2423,5 +2445,5 @@ if( $program eq "getDependencies" ) {
 
 $command->prepare( @ARGV );
 $command->execute() and die "can not execute $program";
-
+INFO "Thank you for making a little program very happy";
 exit 0;

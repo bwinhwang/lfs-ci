@@ -195,9 +195,12 @@ _lfsArtifactsRemoveOldArtifacts() {
     for jobName in ${directoryToCleanup}/* 
     do 
         [[ -d ${jobName} ]] || continue
+        info "checking for artifacts for ${jobName}"
         find ${jobName} -mindepth 1 -maxdepth 1 -ctime +10 -type d -printf "%C@ %p\n" \
-            | sort -n \
-            | cut -d" " -f2 >> ${resultFile}
+            | sort -n     \
+            | tac         \
+            | tail -n +10 \
+            >> ${resultFile}
     done
 
     return

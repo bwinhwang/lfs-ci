@@ -92,6 +92,7 @@ _createRevisionsTxtFile() {
 
     # can not use execute here, so we have to do the error handling by hande
     # do the magic for all dir
+    info "dependenciesFileUrl is ${dependenciesFileUrl}"
     ${LFS_CI_ROOT}/bin/getRevisionTxtFromDependencies -u ${dependenciesFileUrl} \
                                                       -f ${dependenciesFile} | sort -u > ${newRevisionsFile} 
     if [[ $? != 0 ]] ; then
