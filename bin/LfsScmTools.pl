@@ -1995,6 +1995,7 @@ use warnings;
 use parent qw( -norequire Object );
 use Getopt::Long;
 use Data::Dumper;
+use Log::Log4perl qw( :easy );
 
 sub prepare {
     my $self = shift;
@@ -2022,7 +2023,10 @@ sub execute {
     my $self = shift;
 
     Singelton::config()->loadData( configFileName => $self->{configFileName} );
-    print Singelton::config()->getConfig( name => $self->{configKeyName} );
+    my $value = Singelton::config()->getConfig( name => $self->{configKeyName} );
+    DEBUG sprintf( "config %s = %s", $self->{configKeyName}, $value );
+
+    print $value;
 
     return;
 }

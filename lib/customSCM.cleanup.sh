@@ -110,6 +110,7 @@ actionCheckout() {
 
             case ${subTaskName} in
                 *_in_ou) _scLfsRemoteSites ou ${tmpFileA} ;;
+                *_in_be) _scLfsRemoteSites be ${tmpFileA} ;;
                 *_in_wr) _scLfsRemoteSites wr ${tmpFileA} ;;
                 *_in_bh) _scLfsRemoteSites bh ${tmpFileA} ;;
                 *_in_du) 
