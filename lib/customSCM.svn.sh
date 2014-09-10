@@ -103,6 +103,8 @@ _createRevisionsTxtFile() {
     # add also buildtools location
     local bldToolsUrl=${srcRepos}/os/trunk/bldtools/bld-buildtools-common
     local rev=$(svn info --xml ${bldToolsUrl}| ${LFS_CI_ROOT}/bin/xpath -q -e '/info/entry/commit/@revision'  | cut -d'"' -f 2)
+    mustHaveValue "${rev}" "svn info ${bldToolsUrl} didnt get a value for revision"
+
     printf "%s %s %s" bld-buildtools "${bldToolsUrl}" "${rev}" >> ${newRevisionsFile}
 
     local filterFile=$(getConfig CUSTOM_SCM_svn_filter_components_file)
