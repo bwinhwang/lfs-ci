@@ -1157,7 +1157,7 @@ SOURCES:
 
             # print label information for different components
             my $label = $self->{label};
-            if( grep { $_ eq $source->{directory} } qw ( src-bos src-fsmbos src-fsmbos35 src-mbrm src-fsmbrm src-fsmbrm35 ) ) {
+            if( grep { $_ eq $source->{directory} } qw ( src-bos src-fsmbos src-fsmbos35 src-mbrm src-fsmbrm src-fsmbrm35 src-tools35 ) ) {
                 $label =~ s/PS_LFS_OS/LFS/g;
                 $label =~ s/PS_LFS_BT/LBT/g;
                 $label =~ s/_20(\d\d)_/$1/g;
@@ -1716,7 +1716,7 @@ sub prepare {
                         : $entry->{msg}->[0] ;
 
         # jira stuff
-        if( $msg =~ m/^.*(BTS[A-Z]*-[0-9]*)\s*PR\s*([^:]*)(.*$)/  ) {
+        if( $msg =~ m/^.*(BTS[A-Z]*-[0-9]*)\s*PR\s*([^ :]*)(.*$)/  ) {
             push @{ $self->{PR} }, { jira => $1,
                                      nr   => $2,
                                      text => $3, };
@@ -1728,7 +1728,7 @@ sub prepare {
                                     text => $3, };
         }
         # new feature
-        if( $msg =~ m/^.*(BTS[A-Z]-[0-9]*)\s*NF\s*([^ t:]*)(.*$)/ ) {
+        if( $msg =~ m/^.*(BTS[A-Z]-[0-9]*)\s*NF\s*([^ :]*)(.*$)/ ) {
             push @{ $self->{NF}}, { jira => $1,
                                     nr   => $2,
                                     text => $3, };

@@ -38,7 +38,7 @@ while( <> ) {
 
 foreach my $branch ( keys %branches ) {
     my $c = 0;
-    my @list = grep { $c++ > 10 }
+    my @list = grep { $c++ > 20 }
                reverse
                sort 
                map  { $_->{base} }

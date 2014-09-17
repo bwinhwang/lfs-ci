@@ -296,7 +296,7 @@ _lfsCiLogfiles() {
 
 ## @fn      actionCalculate()
 #  @brief   action ...
-#  @details «full description»
+#  @details 
 #  @param   <none>
 #  @return  <none>
 actionCalculate() {
