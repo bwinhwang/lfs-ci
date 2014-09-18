@@ -1804,7 +1804,7 @@ sub prepare {
                                   );
     # __BASELINES__
     my @baselineFiles = qw ( bld/bld-externalComponents-summary/externalComponents );
-    push @baselineFiles, glob( "bld/bld-fsmpsl-*/results/doc/versions/fpga_baselines.txt" );
+    push @baselineFiles, glob( "bld/bld-*psl-*/results/doc/versions/fpga_baselines.txt" );
 
     foreach my $file ( @baselineFiles ) {
         open FILE, $file or die "can not open file $file";

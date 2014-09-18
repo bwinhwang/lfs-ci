@@ -204,3 +204,7 @@ enableJob() {
     executeJenkinsCli enable-job "${jobName}"
     return
 }
+setBuildResultUnstable() {                                                                                                                                                                                                                     
+    executeJenkinsCli set-build-result unstable                                                                                                                                                                                                
+    return                                                                                                                                                                                                                                     
+}     

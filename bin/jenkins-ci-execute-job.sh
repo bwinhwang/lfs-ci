@@ -60,6 +60,7 @@ case "${JOB_NAME}" in
 
     # hack
     Test-lcpa878) ${LFS_CI_ROOT}/scripts/CLRC02_Test_Release_Candidate_LRC || exit 1 ;;
+    Test-lcpa914) ${LFS_CI_ROOT}/scripts/CLRC02_Test_Release_Candidate_LRC || exit 1 ;;
     
     *_CI_*_Build) 
         source ${LFS_CI_ROOT}/lib/uc_build.sh

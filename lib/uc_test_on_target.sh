@@ -91,7 +91,7 @@ makingTest_testLRC() {
     execute mkdir -p ${xmlOutputDirectory}
     mustExistDirectory ${xmlOutputDirectory}
 
-    local testTargetName=lcpa878 # TODO $(getConfig LFS_CI_uc_test_testTargetName)
+    local testTargetName=lcpa914 # TODO $(getConfig LFS_CI_uc_test_testTargetName)
     mustHaveValue "${testTargetName}" "test target name"
 
     local testSuiteDirectory=${workspace}/src-test/src/unittest/testsuites/continousintegration/production_ci_LRC
