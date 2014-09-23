@@ -1,13 +1,23 @@
 #!/bin/bash
 set -a
 
+source ${LFS_CI_ROOT}/lib/common.sh
+source ${LFS_CI_ROOT}/lib/jenkins.sh
 
+setBuildDescription "${JOB_NAME}" "${BUILD_NUMBER}" "$(basename ${DELIVERY_DIRECTORY})"
+
+source ${WORKSPACE}/.properties
+cat ${WORKSPACE}/.properties
+branchName=$(getLocationName ${UPSTREAM_PROJECT})
 export WORKSPACE=${WORKSPACE}/workspace/
 rm -rf ${WORKSPACE}
 mkdir -p ${WORKSPACE}
 cd ${WORKSPACE}
 build setup
+build newlocations ${branchName}
 build adddir src-test
+
+
 TEST_NAME=production_ci_LRC
 RELEASELABEL_LRC=${LABEL}
 # RELEASELABEL_LRC=LRC_LCP_PS_LFS_OS_2014_08_0118
@@ -25,6 +35,7 @@ TESTTARGET_SHP=lcpa914_shp
 # TESTBUILD="/build/home/psulm/CI_LFS/Release_Candidates/LRC/${RELEASELABEL_LRC}"
 TESTBUILD="${DELIVERY_DIRECTORY}"
 # TESTBUILD=${TESTBUILD/_OS_/_REL_}
+
 
 XML_REPORTS_TEST="$TESTSUITE_DIR/xml-reports"
 XML_REPORTS_TEST_AHP="$TESTSUITE_DIR_AHP/xml-reports"

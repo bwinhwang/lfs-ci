@@ -9,9 +9,9 @@
   <importantNotes>
     <note name="__TAGNAME__">__IMPORTANT_NOTE__</note>
   </importantNotes>
-  <repositoryUrl>__SVN_REPOS_URL__</repositoryUrl>
-  <repositoryBranch>tags</repositoryBranch>
-  <repositoryRevision>__SVN_REVISION__</repositoryRevision>
+  <repositoryUrl>__SVN_OS_REPOS_URL__</repositoryUrl>
+  <repositoryBranch>tags/__TAGNAME__</repositoryBranch>
+  <repositoryRevision>__SVN_OS_REPOS_REVISION__</repositoryRevision>
   <correctedFaults>
     <module name="PS_LFS_OS">
         __CORRECTED_FAULTS__
@@ -47,7 +47,10 @@
     </module>
   </restrictions>
   <download>
-    <downloadItem storage="SVN" name="PS_LFS_OS">__SVN_TAGS_URL_WITH_REVISION__</downloadItem>
+    <downloadItem storage="SVN"             name="PS_LFS_OS">__SVN_OS_TAGS_URL_WITH_REVISION__</downloadItem>
+    <downloadItem storage="FILE CI_LFS"     name="PS_LFS_OS">/build/home/CI_LFS/Release/__LFS_PROD_RELEASE_CURRENT_TAG_NAME_REL__</downloadItem>
+    <downloadItem storage="FILE ltesdkroot" name="PS_LFS_OS">/ltesdkroot/ltesdkroot/Platforms/PS_LFS_REL/__LFS_PROD_RELEASE_CURRENT_TAG_NAME_REL__-LTE/</downloadItem>
+    <downloadItem storage="SVN source"      name="PS_LFS_OS">__SVN_SOURCE_TAGS_URL_WITH_REVISION__</downloadItem>
   </download>
   <additional> </additional>
 </releasenote>

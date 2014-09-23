@@ -1756,6 +1756,9 @@ sub prepare {
     # collect data
     # __TAGNAME__
     $self->{data}{TAGNAME} = $self->{tagName};
+
+    # __LFS_PROD_RELEASE_CURRENT_TAG_NAME_REL__
+    $self->{data}{LFS_PROD_RELEASE_CURRENT_TAG_NAME_REL} = $ENV{"LFS_PROD_RELEASE_CURRENT_TAG_NAME_REL"};
     # __DATE__
     $self->{data}{DATE} = strftime( "%Y-%m-%d", gmtime());
     # __TIME__
@@ -1767,9 +1770,12 @@ sub prepare {
     # __IMPORTANT_NOTE__
     $self->{data}{IMPORTANT_NOTE} = $self->{releaseNote}->importantNote();
     # __SVN_REPOS_URL__
-    $self->{data}{SVN_REPOS_URL} = $config->getConfig( name => "LFS_PROD_svn_delivery_os_repos_url" );
+    $self->{data}{SVN_REPOS_URL}        = $config->getConfig( name => "LFS_PROD_svn_delivery_os_repos_url" );
+    # __LFS_PROD_RELEASE_CURRENT_TAG_NAME_REL__
+    $self->{data}{LFS_PROD_RELEASE_CURRENT_TAG_NAME_REL} = $ENV{"LFS_PROD_RELEASE_CURRENT_TAG_NAME_REL"};
+
     # __SVN_REVISION__
-    my $svnUrl = sprintf( "%s/os/tags/%s", 
+    my $svnUrl = sprintf( "%s/tags/%s", 
                             $self->{data}{SVN_REPOS_URL},
                             $self->{data}{TAGNAME},
                         );
@@ -1781,6 +1787,20 @@ sub prepare {
                                                             $self->{data}{TAGNAME},
                                                             $self->{data}{SVN_REVISION},
                                                        );
+
+    # __SVN_SOURCE_TAGS_URL_WITH_REVISION__
+    $self->{data}{SVN_SOURCE_TAGS_URL}               = $config->getConfig( name => "lfsSourceRepos" );
+    $svnUrl = sprintf( "%s/os/tags/%s", 
+                         $self->{data}{SVN_SOURCE_TAGS_URL},
+                         $self->{data}{TAGNAME},
+                     );
+    $self->{data}{SVN_SOURCE_TAGS_REVISION}          = $svn->info( url => $svnUrl )->{entry}->{commit}->{revision};
+    $self->{data}{SVN_SOURCE_TAGS_URL_WITH_REVISION} = sprintf( "%s/tags/%s@%d",
+                                                            $self->{data}{SVN_SOURCE_TAGS_URL},
+                                                            $self->{data}{TAGNAME},
+                                                            $self->{data}{SVN_SOURCE_TAGS_REVISION}
+                                                       );
+
     # __CORRECTED_FAULTS__
     $self->{data}{CORRECTED_FAULTS} = join( "\n        ", 
                                             map { sprintf( "<fault %sid=\"%s\">%sPR %s</fault>",
