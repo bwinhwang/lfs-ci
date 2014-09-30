@@ -1769,37 +1769,40 @@ sub prepare {
     $self->{data}{BRANCH} = "Branch";
     # __IMPORTANT_NOTE__
     $self->{data}{IMPORTANT_NOTE} = $self->{releaseNote}->importantNote();
-    # __SVN_REPOS_URL__
-    $self->{data}{SVN_REPOS_URL}        = $config->getConfig( name => "LFS_PROD_svn_delivery_os_repos_url" );
-    # __LFS_PROD_RELEASE_CURRENT_TAG_NAME_REL__
-    $self->{data}{LFS_PROD_RELEASE_CURRENT_TAG_NAME_REL} = $ENV{"LFS_PROD_RELEASE_CURRENT_TAG_NAME_REL"};
 
-    # __SVN_REVISION__
+    # __SVN_OS_REPOS_URL__
+    $self->{data}{SVN_OS_REPOS_URL}       = $config->getConfig( name => "LFS_PROD_svn_delivery_os_repos_url" );
+
+    # __SVN_OS_REPOS_REVISION__
     my $svnUrl = sprintf( "%s/tags/%s", 
-                            $self->{data}{SVN_REPOS_URL},
+                            $self->{data}{SVN_OS_REPOS_URL},
                             $self->{data}{TAGNAME},
                         );
-    $self->{data}{SVN_REVISION} = $svn->info( url => $svnUrl )->{entry}->{commit}->{revision};
+    $self->{data}{SVN_OS_REPOS_REVISION} = $svn->info( url => $svnUrl )->{entry}->{commit}->{revision};
+    # __SVN_OS_TAGS_URL_WITH_REVISION__
+    $self->{data}{SVN_OS_TAGS_URL_WITH_REVISION} = $svnUrl;
 
-    # __SVN_TAGS_URL_WITH_REVISION__
-    $self->{data}{SVN_TAGS_URL_WITH_REVISION} = sprintf( "%s/tags/%s@%d",
-                                                            $self->{data}{SVN_REPOS_URL},
-                                                            $self->{data}{TAGNAME},
-                                                            $self->{data}{SVN_REVISION},
-                                                       );
+    # __SVN_REL_REPOS_URL__
+    $self->{data}{SVN_REL_REPOS_URL} = $config->getConfig( name => "LFS_PROD_svn_delivery_release_repos_url" );
+    # __SVN_REL_REPOS_REVISION__
+    $svnUrl = sprintf( "%s/tags/%s", 
+                         $self->{data}{SVN_REL_REPOS_URL},
+                         $self->{data}{LFS_PROD_RELEASE_CURRENT_TAG_NAME_REL},
+                     );
+    $self->{data}{SVN_REL_REPOS_REVISION} = $svn->info( url => $svnUrl )->{entry}->{commit}->{revision};
+    # __SVN_REL_TAGS_URL_WITH_REVISION__
+    $self->{data}{SVN_REL_TAGS_URL_WITH_REVISION} = $svnUrl;
 
     # __SVN_SOURCE_TAGS_URL_WITH_REVISION__
-    $self->{data}{SVN_SOURCE_TAGS_URL}               = $config->getConfig( name => "lfsSourceRepos" );
+    $self->{data}{SVN_SOURCE_REPOS_URL} = $config->getConfig( name => "lfsSourceRepos" );
+
     $svnUrl = sprintf( "%s/os/tags/%s", 
-                         $self->{data}{SVN_SOURCE_TAGS_URL},
+                         $self->{data}{SVN_SOURCE_REPOS_URL},
                          $self->{data}{TAGNAME},
                      );
+
     $self->{data}{SVN_SOURCE_TAGS_REVISION}          = $svn->info( url => $svnUrl )->{entry}->{commit}->{revision};
-    $self->{data}{SVN_SOURCE_TAGS_URL_WITH_REVISION} = sprintf( "%s/tags/%s@%d",
-                                                            $self->{data}{SVN_SOURCE_TAGS_URL},
-                                                            $self->{data}{TAGNAME},
-                                                            $self->{data}{SVN_SOURCE_TAGS_REVISION}
-                                                       );
+    $self->{data}{SVN_SOURCE_TAGS_URL_WITH_REVISION} = $svnUrl;
 
     # __CORRECTED_FAULTS__
     $self->{data}{CORRECTED_FAULTS} = join( "\n        ", 

@@ -9,6 +9,9 @@
 /PS_LFS_OS_2013_07_05-ci3/d
 /LFS_PROD_.*Release.*/d
 
+# needed by TRUNK FSMr2 bos
+/LFS120800-ci14/d
+
 # needed by FB1406
 /FSMR4LBT140601/d
 /FBLFS140602/d

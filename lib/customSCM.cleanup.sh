@@ -279,7 +279,7 @@ _lfsArtifactsRemoveOldArtifacts() {
     do 
         [[ -d ${jobName} ]] || continue
         info "checking for artifacts for ${jobName}"
-        find ${jobName} -mindepth 1 -maxdepth 1 -ctime +10 -type d -printf "%C@ %p\n" \
+        find ${jobName} -mindepth 1 -maxdepth 1 -ctime +7 -type d -printf "%C@ %p\n" \
             | sort -n     \
             | tac         \
             | tail -n +10 \
