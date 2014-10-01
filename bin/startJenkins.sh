@@ -43,7 +43,7 @@ main() {
 #            -XX:-UseGCOverheadLimit                           \
     cd ${JENKINS_HOME}
     exec ${java}                                              \
-            -XX:PermSize=512M -XX:MaxPermSize=1536M -Xmn128M -Xms1024M -Xmx1536M \
+            -XX:PermSize=512M -XX:MaxPermSize=4096M -Xmn128M -Xms1024M -Xmx4096M \
             -jar ${jenkins_war}                               \
             --httpsPort=${jenkinsMasterServerHttpsPort}       \
             --httpPort=${jenkinsMasterServerHttpPort}         \
