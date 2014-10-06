@@ -8,3 +8,21 @@
 /FB_PS_LFS_REL_2013_12_06/d
 /PS_LFS_OS_2013_07_05-ci3/d
 /LFS_PROD_.*Release.*/d
+
+# needed by TRUNK FSMr2 bos
+/LFS120800-ci14/d
+
+# needed by FB1406
+/FSMR4LBT140601/d
+/FBLFS140602/d
+
+# needed by FB1407 
+/LBT140704-ci1/d
+/FSMR4LBT140605/d
+/FSMR4LBT/d
+/LBT/d
+/PS_LFS_BT/d
+
+# needed by MD11408
+/PS_LFS_OS_2014_07_02/d
+

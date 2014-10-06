@@ -52,9 +52,14 @@ makingTest_checkUname() {
     # Note: TESTTARGET lowercase with ,,
     local make="make TESTTARGET=${targetName,,}"    
 
+
     cd ${workspace}/src-test/src/unittest/tests/common/checkuname
+
+    info "writing test config"
+    execute ${make} testconfig-overwrite TESTBUILD=${DELIVERY_DIRECTORY} TESTTARGET=${testTargetName}
+
     info "installing software on the target"
-    execute ${make} install WORKSPACE=${DELIVERY_DIRECTORY} 
+    execute ${make} install 
 
     info "powercycle target"
     execute ${make} powercycle
@@ -91,7 +96,7 @@ makingTest_testLRC() {
     execute mkdir -p ${xmlOutputDirectory}
     mustExistDirectory ${xmlOutputDirectory}
 
-    local testTargetName=lcpa878 # TODO $(getConfig LFS_CI_uc_test_testTargetName)
+    local testTargetName=lcpa914 # TODO $(getConfig LFS_CI_uc_test_testTargetName)
     mustHaveValue "${testTargetName}" "test target name"
 
     local testSuiteDirectory=${workspace}/src-test/src/unittest/testsuites/continousintegration/production_ci_LRC

@@ -19,10 +19,13 @@ LFS_CI_SOURCE_config='$Id$'
 
 ## @fn      getLocationName()
 #  @brief   get the location name (aka branch) from the jenkins job name
-#  @param   <none>
+#  @param   {jobName} name of the job, optional, default JOB_NAME
 #  @return  location name
 getLocationName() {
-    local location=$(${LFS_CI_ROOT}/bin/getFromString.pl "${JOB_NAME}" location)
+    requiredParameters JOB_NAME
+
+    local jobName=${1:-${JOB_NAME}}
+    local location=$(${LFS_CI_ROOT}/bin/getFromString.pl "${jobName}" location)
 
     # 2014-02-17 demx2fk3 TODO do this in a better wa
     case ${location} in

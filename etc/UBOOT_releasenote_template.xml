@@ -9,16 +9,16 @@
   <importantNotes>
     <note name="__TAGNAME__">__IMPORTANT_NOTE__</note>
   </importantNotes>
-  <repositoryUrl>__SVN_REPOS_URL__</repositoryUrl>
-  <repositoryBranch>tags</repositoryBranch>
-  <repositoryRevision>__SVN_REVISION__</repositoryRevision>
+  <repositoryUrl>__SVN_OS_REPOS_URL__</repositoryUrl>
+  <repositoryBranch>tags/__TAGNAME__</repositoryBranch>
+  <repositoryRevision>__SVN_OS_REPOS_REVISION__</repositoryRevision>
   <correctedFaults>
-    <module name="PS_BT_OS">
+    <module name="PS_LFS_BT">
         __CORRECTED_FAULTS__
     </module>
   </correctedFaults>
   <features>
-    <module name="PS_BT_OS">
+    <module name="PS_LFS_BT">
         __FEATURES__
     </module>
   </features>
@@ -28,20 +28,20 @@
   <notes>
   </notes>
   <changenotes>
-    <module name="PS_BT_OS">
+    <module name="PS_LFS_BT">
         __CHANGENOTES__
     </module>
   </changenotes>
   <unsupportedFeatures>
-    <module name="PS_BT_OS">
+    <module name="PS_LFS_BT">
     </module>
   </unsupportedFeatures>
   <restrictions>
-    <module name="PS_BT_OS">
+    <module name="PS_LFS_BT">
     </module>
   </restrictions>
   <download>
-      <downloadItem storage="SVN" name="PS_LFS_OS">__SVN_TAGS_URL_WITH_REVISION__</downloadItem>
+      <downloadItem storage="SVN" name="PS_LFS_BT">__SVN_OS_TAGS_URL_WITH_REVISION__</downloadItem>
   </download>
   <additional>
   </additional>

@@ -1250,7 +1250,7 @@ SOURCES:
 
             # print label information for different components
             my $label = $self->{label};
-            if( grep { $_ eq $source->{directory} } qw ( src-bos src-fsmbos src-fsmbos35 src-mbrm src-fsmbrm src-fsmbrm35 ) ) {
+            if( grep { $_ eq $source->{directory} } qw ( src-bos src-fsmbos src-fsmbos35 src-mbrm src-fsmbrm src-fsmbrm35 src-tools35 ) ) {
                 $label =~ s/PS_LFS_OS/LFS/g;
                 $label =~ s/PS_LFS_BT/LBT/g;
                 $label =~ s/_20(\d\d)_/$1/g;
@@ -1787,7 +1787,7 @@ sub prepare {
                                     text => $3, };
         }
         # new feature
-        elsif( $msg =~ m/^.*(BTS[A-Z]-[0-9]*)\s*NF\s*([^ t:]*)(.*$)/ ) {
+        if( $msg =~ m/^.*(BTS[A-Z]-[0-9]*)\s*NF\s*([^ :]*)(.*$)/ ) {
             push @{ $self->{NF}}, { jira => $1,
                                     nr   => $2,
                                     text => $3, };
@@ -1815,6 +1815,9 @@ sub prepare {
     # collect data
     # __TAGNAME__
     $self->{data}{TAGNAME} = $self->{tagName};
+
+    # __LFS_PROD_RELEASE_CURRENT_TAG_NAME_REL__
+    $self->{data}{LFS_PROD_RELEASE_CURRENT_TAG_NAME_REL} = $ENV{"LFS_PROD_RELEASE_CURRENT_TAG_NAME_REL"};
     # __DATE__
     $self->{data}{DATE} = strftime( "%Y-%m-%d", gmtime());
     # __TIME__
@@ -1825,21 +1828,41 @@ sub prepare {
     $self->{data}{BRANCH} = "Branch";
     # __IMPORTANT_NOTE__
     $self->{data}{IMPORTANT_NOTE} = $self->{releaseNote}->importantNote();
-    # __SVN_REPOS_URL__
-    $self->{data}{SVN_REPOS_URL} = $config->getConfig( name => "LFS_PROD_svn_delivery_os_repos_url" );
-    # __SVN_REVISION__
-    my $svnUrl = sprintf( "%s/os/tags/%s", 
-                            $self->{data}{SVN_REPOS_URL},
+
+    # __SVN_OS_REPOS_URL__
+    $self->{data}{SVN_OS_REPOS_URL}       = $config->getConfig( name => "LFS_PROD_svn_delivery_os_repos_url" );
+
+    # __SVN_OS_REPOS_REVISION__
+    my $svnUrl = sprintf( "%s/tags/%s", 
+                            $self->{data}{SVN_OS_REPOS_URL},
                             $self->{data}{TAGNAME},
                         );
-    $self->{data}{SVN_REVISION} = $svn->info( url => $svnUrl )->{entry}->{commit}->{revision};
+    $self->{data}{SVN_OS_REPOS_REVISION} = $svn->info( url => $svnUrl )->{entry}->{commit}->{revision};
+    # __SVN_OS_TAGS_URL_WITH_REVISION__
+    $self->{data}{SVN_OS_TAGS_URL_WITH_REVISION} = $svnUrl;
 
-    # __SVN_TAGS_URL_WITH_REVISION__
-    $self->{data}{SVN_TAGS_URL_WITH_REVISION} = sprintf( "%s/tags/%s@%d",
-                                                            $self->{data}{SVN_REPOS_URL},
-                                                            $self->{data}{TAGNAME},
-                                                            $self->{data}{SVN_REVISION},
-                                                       );
+    # __SVN_REL_REPOS_URL__
+    $self->{data}{SVN_REL_REPOS_URL} = $config->getConfig( name => "LFS_PROD_svn_delivery_release_repos_url" );
+    # __SVN_REL_REPOS_REVISION__
+    $svnUrl = sprintf( "%s/tags/%s", 
+                         $self->{data}{SVN_REL_REPOS_URL},
+                         $self->{data}{LFS_PROD_RELEASE_CURRENT_TAG_NAME_REL},
+                     );
+    $self->{data}{SVN_REL_REPOS_REVISION} = $svn->info( url => $svnUrl )->{entry}->{commit}->{revision};
+    # __SVN_REL_TAGS_URL_WITH_REVISION__
+    $self->{data}{SVN_REL_TAGS_URL_WITH_REVISION} = $svnUrl;
+
+    # __SVN_SOURCE_TAGS_URL_WITH_REVISION__
+    $self->{data}{SVN_SOURCE_REPOS_URL} = $config->getConfig( name => "lfsSourceRepos" );
+
+    $svnUrl = sprintf( "%s/os/tags/%s", 
+                         $self->{data}{SVN_SOURCE_REPOS_URL},
+                         $self->{data}{TAGNAME},
+                     );
+
+    $self->{data}{SVN_SOURCE_TAGS_REVISION}          = $svn->info( url => $svnUrl )->{entry}->{commit}->{revision};
+    $self->{data}{SVN_SOURCE_TAGS_URL_WITH_REVISION} = $svnUrl;
+
     # __CORRECTED_FAULTS__
     $self->{data}{CORRECTED_FAULTS} = join( "\n        ", 
                                             map { sprintf( "<fault %sid=\"%s\">%sPR %s</fault>",
@@ -1863,7 +1886,7 @@ sub prepare {
                                   );
     # __BASELINES__
     my @baselineFiles = qw ( bld/bld-externalComponents-summary/externalComponents );
-    push @baselineFiles, glob( "bld/bld-fsmpsl-*/results/doc/versions/fpga_baselines.txt" );
+    push @baselineFiles, glob( "bld/bld-*psl-*/results/doc/versions/fpga_baselines.txt" );
     push @baselineFiles, glob( "bld/pkgpool*.txt" );
 
     foreach my $file ( @baselineFiles ) {

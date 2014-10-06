@@ -325,7 +325,8 @@ _createLfsOsReleaseNote() {
     execute rsync -ae ssh ${serverName}:${buildDirectory}/changelog.xml ${workspace}/os/
     mustExistFile ${workspace}/os/changelog.xml
 
-    copyArtifactsToWorkspace "${buildJobName}" "${buildBuildNumber}" "externalComponents fsmpsl psl fsmci"
+    # TIDO FIME
+    copyArtifactsToWorkspace "${buildJobName}" "${buildBuildNumber}" "externalComponents fsmpsl psl fsmci lrcpsl"
 
     # convert the changelog xml to a release note
     cd ${workspace}/os/
