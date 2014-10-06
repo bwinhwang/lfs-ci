@@ -515,6 +515,7 @@ use parent qw( -norequire Object );
 
 use XML::Simple;
 use Data::Dumper;
+use Log::Log4perl qw( :easy );
 
 ## @fn     init()
 #  @brief  initialize the Svn Object with data
@@ -587,13 +588,25 @@ sub propget {
 sub info {
     my $self  = shift;
     my $param = { @_ } ;
-    my $url   = replaceMasterByUlmServer( $param->{url} || "" );
+    my $url   = $param->{url} || "";
+    my $xml   = "";
+    my $count = 0;
 
-    open SVN_INFO, sprintf( "%s --xml info %s|", $self->{svnCli}, $url ) || die "can not open svn info: %!";
-    my $xml = join( "", <SVN_INFO> );
-    close SVN_INFO;
+    while ( $xml eq "" && $count < 4 ) {
+        TRACE "running svn info --xml ${url}";
+        open SVN_INFO, sprintf( "%s --xml info %s|", $self->{svnCli}, $url ) || die "can not open svn info: %!";
+        $xml = join( "", <SVN_INFO> );
+        close SVN_INFO;
+        $count++;
+    }
+    if( $xml eq "" ) {
+        die "svn info --xml failed";
+    }
 
-    return XMLin( $xml );
+    my $xmlDataHash = XMLin( $xml );
+    TRACE "got data from svn info " . Dumper( $xmlDataHash );
+
+    return $xmlDataHash;
 }
 
 sub ls {
@@ -1118,7 +1131,7 @@ SOURCES:
         next if not $source;
 
         my @deps = map  { $_->{directory} }
-                   grep { $_->{sourceExistsInFileSystem} }
+                   # grep { $_->{sourceExistsInFileSystem} }
                    $source->getDependencies();
 
         foreach my $dep ( sort @deps ) {
@@ -1142,7 +1155,6 @@ SOURCES:
 
         if( $self->{style} eq "makefile" ) {
 
-
             # print label information for different components
             my $label = $self->{label};
             if( grep { $_ eq $source->{directory} } qw ( src-bos src-fsmbos src-fsmbos35 src-mbrm src-fsmbrm src-fsmbrm35 ) ) {
@@ -1155,6 +1167,7 @@ SOURCES:
             printf "%s: LABEL := %s\n\n", $source->{directory}, $label;
 
             if( grep { $_ eq $goal } $source->platforms() ) {
+                printf ".PHONY: %s\n\n", $source->{directory};
                 printf "%s: ", $source->{directory};
                 foreach my $platform ( sort grep { $_ eq $goal } $source->platforms() ) {
                     printf "%s-%s ", $source->{directory}, $platform;
@@ -1165,7 +1178,9 @@ SOURCES:
             foreach my $target ( sort $source->targets() ) {
                 my $platform = $target->platform();
                 foreach my $p ( $target->targetsParameter() ) {
-                    printf "%s-%s: %s-%s\n\n", $source->{directory}, $p, $source->{directory}, $platform;
+                    if( $p ne $platform ) {
+                        printf "%s-%s: %s-%s\n\n", $source->{directory}, $p, $source->{directory}, $platform;
+                    }
 
                 }
                 printf "%s-%s: %s\n", $source->{directory}, $platform, join( " ", @filteredDeps );
@@ -1514,30 +1529,39 @@ sub prepare {
             # skip this type of comments.
             next;
         }
+        my @newMessage;
+        foreach my $line ( split( /[\n\r]+/, $msg ) ) {
 
-        # cleanup the message a little bit
-        $msg =~ s/^[\%\#]FIN  *[\%\#](\w+)=(\S+)\s*(.*)/$1 $2 $3 (completed)/;
-        $msg =~ s/^[\%\#]TBC  *[\%\#](\w+)=(\S+)\s*(.*)/$1 $2 $3 (to be continued)/;
-        $msg =~ s/^[\%\#]TPC  *[\%\#](\w+)=(\S+)\s*(.*)/$1 $2 $3 (work in progress)/;
-        $msg =~ s/[\%\#]REM /Remark: /;
-        $msg =~ s/\s*commit [0-9a-f]+\s*//g;
-        $msg =~ s/\s*Author: .*[@].+//g;
-        $msg =~ s/\s*Date: .* [0-9]+:[0-9]+:[0-9]+ .*//g;
-        $msg =~ s/\n/\\n/g;
-        $msg =~ s/\s+/ /g;
-        $msg =~ s/^\s+//;
-        $msg =~ s/\s+$//;
-        $msg =~ s/\(ros\)/ /;
-        $msg =~ s/\s*NOJCHK\s*//;
-        $msg =~ s/\bDESCRIPTION:\s*/ /;
-        $msg =~ s/\bREADINESS\s*:\s*COMPLETED\s*/ /;
-        $msg =~ s/^BTSPS-\d+\s+IN[^:]+:\s*//;
-        $msg =~ s/^BTSPS-\d+\s+IN\s*//;
-        $msg =~ s/  */ /g;
-        $msg =~ s/^fk\s*:\s*//;
-        $msg =~ s/\\n/\n/g;
-        $msg =~ s/^\s+//;
-        $msg =~ s/\s+$//;
+            # cleanup the message a little bit
+            $line =~ s/[\%\#]FIN  *[\%\#](\w+)=(\S+)\s*(.*)/$1 $2 $3 (completed)/g;
+            $line =~ s/[\%\#]TBC  *[\%\#](\w+)=(\S+)\s*(.*)/$1 $2 $3 (to be continued)/g;
+            $line =~ s/[\%\#]TPC  *[\%\#](\w+)=(\S+)\s*(.*)/$1 $2 $3 (work in progress)/g;
+            $line =~ s/[\%\#]REM /Remark: /g;
+            $line =~ s/[\%[#]RB=\d+//g;
+            $line =~ s/\s*commit [0-9a-f]+\s*//g;
+            $line =~ s/\s*Author: .*[@].+//g;
+            $line =~ s/\s*Date: .* [0-9]+:[0-9]+:[0-9]+ .*//g;
+            $line =~ s/\n/\\n/g;
+            $line =~ s/\s+/ /g;
+            $line =~ s/^\s+//;
+            $line =~ s/\s+$//;
+            $line =~ s/\(ros\)/ /;
+            $line =~ s/\s*NOJCHK\s*//;
+            $line =~ s/\bDESCRIPTION:\s*/ /;
+            $line =~ s/\bREADINESS\s*:\s*COMPLETED\s*/ /;
+            $line =~ s/^BTSPS-\d+\s+IN[^:]+:\s*//;
+            $line =~ s/^BTSPS-\d+\s+IN\s*//;
+            $line =~ s/  */ /g;
+            $line =~ s/^fk\s*:\s*//;
+            $line =~ s/\\n/\n/g;
+            $line =~ s/^\s+//;
+            $line =~ s/\s+$//;
+            next if $line =~ m/^\s*$/;
+
+            push @newMessage, $line;
+        }
+
+        $msg = join( "\n", @newMessage );
 
         my @pathes = map { $_->{content} }
                     @{ $entry->{paths}->[0]->{path} };
@@ -1692,33 +1716,33 @@ sub prepare {
                         : $entry->{msg}->[0] ;
 
         # jira stuff
-        if( $msg =~ m/^.*(BTS[A-Z]*-[0-9]*)\s*PR\s*([^:]*)(.*$)/  ) {
+        if( $msg =~ m/^.*(BTS[A-Z]*-[0-9]*)\s*PR\s*([^ :]*)(.*$)/  ) {
             push @{ $self->{PR} }, { jira => $1,
                                      nr   => $2,
                                      text => $3, };
         }
         # change note
-        if( $msg =~ m/^.*(BTS[A-Z]-[0-9]*)\s*CN\s*([^ :]*)(.*$)/ ) {
+        elsif( $msg =~ m/^.*(BTS[A-Z]-[0-9]*)\s*CN\s*([^ :]*)(.*$)/ ) {
             push @{ $self->{CN}}, { jira => $1,
                                     nr   => $2,
                                     text => $3, };
         }
         # new feature
-        if( $msg =~ m/^.*(BTS[A-Z]-[0-9]*)\s*NF\s*([^ t:]*)(.*$)/ ) {
+        elsif( $msg =~ m/^.*(BTS[A-Z]-[0-9]*)\s*NF\s*([^ t:]*)(.*$)/ ) {
             push @{ $self->{NF}}, { jira => $1,
                                     nr   => $2,
                                     text => $3, };
+        }
+        # %FIN PR=PR123456 foobar
+        elsif( $msg =~ m/\s*[#%]FIN\s+[%@](PR|NF|CN)=(\w+)(.*)/ ) {
+            push @{ $self->{ $1 } }, { nr   => $2,
+                                       text => $2 . $3, };
         }
         # notes
         if( $msg =~ m/Transport Drivers/ ) {
             push @{ $self->{notes} }, { notes => "Change in Transport Drivers. Please update transport software also when testing this release." };
         }
 
-        # %FIN PR=PR123456 foobar
-        if( $msg =~ m/\s*[#%]FIN\s+[%@](PR|NF|CN)=(\w+)(.*)/ ) {
-            push @{ $self->{ $1 } }, { nr   => $2,
-                                       text => $2 . $3, };
-        }
     }
 
     $self->{templateFileName} = $config->getConfig( name => "LFS_PROD_ReleaseNote_TemplateFileXml" );
@@ -2295,8 +2319,29 @@ use warnings;
 use Data::Dumper;
 use File::Basename;
 
+use Log::Log4perl qw( :easy );
+
+my %l4p_config = (
+    'log4perl.category'                                  => 'TRACE, Logfile',
+    'log4perl.category.Sysadm.Install'                   => 'OFF',
+    'log4perl.appender.Logfile'                          => 'Log::Log4perl::Appender::File',
+    'log4perl.appender.Logfile.filename'                 => $ENV{CI_LOGGING_LOGFILENAME}, 
+    'log4perl.appender.Logfile.layout'                   => 'Log::Log4perl::Layout::PatternLayout',
+    'log4perl.appender.Logfile.layout.ConversionPattern' => '%p %d{ISO8601} %r [%M] %m%n',
+    'log4perl.appender.Screen'                           => 'Log::Log4perl::Appender::Screen',
+    'log4perl.appender.Screen.stderr'                    => '1',
+    'log4perl.appender.Screen.Threshold'                 => 'INFO',
+    'log4perl.appender.Screen.layout'                    => 'Log::Log4perl::Layout::SimpleLayout',
+);
+
+if( $ENV{CI_LOGGING_LOGFILENAME} ) {
+    Log::Log4perl::init( \%l4p_config );
+}
+
 my $program = basename( $0 );
 my $command;
+
+INFO "welcome to $program";
 
 if( $program eq "getDependencies" ) {
     $command = Command::GetDependencies->new();
@@ -2324,5 +2369,5 @@ if( $program eq "getDependencies" ) {
 
 $command->prepare( @ARGV );
 $command->execute() and die "can not execute $program";
-
+INFO "Thank you for making a little program very happy";
 exit 0;

@@ -120,6 +120,7 @@ startBuildJobs() {
 #  @return  list of jobs names
 listJobNames() {
     local serverPath=$(getConfig jenkinsMasterServerPath)
+    # TODO: demx2fk3 2014-09-16 fixme does not work in the correct way
     runOnMaster ls ${serverPath}/jobs
 }
 
@@ -202,5 +203,10 @@ disableJob() {
 enableJob() {
     local jobName=$1
     executeJenkinsCli enable-job "${jobName}"
+    return
+}
+
+setBuildResultUnstable() {
+    executeJenkinsCli set-build-result unstable
     return
 }

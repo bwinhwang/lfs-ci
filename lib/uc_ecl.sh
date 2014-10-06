@@ -38,7 +38,8 @@ ci_job_ecl() {
     local buildBuildNumber=$(  grep Build   ${upstreamsFile} | cut -d: -f2 | sort -n | tail -n 1)
     if [[ -z ${buildJobName} ]] ; then
         error "not trigger an ECL update without a build job name"
-        exit 1
+        setBuildResultUnstable
+        exit 0
     fi
 
     info "upstream    is ${UPSTREAM_PROJECT} / ${UPSTREAM_BUILD}"
