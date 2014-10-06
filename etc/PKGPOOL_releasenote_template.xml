@@ -1,0 +1,32 @@
+<?xml version="1.0"?>
+<releasenote version="9">
+  <name>__TAGNAME__</name>
+  <system>PS_LFS</system>
+  <releaseDate>__DATE__</releaseDate>
+  <releaseTime>__TIME__</releaseTime>
+  <authorEmail>robert.schiele@nsn.com</authorEmail>
+  <basedOn>__BASED_ON__</basedOn>
+  <branchFor>
+    <branch>PS_Basic</branch>
+  </branchFor>
+  <importantNotes>
+    <note name="PS_LFS_PKG">
+        __IMPORTANT_NOTES__
+    </note>
+  </importantNotes>
+  <repositoryUrl>/build/home/SC_LFS/pkgpool</repositoryUrl>
+  <repositoryBranch/>
+  <repositoryRevision>__TAG_NAME__</repositoryRevision>
+  <correctedFaults>
+    <module name="$RELSTR">
+    </module>
+  </correctedFaults>
+  <baselines>
+   __BASELINES__
+  </baselines>
+  <download>
+    <downloadItem storage="FILE" name="SC_LFS">/build/home/SC_LFS/pkgpool/__TAG_NAME__</downloadItem>
+  </download>
+  <features>
+  </features>
+</releasenote>

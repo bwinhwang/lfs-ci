@@ -443,7 +443,7 @@ createOsFileList() {
     mustHaveWorkspaceName
 
     local dst=${workspace}/upload
-    find ${dst} -not -type d | sort | xargs md5sum 2>/dev/null | sed "s,${dst}/,,g" > ${dst}/doc/list_all_os_files
+    execute -n find ${dst} -not -type d | sort | xargs md5sum 2>/dev/null | sed "s,${dst}/,,g" > ${dst}/doc/list_all_os_files.txt
 
     return
 }

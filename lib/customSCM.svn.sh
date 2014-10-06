@@ -42,7 +42,9 @@ actionCompare() {
     local oldRevisionsFile=${REVISION_STATE_FILE}
 
     local newRevisionsFile=$(createTempFile)
+    execute rm -rf ${WORKSPACE}/revision_state.txt
     _createRevisionsTxtFile ${newRevisionsFile}
+    execute cp ${newRevisionsFile} ${WORKSPACE}/revision_state.txt
 
     debug "old revision state file"
     rawDebug ${oldRevisionsFile}
@@ -80,6 +82,12 @@ _createRevisionsTxtFile() {
     locationName=$(getLocationName)
     mustHaveLocationName
 
+    if [[ -f ${WORKSPACE}/revision_state.txt ]] ; then
+        info "using ${WORKSPACE}/revision_state.txt from compare"
+        # cat ${WORKSPACE}/revision_state.txt > ${newRevisionsFile}
+        # return
+    fi
+
     local srcRepos=$(getConfig lfsSourceRepos)
 
     # get the locations/<branch>/Dependencies
@@ -92,16 +100,19 @@ _createRevisionsTxtFile() {
 
     # can not use execute here, so we have to do the error handling by hande
     # do the magic for all dir
+    info "dependenciesFileUrl is ${dependenciesFileUrl}"
     ${LFS_CI_ROOT}/bin/getRevisionTxtFromDependencies -u ${dependenciesFileUrl} \
                                                       -f ${dependenciesFile} | sort -u > ${newRevisionsFile} 
     if [[ $? != 0 ]] ; then
-        error "reported an error..."
+        error "getRevisionTxtFromDependencies failed to generate ${newRevisionsFile}"
         exit 1
     fi
 
     # add also buildtools location
     local bldToolsUrl=${srcRepos}/os/trunk/bldtools/bld-buildtools-common
     local rev=$(svn info --xml ${bldToolsUrl}| ${LFS_CI_ROOT}/bin/xpath -q -e '/info/entry/commit/@revision'  | cut -d'"' -f 2)
+    mustHaveValue "${rev}" "svn info ${bldToolsUrl} didnt get a value for revision"
+
     printf "%s %s %s" bld-buildtools "${bldToolsUrl}" "${rev}" >> ${newRevisionsFile}
 
     local filterFile=$(getConfig CUSTOM_SCM_svn_filter_components_file)
@@ -204,7 +215,6 @@ actionCheckout() {
 
 ## @fn      actionCalculate()
 #  @brief   action ...
-#  @details «full description»
 #  @param   <none>
 #  @return  <none>
 actionCalculate() {

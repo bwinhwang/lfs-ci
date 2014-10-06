@@ -122,6 +122,10 @@ copyReleaseCandidateToShare() {
     mustExistFile ${commonentsFile}
     for sdk in $(getConfig LFS_CI_UC_package_linking_component) ; do
         local sdkValue=$(getConfig ${sdk} ${commonentsFile})
+        # TODO: demx2fk3 2014-08-26 hack place make this different
+        if [[ ${sdk} = sdk3 && -z ${sdkValue} ]] ; then
+            sdkValue=$(getConfig sdk ${commonentsFile})
+        fi
         mustExistDirectory ../../../SDKs/${sdkValue}
         execute ln -sf ../../../SDKs/${sdkValue} ${sdk}
     done
@@ -132,14 +136,6 @@ copyReleaseCandidateToShare() {
     # get the latest used revision in this build
     local revision=$(cut -d" " -f 3 ${workspace}/bld/bld-externalComponents-*/usedRevisions.txt | sort -u | tail -n 1)
     mustHaveValue "${revision}" "latest used revision"
-
-    # info "create link in RCversion to "
-    # execute mkdir -p ${linkDirectory}
-    # execute cd ${linkDirectory}
-    # TODO: demx2fk3 2014-07-22 disabled at the moment (see ecl promotion)
-    # execute ln -sf ${pathToLink} ${label}
-    # TODO: demx2fk3 2014-07-22 disabled, bis jemand schreit...
-    # execute ln -sf ${pathToLink} "trunk@${revision}"
 
     # this is only for internal use!
     info "creating link for internal usage"

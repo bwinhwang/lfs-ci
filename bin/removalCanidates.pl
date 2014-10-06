@@ -26,7 +26,9 @@ while( <> ) {
         push @{ $branches{ $1 } }, { path => $_,
                                      base => $base };
     } elsif ( $base eq "SAMPLEVERSION" or
-              $base eq "EMPTY" ) {
+              $base eq "EMPTY" or
+              $base eq "DENSE" 
+              ) {
         # ignore this baselines
     } else {
         die "fail $base";
@@ -36,10 +38,11 @@ while( <> ) {
 
 foreach my $branch ( keys %branches ) {
     my $c = 0;
-    my @list = map  { $_->{base} }
-               grep { $c++ > 10 }
+    my @list = grep { $c++ > 10 }
                reverse
-               sort @{ $branches{ $branch } };
-    print join( "\n", @list ) . "\n" if scalar( @list ) > 0;
+               sort 
+               map  { $_->{base} }
+               @{ $branches{ $branch } };
+     print join( "\n", @list ) . "\n" if scalar( @list ) > 0;
 }
 

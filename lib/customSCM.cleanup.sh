@@ -6,48 +6,6 @@
 #  @param   <none>
 #  @return  1 if if a build is not required, 0 otherwise
 actionCompare() {
-
-#     if [[ -z "${REVISION_STATE_FILE}" ]] ; then
-#         info "no old revision state file found"
-#         exit 0
-#     fi
-# 
-#     export subTaskName=$(getSubTaskNameFromJobName)
-#     # syntax is <share>_to_<site>
-#     export shareType=$(cut -d_ -f 1 <<< ${subTaskName})
-#     export siteName=$(cut -d_ -f 3 <<< ${subTaskName})
-#     local directoryNameToSynchronize=$(getConfig ADMIN_sync_share_local_directoryName)
-#     local findDepth=$(getConfig ADMIN_sync_share_check_depth)
-#     unset shareType siteName
-# 
-#     # remove this
-#     if [[ -z ${findDepth} ]] ; then
-#         findDepth=1
-#     fi
-#     # read the revision state file
-#     # format:
-#     # projectName
-#     # buildNumber
-#     { read oldDirectoryNameToSynchronize ; 
-#       read oldChecksum ; } < "${REVISION_STATE_FILE}"
-# 
-#     info "old revision state data are ${oldDirectoryNameToSynchronize} / ${oldChecksum}"
-# 
-#     # comparing to new state
-#     if [[ "${directoryNameToSynchronize}" != "${oldDirectoryNameToSynchronize}" ]] ; then
-#         info "directory name changed, trigger build"
-#         exit 0
-#     fi
-# 
-#     local checksum=$(find ${directoryNameToSynchronize} -mindepth ${findDepth} -maxdepth ${findDepth} -printf "%C@ %p\n" | sort | md5sum | cut -d" " -f 1)
-# 
-#     info "new revision state data are ${directoryNameToSynchronize} / ${checksum}"
-# 
-#     if [[ "${checksum}" != "${oldChecksum}" ]] ; then
-#         info "checksum has changed, trigger build"
-#         exit 0
-#     fi
-# 
     info "no change in ${directoryNameToSynchronize} / ${checksum}"
     exit 1
 }
@@ -69,6 +27,8 @@ actionCheckout() {
 
     local subTaskName=$(getSubTaskNameFromJobName)
 
+    info "subtask name is ${subTaskName}"
+
     case ${subTaskName} in 
         phase_1_CI_LFS_in_Ulm)
             _ciLfsNotReleasedBuilds ${tmpFileA}
@@ -78,15 +38,19 @@ actionCheckout() {
             _ciLfsOldReleasesOnBranches ${tmpFileA}
             execute touch ${tmpFileB}
         ;;
-        phase_3_SC_LFS_in_Ulm)
-            fatal "not implemented"
-        ;;
         phase_3_CI_LFS_in_Ulm)
             fatal "not implemented"
+        ;;
+        phase_2_SC_LFS_linuxKernel_in_Ulm)
+            _scLfsLinuxKernelOldReleasesOnBranches ${tmpFileA}
+            execute touch ${tmpFileB}
         ;;
         phase_2_SC_LFS_in_Ulm)
             _scLfsOldReleasesOnBranches ${tmpFileA}
             execute touch ${tmpFileB}
+        ;;
+        phase_3_SC_LFS_in_Ulm)
+            fatal "not implemented"
         ;;
         phase_4_CI_LFS_in_*)
             _ciLfsRemoteSites ul ${tmpFileB}
@@ -104,6 +68,7 @@ actionCheckout() {
 
             case ${subTaskName} in
                 *_in_ou) _scLfsRemoteSites ou ${tmpFileA} ;;
+                *_in_be) _scLfsRemoteSites be ${tmpFileA} ;;
                 *_in_wr) _scLfsRemoteSites wr ${tmpFileA} ;;
                 *_in_bh) _scLfsRemoteSites bh ${tmpFileA} ;;
                 *_in_du) 
@@ -114,13 +79,23 @@ actionCheckout() {
             esac
 
         ;;
+        lfsArtifacts)
+            _lfsArtifactsRemoveOldArtifacts ${tmpFileA}
+        ;;
     esac
 
     if [[ -e ${LFS_CI_ROOT}/etc/baselineExclutionList.sed ]] ; then
         execute sed -i -f ${LFS_CI_ROOT}/etc/baselineExclutionList.sed ${tmpFileA}
     fi
 
+    debug "tmpFile A"
+    rawDebug ${tmpFileA}
+    debug "tmpFile B"
+    rawDebug ${tmpFileB}
     ${LFS_CI_ROOT}/bin/diffToChangelog.pl -d -a ${tmpFileA} -b ${tmpFileB} > ${CHANGELOG}
+
+    debug "changelog"
+    rawDebug ${CHANGELOG}
 
     # Fix empty changelogs:
     if [ ! -s "${CHANGELOG}" ] ; then
@@ -157,10 +132,15 @@ _ciLfsNotReleasedBuilds() {
     sort -u ${tmpFile} > ${tmpFileA}
     find ${directoryToCleanup} -mindepth 2 -maxdepth 2 -mtime +7 -type d -printf "%p\n" | sort -u > ${tmpFileB}
 
-#        |  egrep -e 'PS_LFS_OS_[0-9]{4}_[0-9]{2}_[0-9]{4}' \
-    # release candidates, which are older than 60 days and are not released
+    debug "list from find"
+    rawDebug ${tmpFileB}
+    debug "list from rcVersions"
+    rawDebug ${tmpFileA}
+
     grep -v -f ${tmpFileA} ${tmpFileB} | sed "s/^/1 /g"    \
         > ${resultFile}
+
+    rawDebug ${resultFile}
 
     return
 }
@@ -170,7 +150,7 @@ _scLfsOldReleasesOnBranches() {
     local tmpFileA=$(createTempFile)
     local tmpFileB=$(createTempFile)
     local directoryToCleanup=/build/home/SC_LFS/releases/bld/
-    local days=600
+    local days=60
 
     info "check for baselines older than ${days} days in ${directoryToCleanup}"
     find ${directoryToCleanup} -mindepth 2 -maxdepth 2 -mtime +${days} -type d -printf "%p\n" \
@@ -183,6 +163,23 @@ _scLfsOldReleasesOnBranches() {
     return
 }
 
+_scLfsLinuxKernelOldReleasesOnBranches() {
+    local resultFile=$1
+    local tmpFileA=$(createTempFile)
+    local tmpFileB=$(createTempFile)
+    local directoryToCleanup=/build/home/SC_LFS/linuxkernels
+    local days=1500
+
+    info "check for baselines older than ${days} days in ${directoryToCleanup}"
+    find ${directoryToCleanup} -mindepth 1 -maxdepth 1 -mtime +${days} -type d -printf "%p\n" \
+        | sort -u > ${tmpFileA}
+
+    ${LFS_CI_ROOT}/bin/removalCanidates.pl  < ${tmpFileA} > ${tmpFileB}
+
+    grep -w -f ${tmpFileB} ${tmpFileA} | sed "s/^/1 /g" > ${resultFile}
+
+    return
+}
 _ciLfsRemoteSites() {
     local siteName=$1
     local resultFile=$2
@@ -219,13 +216,39 @@ _ciLfsOldReleasesOnBranches() {
     local resultFile=$1
 
     local tmpFileA=$(createTempFile)
-    local directoryToCleanup=/build/home/CI_LFS/Release_Candidates
+    local tmpFileB=$(createTempFile)
+    local directoryToCleanup=/build/home/CI_LFS/Release_Candidates/
 
     find ${directoryToCleanup} -mindepth 2 -maxdepth 2 -mtime +60 -type d -printf "%p\n" \
-        | sort -u \
-        | ${LFS_CI_ROOT}/bin/removalCanidates.pl \
-        | sed "s/^/1 ${directoryToCleanup}/g" | sort -u > ${resultFile}
+        | sort -u > ${tmpFileA}
 
+    ${LFS_CI_ROOT}/bin/removalCanidates.pl  < ${tmpFileA} > ${tmpFileB}
+    grep -w -f ${tmpFileB} ${tmpFileA} | sed "s/^/1 /g" > ${resultFile}
+
+    return
+}
+
+_lfsArtifactsRemoveOldArtifacts() {
+    local resultFile=$1
+
+    local directoryToCleanup=/build/home/psulm/LFS_internal/artifacts
+
+    for jobName in ${directoryToCleanup}/* 
+    do 
+        [[ -d ${jobName} ]] || continue
+        info "checking for artifacts for ${jobName}"
+        find ${jobName} -mindepth 1 -maxdepth 1 -ctime +10 -type d -printf "%C@ %p\n" \
+            | sort -n     \
+            | tac         \
+            | tail -n +10 \
+            >> ${resultFile}
+    done
+
+    return
+}
+_lfsCiLogfiles() {
+    local resultFile=$1
+    find /ps/lfs/ci/log/ -type f -ctime +60 | sed "s:^:1 :" > ${resultFile}
     return
 }
 
