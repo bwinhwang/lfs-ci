@@ -94,45 +94,48 @@ makingTest_testFSM() {
     execute mkdir -p ${xmlOutputDirectory}
     mustExistDirectory ${xmlOutputDirectory}
 
-	local targetName=$(sed "s/^Test-//" <<< ${JOB_NAME})
+	export targetName=$(sed "s/^Test-//" <<< ${JOB_NAME})
     mustHaveValue "${testTargetName}" "test target name"
 
 	local testSuiteDirectory=${workspace}/$(getConfig LFS_CI_uc_test_making_test_suite_dir)
     mustExistDirectory ${testSuiteDirectory}
-	mustExistFile ${testSuiteDirectory/testsuite.mk}
+	mustExistFile ${testSuiteDirectory}/testsuite.mk
 
     info "create testconfig for ${testSuiteDirectory}"
     execute make -C ${testSuiteDirectory} testconfig-overwrite \
                 TESTBUILD=${testBuildDirectory} \
                 TESTTARGET=${testTargetName}
 
-    # TODO: demx2fk3 2014-08-13 remove me
     info "powercycle the target to get it in a defined state"
-    execute make -C ${testSuiteDirectory} TESTTARGET=${testTargetName} powercycle
+    execute make -C ${testSuiteDirectory} powercycle
+
     info "waiting for prompt"
-    execute make -C ${testSuiteDirectory} TESTTARGET=${testTargetName} waitprompt
-    sleep 120
+    execute make -C ${testSuiteDirectory} waitprompt
 
     info "installing software"
-    execute make -C ${testSuiteDirectory} TESTTARGET=${testTargetName} install
+    execute make -C ${testSuiteDirectory} install
+
+    info "installing testexecd on target"
+    execute make -C ${testSuiteDirectory} setup
 
     info "checking the board for correct software"
-    execute make -C ${testSuiteDirectory} TESTTARGET=${testTargetName} check
+    execute make -C ${testSuiteDirectory} check
 
-    export LFS_CI_ERROR_CODE=0
-
-    execute make -C ${testSuiteDirectory} TESTTARGET=${testTargetName} waitssh
-    execute make -C ${testSuiteDirectory} TESTTARGET=${testTargetName} setup
-    execute make -C ${testSuiteDirectory} TESTTARGET=${testTargetName} check
+    execute make -C ${testSuiteDirectory} waitssh
+    execute make -C ${testSuiteDirectory} setup
+    execute make -C ${testSuiteDirectory} check
 
     info "executing testsuite production_ci_FSMr2"
-    execute make -C ${testSuiteDirectory} TESTTARGET=${testTargetName} test
+    execute make -C ${testSuiteDirectory} test
+
+    export LFS_CI_ERROR_CODE= 
+    runAndLog make -C ${testSuiteDirectory} test-xmloutput       || LFS_CI_ERROR_CODE=0 # also true
 
     find ${workspace}/xml-output -name '*.xml' | while read file
-
     do
         cat -v ${file} > ${file}.tmp && mv ${file}.tmp ${file}
     done
+
     if [[ ${LFS_CI_ERROR_CODE} ]] ; then
         error "some errors in test cases. please see logfile"
         exit 1
