@@ -55,9 +55,14 @@ makingTest_checkUname() {
     # Note: TESTTARGET lowercase with ,,
     local make="make TESTTARGET=${targetName,,}"    
 
+
     cd ${workspace}/src-test/src/unittest/tests/common/checkuname
+
+    info "writing test config"
+    execute ${make} testconfig-overwrite TESTBUILD=${DELIVERY_DIRECTORY} TESTTARGET=${testTargetName}
+
     info "installing software on the target"
-    execute ${make} install WORKSPACE=${DELIVERY_DIRECTORY} 
+    execute ${make} install 
 
     info "powercycle target"
     execute ${make} powercycle
