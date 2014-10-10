@@ -4,7 +4,7 @@
 [[ -z ${LFS_CI_SOURCE_jenkins} ]] && source ${LFS_CI_ROOT}/lib/jenkins.sh
 
 ci_job_test_on_target() {
-    requiredParameters JOB_NAME BUILD_NUMBER LABEL DELIVERY_DIRECTORY
+    requiredParameters JOB_NAME BUILD_NUMBER LABEL DELIVERY_DIRECTORY UPSTREAM_PROJECT
 
     setBuildDescription ${JOB_NAME} ${BUILD_NUMBER} ${LABEL}
 
@@ -17,9 +17,13 @@ ci_job_test_on_target() {
     mustHaveWorkspaceName
     mustHaveWritableWorkspace
 
-    info "create workspace for testing"
+    local branchName=$(getLocationName ${UPSTREAM_PROJECT})
+    mustHaveValue "${branchName}" "branch name"
+
+    info "create workspace for testing on ${branchName}"
     cd ${workspace}
     execute build setup
+    execute build newlocations ${branchName}
     execute build adddir src-test
 
     export testTargetName=${targetName}
@@ -120,26 +124,22 @@ makingTest_testFSM() {
     info "installing software"
     execute make -C ${testSuiteDirectory} install
 
+    info "restarting the target"
+    execute make -C ${testSuiteDirectory} powercycle
+    execute make -C ${testSuiteDirectory} waitprompt
+    execute make -C ${testSuiteDirectory} waitssh
+
     info "installing testexecd on target"
     execute make -C ${testSuiteDirectory} setup
 
     info "checking the board for correct software"
     execute make -C ${testSuiteDirectory} check
 
-    execute make -C ${testSuiteDirectory} waitssh
-    execute make -C ${testSuiteDirectory} setup
-    execute make -C ${testSuiteDirectory} check
-
-    info "executing testsuite production_ci_FSMr2"
-    execute make -C ${testSuiteDirectory} test
-
     export LFS_CI_ERROR_CODE= 
     runAndLog make -C ${testSuiteDirectory} test-xmloutput       || LFS_CI_ERROR_CODE=0 # also true
 
-    find ${workspace}/xml-output -name '*.xml' | while read file
-    do
-        cat -v ${file} > ${file}.tmp && mv ${file}.tmp ${file}
-    done
+    execute mkdir ${workspace}/xml-reports/
+    execute cp -f ${testSuiteDirectory}/xml-reports/*.xml ${workspace}/xml-reports/
 
     if [[ ${LFS_CI_ERROR_CODE} ]] ; then
         error "some errors in test cases. please see logfile"
