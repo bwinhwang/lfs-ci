@@ -592,10 +592,12 @@ sub info {
     my $xml   = "";
     my $count = 0;
 
-    while ( $xml eq "" && $count < 4 ) {
-        TRACE "running svn info --xml ${url}";
-        open SVN_INFO, sprintf( "%s --xml info %s|", $self->{svnCli}, $url ) || die "can not open svn info: %!";
+    while ( $xml eq "" && $count < 8 ) {
+        TRACE "running ($count) svn info --xml ${url}";
+        open SVN_INFO, sprintf( "%s --xml info %s|", $self->{svnCli}, $url ) or next;
+        TRACE "svn info --xml ${url} command was ok";
         $xml = join( "", <SVN_INFO> );
+        TRACE "xml is $xml";
         close SVN_INFO;
         $count++;
     }
