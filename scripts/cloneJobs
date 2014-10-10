@@ -3,10 +3,11 @@
 source ${LFS_CI_ROOT}/lib/common.sh
 source ${LFS_CI_ROOT}/lib/jenkins.sh
 
-branchName=MD11410
-branchDisplayName="MD1 1410"
+branchName=TST_GCC49_LRC
+branchDisplayName="GCC 4.9 Test for LRC"
 lastReleaseName="PS_LFS_OS_2014_08_0001"
-trunk=trunk
+trunk=LRC
+trunkDisplayName="LRC trunk"
 
 # ls /var/fpwork/demx2fk3/lfs-jenkins/home/jobs/*/promotions
 
@@ -24,7 +25,7 @@ do
     info "new job will be ${newJobName}"
     if existsJenkinsJob "${newJobName}" ; then
         info "delete new job ${newJobName} first, because it exists"
-        # deleteJenkinsJob "${newJobName}"
+        deleteJenkinsJob "${newJobName}"
     fi
 done
 
@@ -50,7 +51,7 @@ do
 
     newDownStreamProjects=$(echo ${downStreamProjects} | sed "s/_-_${trunk}_-_/_-_${branchName}_-_/g")
     newUpStreamProjects=$(  echo ${upStreamProjects}   | sed "s/_-_${trunk}_-_/_-_${branchName}_-_/g")
-    newDisplayName=$(       echo ${displayName}        | sed "s/ - ${trunk} - / - ${branchDisplayName} - /g")
+    newDisplayName=$(       echo ${displayName}        | sed "s/ - ${trunkDisplayName} - / - ${branchDisplayName} - /g")
 
     if [[ ${job} == ${newJobName} ]] ; then
         error "something is wrong. old and new job name is the same"

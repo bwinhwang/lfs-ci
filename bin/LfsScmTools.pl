@@ -173,10 +173,10 @@ use warnings;
 use parent qw( -norequire Object );
 
 # }}} ------------------------------------------------------------------------------------------------------------------
+package Model::Config; # {{{
 ## @fn     Model::Config
 #  @brief  model for a configuration value
 
-package Model::Config; # {{{
 use warnings;
 use strict;
 use parent qw( -norequire Model );
@@ -490,6 +490,16 @@ sub getDependencies {
 }
 
 
+sub matchingPlatform {
+    my $self     = shift;
+    my $platform = shift;
+    my @targets  = @{ $self->{targets} || [] };
+    my @matches = grep { $_ }
+                  map  { $_->matchingPlatform( $platform ) }
+                  @targets;
+    return @matches;
+}
+
 ## @fn      matchesPlatform( $value )
 #  @brief   checks, if the platform is matching to the given one 
 #  @param   {platform}    name of the platform to match
@@ -498,7 +508,7 @@ sub matchesPlatform {
     my $self     = shift;
     my $platform = shift;
     my @targets  = @{ $self->{targets} || [] };
-    my @matches = grep { 1 }
+    my @matches = grep { $_ }
                   map  { $_->matchesPlatform( $platform ) }
                   @targets;
     return scalar( @matches ) > 0 ? 1 : 0;
@@ -511,6 +521,22 @@ sub matchesPlatform {
 sub platforms {
     my $self = shift;
     return map { $_->platforms() } @{ $self->{targets} };
+}
+
+sub directory {
+    my $self = shift;
+    return $self->{directory};
+}
+
+sub bldDirectory {
+    my $self     = shift;
+    my $platform = shift;
+
+    my $bld = $self->directory();
+    if( $bld =~ m/src-(.*)$/ ) {
+        $bld = sprintf( "bld/bld-%s-%s", $1, $self->matchingPlatform( $platform ));
+    }
+    return $bld;
 }
 
 ## @fn      targets()
@@ -624,6 +650,9 @@ sub cat {
 
     my $url      = replaceMasterByUlmServer( $param->{url} );
     my $revision = $param->{revision};
+
+    TRACE sprintf( "running svn cat for %s - rev %s", $url, $revision || "undef" );
+
     my $cmd = sprintf( "%s cat %s %s|",
                         $self->{svnCli},
                         $revision ? sprintf( "-r %d", $revision ) : "",
@@ -981,6 +1010,7 @@ package Parser::Dependencies::Models::Target; # {{{
 use strict;
 use warnings;
 use parent qw( -norequire Parser::Model );
+use Data::Dumper;
 
 sub cleanup {
     my $self = shift;
@@ -1008,14 +1038,24 @@ sub platforms {
     return @platforms;
 }
 
+## @fn      matchingPlatform( $platform )
+#  @brief   return the name of the matching platform
+#  @param   {platform}    name of the requested platform
+#  @return  name of the platform
+sub matchingPlatform {
+    my $self     = shift;
+    my $platform = shift;
+    
+    return $self->platform() if $self->hasTargetsParameter() and scalar( grep { $platform eq $_ or $_ eq "all" } $self->targetsParameter() ) > 0;
+    return $self->platform() if $self->{target} =~ m/-$platform/;
+    return;
+}
+
 sub matchesPlatform {
     my $self     = shift;
     my $platform = shift;
 
-    if( $self->hasTargetsParameter() ) {
-        return scalar( grep { $platform eq $_ || $_ eq "all" } $self->targetsParameter() ) ? 1 : 0;
-    }
-    return 1 if $self->{target} =~ m/-$platform$/;
+    return 1 if $self->matchingPlatform( $platform );
     return 0;
 }
 
@@ -1182,6 +1222,87 @@ sub hint {
 }
 
 # }}} ------------------------------------------------------------------------------------------------------------------
+package Command::DependenciesForMakefile; # {{{
+use strict;
+use warnings;
+
+use parent qw( -norequire Object );
+use Data::Dumper;
+
+sub prepare {
+    my $self = shift;
+    my @args = @_;
+
+    $self->{src}   = shift @args || die "no src";
+    $self->{goal}  = shift @args || die "no cfg";
+
+    @{ $self->{sourcesDirectories} } = <src-*>;
+    @{ $self->{sources} } = ();
+
+    my $loc = Usecase::GetLocation->new();
+    foreach my $subDir ( @{ $self->{sourcesDirectories} } ) {
+        my $dir = $loc->getLocation( subDir   => $subDir );
+        $dir->loadDependencyTree();
+        push @{ $self->{sources} }, $dir;
+    }
+
+    return;
+}
+
+sub createMakefileEntry {
+    my $self = shift;
+    my $obj  = shift;
+    my $goal = $self->{goal};
+
+    return if $self->{seen}->{ $obj->directory() }++;
+
+    my @deps;
+    foreach my $dependency ( $obj->getDependencies() ) {
+        next if not $dependency->matchesPlatform( $goal );
+        push @deps, $dependency->bldDirectory( $goal );
+        $self->createMakefileEntry( $dependency );
+    }
+
+    my %duplicates;
+    printf "%s/%s/Version: %s\n", $ENV{BUILD_WORKDIR} || ".",
+                                  $obj->bldDirectory( $goal ), 
+                                  join( " ", grep { not $duplicates{ $_ }++ } 
+                                             map { sprintf( "%s/%s/Version", $ENV{BUILD_WORKDIR} || ".", $_ ) } @deps );
+
+    if( $obj->directory() ne $self->{src} ) {
+        printf( "\t%s -C %s/%s %s --label=\$\(LABEL\) NOAUTOBUILD=1\n\n", $ENV{BUILD} || "build",
+                                        $ENV{BUILD_WORKDIR} || ".",
+                                        $obj->directory(), 
+                                        $obj->matchingPlatform( $goal ) );
+    } else {
+        printf( "\n" );
+    }
+
+    return;
+}
+
+sub execute {
+    my $self = shift;
+    my $goal = $self->{goal};
+    my $src  = $self->{src};
+
+    my @sources = sort { $a->directory() cmp $b->directory() } @{ $self->{sources} };
+    my %seen;
+
+	print "ifneq \(\$\(NOAUTOBUILD\),1\)\n\n";
+    foreach my $source ( @sources ) {
+        next if not $source->matchesPlatform( $goal );
+        next if $seen{ $source->directory() }++;
+
+        $self->createMakefileEntry( $source );
+
+    }
+	print "endif\n\n";
+
+    return 0;
+}
+
+# }}} ------------------------------------------------------------------------------------------------------------------
 package Command::SortBuildsFromDependencies; # {{{
 use strict;
 use warnings;
@@ -1236,17 +1357,15 @@ SOURCES:
         }
 
         my %duplicate;
-
-        # t: t-1 t-2
-        # t-1:
-        #     build -C t 1
-
         my @filteredDeps = sort 
                            grep { /src-/ } 
                            grep { not $duplicate{$_}++; } 
                            @deps;
 
         if( $self->{style} eq "makefile" ) {
+            # t: t-1 t-2
+            # t-1:
+            #     build -C t 1
 
             # print label information for different components
             my $label = $self->{label};
@@ -1280,12 +1399,12 @@ SOURCES:
                 printf "\t/usr/bin/time -v build -L \$@.log -C %s %s --label=\$(LABEL)\n\n", $source->{directory}, $platform;
             }
         } elsif( $self->{style} eq "legacy" ) {
+            my %duplicate;
+            my %duplicate2;
             printf "%s %s - %s\n",
                     $source->{directory},
-                    join( ",", sort $source->platforms() ),
+                    join( ",", sort grep { not $duplicate2{ $_ }++ } $source->platforms() ),
                     join( ",", sort 
-                               grep { /src-/ } 
-                               grep { not $duplicate{ $_ }++; } 
                                @filteredDeps 
                     );
         } else {
@@ -1721,7 +1840,7 @@ sub filterComments {
     # remove new lines at the end
     $commentLine =~ s/\n$//g;
 
-    my $jiraComment = Singelton::config->getConfig( "LFS_PROD_uc_release_svn_message_prefix" )
+    my $jiraComment = Singelton::config->getConfig( "LFS_PROD_uc_release_svn_message_prefix" );
     return if $commentLine =~ m/$jiraComment/;
 
     # TODO: demx2fk3 2014-09-08 remove this line, if legacy CI is switched off
@@ -1985,7 +2104,6 @@ use lib sprintf( "%s/lib/perl5/", $ENV{LFS_CI_ROOT} || "." );
 use XML::Simple;
 use Data::Dumper;
 use Getopt::Std;
-use Mail::Sender;
 
 sub prepare {
     my $self = shift;
@@ -2046,6 +2164,8 @@ sub prepare {
 sub execute {
     my $self = shift;
 
+    # no use here, we only want to load the module, if we need the module
+    require Mail::Sender;
     my $mua = Mail::Sender->new(
                                 { smtp      => $self->{smtpServer},
                                   from      => $self->{fromAddress}, 
@@ -2408,42 +2528,6 @@ use File::Basename;
 use Log::Log4perl qw( :easy );
 
 my %l4p_config = (
-    'log4perl.category'                                  => 'TRACE, Screen, Logfile',
-    'log4perl.category.Sysadm.Install'                   => 'OFF',
-    'log4perl.appender.Logfile'                          => 'Log::Log4perl::Appender::File',
-    'log4perl.appender.Logfile.filename'                 => 'youtube.log',
-    'log4perl.appender.Logfile.layout'                   => 'Log::Log4perl::Layout::PatternLayout',
-    'log4perl.appender.Logfile.layout.ConversionPattern' => '%p %d{ISO8601} %r [%M] %m%n',
-    'log4perl.appender.Screen'                           => 'Log::Log4perl::Appender::Screen',
-    'log4perl.appender.Screen.stderr'                    => '0',
-    'log4perl.appender.Screen.Threshold'                 => 'INFO',
-    'log4perl.appender.Screen.layout'                    => 'Log::Log4perl::Layout::SimpleLayout',
-);
-
-Log::Log4perl::init( \%l4p_config );
-
-use Log::Log4perl qw( :easy );
-
-my %l4p_config = (
-    'log4perl.category'                                  => 'TRACE, Logfile',
-    'log4perl.category.Sysadm.Install'                   => 'OFF',
-    'log4perl.appender.Logfile'                          => 'Log::Log4perl::Appender::File',
-    'log4perl.appender.Logfile.filename'                 => $ENV{CI_LOGGING_LOGFILENAME}, 
-    'log4perl.appender.Logfile.layout'                   => 'Log::Log4perl::Layout::PatternLayout',
-    'log4perl.appender.Logfile.layout.ConversionPattern' => '%d{ISO8601}       UTC [%9r] [%-8p] %M -- %m%n',
-    'log4perl.appender.Screen'                           => 'Log::Log4perl::Appender::Screen',
-    'log4perl.appender.Screen.stderr'                    => '1',
-    'log4perl.appender.Screen.Threshold'                 => 'INFO',
-    'log4perl.appender.Screen.layout'                    => 'Log::Log4perl::Layout::SimpleLayout',
-);
-
-if( $ENV{CI_LOGGING_LOGFILENAME} ) {
-    Log::Log4perl::init( \%l4p_config );
-}
-
-use Log::Log4perl qw( :easy );
-
-my %l4p_config = (
     'log4perl.category'                                  => 'TRACE, Logfile',
     'log4perl.category.Sysadm.Install'                   => 'OFF',
     'log4perl.appender.Logfile'                          => 'Log::Log4perl::Appender::File',
@@ -2485,6 +2569,8 @@ if( $program eq "getDependencies" ) {
     $command = Command::SendReleaseNote->new();
 } elsif ( $program eq "getConfig" ) {
     $command = Command::GetConfig->new();
+} elsif ( $program eq "dependenciesForMakefile" ) {
+    $command = Command::DependenciesForMakefile->new();
 } else {
     die "command not defined";
 }
