@@ -38,10 +38,10 @@ ci_job_release() {
 
     # find the related jobs of the build
 
-    local packageJobName=$(getPackageJobNameFromUpstreamProject ${TESTED_BUILD_JOBNAME} ${TESTED_BUILD_NUMBER})
+    local packageJobName=$(getPackageJobNameFromUpstreamProject         ${TESTED_BUILD_JOBNAME} ${TESTED_BUILD_NUMBER})
     local packageBuildNumber=$(getPackageBuildNumberFromUpstreamProject ${TESTED_BUILD_JOBNAME} ${TESTED_BUILD_NUMBER})
-    local buildJobName=$(getBuildJobNameFromUpstreamProject ${TESTED_BUILD_JOBNAME} ${TESTED_BUILD_NUMBER})
-    local buildBuildNumber=$(getBuildBuildNumberFromUpstreamProject ${TESTED_BUILD_JOBNAME} ${TESTED_BUILD_NUMBER})
+    local buildJobName=$(getBuildJobNameFromUpstreamProject             ${TESTED_BUILD_JOBNAME} ${TESTED_BUILD_NUMBER})
+    local buildBuildNumber=$(getBuildBuildNumberFromUpstreamProject     ${TESTED_BUILD_JOBNAME} ${TESTED_BUILD_NUMBER})
     mustHaveValue "${packageJobName}"     "package job name"
     mustHaveValue "${packageBuildNumber}" "package build name"
     mustHaveValue "${buildJobName}"       "build job name"
@@ -56,7 +56,7 @@ ci_job_release() {
     setBuildDescription "${JOB_NAME}" "${BUILD_NUMBER}" "${releaseLabel}<br>${LFS_PROD_RELEASE_CURRENT_TAG_NAME_REL}"
 
     info "found package job: ${packageJobName} / ${packageBuildNumber}"
-    info "found build   job: ${buildJobName} / ${buildBuildNumber}"
+    info "found build   job: ${buildJobName}   / ${buildBuildNumber}"
     
     local ciBuildShare=$(getConfig LFS_CI_UC_package_internal_link)
     local releaseDirectory=${ciBuildShare}/build_${packageBuildNumber}
