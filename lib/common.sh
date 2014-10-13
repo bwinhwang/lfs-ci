@@ -519,6 +519,8 @@ copyRevisionStateFileToWorkspace() {
     local jobName=$1
     local buildNumber=$2
 
+    [[ -z ${jobName} ]] && return
+
     copyFileFromBuildDirectoryToWorkspace ${jobName} ${buildNumber} revisionstate.xml
     mv ${WORKSPACE}/revisionstate.xml ${WORKSPACE}/revisions.txt
     rawDebug ${WORKSPACE}/revisions.txt

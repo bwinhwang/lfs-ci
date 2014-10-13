@@ -119,6 +119,7 @@ ci_job_release() {
             prereleaseChecks
         ;;
         summary)
+        
             sendReleaseNote "${TESTED_BUILD_JOBNAME}" "${TESTED_BUILD_NUMBER}" \
                             "${buildJobName}"         "${buildBuildNumber}"
         ;;

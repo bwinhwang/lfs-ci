@@ -4,7 +4,7 @@
 [[ -z ${LFS_CI_SOURCE_jenkins} ]] && source ${LFS_CI_ROOT}/lib/jenkins.sh
 
 ci_job_test_on_target() {
-    requiredParameters JOB_NAME BUILD_NUMBER LABEL DELIVERY_DIRECTORY
+    requiredParameters JOB_NAME BUILD_NUMBER LABEL DELIVERY_DIRECTORY UPSTREAM_PROJECT
 
     setBuildDescription ${JOB_NAME} ${BUILD_NUMBER} ${LABEL}
 
@@ -17,9 +17,13 @@ ci_job_test_on_target() {
     mustHaveWorkspaceName
     mustHaveWritableWorkspace
 
-    info "create workspace for testing"
+    local branchName=$(getLocationName ${UPSTREAM_PROJECT})
+    mustHaveValue "${branchName}" "branch name"
+
+    info "create workspace for testing on ${branchName}"
     cd ${workspace}
     execute build setup
+    execute build newlocations ${branchName}
     execute build adddir src-test
 
     export testTargetName=${targetName}
@@ -28,6 +32,9 @@ ci_job_test_on_target() {
     case ${testType} in
         checkUname)
             makingTest_checkUname
+        ;;
+        testProductionFSM)
+            makingTest_testFSM
         ;;
         testProductionLRC)
             makingTest_testLRC
@@ -80,6 +87,66 @@ makingTest_checkUname() {
     info "testing done."
 
     return 0
+}
+
+makingTest_testFSM() {
+
+    requiredParameters JOB_NAME DELIVERY_DIRECTORY
+
+    local workspace=$(getWorkspaceName)
+    mustHaveWorkspaceName
+
+    local testBuildDirectory=${DELIVERY_DIRECTORY}
+    mustExistDirectory ${testBuildDirectory}
+
+    local xmlOutputDirectory=${workspace}/xml-output
+    execute mkdir -p ${xmlOutputDirectory}
+    mustExistDirectory ${xmlOutputDirectory}
+
+	export targetName=$(sed "s/^Test-//" <<< ${JOB_NAME})
+    mustHaveValue "${testTargetName}" "test target name"
+
+	local testSuiteDirectory=${workspace}/$(getConfig LFS_CI_uc_test_making_test_suite_dir)
+    mustExistDirectory ${testSuiteDirectory}
+	mustExistFile ${testSuiteDirectory}/testsuite.mk
+
+    info "create testconfig for ${testSuiteDirectory}"
+    execute make -C ${testSuiteDirectory} testconfig-overwrite \
+                TESTBUILD=${testBuildDirectory} \
+                TESTTARGET=${testTargetName}
+
+    info "powercycle the target to get it in a defined state"
+    execute make -C ${testSuiteDirectory} powercycle
+
+    info "waiting for prompt"
+    execute make -C ${testSuiteDirectory} waitprompt
+
+    info "installing software"
+    execute make -C ${testSuiteDirectory} install
+
+    info "restarting the target"
+    execute make -C ${testSuiteDirectory} powercycle
+    execute make -C ${testSuiteDirectory} waitprompt
+    execute make -C ${testSuiteDirectory} waitssh
+
+    info "installing testexecd on target"
+    execute make -C ${testSuiteDirectory} setup
+
+    info "checking the board for correct software"
+    execute make -C ${testSuiteDirectory} check
+
+    export LFS_CI_ERROR_CODE= 
+    runAndLog make -C ${testSuiteDirectory} test-xmloutput       || LFS_CI_ERROR_CODE=0 # also true
+
+    execute mkdir ${workspace}/xml-reports/
+    execute cp -f ${testSuiteDirectory}/xml-reports/*.xml ${workspace}/xml-reports/
+
+    if [[ ${LFS_CI_ERROR_CODE} ]] ; then
+        error "some errors in test cases. please see logfile"
+        exit 1
+    fi
+
+    return
 }
 
 makingTest_testLRC() {
@@ -252,3 +319,4 @@ makingTest_install() {
 
     return
 }
+
