@@ -34,7 +34,8 @@ ci_job_test_on_target() {
             makingTest_checkUname
         ;;
         testProductionFSM)
-            makingTest_testFSM
+            fmon_tests
+            # makingTest_testFSM
         ;;
         testProductionLRC)
             makingTest_testLRC
@@ -47,6 +48,37 @@ ci_job_test_on_target() {
     return
 
 }
+
+fmon_tests() {
+    local targetName=$(sed "s/^Test-//" <<< ${JOB_NAME})
+    mustHaveValue ${targetName} "target name"
+    info "testing on target ${targetName}"
+
+    local workspace=$(getWorkspaceName)
+    mustHaveWorkspaceName
+
+    local wbitSvnUrl=$(build location src-fsmwbit)
+    mustHaveValue "${wbitSvnUrl}" "svn ur of src-fsmwbit"
+
+    info "checking out src-fsmtest"
+    execute build adddir src-fsmtest
+    info "checking out src-ddal"
+    execute build adddir src-ddal
+    info "checking out src-fsmfmon"
+    execute build adddir src-fsmfmon
+    info "exporting src-fsmwbit"
+    execute svn co ${wbitSvnUrl}/src/tools            ${workspace}/src-fsmwbit/src/tools
+    execute svn co ${wbitSvnUrl}/src/test_cases/share ${workspace}/src-fsmwbit/src/test_cases/share
+
+    execute mkdir -p ${workspace}/src-fsmwbit/src/log/
+
+    info "start fmon tests..."
+    execute ${workspace}/src-fsmwbit/src/tools/ftcm/startftcm -cfg ${workspace}/src-fsmtest/src/test_scripts/configs/fcmd15.cfg
+
+    return
+}
+
+
 makingTest_checkUname() {
     requiredParameters JOB_NAME BUILD_NUMBER LABEL DELIVERY_DIRECTORY
 
