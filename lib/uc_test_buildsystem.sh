@@ -2,6 +2,7 @@
 
 
 # LFS_Post_-_trunk_-_TestBuildsystem_-_Dependencies_Ulm
+source ${LFS_CI_ROOT}/lib/uc_build.sh
 
 ci_job_test_buildsystem() {
 
@@ -12,16 +13,13 @@ ci_job_test_buildsystem() {
     mustHaveWorkspaceName
     mustHaveWritableWorkspace
 
-    warning "work in progress..."
-    exit 0
-#    cd ${workspace}
-#    build setup
-#    build newlocations
-#    build adddir src-test
-#
-#    make -C ... test (xml output)
-#    cp *.xml ...
+    _createWorkspace
+
+    local testSuiteDirectory=${workspace}/src-test/src/unittest/testsuites/buildsystem/dependencies
+
+    execute make -C ${testSuiteDirectory} test-xmloutput
+    execute mkdir ${workspace}/xml-reports/
+    execute cp -f ${testSuiteDirectory}/xml-reports/*.xml ${workspace}/xml-reports/
 
     return
-
 }

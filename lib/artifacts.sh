@@ -83,6 +83,9 @@ copyAndExtractBuildArtifactsFromProject() {
     local jobName=$1
     local buildNumber=$2
     local allowedComponentsFilter="$3"
+
+    [[ -z ${jobName} ]] && return
+
     local artifactesShare=$(getConfig artifactesShare)
     local artifactsPathOnMaster=${artifactesShare}/${jobName}/${buildNumber}/save/
     local serverName=$(getConfig linseeUlmServer)
