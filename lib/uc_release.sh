@@ -106,6 +106,9 @@ ci_job_release() {
         build_results_to_share)
             extractArtifactsOnReleaseShare "${buildJobName}" "${buildBuildNumber}"
         ;;
+        build_results_to_share_kernelsources)
+            extractArtifactsOnReleaseShareKernelSources
+        ;;
         create_release_tag)
             createReleaseTag ${buildJobName} ${buildBuildNumber}
         ;;
@@ -210,6 +213,79 @@ extractArtifactsOnReleaseShare() {
 
     info "clean up workspace"
     execute rm -rf ${workspace}/bld
+
+    return
+}
+
+extractArtifactsOnReleaseShareKernelSources() {
+    local jobName=$1
+    local buildNumber=$2
+
+    local workspace=$(getWorkspaceName)
+    mustHaveCleanWorkspace
+    mustHaveWorkspaceName
+    mustHaveWritableWorkspace
+
+    local server=$(getConfig jenkinsMasterServerHostName)
+    mustHaveValue "${server}" "server name"
+
+    local resultBuildShare=$(getConfig LFS_PROD_UC_release_copy_build_to_share_linux_kernel)
+    mustExistDirectory ${resultBuildShare}
+
+    local canStoreArtifactsOnShare=$(getConfig LFS_CI_uc_release_can_store_build_results_on_share)
+
+    local labelName=${LFS_PROD_RELEASE_CURRENT_TAG_NAME}
+    mustHaveValue "${labelName}"
+
+    info "getting down stream information for ${jobName} / ${buildNumber}"
+    local downStreamprojectsFile=$(createTempFile)
+    runOnMaster ${LFS_CI_ROOT}/bin/getDownStreamProjects -j ${jobName}     \
+                                                         -b ${buildNumber} \
+                                                         -h ${serverPath} > ${downStreamprojectsFile}
+
+    for jobData in ${triggeredJobData} ; do
+        local number=$(echo ${jobData} | cut -d: -f 1)
+        local result=$(echo ${jobData} | cut -d: -f 2)
+        local name=$(  echo ${jobData} | cut -d: -f 3-)
+        local subTaskName=$(getSubTaskNameFromJobName ${name})
+
+        case ${subTaskName} in
+            FSM-r2) location=trunk      ;;
+            FSM-r3) location=trunk      ;;
+            FSM-r4) location=FSM_R4_DEV ;;
+            LRC)    location=LRC        ;;
+        esac
+
+        info "creating new workspace to copy kernel sources for ${name} / ${location}"
+        execute rm -rf ${workspace}
+        execute mkdir ${workspace}
+        execute cd ${workspace}
+        execute build setup
+        execute build newlocations ${location}
+        execute mkdir -p ${workspace}/bld/
+
+        copyArtifactsToWorkspace "${name}" "${number}" "kernelsources"
+
+        local destination=$(build bld/bld-kernelsources-linux)
+        mustExistDirectory ${destination}
+
+        [[ ! -d ${workspace}/bld/bld-kernelsources-linux ]] && continue
+        [[   -d ${destination}                           ]] && continue
+
+        info "copy kernelsources from ${name} to buildresults share ${destination}"
+
+        if [[ ${canStoreArtifactsOnShare} ]] ; then
+            executeOnMaster chmod u+w ${resultBuildShare}/
+            executeOnMaster mkdir -p  ${destination}
+            execute rsync -av --exclude=.svn ${workspace}/bld/bld-kernelsources-linux/. ${server}:${destination}/
+            touch ${destination}
+        else
+            warning "storing artifacts on share is disabled in config"
+        fi
+    done
+
+    info "clean up workspace"
+    execute rm -rf ${workspace}
 
     return
 }
@@ -456,7 +532,7 @@ _createLfsOsReleaseNote() {
     execute rsync -ae ssh ${serverName}:${buildDirectory}/changelog.xml ${workspace}/os/
     mustExistFile ${workspace}/os/changelog.xml
 
-    # TIDO FIME
+    # TODO FIME
     copyArtifactsToWorkspace "${buildJobName}" "${buildBuildNumber}" "externalComponents fsmpsl psl fsmci lrcpsl"
 
     # convert the changelog xml to a release note

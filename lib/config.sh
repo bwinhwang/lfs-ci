@@ -22,8 +22,6 @@ LFS_CI_SOURCE_config='$Id$'
 #  @param   {jobName} name of the job, optional, default JOB_NAME
 #  @return  location name
 getLocationName() {
-    requiredParameters JOB_NAME
-
     local jobName=${1:-${JOB_NAME}}
     local location=$(${LFS_CI_ROOT}/bin/getFromString.pl "${jobName}" location)
 
@@ -43,7 +41,8 @@ getLocationName() {
 #  @param   <none>
 #  @return  task name
 getTaskNameFromJobName() {
-    ${LFS_CI_ROOT}/bin/getFromString.pl "${JOB_NAME}" taskName
+    local jobName=${1:-${JOB_NAME}}
+    ${LFS_CI_ROOT}/bin/getFromString.pl "${jobName}" taskName
     return
 }
 
@@ -52,7 +51,8 @@ getTaskNameFromJobName() {
 #  @param   <none>
 #  @return  sub task name
 getSubTaskNameFromJobName() {
-    ${LFS_CI_ROOT}/bin/getFromString.pl "${JOB_NAME}" subTaskName
+    local jobName=${1:-${JOB_NAME}}
+    ${LFS_CI_ROOT}/bin/getFromString.pl "${jobName}" subTaskName
     return
 }
 
@@ -61,13 +61,15 @@ getSubTaskNameFromJobName() {
 #  @param   <none>
 #  @return  target board name
 getTargetBoardName() {
-    ${LFS_CI_ROOT}/bin/getFromString.pl "${JOB_NAME}" platform
+    local jobName=${1:-${JOB_NAME}}
+    ${LFS_CI_ROOT}/bin/getFromString.pl "${jobName}" platform
     return
 }
 
 
 getProductNameFromJobName() {
-    ${LFS_CI_ROOT}/bin/getFromString.pl "${JOB_NAME}" productName
+    local jobName=${1:-${JOB_NAME}}
+    ${LFS_CI_ROOT}/bin/getFromString.pl "${jobName}" productName
     return
 }
 

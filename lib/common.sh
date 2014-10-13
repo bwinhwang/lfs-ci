@@ -13,7 +13,6 @@ LFS_CI_SOURCE_common='$Id$'
 #  @return  <none>
 #  @throws  raise an error, if there is no target board name
 mustHaveTargetBoardName() {
-
     local location=$(getTargetBoardName) 
     if [[ ! ${location} ]] ; then
         error "can not get the correction target board name from JOB_NAME \"${JOB_NAME}\""
@@ -37,7 +36,6 @@ getBranchName() {
 #  @return  <none>
 #  @throws  raises an error, if there is no location name
 mustHaveLocationName() {
-
     local location=$(getLocationName) 
     if [[ ! ${location} ]] ; then
         error "can not get the correction location name from JOB_NAME \"${JOB_NAME}\""
