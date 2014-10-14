@@ -244,16 +244,16 @@ _createWorkspace() {
 
     checkoutSubprojectDirectories ${srcDirectory} ${revision}
 
-    info "getting required src-directories for ${srcDirectory}"
-    # local buildTargets=$(${LFS_CI_ROOT}/bin/getDependencies ${srcDirectory} 2>/dev/null )
-    execute "${build} -C ${srcDirectory} src-list_${productName}_${subTaskName}"
-    local buildTargets=$(${build} -C ${srcDirectory} src-list_${productName}_${subTaskName}) 
-    mustHaveValue "${buildTargets}" "no build targets configured"
-    buildTargets="$(getConfig LFS_CI_UC_build_additionalSourceDirectories) ${buildTargets}"
-
     local onlySourceDirectory=$(getConfig LFS_CI_UC_build_onlySourceDirectories)
     if [[ ${onlySourceDirectory} ]] ; then
         buildTargets=${onlySourceDirectory}
+    else
+        info "getting required src-directories for ${srcDirectory}"
+        # local buildTargets=$(${LFS_CI_ROOT}/bin/getDependencies ${srcDirectory} 2>/dev/null )
+        execute "${build} -C ${srcDirectory} src-list_${productName}_${subTaskName}"
+        local buildTargets=$(${build} -C ${srcDirectory} src-list_${productName}_${subTaskName}) 
+        mustHaveValue "${buildTargets}" "no build targets configured"
+        buildTargets="$(getConfig LFS_CI_UC_build_additionalSourceDirectories) ${buildTargets}"
     fi
 
     info "using src-dirs: ${buildTargets}"
@@ -279,7 +279,8 @@ _createWorkspace() {
     createRebuildScript_bldLinks ${target}
 
     mustHaveLocalSdks
-    mustHaveBuildArtifactsFromUpstream
+    # mustHaveBuildArtifactsFromUpstream
+    copyAndExtractBuildArtifactsFromProject ${UPSTREAM_PROJECT} ${UPSTREAM_BUILD}
 
     postCheckoutPatchWorkspace
 

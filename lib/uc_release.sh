@@ -38,10 +38,10 @@ ci_job_release() {
 
     # find the related jobs of the build
 
-    local packageJobName=$(getPackageJobNameFromUpstreamProject ${TESTED_BUILD_JOBNAME} ${TESTED_BUILD_NUMBER})
+    local packageJobName=$(getPackageJobNameFromUpstreamProject         ${TESTED_BUILD_JOBNAME} ${TESTED_BUILD_NUMBER})
     local packageBuildNumber=$(getPackageBuildNumberFromUpstreamProject ${TESTED_BUILD_JOBNAME} ${TESTED_BUILD_NUMBER})
-    local buildJobName=$(getBuildJobNameFromUpstreamProject ${TESTED_BUILD_JOBNAME} ${TESTED_BUILD_NUMBER})
-    local buildBuildNumber=$(getBuildBuildNumberFromUpstreamProject ${TESTED_BUILD_JOBNAME} ${TESTED_BUILD_NUMBER})
+    local buildJobName=$(getBuildJobNameFromUpstreamProject             ${TESTED_BUILD_JOBNAME} ${TESTED_BUILD_NUMBER})
+    local buildBuildNumber=$(getBuildBuildNumberFromUpstreamProject     ${TESTED_BUILD_JOBNAME} ${TESTED_BUILD_NUMBER})
     mustHaveValue "${packageJobName}"     "package job name"
     mustHaveValue "${packageBuildNumber}" "package build name"
     mustHaveValue "${buildJobName}"       "build job name"
@@ -56,7 +56,7 @@ ci_job_release() {
     setBuildDescription "${JOB_NAME}" "${BUILD_NUMBER}" "${releaseLabel}<br>${LFS_PROD_RELEASE_CURRENT_TAG_NAME_REL}"
 
     info "found package job: ${packageJobName} / ${packageBuildNumber}"
-    info "found build   job: ${buildJobName} / ${buildBuildNumber}"
+    info "found build   job: ${buildJobName}   / ${buildBuildNumber}"
     
     local ciBuildShare=$(getConfig LFS_CI_UC_package_internal_link)
     local releaseDirectory=${ciBuildShare}/build_${packageBuildNumber}
@@ -105,6 +105,9 @@ ci_job_release() {
         ;;
         build_results_to_share)
             extractArtifactsOnReleaseShare "${buildJobName}" "${buildBuildNumber}"
+        ;;
+        build_results_to_share_kernelsources)
+            extractArtifactsOnReleaseShareKernelSources "${buildJobName}" "${buildBuildNumber}"
         ;;
         create_release_tag)
             createReleaseTag ${buildJobName} ${buildBuildNumber}
@@ -210,6 +213,80 @@ extractArtifactsOnReleaseShare() {
 
     info "clean up workspace"
     execute rm -rf ${workspace}/bld
+
+    return
+}
+
+extractArtifactsOnReleaseShareKernelSources() {
+    local testedJobName=$1
+    local testedBuildNumber=$2
+
+    requiredParameters LFS_PROD_RELEASE_CURRENT_TAG_NAME
+
+    local workspace=$(getWorkspaceName)
+    mustHaveCleanWorkspace
+    mustHaveWorkspaceName
+    mustHaveWritableWorkspace
+
+    local server=$(getConfig jenkinsMasterServerHostName)
+    mustHaveValue "${server}" "server name"
+
+    # TODO: demx2fk3 2014-10-14 enable this line
+    #local canStoreArtifactsOnShare=$(getConfig LFS_CI_uc_release_can_store_build_results_on_share)
+    local canStoreArtifactsOnShare=
+
+    local labelName=${LFS_PROD_RELEASE_CURRENT_TAG_NAME}
+    mustHaveValue "${labelName}"
+
+    info "getting down stream information for ${testedJobName} / ${testedBuildNumber}"
+    local triggeredJobData=$(getDownStreamProjectsData ${testedJobName} ${testedBuildNumber})
+    mustHaveValue "${triggeredJobData}" "triggered job data"
+
+    for jobData in ${triggeredJobData} ; do
+        local buildNumber=$(echo ${jobData} | cut -d: -f 1)
+        local jobName=$(    echo ${jobData} | cut -d: -f 3-)
+        local subTaskName=$(getSubTaskNameFromJobName ${Name})
+
+        info "checking for ${jobName} / ${buildNumber}"
+
+        # TODO: demx2fk3 2014-10-14 this is wrong!!! it does not handle other branches correcly
+        # BUT, the location of the kernel sources are the same on all branches
+        case ${subTaskName} in
+            FSM-r2) location=trunk      ;;
+            FSM-r3) location=trunk      ;;
+            FSM-r4) location=FSM_R4_DEV ;;
+            LRC)    location=LRC        ;;
+            FSM-r3-FSMDDALpdf) continue ;;
+            *) fatal "subTaskName ${subTaskName} is not supported" ;;
+        esac
+
+        info "creating new workspace to copy kernel sources for ${jobName} / ${location}"
+        createBasicWorkspace src-project
+        copyArtifactsToWorkspace "${jobName}" "${buildNumber}" "kernelsources"
+
+        local lastKernelLocation=$(build bld/bld-kernelsources-linux)
+        local destinationBaseDirectory=$(dirname ${lastKernelLocation})
+        mustExistDirectory ${destinationBaseDirectory}
+
+        local destination=${destinationBaseDirectory}/${labelName}
+
+        [[ ! -d ${workspace}/bld/bld-kernelsources-linux ]] && continue
+        [[   -d ${destination}                           ]] && continue
+
+        info "copy kernelsources from ${jobName} to buildresults share ${destination}"
+
+        if [[ ${canStoreArtifactsOnShare} ]] ; then
+            executeOnMaster chmod u+w $(dirname ${destination})
+            executeOnMaster mkdir -p  ${destination}
+            execute rsync -av --exclude=.svn ${workspace}/bld/bld-kernelsources-linux/. ${server}:${destination}/
+            touch ${destination}
+        else
+            warning "storing artifacts on share is disabled in config"
+        fi
+    done
+
+    info "clean up workspace"
+    execute rm -rf ${workspace}
 
     return
 }
@@ -456,7 +533,7 @@ _createLfsOsReleaseNote() {
     execute rsync -ae ssh ${serverName}:${buildDirectory}/changelog.xml ${workspace}/os/
     mustExistFile ${workspace}/os/changelog.xml
 
-    # TIDO FIME
+    # TODO FIME
     copyArtifactsToWorkspace "${buildJobName}" "${buildBuildNumber}" "externalComponents fsmpsl psl fsmci lrcpsl"
 
     # convert the changelog xml to a release note
