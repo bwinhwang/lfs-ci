@@ -170,6 +170,27 @@ setupNewWorkspace() {
     return
 }
 
+
+createBasicWorkspace() {
+    local workspace=$(getWorkspaceName)
+    mustHaveWritableWorkspace
+    mustHaveWorkspaceName
+    mustHaveCleanWorkspace
+
+    local components=$@
+
+    setupNewWorkspace
+    switchToNewLocation
+    switchSvnServerInLocations
+
+    for component in ${components} ; do
+        execute build adddir ${component}
+    done
+   
+    return
+}
+
+
 ## @fn      mustHaveValidWorkspace()
 #  @brief   ensure, that the workspace is valid
 #  @todo    not implemented yet
@@ -619,6 +640,38 @@ _getUpstreamProjects() {
     return
 }
 
+_getDownstreamProjects() {
+    fatal "not implemented"
+    local jobName=$1
+    local buildNumber=$2
+    local downstreamFile=$3
+
+    requiredParameters LFS_CI_ROOT 
+
+    local serverPath=$(getConfig jenkinsMasterServerPath)
+    mustHaveValue "${serverPath}" "server path"
+    mustExistDirectory ${serverPath}
+
+    runOnMaster ${LFS_CI_ROOT}/bin/getDownStreamProjects -j ${jobName}     \
+                                                         -b ${buildNumber} \
+                                                         -h ${serverPath} > ${downstreamFile}
+    rawDebug ${downstreamFile}
+
+    return
+}
+
+getDownStreamProjectsData() {
+    local jobName=$1
+    local buildNumber=$2
+
+    local file=$(createTempFile)
+
+    _getDownstreamProjects ${jobName} ${buildNumber} ${file}
+
+    cat ${file}
+    return
+}
+
 ## @fn      _getJobInformationFromUpstreamProject( $jobName, $buildNumber, $jobNamePart, $fieldNumber  )
 #  @brief   get the information about a job from a finished upstream job
 #  @warning internal function
@@ -719,3 +772,5 @@ getPackageJobNameFromUpstreamProject() {
 mustHaveAccessableServer() {
     return
 }
+
+

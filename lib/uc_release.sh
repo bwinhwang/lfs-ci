@@ -107,7 +107,7 @@ ci_job_release() {
             extractArtifactsOnReleaseShare "${buildJobName}" "${buildBuildNumber}"
         ;;
         build_results_to_share_kernelsources)
-            extractArtifactsOnReleaseShareKernelSources
+            extractArtifactsOnReleaseShareKernelSources "${buildJobName}" "${buildBuildNumber}"
         ;;
         create_release_tag)
             createReleaseTag ${buildJobName} ${buildBuildNumber}
@@ -218,8 +218,10 @@ extractArtifactsOnReleaseShare() {
 }
 
 extractArtifactsOnReleaseShareKernelSources() {
-    local jobName=$1
-    local buildNumber=$2
+    local testedJobName=$1
+    local testedBuildNumber=$2
+
+    requiredParameters LFS_PROD_RELEASE_CURRENT_TAG_NAME
 
     local workspace=$(getWorkspaceName)
     mustHaveCleanWorkspace
@@ -229,53 +231,52 @@ extractArtifactsOnReleaseShareKernelSources() {
     local server=$(getConfig jenkinsMasterServerHostName)
     mustHaveValue "${server}" "server name"
 
-    local resultBuildShare=$(getConfig LFS_PROD_UC_release_copy_build_to_share_linux_kernel)
-    mustExistDirectory ${resultBuildShare}
-
-    local canStoreArtifactsOnShare=$(getConfig LFS_CI_uc_release_can_store_build_results_on_share)
+    # TODO: demx2fk3 2014-10-14 enable this line
+    #local canStoreArtifactsOnShare=$(getConfig LFS_CI_uc_release_can_store_build_results_on_share)
+    local canStoreArtifactsOnShare=
 
     local labelName=${LFS_PROD_RELEASE_CURRENT_TAG_NAME}
     mustHaveValue "${labelName}"
 
-    info "getting down stream information for ${jobName} / ${buildNumber}"
-    local downStreamprojectsFile=$(createTempFile)
-    runOnMaster ${LFS_CI_ROOT}/bin/getDownStreamProjects -j ${jobName}     \
-                                                         -b ${buildNumber} \
-                                                         -h ${serverPath} > ${downStreamprojectsFile}
+    info "getting down stream information for ${testedJobName} / ${testedBuildNumber}"
+    local triggeredJobData=$(getDownStreamProjectsData ${testedJobName} ${testedBuildNumber})
+    mustHaveValue "${triggeredJobData}" "triggered job data"
 
     for jobData in ${triggeredJobData} ; do
-        local number=$(echo ${jobData} | cut -d: -f 1)
-        local result=$(echo ${jobData} | cut -d: -f 2)
-        local name=$(  echo ${jobData} | cut -d: -f 3-)
-        local subTaskName=$(getSubTaskNameFromJobName ${name})
+        local buildNumber=$(echo ${jobData} | cut -d: -f 1)
+        local jobName=$(    echo ${jobData} | cut -d: -f 3-)
+        local subTaskName=$(getSubTaskNameFromJobName ${Name})
 
+        info "checking for ${jobName} / ${buildNumber}"
+
+        # TODO: demx2fk3 2014-10-14 this is wrong!!! it does not handle other branches correcly
+        # BUT, the location of the kernel sources are the same on all branches
         case ${subTaskName} in
             FSM-r2) location=trunk      ;;
             FSM-r3) location=trunk      ;;
             FSM-r4) location=FSM_R4_DEV ;;
             LRC)    location=LRC        ;;
+            FSM-r3-FSMDDALpdf) continue ;;
+            *) fatal "subTaskName ${subTaskName} is not supported" ;;
         esac
 
-        info "creating new workspace to copy kernel sources for ${name} / ${location}"
-        execute rm -rf ${workspace}
-        execute mkdir ${workspace}
-        execute cd ${workspace}
-        execute build setup
-        execute build newlocations ${location}
-        execute mkdir -p ${workspace}/bld/
+        info "creating new workspace to copy kernel sources for ${jobName} / ${location}"
+        createBasicWorkspace src-project
+        copyArtifactsToWorkspace "${jobName}" "${buildNumber}" "kernelsources"
 
-        copyArtifactsToWorkspace "${name}" "${number}" "kernelsources"
+        local lastKernelLocation=$(build bld/bld-kernelsources-linux)
+        local destinationBaseDirectory=$(dirname ${lastKernelLocation})
+        mustExistDirectory ${destinationBaseDirectory}
 
-        local destination=$(build bld/bld-kernelsources-linux)
-        mustExistDirectory ${destination}
+        local destination=${destinationBaseDirectory}/${labelName}
 
         [[ ! -d ${workspace}/bld/bld-kernelsources-linux ]] && continue
         [[   -d ${destination}                           ]] && continue
 
-        info "copy kernelsources from ${name} to buildresults share ${destination}"
+        info "copy kernelsources from ${jobName} to buildresults share ${destination}"
 
         if [[ ${canStoreArtifactsOnShare} ]] ; then
-            executeOnMaster chmod u+w ${resultBuildShare}/
+            executeOnMaster chmod u+w $(dirname ${destination})
             executeOnMaster mkdir -p  ${destination}
             execute rsync -av --exclude=.svn ${workspace}/bld/bld-kernelsources-linux/. ${server}:${destination}/
             touch ${destination}
