@@ -138,17 +138,15 @@ removeWorkspace() {
 #  @param   {locationName}   the new location name aka branch name
 #  @return  <none>
 switchToNewLocation() {
-    local location=$1
+    local location=${1:-$(getLocationName)}
 
-    trace "check, if user can use this location"
     # TODO: demx2fk3 2014-03-28 fixme
+    # trace "check, if user can use this location"
     # if id -ng ${USER} | grep pronb ; then
     #     error "${USER} has wrong group id. correct is pronb"
     #     exit 1
     # fi
 
-    # local newLocation=$(getConfig locationMapping)
-    local location=$(getLocationName)
     info "switching to new location \"${location}\""
     execute build newlocations ${location}
 
@@ -172,6 +170,13 @@ setupNewWorkspace() {
 
 
 createBasicWorkspace() {
+    local opt=$1
+    local location=
+    if [[ ${opt} = "-l" ]] ; then
+        location=$2
+        shift 2
+    fi
+
     local workspace=$(getWorkspaceName)
     mustHaveWritableWorkspace
     mustHaveWorkspaceName
@@ -180,7 +185,7 @@ createBasicWorkspace() {
     local components=$@
 
     setupNewWorkspace
-    switchToNewLocation
+    switchToNewLocation ${location}
     switchSvnServerInLocations
 
     for component in ${components} ; do
