@@ -98,10 +98,11 @@ actionCheckout() {
             _ciLfsRemoteSites ul ${tmpFileB}
 
             case ${subTaskName} in
-                *_in_ou) _ciLfsRemoteSites ou ${tmpFileA} ;;
-                *_in_wr) _ciLfsRemoteSites wr ${tmpFileA} ;;
-                *_in_ch) _ciLfsRemoteSites ch ${tmpFileA} ;;
-                *_in_es) _ciLfsRemoteSites es ${tmpFileA} ;;
+                *_in_ou) _ciLfsRemoteSites ou  ${tmpFileA} ;;
+                *_in_wr) _ciLfsRemoteSites wr  ${tmpFileA} ;;
+                *_in_ch) _ciLfsRemoteSites ch  ${tmpFileA} ;;
+                *_in_es) _ciLfsRemoteSites es  ${tmpFileA} ;;
+                *_in_be) _ciLfsRemoteSites be2 ${tmpFileA} ;;
                 *)       fatal "subTaskName ${subTaskName} not implemented" ;;
             esac
         ;;
