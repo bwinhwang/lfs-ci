@@ -17,10 +17,11 @@ ci_job_test_buildsystem() {
 
     local testSuiteDirectory=${workspace}/src-test/src/unittest/testsuites/buildsystem/dependencies
 
-    execute make -C ${testSuiteDirectory} test
-    # execute make -C ${testSuiteDirectory} test-xmloutput
+    execute make -C ${testSuiteDirectory} clean
+    #execute make -C ${testSuiteDirectory} test
+    execute make -C ${testSuiteDirectory} test-xmloutput
     execute mkdir ${workspace}/xml-reports/
-    execute cp -f ${testSuiteDirectory}/xml-reports/*.xml ${workspace}/xml-reports/
+    execute cp -f ${testSuiteDirectory}/xml-reports/*.xml* ${workspace}/xml-reports/
 
     return
 }
