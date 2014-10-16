@@ -234,9 +234,10 @@ _stackTrace() {
     # FRAMES-2 skips main, the last one in arrays
     for ((i=FRAMES-2; i>=0; i--)); do
         # Grab the source code of the line
-        code=$(sed -n "${BASH_LINENO[i]}{s/^//;p}" "${BASH_SOURCE[i+1]}")
-        printf "File %-30s Line %5d Method %-20s: %-100s\n"   \
-                ${BASH_SOURCE[i+1]}              \
+        local code=$(sed -n "${BASH_LINENO[i]}{s/^\s*//;p}" "${BASH_SOURCE[i+1]}")
+        local file=${BASH_SOURCE[i+1]}
+        printf "File %-30s Line %5d %-30s: %-100s\n"   \
+                ${file//${LFS_CI_ROOT}\//}              \
                 ${BASH_LINENO[i]}                \
                 ${FUNCNAME[i+1]}                 \
                 "${code}"
