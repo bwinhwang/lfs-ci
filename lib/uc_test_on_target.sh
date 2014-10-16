@@ -38,6 +38,8 @@ ci_job_test_on_target() {
         esac
     done
 
+    info "testing done."
+
     return
 
 }
@@ -68,13 +70,13 @@ fmon_tests() {
     execute mkdir -p ${workspace}/xml-reports
 
     info "start fmon tests..."
-
     # tell the fmon scripting, where the workspace is. otherwise it will use
     # the hardcoded path /lvol2/production_jenkins/test-repos/...
     export TESTING_WORKSPACE=${workspace}
     execute ${workspace}/src-fsmwbit/src/tools/ftcm/startftcm -cfg ${workspace}/src-fsmtest/src/test_scripts/configs/fcmd15.cfg
     mustExistFile ${workspace}/src-fsmwbit/src/log/tcm2.log
 
+    info "converting fmon log to junit test xml file"
     ${LFS_CI_ROOT}/bin/mkjunitxml.pl ${workspace}/src-fsmwbit/src/log/tcm2.log > ${workspace}/xml-reports/fsmr2.xml
     mustBeSuccessfull "$?" "mkjunitxml.pl"
 
