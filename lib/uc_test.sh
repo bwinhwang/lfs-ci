@@ -70,8 +70,8 @@ ci_job_test_summary() {
     local labelName=$(basename ${realDirectory})
 
     info "creating upstream file in workspace"
-    echo "upstreamProject=${UPSTREAM_PROJECT}"   > ${WORKSPACE}/upstream
-    echo "upstreamBuildNumber=${UPSTREAM_BUILD}" > ${WORKSPACE}/upstream
+    echo "upstreamProject=${UPSTREAM_PROJECT}"    > ${WORKSPACE}/upstream
+    echo "upstreamBuildNumber=${UPSTREAM_BUILD}" >> ${WORKSPACE}/upstream
 
     setBuildDescription "${JOB_NAME}" "${BUILD_NUMBER}" "${labelName}"
 
