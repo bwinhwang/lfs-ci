@@ -21,32 +21,69 @@ ci_job_test_on_target() {
     mustHaveValue "${branchName}" "branch name"
 
     info "create workspace for testing on ${branchName}"
-    cd ${workspace}
-    execute build setup
-    execute build newlocations ${branchName}
-    execute build adddir src-test
+    createBasicWorkspace -l ${branchName} src-test
 
     export testTargetName=${targetName}
     local testType=$(getConfig LFS_CI_uc_test_making_test_type)
 
-    case ${testType} in
-        checkUname)
-            makingTest_checkUname
-        ;;
-        testProductionFSM)
-            makingTest_testFSM
-        ;;
-        testProductionLRC)
-            makingTest_testLRC
-        ;;
-        *) 
-            fatal "unknown testType";
-        ;;
-    esac
+    for type in $(getConfig LFS_CI_uc_test_making_test_type) ; do
+        info "running test type ${type} on target ${testTargetName}"
+        case ${testType} in
+            checkUname) makingTest_checkUname ;;
+            testProductionFSM) 
+                               makingTest_testFSM
+                               fmon_tests ;;
+            testProductionLRC) makingTest_testLRC ;;
+            *) fatal "unknown testType"; ;;
+        esac
+    done
+
+    info "testing done."
 
     return
 
 }
+
+fmon_tests() {
+    local targetName=$(sed "s/^Test-//" <<< ${JOB_NAME})
+    mustHaveValue ${targetName} "target name"
+    info "testing on target ${targetName}"
+
+    local workspace=$(getWorkspaceName)
+    mustHaveWorkspaceName
+
+    local wbitSvnUrl=$(build location src-fsmwbit)
+    mustHaveValue "${wbitSvnUrl}" "svn ur of src-fsmwbit"
+
+    info "checking out src-fsmtest"
+    execute build adddir src-fsmtest
+    info "checking out src-ddal"
+    execute build adddir src-ddal
+    info "checking out src-fsmfmon"
+    execute build adddir src-fsmfmon
+    info "exporting src-fsmwbit"
+    execute svn co ${wbitSvnUrl}/src/tools            ${workspace}/src-fsmwbit/src/tools
+    execute svn co ${wbitSvnUrl}/src/test_cases/share ${workspace}/src-fsmwbit/src/test_cases/share
+    execute svn co ${wbitSvnUrl}/src/test_cases/lib   ${workspace}/src-fsmwbit/src/test_cases/lib
+
+    execute mkdir -p ${workspace}/src-fsmwbit/src/log/
+    execute mkdir -p ${workspace}/xml-reports
+
+    info "start fmon tests..."
+    # tell the fmon scripting, where the workspace is. otherwise it will use
+    # the hardcoded path /lvol2/production_jenkins/test-repos/...
+    export TESTING_WORKSPACE=${workspace}
+    execute ${workspace}/src-fsmwbit/src/tools/ftcm/startftcm -cfg ${workspace}/src-fsmtest/src/test_scripts/configs/fcmd15.cfg
+    mustExistFile ${workspace}/src-fsmwbit/src/log/tcm2.log
+
+    info "converting fmon log to junit test xml file"
+    ${LFS_CI_ROOT}/bin/mkjunitxml.pl ${workspace}/src-fsmwbit/src/log/tcm2.log > ${workspace}/xml-reports/fsmr2.xml
+    mustBeSuccessfull "$?" "mkjunitxml.pl"
+
+    return
+}
+
+
 makingTest_checkUname() {
     requiredParameters JOB_NAME BUILD_NUMBER LABEL DELIVERY_DIRECTORY
 
