@@ -1,5 +1,4 @@
 #!/bin/bash
-
 ## @fn      actionCompare()
 #  @brief   this command is called by jenkins custom scm plugin via a
 #           polling trigger. It should decide, if a build is required
@@ -59,10 +58,15 @@ actionCheckout() {
     # This includes the upstream project name and the upstream build number.
     # So the job is easy: get the changelog of the upstream project builds between old and new
 
-    debug "get the old upstream project data... from ${OLD_REVISION_STATE_FILE}"
-    { read oldUpstreamProjectName ; 
-      read oldUpstreamBuildNumber ;  } < "${OLD_REVISION_STATE_FILE}"
-    debug "old upstream project data are: ${oldUpstreamProjectName} / ${oldUpstreamBuildNumber}"
+    if [[ -e ${OLD_REVISION_STATE_FILE} ]] ; then
+        debug "get the old upstream project data... from ${OLD_REVISION_STATE_FILE}"
+        { read oldUpstreamProjectName ; 
+          read oldUpstreamBuildNumber ;  } < "${OLD_REVISION_STATE_FILE}"
+        debug "old upstream project data are: ${oldUpstreamProjectName} / ${oldUpstreamBuildNumber}"
+    else
+        debug "old revision state file does not exist."
+        oldUpstreamBuildNumber=1
+    fi
 
     # set variables upstreamProjectName and upstreamBuildNumber
     _getUpstream
@@ -81,7 +85,7 @@ actionCheckout() {
 
 ## @fn      actionCalculate()
 #  @brief   action ...
-#  @details «full description»
+#  @details 
 #  @param   <none>
 #  @return  <none>
 actionCalculate() {
@@ -135,6 +139,8 @@ _createChangelog() {
 
         build=$(( build - 1 ))
     done
+
+    rawDebug ${CHANGELOG}
 
     return
 }

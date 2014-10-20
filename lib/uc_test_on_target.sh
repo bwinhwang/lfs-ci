@@ -62,9 +62,11 @@ fmon_tests() {
     info "checking out src-fsmfmon"
     execute build adddir src-fsmfmon
     info "exporting src-fsmwbit"
-    execute svn co ${wbitSvnUrl}/src/tools            ${workspace}/src-fsmwbit/src/tools
-    execute svn co ${wbitSvnUrl}/src/test_cases/share ${workspace}/src-fsmwbit/src/test_cases/share
-    execute svn co ${wbitSvnUrl}/src/test_cases/lib   ${workspace}/src-fsmwbit/src/test_cases/lib
+    execute build adddir src-fsmwbit
+    # execute svn co ${wbitSvnUrl}/src/tools            ${workspace}/src-fsmwbit/src/tools
+    # execute svn co ${wbitSvnUrl}/src/test_cases/share ${workspace}/src-fsmwbit/src/test_cases/share
+    # execute svn co ${wbitSvnUrl}/src/test_cases/lib   ${workspace}/src-fsmwbit/src/test_cases/lib
+    # execute svn co ${wbitSvnUrl}/src/test_cases/lib   ${workspace}/src-fsmwbit/src/test_cases/lib
 
     execute mkdir -p ${workspace}/src-fsmwbit/src/log/
     execute mkdir -p ${workspace}/xml-reports

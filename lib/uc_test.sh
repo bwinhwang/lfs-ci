@@ -34,7 +34,9 @@ ci_job_test() {
     # local upstreamProject=$(sed "s/Test.*/Package_-_package/" <<< ${JOB_NAME})
     # local upstreamBuildNumber=$(readlink ${serverPath}/jobs/${upstreamProject}/builds/lastSuccessfulBuild)
     # info "upstreamProject ${upstreamProject} ${upstreamBuildNumber}"
-    source /var/fpwork/psulm/lfs-jenkins/home/jobs/${upstreamProject}/workspace/upstream
+    copyFileFromBuildDirectoryToWorkspace ${UPSTREAM_PROJECT} ${UPSTREAM_BUILD} upstream 
+    mustExistFile ${WORKSPACE}/upstream
+    source ${WORKSPACE}/upstream
 
     local ciBuildShare=$(getConfig LFS_CI_UC_package_internal_link)
     local workspace=${ciBuildShare}/build_${upstreamBuildNumber}
@@ -70,8 +72,10 @@ ci_job_test_summary() {
     local labelName=$(basename ${realDirectory})
 
     info "creating upstream file in workspace"
-    echo "upstreamProject=${UPSTREAM_PROJECT}"   > ${WORKSPACE}/upstream
-    echo "upstreamBuildNumber=${UPSTREAM_BUILD}" > ${WORKSPACE}/upstream
+    echo "upstreamProject=${UPSTREAM_PROJECT}"    > ${WORKSPACE}/upstream
+    echo "upstreamBuildNumber=${UPSTREAM_BUILD}" >> ${WORKSPACE}/upstream
+
+    copyFileFromWorkspaceToBuildDirectory ${JOB_NAME} ${BUILD_NUMBER} upstream
 
     setBuildDescription "${JOB_NAME}" "${BUILD_NUMBER}" "${labelName}"
 

@@ -354,6 +354,8 @@ mustHaveLocalSdks() {
 
         if [[ ! -d ${localCacheDir}/${tag} ]] ; then
             synchroniceToLocalPath ${bld}
+        else
+            execute touch ${localCacheDir}/data/${tag}
         fi
 
         execute rm -rf ${bld}
@@ -388,7 +390,9 @@ synchroniceToLocalPath() {
     if [[ ! -e ${localCacheDir}/${tag} ]] ; then
         progressFile=${localCacheDir}/data/${tag}.in_progress
 
-        sleep $(( RANDOM % 60 ))
+        local sleep=$(( RANDOM % 60 ))
+        debug "sleeping ${sleep} s for sync based on ${progressFile}"
+        sleep ${sleep}
 
         if [[ ! -e ${progressFile} ]] ; then
 
@@ -399,8 +403,8 @@ synchroniceToLocalPath() {
 
             execute rsync --archive --numeric-ids --delete-excluded --ignore-errors \
                 --hard-links --sparse --exclude=.svn --rsh=ssh                      \
-                ${rsync_opts} \
-                ${serverName}:${remotePath}/                                   \
+                ${rsync_opts}                                                       \
+                ${serverName}:${remotePath}/                                        \
                 ${localCacheDir}/data/${tag}/
 
             execute ln -sf data/${tag} ${localCacheDir}/${tag}
