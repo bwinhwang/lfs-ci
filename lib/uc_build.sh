@@ -356,6 +356,8 @@ mustHaveLocalSdks() {
 
         if [[ ! -d ${localCacheDir}/${tag} ]] ; then
             synchroniceToLocalPath ${bld}
+        else
+            execute touch ${localCacheDir}/data/${tag}
         fi
 
         execute rm -rf ${bld}
@@ -415,8 +417,6 @@ synchroniceToLocalPath() {
             sleep 60
             synchroniceToLocalPath ${localPath}
         fi
-    else
-        execute touch ${localCacheDir}/data/${tag}
     fi
 
     return

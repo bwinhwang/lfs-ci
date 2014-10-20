@@ -35,8 +35,8 @@ ci_job_test() {
     # local upstreamBuildNumber=$(readlink ${serverPath}/jobs/${upstreamProject}/builds/lastSuccessfulBuild)
     # info "upstreamProject ${upstreamProject} ${upstreamBuildNumber}"
     copyFileFromBuildDirectoryToWorkspace ${UPSTREAM_PROJECT} ${UPSTREAM_BUILD} upstream 
-    mustExistFile ${workspace}/upstream
-    source ${workspace}/upstream
+    mustExistFile ${WORKSPACE}/upstream
+    source ${WORKSPACE}/upstream
 
     local ciBuildShare=$(getConfig LFS_CI_UC_package_internal_link)
     local workspace=${ciBuildShare}/build_${upstreamBuildNumber}
