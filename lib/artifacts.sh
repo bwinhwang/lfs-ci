@@ -67,6 +67,9 @@ copyAndExtractBuildArtifactsFromProject() {
     local jobName=$1
     local buildNumber=$2
     local allowedComponentsFilter="$3"
+
+    [[ -z ${jobName} ]] && return
+
     local artifactesShare=$(getConfig artifactesShare)
     local artifactsPathOnMaster=${artifactesShare}/${jobName}/${buildNumber}/save/
     local serverName=$(getConfig linseeUlmServer)
@@ -137,6 +140,7 @@ copyArtifactsToWorkspace() {
     local workspace=$(getWorkspaceName)
     mustHaveWorkspaceName
 
+    # TODO: demx2fk3 2014-10-14 use getDownStreamProjectsData
     runOnMaster ${LFS_CI_ROOT}/bin/getDownStreamProjects -j ${jobName}     \
                                                          -b ${buildNumber} \
                                                          -h ${serverPath} > ${downStreamprojectsFile}
@@ -144,6 +148,9 @@ copyArtifactsToWorkspace() {
     if [[ $? -ne 0 ]] ; then
         error "error in getDownStreamProjects for ${jobName} #${buildNumber}"
         exit 1
+    fi
+    if [[ ! -s  ${downStreamprojectsFile} ]] ; then
+        printf "%d:SUCCESS:%s" ${buildNumber} ${jobName} > ${downStreamprojectsFile}
     fi
 
     local triggeredJobData=$(cat ${downStreamprojectsFile})

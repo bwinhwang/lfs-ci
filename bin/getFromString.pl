@@ -32,7 +32,7 @@ my $regex1 = qr /
                     ^
                     $productRE
                     _
-                    ( CI | Prod )
+                    ( CI | Prod | Post )
                     $splitRE
                     $locationRE           # location aka branch 
                     $splitRE
@@ -48,7 +48,7 @@ my $regex2 = qr /
                     ^
                     $productRE
                     _
-                    ( CI | Prod )
+                    ( CI | Prod | Post )
                     $splitRE
                     $locationRE           # location aka branch 
                     $splitRE

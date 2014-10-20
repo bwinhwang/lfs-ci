@@ -13,7 +13,6 @@ LFS_CI_SOURCE_common='$Id$'
 #  @return  <none>
 #  @throws  raise an error, if there is no target board name
 mustHaveTargetBoardName() {
-
     local location=$(getTargetBoardName) 
     if [[ ! ${location} ]] ; then
         error "can not get the correction target board name from JOB_NAME \"${JOB_NAME}\""
@@ -37,7 +36,6 @@ getBranchName() {
 #  @return  <none>
 #  @throws  raises an error, if there is no location name
 mustHaveLocationName() {
-
     local location=$(getLocationName) 
     if [[ ! ${location} ]] ; then
         error "can not get the correction location name from JOB_NAME \"${JOB_NAME}\""
@@ -140,17 +138,15 @@ removeWorkspace() {
 #  @param   {locationName}   the new location name aka branch name
 #  @return  <none>
 switchToNewLocation() {
-    local location=$1
+    local location=${1:-$(getLocationName)}
 
-    trace "check, if user can use this location"
     # TODO: demx2fk3 2014-03-28 fixme
+    # trace "check, if user can use this location"
     # if id -ng ${USER} | grep pronb ; then
     #     error "${USER} has wrong group id. correct is pronb"
     #     exit 1
     # fi
 
-    # local newLocation=$(getConfig locationMapping)
-    local location=$(getLocationName)
     info "switching to new location \"${location}\""
     execute build newlocations ${location}
 
@@ -171,6 +167,34 @@ setupNewWorkspace() {
     execute build setup
     return
 }
+
+
+createBasicWorkspace() {
+    local opt=$1
+    local location=
+    if [[ ${opt} = "-l" ]] ; then
+        location=$2
+        shift 2
+    fi
+
+    local workspace=$(getWorkspaceName)
+    mustHaveWritableWorkspace
+    mustHaveWorkspaceName
+    mustHaveCleanWorkspace
+
+    local components=$@
+
+    setupNewWorkspace
+    switchToNewLocation ${location}
+    switchSvnServerInLocations
+
+    for component in ${components} ; do
+        execute build adddir ${component}
+    done
+   
+    return
+}
+
 
 ## @fn      mustHaveValidWorkspace()
 #  @brief   ensure, that the workspace is valid
@@ -519,6 +543,8 @@ copyRevisionStateFileToWorkspace() {
     local jobName=$1
     local buildNumber=$2
 
+    [[ -z ${jobName} ]] && return
+
     copyFileFromBuildDirectoryToWorkspace ${jobName} ${buildNumber} revisionstate.xml
     mv ${WORKSPACE}/revisionstate.xml ${WORKSPACE}/revisions.txt
     rawDebug ${WORKSPACE}/revisions.txt
@@ -616,6 +642,38 @@ _getUpstreamProjects() {
     trace "output of getUpStreamProject" 
     rawDebug ${upstreamsFile}
 
+    return
+}
+
+_getDownstreamProjects() {
+    fatal "not implemented"
+    local jobName=$1
+    local buildNumber=$2
+    local downstreamFile=$3
+
+    requiredParameters LFS_CI_ROOT 
+
+    local serverPath=$(getConfig jenkinsMasterServerPath)
+    mustHaveValue "${serverPath}" "server path"
+    mustExistDirectory ${serverPath}
+
+    runOnMaster ${LFS_CI_ROOT}/bin/getDownStreamProjects -j ${jobName}     \
+                                                         -b ${buildNumber} \
+                                                         -h ${serverPath} > ${downstreamFile}
+    rawDebug ${downstreamFile}
+
+    return
+}
+
+getDownStreamProjectsData() {
+    local jobName=$1
+    local buildNumber=$2
+
+    local file=$(createTempFile)
+
+    _getDownstreamProjects ${jobName} ${buildNumber} ${file}
+
+    cat ${file}
     return
 }
 
@@ -719,3 +777,5 @@ getPackageJobNameFromUpstreamProject() {
 mustHaveAccessableServer() {
     return
 }
+
+
