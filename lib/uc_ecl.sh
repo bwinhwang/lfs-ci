@@ -17,9 +17,6 @@ ci_job_ecl() {
     mustHaveWorkspaceName
     mustHaveCleanWorkspace
 
-    local eclUrl=$(getConfig LFS_CI_uc_update_ecl_url)
-    mustHaveValue ${eclUrl}
-
     local eclKeysToUpdate=$(getConfig LFS_CI_uc_update_ecl_key_names)
     mustHaveValue "${eclKeysToUpdate}"
 
@@ -71,7 +68,6 @@ ci_job_ecl() {
         exit 0
     fi
 
-
     local linkDirectory=$(getConfig LFS_CI_UC_package_copy_to_share_link_location)
     local pathToLink=../../$(getConfig LFS_CI_UC_package_copy_to_share_path_name)/${labelName}
     local relTagName=${labelName//PS_LFS_OS_/PS_LFS_REL_}
@@ -79,51 +75,42 @@ ci_job_ecl() {
     execute mkdir -p ${linkDirectory}
     execute cd ${linkDirectory}
     execute ln -sf ${pathToLink} ${relTagName}
-    # TODO: demx2fk3 2014-07-22 disabled, bis jemand schreit...
-    # execute ln -sf ${pathToLink} "trunk@${revision}"
 
-    # TODO: demx2fk3 2014-07-22 fixme hack - cleanup
-    # TODO: demx2fk3 2014-07-23 is/was required for lfs2cloud by Rainer Schiele
-#     local buildResultsShare=$(getConfig LFS_PROD_UC_ecl_update_buildresults_share)/${labelName}
-#     execute mkdir -p ${buildResultsShare}/bld
-#     cd ${buildResultsShare}/bld/
-#     for key in $(cut -d" " -f 1 ${workspace}/bld/bld-externalComponents-summary ) ; do
-#         value=$(getConfig ${key} -f ${workspace}/bld/bld-externalComponents-summary)
-#         
-#         case ${key} in
-#             sdk*) execute ln -sf ../../../sdk/tags/${value} ${key} ;;
-#             bld*) execute ln -sf ./../../releases/bld/${value} ${key} ;;
-#             pkgpool) execute ln -sf ../../../pkgpool/${value} ${key} ;;
-#             *) error "do not support ${key} / ${value} for ${buildResultsShare}" ; exit 1 ;;
-#         esac
-#     done
-    # end of hack
+    local counter=0
+    local eclUrls=$(getConfig LFS_CI_uc_update_ecl_url)
+    mustHaveValue ${eclUrls}
 
-    info "checkout ECL from ${eclUrl}"
-    svnCheckout ${eclUrl} ${workspace}/ecl_checkout
-    mustHaveWritableFile ${workspace}/ecl_checkout/ECL
+    for eclUrl in ${eclUrls} ; do
+        local eclWorkspace=${workspace}/ecl_checkout.${counter}
 
-    for eclKey in ${eclKeysToUpdate} ; do
-        local oldEclValue=$(grep "^${eclKey}=" ${workspace}/ecl_checkout/ECL | cut -d= -f2)
-        local eclValue=$(getEclValue "${eclKey}" "${oldEclValue}")
-        debug "got new value for eclKey ${eclKey} / oldValue ${oldEclValue}"
+        info "checkout ECL from ${eclUrl} to ${eclWorkspace}"
+        svnCheckout ${eclUrl} ${eclWorkspace}
+        mustHaveWritableFile ${eclWorkspace}/ECL
 
-        mustHaveValue "${eclKey}" "no key ${eclKey}"
-        mustHaveValue "${eclValue}" "no value for ${eclKey}"
+        for eclKey in ${eclKeysToUpdate} ; do
+            local oldEclValue=$(grep "^${eclKey}=" ${eclWorkspace}/ECL | cut -d= -f2)
+            local eclValue=$(getEclValue "${eclKey}" "${oldEclValue}")
+            debug "got new value for eclKey ${eclKey} / oldValue ${oldEclValue}"
 
-        info "update ecl key ${eclKey} with value ${eclValue} (old: ${oldEclValue})"
-        execute perl -pi -e "s:^${eclKey}=.*:${eclKey}=${eclValue}:" ${workspace}/ecl_checkout/ECL
+            mustHaveValue "${eclKey}"   "no key ${eclKey}"
+            mustHaveValue "${eclValue}" "no value for ${eclKey}"
 
+            info "update ecl key ${eclKey} with value ${eclValue} (old: ${oldEclValue})"
+            execute perl -pi -e "s:^${eclKey}=.*:${eclKey}=${eclValue}:" ${eclWorkspace}/ECL
+
+        done
+
+        svnDiff ${eclWorkspace}/ECL
+
+        local canCommit=$(getConfig LFS_CI_uc_update_ecl_can_commit_ecl)
+        if [[ ${canCommit} ]] ; then
+            local logMessage=$(createTempFile)
+            echo "updating ECL" > ${logMessage} 
+            svnCommit -F ${logMessage} ${eclWorkspace}/ECL
+        fi
+
+        counter=$((counter + 1))
     done
-
-    svnDiff ${workspace}/ecl_checkout/ECL
-
-    local canCommit=$(getConfig LFS_CI_uc_update_ecl_can_commit_ecl)
-    if [[ $canCommit ]] ; then
-        local logMessage=$(createTempFile)
-        echo "updating ECL" > ${logMessage} 
-        svnCommit -F ${logMessage} ${workspace}/ecl_checkout/ECL
-    fi
 
     return
 }
