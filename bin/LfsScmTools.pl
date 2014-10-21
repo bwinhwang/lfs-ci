@@ -1721,6 +1721,7 @@ use parent qw( -norequire Command );
 use XML::Simple;
 use Data::Dumper;
 use Getopt::Std;
+use Log::Log4perl qw( :easy );
 
 sub prepare {
     my $self = shift;
@@ -1796,10 +1797,14 @@ sub prepare {
         }
     }
 
+    DEBUG "changelog entry parsing done";
+
     # map the comments to the component names
     my $changeLogAsTextHash;
     my $duplicates;
+
     foreach my $key ( keys %{ $subsysHash } ) {
+        DEBUG "key = $key";
         # my @components = split( "/", $key );
         my $componentName = $key; # $components[1];
         
@@ -1824,6 +1829,7 @@ sub execute {
     }
 
     foreach my $component ( keys %{ $self->{changeLog} } ) {
+
         my @list = $self->{changeLog}->{$component};
         @list = map { @{ $_ } } @list;
         
@@ -1842,17 +1848,60 @@ sub execute {
 sub mapComponentName {
     my $self = shift;
     my $name = shift;
-    return Singelton::config->getConfig( $name );
+    # TODO FIXME do this different!
+    # DEBUG "mapping component name $name";
+    # Singelton::configStore( "cache" )->{data}->{"src"} = { name => "src", value => $name };
+    # DEBUG Dumper( Singelton::config() );
+    # return Singelton::config()->getConfig( name => "LFS_PROD_uc_release_component_name" ) || $name;
+    my $data = {
+        'src-project'        => "Project Meta Information",
+        'src-bos'            => "Linux Kernel Config",
+        'src-cvmxsources'    => "CVMX Sources",
+        'src-cvmxsources3'   => "CVMX Sources 3.x",
+        'src-ddal'           => "FSMr2 DDAL",
+        'src-ddg'            => "Kernel Drivers",
+        'src-ifddg'          => "Intreface Kernel Drivers",
+        'src-firmware'       => "Firmware",
+        'src-fsmbos'         => "Linux Kernel Config",
+        'src-fsmbrm'         => "FSMr3 U-Boot",
+        'src-fsmbrm35'       => "FSMr4 U-Boot",
+        'src-fsmddal'        => "DDAL Library",
+        'src-fsmddg'         => "Kernel Drivers",
+        'src-fsmdtg'         => "Transport Drivers",
+        'src-fsmfirmware'    => "Firmware",
+        'src-fsmfmon'        => "FMON",
+        'src-fsmifdd'        => "DDAL Library API",
+        'src-fsmpsl'         => "Software Load",
+        'src-fsmrfs'         => "Root Filesystem",
+        'src-ifddal'         => "FSMr2 DDAL Library API",
+        'src-kernelsources'  => "Linux Kernel",
+        'src-kernelsources3' => "Linux Kernel 3.x",
+        'src-lrcbrm'         => "LRC U-Boot",
+        'src-lrcddal'        => "LRC specific DDAL",
+        'src-lrcddg'         => "LRC Kernel Drivers",
+        'src-lrcifddg'       => "LRC Kernel Drivers Interface",
+        'src-lrcpsl'          => "LRC Software Load",
+        'src-mddg'            => "FSMr2 Kernel Drivers",
+        'src-mrfs'            => "FSMr2 Root Filesystem",
+        'src-psl'             => "FSMr2 Software Load",
+        'src-rfs'             => "Common Root Filesystem",
+        'src-test'            => "Testing",
+        'src-tools'           => "Tools (LRC)",
+    };
+
+    return $data->{$name} || $name;
 }
 
 sub filterComments {
     my $self        = shift;
     my $commentLine = shift;
 
+    DEBUG "filter component $commentLine";
+
     # remove new lines at the end
     $commentLine =~ s/\n$//g;
 
-    my $jiraComment = Singelton::config->getConfig( "LFS_PROD_uc_release_svn_message_prefix" );
+    my $jiraComment = Singelton::config()->getConfig( name => "LFS_PROD_uc_release_svn_message_prefix" );
     return if $commentLine =~ m/$jiraComment/;
 
     # TODO: demx2fk3 2014-09-08 remove this line, if legacy CI is switched off
@@ -2652,6 +2701,7 @@ use strict;
 use parent qw( -norequire Object );
 
 use Data::Dumper;
+use Log::Log4perl qw( :easy );
 
 ## @fn      init()
 #  @brief   initialize the config handler object
@@ -2671,6 +2721,7 @@ sub getConfig {
     my $self  = shift;
     my $param = { @_ };
     my $name  = $param->{name};
+    DEBUG "config name => $name";
 
     my @candidates = map  { $_->[0]               } # schwarzian transform
                      sort { $b->[1] <=> $a->[1]   } 
@@ -2705,7 +2756,7 @@ sub loadData {
     my $self  = shift;
     my $param = { @_ };
 
-    my $fileName = $param->{configFileName};
+    my $fileName = $param->{configFileName} || sprintf( "%s/etc/file.cfg", $ENV{LFS_CI_ROOT} );
 
     my @dataList;
     # TODO: demx2fk3 2014-10-06 this should be somehow configurable
@@ -2748,6 +2799,7 @@ sub loadData {
                                                              tags    => \@tags,
                                                             );
     }
+
     return
 }
 # }}} ------------------------------------------------------------------------------------------------------------------
@@ -2798,6 +2850,7 @@ sub configStore {
 sub config {
     if( not $obj->{config}{handler} ) {
         $obj->{config}{handler} = Config->new();
+        $obj->{config}{handler}->loadData();
     }
     return $obj->{config}{handler};
 }
