@@ -1217,6 +1217,25 @@ sub hint {
 }
 
 # }}} ------------------------------------------------------------------------------------------------------------------
+package Command; # {{{
+## @fn     Command
+#  @brief  parent class for all commands
+
+use strict;
+use warnings;
+use parent qw( -norequire Object );
+
+sub prepare {
+    my $self = shift;
+    return;
+}
+
+sub execute {
+    my $self = shift;
+    return;
+}
+
+# }}} ------------------------------------------------------------------------------------------------------------------
 package Command::DependenciesForMakefile; # {{{
 use strict;
 use warnings;
