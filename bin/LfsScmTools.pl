@@ -113,12 +113,6 @@ use warnings;
 use strict;
 use parent qw( -norequire Object );
 
-# sub init {
-#     my $self = shift;
-#     $self->{data} = {};
-#     return;
-# }
-
 ## @fn      readConfig()
 #  @brief   read the "configuration" file for this config store
 #  @details this store has no configuration file, it just generate all possible configuration values
@@ -177,8 +171,8 @@ package Model::Config; # {{{
 ## @fn     Model::Config
 #  @brief  model for a configuration value
 
-use warnings;
 use strict;
+use warnings;
 use parent qw( -norequire Model );
 
 our $AUTOLOAD;
@@ -488,7 +482,6 @@ sub getDependencies {
     my $self = shift;
     return @{ $self->{dependencies} || [] };
 }
-
 
 sub matchingPlatform {
     my $self     = shift;
@@ -1228,7 +1221,7 @@ package Command::DependenciesForMakefile; # {{{
 use strict;
 use warnings;
 
-use parent qw( -norequire Object );
+use parent qw( -norequire Command );
 use Data::Dumper;
 
 sub prepare {
@@ -1309,7 +1302,7 @@ package Command::SortBuildsFromDependencies; # {{{
 use strict;
 use warnings;
 
-use parent qw( -norequire Object );
+use parent qw( -norequire Command );
 use Data::Dumper;
 
 sub prepare {
@@ -1401,7 +1394,6 @@ SOURCES:
                 printf "\t/usr/bin/time -v build -L \$@.log -C %s %s --label=\$(LABEL)\n\n", $source->{directory}, $platform;
             }
         } elsif( $self->{style} eq "legacy" ) {
-            my %duplicate;
             my %duplicate2;
             printf "%s %s - %s\n",
                     $source->{directory},
@@ -1424,7 +1416,7 @@ package Command::GetDependencies; # {{{
 use strict;
 use warnings;
 
-use parent qw( -norequire Object );
+use parent qw( -norequire Command );
 use Data::Dumper;
 
 sub prepare {
@@ -1464,7 +1456,7 @@ package Command::GetUpStreamProject; # {{{
 use strict;
 use warnings;
 
-use parent qw( -norequire Object );
+use parent qw( -norequire Command );
 use XML::Simple;
 use Getopt::Std;
 use Data::Dumper;
@@ -1525,7 +1517,6 @@ sub readBuildXml {
 #         </hudson.model.Cause_-UpstreamCause>
 #       </causes>
 #     </hudson.model.CauseAction>
-
 
     my @results;
     my $xml = XMLin( $file, ForceArray => 1 );
@@ -1590,7 +1581,7 @@ package Command::GetDownStreamProjects; # {{{
 use strict;
 use warnings;
 
-use parent qw( -norequire Object );
+use parent qw( -norequire Command );
 use XML::Simple;
 use Getopt::Std;
 
@@ -1658,7 +1649,7 @@ package Command::GetRevisionTxtFromDependencies; # {{{
 use strict;
 use warnings;
 
-use parent qw( -norequire Object );
+use parent qw( -norequire Command );
 use Getopt::Std;
 use Data::Dumper;
 
@@ -1706,7 +1697,7 @@ package Command::GetReleaseNoteContent; # {{{
 use strict;
 use warnings;
 
-use parent qw( -norequire Object );
+use parent qw( -norequire Command );
 
 use XML::Simple;
 use Data::Dumper;
@@ -2075,33 +2066,12 @@ sub execute {
 }
 
 # }}} ------------------------------------------------------------------------------------------------------------------
-package Command::Template; # {{{
-use strict;
-use warnings;
-
-use parent qw( -norequire Object );
-
-use XML::Simple;
-use Data::Dumper;
-
-sub prepare {
-    my $self = shift;
-    return;
-}
-
-sub execute {
-    my $self = shift;
-    return;
-}
-
-# }}} ------------------------------------------------------------------------------------------------------------------
 package Command::SendReleaseNote; # {{{
 use strict;
 use warnings;
 
 use parent qw( -norequire Object );
 use lib sprintf( "%s/lib/perl5/", $ENV{LFS_CI_ROOT} || "." );
-
 
 use XML::Simple;
 use Data::Dumper;
@@ -2115,7 +2085,6 @@ sub prepare {
     getopts( "r:t:f:", \my %opts );
     $self->{releaseNoteFile} = $opts{r} || die "no r";
     $self->{tagName}         = $opts{t} || die "no t";
-#     $self->{oldTagName}      = $opts{o} || die "no o";
     $self->{configFileName}  = $opts{f} || die "no f";
 
     my $config = Singelton::config();
@@ -2215,7 +2184,6 @@ sub prepare {
     $self->{configFileName} = $opt_f;
     $self->{configKeyName}  = $opt_k || die "no key";
 
-
     foreach my $value ( @{ $opt_t } ) {
         if( $value =~ m/([\w_]+):(.*)/ ) {
             Singelton::configStore( "cache" )->{data}->{ $1 } = $2;
@@ -2242,15 +2210,18 @@ use strict;
 use warnings;
 
 use parent qw( -norequire Object );
+
 use Getopt::Std;
 use Data::Dumper;
+use Log::Log4perl qw( :easy );
 
 sub prepare {
     my $self = shift;
+
     getopts( "r:i:o:", \my %opts );
-    $self->{regex}  = $opts{r} || die "no regex";
+    $self->{regex}  = $opts{r} or LOGDIE "no regex";
+    $self->{oldTag} = $opts{o} or LOGDIE "no old tag";
     $self->{incr}   = $opts{i} // 1;
-    $self->{oldTag} = $opts{o} || die "no old tag";
 
     return;
 }
@@ -2269,7 +2240,255 @@ sub execute {
     }
     $newTag =~ s/\(.*\)/$newTagLastByte/g;
 
+    INFO "new tag will be $newTag based on $regex";
     printf $newTag;
+    return;
+}
+
+
+# }}} ------------------------------------------------------------------------------------------------------------------
+package Command::RemovalCandidates; # {{{
+## @brief get the removal candidates baselines
+use strict;
+use warnings;
+
+use parent qw( -norequire Object );
+use Getopt::Std;
+use Data::Dumper;
+
+sub init {
+    my $self = shift;
+    $self->{branches} = {};
+    return;
+}
+
+sub prepare {
+    my $self = shift;
+
+    while( <STDIN> ) {
+        chomp;
+        my $base = basename( $_ );
+        my $branch;
+
+        if( $base =~ m/^PS_LFS_OS_\d\d\d\d_\d\d_\d{2,4}/ 
+            or $base =~ m/LFS\d+/ 
+            or $base =~ m/LBT\d+/ 
+            or $base =~ m/LFSM\d+/ 
+            or $base =~ m/UBOOT\d+/ 
+            or $base =~ m/results/
+        ) {
+            push @{ $self->{branches}{ "trunk" } }, { path => $_,
+                                                      base => $base };
+        } elsif( $base =~ m/^(.*)_.*$/ ) {
+            push @{ $self->{branches}{ $1 } }, { path => $_,
+                                                 base => $base };
+        } elsif ( $base eq "SAMPLEVERSION" or
+                  $base eq "EMPTY" or
+                  $base eq "DENSE" 
+                ) {
+            # ignore this baselines
+        } else {
+            die "fail $base";
+        }
+
+    }
+    return;
+}
+
+sub execute {
+    my $self = shift;
+
+    foreach my $branch ( keys %{ $self->{branches} } ) {
+        my $c = 0;
+        my @list = grep { $c++ > 20 }
+                   reverse
+                   sort 
+                   map  { $_->{base} }
+                   @{ $self->{branches}{ $branch } };
+        print join( "\n", @list ) . "\n" if scalar( @list ) > 0;
+    }
+
+    return;
+}
+
+
+# }}} ------------------------------------------------------------------------------------------------------------------
+package Command::GetFromString; # {{{
+## @brief    get a specified information from a string
+#   @details parses the string and return the requested substring.
+#            string: e.g. LFS_CI_-_asdf_v3.x_-_build_-_FSM-r3_-_fct
+#            wanted: location | subTaskName | subTaskName | platform
+#
+# usage: $0 <JOB_NAME> <wanted>
+#
+use strict;
+use warnings;
+
+use parent qw( -norequire Object );
+
+use Log::Log4perl qw( :easy );
+
+sub prepare {
+    my $self = shift;
+    return;
+}
+
+sub execute {
+    my $self = shift;
+
+    my $string = $ARGV[0]; # string, which should be parsed
+    my $wanted = $ARGV[1]; # wanted substring from regex
+
+    my $locationRE    = qr / (?<location> 
+                            [A-Za-z0-9.:_+-]+?
+                            )
+                        /x;
+    my $subTaskNameRE = qr / (?<subTaskName>
+                            [A-Za-z0-9.:_+-]+
+                            )
+                        /x;
+    my $taskNameRE    = qr / (?<taskName>
+                            [^-_]+
+                            )
+                        /x;
+    my $platformRE    = qr / (?<platform>
+                            .*)
+                        /x;
+    my $splitRE       = qr / _-_ /x;
+
+    my $productRE     = qr / (?<productName>(Admin | LFS | UBOOT | PKGPOOL)) /x;
+
+    my $regex1 = qr /
+                        ^
+                        $productRE
+                        _
+                        ( CI | Prod | Post )
+                        $splitRE
+                        $locationRE           # location aka branch 
+                        $splitRE
+                        $taskNameRE           # task name (Build)
+                        $splitRE?             # sub task name is 
+                        $subTaskNameRE?       # optional string, like FSM-r3
+                        $splitRE
+                        $platformRE           # platfrom, like fcmd, fspc, fct, ...
+                        $
+                    /x;
+
+    my $regex2 = qr /
+                        ^
+                        $productRE
+                        _
+                        ( CI | Prod | Post )
+                        $splitRE
+                        $locationRE           # location aka branch 
+                        $splitRE
+                        $taskNameRE           # task name (Build | Package | Testing )
+                        $
+                    /x;
+
+    my $regex3 = qr /
+                        ^
+                        (Admin)
+                        $splitRE
+                        $taskNameRE           # task name (Build)
+                        $splitRE?             # sub task name is 
+                        $subTaskNameRE?       # optional string, like FSM-r3
+                        $
+                    /x;
+
+
+    if( $string =~ m/$regex1/x or
+        $string =~ m/$regex2/x or
+        $string =~ m/$regex3/x
+    ) {
+        DEBUG sprintf( "wanted %s from \"%s\" ==> %s", $wanted, $string, $+{ $wanted } );
+        printf "%s\n", $+{ $wanted };
+    }
+
+    return;
+}
+
+# }}} ------------------------------------------------------------------------------------------------------------------
+package Command::DiffToChangelog; # {{{
+# @brief creates a svn style xml changelog file from the output of diff <a> <b>
+use strict;
+use warnings;
+use parent qw( -norequire Object );
+
+use POSIX         qw( strftime );
+use Log::Log4perl qw( :easy );
+use Data::Dumper;
+use Getopt::Std;
+
+sub init {
+    my $self = shift;
+    $self->{msg}     = "";
+    $self->{pathes}  = [];
+    $self->{changes} = {};
+
+    return;
+}
+
+sub prepare {
+    my $self = shift;
+    getopts( "a:b:d", \my %opts );
+
+
+    open CMD, sprintf( "diff %s %s|", $opts{a}, $opts{b} ) 
+        or LOGDIE "can not execute diff";
+
+    while( <CMD> ) {
+        chomp;
+        next if not m/[<>]/;
+        my ( $op, $time, $path ) = split( /\s+/, $_ );
+
+        if( $op eq "<" ) {
+            INFO "$path was deleted";
+            $self->{changes}{ $path } = "D";
+        } elsif( $op eq ">"  and exists $self->{changes}{ $path } and $self->{changes}{ $path } eq "D" ) {
+            # TODO: demx2fk3 2014-08-12 fix me - make this configureable
+            # $changes{ $path } = "M";
+            INFO "$path was modified";
+            delete $self->{changes}{ $path };
+        } else {
+            # noop
+            # INFO "$path was added";
+            # $changes{ $path } = "A";
+        }
+    }
+    close CMD;
+    return;
+}
+
+sub execute {
+    my $self = shift;
+
+    my %types = ( "A" => "added", "M" => "modified", "D" => "deleted" );
+
+    printf( "<?xml version=\"1.0\"?>
+<log>
+    <logentry revsion=\"%d\">
+        <author>%s</author>
+        <date>%s</date>
+        <paths>
+            %s
+        </paths>
+        <msg>%s</msg>
+    </logentry>
+</log>
+",
+        time(),
+        $ENV{ "USER" },
+        strftime( "%Y-%m-%dT%H:%M:%S.000000Z", gmtime( time() ) ),
+        join( "            \n", 
+            map { sprintf( '<path kind="" action="%s">%s</path>', $self->{changes}{ $_ }, $_, ) } 
+            keys %{ $self->{changes} } ),
+        join( "\n", 
+            map { sprintf( "%s %s ", $types{ $self->{changes}{ $_ } }, $_, ) } 
+            sort 
+            keys %{ $self->{changes} } ),
+);
+
     return;
 }
 
@@ -2349,28 +2568,44 @@ sub getLocation {
     return;
 }
 
+## @fn      prepare()
+#  @brief   prepare the usecase
+#  @param   <none>
+#  @return  <none>
 sub prepare {
     my $self  = shift;
-    my $param = { @_ };
-
+    # NOOP
     return;
 }
 
+## @fn      execute()
+#  @brief   execute the usecase
+#  @param   <none>
+#  @return  <none>
 sub execute {
     my $self = shift;
+    # NOOP
     return;
 }
 
 # }}} ------------------------------------------------------------------------------------------------------------------
 package Hints; # {{{
 ## @fn    Hints
-#  @brief 
+#  @brief Hints is a singleton object, which contains the informations
+#         about the hints entries from the dependency files.
+#         this must be a singelton, because it is required in many 
+#         different locations in the program.
 use strict;
 use warnings;
 use Data::Dumper;
 
 use parent qw( -norequire Object );
 
+## @fn      addHint( %param )
+#  @brief   add a hint to the singleton object
+#  @param   {keyName}    name of the baseline type e.g. bld-rfs-arm
+#  @param   {valueName}  value of the baseline e.g. PS_LFS_OS_2014_01_01
+#  @return  <none>
 sub addHint {
     my $self = shift;
     my $param = { @_ };
@@ -2380,6 +2615,10 @@ sub addHint {
     return;
 }
 
+## @fn      hint( $key )
+#  @brief   get the hint information 
+#  @param   {keyName}    name of the baseline tye e.g. bld-rfs-arm
+#  @return  value of the hint entry
 sub hint { 
     my $self = shift;
     my $key  = shift;
@@ -2395,12 +2634,20 @@ use parent qw( -norequire Object );
 
 use Data::Dumper;
 
+## @fn      init()
+#  @brief   initialize the config handler object
+#  @param   <none>
+#  @return  <none>
 sub init {
     my $self = shift;
     $self->{configObjects} = [];
     return;
 }
 
+## @fn      getConfig( $param )
+#  @brief   get the configuration value for a specified name
+#  @param   {name}    name of the config
+#  @return  value of the config
 sub getConfig {
     my $self  = shift;
     my $param = { @_ };
@@ -2431,6 +2678,10 @@ sub getConfig {
     return $value;
 }
 
+## @fn      loadData( $param )
+#  @brief   load the data for a config store
+#  @param   {configFileName}    name of the configu file
+#  @return  <none>
 sub loadData {
     my $self  = shift;
     my $param = { @_ };
@@ -2438,6 +2689,7 @@ sub loadData {
     my $fileName = $param->{configFileName};
 
     my @dataList;
+    # TODO: demx2fk3 2014-10-06 this should be somehow configurable
     foreach my $store ( Store::Config::File->new( file => $fileName ),
                         Store::Config::Environment->new(), 
                         Store::Config::Date->new(), 
@@ -2488,6 +2740,10 @@ use warnings;
 
 my $obj = bless {}, __PACKAGE__;
 
+## @fn      svn()
+#  @brief   return the svn handler
+#  @param   <none>
+#  @return  svn handler object
 sub svn {
     if( not $obj->{svn} ) {
         $obj->{svn} = Svn->new();
@@ -2495,6 +2751,10 @@ sub svn {
     return $obj->{svn};
 }
 
+## @fn      hint()
+#  @brief   return the hint handler
+#  @param   <none>
+#  @return  hint handler object
 sub hint {
     if( not $obj->{hint} ) {
         $obj->{hint} = Hints->new();
@@ -2512,6 +2772,10 @@ sub configStore {
     return $obj->{config}{ $storeName };
 }
 
+## @fn      config()
+#  @brief   return the config handler
+#  @param   <none>
+#  @return  config handler object
 sub config {
     if( not $obj->{config}{handler} ) {
         $obj->{config}{handler} = Config->new();
@@ -2535,49 +2799,41 @@ my %l4p_config = (
     'log4perl.appender.Logfile'                          => 'Log::Log4perl::Appender::File',
     'log4perl.appender.Logfile.filename'                 => $ENV{CI_LOGGING_LOGFILENAME}, 
     'log4perl.appender.Logfile.layout'                   => 'Log::Log4perl::Layout::PatternLayout',
-    'log4perl.appender.Logfile.layout.ConversionPattern' => '%p %d{ISO8601} %r [%M] %m%n',
-    'log4perl.appender.Screen'                           => 'Log::Log4perl::Appender::Screen',
-    'log4perl.appender.Screen.stderr'                    => '1',
-    'log4perl.appender.Screen.Threshold'                 => 'INFO',
-    'log4perl.appender.Screen.layout'                    => 'Log::Log4perl::Layout::SimpleLayout',
+    'log4perl.appender.Logfile.layout.ConversionPattern' => '%d{ISO8601}       UTC [%9r] [%-8p] %M -- %m%n',
 );
 
 if( $ENV{CI_LOGGING_LOGFILENAME} ) {
+    # we are only create a log, if the log already exists.
+    # this is the case, if the perl script is called from the ci scripting (bash)
     Log::Log4perl::init( \%l4p_config );
 }
 
-my $program = basename( $0 );
-my $command;
-
+my $program = basename( $0, qw( .pl ) );
 INFO "welcome to $program";
 
-if( $program eq "getDependencies" ) {
-    $command = Command::GetDependencies->new();
-} elsif ( $program eq "sortBuildsFromDependencies" ) {
-    $command = Command::SortBuildsFromDependencies->new();
-} elsif ( $program eq "getUpStreamProject" ) {
-    $command = Command::GetUpStreamProject->new();
-} elsif ( $program eq "getDownStreamProjects" ) {
-    $command = Command::GetDownStreamProjects->new();
-} elsif ( $program eq "getRevisionTxtFromDependencies" ) {
-    $command = Command::GetRevisionTxtFromDependencies->new();
-} elsif ( $program eq "getNewTagName" ) {
-    $command = Command::GetNewTagName->new();
-} elsif ( $program eq "getReleaseNoteContent" ) {
-    $command = Command::GetReleaseNoteContent->new();
-} elsif ( $program eq "getReleaseNoteXML" ) {
-    $command = Command::GetReleaseNoteXML->new();
-} elsif ( $program eq "sendReleaseNote" ) {
-    $command = Command::SendReleaseNote->new();
-} elsif ( $program eq "getConfig" ) {
-    $command = Command::GetConfig->new();
-} elsif ( $program eq "dependenciesForMakefile" ) {
-    $command = Command::DependenciesForMakefile->new();
-} else {
-    die "command not defined";
+my %commands = (
+                 diffToChangelog                => "Command::DiffToChangelog",
+                 getConfig                      => "Command::GetConfig",
+                 getDependencies                => "Command::GetDependencies",
+                 getDownStreamProjects          => "Command::GetDownStreamProjects",
+                 getFromString                  => "Command::GetFromString",
+                 getNewTagName                  => "Command::GetNewTagName",
+                 getReleaseNoteContent          => "Command::GetReleaseNoteContent",
+                 getReleaseNoteXML              => "Command::GetReleaseNoteXML",
+                 getRevisionTxtFromDependencies => "Command::GetRevisionTxtFromDependencies",
+                 getUpStreamProject             => "Command::GetUpStreamProject",
+                 removalCandidates              => "Command::RemovalCandidates",
+                 sendReleaseNote                => "Command::SendReleaseNote",
+                 sortBuildsFromDependencies     => "Command::SortBuildsFromDependencies",
+               );
+
+if( not exists $commands{$program} ) {
+    die "command $program not defined";
 }
 
+my $command = $commands{$program}->new();
 $command->prepare( @ARGV );
 $command->execute() and die "can not execute $program";
+
 INFO "Thank you for making a little program very happy";
 exit 0;
