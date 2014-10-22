@@ -43,7 +43,6 @@ fmon_tests() {
     return
 }
 
-
 makingTest_checkUname() {
     requiredParameters JOB_NAME BUILD_NUMBER LABEL DELIVERY_DIRECTORY
 
@@ -86,7 +85,6 @@ makingTest_checkUname() {
 }
 
 makingTest_testFSM() {
-
     requiredParameters JOB_NAME DELIVERY_DIRECTORY
 
     local workspace=$(getWorkspaceName)
@@ -106,33 +104,41 @@ makingTest_testFSM() {
     mustExistDirectory ${testSuiteDirectory}
 	mustExistFile ${testSuiteDirectory}/testsuite.mk
 
+    local make="make -C ${testSuiteDirectory}"
+
     info "create testconfig for ${testSuiteDirectory}"
-    execute make -C ${testSuiteDirectory} testconfig-overwrite \
+    execute ${make} testconfig-overwrite \
                 TESTBUILD=${testBuildDirectory} \
                 TESTTARGET=${testTargetName}
 
     info "powercycle the target to get it in a defined state"
-    execute make -C ${testSuiteDirectory} powercycle
+    execute ${make} powercycle
 
     info "waiting for prompt"
-    execute make -C ${testSuiteDirectory} waitprompt
+    execute ${make} waitprompt
+    # workaround for broken waitprompt / moxa: It seems, that moxa is buffering some data.
+    execute ${make} waitprompt 
+    execute ${make} waitssh
 
     info "installing software"
-    execute make -C ${testSuiteDirectory} install
+    local installOptions="$(getConfig LFS_CI_uc_test_making_test_install_options)"
+    execute ${make} install ${installOptions}
 
     info "restarting the target"
-    execute make -C ${testSuiteDirectory} powercycle
-    execute make -C ${testSuiteDirectory} waitprompt
-    execute make -C ${testSuiteDirectory} waitssh
+    execute ${make} powercycle
+    execute ${make} waitprompt
+    # workaround for broken waitprompt / moxa: It seems, that moxa is buffering some data.
+    execute ${make} waitprompt
+    execute ${make} waitssh
 
     info "installing testexecd on target"
-    execute make -C ${testSuiteDirectory} setup
+    execute ${make} setup
 
     info "checking the board for correct software"
-    execute make -C ${testSuiteDirectory} check
+    execute ${make} check
 
     export LFS_CI_ERROR_CODE= 
-    runAndLog make -C ${testSuiteDirectory} test-xmloutput       || LFS_CI_ERROR_CODE=0 # also true
+    runAndLog ${make} test-xmloutput       || LFS_CI_ERROR_CODE=0 # also true
 
     execute mkdir ${workspace}/xml-reports/
     execute cp -f ${testSuiteDirectory}/xml-reports/*.xml ${workspace}/xml-reports/
