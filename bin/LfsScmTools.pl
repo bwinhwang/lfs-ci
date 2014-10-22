@@ -2488,8 +2488,9 @@ sub execute {
         $string =~ m/$regex2/x or
         $string =~ m/$regex3/x
     ) {
-        DEBUG sprintf( "wanted %s from \"%s\" ==> %s", $wanted, $string, $+{ $wanted } );
-        printf "%s\n", $+{ $wanted };
+        my $result = $+{ $wanted };
+        DEBUG sprintf( "wanted %s from \"%s\" ==> %s", $wanted, $string, $result || "not defined" );
+        printf "%s\n", $result;
     }
 
     return;
