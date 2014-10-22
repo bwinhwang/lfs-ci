@@ -70,17 +70,19 @@ uc_job_test_on_target_archive_logs() {
     requiredParameters JOB_NAME BUILD_NUMBER LABEL
     local workspace=$(getWorkspaceName)
     mustHaveCleanWorkspace
-
+    local jobName=$(sed "s/_archiveLogs$//" <<< ${JOB_NAME})
+    # set the correct jobName
+    export JOB_NAME=${jobName}
     
     execute rsync -LavrPe ssh \
-        moritz:/lvol2/production_jenkins/jenkins-home/jobs/${JOB_NAME}/workspace/. \
+        moritz:/lvol2/production_jenkins/jenkins-home/jobs/${jobName}/workspace/. \
         ${workspace}/.
     execute rsync -LavrPe ssh \
-        moritz:/lvol2/production_jenkins/test-repos/src-fsmtest/${LABEL}-${JOB_NAME}/. 
+        moritz:/lvol2/production_jenkins/test-repos/src-fsmtest/${LABEL}-${jobName}/.  \
         ${workspace}/.
 
     copyFileToArtifactDirectory ${workspace}/. 
-    local artifactsPathOnShare=$(getConfig artifactesShare)/${JOB_NAME}/${BUILD_NUMBER}
-    linkFileToArtifactsDirectory ${artifactsPathOnShare}
+    local artifactsPathOnShare=$(getConfig artifactesShare)/${jobName}/${BUILD_NUMBER}
+    linkFileToArtifactsDirectory ${artifactsPathOnShare}/save
     
 }

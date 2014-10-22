@@ -284,7 +284,16 @@ sub commentForRevision {
 sub importantNote {
     my $self = shift;
     $self->mustHaveFileData( "importantNote" );
-    return join( "\n", @{ $self->{importantNote} || [] } );
+    my %duplicates;
+    return join( "\n", grep { not $duplicates{$_}++ } 
+                       @{ $self->{importantNote} || [] } );
+}
+
+sub addImportantNoteMessage {
+    my $self    = shift;
+    my $message = shift;
+    push @{ $self->{importantNote} }, $message;
+    return;
 }
 
 ## @fn      mustHaveFileData( $fileType )
@@ -333,7 +342,7 @@ sub isSubversion {
 sub getHeadRevision {
     my $self = shift;
     if( $self->isSubversion() ) {
-        my $svn = Singelton::svn();
+        my $svn = Singleton::svn();
         $self->{revision} = $svn->info( url => $self->{repos} )->{entry}->{commit}->{revision};
     }
     return $self->{revision};
@@ -390,7 +399,7 @@ sub loadDependencyTree {
     my $self = shift;
 
     my $dependencyParser;
-    my $svn = Singelton::svn();
+    my $svn = Singleton::svn();
     $self->{tag} =\ "";
 
     # hack
@@ -422,7 +431,7 @@ sub loadDependencyTree {
 
     foreach my $hint ( @{ $dependencyParser->{data}->{hint} } ) {
             push @{ $self->{hints} }, $hint;
-            Singelton::hint()->addHint( $hint->{src} => $hint->{dst}[0] );
+            Singleton::hint()->addHint( $hint->{src} => $hint->{dst}[0] );
     }
 
     foreach my $useLine ( @{ $dependencyParser->{data}->{use} } ) {
@@ -572,7 +581,7 @@ sub checkout {
     my $dirname  = dirname( $self->{repos} );   # https://svne1.access.nsn.com/isource/svnroot/BTS_SC_LFS/os/KERNEL_3.4_DEV/trunk/ci
     my $svnUrl;
 
-    my $svn = Singelton::svn(); # the subversion client
+    my $svn = Singleton::svn(); # the subversion client
 
     if( not -d ".svn" ) {
         $svn->checkout( url      => $self->{repos},
@@ -1684,7 +1693,7 @@ sub prepare {
 sub execute {
     my $self = shift;
 
-    my $svn = Singelton::svn();
+    my $svn = Singleton::svn();
 
     my $dependencies = $svn->cat(  url => $self->{url} );
     my $rev          = $svn->info( url => $self->{url} )->{entry}->{commit}->{revision};
@@ -1757,6 +1766,10 @@ sub prepare {
         my @newMessage;
         foreach my $line ( split( /[\n\r]+/, $msg ) ) {
 
+            if( $line =~ m/[\%\#]REM (.*)/) {
+                $self->{releaseNote}->addImportantNoteMessage( $1 );
+            }
+
             # cleanup the message a little bit
             $line =~ s/[\%\#]FIN  *[\%\#](\w+)=(\S+)\s*(.*)/$1 $2 $3 (completed)/g;
             $line =~ s/[\%\#]TBC  *[\%\#](\w+)=(\S+)\s*(.*)/$1 $2 $3 (to be continued)/g;
@@ -1828,8 +1841,7 @@ sub execute {
     my $importantNote = $self->{releaseNote}->importantNote();
     if( $importantNote ) {
         printf "--- Important Note ---\n\n";
-        printf "%s\n", $importantNote;
-        printf "--- Important Note ---\n\n";
+        printf "%s\n\n", $importantNote;
     }
 
     foreach my $component ( keys %{ $self->{changeLog} } ) {
@@ -1854,9 +1866,9 @@ sub mapComponentName {
     my $name = shift;
     # TODO FIXME do this different!
     # DEBUG "mapping component name $name";
-    # Singelton::configStore( "cache" )->{data}->{"src"} = { name => "src", value => $name };
-    # DEBUG Dumper( Singelton::config() );
-    # return Singelton::config()->getConfig( name => "LFS_PROD_uc_release_component_name" ) || $name;
+    # Singleton::configStore( "cache" )->{data}->{"src"} = { name => "src", value => $name };
+    # DEBUG Dumper( Singleton::config() );
+    # return Singleton::config()->getConfig( name => "LFS_PROD_uc_release_component_name" ) || $name;
     my $data = {
         'src-project'        => "Project Meta Information",
         'src-bos'            => "Linux Kernel Config",
@@ -1905,7 +1917,7 @@ sub filterComments {
     # remove new lines at the end
     $commentLine =~ s/\n$//g;
 
-    my $jiraComment = Singelton::config()->getConfig( name => "LFS_PROD_uc_release_svn_message_prefix" );
+    my $jiraComment = Singleton::config()->getConfig( name => "LFS_PROD_uc_release_svn_message_prefix" );
     return if $commentLine =~ m/$jiraComment/;
 
     # TODO: demx2fk3 2014-09-08 remove this line, if legacy CI is switched off
@@ -1938,12 +1950,12 @@ sub prepare {
     $self->{basedOn}         = $opts{o} || die "no o";
     $self->{configFileName}  = $opts{f} || die "no f";
 
-    my $config = Singelton::config();
+    my $config = Singleton::config();
     $config->loadData( configFileName => $self->{configFileName} );
 
     $self->{releaseNote} = Model::ReleaseNote->new( releaseName => $self->{tagName} );
 
-    my $svn = Singelton::svn();
+    my $svn = Singleton::svn();
 
     my $xml  = XMLin( "changelog.xml", ForceArray => 1 ) or die "can not open changelog.xml";
 
@@ -1958,6 +1970,9 @@ sub prepare {
                         ? sprintf( "empty commit message (r%s) from %s at %s", $entry->{revision}, $entry->{author}->[0], $entry->{date}->[0] ) 
                         : $entry->{msg}->[0] ;
 
+        if( $msg =~ m/[\%\#]REM (.*)/) {
+            $self->{releaseNote}->addImportantNoteMessage( $1 );
+        }
         # jira stuff
         if( $msg =~ m/^.*(BTS[A-Z]*-[0-9]*)\s*PR\s*([^ :]*)(.*$)/  ) {
             push @{ $self->{PR} }, { jira => $1,
@@ -2159,7 +2174,7 @@ sub prepare {
     $self->{tagName}         = $opts{t} || die "no t";
     $self->{configFileName}  = $opts{f} || die "no f";
 
-    my $config = Singelton::config();
+    my $config = Singleton::config();
     $config->loadData( configFileName => $self->{configFileName} );
 
     $self->{fromAddress}     = $config->getConfig( name => "LFS_PROD_ReleaseNote_FromAddress" );
@@ -2192,7 +2207,7 @@ sub prepare {
     $self->{data}{DELIVERY_REPOS}       = $config->getConfig( name => "LFS_PROD_svn_delivery_release_repos_url" );
     $self->{data}{SOURCE_REPOS}         = $config->getConfig( name => "LFS_PROD_svn_delivery_os_repos_url" );
     $self->{data}{TAGNAME}              = $self->{tagName};
-    $self->{data}{SVN_EXTERNALS}        = Singelton::svn()->propget( property => "svn:externals",
+    $self->{data}{SVN_EXTERNALS}        = Singleton::svn()->propget( property => "svn:externals",
                                                                    url      => sprintf( "%s/tags/%s",
                                                                                   $self->{data}{DELIVERY_REPOS},
                                                                                   $self->{data}{TAGNAME} ) );
@@ -2258,7 +2273,7 @@ sub prepare {
 
     foreach my $value ( @{ $opt_t } ) {
         if( $value =~ m/([\w_]+):(.*)/ ) {
-            Singelton::configStore( "cache" )->{data}->{ $1 } = $2;
+            Singleton::configStore( "cache" )->{data}->{ $1 } = $2;
         }
     }
     return;
@@ -2267,8 +2282,8 @@ sub prepare {
 sub execute {
     my $self = shift;
 
-    Singelton::config()->loadData( configFileName => $self->{configFileName} );
-    my $value = Singelton::config()->getConfig( name => $self->{configKeyName} );
+    Singleton::config()->loadData( configFileName => $self->{configFileName} );
+    my $value = Singleton::config()->getConfig( name => $self->{configKeyName} );
     DEBUG sprintf( "config %s = %s", $self->{configKeyName}, $value );
 
     print $value;
@@ -2473,8 +2488,9 @@ sub execute {
         $string =~ m/$regex2/x or
         $string =~ m/$regex3/x
     ) {
-        DEBUG sprintf( "wanted %s from \"%s\" ==> %s", $wanted, $string, $+{ $wanted } );
-        printf "%s\n", $+{ $wanted };
+        my $result = $+{ $wanted };
+        DEBUG sprintf( "wanted %s from \"%s\" ==> %s", $wanted, $string, $result || "not defined" );
+        printf "%s\n", $result;
     }
 
     return;
@@ -2604,11 +2620,11 @@ sub getLocation {
     my $tag      = $param->{tag};
     my $revision = $param->{revision};
 
-    if( Singelton::hint()->hint( $subDir ) ) {
-        $tag = Singelton::hint()->hint( $subDir );
+    if( Singleton::hint()->hint( $subDir ) ) {
+        $tag = Singleton::hint()->hint( $subDir );
     }
 
-    # printf STDERR "LOCATION HINT %s %s -- %s\n", $subDir, $tag // "undef tag", Singelton::hint()->hint( $subDir ) // "undef";
+    # printf STDERR "LOCATION HINT %s %s -- %s\n", $subDir, $tag // "undef tag", Singleton::hint()->hint( $subDir ) // "undef";
     
     my $tmp = $self->{locations}->getReporitoryOrLocation( subDir => $subDir,
                                                            tag    => $tag );
@@ -2767,7 +2783,7 @@ sub loadData {
     foreach my $store ( Store::Config::File->new( file => $fileName ),
                         Store::Config::Environment->new(), 
                         Store::Config::Date->new(), 
-                        Singelton::configStore( "cache" ),
+                        Singleton::configStore( "cache" ),
                       ) {
         push @dataList, @{ $store->readConfig() };
     }
@@ -2807,8 +2823,8 @@ sub loadData {
     return
 }
 # }}} ------------------------------------------------------------------------------------------------------------------
-package Singelton; # {{{
-## @fn    Singelton
+package Singleton; # {{{
+## @fn    Singleton
 #  @brief class which just provide a singelton - just one instance of this class
 use strict;
 use warnings;
