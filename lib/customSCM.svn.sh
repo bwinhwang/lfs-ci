@@ -90,23 +90,33 @@ _createRevisionsTxtFile() {
 
     local srcRepos=$(getConfig lfsSourceRepos)
 
-    # get the locations/<branch>/Dependencies
-    dependenciesFileUrl=${srcRepos}/os/trunk/bldtools/locations-${locationName}/Dependencies
-    if ! svn ls ${dependenciesFileUrl} >/dev/null 
-    then
-        error "svn is not responding or ${dependenciesFileUrl} does not exist"
-        exit 1
-    fi
+    execute touch ${newRevisionsFile}
 
-    # can not use execute here, so we have to do the error handling by hande
-    # do the magic for all dir
-    info "dependenciesFileUrl is ${dependenciesFileUrl}"
-    ${LFS_CI_ROOT}/bin/getRevisionTxtFromDependencies -u ${dependenciesFileUrl} \
-                                                      -f ${dependenciesFile} | sort -u > ${newRevisionsFile} 
-    if [[ $? != 0 ]] ; then
-        error "getRevisionTxtFromDependencies failed to generate ${newRevisionsFile}"
-        exit 1
-    fi
+    # get the locations/<branch>/Dependencies
+    local branch=
+    for branch in ${locationName} $(getConfig CUSTOM_SCM_svn_additional_location)
+    do
+
+        local dependenciesFileUrl=${srcRepos}/os/trunk/bldtools/locations-${branch}/Dependencies
+        # check, if dependency file exists
+        execute -n svn ls ${dependenciesFileUrl} 
+
+        # can not use execute here, so we have to do the error handling by hande
+        # do the magic for all dir
+        info "dependenciesFileUrl is ${dependenciesFileUrl}"
+
+        local tmpFile1=$(createTempFile)
+        execute -n ${LFS_CI_ROOT}/bin/getRevisionTxtFromDependencies \
+                    -u ${dependenciesFileUrl} \
+                    -f ${dependenciesFile}    \
+            | execute -n sort -u > ${newRevisionsFile} 
+
+        debug "got revisions from ${dependenciesFileUrl}"
+        rawDebug ${tmpFile1}
+
+        execute -n sort -u ${dependenciesFileUrl} ${tmpFile1} > ${tmpFile2}
+        execute -n ${tmpFile2} > ${dependenciesFileUrl}
+    done
 
     # add also buildtools location
     local bldToolsUrl=${srcRepos}/os/trunk/bldtools/bld-buildtools-common
