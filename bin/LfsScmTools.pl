@@ -2036,7 +2036,7 @@ sub prepare {
                             $self->{data}{SVN_OS_REPOS_URL},
                             $self->{data}{TAGNAME},
                         );
-    $self->{data}{SVN_OS_REPOS_REVISION} = $svn->info( url => $svnUrl )->{entry}->{commit}->{revision};
+    $self->{data}{SVN_OS_REPOS_REVISION} = ""; # $svn->info( url => $svnUrl )->{entry}->{commit}->{revision};
     # __SVN_OS_TAGS_URL_WITH_REVISION__
     $self->{data}{SVN_OS_TAGS_URL_WITH_REVISION} = $svnUrl;
 
@@ -2047,7 +2047,7 @@ sub prepare {
                          $self->{data}{SVN_REL_REPOS_URL},
                          $self->{data}{LFS_PROD_RELEASE_CURRENT_TAG_NAME_REL},
                      );
-    $self->{data}{SVN_REL_REPOS_REVISION} = $svn->info( url => $svnUrl )->{entry}->{commit}->{revision};
+    $self->{data}{SVN_REL_REPOS_REVISION} = ""; # $svn->info( url => $svnUrl )->{entry}->{commit}->{revision};
     # __SVN_REL_TAGS_URL_WITH_REVISION__
     $self->{data}{SVN_REL_TAGS_URL_WITH_REVISION} = $svnUrl;
 
@@ -2059,7 +2059,7 @@ sub prepare {
                          $self->{data}{TAGNAME},
                      );
 
-    $self->{data}{SVN_SOURCE_TAGS_REVISION}          = $svn->info( url => $svnUrl )->{entry}->{commit}->{revision};
+    $self->{data}{SVN_SOURCE_TAGS_REVISION}          = ""; # $svn->info( url => $svnUrl )->{entry}->{commit}->{revision};
     $self->{data}{SVN_SOURCE_TAGS_URL_WITH_REVISION} = $svnUrl;
 
     # __CORRECTED_FAULTS__
