@@ -1217,6 +1217,25 @@ sub hint {
 }
 
 # }}} ------------------------------------------------------------------------------------------------------------------
+package Command; # {{{
+## @fn     Command
+#  @brief  parent class for all commands
+
+use strict;
+use warnings;
+use parent qw( -norequire Object );
+
+sub prepare {
+    my $self = shift;
+    return;
+}
+
+sub execute {
+    my $self = shift;
+    return;
+}
+
+# }}} ------------------------------------------------------------------------------------------------------------------
 package Command::DependenciesForMakefile; # {{{
 use strict;
 use warnings;
@@ -1773,8 +1792,12 @@ sub prepare {
                     @{ $entry->{paths}->[0]->{path} };
 
         foreach my $p ( @pathes ) {
-            $p =~ s:.*/(src-.*?)/.*:$1:;
-            $subsysHash->{ $p }->{ $msg } = undef;
+            my $component = "Subversion branch creation or merge";
+            if( $p =~ m:.*/(src-\w*?)/.*: or
+                $p =~ m:.*/(src-\w*)$: ) {
+                $component = $1;
+            }
+            $subsysHash->{ $component }->{ $msg } = undef;
         }
     }
 
@@ -1861,13 +1884,13 @@ sub mapComponentName {
         'src-lrcddal'        => "LRC specific DDAL",
         'src-lrcddg'         => "LRC Kernel Drivers",
         'src-lrcifddg'       => "LRC Kernel Drivers Interface",
-        'src-lrcpsl'          => "LRC Software Load",
-        'src-mddg'            => "FSMr2 Kernel Drivers",
-        'src-mrfs'            => "FSMr2 Root Filesystem",
-        'src-psl'             => "FSMr2 Software Load",
-        'src-rfs'             => "Common Root Filesystem",
-        'src-test'            => "Testing",
-        'src-tools'           => "Tools (LRC)",
+        'src-lrcpsl'         => "LRC Software Load",
+        'src-mddg'           => "FSMr2 Kernel Drivers",
+        'src-mrfs'           => "FSMr2 Root Filesystem",
+        'src-psl'            => "FSMr2 Software Load",
+        'src-rfs'            => "Common Root Filesystem",
+        'src-test'           => "Testing",
+        'src-tools'          => "Tools (LRC)",
     };
 
     return $data->{$name} || $name;
