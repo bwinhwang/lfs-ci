@@ -69,8 +69,9 @@ actionCheckout() {
     local upstreamBuildNumber=${UPSTREAM_BUILD:-${TESTED_BUILD_NUMBER}}
 
     if [[ -z ${upstreamProjectName} || -z ${upstreamBuildNumber} ]] ; then
-        error "didn't find the upstream build"
-        exit 1
+        warning "didn't find the upstream build"
+        upstreamProjectName=$(getUpstreamProjectName)
+        upstreamBuildNumber=lastSu
     fi
 
     build=${upstreamBuildNumber}
@@ -106,14 +107,6 @@ actionCheckout() {
         echo -n "<log/>" >"$CHANGELOG"
     fi
 
-    # copy revisions.txt from upstream
-#     local buildDirectory=/var/fpwork/demx2fk3/lfs-jenkins/home/jobs/${upstreamProjectName}/builds/${upstreamBuildNumber}
-#     if runOnMaster test -f ${buildDirectory}/revisionstate.xml ; then
-#         execute rsync -a ${server}:${buildDirectory}/revisionstate.xml ${WORKSPACE}/revisions.txt
-#     else
-#         touch ${WORKSPACE}/revisions.txt
-#     fi
-
     return
 }
 
@@ -128,8 +121,9 @@ actionCalculate() {
     local upstreamBuildNumber=${UPSTREAM_BUILD:-${TESTED_BUILD_NUMBER}}
 
     if [[ -z ${upstreamProjectName} || -z ${upstreamBuildNumber} ]] ; then
-        error "didn't find the upstream build"
-        # exit 1
+        warning "didn't find the upstream build"
+        upstreamProjectName=$(getUpstreamProjectName)
+        upstreamBuildNumber=lastSu
     fi
 
     debug "creating revision state file ${REVISION_STATE_FILE}"
@@ -143,13 +137,4 @@ actionCalculate() {
 
     return 
 }
-
-# _setUpstream() {
-#     if [[ "${BUILD_CAUSE_MANUALTRIGGER}" == true ]] ; then
-#         debug "build was triggered manually, get last stable upstream"
-#         
-#     else
-#         debug "build was triggered by upstream"
-#     fi
-# }
 
