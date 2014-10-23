@@ -272,7 +272,7 @@ cleanupBaselineShares() {
         mustExistDirectory "${LFS_CI_SHARE_MIRROR}/${USER}/lfs-ci-local/"
         info "changing write permissions..."
 
-        local baselineDirectories=$(baselineDirectories)
+        local baselineDirectories=$(createTempFile)
         execute -n find ${LFS_CI_SHARE_MIRROR}/${USER}/lfs-ci-local/*/data -mindepth 1 -maxdepth 1 -mtime +2 > ${baselineDirectories}
         for directory in $(cat ${baselineDirectories}) ; do
             info "removing ${directory}";
