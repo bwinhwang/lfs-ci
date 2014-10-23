@@ -207,7 +207,7 @@ cleanupArtifactsShare() {
 ## @fn      backupJenkinsMasterServerInstallation()
 #  @brief   backup the jenkins installation from the master server on the build share
 #  @details we keep 10 backups of the jenkins installation, we use the 
-#  @todo    «description of incomplete business»
+#  @todo    
 #  @param   <none>
 #  @return  <none>
 backupJenkinsMasterServerInstallation() {
@@ -259,7 +259,6 @@ cleanupOrphanWorkspaces() {
 
 ## @fn      cleanupBaselineShares()
 #  @brief   cleanup the baselines on the local share on the build node, which are not required any more
-#  @details «full description»
 #  @param   <none>
 #  @return  <none>
 cleanupBaselineShares() {
@@ -269,14 +268,18 @@ cleanupBaselineShares() {
     # ensure, that no other job is running on the node, otherwise exist with a nice description
     # nice algorithm to find out, which directory can be removed
     # remove the directory
-    debug "not implemented yet"
-
     if [[ ${LFS_CI_SHARE_MIRROR} ]] ; then
         mustExistDirectory "${LFS_CI_SHARE_MIRROR}/${USER}/lfs-ci-local/"
         info "changing write permissions..."
-        execute chmod -R u+w ${LFS_CI_SHARE_MIRROR}/${USER}/lfs-ci-local/
-        info "removing local baseline share"
-        execute rm -rf ${LFS_CI_SHARE_MIRROR}/${USER}/lfs-ci-local/
+
+        local baselineDirectories=$(baselineDirectories)
+        execute -n find ${LFS_CI_SHARE_MIRROR}/${USER}/lfs-ci-local/*/data -mindepth 1 -maxdepth 1 -mtime +2 > ${baselineDirectories}
+        for directory in $(cat ${baselineDirectories}) ; do
+            info "removing ${directory}";
+            execute chmod -R u+w ${directory}
+            execute rm -rf ${directory}
+            execute symlinks -d ${LFS_CI_SHARE_MIRROR}/${USER}/lfs-ci-local/*
+        done
     fi
 
     return
