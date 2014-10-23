@@ -64,3 +64,35 @@ getJobNameFromUrl() {
     cut -d/ -f 5 <<< ${url}
     return
 }
+
+## @fn      getUpstreamProjectName( $jobName )
+#  @brief   get the upstream project name of the (optional) jobName / current job
+#  @details this function is required, if the job was triggered by hand. we have to found out
+#           what is the upstream job name to get everything working - like getting change notes
+#           and artifacts from the upstream job
+#  @param   {jobName}    name of the job (optional, default ${JOB_NAME})
+#  @return  name of the upstream job
+getUpstreamProjectName() {
+    local jobName=$1
+
+    if [[ -z ${jobName} ]] ; then
+        requiredParameters JOB_NAME
+        jobName=${JOB_NAME}
+    fi
+
+    case ${jobName} in
+        LFS_CI_-_*_-_Test)
+            local branchName=$(getBranchName)
+            echo LFS_CI_-_${branchName}_-_Package_-_package
+        ;;
+        UBOOT_CI_-_*_-_Test)
+            local branchName=$(getBranchName)
+            echo UBOOT_CI_-_${branchName}_-_Package_-_package
+        ;;
+        *)
+            fatal "no rule to get the upstream job for ${jobName}"
+        ;;
+    esac
+
+    return        
+}
