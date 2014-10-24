@@ -82,15 +82,18 @@ synchronizeShare() {
 
     execute ssh ${remoteServer} "${find} ${remotePath} -maxdepth $(( findDepth - 1 )) -exec chmod u+w {} \; " 
 
+    local pathesToCreate=$(createTempFile)
     for entry in $(cat ${pathToSyncFile})
     do
         local entryDirname=$(dirname ${entry})
         local entryBasename=$(basename ${entry})
 
         basePartOfEntry=${entryDirname//${localPath}}
-        info "mkdir -p ${remoteServer}:${remotePath}/${basePartOfEntry}"
-        execute ssh ${remoteServer} mkdir -p ${remotePath}/${basePartOfEntry}
+        echo ${remotePath}/${basePartOfEntry} >> ${pathesToCreate}
     done
+
+    info "creating directories on remote site"
+    execute -n sort -u ${pathToSyncFile} | execute xargs ssh ${remotePath} mkdir -p
 
     info "transferting to ${remoteServer}:${remotePath}/${basePartOfEntry}"
     execute rsync -aHz -e ssh --stats ${rsyncOpts} --files-from=${pathToSyncFile} ${localPath} ${remoteServer}:${remotePath}
