@@ -83,7 +83,7 @@ synchronizeShare() {
     for entry in $(cat ${pathToSyncFile})
     do
         basePartOfEntry=${entry//${localPath}}
-       [[ -d ${entry} ]] || continue
+        [[ -d ${entry} ]] || continue
         info "transferting ${entry} to ${remoteServer}:${remotePath}/${basePartOfEntry}"
         execute ssh ${remoteServer} mkdir -p ${remotePath}/${basePartOfEntry}
         execute rsync -aHz -e ssh --stats ${rsyncOpts} ${entry}/ ${remoteServer}:${remotePath}/${basePartOfEntry}

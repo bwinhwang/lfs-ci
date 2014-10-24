@@ -54,7 +54,6 @@ ci_job_release() {
     local releaseLabel=$(getNextReleaseLabel)
     mustHaveValue "${releaseLabel}" "release label"
 
-    setBuildDescription "${JOB_NAME}" "${BUILD_NUMBER}" "${releaseLabel}<br>${LFS_PROD_RELEASE_CURRENT_TAG_NAME_REL}"
 
     info "found package job: ${packageJobName} / ${packageBuildNumber}"
     info "found build   job: ${buildJobName}   / ${buildBuildNumber}"
@@ -94,6 +93,8 @@ ci_job_release() {
     export LFS_PROD_RELEASE_PREVIOUS_TAG_NAME_REL=${LFS_PROD_RELEASE_PREVIOUS_TAG_NAME//PS_LFS_OS_/PS_LFS_REL_}
     info "LFS os release ${LFS_PROD_RELEASE_CURRENT_TAG_NAME} is based on ${LFS_PROD_RELEASE_PREVIOUS_TAG_NAME}"
     info "LFS release ${LFS_PROD_RELEASE_CURRENT_TAG_NAME_REL} is based on ${LFS_PROD_RELEASE_PREVIOUS_TAG_NAME_REL}"
+
+    setBuildDescription "${JOB_NAME}" "${BUILD_NUMBER}" "${releaseLabel}<br>${LFS_PROD_RELEASE_CURRENT_TAG_NAME_REL}<br><a href=https://wft.inside.nsn.com/ALL/builds/${releaseLabel}>WFT</a>"
 
     info "task is ${subJob}"
     case ${subJob} in

@@ -49,6 +49,7 @@ ci_job_package() {
     # creates a file under doc/ with all delivered files of a LFS OS release
     createOsFileList
 
+    # TODO: demx2fk3 2014-08-05 reenable me
     copyReleaseCandidateToShare
 
     return 0
@@ -240,20 +241,22 @@ copySysroot() {
 
     done
 
-    for bldDirectory in ${workspace}/bld/bld-*-*/ ; do
-        [[ -d ${bldDirectory}                   ]] || continue
-        [[ -d ${bldDirectory}/results/sys-root/ ]] || continue
+    if [[ $(getBranchName) =~ "LRC" ]] ; then
+        for bldDirectory in ${workspace}/bld/bld-*-*/ ; do
+            [[ -d ${bldDirectory}                   ]] || continue
+            [[ -d ${bldDirectory}/results/sys-root/ ]] || continue
 
-        local destinationsArchitecture=$(getArchitectureFromDirectory ${bldDirectory})
-        mustHavePlatformFromDirectory ${bldDirectory} ${destinationsArchitecture} 
+            local destinationsArchitecture=$(getArchitectureFromDirectory ${bldDirectory})
+            mustHavePlatformFromDirectory ${bldDirectory} ${destinationsArchitecture} 
 
-        local platform=$(getPlatformFromDirectory ${bldDirectory})
-        mustHaveValue "${platform}" "platform from directory from ${bldDirectory}"
+            local platform=$(getPlatformFromDirectory ${bldDirectory})
+            mustHaveValue "${platform}" "platform from directory from ${bldDirectory}"
 
-        info "copy sys-root for ${destinationsArchitecture} from ${bldDirectory}"
-        local dst=${workspace}/upload/
-        execute rsync -av --exclude=.svn ${bldDirectory}/results/sys-root/ ${dst}/sys-root/
-    done
+            info "copy sys-root for ${destinationsArchitecture} from ${bldDirectory}"
+            local dst=${workspace}/upload/
+            execute rsync -av --exclude=.svn ${bldDirectory}/results/sys-root/ ${dst}/sys-root/
+        done
+    fi
 
     return
 }

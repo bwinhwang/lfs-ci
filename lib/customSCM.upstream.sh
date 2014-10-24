@@ -69,9 +69,10 @@ actionCheckout() {
     local upstreamBuildNumber=${UPSTREAM_BUILD:-${TESTED_BUILD_NUMBER}}
 
     if [[ -z ${upstreamProjectName} || -z ${upstreamBuildNumber} ]] ; then
-        warning "didn't find the upstream build"
         upstreamProjectName=$(getUpstreamProjectName)
-        upstreamBuildNumber=lastSu
+        local buildPath=$(getBuildDirectoryOnMaster ${upstreamProjectName} lastSuccessfulBuild)
+        upstreamBuildNumber=$(runOnMaster readlink ${buildPath}) 
+        warning "didn't find the upstream build, using ${upstreamProjectName} / ${upstreamBuildNumber}"
     fi
 
     build=${upstreamBuildNumber}
@@ -112,7 +113,6 @@ actionCheckout() {
 
 ## @fn      actionCalculate()
 #  @brief   action ...
-#  @details «full description»
 #  @param   <none>
 #  @return  <none>
 actionCalculate() {
@@ -121,9 +121,10 @@ actionCalculate() {
     local upstreamBuildNumber=${UPSTREAM_BUILD:-${TESTED_BUILD_NUMBER}}
 
     if [[ -z ${upstreamProjectName} || -z ${upstreamBuildNumber} ]] ; then
-        warning "didn't find the upstream build"
         upstreamProjectName=$(getUpstreamProjectName)
-        upstreamBuildNumber=lastSu
+        local buildPath=$(getBuildDirectoryOnMaster ${upstreamProjectName} lastSuccessfulBuild)
+        upstreamBuildNumber=$(runOnMaster readlink ${buildPath}) 
+        warning "didn't find the upstream build, using ${upstreamProjectName} / ${upstreamBuildNumber}"
     fi
 
     debug "creating revision state file ${REVISION_STATE_FILE}"
