@@ -75,6 +75,8 @@ synchronizeShare() {
         return
     fi         
 
+    rawDebug ${pathToSyncFile}
+
     local buildDescription=$(perl -p -e 's:.*/::g' ${pathToSyncFile} | sort -u)
     setBuildDescription "${JOB_NAME}" "${BUILD_NUMBER}" "${buildDescription:-no change}"
 
@@ -82,12 +84,16 @@ synchronizeShare() {
 
     for entry in $(cat ${pathToSyncFile})
     do
-        basePartOfEntry=${entry//${localPath}}
-       [[ -d ${entry} ]] || continue
-        info "transferting ${entry} to ${remoteServer}:${remotePath}/${basePartOfEntry}"
+        local entryDirname=$(dirname ${entry})
+        local entryBasename=$(basename ${entry})
+
+        basePartOfEntry=${entryDirname//${localPath}}
+        info "mkdir -p ${remoteServer}:${remotePath}/${basePartOfEntry}"
         execute ssh ${remoteServer} mkdir -p ${remotePath}/${basePartOfEntry}
-        execute rsync -aHz -e ssh --stats ${rsyncOpts} ${entry}/ ${remoteServer}:${remotePath}/${basePartOfEntry}
     done
+
+    info "transferting to ${remoteServer}:${remotePath}/${basePartOfEntry}"
+    execute rsync -aHz -e ssh --stats ${rsyncOpts} --files-from=${pathToSyncFile} ${localPath} ${remoteServer}:${remotePath}
 
     info "synchronizing is done."
 
