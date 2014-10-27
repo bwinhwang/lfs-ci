@@ -103,7 +103,7 @@ copyAndExtractBuildArtifactsFromProject() {
 
         info "copy artifact ${file} from job ${jobName}#${buildNumber} to workspace and untar it"
 
-        execute rsync --archive --verbose --rsh=ssh -P          \
+        execute -r 3 rsync --archive --verbose --rsh=ssh -P          \
             ${serverName}:${artifactsPathOnMaster}/${file} \
             ${workspace}/bld/
 
