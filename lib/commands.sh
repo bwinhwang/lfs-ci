@@ -1,6 +1,9 @@
 #!/bin/bash
 
+[[ -z ${LFS_CI_SOURCE_common} ]] && source ${LFS_CI_ROOT}/lib/common.sh
 LFS_CI_SOURCE_commands='$Id$'
+
+# TODO: demx2fk3 2014-10-27 source logging.sh is missing
 
 ## @fn      execute( command )
 #  @brief   executes the given command in a shell
@@ -14,8 +17,10 @@ LFS_CI_SOURCE_commands='$Id$'
 #  @return  <none>
 #  @throws  raise an error, if the command exits with an exit code != 0
 execute() {
+    debug "execute $@"
     local opt=$1
     local noRedirect=
+    local retryCount=1
     if [[ ${opt} = "-n" ]] ; then
         # we found an -n as the first parameter, so the user
         # want to redirect the stuff by himself.
@@ -23,23 +28,45 @@ execute() {
         shift
         noRedirect=1
     fi
+    opt=$1
+    if [[ ${opt} = "-r" ]] ; then
+        shift
+        retryCount=$1
+        shift
+        trace "user requested reexecution via -r ${retryCount}"
+    fi
  
     local command=$@
-    trace "execute command: \"${command}\""
+    local exitCode=1
+    local output=
 
-    if [[ ${noRedirect} ]] ; then
-        # in case that the user forgot to redirect stderr to stdout, we are doing it for him...
-        # this is called real service!!
-        ${command} 2>&1 
-        exitCode=$?
-    else
-        local output=$(createTempFile)
-        ${command} >${output} 2>&1
-        exitCode=$?
-        rawDebug ${output}
-    fi
+    # in cause of an error and the user requested it, we can rerun the
+    # command serveral times with some delay.
+    # the retryCount can be choosen by the user
+    while [[ ${retryCount} -gt 0 && ${exitCode} -ne 0 ]] ; do
+        retryCount=$((retryCount - 1))
+        trace "execute command: \"${command}\""
+        if [[ ${noRedirect} ]] ; then
+            # in case that the user forgot to redirect stderr to stdout, we are doing it for him...
+            # this is called real service!!
+            ${command} 2>&1 
+            exitCode=$?
+        else
+            output=$(createTempFile)
+            ${command} >${output} 2>&1
+            exitCode=$?
+            rawDebug ${output}
+        fi
 
-    trace "exit code of \"${command}\" was ${exitCode}"
+        trace "exit code of \"${command}\" was ${exitCode}"
+
+        # in the last loop, don't wait, just exist
+        if [[ ${retryCount} -gt 0 && ${exitCode} -gt 0 ]] ; then
+            local randomSeconds=$((RANDOM % 20))
+            trace "waiting ${randomSeconds} seconds for retry execution (try ${retryCount}"
+            sleep ${randomSeconds}
+        fi
+    done
 
     if [[ ${exitCode} -gt 0 ]] ; then
         [[ -e ${output} ]] && rawOutput ${output}
