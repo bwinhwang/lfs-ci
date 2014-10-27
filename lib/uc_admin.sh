@@ -93,10 +93,13 @@ synchronizeShare() {
     done
 
     info "creating directories on remote site"
-    execute -n sort -u ${pathToSyncFile} | execute xargs ssh ${remotePath} mkdir -p
+    rawDebug ${pathesToCreate}
+    execute -n sort -u ${pathesToCreate} | execute xargs ssh ${remoteServer} mkdir -p
 
     info "transferting to ${remoteServer}:${remotePath}/${basePartOfEntry}"
-    execute rsync -aHz -e ssh --stats ${rsyncOpts} --files-from=${pathToSyncFile} ${localPath} ${remoteServer}:${remotePath}
+    execute sed -i "s:${localPath}::g;s:^/::g" ${pathToSyncFile}
+    rawDebug ${pathToSyncFile} 
+    execute rsync -avHz -e ssh --stats ${rsyncOpts} --files-from=${pathToSyncFile} ${localPath} ${remoteServer}:${remotePath}
 
     info "synchronizing is done."
 

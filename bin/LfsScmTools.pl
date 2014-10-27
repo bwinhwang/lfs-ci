@@ -2136,6 +2136,7 @@ sub prepare {
     $self->{data}{CHANGENOTES} = join( "\n        ", 
                                         map { sprintf( "<changenote id=\"CN %s\">CN %s%s</changenote>",
                                                          $_->{nr},
+                                                         $_->{nr},
                                                          $_->{text},
                                                      ) }
                                          @{ $self->{CN} || [] }

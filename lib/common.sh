@@ -657,9 +657,9 @@ _getDownstreamProjects() {
     mustHaveValue "${serverPath}" "server path"
     mustExistDirectory ${serverPath}
 
-    runOnMaster ${LFS_CI_ROOT}/bin/getDownStreamProjects -j ${jobName}     \
-                                                         -b ${buildNumber} \
-                                                         -h ${serverPath} > ${downstreamFile}
+    execute -n ${LFS_CI_ROOT}/bin/getDownStreamProjects -j ${jobName}     \
+                                                        -b ${buildNumber} \
+                                                        -h ${serverPath} > ${downstreamFile}
     rawDebug ${downstreamFile}
 
     return

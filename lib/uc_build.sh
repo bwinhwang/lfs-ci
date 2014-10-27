@@ -459,6 +459,8 @@ storeExternalComponentBaselines() {
 #  @param   {targetName}    name of the target
 #  @return  <none>
 createRebuildScript() {
+    requiredParameters JOB_NAME BUILD_NUMBER
+
     local workspace=$(getWorkspaceName)
     mustHaveWorkspaceName
     info "adding svn commands to rebuilding script"
@@ -478,8 +480,8 @@ createRebuildScript() {
     echo "set -o errexit"                                                                  >> ${script}
     echo "set -o allexport"                                                                >> ${script}
     echo "set -o nounset"                                                                  >> ${script}
-    echo "mkdir workdir-${tagName}"                                                        >> ${script}
-    echo "cd workdir-${tagName}"                                                           >> ${script}
+    echo "mkdir workdir-${targetName}"                                                     >> ${script}
+    echo "cd workdir-${targetName}"                                                        >> ${script}
     echo "mkdir -p bld bldtools locations .build_workdir"                                  >> ${script}
    
     # reading the external components file and create the lines for linking them 
