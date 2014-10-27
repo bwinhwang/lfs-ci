@@ -43,7 +43,7 @@ actionCheckout() {
             printf "<path kind=\"\" action=\"A\">%s</path>\n" ${path} >> ${logEntries}
         done                
         fileListString="${fileListString} ${fileList}"
-        execute echo rm -f ${fileList}
+        execute rm -f ${fileList}
     done
 
     # create changelog:
@@ -61,7 +61,7 @@ actionCheckout() {
     "$(date +%s)"                        \
     "${USER}"                            \
     "$(date +%Y-%m-%dT%H:%M:%S.000000Z)" \
-    "$(cat ${logEntries})"               \
+    "$(cat ${logEntries} | sort -u)"     \
     "${fileListString}"                  \
                                         > ${CHANGELOG}
 
@@ -69,6 +69,8 @@ actionCheckout() {
     if [ ! -s "${CHANGELOG}" ] ; then
         echo -n "<log/>" >"${CHANGELOG}"
     fi
+
+    execute -n date > ${REVISION_STATE_FILE}
 
     return
 }

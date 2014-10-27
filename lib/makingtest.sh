@@ -53,12 +53,12 @@ makingTest_checkUname() {
     local workspace=$(getWorkspaceName)
 
     # Note: TESTTARGET lowercase with ,,
-    local make="make TESTTARGET=${targetName,,}"    
+    local make="make"
 
     cd ${workspace}/src-test/src/unittest/tests/common/checkuname
 
     info "writing test config"
-    execute ${make} testconfig-overwrite TESTBUILD=${DELIVERY_DIRECTORY} TESTTARGET=${testTargetName}
+    execute ${make} testconfig-overwrite TESTBUILD=${DELIVERY_DIRECTORY} TESTTARGET=${testTargetName,,}
 
     info "installing software on the target"
     execute ${make} install 
@@ -109,7 +109,7 @@ makingTest_testFSM() {
     info "create testconfig for ${testSuiteDirectory}"
     execute ${make} testconfig-overwrite \
                 TESTBUILD=${testBuildDirectory} \
-                TESTTARGET=${testTargetName}
+                TESTTARGET=${testTargetName,,}
 
     info "powercycle the target to get it in a defined state"
     execute ${make} powercycle
@@ -120,8 +120,8 @@ makingTest_testFSM() {
     execute ${make} waitprompt 
     execute ${make} waitssh
 
-    info "installing software"
     local installOptions="$(getConfig LFS_CI_uc_test_making_test_install_options)"
+    info "installing software using ${installOptions}"
     execute ${make} install ${installOptions}
 
     info "restarting the target"

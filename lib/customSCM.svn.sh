@@ -99,7 +99,7 @@ _createRevisionsTxtFile() {
 
         local dependenciesFileUrl=${srcRepos}/os/trunk/bldtools/locations-${branch}/Dependencies
         # check, if dependency file exists
-        execute -n svn ls ${dependenciesFileUrl} 
+        execute svn ls ${dependenciesFileUrl} 
 
         # can not use execute here, so we have to do the error handling by hande
         # do the magic for all dir
@@ -107,8 +107,8 @@ _createRevisionsTxtFile() {
 
         local tmpFile1=$(createTempFile)
         execute -n ${LFS_CI_ROOT}/bin/getRevisionTxtFromDependencies \
-                    -u ${dependenciesFileUrl} \
-                    -f ${dependenciesFile}    \
+                    -u ${dependenciesFileUrl}                        \
+                    -f ${dependenciesFile}                           \
             | execute -n sort -u > ${newRevisionsFile} 
 
         debug "got revisions from ${dependenciesFileUrl}"

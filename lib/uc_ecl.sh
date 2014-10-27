@@ -29,6 +29,8 @@ ci_job_ecl() {
                     -b ${UPSTREAM_BUILD}         \
                     -h ${serverPath} > ${upstreamsFile}
 
+    rawDebug ${upstreamsFile}
+
     local packageJobName=$(    grep Package ${upstreamsFile} | cut -d: -f1 | sort -n | tail -n 1)
     local packageBuildNumber=$(grep Package ${upstreamsFile} | cut -d: -f2 | sort -n | tail -n 1)
     local buildJobName=$(      grep Build   ${upstreamsFile} | cut -d: -f1 | sort -n | tail -n 1)

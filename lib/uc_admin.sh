@@ -75,19 +75,28 @@ synchronizeShare() {
         return
     fi         
 
+    rawDebug ${pathToSyncFile}
+
     local buildDescription=$(perl -p -e 's:.*/::g' ${pathToSyncFile} | sort -u)
     setBuildDescription "${JOB_NAME}" "${BUILD_NUMBER}" "${buildDescription:-no change}"
 
     execute ssh ${remoteServer} "${find} ${remotePath} -maxdepth $(( findDepth - 1 )) -exec chmod u+w {} \; " 
 
+    local pathesToCreate=$(createTempFile)
     for entry in $(cat ${pathToSyncFile})
     do
-        basePartOfEntry=${entry//${localPath}}
-        [[ -d ${entry} ]] || continue
-        info "transferting ${entry} to ${remoteServer}:${remotePath}/${basePartOfEntry}"
-        execute ssh ${remoteServer} mkdir -p ${remotePath}/${basePartOfEntry}
-        execute rsync -aHz -e ssh --stats ${rsyncOpts} ${entry}/ ${remoteServer}:${remotePath}/${basePartOfEntry}
+        local entryDirname=$(dirname ${entry})
+        local entryBasename=$(basename ${entry})
+
+        basePartOfEntry=${entryDirname//${localPath}}
+        echo ${remotePath}/${basePartOfEntry} >> ${pathesToCreate}
     done
+
+    info "creating directories on remote site"
+    execute -n sort -u ${pathToSyncFile} | execute xargs ssh ${remotePath} mkdir -p
+
+    info "transferting to ${remoteServer}:${remotePath}/${basePartOfEntry}"
+    execute rsync -aHz -e ssh --stats ${rsyncOpts} --files-from=${pathToSyncFile} ${localPath} ${remoteServer}:${remotePath}
 
     info "synchronizing is done."
 
@@ -272,7 +281,7 @@ cleanupBaselineShares() {
         mustExistDirectory "${LFS_CI_SHARE_MIRROR}/${USER}/lfs-ci-local/"
         info "changing write permissions..."
 
-        local baselineDirectories=$(baselineDirectories)
+        local baselineDirectories=$(createTempFile)
         execute -n find ${LFS_CI_SHARE_MIRROR}/${USER}/lfs-ci-local/*/data -mindepth 1 -maxdepth 1 -mtime +2 > ${baselineDirectories}
         for directory in $(cat ${baselineDirectories}) ; do
             info "removing ${directory}";

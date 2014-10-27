@@ -1,8 +1,8 @@
 #!/bin/bash
 
-[[ -z ${LFS_CI_SOURCE_artifacts} ]] && source ${LFS_CI_ROOT}/lib/artifacts.sh
-[[ -z ${LFS_CI_SOURCE_jenkins}   ]] && source ${LFS_CI_ROOT}/lib/jenkins.sh
-[[ -z ${LFS_CI_SOURCE_jenkins}   ]] && source ${LFS_CI_ROOT}/lib/makingtest.sh
+[[ -z ${LFS_CI_SOURCE_artifacts}  ]] && source ${LFS_CI_ROOT}/lib/artifacts.sh
+[[ -z ${LFS_CI_SOURCE_jenkins}    ]] && source ${LFS_CI_ROOT}/lib/jenkins.sh
+[[ -z ${LFS_CI_SOURCE_makingtest} ]] && source ${LFS_CI_ROOT}/lib/makingtest.sh
 
 ## @fn      ci_job_test_on_target()
 #  @brief   usecase test on target
@@ -36,7 +36,6 @@ ci_job_test_on_target() {
             testProductionLRC) makingTest_testLRC ;;
             testProductionFSM) 
                                makingTest_testFSM
-                               fmon_tests 
             ;;
             *) fatal "unknown testType"; ;;
         esac

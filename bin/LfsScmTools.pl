@@ -2490,7 +2490,7 @@ sub execute {
     ) {
         my $result = $+{ $wanted };
         DEBUG sprintf( "wanted %s from \"%s\" ==> %s", $wanted, $string, $result || "not defined" );
-        printf "%s\n", $result;
+        printf "%s\n", $result || "";
     }
 
     return;

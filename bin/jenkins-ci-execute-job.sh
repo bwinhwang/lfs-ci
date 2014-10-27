@@ -41,7 +41,7 @@ debug "used lfs ci git version ${LFS_CI_git_version}"
 JENKINS_SVN_REVISION=${SVN_REVISION}
 export JENKINS_SVN_REVISION
 
-if [[ -z "${JOB_NAME}" ]] ; then
+if [[ ! -z "${1}" ]] ; then
     export JOB_NAME=$1
     shift
 fi
