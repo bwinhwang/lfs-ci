@@ -646,7 +646,6 @@ _getUpstreamProjects() {
 }
 
 _getDownstreamProjects() {
-    fatal "not implemented"
     local jobName=$1
     local buildNumber=$2
     local downstreamFile=$3

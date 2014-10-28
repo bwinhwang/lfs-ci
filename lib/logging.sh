@@ -119,7 +119,7 @@ warning() {
 #  @param   {message}  a fatal message
 #  @return  <none>
 fatal() {
-    message "FATAL ERROR" "$@"
+    message "FATAL_ERROR" "$@"
     exit 1
 }
 
