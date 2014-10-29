@@ -20,30 +20,50 @@ ci_job_ecl() {
     local eclKeysToUpdate=$(getConfig LFS_CI_uc_update_ecl_key_names)
     mustHaveValue "${eclKeysToUpdate}"
 
-    local serverPath=$(getConfig jenkinsMasterServerPath)
-
     # find the related jobs of the build
-    local upstreamsFile=$(createTempFile)
-    runOnMaster ${LFS_CI_ROOT}/bin/getUpStreamProject \
-                    -j ${UPSTREAM_PROJECT}        \
-                    -b ${UPSTREAM_BUILD}         \
-                    -h ${serverPath} > ${upstreamsFile}
+    local buildJobName=$(     getBuildJobNameFromUpstreamProject     ${UPSTREAM_PROJECT} ${UPSTREAM_BUILD})
+    local buildBuildNumber=$( getBuildBuildNumberFromUpstreamProject ${UPSTREAM_PROJECT} ${UPSTREAM_BUILD})
+    local testJobName=$(      getTestJobNameFromUpstreamProject      ${UPSTREAM_PROJECT} ${UPSTREAM_BUILD})
+    local testBuildNumber=$(  getTestBuildNumberFromUpstreamProject  ${UPSTREAM_PROJECT} ${UPSTREAM_BUILD})
+    local packageJobName=
+    local packageBuildNumber=
+    
+    if [[ ! -z ${buildJobName} ]] ; then
+        packageJobName=$(    getPackageJobNameFromUpstreamProject     ${UPSTREAM_PROJECT} ${UPSTREAM_BUILD})
+        packageBuildNumber=$(getPackageBuildNumberFromUpstreamProject ${UPSTREAM_PROJECT} ${UPSTREAM_BUILD})
+    else
+        warning "can not find the build job name, try to figure out..."
 
-    rawDebug ${upstreamsFile}
-
-    local packageJobName=$(    grep Package ${upstreamsFile} | cut -d: -f1 | sort -n | tail -n 1)
-    local packageBuildNumber=$(grep Package ${upstreamsFile} | cut -d: -f2 | sort -n | tail -n 1)
-    local buildJobName=$(      grep Build   ${upstreamsFile} | cut -d: -f1 | sort -n | tail -n 1)
-    local buildBuildNumber=$(  grep Build   ${upstreamsFile} | cut -d: -f2 | sort -n | tail -n 1)
+        # this happens, if someone started the test job, without building it.
+        # it's ok, but we have to find the build job for this test job.
+        # for this, we have a file in the ${WORKSPACE} of the test job called upstream.
+        # it contains the information about the upstream aka the package job. 
+        copyFileFromBuildDirectoryToWorkspace ${testJobName} ${testBuildNumber} upstream
+        
+        # this should be the package build job
+        rawDebug upstream
+        cat ${WORKSPACE}/upstream
+        packageJobName=$(    grep upstreamProject     ${WORKSPACE}/upstream | cut -d= -f2-)
+        packageBuildNumber=$(grep upstreamBuildNumber ${WORKSPACE}/upstream | cut -d= -f2-)
+        
+        mustHaveValue "${packageJobName}"     "package job name"
+        mustHaveValue "${packageBuildNumber}" "package job build number"
+        
+        buildJobName=$(      getBuildJobNameFromUpstreamProject     ${packageJobName} ${packageBuildNumber})
+        buildBuildNumber=$(  getBuildBuildNumberFromUpstreamProject ${packageJobName} ${packageBuildNumber})
+        
+    fi  
+    
     if [[ -z ${buildJobName} ]] ; then
         error "not trigger an ECL update without a build job name"
-        setBuildResultUnstable
+        echo setBuildResultUnstable
         exit 0
-    fi
-
+    fi  
+    
     info "upstream    is ${UPSTREAM_PROJECT} / ${UPSTREAM_BUILD}"
     info "build job   is ${buildJobName} / ${buildBuildNumber}"
     info "package job is ${packageJobName} / ${packageBuildNumber}"
+    info "test job    is ${testJobName} / ${testBuildNumber}"
 
     local requiredArtifacts=$(getConfig LFS_CI_UC_update_ecl_required_artifacts)
     copyArtifactsToWorkspace "${buildJobName}" "${buildBuildNumber}" "${requiredArtifacts}"
@@ -146,7 +166,7 @@ getEclValue() {
         ;;
         ECL_LFS)
             local branchNameInSubversion=$(getConfig SVN_lfs_branch_name)
-            local rev=$(cut -d" " -f 3 ${workspace}/bld/bld-externalComponents-*/usedRevisions.txt| sort -u | tail -n 1 )
+            local rev=$(cut -d" " -f 3 ${workspace}/bld/bld-externalComponents-*/usedRevisions.txt| sort -un | tail -n 1 )
             mustHaveNextCiLabelName "${rev}" "revision"
             debug "branch ${branchNameInSubversion} rev ${rev}"
             newValue=$(printf "%s\@%d" "${branchNameInSubversion}" ${rev})
