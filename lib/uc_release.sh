@@ -20,10 +20,6 @@ ci_job_release() {
     mustHaveCleanWorkspace
     mustHaveWorkspaceName
 
-    local serverPath=$(getConfig jenkinsMasterServerPath)
-    mustHaveValue "${serverPath}" "server path"
-    mustExistDirectory ${serverPath}
-
     local subJob=$(getTargetBoardName)
     mustHaveTargetBoardName
 
@@ -123,7 +119,6 @@ ci_job_release() {
             prereleaseChecks
         ;;
         summary)
-        
             sendReleaseNote "${TESTED_BUILD_JOBNAME}" "${TESTED_BUILD_NUMBER}" \
                             "${buildJobName}"         "${buildBuildNumber}"
         ;;
