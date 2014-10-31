@@ -1,6 +1,7 @@
 #!/bin/bash
 
 [[ -z ${LFS_CI_SOURCE_common} ]] && source ${LFS_CI_ROOT}/lib/common.sh
+
 LFS_CI_SOURCE_commands='$Id$'
 
 # TODO: demx2fk3 2014-10-27 source logging.sh is missing
@@ -65,7 +66,7 @@ execute() {
             local randomSeconds=$((RANDOM % 20))
             trace "waiting ${randomSeconds} seconds for retry execution (try ${retryCount}"
             sleep ${randomSeconds}
-        fi
+       fi
     done
 
     if [[ ${exitCode} -gt 0 ]] ; then
