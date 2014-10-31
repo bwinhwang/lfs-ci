@@ -20,10 +20,6 @@ ci_job_release() {
     mustHaveCleanWorkspace
     mustHaveWorkspaceName
 
-    local serverPath=$(getConfig jenkinsMasterServerPath)
-    mustHaveValue "${serverPath}" "server path"
-    mustExistDirectory ${serverPath}
-
     local subJob=$(getTargetBoardName)
     mustHaveTargetBoardName
 
@@ -54,9 +50,8 @@ ci_job_release() {
     local releaseLabel=$(getNextReleaseLabel)
     mustHaveValue "${releaseLabel}" "release label"
 
-
     info "found package job: ${packageJobName} / ${packageBuildNumber}"
-    info "found build   job: ${buildJobName}   / ${buildBuildNumber}"
+    info "found build   job: ${buildJobName} / ${buildBuildNumber}"
     
     local ciBuildShare=$(getConfig LFS_CI_UC_package_internal_link)
     local releaseDirectory=${ciBuildShare}/build_${packageBuildNumber}
@@ -124,7 +119,6 @@ ci_job_release() {
             prereleaseChecks
         ;;
         summary)
-        
             sendReleaseNote "${TESTED_BUILD_JOBNAME}" "${TESTED_BUILD_NUMBER}" \
                             "${buildJobName}"         "${buildBuildNumber}"
         ;;
@@ -233,9 +227,7 @@ extractArtifactsOnReleaseShareKernelSources() {
     local server=$(getConfig jenkinsMasterServerHostName)
     mustHaveValue "${server}" "server name"
 
-    # TODO: demx2fk3 2014-10-14 enable this line
-    #local canStoreArtifactsOnShare=$(getConfig LFS_CI_uc_release_can_store_build_results_on_share)
-    local canStoreArtifactsOnShare=
+    local canStoreArtifactsOnShare=$(getConfig LFS_CI_uc_release_can_store_build_results_on_share)
 
     local labelName=${LFS_PROD_RELEASE_CURRENT_TAG_NAME}
     mustHaveValue "${labelName}"
@@ -247,7 +239,7 @@ extractArtifactsOnReleaseShareKernelSources() {
     for jobData in ${triggeredJobData} ; do
         local buildNumber=$(echo ${jobData} | cut -d: -f 1)
         local jobName=$(    echo ${jobData} | cut -d: -f 3-)
-        local subTaskName=$(getSubTaskNameFromJobName ${Name})
+        local subTaskName=$(getSubTaskNameFromJobName ${jobName})
 
         info "checking for ${jobName} / ${buildNumber}"
 
@@ -263,10 +255,10 @@ extractArtifactsOnReleaseShareKernelSources() {
         esac
 
         info "creating new workspace to copy kernel sources for ${jobName} / ${location}"
-        createBasicWorkspace src-project
+        createBasicWorkspace -l ${location} src-project
         copyArtifactsToWorkspace "${jobName}" "${buildNumber}" "kernelsources"
 
-        local lastKernelLocation=$(build bld/bld-kernelsources-linux)
+        local lastKernelLocation=$(build location bld/bld-kernelsources-linux)
         local destinationBaseDirectory=$(dirname ${lastKernelLocation})
         mustExistDirectory ${destinationBaseDirectory}
 

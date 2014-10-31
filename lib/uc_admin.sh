@@ -96,10 +96,11 @@ synchronizeShare() {
     rawDebug ${pathesToCreate}
     execute -n sort -u ${pathesToCreate} | execute xargs ssh ${remoteServer} mkdir -p
 
-    info "transferting to ${remoteServer}:${remotePath}/${basePartOfEntry}"
+    info "transfering changes to ${remoteServer}:${remotePath}/"
     execute sed -i "s:${localPath}::g;s:^/::g" ${pathToSyncFile}
     rawDebug ${pathToSyncFile} 
-    execute rsync -avHz -e ssh --stats ${rsyncOpts} --files-from=${pathToSyncFile} ${localPath} ${remoteServer}:${remotePath}
+    # NOTE: demx2fk3 2014-10-27 -r is needed, because we specified --files-from
+    execute rsync -avHz -e ssh --stats ${rsyncOpts} -r --files-from=${pathToSyncFile} ${localPath} ${remoteServer}:${remotePath}
 
     info "synchronizing is done."
 

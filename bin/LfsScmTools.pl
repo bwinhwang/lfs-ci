@@ -2343,6 +2343,7 @@ use warnings;
 use parent qw( -norequire Object );
 use Getopt::Std;
 use Data::Dumper;
+use File::Basename;
 
 sub init {
     my $self = shift;
@@ -2916,6 +2917,8 @@ my %commands = (
                  getRevisionTxtFromDependencies => "Command::GetRevisionTxtFromDependencies",
                  getUpStreamProject             => "Command::GetUpStreamProject",
                  removalCandidates              => "Command::RemovalCandidates",
+                 #TODO 2014-10-31 demx2fk3: typo FIXME
+                 removalCanidates               => "Command::RemovalCandidates",
                  sendReleaseNote                => "Command::SendReleaseNote",
                  sortBuildsFromDependencies     => "Command::SortBuildsFromDependencies",
                );

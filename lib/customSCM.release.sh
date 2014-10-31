@@ -99,8 +99,8 @@ actionCalculate() {
 
     # upstream handling if missing
     debug "storing upstream info in .properties"
-    echo TESTED_BUILD_JOBNAME=${upstreamProjectName} > ${WORKSPACE}/.properties
-    echo TESTED_BUILD_NUMBER=${upstreamBuildNumber}   >> ${WORKSPACE}/.properties
+    echo TESTED_BUILD_JOBNAME=${upstreamProjectName} >  ${WORKSPACE}/.properties
+    echo TESTED_BUILD_NUMBER=${upstreamBuildNumber}  >> ${WORKSPACE}/.properties
 
     return 0
 }
@@ -152,27 +152,23 @@ _getUpstream() {
     upstreamProjectName=${UPSTREAM_PROJECT}
     upstreamBuildNumber=${UPSTREAM_BUILD}
 
-    # TODO: demx2fk3 2014-07-25 FIXME 
-#     if [[ -z ${UPSTREAM_PROJECT} || -z ${UPSTREAM_BUILD} ]] ; then
+    debug "build was triggered manually, get last promoted upstream"
+    # workaround
+    local backlogItemTwentyFiveMigration=$(getConfig backlogItemTwentyFiveMigration)
 
-        debug "build was triggered manually, get last promoted upstream"
+    if [[ ${backlogItemTwentyFiveMigration} ]] ; then
+        upstreamProjectName=$(sed 's/\(.*\)_Prod_-_\(.*\)_-_Releasing_-_summary/\1_CI_-_\2_-_Wait_for_release/' <<< ${JOB_NAME} )
+    else
         upstreamProjectName=$(sed 's/\(.*\)_Prod_-_\(.*\)_-_Releasing_-_summary/\1_CI_-_\2_-_Test/' <<< ${JOB_NAME} )
+    fi
 
-        copyFileFromBuildDirectoryToWorkspace "${upstreamProjectName}/promotions/Test_ok" "lastStableBuild" build.xml
-        mustExistFile ${WORKSPACE}/build.xml
+    copyFileFromBuildDirectoryToWorkspace "${upstreamProjectName}/promotions/Test_ok" "lastStableBuild" build.xml
+    mustExistFile ${WORKSPACE}/build.xml
 
-        local xml='hudson.plugins.promoted__builds.Promotion/actions/hudson.plugins.promoted__builds.PromotionTargetAction/number/node()' 
-        upstreamBuildNumber=$(${LFS_CI_ROOT}/bin/xpath -q -e ${xml} ${WORKSPACE}/build.xml)
+    local xml='hudson.plugins.promoted__builds.Promotion/actions/hudson.plugins.promoted__builds.PromotionTargetAction/number/node()' 
+    upstreamBuildNumber=$(${LFS_CI_ROOT}/bin/xpath -q -e ${xml} ${WORKSPACE}/build.xml)
 
-        execute rm -rf ${WORKSPACE}/build.xml
+    execute rm -rf ${WORKSPACE}/build.xml
         
-#     else
-#         debug "build was triggered by upstream"
-# 
-#         upstreamProjectName=${UPSTREAM_PROJECT}
-#         upstreamBuildNumber=${UPSTREAM_BUILD}
-# 
-#     fi
-
     return
 }

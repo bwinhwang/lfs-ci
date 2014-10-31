@@ -69,6 +69,8 @@ makingTest_checkUname() {
     info "wait for prompt"
     execute ${make} waitprompt
     execute ${make} waitprompt
+    sleep 60
+    execute ${make} waitprompt
 
     info "executing checks"
     execute ${make} test
@@ -138,7 +140,7 @@ makingTest_testFSM() {
     execute ${make} check
 
     export LFS_CI_ERROR_CODE= 
-    runAndLog ${make} test-xmloutput       || LFS_CI_ERROR_CODE=0 # also true
+    runAndLog ${make} --ignore-errors test-xmloutput || LFS_CI_ERROR_CODE=0 # also true
 
     execute mkdir ${workspace}/xml-reports/
     execute cp -f ${testSuiteDirectory}/xml-reports/*.xml ${workspace}/xml-reports/

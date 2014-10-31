@@ -631,7 +631,6 @@ _getUpstreamProjects() {
 
     local serverPath=$(getConfig jenkinsMasterServerPath)
     mustHaveValue "${serverPath}" "server path"
-    mustExistDirectory ${serverPath}
 
     # find the related jobs of the build
     runOnMaster ${LFS_CI_ROOT}/bin/getUpStreamProject \
@@ -646,7 +645,6 @@ _getUpstreamProjects() {
 }
 
 _getDownstreamProjects() {
-    fatal "not implemented"
     local jobName=$1
     local buildNumber=$2
     local downstreamFile=$3
@@ -655,11 +653,10 @@ _getDownstreamProjects() {
 
     local serverPath=$(getConfig jenkinsMasterServerPath)
     mustHaveValue "${serverPath}" "server path"
-    mustExistDirectory ${serverPath}
 
-    execute -n ${LFS_CI_ROOT}/bin/getDownStreamProjects -j ${jobName}     \
+    runOnMaster ${LFS_CI_ROOT}/bin/getDownStreamProjects -j ${jobName}    \
                                                         -b ${buildNumber} \
-                                                        -h ${serverPath} > ${downstreamFile}
+                                                        -h ${serverPath}  > ${downstreamFile}
     rawDebug ${downstreamFile}
 
     return

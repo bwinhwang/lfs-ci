@@ -43,7 +43,7 @@ actionCheckout() {
             printf "<path kind=\"\" action=\"A\">%s</path>\n" ${path} >> ${logEntries}
         done                
         fileListString="${fileListString} ${fileList}"
-        execute rm -f ${fileList}
+        execute mv -f ${fileList} ${fileList}.syned
     done
 
     # create changelog:

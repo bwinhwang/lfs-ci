@@ -66,7 +66,7 @@ execute() {
             local randomSeconds=$((RANDOM % 20))
             trace "waiting ${randomSeconds} seconds for retry execution (try ${retryCount}"
             sleep ${randomSeconds}
-       fi
+        fi
     done
 
     if [[ ${exitCode} -gt 0 ]] ; then
@@ -74,6 +74,8 @@ execute() {
         error "error occoured in \"${command}\""
         exit ${exitCode}
     fi
+
+    trace "normal return of execute method"
 
     return
 }
