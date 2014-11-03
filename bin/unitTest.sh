@@ -10,7 +10,7 @@ source ${LFS_CI_ROOT}/lib/logging.sh
 for file in test/*.sh ; do
     
     info "executing unit test ${file}"
-    ${file} || exit 1
+    ${file} 
 
 done
 

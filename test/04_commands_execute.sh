@@ -1,6 +1,11 @@
 #!/bin/bash
 
-export UNITTEST_TRUE_COMMAND=$(mktemp)
+source lib/common.sh
+initTempDirectory
+
+source lib/commands.sh
+
+export UNITTEST_TRUE_COMMAND=$(createTempFile)
 # mock the date command
 oneTimeSetUp() {
     mockedCommand() {
@@ -16,6 +21,15 @@ oneTimeSetUp() {
     trueCommand() {
         echo executed $@ >> ${UNITTEST_TRUE_COMMAND}
         return
+    }
+    export UNITTEST_TRUE_COMMAND_SUCCESS_THIRD=0
+    successInThirdCommand() {
+        UNITTEST_TRUE_COMMAND_SUCCESS_THIRD=$(( UNITTEST_TRUE_COMMAND_SUCCESS_THIRD + 1))
+        if [[ ${UNITTEST_TRUE_COMMAND_SUCCESS_THIRD} -eq 3 ]] ; then
+            return
+        else
+            return 1                 
+        fi
     }
     sleep() {
         echo $@
@@ -34,24 +48,26 @@ tearDown() {
 
 
 testExecute_part1() {
-    assertTrue "execute mocked true Command" 'execute trueCommand'
+    assertTrue "execute trueCommand part1"
     assertEquals 'mocked true command executed' 1 "$(cat ${UNITTEST_TRUE_COMMAND} | wc -l)"
 }
 testExecute_part2() {
-    assertFalse "execute mocked false Command" 'execute falseCommand'
+    assertFalse 'execute falseCommand part2'
     assertEquals 'mocked false command executed' 1 "$(cat ${UNITTEST_TRUE_COMMAND} | wc -l)"
 }
 testExecute_part3() {
-    assertFalse "execute mocked false Command" 'execute -r 3 falseCommand'
+    assertFalse 'execute -r 3 falseCommand part3'
     assertEquals 'mocked false command executed' 3 "$(cat ${UNITTEST_TRUE_COMMAND} | wc -l)"
 }
 testExecute_part4() {
-    assertTrue "execute mocked false Command" 'execute -n -r 3 trueCommand'
+    assertTrue 'execute -n -r 3 trueCommand part4'
     assertEquals 'mocked false command executed' 1 "$(cat ${UNITTEST_TRUE_COMMAND} | wc -l)"
+}
+testExecute_part5() {
+    assertTrue 'execute -n -r 3 successInThirdCommand part5'
 }
 
 
-source lib/commands.sh
 source lib/shunit2
 
 exit 0

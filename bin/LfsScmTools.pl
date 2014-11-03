@@ -56,6 +56,7 @@ package Store::Config::File; # {{{
 use warnings;
 use strict;
 use parent qw( -norequire Object );
+use Log::Log4perl qw( :easy );
 
 ## @fn      readConfig()
 #  @brief   read the configuration file for this config store
@@ -332,6 +333,8 @@ sub isSubversion {
     my $self = shift;
     return 0 if $self->{repos} =~ m|^/|;
     return 1 if $self->{repos} =~ m|^https://|;
+    return 1 if $self->{repos} =~ m|^http://|;
+    return 1 if $self->{repos} =~ m|^file://|;
     return 0;
 }
 
@@ -1680,6 +1683,7 @@ use warnings;
 use parent qw( -norequire Command );
 use Getopt::Std;
 use Data::Dumper;
+use Log::Log4perl qw( :easy );
 
 sub prepare {
     my $self = shift;
@@ -1714,7 +1718,6 @@ sub execute {
                                      revision => "", );
         $dir->getHeadRevision();
         printf( "%s %s %s\n", $subDir, $dir->{repos}, $dir->{revision});
-
     }
 
     return;
@@ -2283,7 +2286,7 @@ sub prepare {
 sub execute {
     my $self = shift;
 
-    Singleton::config()->loadData( configFileName => $self->{configFileName} );
+    Singleton::config()->loadData();
     my $value = Singleton::config()->getConfig( name => $self->{configKeyName} );
     DEBUG sprintf( "config %s = %s", $self->{configKeyName}, $value );
 
@@ -2778,7 +2781,7 @@ sub loadData {
     my $self  = shift;
     my $param = { @_ };
 
-    my $fileName = $param->{configFileName} || sprintf( "%s/etc/file.cfg", $ENV{LFS_CI_ROOT} );
+    my $fileName = $param->{configFileName} || $ENV{LFS_CI_CONFIG_FILE};
 
     my @dataList;
     # TODO: demx2fk3 2014-10-06 this should be somehow configurable
@@ -2893,7 +2896,7 @@ my %l4p_config = (
     'log4perl.appender.Logfile'                          => 'Log::Log4perl::Appender::File',
     'log4perl.appender.Logfile.filename'                 => $ENV{CI_LOGGING_LOGFILENAME}, 
     'log4perl.appender.Logfile.layout'                   => 'Log::Log4perl::Layout::PatternLayout',
-    'log4perl.appender.Logfile.layout.ConversionPattern' => '%d{ISO8601}       UTC [%9r] [%-8p] %M -- %m%n',
+    'log4perl.appender.Logfile.layout.ConversionPattern' => '%d{ISO8601}       UTC [%9r] [%-8p] %M:%L -- %m%n',
 );
 
 if( $ENV{CI_LOGGING_LOGFILENAME} ) {
