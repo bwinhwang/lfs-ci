@@ -44,10 +44,10 @@ oneTimeTearDown() {
 
 testNoChangeNoBuild() {
     echo "location ${reposUrl}/os/trunk/bldtools/locations-pronb-developer/Dependencies 4" >> ${REVISION_STATE_FILE}
-    echo "src-foo ${reposUrl}/os/trunk/main/src-foo 5"                                     >> ${REVISION_STATE_FILE}
+    echo "src-foo ${reposUrl}/os/trunk/main/src-foo 4"                                     >> ${REVISION_STATE_FILE}
     printf "bld-buildtools ${reposUrl}/os/trunk/bldtools/bld-buildtools-common 3"          >> ${REVISION_STATE_FILE}
 
-    assertFalse "${LFS_CI_ROOT}/bin/customSCM.svn.sh compare"
+    assertTrue "${LFS_CI_ROOT}/bin/customSCM.svn.sh compare"
 }
 
 testChangeTriggerBuild() {
@@ -59,7 +59,7 @@ testChangeTriggerBuild() {
     assertFalse "${LFS_CI_ROOT}/bin/customSCM.svn.sh compare"
 }
 
-testSingleChangeWithKeywordNoBuild() {
+testChangeWithKeywordNoBuild() {
  
     local workspace=$(createTempDirectory)
     assertTrue "svn co -q ${reposUrl} ${workspace}"
@@ -69,7 +69,7 @@ testSingleChangeWithKeywordNoBuild() {
     assertFalse "${LFS_CI_ROOT}/bin/customSCM.svn.sh compare"
 }
 
-testTwoChangesWithKeywordNoBuild() {
+testChangeWithoutKeywordBuild() {
  
     local workspace=$(createTempDirectory)
     assertTrue "svn co -q ${reposUrl} ${workspace}"
@@ -85,11 +85,35 @@ testNoRevisionStateFile() {
     assertFalse "${LFS_CI_ROOT}/bin/customSCM.svn.sh compare"
 }
 
-testNoRevisionStateFileVariable() {
+testNoRevisionStateFileVariableBuild() {
     unset REVISION_STATE_FILE
     export REVISION_STATE_FILE
 
     assertTrue "${LFS_CI_ROOT}/bin/customSCM.svn.sh compare"
+}
+
+testTwoLocationsBuild() {
+    # the feature does not work, so we do not need any test
+#     local workspace=$(createTempDirectory)
+# 
+#     svn mkdir -q -m "new dir" --parents ${reposUrl}/os/trunk/bldtools/locations-FSM_R4_DEV
+#     svn mkdir -q -m "new dir" --parents ${reposUrl}/os/trunk/main/src-bar
+#     svn co -q ${reposUrl} ${workspace}
+# 
+#     local deps=${workspace}/os/trunk/bldtools/locations-FSM_R4_DEV/Dependencies
+#     echo "dir src-bar"                                        > ${deps}
+#     echo "svn-repository @REPOS ${reposUrl}"                 >> ${deps}
+#     echo 'search-trunk  src-*   @REPOS/os/trunk/main/${DIR}' >> ${deps}
+#     svn add -q ${deps}
+#     svn commit -q -m "add new location" ${workspace}
+# 
+#     echo a > ${workspace}/os/trunk/main/src-bar/file
+#     svn add -q ${workspace}/os/trunk/main/src-bar/file
+#     svn commit -q -m "change file" ${workspace}
+# 
+#     echo "CUSTOM_SCM_svn_additional_location = FSM_R4_DEV" >> ${LFS_CI_CONFIG_FILE}
+#     assertTrue "${LFS_CI_ROOT}/bin/customSCM.svn.sh compare"
+    true
 }
 
 source lib/shunit2

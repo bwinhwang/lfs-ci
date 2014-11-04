@@ -152,7 +152,11 @@ _createRevisionsTxtFile() {
 
     # get the locations/<branch>/Dependencies
     local branch=
-    for branch in ${locationName} $(getConfig CUSTOM_SCM_svn_additional_location)
+
+    # TODO: demx2fk3 2014-11-04 this feature does not work
+    # for branch in ${locationName} $(getConfig CUSTOM_SCM_svn_additional_location)
+
+    for branch in ${locationName} 
     do
         local dependenciesFileUrl=${srcRepos}/os/trunk/bldtools/locations-${branch}/Dependencies
         # check, if dependency file exists
@@ -166,10 +170,11 @@ _createRevisionsTxtFile() {
         execute -n ${LFS_CI_ROOT}/bin/getRevisionTxtFromDependencies \
                     -u ${dependenciesFileUrl}                        \
                     -f ${dependenciesFile}                           \
-            | execute -n sort -u > ${newRevisionsFile} 
+                    > ${tmpFile1}
+        execute -n sort -u ${tmpFile1} > ${newRevisionsFile} 
 
         debug "got revisions from ${dependenciesFileUrl}"
-        rawDebug ${tmpFile1}
+        rawDebug ${newRevisionsFile}
 
     done
 
