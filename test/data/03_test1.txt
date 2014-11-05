@@ -1,6 +1,10 @@
 ------------------------------------------------------------------
 starting logfile
   script: test/03_logging_logfile.sh
-  arguments: 
+  jobName:  unknownJobName
+  hostname: gallumbits
+  username: bm
+------------------------------------------------------------------
+-- Please note, all timestamps are in UTC                       --
 ------------------------------------------------------------------
 {{{

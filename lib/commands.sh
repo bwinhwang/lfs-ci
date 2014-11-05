@@ -1,6 +1,7 @@
 #!/bin/bash
 
 [[ -z ${LFS_CI_SOURCE_common} ]] && source ${LFS_CI_ROOT}/lib/common.sh
+
 LFS_CI_SOURCE_commands='$Id$'
 
 # TODO: demx2fk3 2014-10-27 source logging.sh is missing
@@ -43,7 +44,7 @@ execute() {
     # in cause of an error and the user requested it, we can rerun the
     # command serveral times with some delay.
     # the retryCount can be choosen by the user
-#    while [[ ${retryCount} -gt 0 && ${exitCode} -ne 0 ]] ; do
+    while [[ ${retryCount} -gt 0 && ${exitCode} -ne 0 ]] ; do
         retryCount=$((retryCount - 1))
         trace "execute command: \"${command}\""
         if [[ ${noRedirect} ]] ; then
@@ -60,13 +61,13 @@ execute() {
 
         trace "exit code of \"${command}\" was ${exitCode}"
 
-#        # in the last loop, don't wait, just exist
-#        if [[ ${retryCount} -gt 0 && ${exitCode} -gt 0 ]] ; then
-#            local randomSeconds=$((RANDOM % 20))
-#            trace "waiting ${randomSeconds} seconds for retry execution (try ${retryCount}"
-#            sleep ${randomSeconds}
-#        fi
-#    done
+        # in the last loop, don't wait, just exist
+        if [[ ${retryCount} -gt 0 && ${exitCode} -gt 0 ]] ; then
+            local randomSeconds=$((RANDOM % 20))
+            trace "waiting ${randomSeconds} seconds for retry execution (try ${retryCount}"
+            sleep ${randomSeconds}
+        fi
+    done
 
     if [[ ${exitCode} -gt 0 ]] ; then
         [[ -e ${output} ]] && rawOutput ${output}

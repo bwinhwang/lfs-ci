@@ -1,0 +1,10 @@
+Dear Colleagues,
+
+PS LFS LTK Release __TAGNAME__ is available on share
+
+__RELEASE_NOTE_CONTENT__
+
+Best Regards,
+
+PS LFS LTK Release Team
+

@@ -81,7 +81,7 @@ getProductNameFromJobName() {
 #  @return  value for the key
 getConfig() {
     local key=$1
-    local file=$2
+    local file=${2:-${LFS_CI_CONFIG_FILE}}
 
     local productName=$(getProductNameFromJobName)
     local taskName=$(getTaskNameFromJobName)

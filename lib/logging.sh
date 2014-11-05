@@ -156,7 +156,7 @@ message() {
     # ------------------------------------------------------------------------------------------
     # interal stuff
     # generate the logline
-    local config=${CI_LOGGING_CONFIG-"DATE SPACE DURATION SPACE TYPE SPACE MESSAGE NEWLINE"}
+    local config=${CI_LOGGING_CONFIG-"PREFIX DATE SPACE DURATION SPACE TYPE SPACE MESSAGE NEWLINE"}
     local prefix=${CI_LOGGING_PREFIX-${CI_LOGGING_PREFIX_HASH["$logType"]}}
     local dateFormat=${CI_LOGGING_DATEFORMAT-"+%Y-%m-%d %H:%M:%S.%N %Z"}
 

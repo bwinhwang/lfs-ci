@@ -177,10 +177,20 @@ makingTest_testLRC() {
     mustExistDirectory ${testSuiteDirectory_SHP}
     mustExistDirectory ${testSuiteDirectory_AHP}
 
+    execute make -C ${testSuiteDirectory} clean
+
     info "create testconfig for ${testSuiteDirectory}"
     execute make -C ${testSuiteDirectory} testconfig-overwrite \
                 TESTBUILD=${testBuildDirectory} \
                 TESTTARGET=${testTargetName}
+
+    execute make -C ${testSuiteDirectory_AHP} testconfig-overwrite \
+                TESTBUILD=${testBuildDirectory} \
+                TESTTARGET=${testTargetName}_ahp
+
+    execute make -C ${testSuiteDirectory_SHP} testconfig-overwrite \
+                TESTBUILD=${testBuildDirectory} \
+                TESTTARGET=${testTargetName}_shp
 
     # TODO: demx2fk3 2014-08-13 remove me
     info "powercycle the target to get it in a defined state"
