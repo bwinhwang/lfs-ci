@@ -2781,7 +2781,8 @@ sub loadData {
     my $self  = shift;
     my $param = { @_ };
 
-    my $fileName = $param->{configFileName} || $ENV{LFS_CI_CONFIG_FILE};
+    # TODO: demx2fk3 2014-10-06 FIXME
+    my $fileName = $param->{configFileName} || $ENV{LFS_CI_CONFIG_FILE} || sprintf( "%s/etc/file.cfg", $ENV{LFS_CI_ROOT} );
 
     my @dataList;
     # TODO: demx2fk3 2014-10-06 this should be somehow configurable
@@ -2790,7 +2791,7 @@ sub loadData {
                         Store::Config::Date->new(), 
                         Singleton::configStore( "cache" ),
                       ) {
-        push @dataList, @{ $store->readConfig() };
+        push @dataList, @{ $store->readConfig( file => $fileName ) };
     }
 
 
