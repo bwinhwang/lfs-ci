@@ -114,8 +114,6 @@ _createRevisionsTxtFile() {
         debug "got revisions from ${dependenciesFileUrl}"
         rawDebug ${tmpFile1}
 
-        execute -n sort -u ${dependenciesFileUrl} ${tmpFile1} > ${tmpFile2}
-        execute -n ${tmpFile2} > ${dependenciesFileUrl}
     done
 
     # add also buildtools location

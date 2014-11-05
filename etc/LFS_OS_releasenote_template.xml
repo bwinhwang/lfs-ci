@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<releasenote version="9">
+<releasenote version="10">
   <name>__TAGNAME__</name>
-  <system>PS LFS</system>
+  <system>PS_LFS</system>
   <releaseDate>__DATE__</releaseDate>
   <releaseTime>__TIME__</releaseTime>
   <authorEmail>psulm-admin@mlist.emea.nsn-intra.net</authorEmail>
