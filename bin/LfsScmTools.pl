@@ -2448,7 +2448,7 @@ sub execute {
                         /x;
     my $splitRE       = qr / _-_ /x;
 
-    my $productRE     = qr / (?<productName>(Admin | LFS | UBOOT | PKGPOOL)) /x;
+    my $productRE     = qr / (?<productName>(Admin | LFS | UBOOT | PKGPOOL | LTK)) /x;
 
     my $regex1 = qr /
                         ^
