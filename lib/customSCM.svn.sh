@@ -111,10 +111,20 @@ actionCheckout() {
     # So the job is easy: get the changelog of the upstream project builds between old and new
     #
     # create a new changelog file
+    #FIXME don't use the ENV variables, make a copy
+    if [[ ! -e ${OLD_REVISION_STATE_FILE} ]] ; then
+        warning "error OLD_REVISION_STATE_FILE does not exist, create a temp file"
+        OLD_REVISION_STATE_FILE=$(createTempFile)
+        execute touch ${OLD_REVISION_STATE_FILE}
+    fi
+
     _createChangelogXmlFileFromSubversion \
             ${OLD_REVISION_STATE_FILE}    \
             ${REVISION_STATE_FILE}        \
             ${CHANGELOG}
+
+    debug "revision state file"
+    rawDebug ${REVISION_STATE_FILE}
 
     exit 0
 }
