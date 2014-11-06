@@ -1827,7 +1827,6 @@ sub prepare {
 
     foreach my $key ( keys %{ $subsysHash } ) {
         DEBUG "key = $key";
-        # my @components = split( "/", $key );
         my $componentName = $key; # $components[1];
         
         push @{ $changeLogAsTextHash->{ $componentName } }, grep { $_ }
@@ -2034,7 +2033,7 @@ sub prepare {
     $self->{data}{IMPORTANT_NOTE} = $self->{releaseNote}->importantNote();
 
     # __SVN_OS_REPOS_URL__
-    $self->{data}{SVN_OS_REPOS_URL}       = $config->getConfig( name => "LFS_PROD_svn_delivery_os_repos_url" );
+    $self->{data}{SVN_OS_REPOS_URL} = $config->getConfig( name => "LFS_PROD_svn_delivery_os_repos_url" );
 
     # __SVN_OS_REPOS_REVISION__
     my $svnUrl = sprintf( "%s/tags/%s", 
@@ -2273,7 +2272,7 @@ sub prepare {
     GetOptions( 'k=s',  \$opt_k,
                 'f=s',  \$opt_f,
                 't=s@', \$opt_t,
-                );
+                ) or LOGDIE "invalid option";
 
     $self->{configKeyName}  = $opt_k || die "no key";
 
