@@ -160,7 +160,7 @@ declare -A locationToSubversionMap=( ["LFS_pronb-developer"]="PS_LFS_OS_MAINBRAN
                                      ["LFS_LRC_FB1411"]="PS_LFS_OS_LRC_FB1411"      \
                                      ["LFS_LRC"]="PS_LFS_OS_LRC"                    \
                                      ["LFS_TST_GCC49_LRC"]="PS_LFS_OS_GCC49_LRC"    \
-                                     ["LFS_TST_GCC49_"]="PS_LFS_OS_GCC49"           \
+                                     ["LFS_TST_GCC49"]="PS_LFS_OS_GCC49"            \
                                      ["LFS_MD11407"]="PS_LFS_OS_MD11407"            \
                                      ["LFS_MD11408"]="PS_LFS_OS_MD11408"            \
                                      ["LFS_MD11409"]="PS_LFS_OS_MD11409"            \
