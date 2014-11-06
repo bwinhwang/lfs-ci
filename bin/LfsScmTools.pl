@@ -1755,9 +1755,11 @@ sub prepare {
         my $msg = $overrideMessage 
                     ?  $overrideMessage
                     :  ref( $entry->{msg}->[0] ) eq "HASH" 
-                        ? sprintf( "empty commit message (r%s) from %s at %s", $entry->{revision}, $entry->{author}->[0], $entry->{date}->[0] ) 
-                        : $entry->{msg}->[0] ;
-
+                        ? sprintf( "empty commit message (r%s) from %s at %s", 
+                                        $entry->{revision}, 
+                                        $entry->{author}->[0], 
+                                        $entry->{date}->[0],   ) 
+                        : $entry->{msg}->[0];
         
         if( $msg =~ m/set Dependencies, Revisions for Release/i or
             $msg =~ m/set Dependencies for Release/i or
@@ -1921,6 +1923,7 @@ sub filterComments {
     # remove new lines at the end
     $commentLine =~ s/\n$//g;
 
+    Singleton::config()->loadData( configFileName => $self->{configFileName} );
     my $jiraComment = Singleton::config()->getConfig( name => "LFS_PROD_uc_release_svn_message_prefix" );
     return if $commentLine =~ m/$jiraComment/;
 
@@ -2847,6 +2850,8 @@ package Singleton; # {{{
 use strict;
 use warnings;
 
+use Log::Log4perl qw( :easy );
+
 my $obj = bless {}, __PACKAGE__;
 
 ## @fn      svn()
@@ -2892,9 +2897,8 @@ sub configStore {
 #  @return  config handler object
 sub config {
     if( not $obj->{config}{handler} ) {
+        DEBUG "creating config handler";
         $obj->{config}{handler} = Config->new();
-        # TODO: demx2fk3 2014-11-05 FIXME 
-        # $obj->{config}{handler}->loadData();
     }
     return $obj->{config}{handler};
 }

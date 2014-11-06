@@ -96,7 +96,7 @@ copyAddons() {
 
 ## @fn      copyArchs()
 #  @brief   handle the archs directory
-#  @details «full description»
+#  @details C
 #  @param   <none>
 #  @return  <none>
 copyArchs() {
@@ -284,7 +284,7 @@ copyFactoryZip() {
 
 ## @fn      copyPlatform(  )
 #  @brief   handle the platform directory in the delivery structure
-#  @details «full description»
+#  @details 
 #  @param   <none>
 #  @return  <none>
 copyPlatform() {

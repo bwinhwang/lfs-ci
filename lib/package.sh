@@ -126,6 +126,7 @@ copyReleaseCandidateToShare() {
         if [[ ${sdk} = sdk3 && -z ${sdkValue} ]] ; then
             sdkValue=$(getConfig sdk ${commonentsFile})
         fi
+        mustHaveValue "${sdkValue}" "sdk value"
         mustExistDirectory ../../../SDKs/${sdkValue}
         execute ln -sf ../../../SDKs/${sdkValue} ${sdk}
     done
