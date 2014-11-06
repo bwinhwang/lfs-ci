@@ -74,6 +74,8 @@ sub readConfig {
 
     return if not -e $file;
 
+    DEBUG "reading config file $file";
+
     my $tagsRE  = qr/ \s*
                        < (?<tags>[^>]*) >
                        \s*
@@ -1753,9 +1755,11 @@ sub prepare {
         my $msg = $overrideMessage 
                     ?  $overrideMessage
                     :  ref( $entry->{msg}->[0] ) eq "HASH" 
-                        ? sprintf( "empty commit message (r%s) from %s at %s", $entry->{revision}, $entry->{author}->[0], $entry->{date}->[0] ) 
-                        : $entry->{msg}->[0] ;
-
+                        ? sprintf( "empty commit message (r%s) from %s at %s", 
+                                        $entry->{revision}, 
+                                        $entry->{author}->[0], 
+                                        $entry->{date}->[0],   ) 
+                        : $entry->{msg}->[0];
         
         if( $msg =~ m/set Dependencies, Revisions for Release/i or
             $msg =~ m/set Dependencies for Release/i or
@@ -1825,7 +1829,6 @@ sub prepare {
 
     foreach my $key ( keys %{ $subsysHash } ) {
         DEBUG "key = $key";
-        # my @components = split( "/", $key );
         my $componentName = $key; # $components[1];
         
         push @{ $changeLogAsTextHash->{ $componentName } }, grep { $_ }
@@ -1920,6 +1923,7 @@ sub filterComments {
     # remove new lines at the end
     $commentLine =~ s/\n$//g;
 
+    Singleton::config()->loadData( configFileName => $self->{configFileName} );
     my $jiraComment = Singleton::config()->getConfig( name => "LFS_PROD_uc_release_svn_message_prefix" );
     return if $commentLine =~ m/$jiraComment/;
 
@@ -2032,7 +2036,7 @@ sub prepare {
     $self->{data}{IMPORTANT_NOTE} = $self->{releaseNote}->importantNote();
 
     # __SVN_OS_REPOS_URL__
-    $self->{data}{SVN_OS_REPOS_URL}       = $config->getConfig( name => "LFS_PROD_svn_delivery_os_repos_url" );
+    $self->{data}{SVN_OS_REPOS_URL} = $config->getConfig( name => "LFS_PROD_svn_delivery_os_repos_url" );
 
     # __SVN_OS_REPOS_REVISION__
     my $svnUrl = sprintf( "%s/tags/%s", 
@@ -2264,16 +2268,24 @@ use Log::Log4perl qw( :easy );
 
 sub prepare {
     my $self = shift;
-    my $opt_f = $ENV{LFS_CI_CONFIG_FILE};
+
+    my $opt_f = $ENV{LFS_CI_CONFIG_FILE} || undef;
     my $opt_k = undef;
     my $opt_t = [];
     GetOptions( 'k=s',  \$opt_k,
                 'f=s',  \$opt_f,
                 't=s@', \$opt_t,
-                );
+                ) or LOGDIE "invalid option";
 
-    $self->{configFileName} = $opt_f;
     $self->{configKeyName}  = $opt_k || die "no key";
+
+    if( $opt_f and -e $opt_f ) { 
+        $self->{configFileName} = $opt_f;
+    } else {
+        LOGDIE sprintf( "config file %s does not exist.", $self->{configFileName} || "<undef>" );
+    }
+
+    DEBUG sprintf( "using config file %s", $self->{configFileName} );
 
     foreach my $value ( @{ $opt_t } ) {
         if( $value =~ m/([\w_]+):(.*)/ ) {
@@ -2286,7 +2298,7 @@ sub prepare {
 sub execute {
     my $self = shift;
 
-    Singleton::config()->loadData();
+    Singleton::config()->loadData( configFileName => $self->{configFileName} );
     my $value = Singleton::config()->getConfig( name => $self->{configKeyName} );
     DEBUG sprintf( "config %s = %s", $self->{configKeyName}, $value );
 
@@ -2746,7 +2758,6 @@ sub getConfig {
     my $self  = shift;
     my $param = { @_ };
     my $name  = $param->{name};
-    DEBUG "config name => $name";
 
     my @candidates = map  { $_->[0]               } # schwarzian transform
                      sort { $b->[1] <=> $a->[1]   } 
@@ -2770,6 +2781,7 @@ sub getConfig {
                 :
                         $self->getConfig( name => $1 ) || "\${$1}"
                 :xgie;
+    DEBUG sprintf( "key name %s => %s", $name, $value || '<undef>' );
     return $value;
 }
 
@@ -2784,14 +2796,17 @@ sub loadData {
     # TODO: demx2fk3 2014-10-06 FIXME
     my $fileName = $param->{configFileName} || $ENV{LFS_CI_CONFIG_FILE} || sprintf( "%s/etc/file.cfg", $ENV{LFS_CI_ROOT} );
 
+    DEBUG "used config file in handler: $fileName";
+
     my @dataList;
     # TODO: demx2fk3 2014-10-06 this should be somehow configurable
-    foreach my $store ( Store::Config::File->new( file => $fileName ),
+    foreach my $store ( 
                         Store::Config::Environment->new(), 
                         Store::Config::Date->new(), 
                         Singleton::configStore( "cache" ),
+                        Singleton::configStore( "file", configFileName => $fileName ),
                       ) {
-        push @dataList, @{ $store->readConfig( file => $fileName ) };
+        push @dataList, @{ $store->readConfig() };
     }
 
 
@@ -2835,6 +2850,8 @@ package Singleton; # {{{
 use strict;
 use warnings;
 
+use Log::Log4perl qw( :easy );
+
 my $obj = bless {}, __PACKAGE__;
 
 ## @fn      svn()
@@ -2861,9 +2878,14 @@ sub hint {
 
 sub configStore {
     my $storeName = shift;
+    my $param     = { @_ };
     if( not $obj->{config}{ $storeName } ) {
         if( $storeName eq "cache" ) {
             $obj->{config}{ $storeName } = Store::Config::Cache->new();
+        }
+        if( $storeName eq "file" ) {
+            my $fileName = $param->{configFileName};
+            $obj->{config}{ $storeName } = Store::Config::File->new( file => $fileName ),
         }
     }
     return $obj->{config}{ $storeName };
@@ -2875,8 +2897,8 @@ sub configStore {
 #  @return  config handler object
 sub config {
     if( not $obj->{config}{handler} ) {
+        DEBUG "creating config handler";
         $obj->{config}{handler} = Config->new();
-        $obj->{config}{handler}->loadData();
     }
     return $obj->{config}{handler};
 }
