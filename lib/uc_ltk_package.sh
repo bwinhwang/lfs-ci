@@ -25,27 +25,7 @@ ci_job_package() {
     setBuildDescription "${JOB_NAME}" "${BUILD_NUMBER}" "${label}"
     info "label name is ${label}"
 
-    local localDirectory=${workspace}/upload
-    execute mkdir -p ${localDirectory}
-
-#     find ${workspace}
-# 
-#     for bldDirectory in ${workspace}/bld/bld-*brm*-* ; do
-#         info "bldDirectory is ${bldDirectory}"
-#         [[ -d ${bldDirectory} ]] || continue
-#         local baseNameBldDir=$(basename ${bldDirectory})
-# 
-#         info "copy uboot for ${bldDirectory}..."
-# 
-#         local srcDirectory=${bldDirectory}
-#         local dstDirectory=${workspace}/upload/bld/${baseNameBldDir}
-# 
-#         execute mkdir -p ${dstDirectory}
-#         execute rsync -av --delete ${srcDirectory}/. ${dstDirectory}/
-# 
-#     done
-# 
-#     copyReleaseCandidateToShare
+    info "do nothing here, dummy task :), have a nice day"
 
     return 0
 }

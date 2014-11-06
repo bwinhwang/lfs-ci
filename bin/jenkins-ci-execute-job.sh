@@ -70,6 +70,10 @@ case "${JOB_NAME}" in
         source ${LFS_CI_ROOT}/lib/uc_build.sh
         ci_job_build   || exit 1 
     ;;
+    LTK_CI_*_Package_*) 
+        source ${LFS_CI_ROOT}/lib/uc_ltk_package.sh
+        ci_job_package || exit 1 
+    ;;
     LFS_CI_*_Package_*) 
         source ${LFS_CI_ROOT}/lib/uc_lfs_package.sh
         ci_job_package || exit 1 
