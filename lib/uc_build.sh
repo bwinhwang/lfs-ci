@@ -160,7 +160,7 @@ _build() {
 
     execute cd ${workspace}
     storeExternalComponentBaselines
-    storeRevisions ${target}
+    storeRevisions      ${target}
     createRebuildScript ${target}
 
     info "creating temporary makefile"
@@ -465,7 +465,9 @@ createRebuildScript() {
     mustHaveWorkspaceName
     info "adding svn commands to rebuilding script"
 
-    local targetName=$(sed "s/-//g" <<< ${1})
+    # TODO: demx2fk3 2014-11-06 why did I removed the -?
+    # local targetName=$(sed "s/-//g" <<< ${1})
+    local targetName=$1
     mustHaveValue "${targetName}" "target name"
 
     local script=${workspace}/bld/bld-externalComponents-${targetName}/workdir_${targetName}.sh
@@ -525,7 +527,9 @@ createRebuildScript() {
 #  @param   <none>
 #  @return  <none>
 storeRevisions() {
-    local targetName=$(sed "s/-//g" <<< ${1})
+    # TODO: demx2fk3 2014-11-06 why did I removed the -?
+    # local targetName=$(sed "s/-//g" <<< ${1})
+    local targetName=$1
     mustHaveValue "${targetName}" "target name"
 
     local workspace=$(getWorkspaceName)
