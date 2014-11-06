@@ -74,6 +74,8 @@ sub readConfig {
 
     return if not -e $file;
 
+    DEBUG "reading config file $file";
+
     my $tagsRE  = qr/ \s*
                        < (?<tags>[^>]*) >
                        \s*
@@ -2264,7 +2266,8 @@ use Log::Log4perl qw( :easy );
 
 sub prepare {
     my $self = shift;
-    my $opt_f = $ENV{LFS_CI_CONFIG_FILE};
+
+    my $opt_f = $ENV{LFS_CI_CONFIG_FILE} || undef;
     my $opt_k = undef;
     my $opt_t = [];
     GetOptions( 'k=s',  \$opt_k,
@@ -2272,8 +2275,15 @@ sub prepare {
                 't=s@', \$opt_t,
                 );
 
-    $self->{configFileName} = $opt_f;
     $self->{configKeyName}  = $opt_k || die "no key";
+
+    if( $opt_f and -e $opt_f ) { 
+        $self->{configFileName} = $opt_f;
+    } else {
+        LOGDIE sprintf( "config file %s does not exist.", $self->{configFileName} || "<undef>" );
+    }
+
+    DEBUG sprintf( "using config file %s", $self->{configFileName} );
 
     foreach my $value ( @{ $opt_t } ) {
         if( $value =~ m/([\w_]+):(.*)/ ) {
@@ -2286,7 +2296,7 @@ sub prepare {
 sub execute {
     my $self = shift;
 
-    Singleton::config()->loadData();
+    Singleton::config()->loadData( configFileName => $self->{configFileName} );
     my $value = Singleton::config()->getConfig( name => $self->{configKeyName} );
     DEBUG sprintf( "config %s = %s", $self->{configKeyName}, $value );
 
@@ -2746,7 +2756,6 @@ sub getConfig {
     my $self  = shift;
     my $param = { @_ };
     my $name  = $param->{name};
-    DEBUG "config name => $name";
 
     my @candidates = map  { $_->[0]               } # schwarzian transform
                      sort { $b->[1] <=> $a->[1]   } 
@@ -2770,6 +2779,7 @@ sub getConfig {
                 :
                         $self->getConfig( name => $1 ) || "\${$1}"
                 :xgie;
+    DEBUG sprintf( "key name %s => %s", $name, $value || '<undef>' );
     return $value;
 }
 
@@ -2784,14 +2794,17 @@ sub loadData {
     # TODO: demx2fk3 2014-10-06 FIXME
     my $fileName = $param->{configFileName} || $ENV{LFS_CI_CONFIG_FILE} || sprintf( "%s/etc/file.cfg", $ENV{LFS_CI_ROOT} );
 
+    DEBUG "used config file in handler: $fileName";
+
     my @dataList;
     # TODO: demx2fk3 2014-10-06 this should be somehow configurable
-    foreach my $store ( Store::Config::File->new( file => $fileName ),
+    foreach my $store ( 
                         Store::Config::Environment->new(), 
                         Store::Config::Date->new(), 
                         Singleton::configStore( "cache" ),
+                        Singleton::configStore( "file", configFileName => $fileName ),
                       ) {
-        push @dataList, @{ $store->readConfig( file => $fileName ) };
+        push @dataList, @{ $store->readConfig() };
     }
 
 
@@ -2861,9 +2874,14 @@ sub hint {
 
 sub configStore {
     my $storeName = shift;
+    my $param     = { @_ };
     if( not $obj->{config}{ $storeName } ) {
         if( $storeName eq "cache" ) {
             $obj->{config}{ $storeName } = Store::Config::Cache->new();
+        }
+        if( $storeName eq "file" ) {
+            my $fileName = $param->{configFileName};
+            $obj->{config}{ $storeName } = Store::Config::File->new( file => $fileName ),
         }
     }
     return $obj->{config}{ $storeName };
@@ -2876,7 +2894,8 @@ sub configStore {
 sub config {
     if( not $obj->{config}{handler} ) {
         $obj->{config}{handler} = Config->new();
-        $obj->{config}{handler}->loadData();
+        # TODO: demx2fk3 2014-11-05 FIXME 
+        # $obj->{config}{handler}->loadData();
     }
     return $obj->{config}{handler};
 }
