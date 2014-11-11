@@ -104,6 +104,7 @@ getConfig() {
     ${LFS_CI_ROOT}/bin/getConfig -k "${key}" -f ${file} \
         -t productName:${productName} \
         -t taskName:${taskName}       \
+        -t subTaskName:${subTaskName} \
         -t location:${location}       \
         -t config:${config}          
 
