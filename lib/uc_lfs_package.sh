@@ -49,7 +49,6 @@ ci_job_package() {
     # creates a file under doc/ with all delivered files of a LFS OS release
     createOsFileList
 
-    # TODO: demx2fk3 2014-08-05 reenable me
     copyReleaseCandidateToShare
 
     return 0
@@ -421,7 +420,7 @@ copyDocumentation() {
         execute rsync -av --exclude=.svn ${bldDirectory}/results/doc/. ${dst}/
     done
 
-    for file in ${workspace}/bld/bld-fsmddal-doc/results/doc/results/{FSM,}DDAL.pdf ; do
+    for file in ${workspace}/bld/bld-fsmddal-doc/results/doc/{FSM,}DDAL.pdf ; do
         if [[ -f ${file} ]] ; then
             info "copy ${file} to documentation directory"
             execute cp ${file} ${dst}/doc

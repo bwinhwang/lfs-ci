@@ -811,6 +811,8 @@ updateDependencyFiles() {
 
     local releaseLabelName=${LFS_PROD_RELEASE_CURRENT_TAG_NAME}
     local oldReleaseLabelName=${LFS_PROD_RELEASE_PREVIOUS_TAG_NAME}
+    mustHaveValue "${oldReleaseLabelName}" "old release label name"
+
     local canCommitDependencies=$(getConfig LFS_CI_uc_release_can_commit_depencencies)
     local svnCommitMessagePrefix=$(getConfig LFS_PROD_uc_release_svn_message_prefix)
 

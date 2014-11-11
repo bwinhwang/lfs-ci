@@ -190,7 +190,8 @@ copyFileToArtifactDirectory() {
     local artifactsPathOnShare=$(getConfig artifactesShare)/${JOB_NAME}/${BUILD_NUMBER}
     executeOnMaster mkdir -p ${artifactsPathOnShare}/save
 
-    execute rsync --archive --verbose --rsh=ssh -P  \
+    # sometimes, the remote host closes connection, so we try to retry...
+    execute -r 3 rsync --archive --verbose --rsh=ssh -P  \
         ${fileName}                                 \
         ${serverName}:${artifactsPathOnShare}/save
 
