@@ -334,3 +334,39 @@ makingTest_install() {
     return
 }
 
+makingTest_testsWithoutTarget() {
+    requiredParameters JOB_NAME DELIVERY_DIRECTORY
+
+    local workspace=$(getWorkspaceName)
+    mustHaveWorkspaceName
+
+    local testBuildDirectory=${DELIVERY_DIRECTORY}
+    mustExistDirectory ${testBuildDirectory}
+
+    local xmlOutputDirectory=${workspace}/xml-output
+    execute mkdir -p ${xmlOutputDirectory}
+    mustExistDirectory ${xmlOutputDirectory}
+
+	local testSuiteDirectory=${workspace}/$(getConfig LFS_CI_uc_test_making_test_suite_dir)
+    mustExistDirectory ${testSuiteDirectory}
+	mustExistFile ${testSuiteDirectory}/testsuite.mk
+
+    local make="make -C ${testSuiteDirectory}"
+
+    info "create testconfig for ${testSuiteDirectory}"
+    execute ${make} testconfig-overwrite \
+                TESTBUILD=${testBuildDirectory} 
+
+    export LFS_CI_ERROR_CODE= 
+    runAndLog ${make} --ignore-errors test-xmloutput || LFS_CI_ERROR_CODE=0 # also true
+
+    execute mkdir ${workspace}/xml-reports/
+    execute cp -f ${testSuiteDirectory}/xml-reports/*.xml ${workspace}/xml-reports/
+
+    if [[ ${LFS_CI_ERROR_CODE} ]] ; then
+        error "some errors in test cases. please see logfile"
+        exit 1
+    fi
+
+    return
+}

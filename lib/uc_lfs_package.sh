@@ -421,7 +421,7 @@ copyDocumentation() {
         execute rsync -av --exclude=.svn ${bldDirectory}/results/doc/. ${dst}/
     done
 
-    for file in ${workspace}/bld/bld-fsmddal-doc/results/doc/results/{FSM,}DDAL.pdf ; do
+    for file in ${workspace}/bld/bld-fsmddal-doc/results/doc/{FSM,}DDAL.pdf ; do
         if [[ -f ${file} ]] ; then
             info "copy ${file} to documentation directory"
             execute cp ${file} ${dst}/doc
