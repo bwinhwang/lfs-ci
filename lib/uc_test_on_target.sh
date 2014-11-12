@@ -10,9 +10,10 @@
 #  @param   <none>
 #  @return  <none>
 ci_job_test_on_target() {
-    requiredParameters JOB_NAME BUILD_NUMBER LABEL DELIVERY_DIRECTORY UPSTREAM_PROJECT
+    requiredParameters JOB_NAME BUILD_NUMBER DELIVERY_DIRECTORY UPSTREAM_PROJECT
+    local label=$(basename ${DELIVERY_DIRECTORY})
 
-    setBuildDescription ${JOB_NAME} ${BUILD_NUMBER} ${LABEL}
+    setBuildDescription ${JOB_NAME} ${BUILD_NUMBER} ${label}
 
     local targetName=$(reserveTarget)
     local workspace=$(getWorkspaceName)
