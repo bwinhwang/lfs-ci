@@ -12,72 +12,71 @@ ci_job_test() {
     # prepare the workspace directory for all test builds
     # copy the files to a workspace directory
     # jobs will be executed by jenkins job, so we can exit very early
-    requiredParameters JOB_NAME BUILD_NUMBER WORKSPACE
-
-    local serverPath=$(getConfig jenkinsMasterServerPath)
-    local productName=$(getProductNameFromJobName)
-    mustHaveValue "${productName}" "product name"
-
-    local location=$(getBranchName)
-    mustHaveBranchName
-
-    local workspace=$(getWorkspaceName)
-    mustHaveCleanWorkspace
-    mustHaveWorkspaceName
-    mustHaveWritableWorkspace
+    requiredParameters JOB_NAME BUILD_NUMBER WORKSPACE UPSTREAM_PROJECT UPSTREAM_BUILD
 
     local upstreamProject=${UPSTREAM_PROJECT}
     local upstreamBuildNumber=${UPSTREAM_BUILD}
-    info "upstreamProject ${upstreamProject} ${upstreamBuildNumber}"
+    info "upstreamProject data: ${upstreamProject} / ${upstreamBuildNumber}"
 
-    # TODO fixme
-    # local upstreamProject=$(sed "s/Test.*/Package_-_package/" <<< ${JOB_NAME})
-    # local upstreamBuildNumber=$(readlink ${serverPath}/jobs/${upstreamProject}/builds/lastSuccessfulBuild)
-    # info "upstreamProject ${upstreamProject} ${upstreamBuildNumber}"
-    copyFileFromBuildDirectoryToWorkspace ${UPSTREAM_PROJECT} ${UPSTREAM_BUILD} upstream 
-    mustExistFile ${WORKSPACE}/upstream
-    source ${WORKSPACE}/upstream
+    # structure of jobs
+    # Test
+    #  |--- FSM-r2 summary
+    #  |     \---- Test-fsmr2_target1
+    #  |--- FSM-r3 summary
+    #  |     |---- Test-fsmr3_target1
+    #  |     |---- Test-fsmr3_target2
+    #  |     \---- Test-fsmr3_target3
+    #  \--- FSM-r4 summary
+    #        |---- Test-fsmr4_target1
+    #        |---- Test-fsmr4_target2
+    #        \---- Test-fsmr4_target3
+    # if we are the Test job, we have to prepare the upstream data for the downstream jobs          
+    if [[ ${JOB_NAME} =~ .*_-_Test$ ]] ; then
 
-    local ciBuildShare=$(getConfig LFS_CI_UC_package_internal_link)
-    local workspace=${ciBuildShare}/build_${upstreamBuildNumber}
-    mustExistSymlink ${workspace}
+        debug "we are the summary test job"
 
-    local realDirectory=$(readlink ${workspace})
-    local labelName=$(basename ${realDirectory})
-    mustExistDirectory ${realDirectory}
-    mustHaveValue "${labelName}" "label name from ${workspace}"
+        local ciBuildShare=$(getConfig LFS_CI_UC_package_internal_link)
+        local workspace=${ciBuildShare}/build_${upstreamBuildNumber}
+        mustExistSymlink ${workspace}
 
-    execute rm -rf ${WORKSPACE}/properties
-    echo "LABEL=${labelName}"                  >> ${WORKSPACE}/properties
-    echo "DELIVERY_DIRECTORY=${realDirectory}" >> ${WORKSPACE}/properties
-    rawDebug ${WORKSPACE}/properties
+        local realDirectory=$(readlink ${workspace})
+        local labelName=$(basename ${realDirectory})
+        mustExistDirectory ${realDirectory}
+        mustHaveValue "${labelName}" "label name from ${workspace}"
+
+        info "using build ${labelName} in ${realDirectory}"
+
+        info "creating upstream file in workspace"
+        execute rm -rf ${WORKSPACE}/upstream
+        echo "upstreamProject=${upstreamProject}"          > ${WORKSPACE}/upstream
+        echo "upstreamBuildNumber=${upstreamBuildNumber}" >> ${WORKSPACE}/upstream
+        rawDebug ${WORKSPACE}/upstream
+
+        execute rm -rf ${WORKSPACE}/properties
+        echo "LABEL=${labelName}"                   > ${WORKSPACE}/properties
+        echo "DELIVERY_DIRECTORY=${realDirectory}" >> ${WORKSPACE}/properties
+        rawDebug ${WORKSPACE}/properties
+
+    else
+
+        debug "we are the slave test job"
+
+        info "overwrite upstreamProject to ${upstreamProject} ${upstreamBuildNumber}"
+        copyFileFromBuildDirectoryToWorkspace ${UPSTREAM_PROJECT} ${UPSTREAM_BUILD} upstream 
+        mustExistFile ${WORKSPACE}/upstream
+        rawDebug ${WORKSPACE}/upstream
+
+        source ${WORKSPACE}/upstream
+
+        info "overwrite upstreamProject to ${upstreamProject} ${upstreamBuildNumber}"
+        copyFileFromBuildDirectoryToWorkspace ${UPSTREAM_PROJECT} ${UPSTREAM_BUILD} properties 
+        mustExistFile ${WORKSPACE}/properties
+        rawDebug ${WORKSPACE}/properties
+
+        source ${WORKSPACE}/properties
+    fi
 
     setBuildDescription "${JOB_NAME}" "${BUILD_NUMBER}" "${labelName}"
     return
 }
 
-ci_job_test_summary() {
-    requiredParameters WORKSPACE
-
-    local workspace=$(getWorkspaceName)
-    mustHaveCleanWorkspace
-    mustHaveWorkspaceName
-    mustHaveWritableWorkspace
-
-    local ciBuildShare=$(getConfig LFS_CI_UC_package_internal_link)
-    local workspace=${ciBuildShare}/build_${UPSTREAM_BUILD}
-    mustExistSymlink ${workspace}
-
-    local realDirectory=$(readlink ${workspace})
-    local labelName=$(basename ${realDirectory})
-
-    info "creating upstream file in workspace"
-    echo "upstreamProject=${UPSTREAM_PROJECT}"    > ${WORKSPACE}/upstream
-    echo "upstreamBuildNumber=${UPSTREAM_BUILD}" >> ${WORKSPACE}/upstream
-
-    copyFileFromWorkspaceToBuildDirectory ${JOB_NAME} ${BUILD_NUMBER} upstream
-
-    setBuildDescription "${JOB_NAME}" "${BUILD_NUMBER}" "${labelName}"
-
-    return
-}
