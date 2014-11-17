@@ -16,6 +16,7 @@ cd ${WORKSPACE}
 build setup
 build newlocations ${branchName}
 build adddir src-test
+targetName=${JOB_NAME/Test-/}
 
 
 TEST_NAME=production_ci_LRC
@@ -29,9 +30,9 @@ TESTSUITE_DIR_SHP="$WORKSPACE/src-test/src/unittest/testsuites/continousintegrat
 
 TESTROOT_DIR="$WORKSPACE/src-test/src/unittest"
 MAKE=make
-TESTTARGET_BOTH=lcpa914
-TESTTARGET_AHP=lcpa914_ahp
-TESTTARGET_SHP=lcpa914_shp
+TESTTARGET_BOTH=${targetName}
+TESTTARGET_AHP=${targetName}_ahp
+TESTTARGET_SHP=${targetName}_shp
 # TESTBUILD="/build/home/psulm/CI_LFS/Release_Candidates/LRC/${RELEASELABEL_LRC}"
 TESTBUILD="${DELIVERY_DIRECTORY}"
 # TESTBUILD=${TESTBUILD/_OS_/_REL_}
