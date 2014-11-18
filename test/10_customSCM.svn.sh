@@ -69,6 +69,19 @@ testChangeWithKeywordNoBuild() {
     assertFalse "${LFS_CI_ROOT}/bin/customSCM.svn.sh compare"
 }
 
+testChangeWithKeywordNoBuild2() {
+ 
+    local workspace=$(createTempDirectory)
+    assertTrue "svn co -q ${reposUrl} ${workspace}"
+    echo c > ${workspace}/os/trunk/main/src-foo/file
+    local comment=$(createTempFile)
+    echo "BTS-1657: commit with keywort" > ${comment}
+    echo "" >> ${comment}
+    assertTrue "svn ci -q -F ${comment} ${workspace}"
+
+    ${LFS_CI_ROOT}/bin/customSCM.svn.sh compare
+}
+
 testChangeWithoutKeywordBuild() {
  
     local workspace=$(createTempDirectory)

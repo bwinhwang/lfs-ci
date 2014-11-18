@@ -44,9 +44,10 @@ sub readConfig {
 
     my $data = [];
 
-    push @{ $data }, { name => "date_%Y", value => sprintf( "%04d", $year ), tags => "" };
-    push @{ $data }, { name => "date_%y", value => sprintf( "%02d", ( $year - 2000 )), tags => "" };
-    push @{ $data }, { name => "date_%m", value => sprintf( "%02d", $mon  ), tags => "" };
+    push @{ $data }, { name => "date_%Y",   value => sprintf( "%04d", $year ), tags => "" };
+    push @{ $data }, { name => "date_%mdY", value => sprintf( "%04d%02d%02d", $year, $mon, $mday ), tags => "" };
+    push @{ $data }, { name => "date_%y",   value => sprintf( "%02d", ( $year - 2000 )), tags => "" };
+    push @{ $data }, { name => "date_%m",   value => sprintf( "%02d", $mon  ), tags => "" };
 
     return $data;
 }
