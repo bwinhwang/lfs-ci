@@ -37,6 +37,7 @@ ci_job_test_on_target() {
             testProductionFSM) 
                                makingTest_testFSM
             ;;
+            testWithoutTarget) makingTest_testsWithoutTarget ;;
             *) fatal "unknown testType"; ;;
         esac
     done

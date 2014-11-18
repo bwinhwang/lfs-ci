@@ -2405,7 +2405,7 @@ sub execute {
 
     foreach my $branch ( keys %{ $self->{branches} } ) {
         my $c = 0;
-        my @list = grep { $c++ > 17 }
+        my @list = grep { $c++ > 14 }
                    reverse
                    sort 
                    map  { $_->{base} }

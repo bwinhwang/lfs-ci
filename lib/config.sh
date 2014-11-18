@@ -104,6 +104,7 @@ getConfig() {
     ${LFS_CI_ROOT}/bin/getConfig -k "${key}" -f ${file} \
         -t productName:${productName} \
         -t taskName:${taskName}       \
+        -t subTaskName:${subTaskName} \
         -t location:${location}       \
         -t config:${config}          
 
@@ -168,6 +169,7 @@ declare -A locationToSubversionMap=( ["LFS_pronb-developer"]="PS_LFS_OS_MAINBRAN
                                      ["LFS_MD11411"]="PS_LFS_OS_MD11411"            \
                                      ["UBOOT_pronb-developer"]="PS_LFS_BT"          \
                                      ["UBOOT_FSM_R4_DEV"]="PS_LFS_BT_FSM_R4"        \
+                                     ["LTK_pronb-developer"]="PS_LFS_LTK"           \
                                    )
 
 ## @fn      getDeliveryRepositoryName( tagName )
