@@ -3,11 +3,11 @@
 source ${LFS_CI_ROOT}/lib/common.sh
 source ${LFS_CI_ROOT}/lib/jenkins.sh
 
-branchName=TST_GCC49_LRC
-branchDisplayName="GCC 4.9 Test for LRC"
+branchName=FB1411
+branchDisplayName="FB1411"
 lastReleaseName="PS_LFS_OS_2014_08_0001"
-trunk="LRC"
-trunkDisplayName="LRC trunk"
+trunk="trunk"
+trunkDisplayName="trunk"
 
 # ls /var/fpwork/demx2fk3/lfs-jenkins/home/jobs/*/promotions
 

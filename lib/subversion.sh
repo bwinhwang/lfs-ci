@@ -156,6 +156,11 @@ svnRemove() {
     return
 }
 
+svnExport() {
+    svnCommand export $@
+    return
+}
+
 ## @fn      shouldNotExistsInSubversion( $url, $pathOrFile )
 #  @brief   checks, if the path/file exists in svn 
 #  @detail  if you want to check http://server/path/to/repos/foo, the

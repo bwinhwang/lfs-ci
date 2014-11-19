@@ -1,9 +1,9 @@
 ------------------------------------------------------------------
 starting logfile
-  script: test/03_logging_logfile.sh
+  script: /home/demx2fk3/lfs-ci/test/03_logging_logfile.sh
   jobName:  unknownJobName
-  hostname: gallumbits
-  username: bm
+  hostname: lfs-host
+  username: psulm
 ------------------------------------------------------------------
 -- Please note, all timestamps are in UTC                       --
 ------------------------------------------------------------------
