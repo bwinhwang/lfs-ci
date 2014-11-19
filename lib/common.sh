@@ -195,6 +195,11 @@ createBasicWorkspace() {
     return
 }
 
+createOrUpdateWorkspace() {
+    # TODO: demx2fk3 2014-11-14 todo
+    true
+}
+
 
 ## @fn      mustHaveValidWorkspace()
 #  @brief   ensure, that the workspace is valid

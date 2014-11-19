@@ -3,6 +3,7 @@
 set -o errexit
 
 export LFS_CI_ROOT=$PWD
+export USER=psulm
 
 source ${LFS_CI_ROOT}/lib/logging.sh
 
@@ -10,7 +11,7 @@ source ${LFS_CI_ROOT}/lib/logging.sh
 for file in test/*.sh ; do
     
     info "executing unit test ${file}"
-    ${file} 
+    ${LFS_CI_ROOT}/lib/contrib/fakehostname/fakehostname lfs-host ${file} 
 
 done
 

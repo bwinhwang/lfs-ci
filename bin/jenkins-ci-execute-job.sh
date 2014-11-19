@@ -68,7 +68,11 @@ case "${JOB_NAME}" in
     ;;
     *_CI_*_Build_*) 
         source ${LFS_CI_ROOT}/lib/uc_build.sh
-        ci_job_build   || exit 1 
+        ci_job_build || exit 1 
+    ;;
+    *_CI_*_KlocworkBuild_*) 
+        source ${LFS_CI_ROOT}/lib/uc_klocwork.sh
+        ci_job_klocwork_build || exit 1 
     ;;
     LTK_CI_*_Package_*) 
         source ${LFS_CI_ROOT}/lib/uc_ltk_package.sh
