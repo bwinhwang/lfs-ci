@@ -210,3 +210,17 @@ setBuildResultUnstable() {
     executeJenkinsCli set-build-result unstable
     return
 }
+
+setRevisionAsJobDescription() {
+    JOB_NAME=$1
+    JOB_XML_FILE=$2
+    BRANCH=$3
+    SVN_SERVER=$(getConfig lfsSourceRepos)
+
+    PATTERN1="<description><\/description>"
+    REVISION=$(svn log --verbose --stop-on-copy $SVN_SERVER/os/$BRANCH | grep -E "([from|von] .*trunk:)" | cut -d'(' -f2 | cut -d':' -f2 | sed s'/)//')
+    PATTERN2="<description>Branched from trunk revision $REVISION<\/description>"
+
+    echo "svn log --verbose --stop-on-copy $SVN_SERVER/os/$BRANCH"
+    sed -i -e "0,/${PATTERN1}/s/${PATTERN1}/${PATTERN2}/" $JOB_XML_FILE
+}
