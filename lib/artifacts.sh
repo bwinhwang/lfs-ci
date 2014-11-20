@@ -103,7 +103,7 @@ copyAndExtractBuildArtifactsFromProject() {
 
         info "copy artifact ${file} from job ${jobName}#${buildNumber} to workspace and untar it"
 
-        execute -r 3 rsync --archive --verbose --rsh=ssh -P          \
+        execute -r 10 rsync --archive --verbose --rsh=ssh -P          \
             ${serverName}:${artifactsPathOnMaster}/${file} \
             ${workspace}/bld/
 
@@ -191,7 +191,7 @@ copyFileToArtifactDirectory() {
     executeOnMaster mkdir -p ${artifactsPathOnShare}/save
 
     # sometimes, the remote host closes connection, so we try to retry...
-    execute -r 3 rsync --archive --verbose --rsh=ssh -P  \
+    execute -r 10 rsync --archive --verbose --rsh=ssh -P  \
         ${fileName}                                 \
         ${serverName}:${artifactsPathOnShare}/save
 

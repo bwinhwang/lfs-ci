@@ -140,6 +140,7 @@ makingTest_testFSM() {
     execute ${make} check
 
     export LFS_CI_ERROR_CODE= 
+    info "running test suite"
     runAndLog ${make} --ignore-errors test-xmloutput || LFS_CI_ERROR_CODE=0 # also true
 
     execute mkdir ${workspace}/xml-reports/
