@@ -784,6 +784,12 @@ sub replaceMasterByUlmServer {
     return $url;
 }
 
+sub replaceUlmByMasterServer {
+    my $url = shift;
+    $url =~ s/ulscmi.inside.nsn.com/svne1.access.nsn.com/g;
+    return $url;
+}
+
 # }}} ------------------------------------------------------------------------------------------------------------------
 package Parser::Replacer; # {{{
 
@@ -2060,6 +2066,8 @@ sub prepare {
 
     # __SVN_SOURCE_TAGS_URL_WITH_REVISION__
     $self->{data}{SVN_SOURCE_REPOS_URL} = $config->getConfig( name => "lfsSourceRepos" );
+    # __SVN_MASTER_SOURCE_TAGS_URL_WITH_REVISION__ 
+    # $self->{data}{SVN_MASTER_SOURCE_REPOS_URL} = $svn::replaceUlmByMasterServer( $config->getConfig( name => "lfsSourceRepos" ) );
 
     $svnUrl = sprintf( "%s/os/tags/%s", 
                          $self->{data}{SVN_SOURCE_REPOS_URL},
