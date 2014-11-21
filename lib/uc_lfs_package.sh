@@ -49,7 +49,6 @@ ci_job_package() {
     # creates a file under doc/ with all delivered files of a LFS OS release
     createOsFileList
 
-    # TODO: demx2fk3 2014-08-05 reenable me
     copyReleaseCandidateToShare
 
     return 0

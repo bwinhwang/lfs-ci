@@ -44,6 +44,7 @@ sub readConfig {
 
     my $data = [];
 
+    push @{ $data }, { name => "date_%Ymd", value => sprintf( "%04d%02d%02d", $year, $mon, $mday ), tags => "" };
     push @{ $data }, { name => "date_%Y", value => sprintf( "%04d", $year ), tags => "" };
     push @{ $data }, { name => "date_%y", value => sprintf( "%02d", ( $year - 2000 )), tags => "" };
     push @{ $data }, { name => "date_%m", value => sprintf( "%02d", $mon  ), tags => "" };
@@ -2412,7 +2413,7 @@ sub execute {
 
     foreach my $branch ( keys %{ $self->{branches} } ) {
         my $c = 0;
-        my @list = grep { $c++ > 17 }
+        my @list = grep { $c++ > 14 }
                    reverse
                    sort 
                    map  { $_->{base} }

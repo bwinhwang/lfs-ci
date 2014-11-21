@@ -27,6 +27,11 @@ ci_job_package() {
 
     info "do nothing here, dummy task :), have a nice day"
 
+    local localDirectory=${workspace}/upload
+    execute mkdir -p ${localDirectory}
+
+    copyReleaseCandidateToShare
+
     return 0
 }
 

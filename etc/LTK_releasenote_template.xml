@@ -41,6 +41,9 @@
     </module>
   </restrictions>
   <download>
+    <downloadItem storage="FILE SC_LFS i686-pc-linux-gnu"   name="PS_LFS_LTK">/build/home/SC_LFS/releases/bld/bld-ltk-i686-pc-linux-gnu/__TAGNAME__</downloadItem>
+    <downloadItem storage="FILE SC_LFS x86_64-pc-linux-gnu" name="PS_LFS_LTK">/build/home/SC_LFS/releases/bld/bld-ltk-x86_64-pc-linux-gnu/__TAGNAME__</downloadItem>
+    <downloadItem storage="subversion"                      name="PS_LFS_LTK">https://ulisop10.emea.nsn-net.net/isource/svnroot/BTS_SC_LFS/os/tags/__TAGNAME__/</downloadItem>
   </download>
   <additional>
   </additional>
