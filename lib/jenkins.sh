@@ -212,15 +212,14 @@ setBuildResultUnstable() {
 }
 
 setRevisionAsJobDescription() {
-    JOB_NAME=$1
-    JOB_XML_FILE=$2
-    BRANCH=$3
-    SVN_SERVER=$(getConfig lfsSourceRepos)
+    local jobName=$1
+    local jobXmlFile=$2
+    local branch=$3
+    local svnServer=$(getConfig lfsSourceRepos)
 
-    PATTERN1="<description><\/description>"
-    REVISION=$(svn log --verbose --stop-on-copy $SVN_SERVER/os/$BRANCH | grep -E "([from|von] .*trunk:)" | cut -d'(' -f2 | cut -d':' -f2 | sed s'/)//')
-    PATTERN2="<description>Branched from trunk revision $REVISION<\/description>"
-
-    echo "svn log --verbose --stop-on-copy $SVN_SERVER/os/$BRANCH"
-    sed -i -e "0,/${PATTERN1}/s/${PATTERN1}/${PATTERN2}/" $JOB_XML_FILE
+    local pattern1="<description><\/description>"
+    local descr=$(svn log -v --xml --stop-on-copy $svnServer/os/$branch | \
+            bin/xpath -q -e '/log/logentry/msg/node()' | tail -1 | sed -e 's/[\/&]/\\&/g')
+    local pattern2="<description>$descr<\/description>"
+    sed -i -e "0,/${pattern1}/s/${pattern1}/${pattern2}/" $jobXmlFile
 }
