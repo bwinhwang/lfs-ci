@@ -211,7 +211,7 @@ setBuildResultUnstable() {
     return
 }
 
-## @jobName     name of the CI job
+## @fn          setRevisionAsJobDescription
 #  @brief       set CI job description to SVN description
 #  @param       {jobName}      name of the CI job
 #  @jobXmlFile  {jobXmlFile}   name of the CI jobs XML file
