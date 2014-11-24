@@ -180,6 +180,10 @@ createBasicWorkspace() {
     local workspace=$(getWorkspaceName)
     mustHaveWritableWorkspace
     mustHaveWorkspaceName
+
+    if [[ -d ${workspace}/.build_workdir ]] ; then
+        execute build updateall
+    fi
     mustHaveCleanWorkspace
 
     local components=$@
@@ -197,6 +201,14 @@ createBasicWorkspace() {
 
 createOrUpdateWorkspace() {
     # TODO: demx2fk3 2014-11-14 todo
+
+#     local workspace=$(getWorkspaceName)
+# 
+#     if [[ -d ${workspace}/.build_workdir ]] ; then
+#         build updateall
+#         if [[ $? -ne 0 ]] ; then
+#             mustHaveCleanWorkspace
+#     fi
     true
 }
 
@@ -220,6 +232,11 @@ mustHaveValidWorkspace() {
 #  @param   <none>
 #  @return  <none>
 switchSvnServerInLocations() {
+
+    if ! grep -q "ulm" <<< ${NODE_LABELS} ; then
+        return
+    fi
+
     local workspace=$(getWorkspaceName) 
     local masterServer=$(getConfig svnMasterServerHostName)
     local slaveServer=$(getConfig svnSlaveServerUlmHostName)

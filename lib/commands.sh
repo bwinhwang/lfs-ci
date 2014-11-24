@@ -19,24 +19,25 @@ LFS_CI_SOURCE_commands='$Id$'
 #  @throws  raise an error, if the command exits with an exit code != 0
 execute() {
     debug "execute $@"
-    local opt=$1
     local noRedirect=
     local retryCount=1
-    if [[ ${opt} = "-n" ]] ; then
-        # we found an -n as the first parameter, so the user
-        # want to redirect the stuff by himself.
-        trace "user requested own redirection via -n"
-        shift
-        noRedirect=1
-    fi
-    opt=$1
-    if [[ ${opt} = "-r" ]] ; then
-        shift
-        retryCount=$1
-        shift
-        trace "user requested reexecution via -r ${retryCount}"
-    fi
- 
+    local ignoreError=
+
+    # Note: we are not using getopt, because we have problems with parsing
+    # the parameters from the command. We don't want that.
+    while [[ $# -gt 0 ]]
+    do
+        case $1 in
+            -n|--noredirect)   noRedirect=1  ;;
+            -i|--ignore-error) ignoreError=1 ;;
+            -r|--retry)        retryCount=$2 ; shift ;;
+            --)                shift ; break ;;
+            (-*)               fatal "unrecognized option $1" ;;
+            *)                 break ;;
+        esac
+        shift;
+    done
+
     local command=$@
     local exitCode=1
     local output=
@@ -72,12 +73,12 @@ execute() {
     if [[ ${exitCode} -gt 0 ]] ; then
         [[ -e ${output} ]] && rawOutput ${output}
         error "error occoured in \"${command}\""
-        exit ${exitCode}
+        [[ -z ${ignoreError} ]] && exit ${exitCode}
     fi
 
     trace "normal return of execute method"
 
-    return
+    return ${exitCode}
 }
 
 ## @fn      executeOnMaster( command )

@@ -213,49 +213,21 @@ _createWorkspace() {
 
     setupNewWorkspace
     switchToNewLocation ${location}
-
-    if grep -q "ulm" <<< ${NODE_LABELS} ; then
-        # change from svne1 to ulmscmi
-        switchSvnServerInLocations
-    fi
-
+    # change from svne1 to ulmscmi
+    switchSvnServerInLocations
     mustHaveValidWorkspace
 
     local srcDirectory=$(getConfig LFS_CI_UC_build_subsystem_to_build)
-    if [[ ! "${srcDirectory}" ]] ; then
-        error "no srcDirectory found (subsystem)"
-        exit 1;
-    fi
+    mustHaveValue "${srcDirectory}" "src directory"
     info "requested source directory: ${srcDirectory}"
 
-    if grep -q "ulm" <<< ${NODE_LABELS} ; then
-        preCheckoutPatchWorkspace
-    fi
-
-    copyRevisionStateFileToWorkspace ${UPSTREAM_PROJECT} ${UPSTREAM_BUILD}
-
-    local revision=
-    if [[ -r "${WORKSPACE}/revisions.txt" ]] ; then
-        # TODO: demx2fk3 2014-06-25 stupid bug: adddir will not update to a higher revision, 
-        #                           if the src-directory already exists...
-        # revision=$(grep "^${src} " ${WORKSPACE}/revisions.txt | cut -d" " -f3)
-        revision=$(cut -d" " -f 3 ${WORKSPACE}/revisions.txt | sort -n -u | tail -n 1)
-    fi
+    local revision=$(latestRevisionFromRevisionStateFile)
+    mustHaveValue "${revision}" "revision from revision state file"
 
     checkoutSubprojectDirectories ${srcDirectory} ${revision}
 
-    local onlySourceDirectory=$(getConfig LFS_CI_UC_build_onlySourceDirectories)
-    if [[ ${onlySourceDirectory} ]] ; then
-        buildTargets=${onlySourceDirectory}
-    else
-        info "getting required src-directories for ${srcDirectory}"
-        # local buildTargets=$(${LFS_CI_ROOT}/bin/getDependencies ${srcDirectory} 2>/dev/null )
-        execute "${build} -C ${srcDirectory} src-list_${productName}_${subTaskName}"
-        local buildTargets=$(${build} -C ${srcDirectory} src-list_${productName}_${subTaskName}) 
-        mustHaveValue "${buildTargets}" "no build targets configured"
-        buildTargets="$(getConfig LFS_CI_UC_build_additionalSourceDirectories) ${buildTargets}"
-    fi
-
+    buildTargets=$(requiredSubprojectsForBuild)
+    mustHaveValue "${buildTargets}" "build targets"
     info "using src-dirs: ${buildTargets}"
 
     local amountOfTargets=$(echo ${buildTargets} | wc -w)
@@ -263,24 +235,16 @@ _createWorkspace() {
 
     for src in ${buildTargets} ; do
 
-        local revision=
-        if [[ -r "${WORKSPACE}/revisions.txt" ]] ; then
-            # TODO: demx2fk3 2014-06-25 stupid bug: adddir will not update to a higher revision, if the src-directory already exists...
-            # revision=$(grep "^${src} " ${WORKSPACE}/revisions.txt | cut -d" " -f3)
-            revision=$(cut -d" " -f 3 ${WORKSPACE}/revisions.txt | sort -n -u | tail -n 1)
-        fi
+        local revision=(latestRevisionFromRevisionStateFile)
+        mustHaveValue ${revision} "revision from revision state file"
 
         counter=$( expr ${counter} + 1 )
         info "(${counter}/${amountOfTargets}) checking out sources for ${src} rev ${revision:-latest}"
         checkoutSubprojectDirectories "${src}" "${revision}"
-
     done 
 
     mustHaveLocalSdks
-    # mustHaveBuildArtifactsFromUpstream
     copyAndExtractBuildArtifactsFromProject ${UPSTREAM_PROJECT} ${UPSTREAM_BUILD}
-
-    postCheckoutPatchWorkspace
 
     return 0
 }
