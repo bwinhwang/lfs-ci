@@ -81,7 +81,22 @@ updateWorkspace() {
     return
 }
 
+## @fn      createWorkspace()
+#  @brief   create a new workspace for LFS
+#  @details this method is very huge. It creates a new workspace for a projects.
+#           this includes several steps:
+#           * create a new directory                             (build setup)
+#           * cleanup the old workspace if exists
+#           * switch to the correct location (aka branch)        (build newlocations)
+#           * get the list of required subsystem
+#           * check out the subsystem from svn                   (build adddir)
+#  @param   <none>
+#  @return  <none>
 createWorkspace() {
+    local workspace=$(getWorkspaceName)
+    mustHaveWorkspaceName
+    mustHaveCleanWorkspace
+
     local location=$(getLocationName)
     mustHaveLocationName
 
@@ -90,10 +105,6 @@ createWorkspace() {
 
     local productName=$(getProductNameFromJobName)
     mustHaveValue "${productName}" "productName"
-
-    local workspace=$(getWorkspaceName)
-    mustHaveWorkspaceName
-    mustHaveCleanWorkspace
 
     local taskName=$(getTaskNameFromJobName)
     local subTaskName=$(getSubTaskNameFromJobName)
