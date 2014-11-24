@@ -1,11 +1,38 @@
-ci_job_klocwork_build() {
+# settings for klocwork
+# PYTHON_HOME=/opt/python/linux64/ix86/python_3.2
 
-    set -o noglob
-    BUILD="bldtools/bld-buildtools-common/results/bin/build NOAUTOBUILD=1"
+# KW_PORT=8080
+# KW_LICENCE_PORT=27018
+# KW_LICENCE_HOST=eseelic050.emea.nsn-net.net
+# KW_HOST=ulkloc.nsn-net.net
+# KW_HOME=/home/kwbts01/kw-server
+# BLD_TOOL=/build/home/SC_LFS/bldtools/bin/build
+
+# name
+# ULKLOC
+# KLOCWORK_HOME
+# /home/kwbts01/kw-server
+# PROJECT_HOST
+# ulkloc.nsn-net.net
+# PROJECT_PORT
+# 8080
+# LICENCE_HOST
+# eseelic050.emea.nsn-net.net
+# LICENCE_PORT
+# 27018
+
+ci_job_klocwork_build() {
 
     requiredParameters WORKSPACE JOB_NAME
 
-    local KWPROJECT=$(getConfig LFS_CI_uc_klokwork_project_name)
+    set -o noglob
+
+    local BUILD="bldtools/bld-buildtools-common/results/bin/build NOAUTOBUILD=1"
+
+    local location=$(getLocationName)
+    local workspace=$(getWorkspaceName)
+
+    local KWPROJECT=$(getConfig LFS_CI_uc_klocwork_project_name)
     local KWINJECT=${KW_HOME}/bin/kwinject
     local KWADMIN=${KW_HOME}/bin/kwadmin
     local KWBUILDPROJECT=${KW_HOME}/bin/kwbuildproject
@@ -63,12 +90,13 @@ ci_job_klocwork_build() {
     ${KWADMIN} ${KWURL} import-config ${KWPROJECT} ${KWTPL}
 
     # build klocwork project
-    ${KWBUILDPROJECT} ${KWURL}/${KWPROJECT} --license-host ${KW_LICENCE_HOST} \
-                                    --license-port ${KW_LICENCE_PORT} \
-                                    --replace-path ${KWPSROOT}/src-=src- \
+    ${KWBUILDPROJECT} ${KWURL}/${KWPROJECT}                                   \
+                                    --license-host ${KW_LICENCE_HOST}         \
+                                    --license-port ${KW_LICENCE_PORT}         \
+                                    --replace-path ${KWPSROOT}/src-=src-      \
                                     --buildspec-variable kwpsroot=${KWPSROOT} \
-                                    --incremental \
-                                    --project ${KWPROJECT} \
+                                    --incremental                             \
+                                    --project ${KWPROJECT}                    \
                                     --tables-directory ${KWTABLES} ${KWTPL}
 
     # upload build report
@@ -76,7 +104,7 @@ ci_job_klocwork_build() {
     if [[ -z ${canUploadBuild} ]] ; then
         execute ${KWADMIN} ${KWURL} load ${KWPROJECT} ${KWTABLES} --name build_ci_${BUILD_ID}
     else
-        warning "klocwork load command is disabled via config"
+        warning "klocwork load is disabled via config"
     fi
 
     # create XML report

@@ -3,7 +3,7 @@
 source lib/common.sh
 initTempDirectory
 
-source lib/commands.sh
+source lib/createWorkspace.sh
 
 export UNITTEST_TRUE_COMMAND=$(createTempFile)
 # mock the date command
@@ -59,14 +59,38 @@ testExecute_part3() {
     assertFalse 'execute -r 3 falseCommand part3'
     assertEquals 'mocked false command executed' 3 "$(cat ${UNITTEST_TRUE_COMMAND} | wc -l)"
 }
+testExecute_part3long() {
+    assertFalse 'execute --retry 3 falseCommand part3'
+    assertEquals 'mocked false command executed' 3 "$(cat ${UNITTEST_TRUE_COMMAND} | wc -l)"
+}
 testExecute_part4() {
     assertTrue 'execute -n -r 3 trueCommand part4'
+    assertEquals 'mocked false command executed' 1 "$(cat ${UNITTEST_TRUE_COMMAND} | wc -l)"
+}
+testExecute_part4long() {
+    assertTrue 'execute --noredirect --retry 3 trueCommand part4'
     assertEquals 'mocked false command executed' 1 "$(cat ${UNITTEST_TRUE_COMMAND} | wc -l)"
 }
 testExecute_part5() {
     assertTrue 'execute -n -r 3 successInThirdCommand part5'
 }
-
+testExecute_part5Long() {
+    assertTrue 'execute -n --retry 3 successInThirdCommand part5'
+    assertTrue 'execute --retry 3 -n successInThirdCommand part5'
+}
+testExecute_part5LongError() {
+    assertFalse 'execute -n --retry successInThirdCommand part5'
+    assertFalse 'execute --retry -n successInThirdCommand part5'
+}
+testExecute_InvalidOption() {
+    assertFalse 'execute --invalid successInThirdCommand part6'
+    assertFalse 'execute -z successInThirdCommand part6'
+}
+testExecute_ParameterIgnoreError() {
+    assertTrue  'execute -i falseCommand part7'
+    assertTrue  'execute --ignore-error falseCommand part7'
+    assertFalse 'execute falseCommand part7'
+}
 
 source lib/shunit2
 
