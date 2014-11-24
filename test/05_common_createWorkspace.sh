@@ -29,7 +29,10 @@ oneTimeSetUp() {
     setupNewWorkspace() {
         mkdir -p ${WORKSPACE}/workspace/.build_workdir
     }
-
+    mustHaveValue() {
+        mockedCommand "mustHaveValue $@"
+        return
+    }
     switchSvnServerInLocations() {
         mockedCommand "switchSvnServerInLocations $@"
     }
@@ -70,15 +73,22 @@ testCreateWorkspace_withoutProblems() {
 
     local expect=$(createTempFile)
 cat <<EOF > ${expect}
+mustHaveValue LFS productName
 switchSvnServerInLocations pronb-developer
+mustHaveValue src-project src directory
 latestRevisionFromRevisionStateFile 
+mustHaveValue 12345 revision from revision state file
 checkoutSubprojectDirectories src-project 12345
 requiredSubprojectsForBuild 
+mustHaveValue src-abc src-foo src-bar build targets
 latestRevisionFromRevisionStateFile 
+mustHaveValue 12345 revision from revision state file
 checkoutSubprojectDirectories src-abc 12345
 latestRevisionFromRevisionStateFile 
+mustHaveValue 12345 revision from revision state file
 checkoutSubprojectDirectories src-foo 12345
 latestRevisionFromRevisionStateFile 
+mustHaveValue 12345 revision from revision state file
 checkoutSubprojectDirectories src-bar 12345
 EOF
 
@@ -102,12 +112,6 @@ testCreateWorkspace_parseErrorProductName() {
     assertFalse "createWorkspace"
 }
 
-testCreateWorkspace_parseErrorWorkspace() {
-    export JOB_NAME=ABC_CI_-_trunk_-_Build_-_FSM-r2_-_fcmd
-    export WORKSPACE=$(createWorkspace)
-    chmod -R 000 ${WORKSPACE}
-    assertTrue "createWorkspace"
-}
 
 source lib/shunit2
 
