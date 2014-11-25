@@ -1,6 +1,6 @@
 ------------------------------------------------------------------
 starting logfile
-  script: /home/demx2fk3/lfs-ci/test/03_logging_logfile.sh
+  script: /home/bm/projekte/work/nsn/ci.git/test/03_logging_logfile.sh
   jobName:  unknownJobName
   hostname: lfs-host
   username: psulm

@@ -79,28 +79,30 @@ testCreateWorkspace_withoutProblems() {
 
     local expect=$(createTempFile)
 cat <<EOF > ${expect}
+mustHaveValue LFS product name
+mustHaveValue FSM-r2 subtask name
+mustHaveValue src-project src directory
+latestRevisionFromRevisionStateFile 
+mustHaveValue 12345 revision from revision state file
+switchSvnServerInLocations pronb-developer
+checkoutSubprojectDirectories src-project 12345
+requiredSubprojectsForBuild 
+mustHaveValue src-abc src-foo src-bar build targets
+latestRevisionFromRevisionStateFile 
+mustHaveValue 12345 revision from revision state file
+checkoutSubprojectDirectories src-abc 12345
+latestRevisionFromRevisionStateFile 
+mustHaveValue 12345 revision from revision state file
+checkoutSubprojectDirectories src-foo 12345
+latestRevisionFromRevisionStateFile 
+mustHaveValue 12345 revision from revision state file
+checkoutSubprojectDirectories src-bar 12345
+mustHaveLocalSdks 
+copyAndExtractBuildArtifactsFromProject 
 EOF
 
     assertEquals "$(cat ${expect})" "$(cat ${UNITTEST_COMMAND})"
 }
-
-testCreateWorkspace_parseErrorLocation() {
-    export JOB_NAME=LFS_CI_-_
-    export WORKSPACE=$(createTempDirectory)
-    assertFalse "createWorkspace"
-}
-testCreateWorkspace_parseErrorTarget() {
-    export JOB_NAME=LFS_CI_-_trunk_-_Build_-_
-    export WORKSPACE=$(createTempDirectory)
-    assertFalse "createWorkspace"
-}
-
-testCreateWorkspace_parseErrorProductName() {
-    export JOB_NAME=ABC_CI_-_trunk_-_Build_-_FSM-r2_-_fcmd
-    export WORKSPACE=$(createTempDirectory)
-    assertFalse "createWorkspace"
-}
-
 
 source lib/shunit2
 
