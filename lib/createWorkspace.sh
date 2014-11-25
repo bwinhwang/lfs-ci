@@ -1,7 +1,9 @@
 [[ -z ${LFS_CI_SOURCE_artifacts} ]] && source ${LFS_CI_ROOT}/lib/artifacts.sh
 
-
-
+## @fn      createOrUpdateWorkspace()
+#  @brief   create a new or update an existing workspace
+#  @param   {option}    -u | --allowUpdate 
+#  @return  <none>
 createOrUpdateWorkspace() {
     local workspace=$(getWorkspaceName)
     mustHaveWorkspaceName
@@ -143,6 +145,12 @@ createWorkspace() {
     return
 }
 
+
+## @fn      latestRevisionFromRevisionStateFile()
+#  @brief   get the latest revision number from the revision state file
+#  @details the revision state file is written by custom scm plugin and
+#           contains all the used svn urls and revisions
+#  @return  latest revision number
 latestRevisionFromRevisionStateFile() {
     requiredParameters UPSTREAM_PROJECT UPSTREAM_BUILD WORKSPACE
 
@@ -270,5 +278,4 @@ synchroniceToLocalPath() {
 
     return
 }
-
 
