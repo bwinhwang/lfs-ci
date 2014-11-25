@@ -1,81 +1,82 @@
-createOrUpdateWorkspace() {
+[[ -z ${LFS_CI_SOURCE_artifacts} ]] && source ${LFS_CI_ROOT}/lib/artifacts.sh
 
-    local updateWorkspace=
+
+
+createOrUpdateWorkspace() {
+    local workspace=$(getWorkspaceName)
+    mustHaveWorkspaceName
+    mustHaveWritableWorkspace
+
+    local shouldUpdateWorkspace=
 
     #  TODO: demx2fk3 2014-11-24 add getopt here
     while [[ $# -gt 0 ]]
     do
         case $1 in
-            -u|--udpate) updateWorkspace=1  ;;
-            (-*)         fatal "unrecognized option $1" ;;
+            -u|--allowUpdate) shouldUpdateWorkspace=1  ;;
+            (-*)              fatal "unrecognized option $1" ;;
         esac
         shift;
     done
 
-    local location=$(getLocationName)
-    mustHaveLocationName
+    debug "create new or update existing workspace ${workspace}"
 
-    local target=$(getTargetBoardName)
-    mustHaveTargetBoardName
-
-    local productName=$(getProductNameFromJobName)
-    mustHaveValue "${productName}" "productName"
-
-    local workspace=$(getWorkspaceName)
-    mustHaveWorkspaceName
-    mustHaveWritableWorkspace
-
-    local taskName=$(getTaskNameFromJobName)
-    local subTaskName=$(getSubTaskNameFromJobName)
-    trace "taskName is ${taskName} / ${subTaskName}"
-    debug "create workspace for ${location} / ${target} in ${workspace}"
-
-    if [[ -f ${workspace}/.build_workdir && ! -z ${updateWorkspace} ]] ; then
+    if [[ -d ${workspace}/.build_workdir && ! -z ${shouldUpdateWorkspace} ]] ; then
+        debug "workspace exists, try to update..."
         updateWorkspace
     else
+        debug "workspace does not exist, create a new one..."
         createWorkspace            
     fi
 
-    mustHaveValidWorkspace
-
-    mustHaveLocalSdks
-    copyAndExtractBuildArtifactsFromProject ${UPSTREAM_PROJECT} ${UPSTREAM_BUILD}
-
-    return 0
-
+    return
 }
 
+## @fn      updateWorkspace()
+#  @brief   update a workspace with build updateall
+#  @details if there is still a valid workspace from previous run, we
+#           want to reuse this workspace and use build updatell in
+#  @param   <none>
+#  @return  <none>
 updateWorkspace() {
-    local location=$(getLocationName)
-    mustHaveLocationName
-
-    local target=$(getTargetBoardName)
-    mustHaveTargetBoardName
-
-    local productName=$(getProductNameFromJobName)
-    mustHaveValue "${productName}" "productName"
-
     local workspace=$(getWorkspaceName)
     mustHaveWorkspaceName
     mustHaveWritableWorkspace
-    mustHaveCleanWorkspace
-
-    local taskName=$(getTaskNameFromJobName)
-    local subTaskName=$(getSubTaskNameFromJobName)
 
     # we want the latest revision state file, so we clean it up first
     execute rm -rf ${WORKSPACE}/revisions.txt
 
-    if ! execute -i ${build} updateall ; then
+    # we need the revision to update to the requested (from upstream / revision state file) revision
+    local revision=$(latestRevisionFromRevisionStateFile)
+    mustHaveValue ${revision} "revision from revision state file"
+
+    local build="build -W \"${workspace}\" --revision=${revision}"
+
+    info "running update all with revision ${revision:-latest}"
+    if ! execute --ignore-error ${build} updateall ; then
         # FALLBACK: updating the workspace failed, we will recreate the workspace
         warning "updating the workspace failed, removing and recreating workspace now..."
         createWorkspace
-    else
-        info "workspace update was successful"
-        updateWorkspace
+        return
     fi
 
+    info "workspace update was successful"
+    # TODO: demx2fk3 2014-11-24 checking for new src-directories
+    # we should also check, if all the required src-directories are in place.
+    # BUT we have a little problem in the concept here. We want to check
+    # again the entries in the build file, but there is something missing
+    # in the name of the build target: e.g.:
+    # project name: LFS_CI_-_trunk_-_Build_-_FSM-r3_-_fsm3_octeon2
+    # Name in Buildfile: src-list_LFS_FSM-r4
+    # So the information about the taskName is missing in Buildfile.
+    # the name in Buildfile should be something like: src-lis_LFS_Build_FSM-r4.
+    # If we want to change this, we have to do this in a lot of branches....
+
+    mustHaveValidWorkspace
+
+    # TODO: demx2fk3 2014-11-24 check, if this is working in update usecase
     mustHaveLocalSdks
+    # TODO: demx2fk3 2014-11-24 does not work in update usecase yet
     copyAndExtractBuildArtifactsFromProject ${UPSTREAM_PROJECT} ${UPSTREAM_BUILD}
 
     return
@@ -100,18 +101,11 @@ createWorkspace() {
     local location=$(getLocationName)
     mustHaveLocationName
 
-    local target=$(getTargetBoardName)
-    mustHaveTargetBoardName
-
     local productName=$(getProductNameFromJobName)
-    mustHaveValue "${productName}" "productName"
+    mustHaveValue "${productName}" "product name"
 
-    local taskName=$(getTaskNameFromJobName)
     local subTaskName=$(getSubTaskNameFromJobName)
-
-    setupNewWorkspace
-    mustHaveWritableWorkspace
-    switchSvnServerInLocations ${location}
+    mustHaveValue "${subTaskName}" "subtask name"
 
     local srcDirectory=$(getConfig LFS_CI_UC_build_subsystem_to_build)
     mustHaveValue "${srcDirectory}" "src directory"
@@ -120,6 +114,9 @@ createWorkspace() {
     local revision=$(latestRevisionFromRevisionStateFile)
     mustHaveValue "${revision}" "revision from revision state file"
 
+    setupNewWorkspace
+    mustHaveWritableWorkspace
+    switchSvnServerInLocations ${location}
     checkoutSubprojectDirectories ${srcDirectory} ${revision}
 
     buildTargets=$(requiredSubprojectsForBuild)
@@ -130,14 +127,18 @@ createWorkspace() {
     local counter=0
 
     for src in ${buildTargets} ; do
-
         local revision=$(latestRevisionFromRevisionStateFile)
         mustHaveValue ${revision} "revision from revision state file"
 
-        counter=$( expr ${counter} + 1 )
+        counter=$(expr ${counter} + 1)
         info "(${counter}/${amountOfTargets}) checking out sources for ${src} rev ${revision:-latest}"
         checkoutSubprojectDirectories "${src}" "${revision}"
     done 
+
+    mustHaveValidWorkspace
+
+    mustHaveLocalSdks
+    copyAndExtractBuildArtifactsFromProject ${UPSTREAM_PROJECT} ${UPSTREAM_BUILD}
 
     return
 }
@@ -145,12 +146,12 @@ createWorkspace() {
 latestRevisionFromRevisionStateFile() {
     requiredParameters UPSTREAM_PROJECT UPSTREAM_BUILD WORKSPACE
 
+    local revision=
 
-    if [[ ! -e ${WORKSPACE}/revisions.txt ]] ; then
+    if [[ ! -f ${WORKSPACE}/revisions.txt ]] ; then
         copyRevisionStateFileToWorkspace ${UPSTREAM_PROJECT} ${UPSTREAM_BUILD}
     fi
 
-    local revision=
     if [[ -r "${WORKSPACE}/revisions.txt" ]] ; then
         # TODO: demx2fk3 2014-06-25 stupid bug: adddir will not update to a higher revision, 
         #                           if the src-directory already exists...
@@ -176,3 +177,98 @@ requiredSubprojectsForBuild() {
 
     echo ${buildTargets}
 }
+
+## @fn      mustHaveLocalSdks()
+#  @brief   ensure, that the "links to share" in bld are pointing to
+#           a local directory
+#  @detail  if there is a link in bld directory to the build share,
+#           the method will trigger the copy of this directory to the local
+#           directory
+#  @param   <none>
+#  @return  <none>
+mustHaveLocalSdks() {
+    local workspace=$(getWorkspaceName)
+    mustHaveWorkspaceName
+
+    debug "checking for links in bld"
+
+    for bld in ${workspace}/bld/*
+    do
+        [[ -e ${bld} ]] || continue
+        [[ -d ${bld} ]] || continue
+        local pathToSdk=$(readlink ${bld})
+        local tag=$(basename ${pathToSdk})
+        local subsystem=$(basename ${bld})
+        local localCacheDir=${LFS_CI_SHARE_MIRROR}/${USER}/lfs-ci-local/${subsystem}
+
+        info "checking for ${subsystem} / ${tag} on local disk"
+
+        if [[ ! -d ${localCacheDir}/${tag} ]] ; then
+            synchroniceToLocalPath ${bld}
+        else
+            execute touch ${localCacheDir}/data/${tag}
+        fi
+
+        execute rm -rf ${bld}
+        execute ln -sf ${localCacheDir}/${tag} ${bld}
+    done
+
+    return
+}
+
+## @fn      synchroniceToLocalPath( localPath )
+#  @brief   syncronice the given local path from there to the local cache directory
+#  @details in bld, there are links to the build share. We want to avoid using build
+#           share, because it's to slow. So we are rsyncing the directories from the
+#           share to a local directory.
+#           There are some safties active to avoid problems during syncing.
+#  @param   {localPath}    local bld path
+#  @return  <none>
+synchroniceToLocalPath() {
+    local localPath=$1
+    local remotePath=$(readlink ${localPath})
+    local subsystem=$(basename ${localPath})
+    local tag=$(basename ${remotePath})
+    local serverName=$(getConfig linseeUlmServer)
+
+    requiredParameters LFS_CI_SHARE_MIRROR
+
+    local localCacheDir=${LFS_CI_SHARE_MIRROR}/${USER}/lfs-ci-local/${subsystem}
+    if [[ ${subsystem} == "pkgpool" ]] ; then
+        local rsync_opts=-L
+    fi        
+
+    if [[ ! -e ${localCacheDir}/${tag} ]] ; then
+        progressFile=${localCacheDir}/data/${tag}.in_progress
+
+        local sleep=$(( RANDOM % 60 ))
+        debug "sleeping ${sleep} s for sync based on ${progressFile}"
+        sleep ${sleep}
+
+        if [[ ! -e ${progressFile} ]] ; then
+
+            info "synchronice ${subsystem}/${tag} to local filesystem"
+
+            execute mkdir -p ${localCacheDir}/data
+            execute touch ${progressFile}
+
+            execute rsync --archive --numeric-ids --delete-excluded --ignore-errors \
+                --hard-links --sparse --exclude=.svn --rsh=ssh                      \
+                ${rsync_opts}                                                       \
+                ${serverName}:${remotePath}/                                        \
+                ${localCacheDir}/data/${tag}/
+
+            execute ln -sf data/${tag} ${localCacheDir}/${tag}
+            execute rm -f ${progressFile}
+        else
+            info "waiting for ${tag} on local filesystem"
+            # 2014-03-12 demx2fk3 TODO make this configurable
+            sleep 60
+            synchroniceToLocalPath ${localPath}
+        fi
+    fi
+
+    return
+}
+
+

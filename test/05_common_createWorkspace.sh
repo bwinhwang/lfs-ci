@@ -48,6 +48,12 @@ oneTimeSetUp() {
         mockedCommand "requiredSubprojectsForBuild $@"
         echo "src-abc src-foo src-bar"
     }
+    mustHaveLocalSdks() {
+        mockedCommand "mustHaveLocalSdks $@"
+    }
+    copyAndExtractBuildArtifactsFromProject() {
+        mockedCommand "copyAndExtractBuildArtifactsFromProject $@"
+    }
 
     return
 }
@@ -73,23 +79,6 @@ testCreateWorkspace_withoutProblems() {
 
     local expect=$(createTempFile)
 cat <<EOF > ${expect}
-mustHaveValue LFS productName
-switchSvnServerInLocations pronb-developer
-mustHaveValue src-project src directory
-latestRevisionFromRevisionStateFile 
-mustHaveValue 12345 revision from revision state file
-checkoutSubprojectDirectories src-project 12345
-requiredSubprojectsForBuild 
-mustHaveValue src-abc src-foo src-bar build targets
-latestRevisionFromRevisionStateFile 
-mustHaveValue 12345 revision from revision state file
-checkoutSubprojectDirectories src-abc 12345
-latestRevisionFromRevisionStateFile 
-mustHaveValue 12345 revision from revision state file
-checkoutSubprojectDirectories src-foo 12345
-latestRevisionFromRevisionStateFile 
-mustHaveValue 12345 revision from revision state file
-checkoutSubprojectDirectories src-bar 12345
 EOF
 
     assertEquals "$(cat ${expect})" "$(cat ${UNITTEST_COMMAND})"
