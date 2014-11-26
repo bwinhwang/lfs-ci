@@ -139,7 +139,12 @@ genericShareCleanup() {
         $execute ssh ${remoteServer} "[[ -w $(dirname ${entry}) ]] || chmod u+w $(dirname ${entry})"
 
         debug "fixing permissions of removal candidate ${entry}"
-        $execute ssh ${remoteServer} "chmod -R u+w ${entry}"
+        if [[ ${UPSTREAM_PROJECT} =~ "CI_LFS" ]] ; then
+            # noop
+            debug noop
+        else
+            $execute ssh ${remoteServer} "chmod -R u+w ${entry}"
+        fi
 
         debug "removing ${entry}"
         if [[ -e ${entry} ]] ; then
