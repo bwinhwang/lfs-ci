@@ -312,6 +312,9 @@ cleanupOrphanJobDirectories() {
 
 createLfsBaselineListFromEcl() {
     cd ${WORKSPACE}
-    grep LFS */ECL_BASE/ECL | cut -d= -f 2 | sort -u > ${WORKSPACE}/usedBaselinesInEcl.txt
+    execute -n grep -e PS_LFS_OS -e PS_LFS_REL */ECL_BASE/ECL | execute -n cut -d= -f2 | execute -n sort -u > ${WORKSPACE}/usedBaselinesInEcl.txt
+    rawDebug ${WORKSPACE}/usedBaselinesInEcl.txt
+
+    info "done."
     return
 }
