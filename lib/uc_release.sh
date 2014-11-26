@@ -579,9 +579,11 @@ createTagOnSourceRepository() {
 
             case ${src} in
                 src-*)
-                    svnCopy -m tag_for_package_src_${src} ${svnUrlOs}/branches/${branch}/${target}/${src} \
-                        ${svnUrl}/subsystems/${src}/${tagPrefix}${osLabelName}
-                    trace "CLEANUP svn rm -m cleanup ${svnUrl}/subsystems/${src}/${tagPrefix}${osLabelName}"
+                    if ! existsInSubversion ${svnUrl}/subsystems/${src}/ ${tagPrefix}${osLabelName} ; then
+                        svnCopy -m tag_for_package_src_${src} ${svnUrlOs}/branches/${branch}/${target}/${src} \
+                            ${svnUrl}/subsystems/${src}/${tagPrefix}${osLabelName}
+                        trace "CLEANUP svn rm -m cleanup ${svnUrl}/subsystems/${src}/${tagPrefix}${osLabelName}"
+                    fi
                 ;;
             esac
 
