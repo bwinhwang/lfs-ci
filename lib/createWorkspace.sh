@@ -1,3 +1,5 @@
+LFS_CI_SOURCE_createWorkspace='$Id$'
+
 [[ -z ${LFS_CI_SOURCE_artifacts} ]] && source ${LFS_CI_ROOT}/lib/artifacts.sh
 
 ## @fn      createOrUpdateWorkspace()
@@ -171,14 +173,27 @@ latestRevisionFromRevisionStateFile() {
 }
 
 requiredSubprojectsForBuild() {
+    local workspace=$(getWorkspaceName)
+    mustHaveWorkspaceName
+
+    local productName=$(getProductNameFromJobName)
+    mustHaveValue "${productName}" "product name"
+
+    local subTaskName=$(getSubTaskNameFromJobName)
+    mustHaveValue "${subTaskName}" "sub task name"
 
     local onlySourceDirectory=$(getConfig LFS_CI_UC_build_onlySourceDirectories)
+    local build="build -W \"${workspace}\""
+
+    local srcDirectory=$(getConfig LFS_CI_UC_build_subsystem_to_build)
+    mustHaveValue "${srcDirectory}" "src directory"
+    info "requested source directory: ${srcDirectory}"
+
     if [[ ${onlySourceDirectory} ]] ; then
         buildTargets=${onlySourceDirectory}
     else
         info "getting required src-directories for ${srcDirectory}"
-        execute "${build} -C ${srcDirectory} src-list_${productName}_${subTaskName}"
-        local buildTargets=$(${build} -C ${srcDirectory} src-list_${productName}_${subTaskName}) 
+        local buildTargets=$(execute -n ${build} -C ${srcDirectory} src-list_${productName}_${subTaskName}) 
         mustHaveValue "${buildTargets}" "no build targets configured"
         buildTargets="$(getConfig LFS_CI_UC_build_additionalSourceDirectories) ${buildTargets}"
     fi

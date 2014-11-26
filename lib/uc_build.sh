@@ -1,6 +1,7 @@
 #!/bin/bash
 
-[[ -z ${LFS_CI_SOURCE_artifacts} ]] && source ${LFS_CI_ROOT}/lib/artifacts.sh
+[[ -z ${LFS_CI_SOURCE_artifacts}       ]] && source ${LFS_CI_ROOT}/lib/artifacts.sh
+[[ -z ${LFS_CI_SOURCE_createWorkspace} ]] && source ${LFS_CI_ROOT}/lib/createWorkspace.sh
 
 ## @fn      ci_job_build()
 #  @brief   usecase job ci build
@@ -12,7 +13,7 @@ ci_job_build() {
     requiredParameters UPSTREAM_PROJECT UPSTREAM_BUILD JOB_NAME BUILD_NUMBER
 
     info "creating the workspace..."
-    _createWorkspace
+    createWorkspace
 
     info "building targets..."
     local subTaskName=$(getSubTaskNameFromJobName)
@@ -171,80 +172,6 @@ _build() {
     mustHaveValue "${makeTarget}" "make target name from src-project/Buildfile"
     info "executing all targets in parallel with ${makeTarget} and label=${label}"
     execute make -f ${cfgFile} ${makeTarget} JOBS=32
-
-    return 0
-}
-
-## @fn      _createWorkspace()
-#  @brief   create a new workspace for the project
-#  @details this method is very huge. It creates a new workspace for a projects.
-#           this includes several steps:
-#           * create a new directory                             (build setup)
-#           * cleanup the old workspace if exists
-#           * switch to the correct location (aka branch)        (build newlocations)
-#           * copy build artifacts from the upstream project if exists
-#           * apply patches to the workspace
-#           * get the list of required subsystem
-#           * check out the subsystem from svn                   (build adddir)
-#  @param   <none>
-#  @return  <none>
-_createWorkspace() {
-
-    local location=$(getLocationName)
-    mustHaveLocationName
-
-    local target=$(getTargetBoardName)
-    mustHaveTargetBoardName
-
-    local productName=$(getProductNameFromJobName)
-    mustHaveValue "${productName}" "productName"
-
-    local workspace=$(getWorkspaceName)
-    mustHaveWorkspaceName
-    mustHaveCleanWorkspace
-    mustHaveWritableWorkspace
-
-    local taskName=$(getTaskNameFromJobName)
-    local subTaskName=$(getSubTaskNameFromJobName)
-    trace "taskName is ${taskName} / ${subTaskName}"
-    debug "create workspace for ${location} / ${target} in ${workspace}"
-
-    local build="build -W \"${workspace}\""
-
-    setupNewWorkspace
-    switchToNewLocation ${location}
-    # change from svne1 to ulmscmi
-    switchSvnServerInLocations
-    mustHaveValidWorkspace
-
-    local srcDirectory=$(getConfig LFS_CI_UC_build_subsystem_to_build)
-    mustHaveValue "${srcDirectory}" "src directory"
-    info "requested source directory: ${srcDirectory}"
-
-    local revision=$(latestRevisionFromRevisionStateFile)
-    mustHaveValue "${revision}" "revision from revision state file"
-
-    checkoutSubprojectDirectories ${srcDirectory} ${revision}
-
-    buildTargets=$(requiredSubprojectsForBuild)
-    mustHaveValue "${buildTargets}" "build targets"
-    info "using src-dirs: ${buildTargets}"
-
-    local amountOfTargets=$(echo ${buildTargets} | wc -w)
-    local counter=0
-
-    for src in ${buildTargets} ; do
-
-        local revision=(latestRevisionFromRevisionStateFile)
-        mustHaveValue ${revision} "revision from revision state file"
-
-        counter=$( expr ${counter} + 1 )
-        info "(${counter}/${amountOfTargets}) checking out sources for ${src} rev ${revision:-latest}"
-        checkoutSubprojectDirectories "${src}" "${revision}"
-    done 
-
-    mustHaveLocalSdks
-    copyAndExtractBuildArtifactsFromProject ${UPSTREAM_PROJECT} ${UPSTREAM_BUILD}
 
     return 0
 }
