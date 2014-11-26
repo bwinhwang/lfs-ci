@@ -144,7 +144,8 @@ genericShareCleanup() {
             # noop
             debug noop
         else
-            $execute ssh ${remoteServer} "chmod -R u+w ${entry}"
+            # $execute -i ssh ${remoteServer} "chmod -R u+w ${entry}"
+            ssh ${remoteServer} "chmod -R u+w ${entry}"
         fi
 
         debug "removing ${entry}"
