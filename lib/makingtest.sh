@@ -155,7 +155,7 @@ makingTest_testFSM() {
         exit 1
     fi
 
-    execute ${make} poweroff
+    # execute ${make} poweroff
 
     return
 }
