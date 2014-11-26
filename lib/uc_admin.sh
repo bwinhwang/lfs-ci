@@ -140,7 +140,8 @@ genericShareCleanup() {
         $execute ssh ${remoteServer} "[[ -w $(dirname ${entry}) ]] || chmod u+w $(dirname ${entry})"
 
         debug "fixing permissions of removal candidate ${entry}"
-        $execute ssh ${remoteServer} "chmod -R u+w ${entry}"
+        # add execute -i here
+        ssh ${remoteServer} "chmod -R u+w ${entry}"
 
         debug "removing ${entry}"
         if [[ -e ${entry} ]] ; then
