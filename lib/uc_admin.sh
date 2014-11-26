@@ -11,13 +11,14 @@ ci_job_admin() {
     # mustHaveTargetBoardName
 
     case ${taskName} in
-        backupJenkins)               backupJenkinsMasterServerInstallation ;;
-        cleanUpArtifactsShare)       cleanupArtifactsShare                 ;;
-        cleanupBaselineShares)       cleanupBaselineShares                 ;;
-        cleanupOrphanJobDirectories) cleanupOrphanJobDirectories           ;;
-        cleanupOrphanWorkspaces)     cleanupOrphanWorkspaces               ;;
-        synchronizeShare)            synchronizeShare                      ;;
-        genericShareCleanup)         genericShareCleanup                   ;;
+        backupJenkins)                backupJenkinsMasterServerInstallation ;;
+        cleanUpArtifactsShare)        cleanupArtifactsShare                 ;;
+        cleanupBaselineShares)        cleanupBaselineShares                 ;;
+        cleanupOrphanJobDirectories)  cleanupOrphanJobDirectories           ;;
+        cleanupOrphanWorkspaces)      cleanupOrphanWorkspaces               ;;
+        synchronizeShare)             synchronizeShare                      ;;
+        genericShareCleanup)          genericShareCleanup                   ;;
+        createLfsBaselineListFromEcl) createLfsBaselineListFromEcl          ;;
         *)
             error "subjob not known (${taskName})"
             exit 1;
@@ -311,5 +312,11 @@ cleanupBaselineShares() {
 #  @return  <none>
 cleanupOrphanJobDirectories() {
     debug "not implemented yet"
+    return
+}
+
+createLfsBaselineListFromEcl() {
+    cd ${WORKSPACE}
+    grep LFS */ECL_BASE/ECL | cut -d= -f 2 | sort -u > ${WORKSPACE}/usedBaselinesInEcl.txt
     return
 }
