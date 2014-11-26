@@ -23,30 +23,26 @@
 
 ci_job_klocwork_build() {
 
-    requiredParameters WORKSPACE JOB_NAME
+    requiredParameters WORKSPACE JOB_NAME BUILD_ID
 
     set -o noglob
 
     local BUILD="bldtools/bld-buildtools-common/results/bin/build NOAUTOBUILD=1"
 
     local location=$(getLocationName)
+    mustHaveValue "${location}" "location name"
+
     local workspace=$(getWorkspaceName)
+    mustHaveWorkspaceName
 
     local KWPROJECT=$(getConfig LFS_CI_uc_klocwork_project_name)
     local KWINJECT=${KW_HOME}/bin/kwinject
     local KWADMIN=${KW_HOME}/bin/kwadmin
     local KWBUILDPROJECT=${KW_HOME}/bin/kwbuildproject
     local KWURL="--url https://${KW_HOST}:${KW_PORT}"
-    local KWTPL=kwinject.tpl
+    local KWTPL=${WORKSPACE}/kwinject.tpl
     local KWTABLES=kloTables
     local KWPSROOT=$(readlink -f ${WORKSPACE})
-
-    # fixme
-    if [ -e ${KWTPL} ]; then
-        KWFLAGS="--update"
-    else
-        KWFLAGS=""
-    fi
 
     if [ -n "${KW_PROJECT}" ]; then
         KWPROJECT=${KW_PROJECT}
@@ -80,17 +76,22 @@ ci_job_klocwork_build() {
     *) exit -1;;
     esac
 
-    createWorkspace 
-    # adddir
+    createOrUpdateWorkspace --allowUpdate
+
+    if [[ -e ${KWTPL} ]] ; then
+        KWFLAGS="--update"
+    else
+        KWFLAGS=""
+    fi
 
     # create build specification template
-    ${KWINJECT} ${KWFLAGS} -o ${KWTPL} bash -c "${BLDCMD}"
+    execute ${KWINJECT} ${KWFLAGS} -o ${KWTPL} bash -c "${BLDCMD}"
 
     # upload klocwork build specification template
-    ${KWADMIN} ${KWURL} import-config ${KWPROJECT} ${KWTPL}
+    execute ${KWADMIN} ${KWURL} import-config ${KWPROJECT} ${KWTPL}
 
     # build klocwork project
-    ${KWBUILDPROJECT} ${KWURL}/${KWPROJECT}                                   \
+    execute ${KWBUILDPROJECT} ${KWURL}/${KWPROJECT}                           \
                                     --license-host ${KW_LICENCE_HOST}         \
                                     --license-port ${KW_LICENCE_PORT}         \
                                     --replace-path ${KWPSROOT}/src-=src-      \
@@ -111,7 +112,7 @@ ci_job_klocwork_build() {
     local reportPythonScript=$(getConfig LFS_CI_uc_klcwork_report_python_script)
     svnExport ${reportPythonScript}
     LD_LIBRARY_PATH=${PYTHON_HOME}/lib \
-                    ${PYTHON_HOME}/bin/python getreport.py \
+                    execute ${PYTHON_HOME}/bin/python getreport.py \
                             ${KW_HOST} \
                             ${KW_PORT} \
                             ${KWPROJECT} \
@@ -131,7 +132,7 @@ ci_job_klocwork_build() {
             ${KWADMIN} ${KWURL} delete-build ${KWPROJECT} "${buil}"
         done < ${buildsList}
     else
-            warning "klocwork delete build is disabled via config"
+        warning "klocwork delete build is disabled via config"
     fi
 
     return
