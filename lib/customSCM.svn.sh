@@ -39,6 +39,12 @@ actionCompare() {
         exit 0
     fi
 
+    local isMaintenance=$(getConfig CUSTOM_SCM_svn_trigger_svn_is_maintenance)
+    if [[ ${isMaintenance} ]] ; then
+        warning "maintenance is active, no build"
+        exit 1
+    fi
+
     # generate the new revsions file
     local oldRevisionsFile=${REVISION_STATE_FILE}
     mustExistFile ${oldRevisionsFile}

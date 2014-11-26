@@ -122,6 +122,8 @@ makingTest_testFSM() {
     execute ${make} waitprompt 
     execute ${make} waitssh
 
+    sleep 60
+
     local installOptions="$(getConfig LFS_CI_uc_test_making_test_install_options)"
     info "installing software using ${installOptions}"
     execute ${make} install ${installOptions}
@@ -133,13 +135,16 @@ makingTest_testFSM() {
     execute ${make} waitprompt
     execute ${make} waitssh
 
-    info "installing testexecd on target"
+    sleep 60
+
+    info "setup target"
     execute ${make} setup
 
     info "checking the board for correct software"
     execute ${make} check
 
     export LFS_CI_ERROR_CODE= 
+    info "running test suite"
     runAndLog ${make} --ignore-errors test-xmloutput || LFS_CI_ERROR_CODE=0 # also true
 
     execute mkdir ${workspace}/xml-reports/
@@ -149,6 +154,8 @@ makingTest_testFSM() {
         error "some errors in test cases. please see logfile"
         exit 1
     fi
+
+    execute ${make} poweroff
 
     return
 }

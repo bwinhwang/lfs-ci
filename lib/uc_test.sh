@@ -52,10 +52,14 @@ ci_job_test() {
         echo "upstreamBuildNumber=${upstreamBuildNumber}" >> ${WORKSPACE}/upstream
         rawDebug ${WORKSPACE}/upstream
 
+        copyFileFromWorkspaceToBuildDirectory ${JOB_NAME} ${BUILD_NUMBER} ${WORKSPACE}/upstream
+
         execute rm -rf ${WORKSPACE}/properties
         echo "LABEL=${labelName}"                   > ${WORKSPACE}/properties
         echo "DELIVERY_DIRECTORY=${realDirectory}" >> ${WORKSPACE}/properties
         rawDebug ${WORKSPACE}/properties
+
+        copyFileFromWorkspaceToBuildDirectory ${JOB_NAME} ${BUILD_NUMBER} ${WORKSPACE}/properties
 
     else
 
@@ -74,6 +78,9 @@ ci_job_test() {
         rawDebug ${WORKSPACE}/properties
 
         source ${WORKSPACE}/properties
+
+        # for setBuildDescription
+        local labelName=${LABEL}
     fi
 
     setBuildDescription "${JOB_NAME}" "${BUILD_NUMBER}" "${labelName}"

@@ -44,8 +44,8 @@ sub readConfig {
 
     my $data = [];
 
+    push @{ $data }, { name => "date_%Ymd", value => sprintf( "%04d%02d%02d", $year, $mon, $mday ), tags => "" };
     push @{ $data }, { name => "date_%Y",   value => sprintf( "%04d", $year ), tags => "" };
-    push @{ $data }, { name => "date_%mdY", value => sprintf( "%04d%02d%02d", $year, $mon, $mday ), tags => "" };
     push @{ $data }, { name => "date_%y",   value => sprintf( "%02d", ( $year - 2000 )), tags => "" };
     push @{ $data }, { name => "date_%m",   value => sprintf( "%02d", $mon  ), tags => "" };
 
@@ -782,6 +782,12 @@ sub replaceMasterByUlmServer {
     my $url = shift;
     $url =~ s/svne1.access.nokiasiemensnetworks.com/ulscmi.inside.nsn.com/g;
     $url =~ s/svne1.access.nsn.com/ulscmi.inside.nsn.com/g;
+    return $url;
+}
+
+sub replaceUlmByMasterServer {
+    my $url = shift;
+    $url =~ s/ulscmi.inside.nsn.com/svne1.access.nsn.com/g;
     return $url;
 }
 
@@ -2061,6 +2067,8 @@ sub prepare {
 
     # __SVN_SOURCE_TAGS_URL_WITH_REVISION__
     $self->{data}{SVN_SOURCE_REPOS_URL} = $config->getConfig( name => "lfsSourceRepos" );
+    # __SVN_MASTER_SOURCE_TAGS_URL_WITH_REVISION__ 
+    # $self->{data}{SVN_MASTER_SOURCE_REPOS_URL} = $svn::replaceUlmByMasterServer( $config->getConfig( name => "lfsSourceRepos" ) );
 
     $svnUrl = sprintf( "%s/os/tags/%s", 
                          $self->{data}{SVN_SOURCE_REPOS_URL},
