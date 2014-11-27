@@ -86,7 +86,7 @@ actionCompare() {
         local commentsFile=$(createTempFile)
         local commentsFileFiltered=$(createTempFile)
         execute -n xpath -q -e '/log/logentry/msg/node()' ${changelogFile} > ${commentsFile}
-        grep -s -v -e "BTS-1657" \
+        grep -s -v -e "BTSPS-1657" \
                    -e "^$" \
                    ${commentsFile} > ${commentsFileFiltered}
 

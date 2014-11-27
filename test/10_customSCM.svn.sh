@@ -64,7 +64,7 @@ testChangeWithKeywordNoBuild() {
     local workspace=$(createTempDirectory)
     assertTrue "svn co -q ${reposUrl} ${workspace}"
     echo b > ${workspace}/os/trunk/main/src-foo/file
-    assertTrue "svn ci -q -m 'BTS-1657: commit with keyword' ${workspace}"
+    assertTrue "svn ci -q -m 'BTSPS-1657: commit with keyword' ${workspace}"
 
     assertFalse "${LFS_CI_ROOT}/bin/customSCM.svn.sh compare"
 }
@@ -75,20 +75,23 @@ testChangeWithKeywordNoBuild2() {
     assertTrue "svn co -q ${reposUrl} ${workspace}"
     echo c > ${workspace}/os/trunk/main/src-foo/file
     local comment=$(createTempFile)
-    echo "BTS-1657: commit with keywort" > ${comment}
+    echo "BTSPS-1657: commit with keywort" > ${comment}
     echo "" >> ${comment}
     assertTrue "svn ci -q -F ${comment} ${workspace}"
 
-    ${LFS_CI_ROOT}/bin/customSCM.svn.sh compare
 }
 
 testChangeWithoutKeywordBuild() {
  
+    echo "location ${reposUrl}/os/trunk/bldtools/locations-pronb-developer/Dependencies 4"  > ${REVISION_STATE_FILE}
+    # different revision
+    echo "src-foo ${reposUrl}/os/trunk/main/src-foo 6"                                     >> ${REVISION_STATE_FILE}
+    echo "bld-buildtools ${reposUrl}/os/trunk/bldtools/bld-buildtools-common 3"            >> ${REVISION_STATE_FILE}
+
     local workspace=$(createTempDirectory)
     assertTrue "svn co -q ${reposUrl} ${workspace}"
-    echo c > ${workspace}/os/trunk/main/src-foo/file
-    assertTrue "svn ci -q -m 'commit without keyword' ${workspace}"
-
+    echo d > ${workspace}/os/trunk/main/src-foo/file
+    assertTrue "svn ci -m 'commit without keyword' ${workspace}"
     assertTrue "${LFS_CI_ROOT}/bin/customSCM.svn.sh compare"
 }
 

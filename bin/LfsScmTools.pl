@@ -787,7 +787,9 @@ sub replaceMasterByUlmServer {
 
 sub replaceUlmByMasterServer {
     my $url = shift;
+    # TODO: demx2fk3 2014-11-27 put this in the config
     $url =~ s/ulscmi.inside.nsn.com/svne1.access.nsn.com/g;
+    $url =~ s/ulisop10.emea.nsn-net.net/svne1.access.nsn.com/g;
     return $url;
 }
 
@@ -2068,6 +2070,7 @@ sub prepare {
     # __SVN_SOURCE_TAGS_URL_WITH_REVISION__
     $self->{data}{SVN_SOURCE_REPOS_URL} = $config->getConfig( name => "lfsSourceRepos" );
     # __SVN_MASTER_SOURCE_TAGS_URL_WITH_REVISION__ 
+    # TODO: demx2fk3 2014-11-27 fixme
     # $self->{data}{SVN_MASTER_SOURCE_REPOS_URL} = $svn::replaceUlmByMasterServer( $config->getConfig( name => "lfsSourceRepos" ) );
 
     $svnUrl = sprintf( "%s/os/tags/%s", 
