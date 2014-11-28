@@ -72,6 +72,12 @@ ci_job_klocwork_build() {
     local architectures=$(getConfig LFS_CI_uc_klocwork_architectures) # " mips64-octeon-linux-gnu- mips64-octeon2-linux-gnu- powerpc-e500-linux-gnu- i686-pc-linux-gnu- "
     mustHaveValue "${architectures}" "architectures"
 
+    local reportPythonScript=$(getConfig LFS_CI_uc_klocwork_report_python_script)
+    mustHaveValue "${reportPythonScript}" "ptyhon report script"
+
+    local pythonHome=$(getConfig LFS_CI_uc_klocwork_python_home)
+    mustHaveValue "${pythonHome}" "python home"
+
     local kw_flags=
     for crossCompiler in ${architectures}; do
         kw_flags="${kw_flags} -P ${crossCompiler}gcc=gnu -P ${crossCompiler}g++=gnu"
@@ -126,10 +132,10 @@ ci_job_klocwork_build() {
     fi
 
     # create XML report
-    local reportPythonScript=$(getConfig LFS_CI_uc_klcwork_report_python_script)
+
     svnExport ${reportPythonScript}
-    LD_LIBRARY_PATH=${PYTHON_HOME}/lib \
-                    execute ${PYTHON_HOME}/bin/python getreport.py \
+    LD_LIBRARY_PATH=${pythonHome}/lib \
+                    execute ${pythonHome}/bin/python getreport.py \
                             ${kw_host} \
                             ${kw_port} \
                             ${kw_project} \
