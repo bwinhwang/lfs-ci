@@ -1,9 +1,10 @@
+#!/bin/bash
 # settings for klocwork
 # PYTHON_HOME=/opt/python/linux64/ix86/python_3.2
 
-# KW_PORT=8080
-# KW_LICENCE_PORT=27018
-# KW_LICENCE_HOST=eseelic050.emea.nsn-net.net
+# kw_port=8080
+# kw_licence_port=27018
+# kw_licence_host=eseelic050.emea.nsn-net.net
 # KW_HOST=ulkloc.nsn-net.net
 # KW_HOME=/home/kwbts01/kw-server
 # BLD_TOOL=/build/home/SC_LFS/bldtools/bin/build
@@ -22,48 +23,64 @@
 # 27018
 
 ci_job_klocwork_build() {
-
-    requiredParameters WORKSPACE JOB_NAME BUILD_ID
+    requiredParameters WORKSPACE BUILD_ID
 
     set -o noglob
-
-    local BUILD="bldtools/bld-buildtools-common/results/bin/build NOAUTOBUILD=1"
-
-    local location=$(getLocationName)
-    mustHaveValue "${location}" "location name"
 
     local workspace=$(getWorkspaceName)
     mustHaveWorkspaceName
 
-    local KWPROJECT=$(getConfig LFS_CI_uc_klocwork_project_name)
-    local KWINJECT=${KW_HOME}/bin/kwinject
-    local KWADMIN=${KW_HOME}/bin/kwadmin
-    local KWBUILDPROJECT=${KW_HOME}/bin/kwbuildproject
-    local KWURL="--url https://${KW_HOST}:${KW_PORT}"
-    local KWTPL=${WORKSPACE}/kwinject.tpl
-    local KWTABLES=kloTables
-    local KWPSROOT=$(readlink -f ${WORKSPACE})
 
-    if [ -n "${KW_PROJECT}" ]; then
-        KWPROJECT=${KW_PROJECT}
-    else
-        KWPROJECT=PS_LFS_${JOB_NAME##*_}
-    fi
+    local BUILD="bldtools/bld-buildtools-common/results/bin/build NOAUTOBUILD=1 -W ${workspace}"
 
-    ARCHS="
-        mips64-octeon-linux-gnu-
-        mips64-octeon2-linux-gnu-
-        powerpc-e500-linux-gnu-
-        i686-pc-linux-gnu-
-    "
+    local kw_port=$(getConfig LFS_CI_uc_klocwork_port)
+    mustHaveValue "${kw_port}" "klocwork port"
 
-    for CROSS_COMPILE in ${ARCHS}; do
-        KWFLAGS="${KWFLAGS} -P ${CROSS_COMPILE}gcc=gnu -P ${CROSS_COMPILE}g++=gnu"
+    local kw_host=$(getConfig LFS_CI_uc_klocwork_hostname)
+    mustHaveValue "${kw_host}" "klocwork host"
+
+    local kw_licence_port=$(getConfig LFS_CI_uc_klocwork_licence_port)
+    mustHaveValue "${kw_licence_port}" "klocwork licence port"
+
+    local kw_licence_host=$(getConfig LFS_CI_uc_klocwork_licence_host)
+    mustHaveValue "${kw_licence_host}" "klocwork licence host"
+
+    local kw_project=$(getConfig LFS_CI_uc_klocwork_project_name)
+    mustHaveValue "${kw_project}" "klocwork project"
+
+    local kw_inject=$(getConfig  LFS_CI_uc_klocwork_cmd_kwinject)   # ${KW_HOME}/bin/kwinject
+    mustHaveValue "${kw_inject}" "klocwork cmd kwinject"
+
+    local kw_admin=$(getConfig   LFS_CI_uc_klocwork_cmd_kwadmin)    # ${KW_HOME}/bin/kwadmin
+    mustHaveValue "${kw_admin}" "klocwork cmd kwadmin"
+
+    local kw_buildProject=$(getConfig LFS_CI_uc_klocwork_cmd_kwbuildproject) # ${KW_HOME}/bin/kwbuildproject
+    mustHaveValue "${kw_buildProject}" "klocwork build project"
+
+    local kw_url="--url $(getConfig LFS_CI_uc_klocwork_url)"        # https://${KW_HOST}:${kw_port}"
+    mustHaveValue "${kw_url}" "klocwork url"
+
+    local kw_template=$(getConfig LFS_CI_uc_klocwork_template)           # ${WORKSPACE}/kwinject.tpl
+    mustHaveValue "${kw_template}" "klocwork template"
+    
+    local kw_tables=$(getConfig LFS_CI_uc_klocwork_tables)          # kloTables
+    mustHaveValue "${kw_tables}" "klocwork tables"
+
+    local kw_psroot=$(readlink -f ${WORKSPACE})
+    mustHaveValue "${kw_psroot}" "klocwork psroot"
+
+    local architectures=$(getConfig LFS_CI_uc_klocwork_architectures) # " mips64-octeon-linux-gnu- mips64-octeon2-linux-gnu- powerpc-e500-linux-gnu- i686-pc-linux-gnu- "
+    mustHaveValue "${architectures}" "architectures"
+
+    local kw_flags=
+    for crossCompiler in ${architectures}; do
+        kw_flags="${kw_flags} -P ${crossCompiler}gcc=gnu -P ${crossCompiler}g++=gnu"
     done
-    KWFLAGS="${KWFLAGS} --ignore-files **/*build/**/*,**/*build/* --variable kwpsroot=${KWPSROOT}"
+    kw_flags="${kw_flags} --ignore-files **/*build/**/*,**/*build/* --variable kwpsroot=${kw_psroot}"
 
+    info "using klocwork project ${kw_project}"
     # get this via src-proejct
-    case "${KWPROJECT}" in
+    case "${kw_project}" in
     *_DDAL)      BLDSRC="src-rfs src-fsmddal"; 
                  BLDCMD="${BUILD} -C src-rfs fct; ${BUILD} -C src-fsmddal fct"
     ;;
@@ -73,37 +90,37 @@ ci_job_klocwork_build() {
     *_DDALFSMR2) BLDSRC=src-ddal;    
                  BLDCMD="${BUILD} -C ${BLDSRC} fcmd; ${BUILD} -C ${BLDSRC} fspc"
     ;;
-    *) exit -1;;
+    *) fatal "unknown klocwork project" ;;
     esac
 
     createOrUpdateWorkspace --allowUpdate
 
-    if [[ -e ${KWTPL} ]] ; then
-        KWFLAGS="--update"
+    if [[ -e ${kw_template} ]] ; then
+        kw_flags="--update"
     else
-        KWFLAGS=""
+        kw_flags=""
     fi
 
     # create build specification template
-    execute ${KWINJECT} ${KWFLAGS} -o ${KWTPL} bash -c "${BLDCMD}"
+    execute ${kw_inject} ${kw_flags} -o ${kw_template} bash -c "${BLDCMD}"
 
     # upload klocwork build specification template
-    execute ${KWADMIN} ${KWURL} import-config ${KWPROJECT} ${KWTPL}
+    execute ${kw_admin} ${kw_url} import-config ${kw_project} ${kw_template}
 
     # build klocwork project
-    execute ${KWBUILDPROJECT} ${KWURL}/${KWPROJECT}                           \
-                                    --license-host ${KW_LICENCE_HOST}         \
-                                    --license-port ${KW_LICENCE_PORT}         \
-                                    --replace-path ${KWPSROOT}/src-=src-      \
-                                    --buildspec-variable kwpsroot=${KWPSROOT} \
+    execute ${kw_buildProject} ${kw_url}/${kw_project}                           \
+                                    --license-host ${kw_licence_host}         \
+                                    --license-port ${kw_licence_port}         \
+                                    --replace-path ${kw_psroot}/src-=src-      \
+                                    --buildspec-variable kwpsroot=${kw_psroot} \
                                     --incremental                             \
-                                    --project ${KWPROJECT}                    \
-                                    --tables-directory ${KWTABLES} ${KWTPL}
+                                    --project ${kw_project}                    \
+                                    --tables-directory ${kw_tables} ${kw_template}
 
     # upload build report
     local canUploadBuild=$(getConfig LFS_CI_uc_klocwork_can_upload_builds)
     if [[ -z ${canUploadBuild} ]] ; then
-        execute ${KWADMIN} ${KWURL} load ${KWPROJECT} ${KWTABLES} --name build_ci_${BUILD_ID}
+        execute ${kw_admin} ${kw_url} load ${kw_project} ${kw_tables} --name build_ci_${BUILD_ID}
     else
         warning "klocwork load is disabled via config"
     fi
@@ -113,9 +130,9 @@ ci_job_klocwork_build() {
     svnExport ${reportPythonScript}
     LD_LIBRARY_PATH=${PYTHON_HOME}/lib \
                     execute ${PYTHON_HOME}/bin/python getreport.py \
-                            ${KW_HOST} \
-                            ${KW_PORT} \
-                            ${KWPROJECT} \
+                            ${kw_host} \
+                            ${kw_port} \
+                            ${kw_project} \
                             LAST > klocwork_result.xml
 
 
@@ -123,13 +140,13 @@ ci_job_klocwork_build() {
     local canDeleteBuilds=$(getConfig LFS_CI_uc_klocwork_can_delete_builds)
     if [[ -z ${canDeleteBuilds} ]] ; then
         local buildsList=$(createTempFile)
-        execute -n ${KWADMIN} ${KWURL} list-builds ${KWPROJECT} > ${buildsList}
+        execute -n ${kw_admin} ${kw_url} list-builds ${kw_project} > ${buildsList}
         execute sed -ine "/^\(Bld\|Build\|Rev\|build_ci\)/ {17,$ p}" ${buildsList}
 
         rawDebug ${buildsList}
         while read build ; do 
-            info "remove build ${KWPROJECT} / ${build}"
-            ${KWADMIN} ${KWURL} delete-build ${KWPROJECT} "${buil}"
+            info "remove build ${kw_project} / ${build}"
+            ${kw_admin} ${kw_url} delete-build ${kw_project} "${buil}"
         done < ${buildsList}
     else
         warning "klocwork delete build is disabled via config"

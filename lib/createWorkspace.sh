@@ -98,6 +98,8 @@ updateWorkspace() {
 #  @param   <none>
 #  @return  <none>
 createWorkspace() {
+    info "creating the workspace..."
+
     local workspace=$(getWorkspaceName)
     mustHaveWorkspaceName
     mustHaveCleanWorkspace
