@@ -172,6 +172,12 @@ latestRevisionFromRevisionStateFile() {
     echo ${revision}
 }
 
+## @fn      requiredSubprojectsForBuild()
+#  @brief   get the required subprojects for a build
+#  @details this runs build -C src-project src-list_<product>_<subtask>
+#  @todo    the task type is missing here. we have to fix this sometimes..
+#  @param   <none>
+#  @return  list of src projects, which are required for the build
 requiredSubprojectsForBuild() {
     local workspace=$(getWorkspaceName)
     mustHaveWorkspaceName
