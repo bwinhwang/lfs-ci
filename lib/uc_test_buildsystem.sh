@@ -4,9 +4,6 @@
 [[ -z ${LFS_CI_SOURCE_createWorkspace} ]] && source ${LFS_CI_ROOT}/lib/createWorkspace.sh
 
 ci_job_test_buildsystem() {
-
-    requiredParameters     
-
     local workspace=$(getWorkspaceName)
     mustHaveCleanWorkspace
     mustHaveWorkspaceName

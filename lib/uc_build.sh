@@ -9,15 +9,13 @@
 #  @param   <none>
 #  @return  <none>
 ci_job_build() {
-
     requiredParameters UPSTREAM_PROJECT UPSTREAM_BUILD JOB_NAME BUILD_NUMBER
-
-    info "creating the workspace..."
-    createWorkspace
 
     info "building targets..."
     local subTaskName=$(getSubTaskNameFromJobName)
     mustHaveValue "${subTaskName}"
+
+    createWorkspace
 
     # release label is stored in the artifacts of fsmci of the build job
     # TODO: demx2fk3 2014-07-15 fix me - wrong function
