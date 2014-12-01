@@ -51,7 +51,7 @@ cat <<EOF > ${expect}
 date +%Y-%m-%d %H-%M-%S
 date +%Y-%m-%d %H:%M:%S.%N %Z
 date +%s.%N
-execute /home/demx2fk3/lfs-ci/bin/createReleaseInDatabase.pl -n A -b pronb-developer -d date
+execute ${LFS_CI_ROOT}/bin/createReleaseInDatabase.pl -n A -b pronb-developer -d date
 EOF
     assertEquals "$(cat ${expect})" "$(cat ${UNITTEST_COMMAND})"
 }
@@ -69,10 +69,14 @@ cat <<EOF > ${expect}
 date +%Y-%m-%d %H-%M-%S
 date +%Y-%m-%d %H:%M:%S.%N %Z
 date +%s.%N
-execute /home/demx2fk3/lfs-ci/bin/createReleaseInDatabase.pl -n B -b pronb-developer -d date
+execute ${LFS_CI_ROOT}/bin/createReleaseInDatabase.pl -n B -b pronb-developer -d date
 EOF
     assertEquals "$(cat ${expect})" "$(cat ${UNITTEST_COMMAND})"
 }
+
+# testCreateReleaseInStatisticDatabase_withProblem() {
+#     assertFalse "createReleaseInStatisticDatabase"
+# }
 
 source lib/shunit2
 
