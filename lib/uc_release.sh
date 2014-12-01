@@ -886,7 +886,7 @@ createReleaseInStatisticDatabase() {
     local label=${LFS_PROD_RELEASE_CURRENT_TAG_NAME}
     mustHaveValue "${label}" "label name"
 
-    local date=$(date "+%Y-%m-%d %H-%M-%S")
+    local date=$(date "+%Y-%m-%d %H:%M:%S")
 
     info "create release in statistic database"
     # TODO: demx2fk3 2014-12-01 add execute -i here

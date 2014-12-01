@@ -48,7 +48,7 @@ testCreateReleaseInStatisticDatabase_withoutProblem() {
 
     local expect=$(createTempFile)
 cat <<EOF > ${expect}
-date +%Y-%m-%d %H-%M-%S
+date +%Y-%m-%d %H:%M:%S
 date +%Y-%m-%d %H:%M:%S.%N %Z
 date +%s.%N
 execute ${LFS_CI_ROOT}/bin/createReleaseInDatabase.pl -n A -b pronb-developer -d date
@@ -66,7 +66,7 @@ testCreateReleaseInStatisticDatabase_withProblem() {
 
     local expect=$(createTempFile)
 cat <<EOF > ${expect}
-date +%Y-%m-%d %H-%M-%S
+date +%Y-%m-%d %H:%M:%S
 date +%Y-%m-%d %H:%M:%S.%N %Z
 date +%s.%N
 execute ${LFS_CI_ROOT}/bin/createReleaseInDatabase.pl -n B -b pronb-developer -d date
