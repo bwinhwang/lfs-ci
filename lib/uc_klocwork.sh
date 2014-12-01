@@ -30,8 +30,7 @@ ci_job_klocwork_build() {
     local workspace=$(getWorkspaceName)
     mustHaveWorkspaceName
 
-
-    local BUILD="bldtools/bld-buildtools-common/results/bin/build NOAUTOBUILD=1 -W ${workspace}"
+    local build="bldtools/bld-buildtools-common/results/bin/build NOAUTOBUILD=1 -W ${workspace}"
 
     local kw_port=$(getConfig LFS_CI_uc_klocwork_port)
     mustHaveValue "${kw_port}" "klocwork port"
@@ -88,13 +87,13 @@ ci_job_klocwork_build() {
     # get this via src-proejct
     case "${kw_project}" in
     *_DDAL)      BLDSRC="src-rfs src-fsmddal"; 
-                 BLDCMD="${BUILD} -C src-rfs fct; ${BUILD} -C src-fsmddal fct"
+                 BLDCMD="${build} -C src-rfs fct; ${build} -C src-fsmddal fct"
     ;;
     *_DDG)       BLDSRC="src-fsmbos src-fsmddg src-ddg";  
-                 BLDCMD="${BUILD} -C src-bos fct; ${BUILD} -C src-fsmddg fct; ${BUILD} -C src-ddg fct"
+                 BLDCMD="${build} -C src-bos fct; ${build} -C src-fsmddg fct; ${build} -C src-ddg fct"
     ;;
     *_DDALFSMR2) BLDSRC=src-ddal;    
-                 BLDCMD="${BUILD} -C ${BLDSRC} fcmd; ${BUILD} -C ${BLDSRC} fspc"
+                 BLDCMD="${build} -C ${BLDSRC} fcmd; ${build} -C ${BLDSRC} fspc"
     ;;
     *) fatal "unknown klocwork project" ;;
     esac
@@ -132,15 +131,13 @@ ci_job_klocwork_build() {
     fi
 
     # create XML report
-
     svnExport ${reportPythonScript}
     LD_LIBRARY_PATH=${pythonHome}/lib \
                     execute ${pythonHome}/bin/python getreport.py \
                             ${kw_host} \
                             ${kw_port} \
                             ${kw_project} \
-                            LAST > klocwork_result.xml
-
+                            LAST > ${WORKSPACE}/klocwork_result.xml
 
     # cleanup old build reports
     local canDeleteBuilds=$(getConfig LFS_CI_uc_klocwork_can_delete_builds)
