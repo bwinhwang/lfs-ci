@@ -58,7 +58,7 @@ date +%Y-%m-%d %H:%M:%S
 copyFileFromBuildDirectoryToWorkspace Build_Job Build_Job ${WORKSPACE}/revisionstate.xml
 date +%Y-%m-%d %H:%M:%S.%N %Z
 date +%s.%N
-execute /home/demx2fk3/lfs-ci/bin/createReleaseInDatabase.pl -n A -b pronb-developer -d date -r 12346
+execute ${LFS_CI_ROOT}/bin/createReleaseInDatabase.pl -n A -b pronb-developer -d date -r 12346
 EOF
     assertEquals "$(cat ${expect})" "$(cat ${UNITTEST_COMMAND})"
 }
@@ -78,7 +78,7 @@ date +%Y-%m-%d %H:%M:%S
 copyFileFromBuildDirectoryToWorkspace Build_Job Build_Job ${WORKSPACE}/revisionstate.xml
 date +%Y-%m-%d %H:%M:%S.%N %Z
 date +%s.%N
-execute /home/demx2fk3/lfs-ci/bin/createReleaseInDatabase.pl -n B -b pronb-developer -d date -r 12346
+execute ${LFS_CI_ROOT}/bin/createReleaseInDatabase.pl -n B -b pronb-developer -d date -r 12346
 EOF
     assertEquals "$(cat ${expect})" "$(cat ${UNITTEST_COMMAND})"
 }
