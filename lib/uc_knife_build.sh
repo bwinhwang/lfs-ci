@@ -16,6 +16,12 @@
 # * create a workspace
 #   - based on baseline name
 #   - or on branch name from BTS_SC_LFS
+#   - we can use the existing createWorkspace function, but we have to
+#     fake the revision state file with the baseline name:
+#     src-bos <url> <LABEL>
+#     src-kernelsources <url> <LABEL>
+#     ...
+
 
 # Limitations
 #  - only on branches, which are compartible with the new CI
