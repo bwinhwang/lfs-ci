@@ -360,11 +360,13 @@ sendReleaseNote() {
     local artifactsPathOnShare=$(getConfig artifactesShare)/${JOB_NAME}/${BUILD_NUMBER}
     linkFileToArtifactsDirectory ${artifactsPathOnShare}
 
-    appproveReleaseForPsScm ${osTagName}
 
     local remoteDirectory=$(getConfig LFS_CI_UC_package_copy_to_share_real_location)/${osTagName}
     local artifactsPathOnMaster=$(getBuildDirectoryOnMaster)/archive
     executeOnMaster ln -sf ${remoteDirectory} ${artifactsPathOnMaster}/release
+
+    appproveReleaseForPsScm ${osTagName}
+    createReleaseInStatisticDatabase
 
     info "release is done."
     return
@@ -735,10 +737,8 @@ mustHaveWorkspaceWithArtefactsFromUpstreamProjects() {
 }
 
 ## @fn      createProxyReleaseTag()
-#  @brief   «brief description»
-#  @warning «anything important»
-#  @details «full description»
-#  @todo    «description of incomplete business»
+#  @brief   create proxy release tag in BTS_D_SC_LFS
+#  @warning this is a legacy tag, which should be removed
 #  @param   {tagName}    name of the tag
 #  @param   {reposName}  name of the svn repos
 #  @return  <none>
@@ -869,6 +869,28 @@ appproveReleaseForPsScm() {
     # TODO: demx2fk3 2014-08-19 fixme - make this in a nicer way
     info "creating approval file on moritz for ${tagName}"
     execute ssh moritz touch /lvol2/production_jenkins/tmp/approved/${tagName}
+
+    return
+}
+
+## @fn      createReleaseInStatisticDatabase()
+#  @brief   create release in statistic database for statistic purposes
+#  @param   <none>
+#  @return  <none>
+createReleaseInStatisticDatabase() {
+    requiredParameters LFS_CI_ROOT LFS_PROD_RELEASE_CURRENT_TAG_NAME
+
+    local location=$(getLocationName)
+    mustHaveLocationName
+
+    local label=${LFS_PROD_RELEASE_CURRENT_TAG_NAME}
+    mustHaveValue "${label}" "label name"
+
+    local date=$(date "+%Y-%m-%d %H-%M-%S")
+
+    info "create release in statistic database"
+    # TODO: demx2fk3 2014-12-01 add execute -i here
+    execute ${LFS_CI_ROOT}/bin/createReleaseInDatabase.pl -n ${label} -b ${location} -d "${date}"
 
     return
 }
