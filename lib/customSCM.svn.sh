@@ -39,6 +39,12 @@ actionCompare() {
         exit 0
     fi
 
+    local isMaintenance=$(getConfig CUSTOM_SCM_svn_trigger_svn_is_maintenance)
+    if [[ ${isMaintenance} ]] ; then
+        warning "maintenance is active, no build"
+        exit 1
+    fi
+
     # generate the new revsions file
     local oldRevisionsFile=${REVISION_STATE_FILE}
     mustExistFile ${oldRevisionsFile}
@@ -57,6 +63,13 @@ actionCompare() {
 
     # execute diff -rub ${oldRevisionsFile} ${newRevisionsFile}
 
+    local isMaintenance=$(getConfig CUSTOM_SCM_svn_trigger_svn_is_maintenance)
+
+    if [[ ${isMaintenance} ]] ; then
+        warning "maintenance is active, no build"
+        exit 1
+    fi
+
     # now we have both files, we can compare them
     if cmp --silent ${oldRevisionsFile} ${newRevisionsFile} ; then
         info "no changes in revision files, no build required"
@@ -73,7 +86,9 @@ actionCompare() {
         local commentsFile=$(createTempFile)
         local commentsFileFiltered=$(createTempFile)
         execute -n xpath -q -e '/log/logentry/msg/node()' ${changelogFile} > ${commentsFile}
-        grep -s -v -e "BTSPS-1657" ${commentsFile} > ${commentsFileFiltered}
+        grep -s -v -e "BTSPS-1657" \
+                   -e "^$" \
+                   ${commentsFile} > ${commentsFileFiltered}
 
         debug "comment file data"
         rawDebug ${commentsFile}

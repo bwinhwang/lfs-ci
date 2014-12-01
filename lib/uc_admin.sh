@@ -11,13 +11,14 @@ ci_job_admin() {
     # mustHaveTargetBoardName
 
     case ${taskName} in
-        backupJenkins)               backupJenkinsMasterServerInstallation ;;
-        cleanUpArtifactsShare)       cleanupArtifactsShare                 ;;
-        cleanupBaselineShares)       cleanupBaselineShares                 ;;
-        cleanupOrphanJobDirectories) cleanupOrphanJobDirectories           ;;
-        cleanupOrphanWorkspaces)     cleanupOrphanWorkspaces               ;;
-        synchronizeShare)            synchronizeShare                      ;;
-        genericShareCleanup)         genericShareCleanup                   ;;
+        backupJenkins)                backupJenkinsMasterServerInstallation ;;
+        cleanUpArtifactsShare)        cleanupArtifactsShare                 ;;
+        cleanupBaselineShares)        cleanupBaselineShares                 ;;
+        cleanupOrphanJobDirectories)  cleanupOrphanJobDirectories           ;;
+        cleanupOrphanWorkspaces)      cleanupOrphanWorkspaces               ;;
+        synchronizeShare)             synchronizeShare                      ;;
+        genericShareCleanup)          genericShareCleanup                   ;;
+        createLfsBaselineListFromEcl) createLfsBaselineListFromEcl          ;;
         *)
             error "subjob not known (${taskName})"
             exit 1;
@@ -139,7 +140,13 @@ genericShareCleanup() {
         $execute ssh ${remoteServer} "[[ -w $(dirname ${entry}) ]] || chmod u+w $(dirname ${entry})"
 
         debug "fixing permissions of removal candidate ${entry}"
-        $execute ssh ${remoteServer} "[[ -w ${entry} ]] || chmod -R u+w ${entry}"
+        if [[ ${UPSTREAM_PROJECT} =~ "CI_LFS" ]] ; then
+            # noop
+            debug noop
+        else
+            # $execute -i ssh ${remoteServer} "chmod -R u+w ${entry}"
+            ssh ${remoteServer} "chmod -R u+w ${entry}"
+        fi
 
         debug "removing ${entry}"
         if [[ -e ${entry} ]] ; then
@@ -306,5 +313,14 @@ cleanupBaselineShares() {
 #  @return  <none>
 cleanupOrphanJobDirectories() {
     debug "not implemented yet"
+    return
+}
+
+createLfsBaselineListFromEcl() {
+    cd ${WORKSPACE}
+    execute -n grep -e PS_LFS_OS -e PS_LFS_REL */ECL_BASE/ECL | execute -n cut -d= -f2 | execute -n sort -u > ${WORKSPACE}/usedBaselinesInEcl.txt
+    rawDebug ${WORKSPACE}/usedBaselinesInEcl.txt
+
+    info "done."
     return
 }

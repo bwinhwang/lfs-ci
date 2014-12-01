@@ -44,9 +44,10 @@ sub readConfig {
 
     my $data = [];
 
-    push @{ $data }, { name => "date_%Y", value => sprintf( "%04d", $year ), tags => "" };
-    push @{ $data }, { name => "date_%y", value => sprintf( "%02d", ( $year - 2000 )), tags => "" };
-    push @{ $data }, { name => "date_%m", value => sprintf( "%02d", $mon  ), tags => "" };
+    push @{ $data }, { name => "date_%Ymd", value => sprintf( "%04d%02d%02d", $year, $mon, $mday ), tags => "" };
+    push @{ $data }, { name => "date_%Y",   value => sprintf( "%04d", $year ), tags => "" };
+    push @{ $data }, { name => "date_%y",   value => sprintf( "%02d", ( $year - 2000 )), tags => "" };
+    push @{ $data }, { name => "date_%m",   value => sprintf( "%02d", $mon  ), tags => "" };
 
     return $data;
 }
@@ -655,7 +656,7 @@ sub cat {
     my $self  = shift;
     my $param = { @_ };
 
-    my $url      = replaceMasterByUlmServer( $param->{url} );
+    my $url      = $self->replaceMasterByUlmServer( $param->{url} );
     my $revision = $param->{revision};
 
     TRACE sprintf( "running svn cat for %s - rev %s", $url, $revision || "undef" );
@@ -683,7 +684,7 @@ sub cat {
 sub propget {
     my $self = shift;
     my $param= { @_ };
-    my $url      = replaceMasterByUlmServer( $param->{url} );
+    my $url      = $self->replaceMasterByUlmServer( $param->{url} );
     my $property = $param->{property};
 
     my $cmd = sprintf( "%s pg %s %s|",
@@ -704,7 +705,7 @@ sub propget {
 sub info {
     my $self  = shift;
     my $param = { @_ } ;
-    my $url   = replaceMasterByUlmServer( $param->{url} || "" );
+    my $url   = $self->replaceMasterByUlmServer( $param->{url} || "" );
     my $xml   = "";
     my $count = 0;
 
@@ -734,7 +735,7 @@ sub info {
 sub ls {
     my $self  = shift;
     my $param = { @_ };
-    my $url   = replaceMasterByUlmServer( $param->{url} || "" );
+    my $url   = $self->replaceMasterByUlmServer( $param->{url} || "" );
 
     open SVN_LS, sprintf( "%s --xml ls %s|", $self->{svnCli}, $url ) || die "can not open svn info: %!";
     my $xml = join( "", <SVN_LS> );
@@ -754,7 +755,7 @@ sub command {
     my $param = { @_ };
 
     my $revision = $param->{revision} || "";
-    my $url      = replaceMasterByUlmServer( $param->{url} || "");
+    my $url      = $self->replaceMasterByUlmServer( $param->{url} || "");
     my $action   = $param->{action}   || "";
     my $args     = join( " ", @{ $param->{args} || [] } );
 
@@ -778,9 +779,19 @@ sub command {
 #  @param   {url}    svn url
 #  @return  normalized svn url
 sub replaceMasterByUlmServer {
-    my $url = shift;
+    my $self = shift;
+    my $url  = shift;
     $url =~ s/svne1.access.nokiasiemensnetworks.com/ulscmi.inside.nsn.com/g;
     $url =~ s/svne1.access.nsn.com/ulscmi.inside.nsn.com/g;
+    return $url;
+}
+
+sub replaceUlmByMasterServer {
+    my $self = shift;
+    my $url  = shift;
+    # TODO: demx2fk3 2014-11-27 put this in the config
+    $url =~ s/ulscmi.inside.nsn.com/svne1.access.nsn.com/g;
+    $url =~ s/ulisop10.emea.nsn-net.net/svne1.access.nsn.com/g;
     return $url;
 }
 
