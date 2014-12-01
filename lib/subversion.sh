@@ -175,6 +175,10 @@ shouldNotExistsInSubversion() {
     return 0
 }
 
+svnLog() {
+    execute -n -r 3 svn log $@
+}
+
 ## @fn      existsInSubversion( $url, $pathOrFile )
 #  @brief   checks, if the path/file exists in svn 
 #  @detail  if you want to check http://server/path/to/repos/foo, the

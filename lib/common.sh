@@ -304,8 +304,6 @@ requiredParameters() {
         # echo "${name}=${!name}" >> ${workspace}/../.env
     done
 
-    local workspace=$(getWorkspaceName)
-
     return
 }
 

@@ -83,7 +83,7 @@ do
 
     createJenkinsJob "${newJobName}" ${job}.xml
     info "job ${newJobName} created."
-    setRevisionAsJobDescription ${newJobName} ${job}.xml ${branchName}
+    setRevisionAsJobDescription ${job}.xml ${branchName}
     updateJenkinsJob ${newJobName} ${job}.xml
     info "updated description of ${newJobName}."
 

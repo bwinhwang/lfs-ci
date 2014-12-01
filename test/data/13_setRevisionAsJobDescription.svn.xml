@@ -1,0 +1,4193 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<log>
+<logentry
+   revision="126010">
+<author>protter</author>
+<date>2014-12-01T07:33:14.801101Z</date>
+<paths>
+<path
+   prop-mods="true"
+   text-mods="false"
+   kind="dir"
+   copyfrom-path="/os/trunk/fsmr3/src-ddal/src/ddal/tools/gpsd"
+   copyfrom-rev="126009"
+   action="R">/os/FB1411/trunk/fsmr3/src-ddal/src/ddal/tools/gpsd</path>
+<path
+   prop-mods="true"
+   text-mods="false"
+   kind="dir"
+   copyfrom-path="/os/trunk/fsmr3/src-fsmddal/src/tools/gpsd"
+   copyfrom-rev="126008"
+   action="R">/os/FB1411/trunk/fsmr3/src-fsmddal/src/tools/gpsd</path>
+</paths>
+<msg>Re-branched GPSd from trunk
+</msg>
+</logentry>
+<logentry
+   revision="125339">
+<author>dems17e7</author>
+<date>2014-11-28T09:33:47.586151Z</date>
+<paths>
+<path
+   prop-mods="true"
+   text-mods="false"
+   kind="file"
+   action="M">/os/FB1411/trunk/fsmr3/src-fsmifdd/src/include/ddal/ddal_id.h</path>
+<path
+   prop-mods="true"
+   text-mods="false"
+   kind="dir"
+   action="M">/os/FB1411/trunk/fsmr3/src-fsmddal/src</path>
+<path
+   prop-mods="true"
+   text-mods="false"
+   kind="file"
+   action="M">/os/FB1411/trunk/fsmr3/src-fsmifdd/src/include/ddal/ddal_cpri.h</path>
+<path
+   prop-mods="true"
+   text-mods="false"
+   kind="file"
+   action="M">/os/FB1411/trunk/fsmr3/src-fsmifdd/src/include/ddal/ddal_temperature.h</path>
+<path
+   prop-mods="true"
+   text-mods="false"
+   kind="dir"
+   action="M">/os/FB1411/trunk/fsmr3/src-kernelsources/src/patches</path>
+<path
+   prop-mods="true"
+   text-mods="false"
+   kind="file"
+   action="M">/os/FB1411/trunk/fsmr3/src-fsmifdd/src/include/ddal/intern/ddal_utils.h</path>
+<path
+   prop-mods="true"
+   text-mods="false"
+   kind="file"
+   action="M">/os/FB1411/trunk/fsmr3/src-fsmifdd/src/include/ddal/ddal_cma.h</path>
+<path
+   prop-mods="true"
+   text-mods="false"
+   kind="file"
+   action="M">/os/FB1411/trunk/fsmr3/src-fsmifdd/src/include/ddal/ddal_watchdog.h</path>
+<path
+   prop-mods="true"
+   text-mods="false"
+   kind="file"
+   action="M">/os/FB1411/trunk/fsmr3/src-fsmifdd/src/include/ddal/ddal_boot.h</path>
+<path
+   prop-mods="true"
+   text-mods="false"
+   kind="file"
+   action="M">/os/FB1411/trunk/fsmr3/src-fsmddal/src/eac/ddal_ext_alarm.c</path>
+<path
+   prop-mods="true"
+   text-mods="false"
+   kind="dir"
+   action="M">/os/FB1411/trunk/fsmr3/src-fsmddal</path>
+<path
+   prop-mods="true"
+   text-mods="false"
+   kind="dir"
+   action="M">/os/FB1411/trunk/fsmr3</path>
+<path
+   prop-mods="true"
+   text-mods="false"
+   kind="dir"
+   action="M">/os/FB1411/trunk/fsmr3/src-fsmifdd</path>
+<path
+   prop-mods="true"
+   text-mods="false"
+   kind="dir"
+   action="M">/os/FB1411/trunk/fsmr3/src-fsmddal/src/tools/hpd</path>
+<path
+   prop-mods="true"
+   text-mods="false"
+   kind="file"
+   action="M">/os/FB1411/trunk/fsmr3/src-fsmifdd/src/include/ddal/ddal_clk.h</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/fsmr3/src-fsmddal/src/tools/trbl_linux_log/trbl_log_list.csv</path>
+<path
+   prop-mods="true"
+   text-mods="false"
+   kind="file"
+   action="M">/os/FB1411/trunk/fsmr3/src-fsmifdd/src/include/ddal/ddal_fpga.h</path>
+<path
+   prop-mods="true"
+   text-mods="false"
+   kind="file"
+   action="M">/os/FB1411/trunk/fsmr3/src-fsmifdd/src/include/ddal/ddal_clk_sfn.h</path>
+<path
+   prop-mods="true"
+   text-mods="false"
+   kind="file"
+   action="M">/os/FB1411/trunk/fsmr3/src-fsmifdd/src/include/ddal/ddal_pmc.h</path>
+<path
+   prop-mods="true"
+   text-mods="false"
+   kind="dir"
+   action="M">/os/FB1411/trunk/fsmr3/src-kernelsources</path>
+<path
+   prop-mods="true"
+   text-mods="false"
+   kind="file"
+   action="M">/os/FB1411/trunk/fsmr3/src-fsmddal/src/utils/ddal_virt_ipc.c</path>
+<path
+   prop-mods="true"
+   text-mods="false"
+   kind="file"
+   action="M">/os/FB1411/trunk/fsmr3/src-fsmifdd/src/include/ddal/intern/ddal_reset.h</path>
+<path
+   prop-mods="true"
+   text-mods="false"
+   kind="file"
+   action="M">/os/FB1411/trunk/fsmr3/src-fsmifdd/src/include/ddal/ddal_reset.h</path>
+<path
+   prop-mods="true"
+   text-mods="false"
+   kind="dir"
+   action="M">/os/FB1411/trunk/fsmr3/src-fsmddal/src/cpu</path>
+<path
+   prop-mods="true"
+   text-mods="false"
+   kind="file"
+   action="M">/os/FB1411/trunk/fsmr3/src-fsmifdd/src/include/ddal/ddal_version.h</path>
+<path
+   prop-mods="true"
+   text-mods="false"
+   kind="file"
+   action="M">/os/FB1411/trunk/fsmr3/src-fsmifdd/src/include/ddal/ddal_sfn.h</path>
+<path
+   prop-mods="true"
+   text-mods="false"
+   kind="file"
+   action="M">/os/FB1411/trunk/fsmr3/src-fsmifdd/src/include/ddal/ddal_clk_time.h</path>
+<path
+   prop-mods="true"
+   text-mods="false"
+   kind="file"
+   action="M">/os/FB1411/trunk/fsmr3/src-fsmifdd/src/include/ddal/ddal_board.h</path>
+<path
+   prop-mods="true"
+   text-mods="false"
+   kind="file"
+   action="M">/os/FB1411/trunk/fsmr3/src-fsmifdd/src/include/ddal/ddal_cpu.h</path>
+<path
+   prop-mods="true"
+   text-mods="false"
+   kind="file"
+   action="M">/os/FB1411/trunk/fsmr3/src-fsmifdd/src/include/ddal/ddal_common.h</path>
+</paths>
+<msg>Added log files from extfm/extfat16 fs check [FSMr2].
+
+%FIN %PR=117069ESPE04
+%FIN %PR=121035ESPE04
+</msg>
+</logentry>
+<logentry
+   revision="124785">
+<author>msobkows</author>
+<date>2014-11-27T11:02:10.443226Z</date>
+<paths>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/fsmr3/src-fsmddal/src/utils/ddal_virt_ipc.c</path>
+</paths>
+<msg>%REM Fixed wrong include path</msg>
+</logentry>
+<logentry
+   revision="124690">
+<author>demx2fk3</author>
+<date>2014-11-27T10:00:48.111459Z</date>
+<paths>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/fsmr3/src-fsmddal/src/ffs/ddal_ffs.c</path>
+</paths>
+<msg>%BCK %PR=55579ESPE05
+%BCK %PR=122467ESPE04
+
+revert faulty commit
+
+</msg>
+</logentry>
+<logentry
+   revision="124686">
+<author>msobkows</author>
+<date>2014-11-27T09:29:05.804350Z</date>
+<paths>
+<path
+   prop-mods="true"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/fsmr3/src-fsmddal/src/utils/ddal_virt_ipc.c</path>
+</paths>
+<msg>%FIN %PR=123000ESPE04
+%REM merge from trunk (added missing case in deserialize_packet for ddal_fs_mount_ramfs function)</msg>
+</logentry>
+<logentry
+   revision="123900">
+<author>wro02777</author>
+<date>2014-11-26T10:05:09.160648Z</date>
+<paths>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/fsmr3/src-fsmddal/src/ffs/ddal_ffs.c</path>
+</paths>
+<msg>REM After cleaning filesystem remains mounted read-write. It is needed for the next steps of SW download/upgrade process. Merged with trunk: use 'svn log -g' for full info.
+%FIN %PR=55579ESPE05
+%FIN %PR=122467ESPE04</msg>
+</logentry>
+<logentry
+   revision="123350">
+<author>mmolnar</author>
+<date>2014-11-25T17:05:50.300091Z</date>
+<paths>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-fsmddg/src/fsoc_dtb/fctb_fsoc.dts</path>
+</paths>
+<msg>Correct serdes values for Murkku cpri3 and cpri4 on FCTB</msg>
+</logentry>
+<logentry
+   revision="122508">
+<author>kokot</author>
+<date>2014-11-25T07:08:41.098608Z</date>
+<paths>
+<path
+   prop-mods="true"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/fsmr3/src-ddal/src/ddal/tools/gpsd/gpsd-3.10-lfs/driver_tsip.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/fsmr3/src-fsmddal/src/tools/gpsd/gpsd-3.10-lfs/driver_tsip.c</path>
+</paths>
+<msg>Merge of change 121866 from trunk.
+%FIN %PR=150296ESPE02
+%REM Change of hw-version for FYGG to 3041
+
+</msg>
+</logentry>
+<logentry
+   revision="121885">
+<author>psulm</author>
+<date>2014-11-24T15:51:08.178014Z</date>
+<paths>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-project/Dependencies</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-project/src/gitrevision</path>
+</paths>
+<msg>commit 8030d6cd586ce8b1a70d84b245e7a9d967db14ec
+Author: Vivenzio Pagliari &lt;vivenzio.pagliari@nsn.com&gt;
+Date:   Mon Nov 24 16:39:32 2014 +0100
+
+    Mount nvram with resgid from btssw.
+    
+    Otherwise, some parts of BTSSW are not allowed to use reserved space on
+    NVRAM.
+    
+%FIN %PR=149948ESPE02
+</msg>
+</logentry>
+<logentry
+   revision="121471">
+<author>psulm</author>
+<date>2014-11-21T15:53:14.319145Z</date>
+<paths>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-project/Dependencies</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-project/src/gitrevision</path>
+</paths>
+<msg>commit b84641fa5e84ebc76533da239a6b39ea75687038
+Author: Vivenzio Pagliari &lt;vivenzio.pagliari@nsn.com&gt;
+Date:   Fri Nov 21 14:38:47 2014 +0100
+
+    Reduce number of retained procdumps once more.
+    
+    Two factors mandate to retain even less procdumps:
+    1. The procdump files became larger as more processes and threads are
+       running on the BTS.
+    2. Other logs have been added (e.g. gpsd logs) that eat up space
+       previously assigned to procdump.
+    
+%FIN %PR=149896ESPE02
+</msg>
+</logentry>
+<logentry
+   revision="121234">
+<author>psulm</author>
+<date>2014-11-21T12:12:18.920448Z</date>
+<paths>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-project/Dependencies</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-project/src/gitrevision</path>
+</paths>
+<msg>commit 421bedcee12b35fda73aba4c2a172914e807dca4
+Author: Vivenzio Pagliari &lt;vivenzio.pagliari@nsn.com&gt;
+Date:   Fri Nov 21 13:02:21 2014 +0100
+
+    Remove wtmp file from /var/log.
+    
+%FIN %PR=122849ESPE04
+</msg>
+</logentry>
+<logentry
+   revision="120933">
+<author>psulm</author>
+<date>2014-11-20T15:21:45.946791Z</date>
+<paths>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-project/Dependencies</path>
+</paths>
+<msg>no changes
+</msg>
+</logentry>
+<logentry
+   revision="120437">
+<author>jmalline</author>
+<date>2014-11-20T09:22:56.336852Z</date>
+<paths>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-ddg/src/radio/murkku/serdes_murkku2.c</path>
+</paths>
+<msg>Corrected Murkku2 serdes CPRI line bit rate configuration for bit rates less than 6144M</msg>
+</logentry>
+<logentry
+   revision="119859">
+<author>zhang</author>
+<date>2014-11-19T13:14:32.897834Z</date>
+<paths>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-fsmdtg/src/Kbuild</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-fsmdtg/src/mcheck/mcheck_mod.c</path>
+</paths>
+<msg>mcheck</msg>
+</logentry>
+<logentry
+   revision="119070">
+<author>niehaus</author>
+<date>2014-11-18T12:18:24.635885Z</date>
+<paths>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-fsmdtg/src/mlppp/mlppp.c</path>
+</paths>
+<msg>BTSPS-1387 IN jni: DESCRIPTION: Update for Kernel 3.x NOJCHK</msg>
+</logentry>
+<logentry
+   revision="118545">
+<author>dems17e7</author>
+<date>2014-11-17T10:08:53.538142Z</date>
+<paths>
+<path
+   prop-mods="true"
+   text-mods="false"
+   kind="file"
+   action="M">/os/FB1411/trunk/fsmr3/src-fsmifdd/src/include/ddal/ddal_id.h</path>
+<path
+   prop-mods="true"
+   text-mods="false"
+   kind="dir"
+   action="M">/os/FB1411/trunk/fsmr3/src-fsmddal/src</path>
+<path
+   prop-mods="true"
+   text-mods="false"
+   kind="file"
+   action="M">/os/FB1411/trunk/fsmr3/src-fsmifdd/src/include/ddal/ddal_cpri.h</path>
+<path
+   prop-mods="true"
+   text-mods="false"
+   kind="file"
+   action="M">/os/FB1411/trunk/fsmr3/src-fsmifdd/src/include/ddal/ddal_temperature.h</path>
+<path
+   prop-mods="true"
+   text-mods="false"
+   kind="dir"
+   action="M">/os/FB1411/trunk/fsmr3/src-kernelsources/src/patches</path>
+<path
+   prop-mods="true"
+   text-mods="false"
+   kind="file"
+   action="M">/os/FB1411/trunk/fsmr3/src-fsmifdd/src/include/ddal/intern/ddal_utils.h</path>
+<path
+   prop-mods="true"
+   text-mods="false"
+   kind="file"
+   action="M">/os/FB1411/trunk/fsmr3/src-fsmifdd/src/include/ddal/ddal_cma.h</path>
+<path
+   prop-mods="true"
+   text-mods="false"
+   kind="file"
+   action="M">/os/FB1411/trunk/fsmr3/src-fsmifdd/src/include/ddal/ddal_watchdog.h</path>
+<path
+   prop-mods="true"
+   text-mods="false"
+   kind="file"
+   action="M">/os/FB1411/trunk/fsmr3/src-fsmifdd/src/include/ddal/ddal_boot.h</path>
+<path
+   prop-mods="true"
+   text-mods="false"
+   kind="file"
+   action="M">/os/FB1411/trunk/fsmr3/src-fsmddal/src/tools/gpsd/gpsd-3.10-lfs/driver_tsip.c</path>
+<path
+   prop-mods="true"
+   text-mods="false"
+   kind="file"
+   action="M">/os/FB1411/trunk/fsmr3/src-fsmddal/src/eac/ddal_ext_alarm.c</path>
+<path
+   prop-mods="true"
+   text-mods="false"
+   kind="dir"
+   action="M">/os/FB1411/trunk/fsmr3/src-fsmddal</path>
+<path
+   prop-mods="true"
+   text-mods="false"
+   kind="dir"
+   action="M">/os/FB1411/trunk/fsmr3</path>
+<path
+   prop-mods="true"
+   text-mods="false"
+   kind="dir"
+   action="M">/os/FB1411/trunk/fsmr3/src-fsmifdd</path>
+<path
+   prop-mods="true"
+   text-mods="false"
+   kind="dir"
+   action="M">/os/FB1411/trunk/fsmr3/src-fsmddal/src/tools/hpd</path>
+<path
+   prop-mods="true"
+   text-mods="false"
+   kind="file"
+   action="M">/os/FB1411/trunk/fsmr3/src-fsmifdd/src/include/ddal/ddal_clk.h</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/fsmr3/src-fsmddal/src/tools/trbl_linux_log/trbl_log_list.csv</path>
+<path
+   prop-mods="true"
+   text-mods="false"
+   kind="file"
+   action="M">/os/FB1411/trunk/fsmr3/src-fsmifdd/src/include/ddal/ddal_fpga.h</path>
+<path
+   prop-mods="true"
+   text-mods="false"
+   kind="file"
+   action="M">/os/FB1411/trunk/fsmr3/src-fsmifdd/src/include/ddal/ddal_clk_sfn.h</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/fsmr3/src-fsmddal/src/tools/trbl_linux_log/trbl_linux_log_store</path>
+<path
+   prop-mods="true"
+   text-mods="false"
+   kind="file"
+   action="M">/os/FB1411/trunk/fsmr3/src-fsmifdd/src/include/ddal/ddal_pmc.h</path>
+<path
+   prop-mods="true"
+   text-mods="false"
+   kind="dir"
+   action="M">/os/FB1411/trunk/fsmr3/src-kernelsources</path>
+<path
+   prop-mods="true"
+   text-mods="false"
+   kind="file"
+   action="M">/os/FB1411/trunk/fsmr3/src-fsmifdd/src/include/ddal/intern/ddal_reset.h</path>
+<path
+   prop-mods="true"
+   text-mods="false"
+   kind="file"
+   action="M">/os/FB1411/trunk/fsmr3/src-fsmifdd/src/include/ddal/ddal_reset.h</path>
+<path
+   prop-mods="true"
+   text-mods="false"
+   kind="dir"
+   action="M">/os/FB1411/trunk/fsmr3/src-fsmddal/src/cpu</path>
+<path
+   prop-mods="true"
+   text-mods="false"
+   kind="file"
+   action="M">/os/FB1411/trunk/fsmr3/src-fsmifdd/src/include/ddal/ddal_version.h</path>
+<path
+   prop-mods="true"
+   text-mods="false"
+   kind="file"
+   action="M">/os/FB1411/trunk/fsmr3/src-fsmifdd/src/include/ddal/ddal_sfn.h</path>
+<path
+   prop-mods="true"
+   text-mods="false"
+   kind="file"
+   action="M">/os/FB1411/trunk/fsmr3/src-fsmifdd/src/include/ddal/ddal_clk_time.h</path>
+<path
+   prop-mods="true"
+   text-mods="false"
+   kind="file"
+   action="M">/os/FB1411/trunk/fsmr3/src-fsmifdd/src/include/ddal/ddal_board.h</path>
+<path
+   prop-mods="true"
+   text-mods="false"
+   kind="file"
+   action="M">/os/FB1411/trunk/fsmr3/src-fsmifdd/src/include/ddal/ddal_cpu.h</path>
+<path
+   prop-mods="true"
+   text-mods="false"
+   kind="file"
+   action="M">/os/FB1411/trunk/fsmr3/src-fsmifdd/src/include/ddal/ddal_common.h</path>
+</paths>
+<msg>Merge bugfixes from trunk.
+
+%FIN %PR=117069ESPE04
+%FIN %PR=121035ESPE04
+</msg>
+</logentry>
+<logentry
+   revision="118333">
+<author>psulm</author>
+<date>2014-11-14T15:47:02.916332Z</date>
+<paths>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-project/Dependencies</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-project/src/gitrevision</path>
+</paths>
+<msg>commit 7824c9af736a20ea8783faedc220a881a26167a1
+Author: Vivenzio Pagliari &lt;vivenzio.pagliari@nsn.com&gt;
+Date:   Fri Nov 14 15:17:22 2014 +0100
+
+    Do not generate ssd.log on nodes with no SSD.
+    
+%TBC %PR=117069ESPE04
+%TBC %PR=121035ESPE04
+</msg>
+</logentry>
+<logentry
+   revision="117637">
+<author>demx2fk3</author>
+<date>2014-11-13T12:00:52.074751Z</date>
+<paths>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/fsmr3/src-fsmpsl/src/control/version_control.xml</path>
+</paths>
+<msg>no fsm-r4 build results in FB1411</msg>
+</logentry>
+<logentry
+   revision="117045">
+<author>psulm</author>
+<date>2014-11-12T14:07:47.031740Z</date>
+<paths>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-project/Dependencies</path>
+</paths>
+<msg>no changes
+</msg>
+</logentry>
+<logentry
+   revision="116450">
+<author>eambrosc</author>
+<date>2014-11-12T09:07:51.361296Z</date>
+<paths>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/fsmr3/src-fsmbrm/src/crtm/Makefile</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/fsmr3/src-fsmdtg_k26/src/se_cfg_dispatcher/seCfgDrv_If.h</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/fsmr3/src-fsmdtg_k26/src/cc_include/nsn-helper-util.h</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/fsmr3/src-fsmddg/src/gpio/gpio.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/fsmr3/src-fsmfmon/src/doc/I_Spec/I-Spec-Gpio-Test.txt</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/fsmr3/src-fsmddg_k26/src/fpga_failsave/fpga_failsave.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/fsmr3/src-fsmddg/src/pbcr/README</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/fsmr3/src-fsmddal/src/tools/crashHandler/src/arch_mips64_types.h</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/fsmr3/src-fsmdtg_k26/src/atm_dev/atmsig.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/fsmr3/src-fsmfmon/src/doc/I_Spec/I-Spec-Hotplug.txt</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/fsmr3/src-fsmfmon/src/doc/I_Spec/I-Spec-UART-Mux.txt</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/fsmr3/src-fsmdtg_k26/src/fpci_dispatcher/fpci_test_stub.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/fsmr3/src-fsmddal/src/tools/crashHandler/src/arch_arm_xscale.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/fsmr3/src-fsmdtg_k26/src/cc_include/se_api_common.h</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/fsmr3/src-fmon/ccmon_VersionGet.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/fsmr3/src-fsmddal/src/tools/crashHandler/src/elf_corefile.cpp</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/fsmr3/src-fsmdtg_k26/src/atm_dev/atmsig.h</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/fsmr3/src-fsmwbit/src/tools/QCReport/QCreport.py</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/fsmr3/src-fsmfmon/src/doc/I_Spec/I-Spec-Gpio.txt</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/fsmr3/src-fsmddal/src/tools/crashHandler/src/thread_stack.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/fsmr3/src-fsmddal/src/tools/crashHandler/src/shlib_map.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/fsmr3/src-fsmdtg_k26/src/mlppp/mlppp_rx.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/fsmr3/src-fsmdtg_k26/src/se_cfg_dispatcher/se_cfg_mod_rx.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/fsmr3/src-fsmddal/src/tools/crashHandler/src/thread_stack.h</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/fsmr3/src-fsmddal/src/tools/crashHandler/src/shlib_map.h</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/fsmr3/src-fsmdtg_k26/src/se_cfg_dispatcher/se_cfg_mod_help.h</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/fsmr3/src-fsmdtg_k26/src/se_cfg_dispatcher/se_cfg_mod_rx.h</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/fsmr3/src-fsmddal/src/tools/crashHandler/src/arch_mips32_types.h.backup</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/fsmr3/src-fsmddg_k26/src/fpga_ver/fpga_ver.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/fsmr3/src-fsmdtg_k26/src/cc_include/se_api_gsm.h</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/fsmr3/src-mddg_k26/src/gpio/mddg_gpio_mpc8548.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/fsmr3/src-fsmfmon/src/doc/I_Spec/I-Spec-Calibration.txt</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/fsmr3/src-fsmfmon/src/doc/I_Spec/I-Spec-RF-Chain.txt</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/fsmr3/src-fsmwbit/src/tools/QCReport/TestCases.py</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/fsmr3/src-fsmddg_k26/src/mfd_dt/mfd_dt.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/fsmr3/src-fsmdtg_k26/src/cc_include/se_api_msg_header.h</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/fsmr3/src-fsmddal/src/tools/crashHandler/src/elf_corefile.h</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/fsmr3/src-fsmddg/src/fpga_failsave/fpga_failsave.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/fsmr3/src-fsmbrm/src/ssllib_uboot/library/Makefile</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/fsmr3/src-fsmdtg_k26/src/ipoatm/ipoatm.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/fsmr3/src-fsmfirmware/src/ccssa/hexfiles/2013_06_21_CCSSA2_CW25_R18_V01/README.txt</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/fsmr3/src-fsmdtg_k26/src/fpci_dispatcher/fpci_nl_rx_tx.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/fsmr3/src-fsmdtg_k26/src/cc_include/nsn-wqe-size-define.h</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/fsmr3/src-fsmddal/src/tools/crashHandler/src/crash_handler.cpp</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/fsmr3/src-fsmdtg_k26/src/ipoatm/ipoatm.h</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/fsmr3/src-fsmdtg_k26/src/fpci_dispatcher/fpci_nl_rx_tx.h</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/fsmr3/src-fsmddg_k26/src/fpga_sgmii/fpga_sgmii.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/fsmr3/src-fsmdtg_k26/src/se_ifcfg/me_hl_se_drv.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/fsmr3/src-fsmdtg_k26/src/ipoatm/ipoatm_rx.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/fsmr3/src-fsmfmon/src/doc/I_Spec/I-Spec-Clk-Dist.txt</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/fsmr3/src-fsmdtg_k26/src/se_ifcfg/me_hl_se_drv.h</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/fsmr3/src-fsmddal/src/tools/crashHandler/src/arch_mips_octeon.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/fsmr3/src-fsmdtg_k26/src/cc_include/dbgcntcommon.h</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/fsmr3/src-fsmddg_k26/src/gpio/gpio.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/fsmr3/src-fsmfmon/src/doc/I_Spec/I-Spec-Bp-3hu.txt</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/fsmr3/src-fsmdtg_k26/src/mlppp/mlppp.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/fsmr3/src-fsmddal/src/tools/crashHandler/src/shlib_map_types.h</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/fsmr3/src-fsmddg/src/fpga_ver/fpga_ver.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/fsmr3/src-fsmddg_k26/src/pbcr/README</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/fsmr3/src-fsmdtg_k26/src/mlppp/mlppp.h</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/fsmr3/src-fsmddg/src/mfd_dt/mfd_dt.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/fsmr3/src-fsmdtg_k26/src/se_ifcfg/me_hal_se_drv_cv.h</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/fsmr3/src-fsmddal/src/tools/crashHandler/src/dtrace.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/fsmr3/src-fsmdtg_k26/src/se_cfg_dispatcher/se_cfg_mod_tx.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/fsmr3/src-fsmddal/src/tools/crashHandler/src/arch_arm_types.h</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/fsmr3/src-fsmfmon/src/doc/I_Spec/I-Spec-Fpga.txt</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/fsmr3/src-fsmddal/src/tools/crashHandler/src/elf_corefile_types.h</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/fsmr3/src-fsmddal/src/tools/crashHandler/src/dtrace.h</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/fsmr3/src-fsmdtg_k26/src/se_cfg_dispatcher/se_cfg_mod_tx.h</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/fsmr3/src-fsmwbit/src/tools/QCReport/LogFilter.py</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/fsmr3/src-fsmddal/src/tools/crashHandler/src/arch_api.h</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/fsmr3/src-fsmdtg_k26/src/fpci_dispatcher/fpci_hwl_rx_tx.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/fsmr3/src-fsmbrm/src/ssllib/library/Makefile</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/fsmr3/src-fsmddg/src/fpga_sgmii/fpga_sgmii.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/fsmr3/src-fsmdtg_k26/src/se_ifcfg/se_ifcfg_mod.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/fsmr3/src-fsmdtg_k26/src/fpci_dispatcher/fpci_hwl_rx_tx.h</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/fsmr3/src-fsmdtg_k26/src/atm_dev/atmsig_rx.c</path>
+</paths>
+<msg>Replaced Nokia Siemens Networks by Nokia.</msg>
+</logentry>
+<logentry
+   revision="116448">
+<author>eambrosc</author>
+<date>2014-11-12T09:04:45.460387Z</date>
+<paths>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/fsmr35/src-tools35/src/ncp_em/event_machine/lsi/event_machine_hw_config.h</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/fsmr35/src-tools35/src/ncp_em/event_machine/lsi/em_lsi_queue_group.h</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/fsmr35/src-tools35/src/ncp_em/event_machine/lsi/em_lsi_fp.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/fsmr35/src-tools35/src/ncp_em/event_test/example/non_em_main.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/fsmr35/src-tools35/src/ncp_em/event_machine/event_machine_group.h</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/fsmr35/src-tools35/src/ncp_em/event_vp_config/code/include/adk_em.h</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/fsmr35/src-tools35/src/ncp_em/misc/lsi/lsi_environment.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/fsmr35/src-tools35/src/ncp_em/event_machine/lsi/em_lsi_fp.h</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/fsmr35/src-tools35/src/ncp_em/misc/lsi/atomic.h</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/fsmr35/src-tools35/src/ncp_em/event_machine/lsi/em_lsi.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/fsmr35/src-tools35/src/ncp_em/event_machine/lsi/linux_kernel/em_lsi_timer_kernel.h</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/fsmr35/src-tools35/src/ncp_em/event_machine/lsi/event_machine_hw_specific.h</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/fsmr35/src-tools35/src/ncp_em/event_machine/lsi/em_lsi.h</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/fsmr35/src-tools35/src/ncp_em/event_machine/lsi/em_trace.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/fsmr35/src-tools35/src/ncp_em/event_test/example/em_main.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/fsmr35/src-tools35/src/ncp_em/event_vp_config/code/src/include/adk_em_internal.h</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/fsmr35/src-tools35/src/ncp_em/event_machine/lsi/em_trace.h</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/fsmr35/src-fsmbrm35/src/ssllib_uboot/library/Makefile</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/fsmr35/src-fsmbrm35/src/crtm/Makefile</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/fsmr35/src-tools35/src/ncp_em/event_machine/lsi/em_lsi.mk</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/fsmr35/src-tools35/src/ncp_em/event_machine/lsi/em_internal_event.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/fsmr35/src-tools35/src/ncp_em/event_machine/lsi/event_machine_config.h</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/fsmr35/src-tools35/src/ncp_em/misc/lsi/environment.h</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/fsmr35/src-tools35/src/ncp_em/event_machine/lsi/em_internal_event.h</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/fsmr35/src-tools35/src/ncp_em/event_machine/event_machine_core_mask.h</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/fsmr35/src-tools35/src/ncp_em/event_machine/event_machine_types.h</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/fsmr35/src-tools35/src/ncp_em/event_machine/lsi/em_lsi_timer.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/fsmr35/src-tools35/src/ncp_adk/code/em/src/include/adk_em_internal.h</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/fsmr35/src-tools35/src/ncp_em/event_machine/lsi/em_error.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/fsmr35/src-tools35/src/ncp_em/event_machine/lsi/em_lsi_timer.h</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/fsmr35/src-tools35/src/ncp_adk/code/em/src/include/adk_em_log.h</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/fsmr35/src-tools35/src/ncp_em/event_test/example/pcx_main.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/fsmr35/src-tools35/src/ncp_em/event_machine/lsi/em_error.h</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/fsmr35/src-fsmbos35/README</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/fsmr35/src-tools35/src/ncp_em/event_machine/event_machine_helper.h</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/fsmr35/src-tools35/src/ncp_em/event_vp_config/code/src/C/adk_em.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/fsmr35/src-tools35/src/ncp_em/event_machine/event_machine.h</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/fsmr35/src-tools35/src/ncp_em/event_vp_config/code/src/include/adk_em_sys_util.h</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/fsmr35/src-tools35/src/ncp_em/event_machine/lsi/em_lsi_event_group.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/fsmr35/src-tools35/src/ncp_em/event_machine/lsi/em_lsi_queue_group.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/fsmr35/src-tools35/src/ncp_em/event_machine/lsi/em_lsi_event_group.h</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/fsmr35/src-tools35/src/ncp_em/misc/misc_list.h</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/fsmr35/src-tools35/src/ncp_em/event_machine/lsi/event_machine_hw_types.h</path>
+</paths>
+<msg>Replaced Nokia Siemens Networks by Nokia.</msg>
+</logentry>
+<logentry
+   revision="116447">
+<author>eambrosc</author>
+<date>2014-11-12T09:02:58.271146Z</date>
+<paths>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-lrcddg/src/led_driver_vrha/led_driver_vrha.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-lrcddg/src/pmc_tracer/pmc_task_trace.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-fsmdtg/src/staging/include/nsn-wqe-size-define.h</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-lrcddg/src/trs/fpci_dispatcher/fpci_nl_rx_tx.h</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-fsmdtg/src/staging/se_cfg_dispatcher/seCfgDrv_If.h</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-fsmdtg/src/mlppp/mlppp.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-fsmddg/src/pbcr/README</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-bos/README</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-fsmdtg/src/mlppp/mlppp.h</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-lrcddg/src/include/trs/dbgcntcommon.h</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-lrcddg/src/include/trs/nsn_sdk_al.h</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-fsmdtg/src/staging/se_ifcfg/me_hl_se_drv.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-fsmdtg/src/include/trs-helper-util.h</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-fsmdtg/src/mlppp/mlppp_rx.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-lrcddg/src/trs/fpci_dispatcher/fpci_hwl_rx_tx.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-fsmdtg/src/staging/include/se_api_gsm.h</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-fsmdtg/src/staging/include/se_api_common.h</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-fsmdtg/src/staging/se_ifcfg/me_hl_se_drv.h</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-ddg/src/i2c/busses/i2c-octeon.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-lrcddg/src/trs/fpci_dispatcher/fpci_hwl_rx_tx.h</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-fsmddg/src/seboot/seboot-device.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-lrcddg/src/fpga_load/fpga_load.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-fsmddg/src/seboot/seboot.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-fsmdtg/src/fpci_dispatcher/fpci_hwl_rx_tx.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-mddg/src/gpio/mddg_gpio_mpc8548.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-lrcddg/src/fault_mgmt/fault_mgmt.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-fsmdtg/src/fpci_dispatcher/fpci_hwl_rx_tx.h</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-ddg/src/firmware/ccssa_family/fpga_ver.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-fsmdtg/src/ipoatm/ipoatm.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-fsmdtg/src/resource-mngr/fpdebug/dbgcntcommon.h</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-fsmdtg/src/staging/include/trs-helper-util.h</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-fsmdtg/src/fpci_dispatcher/fpci_nl_rx_tx.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-fsmdtg/src/staging/se_ifcfg/me_hal_se_drv_cv.h</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-fsmdtg/src/staging/se_cfg_dispatcher/se_cfg_mod_rx.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-fsmdtg/src/ipoatm/ipoatm.h</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-lrcddg/src/trs/fpci_dispatcher/fpci_test_stub.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-fsmdtg/src/staging/se_cfg_dispatcher/se_cfg_mod_tx.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-fsmdtg/src/staging/se_cfg_dispatcher/se_cfg_mod_help.h</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-fsmdtg/src/staging/resource-mngr/oct_hw_init.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-fsmddg/src/fpga_sgmii/fpga_sgmii.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-fsmdtg/src/fpci_dispatcher/fpci_nl_rx_tx.h</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-fsmdtg/src/staging/se_cfg_dispatcher/se_cfg_mod_rx.h</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-fsmdtg/src/ipoatm/ipoatm_rx.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-ddg/src/misc/fpga_failsave.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-fsmdtg/src/staging/se_cfg_dispatcher/se_cfg_mod_tx.h</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-lrcddg/src/i2c/busses/i2c-octeon.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-lrcddg/src/eac/port_core.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-lrcddg/src/trs/oct_hw_init/oct_hw_init.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-fsmdtg/src/staging/include/se_api_msg_header.h</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-fsmdtg/src/fpci_dispatcher/fpci_test_stub.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-fsmdtg/src/staging/se_ifcfg/se_ifcfg_mod.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-lrcddg/src/trs/fpci_dispatcher/fpci_nl_rx_tx.c</path>
+</paths>
+<msg>Replaced Nokia Siemens Networks by Nokia.</msg>
+</logentry>
+<logentry
+   revision="116445">
+<author>eambrosc</author>
+<date>2014-11-12T08:34:02.109081Z</date>
+<paths>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-fsmddg/src/pbcr/pbcr_p_sync.h</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-fsmddg/src/include/fsmddg_defs.h</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-lrcbrm/src/xt/ocxo/hta_oven_temp_cntl.h</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-ddg/src/include/fsmddg_sfp.h</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-lrcddg/src/reset/agusta_i2c.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-fsmddg/src/include/iffsmddg/fsmddg_if_ccssa_irq_hook.h</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-ddg/src/radio/routing/murkku/stream_router/intr.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-ddg/src/radio/routing/murkku/switched_router/rp3_swr.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-fsmddg/src/tty_console/fsmddg_tty.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-fsmddg/src/include/pkae.h</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-ddg/src/radio/routing/murkku/stream_router/intr.h</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-lrcddgif/src/include/iffsmddg_clk_sync.h</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-lrcddal/src/axc/ddal_axc.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-ddg/src/sfp/fsmr4/sfp_common.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-fsmddg/src/filter/filter.h</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-fsmddg/src/clk/clk_hw.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-fsmddg/src/sscop/sscs_sscf.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-fsmddg/src/uccssa_clk/uccssa_clk_hw.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-fsmddg/src/sscop/sscs_sscf.h</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-fsmdtg/src/fpci_dispatcher/fpci_hwl_rx_tx.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-ddg/src/radio/cpri/cprimon/eb.h</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-lrcddg/src/include/bbb_cpri_port.h</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-commonddal/src/unit/ddal_unit.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-commonddal/src/devicetree/ddal_devicetree.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-fsmdtg/src/fpci_dispatcher/fpci_hwl_rx_tx.h</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-tools/src/iq_capture_play/iq_capture_play.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-ddg/src/radio/cpri/cprimon/delay.h</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-fsmdtg/src/resource-mngr/fpdebug/fpdebug.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-ddg/src/radio/obsai/murkku/murkku_rp3_link_define.h</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-ddg/src/sfp/fsmr3/murkku_sfp.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-lrcbrm/src/xt/xt.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-ddg/src/system_driver/fsmddg_system_debug.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-fsmddg/src/fpga_spi/spi_temp.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-lrcbrm/src/xt/xt.h</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-fsmddg/src/dtb/fsmddg_dtb_main.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-fsmddg/src/include/ccssa_registers.h</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-fsmddg/src/mdio/eifs_irqs.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-lrcddgif/src/include/axc.h</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-ddg/src/radio/cpri/core/port_ops.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-ddg/src/radio/obsai/murkku/murkku_mcubuf.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-fsmdtg/src/fpci_dispatcher/fpci_test_stub.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-ddg/src/radio/cpri/cprimon/measureT14.h</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-lrcddg/src/vespa/vespa_main.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-fsmddg/src/fseb/fseb.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-fsmddg/src/mdio/phy-mux.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-lrcbrm/src/bootcore/string.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-ddg/src/system_driver/fsmddg_system_init_mfd_dt.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-ddg/src/radio/cpri/murkku/vsb_fsm.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-fsmddg/src/ec2g_clk/ec2g_clk_init.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-lrcddg/src/vespa/vespa_gpio.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-ddg/src/i2c/devices/eeprom/eeprom.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-commonddal/src/common/ddal_strerror.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-ddg/src/radio/cpri/murkku/vsb_fsm.h</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-fsmddg/src/include/iffsmddg/fsmddg_clk.h</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-ddg/src/radio/cpri/murkku/port_ops.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-ddg/src/radio/cpri/murkku/regs.h</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-fsmdtg/src/include/trs-helper-util.h</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-fsmdtg/src/mlppp/mlppp_rx.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-lrcbrm/src/xt/ocxo/hta_driver_i2c.h</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-lrcddg/src/trs/fpci_dispatcher/fpci_hwl_rx_tx.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-ddg/src/radio/cpri/murkku/hdlc_m2.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-fsmddg/src/rf-asic/ad9643-uspi.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-ddg/src/radio/cpri/murkku/port_ops.h</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-lrcddg/src/trs/fpci_dispatcher/fpci_hwl_rx_tx.h</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-fsmddg/src/temperature/lm75.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-tools/src/fmon/target/homeless/cmd/cmd_agent.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-ddg/src/gpio/gpio.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-fsmddg/src/ec2_clk/ec2_clk_init.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-ddg/src/leds/leds_asic_murkku2.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-ddg/src/radio/cpri/cprimux/intr.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-ddg/src/rp3_mux/ad8153.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-ddg/src/radio/cpri/cprimux/intr.h</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-ddg/src/radio/cpri/murkku/vsb.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-fsmddg/src/sfn/fsmddg_sfn.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-ddg/src/radio/cpri/murkku/vsb.h</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-lrcddg/src/vespa/vespa_irq.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-fsmddg/src/rf-asic/tx-pll.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-fsmddg/src/system_driver/fsmddg_system_mem.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-lrcbrm/src/xt/ocxo/hta_driver_tty.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-lrcddg/src/sfp/drivers/sfp_gpio.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-lrcddg/src/trs/fpci_dispatcher/fpci_test_stub.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-ddg/src/testing/fsmddg_testmod.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-fsmdtg/src/staging/se_cfg_dispatcher/se_cfg_mod_help.h</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-ddg/src/misc/fpga_failsave.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-lrcbrm/src/xt/ocxo/hta_driver_tty.h</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-fsmddg/src/temperature/lm95235.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-lrcddal/src/fpga_load/ddal_fpga_load.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-ddg/src/include/cpri.h</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-fsmddg/src/ec2_clk/clk.h</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-lrcddg/src/vrha/drivers/vrha_epcq.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-ddg/src/eth/murkku/ex_switch/ex_switch.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-ddg/src/radio/routing/murkku/stream_router/stream.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-ddg/src/firmware/dtbo_loader.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-fsmddg/src/sscop/sscf.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-lrcddg/src/clk/clk_ninja_i2c/ninja_i2c.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-lrcddg/src/sfp/drivers/sfp_i2c.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-ddg/src/eth/murkku/ex_switch/ex_switch.h</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-fsmddg/src/fpga_3hu/fpga_3hu.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-ddg/src/radio/routing/murkku/stream_router/stream.h</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-ddg/src/gpio/gpio_bmu.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-ddg/src/fsoc_clk/fsoc_clk_sah.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-ddg/src/radio/cpri/murkku/forwarder_m2.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-fsmddg/src/synceth/zl30142.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-lrcddal/src/cpri/ddal_cpri_link.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-ddg/src/radio/routing/murkku/stream_router/regs.h</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-fsmddg/src/i2c_mdio/i2c_mdio_multibus.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-lrcbrm/src/xt/ocxo/hta_fpga.h</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-ddg/src/testing/locktest.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-fsmddg/src/ts_setup/fsmddg_ts_setup.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-fsmdtg/src/mlppp/mlppp.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-fsmddg/src/mdio/cavium_pcs_phy.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-fsmddg/src/clk/ccssa_registers.h</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-lrcddal/src/sfn/ddal_sfn.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-fsmddg/src/include/fsmddg_rp3_control2.h</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-lrcbrm/src/xt/gpio/gpio_test.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-fsmdtg/src/mlppp/mlppp.h</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-lrcddg/src/include/trs/dbgcntcommon.h</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-ddg/src/radio/obsai/murkku/murkku_rp301.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-ddg/src/system_driver/fsmddg_system_board.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-ddg/src/i2c/devices/cortina/cs4223.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-lrcbrm/src/xt/gpio/gpio_test.h</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-ddg/src/radio/cpri/cprimux/cpri.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-ddg/src/leds/leds_bmu.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-ddg/src/dtb/maia/hexfiles/MAIA_FLv1/maia0_k3.dts</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-ddg/src/fsoc_test/fsoc_test.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-ddg/src/radio/cpri/murkku/hdlc_m3.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-fsmddg/src/sscop/sscop_dsc.h</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-lrcddal/src/redundancy/ddal_redundancy.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-fsmddg/src/include/fsmddg_if_dac.h</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-ddg/src/sfp/fsmr4/sfp_gpio.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-lrcddg/src/vespa/vespa_i2c.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-fsmddg/src/clk/clk_testmode.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-ddg/src/radio/cpri/murkku/main.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-ddg/src/radio/cpri/cprimux/fw.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-fsmddg/src/include/fsmddg_fpga.h</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-lrcddg/src/trs/fpdebug/fpdebug_mod.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-ddg/src/radio/cpri/murkku/main.h</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-fsmddg/src/include/fsmddg_rf_jitter_cleaner.h</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-lrcddg/src/cpri/cpri_core.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-lrcddg/src/pmc_tracer/main.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-ddg/src/gpio/fspx_detect.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-fsmddg/src/uccssa_clk/uccssa_clk_alarm.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-fsmddg/src/rf-asic/rx-pll.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-lrcddg/src/cpri/cpri_core.h</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-lrcddal/src/clk/ddal_clk_sync.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-fsmddg/src/mdio/fsmddg_mdio.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-ddg/src/fsoc_clk/fsoc_clk.h</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-lrcddg/src/sfn/ahp/sfn_ahp.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-fsmdtg/src/staging/se_cfg_dispatcher/se_cfg_mod_tx.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-lrcbrm/src/xt/ocxo/hta_common.h</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-lrcddal/src/cpri/ddal_cpri_hdlc_lrc.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-fsmddg/src/poc_ctrl/poc_ctrl.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-lrcddg/src/axc/axc_attr.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-fsmdtg/src/staging/se_cfg_dispatcher/se_cfg_mod_tx.h</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-lrcddg/src/trs/oct_hw_init/oct_hw_init.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-ddg/src/fsoc_clk/fsoc_clk_init.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-fsmdtg/src/staging/se_ifcfg/se_ifcfg_mod.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-fsmddg/src/sscop/sscop_common.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-fsmddg/src/fan/fan_murkku1.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-lrcbrm/src/xt/twsi/twsi.h</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-fsmddg/src/sscop/sscop_common.h</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-fsmddg/src/cdce/cdce.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-fsmddg/src/Makefile</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-ddg/src/radio/murkku/murkku_core.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-ddg/src/radio/cpri/murkku/forwarder_m3.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-fsmddg/src/demo/fsmddg_demo02.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-ddg/src/reset/reset.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-ddg/src/system_driver/fsmddg_system_mem.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-fsmddg/src/rf-asic/rx-attenuator.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-lrcddg/src/include/vespa.h</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-fsmddg/src/i2c-mux/fsoc_i2c_mux.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-fsmddg/src/fpga_ftm/fpga_ftm.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-lrcddg/src/sfn/shp/sfn_shp.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-ddg/src/radio/routing/murkku/stream_router/main.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-fsmdtg/src/Makefile</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-ddg/src/include/fsmddg_rp3_control_clk_int.h</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-ddg/src/cpri_mon/cpri_mon_pcu.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-fsmddg/src/filter/filter_main.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-ddg/src/radio/cpri/murkku/l1.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-lrcbrm/src/xt/ocxo/hta_cfg.h</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-ddg/src/radio/routing/murkku/stream_router/main.h</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-ddg/src/radio/cpri/cprimux/regs.h</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-ddg/src/radio/cpri/cprimux/rp301.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-tools/src/se-utils/nsn_hotplugse/nsn_hotplugse.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-ddg/src/cpri_mon/cpri_mon_pcu.h</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-fsmddg/src/sscop/sscf_dsc.h</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-ddg/src/radio/cpri/murkku/l1.h</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-fsmddg/src/include/fsmddg_mdio_access.h</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-ddg/src/leds/led.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-fsmddg/src/rf-asic/pdrx-adc.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-fsmddg/src/retimer/gn1406.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-fsmddg/src/udpcp/udpcp.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-ddg/src/include/fsmddg_mcubuf.h</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-ddg/src/radio/murkku/murkku_core_2_6_x.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-lrcbrm/src/xt/pmbus/hta_enet.h</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-fsmddg/src/udpcp/udpcp.h</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-ddg/src/radio/cpri/cprimux/cprimux_rp301.h</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-ddg/src/net/mdio/ddg_mdio_access.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-lrcbrm/src/xt/pci/pci_i2c.h</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-lrcbrm/src/xt/fpga_i2c/fpga_i2c.h</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-lrcddg/src/sfp/drivers/sfp_common.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-fsmdtg/src/ipoatm/ipoatm.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-fsmddg/src/psu_shutdown_interface/psu_shutdown_interface.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-lrcbrm/src/xt/pmbus/hta_wd.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-fsmddg/src/clk/clk_init.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-ddg/src/i2c/devices/sfp/sfp_i2c.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-ddg/src/radio/cpri/cprimon/perfcount.h</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-lrcddg/src/sfp/drivers/sfp_common.h</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-fsmdtg/src/ipoatm/ipoatm.h</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-fsmddg/src/sscop/af_sscs.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-lrcddg/src/trs/hrtbt/hrtbt_mod.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-lrcbrm/src/xt/pmbus/hta_wd.h</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-fsmddg/src/fpga_sgmii/fpga_sgmii.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-fsmddg/src/include/iffsmddg/fsmddg_if_cal.h</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-lrcbrm/src/bootcore/main.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-ddg/src/sfp/fsmr3/fqg_sfp_gpio.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-ddg/src/i2c/devices/fpga/pldRace.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-ddg/src/fsoc_clk/fsoc_clk_ops.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-fsmddg/src/include/iffsmddg/fsmddg_if_rf_asic.h</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-fsmddg/src/utils/fsmddg_utils.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-fsmddg/src/sscop/tnp_ErrorInterface.h</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-fsmddg/src/fan/fan_murkku2.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-lrcddal/src/cpri/ddal_cpri_misc.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-ddg/src/leds/leds_fpga_cprimon.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-ddg/src/radio/cpri/core/event.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-ddg/src/i2c/devices/fpga/bmuq_ctrl.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-ddg/src/cpu/fsmddg_ecc_test.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-ddg/src/radio/cpri/cprimux/port.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-fsmddg/src/ec2_clk/ec2_clk_hw.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-ddg/src/radio/cpri/core/event.h</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-fsmddg/src/rf-asic/pdrx-temp.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-fsmddg/src/include/fsmddg_dtbo.h</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-ddg/src/radio/cpri/cprimux/core.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-ddg/src/radio/cpri/cprimux/port.h</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-lrcddal/src/id/ddal_id.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-ddg/src/system_driver/fsmddg_system_driver_loc.h</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-fsmddg/src/temperature/ccssa_temp.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-ddg/src/gpio/gpio_u32.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-fsmddg/src/sscop/saal_queue.h</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-ddg/src/include/fsmddg_fsoc_access.h</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-fsmddg/src/sfn/Makefile</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-lrcbrm/src/bootcore/include/cavium/cvmx.h</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-ddg/src/radio/cpri/cprimon/cpri_mon_cpri.h</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-lrcddal/src/utils/ddal_utils.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-fsmddg/src/seboot/seboot.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-ddg/src/fsoc_clk/fsoc_clk_gsm_bcn.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-ddg/src/radio/cpri/murkku/fsm.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-fsmddg/src/uccssa_clk/clk.h</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-ddg/src/firmware/ccssa_family/fpga_ver.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-ddg/src/radio/cpri/murkku/fsm.h</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-fsmddg/src/serdes_switch/i2c_ds100mb203.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-fsmddg/src/sscop/tnp_Log.h</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-lrcbrm/src/xt/ocxo/hta_i2c.h</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-lrcddg/src/cpri/cpri_irq.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-ddg/src/radio/cpri/murkku/forwarder.h</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-ddg/src/radio/cpri/cprimon/zhdlc.h</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-lrcddg/src/cpri/cpri_irq.h</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-ddg/src/fsoc_i2c/fsoc_i2c.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-fsmddg/src/include/fsmddg_system_driver.h</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-lrcbrm/src/xt/pmbus/hta_test_mem.h</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-ddg/src/radio/cpri/cprimux/gpio.h</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-fsmddg/src/clock-distributor/cdcl1810.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-lrcddgif/src/include/cs4322.h</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-fsmddg/src/rf-asic/pa-temp.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-fsmddg/src/include/device_name.h</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-fsmddg/src/ppe/ltc4266.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-lrcddgif/src/include/sfn.h</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-lrcddg/src/temperature/harley_temperature.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-test/src/unittest/tests/lrc/ddal/pmc_tracer/tc03030.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-fsmdtg/src/staging/se_cfg_dispatcher/se_cfg_mod.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-fsmddg/src/ec2g_clk/ec2g_clk_alarm.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-fsmddg/src/include/fsmddg_bmu.h</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-lrcbrm/src/xt/vrha/harley.h</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-fsmddg/src/dac/fsmddg_dac.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-fsmddg/src/sscop/tnp_ArpTable.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-fsmddg/src/mdio/virtual-mdio.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-fsmddg/src/include/fsmddg_mdio.h</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-ddg/src/radio/cpri/cprimux/cpri_axc.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-lrcddg/src/cpri_misc/cpri_dbgfs.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-fsmddg/src/rf-asic/aux-dac.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-fsmddg/src/include/iffsmddg/fsmddg_if_fsoc_test.h</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-ddg/src/fsoc_clk/fsoc_clk_monitor.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-fsmddg/src/sscop/tnp_ArpTable.h</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-fsmddg/src/fan/fan.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-fsmdtg/src/staging/include/se_api_gsm.h</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-lrcddg/src/cpri_misc/cpri_dbgfs.h</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-lrcddg/src/vespa/vespa_payload_alarm.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-fsmddg/src/include/iffsmddg/fsmddg_if_watchdog.h</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-ddg/src/radio/routing/murkku/stream_router/tr.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-fsmddg/src/system_driver/fsmddg_system_debug.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-ddg/src/i2c/devices/srio/srio_i2c.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-lrcbrm/src/xt/xt_func.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-lrcddg/src/cortina_srlr/cs4322_srlr.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-fsmddg/src/sscop/pdu.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-lrcbrm/src/xt/iic/iic_test.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-lrcddal/src/gpsd/ddal_gpsd.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-lrcddg/src/mdio/fsmddg_mdio_access.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-ddg/src/gpio/gpio_u16.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-ddg/src/radio/routing/murkku/stream_router/tr.h</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-ddg/src/radio/cpri/murkku/hdlc.h</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-fsmdtg/src/staging/hrtbt/hrtbt.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-fsmddg/src/sscop/pdu.h</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-ddg/src/uart2/uart2.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-lrcbrm/src/xt/iic/iic_test.h</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-lrcddg/src/mdio/fsmddg_mdio_access.h</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-fsmddg/src/nbb/fsmddg_nbb.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-fsmddg/src/qsfp_repeater/ds64br111.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-lrcddg/src/vespa/vespa_slot.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-lrcddg/src/axc/axc_core.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-ddg/src/radio/cpri/cprimon/gtp.h</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-lrcddal/src/fan/ddal_fan.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-ddg/src/radio/cpri/cprimux/cpri_port_ops.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-lrcddg/src/axc/axc_core.h</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-ddg/src/cpu/fsmddg_ecc.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-ddg/src/include/cpri_mon_core.h</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-fsmddg/src/include/iffsmddg/fsmddg_if_ppe.h</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-ddg/src/radio/cpri/core/port.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-ddg/src/radio/murkku/murkku2_registers.h</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-lrcddg/src/vespa/vespa_latch.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-fsmddg/src/include/iffsmddg/fsmddg_if_sfn.h</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-fsmdtg/src/resource-mngr/fpdebug/dbgcntcommon.h</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-lrcddg/src/linkstreet/linkstreet.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-fsmdtg/src/staging/include/trs-helper-util.h</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-lrcddg/src/axc/axc_proc.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-ddg/src/radio/cpri/core/port.h</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-fsmddg/src/uccssa_clk/uccssa_clk_init.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-lrcbrm/src/xt/pmbus/hta_util.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-ddg/src/sfp/fsmr3/fct_srio_sfp_gpio.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-fsmdtg/src/ipoatm/ipoatm_rx.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-lrcbrm/src/xt/pmbus/hta_util.h</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-ddg/src/dtb/maia/hexfiles/MAIA_FLv1/maia1_k3.dts</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-lrcbrm/src/xt/pmbus/hta_tty.h</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-fsmddg/src/ec2g_clk/ec2g_clk_hw.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-fsmddg/src/rf-asic/adl5811-uspi.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-ddg/src/radio/cpri/cprimon/slowCnM.h</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-tools/src/se-utils/nsn_hotplugse/Makefile</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-fsmddg/src/ec2g_clk/clk.h</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-lrcddg/src/vrha/drivers/vrha_gpio.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-lrcddal/src/hotplug/ddal_hotplug.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-test/src/unittest/tests/lrc/ddal/pmc_tracer/tc03031.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-tools/src/uboot_env/uboot_env.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-lrcbrm/src/bootcore/include/bootcore.h</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-test/src/unittest/tests/lrc/ddal/slot_id/test_ddal_slot_id.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-ddg/src/eth/murkku/ex_gmac/ex_gmac.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-lrcddg/src/vrha/drivers/vrha_fpga_dtb.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-fsmddg/src/sscop/diag.h</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-ddg/src/radio/cpri/core/main.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-ddg/src/eth/murkku/ex_gmac/ex_gmac.h</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-fsmdtg/src/staging/se_ifcfg/me_hl_se_drv.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-fsmddg/src/i2c_mdio/i2c_mdio.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-ddg/src/sfp/sfp.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-lrcddg/src/include/dtbo.h</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-lrcddg/src/include/sfp.h</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-fsmdtg/src/staging/se_ifcfg/me_hl_se_drv.h</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-lrcddal/src/clk/ddal_clk_rtc.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-fsmddg/src/ec2_clk/ec2_clk_alarm.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-ddg/src/radio/cpri/murkku/vsb_fops.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-fsmddg/src/sscop/sscs_mgmt.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-fsmddg/src/clk/clk.h</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-ddg/src/radio/cpri/core/axc.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-fsmddg/src/pbcr/pbcr_misc_loc.h</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-ddg/src/radio/cpri/murkku/vsb_fops.h</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-fsmddg/src/sscop/sscs_mgmt.h</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-ddg/src/picasso/picasso.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-test/src/unittest/tests/lrc/ddal/pmc_tracer/tc03040.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-ddg/src/radio/cpri/core/axc.h</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-fsmddg/src/sscop/sscf_common.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-ddg/src/include/fsmddg_fsoc_interrupts.h</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-fsmdtg/src/staging/se_ifcfg/me_hal_se_drv_cv.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-lrcddg/src/dtbo/dtbo_loader.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-fsmddg/src/sscop/sscf_common.h</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-lrcddg/src/cpri/cpri_packer_unpacker.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-fsmdtg/src/mcheck/mcheck_mod.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-fsmdtg/src/staging/fpdebug/fpdebug_mod.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-lrcddg/src/reset/reset.h</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-fsmdtg/src/staging/se_ifcfg/me_hal_se_drv_cv.h</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-fsmddg/src/include/fsmddg_fct_gpio.h</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-fsmddg/src/include/fsmddg_irq.h</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-ddg/src/radio/routing/murkku/stream_router/event.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-lrcddg/src/vespa/vespa_led.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-fsmddg/src/dac_high_acc/fsmddg_dac_high_acc.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-lrcbrm/src/xt/boot/boot_test.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-ddg/src/radio/routing/murkku/stream_router/event.h</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-fsmddg/src/system_driver/fsmddg_system_board.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-lrcbrm/src/xt/cpld/cpld_i2c.h</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-fsmddg/src/sscop/share/sscop_addr.h</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-fsmddg/src/dac_high_acc/fsmddg_dac_high_acc.h</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-ddg/src/radio/cpri/cprimon/mt.h</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-lrcddg/src/nbb/fsmddg_nbb.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-cvmxsources/src/patches/024_sdk_sync.patch_</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-lrcbrm/src/xt/boot/boot_test.h</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-ddg/src/radio/cpri/cprimux/cprimux_cpri.h</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-fsmddg/src/temperature/fpga_ovr_temp.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-ddg/src/radio/cpri/cprimon/debug_ram.h</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-fsmdtg/src/atm_dev/atmsig.h</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-lrcddg/src/trs/fpci_dispatcher/fpci_nl_rx_tx.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-lrcddg/src/vespa/vespa_reset.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-fsmdtg/src/staging/include/nsn-wqe-size-define.h</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-fsmddg/src/rf-asic/uspi-driver.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-lrcddg/src/trs/fpci_dispatcher/fpci_nl_rx_tx.h</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-test/src/unittest/tests/lrc/ddal/pmc_tracer/tc03032.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-fsmdtg/src/staging/se_cfg_dispatcher/seCfgDrv_If.h</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-lrcbrm/src/xt/ocxo/hta_i2c_defs.h</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-ddg/src/irqchip/murkku/murkku_irq.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-fsmddg/src/rf-asic/rx-adc.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-test/src/unittest/tests/lrc/ddal/shf/ddal_shf_test.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-fsmddg/src/retimer/ds125.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-ddg/src/include/fsmddg_system_driver.h</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-lrcddg/src/include/trs/nsn_sdk_al.h</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-lrcddg/src/vespa/vespa_ninja.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-fsmddg/src/include/fsmddg_system_board.h</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-fsmddg/src/sscop/sscs.h</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-lrcbrm/src/xt/phy/phy_test.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-ddg/src/radio/cpri/core/lsm.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-ddg/src/include/fsmddg_rp3_control.h</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-fsmddg/src/sscop/share/sscop_Config.h</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-ddg/src/fsoc_clk/fsoc_clk_clock_control.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-fsmdtg/src/staging/include/se_api_common.h</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-lrcbrm/src/xt/phy/phy_test.h</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-ddg/src/i2c/devices/fpga/bmu_ctrl.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-fsmddg/src/rf-chain/rf-chain.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-lrcddg/src/vrha/drivers/vrha_sfp_i2c.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-ddg/src/radio/cpri/murkku/intr.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-ddg/src/include/sfp_common.h</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-lrcddal/src/fault_mgmt/ddal_fault_mgmt.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-fsmddg/src/mdio/Makefile</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-ddg/src/radio/cpri/murkku/intr.h</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-ddg/src/Makefile</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-ddg/src/picasso_gpio/picasso_gpio.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-ddg/src/clk/murkku/rp301_interrupts.h</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-lrcbrm/src/xt/pmbus/hta_math64.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-test/src/unittest/tests/lrc/ddal/pmc_tracer/tc03041.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-fsmddg/src/clk/clk_alarm.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-lrcddal/src/clk/ddal_clk_ocxo.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-ddg/src/radio/murkku/murkku1_registers.h</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-fsmddg/src/rf-asic/lclk153.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-fsmddg/src/include/fsmddg_ftm.h</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-lrcbrm/src/xt/pmbus/hta_math64.h</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-lrcddg/src/fpga_load/fpga_load_driver.h</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-fsmddg/src/rf-asic/tx-dac.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-fsmddg/src/uart-mux/uart-mux.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-fsmdtg/src/fpci_dispatcher/fpci_nl_rx_tx.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-fsmdtg/src/staging/se_cfg_dispatcher/se_cfg_mod_rx.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-fsmddg/src/sscop/timer.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-fsmddg/src/system_driver/fsmddg_system_init_mfd_dt.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-lrcddg/src/sfn/sfn.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-fsmddg/src/rf-asic/rf-asic.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-ddg/src/radio/cpri/cprimux/cprimux.h</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-ddg/src/radio/cpri/core/axc_ops.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-fsmdtg/src/fpci_dispatcher/fpci_nl_rx_tx.h</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-fsmdtg/src/staging/resource-mngr/oct_hw_init.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-lrcddg/src/axc/axc_playback_capture.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-lrcddgif/src/include/cortina_raw.h</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-fsmddg/src/sscop/queue.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-fsmdtg/src/staging/se_cfg_dispatcher/se_cfg_mod_rx.h</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-lrcddg/src/sfp/sfp.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-fsmddg/src/rf-asic/rf-asic.h</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-commonddal/src/sfp/ddal_sfp.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-ddg/src/radio/cpri/murkku/axc.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-fsmddg/src/sscop/common.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-lrcddg/src/cpri/cpri_attr.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-lrcddg/src/vrha/drivers/vrha_pmbus.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-fsmdtg/src/staging/include/se_api_msg_header.h</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-lrcddg/src/include/bbb_iq_switch.h</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-ddg/src/radio/cpri/murkku/axc.h</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-lrcddal/src/pmc_tracer/ddal_pmc.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-fsmddg/src/system_driver/fsmddg_system_driver_loc.h</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-lrcddg/src/cpri/cpri_attr.h</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-fsmddg/src/pbcr/pbcr_p_sync.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-ddg/src/include/fsmddg_rp3_link.h</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-lrcddal/src/cpri/ddal_cpri_common.c</path>
+</paths>
+<msg>Replaced Siemens copyright by Nokia.</msg>
+</logentry>
+<logentry
+   revision="116443">
+<author>eambrosc</author>
+<date>2014-11-12T08:23:30.348486Z</date>
+<paths>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/fsmr35/src-tools35/src/ncp_em/event_machine/lsi/em_lsi_queue_group.h</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/fsmr35/src-tools35/src/ncp_em/event_machine/lsi/em_lsi_fp.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/fsmr35/src-tools35/src/ncp_em/event_machine/lsi/event_machine_hw_config.h</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/fsmr35/src-tools35/src/ncp_em/event_test/example/non_em_main.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/fsmr35/src-tools35/src/ncp_em/event_machine/event_machine_group.h</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/fsmr35/src-tools35/src/ncp_em/event_vp_config/code/include/adk_em.h</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/fsmr35/src-tools35/src/ncp_em/misc/lsi/lsi_environment.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/fsmr35/src-tools35/src/ncp_em/event_machine/lsi/em_lsi_fp.h</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/fsmr35/src-tools35/src/ncp_em/misc/lsi/atomic.h</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/fsmr35/src-tools35/src/ncp_em/event_machine/lsi/em_lsi.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/fsmr35/src-fsmbos35/src/kernel/Makefile</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/fsmr35/src-fsmbos35/src/kernel/scripts/Makefile.modules.in</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/fsmr35/src-fsmbrm35/src/ftool4/src/main.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/fsmr35/src-tools35/src/ncp_em/event_machine/lsi/linux_kernel/em_lsi_timer_kernel.h</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/fsmr35/src-tools35/src/ncp_em/event_machine/lsi/em_lsi.h</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/fsmr35/src-tools35/src/ncp_em/event_machine/lsi/event_machine_hw_specific.h</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/fsmr35/src-fsmbrm35/src/xt/xt.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/fsmr35/src-tools35/src/ncp_em/event_machine/lsi/em_trace.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/fsmr35/src-fsmbrm35/src/xt/xt.h</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/fsmr35/src-tools35/src/ncp_em/event_machine/lsi/em_trace.h</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/fsmr35/src-tools35/src/ncp_em/event_test/example/em_main.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/fsmr35/src-tools35/src/ncp_em/event_vp_config/code/src/include/adk_em_internal.h</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/fsmr35/src-fsmbrm35/src/ftool4_k2_4mb_flash/src/main.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/fsmr35/src-fsmbrm35/src/crtm/cpu/uimage.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/fsmr35/src-tools35/src/ncp_em/event_machine/lsi/em_lsi.mk</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/fsmr35/src-fsmbrm35/src/xt/cmd_tbl.h</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/fsmr35/src-tools35/src/ncp_em/event_machine/lsi/em_internal_event.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/fsmr35/src-tools35/src/ncp_em/event_machine/lsi/event_machine_config.h</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/fsmr35/src-tools35/src/ncp_em/misc/lsi/environment.h</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/fsmr35/src-tools35/src/ncp_em/event_machine/lsi/em_internal_event.h</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/fsmr35/src-tools35/src/ncp_em/event_machine/event_machine_core_mask.h</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/fsmr35/src-tools35/src/ncp_em/event_machine/event_machine_types.h</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/fsmr35/src-fsmbrm35/src/ssllib_uboot/build_control/ReleaseNote.crtmlib</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/fsmr35/src-tools35/src/ncp_adk/code/em/src/include/adk_em_internal.h</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/fsmr35/src-tools35/src/ncp_em/event_machine/lsi/em_lsi_timer.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/fsmr35/src-fsmbrm35/src/crtm/cpu/main.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/fsmr35/src-tools35/src/ncp_em/event_machine/lsi/em_error.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/fsmr35/src-tools35/src/ncp_adk/code/em/src/include/adk_em_log.h</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/fsmr35/src-tools35/src/ncp_em/event_machine/lsi/em_lsi_timer.h</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/fsmr35/src-tools35/src/ncp_em/event_test/example/pcx_main.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/fsmr35/src-tools35/src/ncp_em/event_machine/lsi/em_error.h</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/fsmr35/src-tools35/src/ncp_em/event_machine/event_machine_helper.h</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/fsmr35/src-tools35/src/ncp_em/event_vp_config/code/src/C/adk_em.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/fsmr35/src-tools35/src/ncp_em/event_machine/event_machine.h</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/fsmr35/src-tools35/src/ncp_em/event_vp_config/code/src/include/adk_em_sys_util.h</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/fsmr35/src-tools35/src/ncp_em/event_machine/lsi/em_lsi_event_group.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/fsmr35/src-tools35/src/ncp_em/event_machine/lsi/em_lsi_queue_group.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/fsmr35/src-tools35/src/ncp_em/event_machine/lsi/em_lsi_event_group.h</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/fsmr35/src-fsmbrm35/src/xt/xt_func.c</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/fsmr35/src-tools35/src/ncp_em/misc/misc_list.h</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/fsmr35/src-fsmbrm35/src/crtm/include/crtm.h</path>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/fsmr35/src-tools35/src/ncp_em/event_machine/lsi/event_machine_hw_types.h</path>
+</paths>
+<msg>Replaced Siemens copyright by Nokia.</msg>
+</logentry>
+<logentry
+   revision="115893">
+<author>demx2fk3</author>
+<date>2014-11-11T15:12:27.740554Z</date>
+<paths>
+<path
+   prop-mods="false"
+   text-mods="true"
+   kind="file"
+   action="M">/os/FB1411/trunk/main/src-project/Dependencies</path>
+</paths>
+<msg>prepared Dependencies for new branch</msg>
+</logentry>
+<logentry
+   revision="115890">
+<author>psulm</author>
+<date>2014-11-11T14:34:48.787304Z</date>
+<paths>
+<path
+   prop-mods="false"
+   text-mods="false"
+   kind="dir"
+   copyfrom-path="/os/trunk"
+   copyfrom-rev="114389"
+   action="A">/os/FB1411/trunk</path>
+<path
+   prop-mods="false"
+   text-mods="false"
+   kind="dir"
+   action="A">/os/FB1411</path>
+</paths>
+<msg>initial creation of FB1411 branch. Based on PS_LFS_REL_2014_11_0100 (rev. 114389). DESCRIPTION: svn cp -r114389 --parents https://svne1.access.nokiasiemensnetworks.com/isource/svnroot/BTS_SC_LFS/os/trunk https://svne1.access.nokiasiemensnetworks.com/isource/svnroot/BTS_SC_LFS/os/FB1411/trunk</msg>
+</logentry>
+</log>

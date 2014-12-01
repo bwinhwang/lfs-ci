@@ -2,6 +2,8 @@
 
 LFS_CI_SOURCE_jenkins='$Id$'
 
+[[ -z ${LFS_CI_SOURCE_subversion} ]] && source ${LFS_CI_ROOT}/lib/subversion.sh
+
 ## @fn      executeJenkinsCli( command, parameters )
 #  @brief   execute a command via the jenkins CLI with some parameters
 #  @details «full description»
@@ -211,25 +213,34 @@ setBuildResultUnstable() {
     return
 }
 
-## @fn          setRevisionAsJobDescription
-#  @brief       set CI job description to SVN description
-#  @param       {jobName}      name of the CI job
-#  @jobXmlFile  {jobXmlFile}   name of the CI jobs XML file
-#  @branch      {branch}       name of the branch
+## @fn      setRevisionAsJobDescription()
+#  @brief   set CI job description to SVN description
+#  @param   {jobName}      name of the CI job
+#  @param   {jobXmlFile}   name of the CI jobs XML file
+#  @param   {branch}       name of the branch
 setRevisionAsJobDescription() {
-    local jobName=$1
-    local jobXmlFile=$2
-    local branch=$3
+    requiredParameters LFS_CI_ROOT
+
+    local jobXmlFile=$1
+    mustHaveValue "${jobXmlFile}" "job xml file"
+
+    local branch=$2
+    mustHaveValue "${branch}" "branch name"
+
     local svnServer=$(getConfig lfsSourceRepos)
-    local svnOutput="__svnout.xml"
+    local svnOutput=$(createTempFile)
 
-    svn log -v --xml --stop-on-copy $svnServer/os/$branch > $svnOutput
-    [ "$(grep '<msg>' $svnOutput)" ] || { echo "ERROR: $0 - invalid SVN output"; exit 1; }
+    svnLog -v --xml --stop-on-copy $svnServer/os/$branch > $svnOutput
+    [[ "$(grep '<msg>' $svnOutput)" ]] || fatal "invalid SVN xml output"
 
-    local pattern1="<description><\/description>"
-    local descr=$(bin/xpath -q -e '/log/logentry/msg/node()' $svnOutput | tail -1 | sed -e 's/[\/&]/\\&/g')
-    local pattern2="<description>$descr<\/description>"
-    rm -f $svnOutput
-    sed -i -e "0,/${pattern1}/s/${pattern1}/${pattern2}/" $jobXmlFile
-    [ $? -ne 0 ] && { "$0: setting description failed."; exit 1; }
+    local description=$(${LFS_CI_ROOT}/bin/xpath -q -e '/log/logentry/msg/node()' $svnOutput | tail -1 )
+    local tmpFile=$(createTempFile)
+
+    # 2014-12-01 eambrosc TODO try to use execute -n here
+    ${LFS_CI_ROOT}/bin/xmlsubst.pl "project/description:=fix($description)" < $jobXmlFile > $tmpFile
+    mustBeSuccessfull "$?" "xmlsubst.pl"
+
+    execute cp -f $tmpFile $jobXmlFile
+
+    return
 }
