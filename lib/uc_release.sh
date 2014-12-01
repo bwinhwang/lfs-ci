@@ -366,7 +366,7 @@ sendReleaseNote() {
     executeOnMaster ln -sf ${remoteDirectory} ${artifactsPathOnMaster}/release
 
     appproveReleaseForPsScm ${osTagName}
-    createReleaseInStatisticDatabase
+    createReleaseInStatisticDatabase ${buildJobName} ${buildBuildNumber}
 
     info "release is done."
     return
@@ -880,6 +880,9 @@ appproveReleaseForPsScm() {
 createReleaseInStatisticDatabase() {
     requiredParameters LFS_CI_ROOT LFS_PROD_RELEASE_CURRENT_TAG_NAME
 
+    local buildJobsName=$1
+    local buildJobBuild=$2
+
     local location=$(getLocationName)
     mustHaveLocationName
 
@@ -888,9 +891,13 @@ createReleaseInStatisticDatabase() {
 
     local date=$(date "+%Y-%m-%d %H:%M:%S")
 
+    copyFileFromBuildDirectoryToWorkspace ${buildJobsName} ${buildJobsName} ${WORKSPACE}/revisionstate.xml
+    local revision=$(cut -d" " -f 3 ${WORKSPACE}/revisionstate.xml | sort -nu | tail -n 1)
+    mustHaveValue "${revision}" "revision from revision state file"
+
     info "create release in statistic database"
     # TODO: demx2fk3 2014-12-01 add execute -i here
-    execute ${LFS_CI_ROOT}/bin/createReleaseInDatabase.pl -n ${label} -b ${location} -d "${date}"
+    execute ${LFS_CI_ROOT}/bin/createReleaseInDatabase.pl -n ${label} -b ${location} -d "${date}" -r ${revision}
 
     return
 }
