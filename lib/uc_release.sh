@@ -897,7 +897,7 @@ createReleaseInStatisticDatabase() {
 
     info "create release in statistic database"
     # TODO: demx2fk3 2014-12-01 add execute -i here
-    execute ${LFS_CI_ROOT}/bin/createReleaseInDatabase.pl -n ${label} -b ${location} -d "${date}" -r ${revision}
+    execute ${LFS_CI_ROOT}/bin/createReleaseInDatabase.pl -n ${label} -b ${location} -d \"${date}\" -r ${revision}
 
     return
 }
