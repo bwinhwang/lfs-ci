@@ -26,8 +26,8 @@ oneTimeSetUp() {
     }
     copyFileFromBuildDirectoryToWorkspace() {
         mockedCommand "copyFileFromBuildDirectoryToWorkspace $@"
-        echo "src-bos url 12345"  > $3
-        echo "src-bos url 12346" >> $3
+        echo "src-bos url 12345"  > ${WORKSPACE}/$3
+        echo "src-bos url 12346" >> ${WORKSPACE}/$3
     }
 
     return
@@ -55,7 +55,7 @@ testCreateReleaseInStatisticDatabase_withoutProblem() {
     local expect=$(createTempFile)
 cat <<EOF > ${expect}
 date +%Y-%m-%d %H:%M:%S
-copyFileFromBuildDirectoryToWorkspace Build_Job Build_Job ${WORKSPACE}/revisionstate.xml
+copyFileFromBuildDirectoryToWorkspace Build_Job Build_Job revisionstate.xml
 date +%Y-%m-%d %H:%M:%S.%N %Z
 date +%s.%N
 execute ${LFS_CI_ROOT}/bin/createReleaseInDatabase.pl -n A -b pronb-developer -d date -r 12346
@@ -75,7 +75,7 @@ testCreateReleaseInStatisticDatabase_withProblem() {
     local expect=$(createTempFile)
 cat <<EOF > ${expect}
 date +%Y-%m-%d %H:%M:%S
-copyFileFromBuildDirectoryToWorkspace Build_Job Build_Job ${WORKSPACE}/revisionstate.xml
+copyFileFromBuildDirectoryToWorkspace Build_Job Build_Job revisionstate.xml
 date +%Y-%m-%d %H:%M:%S.%N %Z
 date +%s.%N
 execute ${LFS_CI_ROOT}/bin/createReleaseInDatabase.pl -n B -b pronb-developer -d date -r 12346

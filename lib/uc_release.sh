@@ -891,7 +891,7 @@ createReleaseInStatisticDatabase() {
 
     local date=$(date "+%Y-%m-%d %H:%M:%S")
 
-    copyFileFromBuildDirectoryToWorkspace ${buildJobsName} ${buildJobsName} ${WORKSPACE}/revisionstate.xml
+    copyFileFromBuildDirectoryToWorkspace ${buildJobsName} ${buildJobsName} revisionstate.xml
     local revision=$(cut -d" " -f 3 ${WORKSPACE}/revisionstate.xml | sort -nu | tail -n 1)
     mustHaveValue "${revision}" "revision from revision state file"
 
