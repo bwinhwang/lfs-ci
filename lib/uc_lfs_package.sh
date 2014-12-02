@@ -152,6 +152,13 @@ copySysroot() {
         local dst=${workspace}/upload/sys-root/${destinationsArchitecture}
         execute mkdir -p ${dst}/doc
 
+        for file in ${workspace}/bld/bld-fsmddal-doc/results/doc/{FSM,}DDAL.pdf ; do
+            if [[ -f ${file} ]] ; then
+                info "copy ${file} to documentation directory in sysroot"
+                execute cp ${file} ${dst}/doc/
+            fi
+        done
+
         # check for sysroot.tgz
             # tar xvfz sysroot.tgz -C ...
             # cp DDAL.pdf doc
@@ -423,7 +430,7 @@ copyDocumentation() {
     for file in ${workspace}/bld/bld-fsmddal-doc/results/doc/{FSM,}DDAL.pdf ; do
         if [[ -f ${file} ]] ; then
             info "copy ${file} to documentation directory"
-            execute cp ${file} ${dst}/doc
+            execute cp ${file} ${dst}/
         fi
     done
 
