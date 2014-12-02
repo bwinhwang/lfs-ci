@@ -55,7 +55,7 @@ testCreateReleaseInStatisticDatabase_withoutProblem() {
     local expect=$(createTempFile)
 cat <<EOF > ${expect}
 date +%Y-%m-%d %H:%M:%S
-copyFileFromBuildDirectoryToWorkspace Build_Job Build_Job revisionstate.xml
+copyFileFromBuildDirectoryToWorkspace Build_Job 1 revisionstate.xml
 date +%Y-%m-%d %H:%M:%S.%N %Z
 date +%s.%N
 execute ${LFS_CI_ROOT}/bin/createReleaseInDatabase.pl -n A -b pronb-developer -d date -r 12346
@@ -75,7 +75,7 @@ testCreateReleaseInStatisticDatabase_withProblem() {
     local expect=$(createTempFile)
 cat <<EOF > ${expect}
 date +%Y-%m-%d %H:%M:%S
-copyFileFromBuildDirectoryToWorkspace Build_Job Build_Job revisionstate.xml
+copyFileFromBuildDirectoryToWorkspace Build_Job 1 revisionstate.xml
 date +%Y-%m-%d %H:%M:%S.%N %Z
 date +%s.%N
 execute ${LFS_CI_ROOT}/bin/createReleaseInDatabase.pl -n B -b pronb-developer -d date -r 12346
