@@ -93,9 +93,9 @@ actionCheckout() {
     copyFileFromBuildDirectoryToWorkspace "Admin_-_createLfsBaselineListFromEcl" "lastSuccessfulBuild" "archive/usedBaselinesInEcl.txt"
     local tmpFileC=$(createTempFile)
     debug "used baselines in ecl"
-    rawDebug usedBaselinesInEcl.txt
+    rawDebug ${WORKSPACE}/usedBaselinesInEcl.txt
 
-    grep -vf usedBaselinesInEcl.txt ${tmpFileA} > ${tmpFileC}
+    grep -vf ${WORKSPACE}/usedBaselinesInEcl.txt ${tmpFileA} > ${tmpFileC}
     execute cp -f ${tmpFileC} ${tmpFileA}
 
     debug "tmpFile A"
