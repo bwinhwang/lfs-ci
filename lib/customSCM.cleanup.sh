@@ -92,7 +92,10 @@ actionCheckout() {
     # don't delete baselines, which are in the ECL
     copyFileFromBuildDirectoryToWorkspace "Admin_-_createLfsBaselineListFromEcl" "lastSuccessfulBuild" "archive/usedBaselinesInEcl.txt"
     local tmpFileC=$(createTempFile)
-    execute -n grep -vf usedBaselinesInEcl.txt ${tmpFileA} > ${tmpFileC}
+    debug "used baselines in ecl"
+    rawDebug usedBaselinesInEcl.txt
+
+    grep -vf usedBaselinesInEcl.txt ${tmpFileA} > ${tmpFileC}
     execute cp -f ${tmpFileC} ${tmpFileA}
 
     debug "tmpFile A"
