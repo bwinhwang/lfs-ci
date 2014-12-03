@@ -199,20 +199,6 @@ createBasicWorkspace() {
     return
 }
 
-createOrUpdateWorkspace() {
-    # TODO: demx2fk3 2014-11-14 todo
-
-#     local workspace=$(getWorkspaceName)
-# 
-#     if [[ -d ${workspace}/.build_workdir ]] ; then
-#         build updateall
-#         if [[ $? -ne 0 ]] ; then
-#             mustHaveCleanWorkspace
-#     fi
-    true
-}
-
-
 ## @fn      mustHaveValidWorkspace()
 #  @brief   ensure, that the workspace is valid
 #  @todo    not implemented yet
