@@ -47,6 +47,9 @@ updateWorkspace() {
     mustHaveWorkspaceName
     mustHaveWritableWorkspace
 
+    debug "changing directory to ${workspace}"
+    cd ${workspace}
+
     # we want the latest revision state file, so we clean it up first
     execute rm -rf ${WORKSPACE}/revisions.txt
 
@@ -122,6 +125,10 @@ createWorkspace() {
 
     setupNewWorkspace
     mustHaveWritableWorkspace
+
+    debug "changing directory to ${workspace}"
+    cd ${workspace}
+
     switchToNewLocation ${location}
     switchSvnServerInLocations ${location}
     checkoutSubprojectDirectories ${srcDirectory} ${revision}
