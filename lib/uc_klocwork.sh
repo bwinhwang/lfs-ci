@@ -1,4 +1,8 @@
 #!/bin/bash
+
+[[ -z ${LFS_CI_SOURCE_artifacts}       ]] && source ${LFS_CI_ROOT}/lib/artifacts.sh
+[[ -z ${LFS_CI_SOURCE_createWorkspace} ]] && source ${LFS_CI_ROOT}/lib/createWorkspace.sh
+
 # ------------------------------------------------------------------
 # settings for klocwork
 # ------------------------------------------------------------------
@@ -46,7 +50,7 @@ ci_job_klocwork_build() {
     local workspace=$(getWorkspaceName)
     mustHaveWorkspaceName
 
-    local build="bldtools/bld-buildtools-common/results/bin/build NOAUTOBUILD=1 -W ${workspace}"
+    local build="${workspace}/bldtools/bld-buildtools-common/results/bin/build NOAUTOBUILD=1 -W ${workspace}"
 
     local kw_port=$(getConfig LFS_CI_uc_klocwork_port)
     mustHaveValue "${kw_port}" "klocwork port"
