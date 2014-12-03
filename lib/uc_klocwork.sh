@@ -117,7 +117,7 @@ ci_job_klocwork_build() {
     fi
 
     # create build specification template
-    execute ${kw_inject} ${kw_flags} -o ${kw_template} bash -c \"${BLDCMD}\"
+    execute ${kw_inject} ${kw_flags} -o ${kw_template} bash -c "${BLDCMD}"
 
     # import klocwork build specification template
     execute ${kw_admin} ${kw_url} import-config ${kw_project} ${kw_template}
