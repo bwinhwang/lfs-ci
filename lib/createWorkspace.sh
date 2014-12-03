@@ -9,7 +9,7 @@ LFS_CI_SOURCE_createWorkspace='$Id$'
 createOrUpdateWorkspace() {
     local workspace=$(getWorkspaceName)
     mustHaveWorkspaceName
-    mustHaveWritableWorkspace
+    # mustHaveWritableWorkspace
 
     local shouldUpdateWorkspace=
 
