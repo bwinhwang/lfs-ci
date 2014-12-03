@@ -122,6 +122,7 @@ createWorkspace() {
 
     setupNewWorkspace
     mustHaveWritableWorkspace
+    switchToNewLocation ${location}
     switchSvnServerInLocations ${location}
     checkoutSubprojectDirectories ${srcDirectory} ${revision}
 

@@ -33,6 +33,9 @@ oneTimeSetUp() {
         mockedCommand "mustHaveValue $@"
         return
     }
+    switchToNewLocation() {
+        mockedCommand "switchToNewLocation $@"
+    }
     switchSvnServerInLocations() {
         mockedCommand "switchSvnServerInLocations $@"
     }
@@ -84,6 +87,7 @@ mustHaveValue FSM-r2 subtask name
 mustHaveValue src-project src directory
 latestRevisionFromRevisionStateFile 
 mustHaveValue 12345 revision from revision state file
+switchToNewLocation pronb-developer
 switchSvnServerInLocations pronb-developer
 checkoutSubprojectDirectories src-project 12345
 requiredSubprojectsForBuild 
