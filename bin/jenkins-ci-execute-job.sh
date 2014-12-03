@@ -70,7 +70,7 @@ case "${JOB_NAME}" in
         source ${LFS_CI_ROOT}/lib/uc_build.sh
         ci_job_build || exit 1 
     ;;
-    *_CI_*_KlocworkBuild_*) 
+    LFS_CI_*_KlocworkBuild_*) 
         source ${LFS_CI_ROOT}/lib/uc_klocwork.sh
         ci_job_klocwork_build || exit 1 
     ;;

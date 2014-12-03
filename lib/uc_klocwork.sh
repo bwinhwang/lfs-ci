@@ -60,7 +60,7 @@ ci_job_klocwork_build() {
     local kw_licence_host=$(getConfig LFS_CI_uc_klocwork_licence_host)
     mustHaveValue "${kw_licence_host}" "klocwork licence host"
 
-    local kw_project=$(getConfig LFS_CI_uc_klocwork_project_name)
+    local kw_project=$(getTargetBoardName)
     mustHaveValue "${kw_project}" "klocwork project"
 
     local kw_inject=$(getConfig  LFS_CI_uc_klocwork_cmd_kwinject)   # ${KW_HOME}/bin/kwinject

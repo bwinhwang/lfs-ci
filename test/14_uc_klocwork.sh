@@ -26,6 +26,10 @@ oneTimeSetUp() {
         mockedCommand "createOrUpdateWorkspace $@"
     }
 
+    getTargetBoardName() {
+        mockedCommand "getTargetBoardName"
+        echo PS_LFS_DDAL
+    }
 #     getConfig() {
 #         mockedCommand "getConfig $@"
 #         case $1 in
