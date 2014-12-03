@@ -38,7 +38,7 @@ execute() {
         shift;
     done
 
-    local command=$@
+    local command="$@"
     local exitCode=1
     local output=
 
@@ -51,12 +51,12 @@ execute() {
         if [[ ${noRedirect} ]] ; then
             # in case that the user forgot to redirect stderr to stdout, we are doing it for him...
             # this is called real service!!
-            ${command} 2>&1 
-            exitCode=$?
+            "${@}" 2>&1 
+            exitCode=${?}
         else
             output=$(createTempFile)
-            ${command} >${output} 2>&1
-            exitCode=$?
+            "${@}" >${output} 2>&1
+            exitCode=${?}
             rawDebug ${output}
         fi
 

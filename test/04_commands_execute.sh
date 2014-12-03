@@ -19,7 +19,7 @@ oneTimeSetUp() {
         return 1
     }
     trueCommand() {
-        echo executed $@ >> ${UNITTEST_TRUE_COMMAND}
+        echo executed "$@" >> ${UNITTEST_TRUE_COMMAND}
         return
     }
     export UNITTEST_TRUE_COMMAND_SUCCESS_THIRD=0
@@ -93,6 +93,19 @@ testExecute_ParameterIgnoreError() {
     assertFalse "ignore error with --ignore-error" \
         'execute --ignore-error falseCommand part7' 
     assertFalse "fail without -i" 'execute falseCommand part2' 
+}
+testExecute_quoting() {
+    export WORKSPACE=$(createTempDirectory)
+    touch "${WORKSPACE}/asdf asdf"
+    assertTrue "execute ls -la \"${WORKSPACE}/asdf asdf\""
+}
+testExecute_redirect() {
+    local file=$(createTempFile)
+    assertTrue "execute echo ok > ${file}"
+    assertEquals "no output" "$(cat ${file})" ""
+
+    assertTrue "execute -n echo ok > ${file}"
+    assertEquals "ok output" "$(cat ${file})" "ok"
 }
 
 source lib/shunit2
