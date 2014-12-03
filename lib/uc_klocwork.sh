@@ -1,14 +1,18 @@
 #!/bin/bash
+# ------------------------------------------------------------------
 # settings for klocwork
+# ------------------------------------------------------------------
+# see also file.cfg
+#
 # PYTHON_HOME=/opt/python/linux64/ix86/python_3.2
-
+#
 # kw_port=8080
 # kw_licence_port=27018
 # kw_licence_host=eseelic050.emea.nsn-net.net
 # KW_HOST=ulkloc.nsn-net.net
 # KW_HOME=/home/kwbts01/kw-server
 # BLD_TOOL=/build/home/SC_LFS/bldtools/bin/build
-
+#
 # name
 # ULKLOC
 # KLOCWORK_HOME
@@ -21,7 +25,19 @@
 # eseelic050.emea.nsn-net.net
 # LICENCE_PORT
 # 27018
+# ------------------------------------------------------------------
+# jenkins job names
+# LFS_CI_-_trunk_-_KlocworkBuild_-_FSM-r2_-_PS_LFS_DDALFSMR2
+# LFS_CI_-_trunk_-_KlocworkBuild_-_FSM-r3_-_PS_LFS_DDAL
+# 
+# * jobs are build after successful build job
+# * job is not blocking for the build
+# ------------------------------------------------------------------
 
+## @fn      ci_job_klocwork_build()
+#  @brief   build and create statistics for klocwork
+#  @param   <none>
+#  @return  <none>
 ci_job_klocwork_build() {
     requiredParameters WORKSPACE BUILD_ID
 
@@ -86,16 +102,10 @@ ci_job_klocwork_build() {
     info "using klocwork project ${kw_project}"
     # get this via src-proejct
     case "${kw_project}" in
-    *_DDAL)      BLDSRC="src-rfs src-fsmddal"; 
-                 BLDCMD="${build} -C src-rfs fct; ${build} -C src-fsmddal fct"
-    ;;
-    *_DDG)       BLDSRC="src-fsmbos src-fsmddg src-ddg";  
-                 BLDCMD="${build} -C src-bos fct; ${build} -C src-fsmddg fct; ${build} -C src-ddg fct"
-    ;;
-    *_DDALFSMR2) BLDSRC=src-ddal;    
-                 BLDCMD="${build} -C ${BLDSRC} fcmd; ${build} -C ${BLDSRC} fspc"
-    ;;
-    *) fatal "unknown klocwork project" ;;
+        *_DDAL)      BLDCMD="${build} -C src-rfs fct; ${build} -C src-fsmddal fct"                         ;;
+        *_DDG)       BLDCMD="${build} -C src-bos fct; ${build} -C src-fsmddg fct; ${build} -C src-ddg fct" ;;
+        *_DDALFSMR2) BLDCMD="${build} -C src-ddal fcmd; ${build} -C src-ddal fspc"                         ;;
+        *)           fatal "unknown klocwork project"                                                      ;;
     esac
 
     createOrUpdateWorkspace --allowUpdate
@@ -107,7 +117,7 @@ ci_job_klocwork_build() {
     fi
 
     # create build specification template
-    execute ${kw_inject} ${kw_flags} -o ${kw_template} bash -c "${BLDCMD}"
+    execute ${kw_inject} ${kw_flags} -o ${kw_template} bash -c \"${BLDCMD}\"
 
     # import klocwork build specification template
     execute ${kw_admin} ${kw_url} import-config ${kw_project} ${kw_template}
@@ -149,7 +159,7 @@ ci_job_klocwork_build() {
         rawDebug ${buildsList}
         while read build ; do 
             info "remove build ${kw_project} / ${build}"
-            ${kw_admin} ${kw_url} delete-build ${kw_project} "${buil}"
+            ${kw_admin} ${kw_url} delete-build ${kw_project} "${build}"
         done < ${buildsList}
     else
         warning "klocwork delete build is disabled via config"

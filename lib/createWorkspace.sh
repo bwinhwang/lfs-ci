@@ -218,6 +218,8 @@ requiredSubprojectsForBuild() {
 #  @param   <none>
 #  @return  <none>
 mustHaveLocalSdks() {
+    requiredParameters LFS_CI_SHARE_MIRROR
+
     local workspace=$(getWorkspaceName)
     mustHaveWorkspaceName
 
@@ -225,6 +227,7 @@ mustHaveLocalSdks() {
 
     for bld in ${workspace}/bld/*
     do
+        info ${bld}
         [[ -e ${bld} ]] || continue
         [[ -d ${bld} ]] || continue
         local pathToSdk=$(readlink ${bld})
