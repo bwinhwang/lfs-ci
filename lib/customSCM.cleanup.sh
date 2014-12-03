@@ -60,6 +60,7 @@ actionCheckout() {
                 *_in_wr)  _ciLfsRemoteSites wr  ${tmpFileA} ;;
                 *_in_ch)  _ciLfsRemoteSites ch  ${tmpFileA} ;;
                 *_in_es)  _ciLfsRemoteSites es  ${tmpFileA} ;;
+                *_in_hz)  _ciLfsRemoteSites hz  ${tmpFileA} ;;
                 *_in_be2) _ciLfsRemoteSites be2 ${tmpFileA} ;;
                 *)       fatal "subTaskName ${subTaskName} not implemented" ;;
             esac
@@ -72,6 +73,7 @@ actionCheckout() {
                 *_in_be) _scLfsRemoteSites be ${tmpFileA} ;;
                 *_in_wr) _scLfsRemoteSites wr ${tmpFileA} ;;
                 *_in_bh) _scLfsRemoteSites bh ${tmpFileA} ;;
+                *_in_hz) _scLfsRemoteSites hz ${tmpFileA} ;;
                 *_in_du) 
                     execute sed -i "s:/build/home/SC_LFS/releases/bld:/usrd9/build/home/SC_LFS/releases/bld:g" ${tmpFileB}
                     _scLfsRemoteSites du ${tmpFileA} 
