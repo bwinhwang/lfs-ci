@@ -57,10 +57,10 @@ updateWorkspace() {
     local revision=$(latestRevisionFromRevisionStateFile)
     mustHaveValue ${revision} "revision from revision state file"
 
-    local build="build -W \"${workspace}\" --revision=${revision}"
+    local build="build updateall --revision=${revision}"
 
     info "running update all with revision ${revision:-latest}"
-    if ! execute --ignore-error ${build} updateall ; then
+    if ! execute --ignore-error ${build} ; then
         # FALLBACK: updating the workspace failed, we will recreate the workspace
         warning "updating the workspace failed, removing and recreating workspace now..."
         createWorkspace
