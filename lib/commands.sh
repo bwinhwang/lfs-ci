@@ -72,8 +72,12 @@ execute() {
 
     if [[ ${exitCode} -gt 0 ]] ; then
         [[ -e ${output} ]] && rawOutput ${output}
-        error "error occoured in \"${command}\""
-        [[ -z ${ignoreError} ]] && exit ${exitCode}
+        if [[ -z ${ignoreError} ]] ; then
+            error "error occoured in \"${command}\""
+            exit ${exitCode}
+        else
+            warning "error occoured in \"${command}\""
+        fi
     fi
 
     trace "normal return of execute method"

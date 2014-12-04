@@ -169,7 +169,10 @@ latestRevisionFromRevisionStateFile() {
     local revision=
 
     if [[ ! -f ${WORKSPACE}/revisions.txt ]] ; then
-        copyRevisionStateFileToWorkspace ${UPSTREAM_PROJECT} ${UPSTREAM_BUILD}
+        local jobName=$(getBuildJobNameFromUpstreamProject ${UPSTREAM_PROJECT} ${UPSTREAM_BUILD})
+        local buildNumber=$(getBuildBuildNumberFromUpstreamProject ${UPSTREAM_PROJECT} ${UPSTREAM_BUILD})
+        info "using revision state file from ${jobName} / ${buildNumber} based on ${UPSTREAM_PROJECT} / ${UPSTREAM_BUILD}"
+        copyRevisionStateFileToWorkspace ${jobName} ${buildNumber} 
     fi
 
     if [[ -r "${WORKSPACE}/revisions.txt" ]] ; then
