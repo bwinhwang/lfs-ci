@@ -85,7 +85,7 @@ ci_job_klocwork_build() {
     local kw_tables=$(getConfig LFS_CI_uc_klocwork_tables)          # kloTables
     mustHaveValue "${kw_tables}" "klocwork tables"
 
-    local kw_psroot=$(readlink -f ${WORKSPACE})
+    local kw_psroot=${workspace}
     mustHaveValue "${kw_psroot}" "klocwork psroot"
 
     local architectures=$(getConfig LFS_CI_uc_klocwork_architectures) # " mips64-octeon-linux-gnu- mips64-octeon2-linux-gnu- powerpc-e500-linux-gnu- i686-pc-linux-gnu- "
@@ -121,18 +121,21 @@ ci_job_klocwork_build() {
     fi
 
     # create build specification template
+    info "running klocwork inject command..."
     execute ${kw_inject} ${kw_flags} -o ${kw_template} bash -c "${BLDCMD}"
 
     # import klocwork build specification template
+    info "running klocwork import-config command..."
     execute ${kw_admin} ${kw_url} import-config ${kw_project} ${kw_template}
 
     # build klocwork project
-    execute ${kw_buildProject} ${kw_url}/${kw_project}                           \
-                                    --license-host ${kw_licence_host}         \
-                                    --license-port ${kw_licence_port}         \
+    info "running klocwork buildproject command..."
+    execute ${kw_buildProject} ${kw_url}/${kw_project}                         \
+                                    --license-host ${kw_licence_host}          \
+                                    --license-port ${kw_licence_port}          \
                                     --replace-path ${kw_psroot}/src-=src-      \
                                     --buildspec-variable kwpsroot=${kw_psroot} \
-                                    --incremental                             \
+                                    --incremental                              \
                                     --project ${kw_project}                    \
                                     --tables-directory ${kw_tables} ${kw_template}
 

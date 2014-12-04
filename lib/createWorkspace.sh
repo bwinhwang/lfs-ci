@@ -59,7 +59,7 @@ updateWorkspace() {
 
     local build="build updateall --revision=${revision}"
 
-    info "running update all with revision ${revision:-latest}"
+    info "running build updateall with revision ${revision:-latest}"
     if ! execute --ignore-error ${build} ; then
         # FALLBACK: updating the workspace failed, we will recreate the workspace
         warning "updating the workspace failed, removing and recreating workspace now..."
