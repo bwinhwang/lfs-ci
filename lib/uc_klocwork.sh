@@ -115,9 +115,9 @@ ci_job_klocwork_build() {
     createOrUpdateWorkspace --allowUpdate
 
     if [[ -e ${kw_template} ]] ; then
-        kw_flags="--update"
+        kw_flags="${kw_flags} --update"
     else
-        kw_flags=""
+        kw_flags="${kw_flags}"
     fi
 
     debug "change directory to ${workspace}"
