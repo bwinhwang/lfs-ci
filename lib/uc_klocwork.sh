@@ -50,7 +50,7 @@ ci_job_klocwork_build() {
     local workspace=$(getWorkspaceName)
     mustHaveWorkspaceName
 
-    local build="${workspace}/bldtools/bld-buildtools-common/results/bin/build NOAUTOBUILD=1 -W ${workspace}"
+    local build="${workspace}/bldtools/bld-buildtools-common/results/bin/build NOAUTOBUILD=1"
 
     local kw_port=$(getConfig LFS_CI_uc_klocwork_port)
     mustHaveValue "${kw_port}" "klocwork port"
@@ -119,6 +119,9 @@ ci_job_klocwork_build() {
     else
         kw_flags=""
     fi
+
+    debug "change directory to ${workspace}"
+    cd ${workspace}
 
     # create build specification template
     info "running klocwork inject command..."
