@@ -226,13 +226,14 @@ switchSvnServerInLocations() {
     local workspace=$(getWorkspaceName) 
     local masterServer=$(getConfig svnMasterServerHostName)
     local slaveServer=$(getConfig svnSlaveServerUlmHostName)
+    local location=$(getLocationName)
 
     info "changing svne1 to ulmscmi"
     perl -pi -e "s/${masterServer}/${slaveServer}/g" \
-        ${workspace}/locations/*/Dependencies
+        ${workspace}/locations/locations-${location}/Dependencies
 
-    execute svn status ${workspace}/locations/*/Dependencies
-    execute svn diff   ${workspace}/locations/*/Dependencies
+    execute svn status ${workspace}/locations/locations-${location}/Dependencies
+    execute svn diff   ${workspace}/locations/locations-${location}/Dependencies
 
     return
 }
