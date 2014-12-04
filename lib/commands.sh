@@ -47,7 +47,7 @@ execute() {
     # the retryCount can be choosen by the user
     while [[ ${retryCount} -gt 0 && ${exitCode} -ne 0 ]] ; do
         retryCount=$((retryCount - 1))
-        trace "execute command: \"${command}\""
+        trace "execute command: \"${@}\""
         if [[ ${noRedirect} ]] ; then
             # in case that the user forgot to redirect stderr to stdout, we are doing it for him...
             # this is called real service!!
