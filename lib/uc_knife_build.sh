@@ -54,8 +54,21 @@ ci_job_knife_build() {
 
     # get the information from WFT (opt)
     # get the information from jenkins
+
+    requiredParameters KNIFE_BASELINE
+
+    local ${baseLabel}=${KNIFE_BASELINE}
+
     # create a workspace
+    debug "create own revision control file"
+    echo "src-foo http://fakeurl/ ${baseLabel}" > ${WORKSPACE}/revisions.txt
+
+    createWorkspace
+
+    # apply patches to the workspace
+
     # build
+    build
 
     return 1
 }
