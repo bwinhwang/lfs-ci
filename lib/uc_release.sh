@@ -29,8 +29,7 @@ ci_job_release() {
     local productName=$(getProductNameFromJobName)
     mustHaveValue "${productName}" "product name"
 
-    # TODO: demx2fk3 2014-07-11 replace this with getConfig
-    local branch=${locationToSubversionMap["${productName}_${location}"]}
+    local branch=$(getConfig LFS_PROD_uc_release_upload_to_subversion_map_location_to_branch)
     mustHaveValue "${branch}" "branch name"
 
     # find the related jobs of the build
