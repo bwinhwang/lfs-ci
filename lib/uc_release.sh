@@ -749,8 +749,8 @@ createProxyReleaseTag() {
     local deliverySvnUrl=$(getConfig LFS_PROD_svn_delivery_release_repos_url)
     local svnCommitMessagePrefix=$(getConfig LFS_PROD_uc_release_svn_message_prefix)
 
-    # TODO: demx2fk3 2014-07-11 replace this with getConfig
-    local branch=${locationToSubversionMap["${productName}_${location}"]}
+    local branch=$(getConfig LFS_PROD_uc_release_upload_to_subversion_map_location_to_branch)
+    mustHaveValue "${branch}" "branch name"
     mustHaveValue "${branch}" "branch name"
 
     local branchName=${branch}_proxyBranchForCreateTag
