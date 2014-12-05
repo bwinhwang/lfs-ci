@@ -57,7 +57,7 @@ updateWorkspace() {
     local revision=$(latestRevisionFromRevisionStateFile)
     mustHaveValue ${revision} "revision from revision state file"
 
-    local build="build updateall --revision=${revision}"
+    local build="build updateall -r ${revision}"
 
     info "running build updateall with revision ${revision:-latest}"
     if ! execute --ignore-error ${build} ; then
@@ -82,7 +82,7 @@ updateWorkspace() {
     mustHaveValidWorkspace
 
     # TODO: demx2fk3 2014-11-24 check, if this is working in update usecase
-    mustHaveLocalSdks
+    # mustHaveLocalSdks
     # TODO: demx2fk3 2014-11-24 does not work in update usecase yet
     copyAndExtractBuildArtifactsFromProject ${UPSTREAM_PROJECT} ${UPSTREAM_BUILD}
 
@@ -171,6 +171,14 @@ latestRevisionFromRevisionStateFile() {
     if [[ ! -f ${WORKSPACE}/revisions.txt ]] ; then
         local jobName=$(getBuildJobNameFromUpstreamProject ${UPSTREAM_PROJECT} ${UPSTREAM_BUILD})
         local buildNumber=$(getBuildBuildNumberFromUpstreamProject ${UPSTREAM_PROJECT} ${UPSTREAM_BUILD})
+
+        if [[ -z ${jobName} ]] ; then
+            jobName=${UPSTREAM_PROJECT}
+        fi
+        if [[ -z ${buildNumber} ]] ; then
+            buildNumber=${UPSTREAM_BUILD}
+        fi
+
         info "using revision state file from ${jobName} / ${buildNumber} based on ${UPSTREAM_PROJECT} / ${UPSTREAM_BUILD}"
         copyRevisionStateFileToWorkspace ${jobName} ${buildNumber} 
     fi

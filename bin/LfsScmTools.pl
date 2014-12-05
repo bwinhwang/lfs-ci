@@ -2436,6 +2436,24 @@ package Command::GetFromString; # {{{
 #
 # usage: $0 <JOB_NAME> <wanted>
 #
+
+# refactor this command, make it much simplier:
+# my $string = $ARGV[0]; # string, which should be parsed
+# my $wanted = $ARGV[1]; # wanted substring from regex
+
+# my $wantMap = {
+#                 location => 1,
+#                 branch   => 1,
+#                 taskName => 2,
+#                 subTaskName => 3,
+#                 platform => 4,
+#               };
+
+# my @resultArray = split( "_-_", $string );
+# 
+# print $resultArray[ $wanted ];
+# exit 0;
+
 use strict;
 use warnings;
 
@@ -2940,7 +2958,7 @@ if( $ENV{CI_LOGGING_LOGFILENAME} ) {
 }
 
 my $program = basename( $0, qw( .pl ) );
-INFO "welcome to $program";
+INFO "{{{ welcome to $program";
 
 my %commands = (
                  diffToChangelog                => "Command::DiffToChangelog",
@@ -2968,5 +2986,5 @@ my $command = $commands{$program}->new();
 $command->prepare( @ARGV );
 $command->execute() and die "can not execute $program";
 
-INFO "Thank you for making a little program very happy";
+INFO "}}} Thank you for making a little program very happy";
 exit 0;
