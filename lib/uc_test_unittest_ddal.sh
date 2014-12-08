@@ -1,3 +1,5 @@
+#!/bin/bash
+
 #
 # LFS_CI_-_trunk_-_Unittest_-_FSM-r3_-_fsm3_octeon2
 #
@@ -78,4 +80,5 @@ ci_job_test_unittest() {
 
     info "testing done."
 
+    return
 }
