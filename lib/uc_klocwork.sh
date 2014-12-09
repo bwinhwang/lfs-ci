@@ -45,8 +45,6 @@
 ci_job_klocwork_build() {
     requiredParameters WORKSPACE BUILD_ID
 
-    set -o noglob
-
     local workspace=$(getWorkspaceName)
     mustHaveWorkspaceName
 
@@ -97,11 +95,17 @@ ci_job_klocwork_build() {
     local pythonHome=$(getConfig LFS_CI_uc_klocwork_python_home)
     mustHaveValue "${pythonHome}" "python home"
 
+
     local kw_flags=
     for crossCompiler in ${architectures}; do
         kw_flags="${kw_flags} -P ${crossCompiler}gcc=gnu -P ${crossCompiler}g++=gnu"
     done
-    kw_flags="${kw_flags} --ignore-files **/*build/**/*,**/*build/* --variable kwpsroot=${kw_psroot}"
+
+    # we need the noglob here, because of the --ignore-files pattern.
+    # with quotes, it does not work. so do not quote the **/*build/**/* in '' or in ""
+    set -o noglob
+
+    kw_flags="${kw_flags} --ignore-files **/*build/**/*,**/*build/*,**/.sconf_temp/* --variable kwpsroot=${kw_psroot}"
 
     info "using klocwork project ${kw_project}"
     # get this via src-proejct

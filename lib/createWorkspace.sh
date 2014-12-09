@@ -57,7 +57,7 @@ updateWorkspace() {
     local revision=$(latestRevisionFromRevisionStateFile)
     mustHaveValue ${revision} "revision from revision state file"
 
-    local build="build updateall --revision=${revision}"
+    local build="build updateall -r ${revision}"
 
     info "running build updateall with revision ${revision:-latest}"
     if ! execute --ignore-error ${build} ; then
