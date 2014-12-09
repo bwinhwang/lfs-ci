@@ -155,7 +155,8 @@ makingTest_testFSM() {
         exit 1
     fi
 
-    # execute ${make} poweroff
+    # not all branches have the poweroff implemented
+    execute -i ${make} poweroff
 
     return
 }

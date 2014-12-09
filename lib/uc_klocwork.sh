@@ -148,7 +148,7 @@ ci_job_klocwork_build() {
 
     # upload build report
     local canUploadBuild=$(getConfig LFS_CI_uc_klocwork_can_upload_builds)
-    if [[ -z ${canUploadBuild} ]] ; then
+    if [[ ${canUploadBuild} ]] ; then
         execute ${kw_admin} ${kw_url} load ${kw_project} ${kw_tables} --name build_ci_${BUILD_ID}
     else
         warning "klocwork load is disabled via config"
@@ -165,7 +165,7 @@ ci_job_klocwork_build() {
 
     # cleanup old build reports
     local canDeleteBuilds=$(getConfig LFS_CI_uc_klocwork_can_delete_builds)
-    if [[ -z ${canDeleteBuilds} ]] ; then
+    if [[ ${canDeleteBuilds} ]] ; then
         local buildsList=$(createTempFile)
         execute -n ${kw_admin} ${kw_url} list-builds ${kw_project} > ${buildsList}
         execute sed -ine "/^\(Bld\|Build\|Rev\|build_ci\)/ {17,$ p}" ${buildsList}

@@ -1,12 +1,17 @@
 #!/bin/bash
 
 #
-# LFS_CI_-_trunk_-_Unittest_-_FSM-r3_-_fsm3_octeon2
+# LFS_CI_-_trunk_-_Unittest_-_FSM-r3_-_fsm3_octeon2_-_ddal
 #
 
 [[ -z ${LFS_CI_SOURCE_common}          ]] && source ${LFS_CI_ROOT}/lib/common.sh
 [[ -z ${LFS_CI_SOURCE_createWorkspace} ]] && source ${LFS_CI_ROOT}/lib/createWorkspace.sh
 
+## @fn      ci_job_test_unittest()
+#  @brief   create a workspace and run the unit tests for ddal
+#  @todo    lot of pathes are hardcoded at the moment. make this more configureable
+#  @param   <none>
+#  @return  <none>
 ci_job_test_unittest() {
 
     export JOB_NAME=LFS_CI_-_trunk_-_Unittest_-_FSM-r3_-_fsm3_octeon2
@@ -24,7 +29,7 @@ ci_job_test_unittest() {
 
     checkoutSubprojectDirectories src-unittests ${revision}
 
-    cd ${workspace}/src-unittests/src/tests/ddal/runtests
+    execute cd ${workspace}/src-unittests/src/tests/ddal/runtests
 
     info "creating testconfig"
     execute make testconfig-overwrite TESTBUILD=${workspace} TESTTARGET=localhost-x86
