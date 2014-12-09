@@ -147,33 +147,6 @@ declare -A archMap=(         ["fct"]="mips64-octeon2-linux-gnu"      \
                          ["fsm4_k2"]="arm-cortexa15-linux-gnueabihf" \
 )
 
-# maps the location name to the branch name in the svn delivery repos
-declare -A locationToSubversionMap=( ["LFS_pronb-developer"]="PS_LFS_OS_MAINBRANCH" \
-                                     ["LFS_FB1407"]="PS_LFS_OS_FB1407"              \
-                                     ["LFS_FB1408"]="PS_LFS_OS_FB1408"              \
-                                     ["LFS_FB1409"]="PS_LFS_OS_FB1409"              \
-                                     ["LFS_FB1410"]="PS_LFS_OS_FB1410"              \
-                                     ["LFS_FB1411"]="PS_LFS_OS_FB1411"              \
-                                     ["LFS_FB1412"]="PS_LFS_OS_FB1412"              \
-                                     ["LFS_FSM_R4_DEV"]="PS_LFS_OS_FSM_R4"          \
-                                     ["LFS_LRC_FB1408"]="PS_LFS_OS_LRC_FB1408"      \
-                                     ["LFS_LRC_FB1409"]="PS_LFS_OS_LRC_FB1409"      \
-                                     ["LFS_LRC_FB1410"]="PS_LFS_OS_LRC_FB1410"      \
-                                     ["LFS_LRC_FB1411"]="PS_LFS_OS_LRC_FB1411"      \
-                                     ["LFS_LRC_FB1412"]="PS_LFS_OS_LRC_FB1412"      \
-                                     ["LFS_LRC"]="PS_LFS_OS_LRC"                    \
-                                     ["LFS_TST_GCC49_LRC"]="PS_LFS_OS_GCC49_LRC"    \
-                                     ["LFS_TST_GCC49"]="PS_LFS_OS_GCC49"            \
-                                     ["LFS_MD11407"]="PS_LFS_OS_MD11407"            \
-                                     ["LFS_MD11408"]="PS_LFS_OS_MD11408"            \
-                                     ["LFS_MD11409"]="PS_LFS_OS_MD11409"            \
-                                     ["LFS_MD11410"]="PS_LFS_OS_MD11410"            \
-                                     ["LFS_MD11411"]="PS_LFS_OS_MD11411"            \
-                                     ["LFS_MD11412"]="PS_LFS_OS_MD11412"            \
-                                     ["UBOOT_pronb-developer"]="PS_LFS_BT"          \
-                                     ["UBOOT_FSM_R4_DEV"]="PS_LFS_BT_FSM_R4"        \
-                                     ["LTK_pronb-developer"]="PS_LFS_LTK"           \
-                                   )
 
 ## @fn      getDeliveryRepositoryName( tagName )
 #  @brief   get the subversion binary delivery repos name based on the defined regex

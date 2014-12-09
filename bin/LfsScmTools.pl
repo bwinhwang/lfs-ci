@@ -1824,11 +1824,12 @@ sub prepare {
 
         foreach my $p ( @pathes ) {
             my $component = "Subversion branch creation or merge";
-            if( $p =~ m:.*/(src-\w*?)/.*: or
-                $p =~ m:.*/(src-\w*)$: ) {
+            if( $p =~ m:/(src-\w*)/: or
+                $p =~ m:/(src-\w*)$: ) {
                 $component = $1;
             }
             $subsysHash->{ $component }->{ $msg } = undef;
+            DEBUG "component = $component / $p / $msg";
         }
     }
 
