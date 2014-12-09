@@ -82,7 +82,7 @@ updateWorkspace() {
     mustHaveValidWorkspace
 
     # TODO: demx2fk3 2014-11-24 check, if this is working in update usecase
-    # mustHaveLocalSdks
+    mustHaveLocalSdks
     # TODO: demx2fk3 2014-11-24 does not work in update usecase yet
     copyAndExtractBuildArtifactsFromProject ${UPSTREAM_PROJECT} ${UPSTREAM_BUILD}
 

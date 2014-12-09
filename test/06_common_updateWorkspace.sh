@@ -93,7 +93,7 @@ cat <<EOF > ${expect}
 execute rm -rf ${WORKSPACE}/revisions.txt
 latestRevisionFromRevisionStateFile
 mustHaveValue 12345 revision from revision state file
-execute --ignore-error build -W "${WORKSPACE}/workspace" --revision=12345 updateall
+execute --ignore-error build updateall -r 12345
 mustHaveLocalSdks
 copyAndExtractBuildArtifactsFromProject
 EOF
@@ -117,8 +117,8 @@ cat <<EOF > ${expect}
 execute rm -rf ${WORKSPACE}/revisions.txt
 latestRevisionFromRevisionStateFile
 mustHaveValue 12345 revision from revision state file
-execute --ignore-error build -W "${WORKSPACE}/workspace" --revision=12345 updateall
-failed execute --ignore-error build -W "${WORKSPACE}/workspace" --revision=12345 updateall
+execute --ignore-error build updateall -r 12345
+failed execute --ignore-error build updateall -r 12345
 createWorkspace
 EOF
     assertEquals "$(cat ${expect})" "$(cat ${UNITTEST_COMMAND})"

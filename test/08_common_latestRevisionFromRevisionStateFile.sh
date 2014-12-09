@@ -24,6 +24,14 @@ oneTimeSetUp() {
     updateWorkspace() {
         mockedCommand "updateWorkspace"
     }
+    getBuildJobNameFromUpstreamProject() {
+        mockedCommand "getBuildJobNameFromUpstreamProject $@"
+        echo "$1"
+    }
+    getBuildBuildNumberFromUpstreamProject() {
+        mockedCommand "getBuildBuildNumberFromUpstreamProject $@"
+        echo "123"
+    }
     copyRevisionStateFileToWorkspace() {
         mockedCommand "copyRevisionStateFileToWorkspace $@"
         if [[ $1 == "createRevisionStateFile" ]] ; then
@@ -91,7 +99,9 @@ testLatestRevisionFromRevisionStateFile_withoutProblem_revisionFileDoesNotExist(
 
     local expect=$(createTempFile)
 cat <<EOF > ${expect}
-copyRevisionStateFileToWorkspace createRevisionStateFile build
+getBuildJobNameFromUpstreamProject createRevisionStateFile build
+getBuildBuildNumberFromUpstreamProject createRevisionStateFile build
+copyRevisionStateFileToWorkspace createRevisionStateFile 123
 EOF
     assertEquals "$(cat ${expect})" "$(cat ${UNITTEST_COMMAND})"
 

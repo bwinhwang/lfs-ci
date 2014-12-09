@@ -4,9 +4,6 @@ source lib/common.sh
 initTempDirectory
 
 oneTimeSetUp() {
-    mockedCommand() {
-        echo "$@" >> ${UNITTEST_COMMAND}
-    }
     return
 }
 

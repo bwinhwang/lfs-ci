@@ -2493,6 +2493,8 @@ sub execute {
     my $result = $resultArray[ $wantMap->{$wanted} ];
 
     DEBUG sprintf( "wanted %s from \"%s\" ==> %s", $wanted, $string, $result || "not defined" );
+    # required for real debugging in unit tests or something like this...
+    # printf STDERR "%s\n", sprintf( "wanted %s from \"%s\" ==> %s", $wanted, $string, $result || "not defined" );
     printf "%s\n", $result || "";
 
     return;

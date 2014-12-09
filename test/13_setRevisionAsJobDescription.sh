@@ -7,6 +7,9 @@ initTempDirectory
 
 oneTimeSetUp() {
   cp test/data/13_setRevisionAsJobDescription.xml test/data/13_setRevisionAsJobDescription.xml.bak
+  getConfig() {
+      echo "repos"
+  }
 }
 
 oneTimeTearDown() {

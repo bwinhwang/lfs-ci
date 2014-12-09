@@ -1,5 +1,8 @@
 #!/bin/bash
 
+#  not ready yet
+exit 0
+
 source lib/common.sh
 initTempDirectory
 

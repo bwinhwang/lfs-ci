@@ -92,7 +92,7 @@ ci_job_klocwork_build() {
     mustHaveValue "${architectures}" "architectures"
 
     local reportPythonScript=$(getConfig LFS_CI_uc_klocwork_report_python_script)
-    mustHaveValue "${reportPythonScript}" "ptyhon report script"
+    mustHaveValue "${reportPythonScript}" "python report script"
 
     local pythonHome=$(getConfig LFS_CI_uc_klocwork_python_home)
     mustHaveValue "${pythonHome}" "python home"
@@ -121,7 +121,7 @@ ci_job_klocwork_build() {
     fi
 
     debug "change directory to ${workspace}"
-    cd ${workspace}
+    execute cd ${workspace}
 
     # create build specification template
     info "running klocwork inject command..."
@@ -169,7 +169,7 @@ ci_job_klocwork_build() {
         rawDebug ${buildsList}
         while read build ; do 
             info "remove build ${kw_project} / ${build}"
-            ${kw_admin} ${kw_url} delete-build ${kw_project} "${build}"
+            execute ${kw_admin} ${kw_url} delete-build ${kw_project} "${build}"
         done < ${buildsList}
     else
         warning "klocwork delete build is disabled via config"
