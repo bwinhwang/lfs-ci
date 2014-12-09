@@ -2441,18 +2441,6 @@ package Command::GetFromString; # {{{
 # my $string = $ARGV[0]; # string, which should be parsed
 # my $wanted = $ARGV[1]; # wanted substring from regex
 
-# my $wantMap = {
-#                 location => 1,
-#                 branch   => 1,
-#                 taskName => 2,
-#                 subTaskName => 3,
-#                 platform => 4,
-#               };
-
-# my @resultArray = split( "_-_", $string );
-# 
-# print $resultArray[ $wanted ];
-# exit 0;
 
 use strict;
 use warnings;
@@ -2472,72 +2460,40 @@ sub execute {
     my $string = $ARGV[0]; # string, which should be parsed
     my $wanted = $ARGV[1]; # wanted substring from regex
 
-    my $locationRE    = qr / (?<location> 
-                            [A-Za-z0-9.:_+-]+?
-                            )
-                        /x;
-    my $subTaskNameRE = qr / (?<subTaskName>
-                            [A-Za-z0-9.:_+-]+
-                            )
-                        /x;
-    my $taskNameRE    = qr / (?<taskName>
-                            [^-_]+
-                            )
-                        /x;
-    my $platformRE    = qr / (?<platform>
-                            .*)
-                        /x;
-    my $splitRE       = qr / _-_ /x;
+    my $wantMap = {
+                    productName => 0,
+                    location    => 1,
+                    branch      => 1,
+                    taskName    => 2,
+                    subTaskName => 3,
+                    platform    => 4,
+                  };
 
-    my $productRE     = qr / (?<productName>(Admin | LFS | UBOOT | PKGPOOL | LTK)) /x;
-
-    my $regex1 = qr /
-                        ^
-                        $productRE
-                        _
-                        ( CI | Prod | Post )
-                        $splitRE
-                        $locationRE           # location aka branch 
-                        $splitRE
-                        $taskNameRE           # task name (Build)
-                        $splitRE?             # sub task name is 
-                        $subTaskNameRE?       # optional string, like FSM-r3
-                        $splitRE
-                        $platformRE           # platfrom, like fcmd, fspc, fct, ...
-                        $
-                    /x;
-
-    my $regex2 = qr /
-                        ^
-                        $productRE
-                        _
-                        ( CI | Prod | Post )
-                        $splitRE
-                        $locationRE           # location aka branch 
-                        $splitRE
-                        $taskNameRE           # task name (Build | Package | Testing )
-                        $
-                    /x;
-
-    my $regex3 = qr /
-                        ^
-                        (Admin)
-                        $splitRE
-                        $taskNameRE           # task name (Build)
-                        $splitRE?             # sub task name is 
-                        $subTaskNameRE?       # optional string, like FSM-r3
-                        $
-                    /x;
-
-
-    if( $string =~ m/$regex1/x or
-        $string =~ m/$regex2/x or
-        $string =~ m/$regex3/x
-    ) {
-        my $result = $+{ $wanted };
-        DEBUG sprintf( "wanted %s from \"%s\" ==> %s", $wanted, $string, $result || "not defined" );
-        printf "%s\n", $result || "";
+    # if the user gave a number instead of a string
+    if( not $wantMap->{$wanted} and $wanted =~ m/^\d+$/ ) {
+        $wantMap->{ $wanted } = $wanted;
     }
+
+    my @resultArray = split( "_-_", $string );
+
+    # some special cases...
+    if( $wanted eq "productName" or
+        $wanted eq "0" ) {
+        @resultArray = split( "_", $resultArray[ $wantMap->{$wanted} ] );
+    }
+    if( $string =~ m/^Admin/ ) {
+        $wantMap = {
+                        productName => 0,
+                        taskName    => 1,
+                        subTaskName => 2,
+                        platform    => 3,
+                    };
+    }
+    
+    my $result = $resultArray[ $wantMap->{$wanted} ];
+
+    DEBUG sprintf( "wanted %s from \"%s\" ==> %s", $wanted, $string, $result || "not defined" );
+    printf "%s\n", $result || "";
 
     return;
 }
