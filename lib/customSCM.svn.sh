@@ -268,7 +268,7 @@ _createChangelogXmlFileFromSubversion() {
 
             oldRev=$(( oldRev + 1))
             debug "get svn changelog ${subSystem} ${oldRev}:${newRev} ${newUrl}"
-            execute -n svn log -v --xml -r${oldRev}:${newRev} ${newUrl} > ${tmpChangeLogFile}
+            execute -n svn log -v --xml --stop-on-copy -r${oldRev}:${newRev} ${newUrl} > ${tmpChangeLogFile}
             mustBeSuccessfull "$?" "svn log -v --xml -r${oldRev}:${newRev} ${newUrl}"
 
             rawDebug ${tmpChangeLogFile}
