@@ -38,7 +38,7 @@ ci_job_test_unittest() {
     info "collecting results"
     execute rm -rf ${workspace}/xml-reports
     execute mkdir ${workspace}/xml-reports
-    find ${workspace}/${src} -name xml-reports \
+    execute -n find ${workspace}/${src} -name xml-reports \
         | while read name ; do
             local destination=$(sed -e "s:^${src}::" <<< ${name})
             execute cp -f ${name}/* ${workspace}/xml-reports
@@ -54,7 +54,7 @@ ci_job_test_unittest() {
     execute rm -rf ${workspace}/html
     execute mkdir ${workspace}/html
 
-    execute cd ${workspace}/${src}/src-fsmddal/src/
+    cd ${workspace}/${src}/src-fsmddal/src/
     execute ${lcov} -c -i -d . -o ${workspace}/html/init.out
     execute ${lcov} -c    -d . -o ${workspace}/html/cov.out
     execute ${lcov} -a ${workspace}/html/init.out -a ${workspace}/html/cov.out \
