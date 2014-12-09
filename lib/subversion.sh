@@ -25,8 +25,7 @@ uploadToSubversion() {
 
     info "upload local path ${pathToUpload} to ${branchToUpload} as ${tagName}"
 
-    local branch=${locationToSubversionMap["${branchToUpload}"]}
-    # local branch=$(getConfig LFS_PROD_subversion_upload_branch_name)
+    local branch=$(getConfig LFS_PROD_uc_release_upload_to_subversion_map_location_to_branch)
     if [[ ! "${branch}" ]] ; then
         debug "mapping for branchToUpload ${branchToUpload} not found"
         branch=${branchToUpload}
