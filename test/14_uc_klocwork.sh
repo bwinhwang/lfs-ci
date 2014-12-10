@@ -51,6 +51,8 @@ oneTimeSetUp() {
              LFS_CI_uc_klocwork_architectures)        echo arm powerpc mips i386 x64 ;;
              LFS_CI_uc_klocwork_report_python_script) echo http://svn/path/to/script.py ;;
              LFS_CI_uc_klocwork_python_home)          echo /path/to/python/home ;;
+             LFS_CI_uc_klocwork_can_upload_builds)    echo 1 ;;
+             LFS_CI_uc_klocwork_can_delete_builds)    echo 1 ;;
          esac
      }
 
@@ -112,7 +114,7 @@ getConfig LFS_CI_uc_klocwork_python_home
 mustHaveValue /path/to/python/home python home
 createOrUpdateWorkspace --allowUpdate
 execute cd ${WORKSPACE}/workspace
-execute /path/to/bin/kwinject -P armgcc=gnu -P armg++=gnu -P powerpcgcc=gnu -P powerpcg++=gnu -P mipsgcc=gnu -P mipsg++=gnu -P i386gcc=gnu -P i386g++=gnu -P x64gcc=gnu -P x64g++=gnu --ignore-files **/*build/**/*,**/*build/* --variable kwpsroot=${WORKSPACE}/workspace -o kw_template bash -c ${WORKSPACE}/workspace/bldtools/bld-buildtools-common/results/bin/build NOAUTOBUILD=1 -C src-rfs fct; ${WORKSPACE}/workspace/bldtools/bld-buildtools-common/results/bin/build NOAUTOBUILD=1 -C src-fsmddal fct
+execute /path/to/bin/kwinject -P armgcc=gnu -P armg++=gnu -P powerpcgcc=gnu -P powerpcg++=gnu -P mipsgcc=gnu -P mipsg++=gnu -P i386gcc=gnu -P i386g++=gnu -P x64gcc=gnu -P x64g++=gnu --ignore-files **/*build/**/*,**/*build/*,**/.sconf_temp/* --variable kwpsroot=${WORKSPACE}/workspace -o kw_template bash -c ${WORKSPACE}/workspace/bldtools/bld-buildtools-common/results/bin/build NOAUTOBUILD=1 -C src-rfs fct; ${WORKSPACE}/workspace/bldtools/bld-buildtools-common/results/bin/build NOAUTOBUILD=1 -C src-fsmddal fct
 execute /path/to/bin/kwadmin --url http://klocwork_hostname:12345/ import-config PS_LFS_DDAL kw_template
 execute /path/to/bin/kwbuildproject --url http://klocwork_hostname:12345//PS_LFS_DDAL --license-host licence_hostname --license-port 54321 --replace-path ${WORKSPACE}/workspace/src-=src- --buildspec-variable kwpsroot=${WORKSPACE}/workspace --incremental --project PS_LFS_DDAL --tables-directory kw_tables kw_template
 getConfig LFS_CI_uc_klocwork_can_upload_builds
