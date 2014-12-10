@@ -167,7 +167,7 @@ ci_job_klocwork_build() {
     local canDeleteBuilds=$(getConfig LFS_CI_uc_klocwork_can_delete_builds)
     if [[ ${canDeleteBuilds} ]] ; then
         local buildsList=$(createTempFile)
-        execute -n ${kw_admin} ${kw_url} list-builds ${kw_project} > ${buildsList}
+        execute -n ${kw_admin} ${kw_url} list-builds ${kw_project} | execute -n sort -u > ${buildsList}
         execute sed -ine "/^\(Bld\|Build\|Rev\|build_ci\)/ {17,$ p}" ${buildsList}
 
         rawDebug ${buildsList}
