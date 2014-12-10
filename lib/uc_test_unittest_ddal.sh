@@ -14,15 +14,18 @@
 #  @return  <none>
 ci_job_test_unittest() {
 
-    export JOB_NAME=LFS_CI_-_trunk_-_Unittest_-_FSM-r3_-_fsm3_octeon2
-
+    requiredParameters UPSTREAM_PROJECT UPSTREAM_BUILD
     local workspace=$(getWorkspaceName)
     mustHaveWorkspaceName
 
     createOrUpdateWorkspace --allowUpdate
 
-    mustHaveNextCiLabelName
-    local label=$(getNextCiLabelName)
+    copyFileFromBuildDirectoryToWorkspace ${UPSTREAM_PROJECT} ${UPSTREAM_BUILD} properties 
+    mustExistFile ${WORKSPACE}/properties
+    rawDebug ${WORKSPACE}/properties
+
+    source ${WORKSPACE}/properties
+
 
     local revision=$(latestRevisionFromRevisionStateFile)
     mustHaveValue "${revision}" "revision"
@@ -70,7 +73,7 @@ ci_job_test_unittest() {
     execute ${genHtml} lcov.out
     execute sed -i -e 's/#FFFFFF/#FFFFEE/' gcov.css
 
-    execute -n find . -name '*.html' | execute xargs -n1 sed -i -e "s/LCOV -/${label} DDAL Unittests -/"
+    execute -n find . -name '*.html' | execute xargs -n1 sed -i -e "s/LCOV -/${LABEL} DDAL Unittests -/"
     execute -n ${lcov} --summary lcov.out > lcov.summary
 
     rawDebug lcov.summary
