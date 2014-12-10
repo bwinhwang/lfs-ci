@@ -156,12 +156,12 @@ ci_job_klocwork_build() {
 
     # create XML report
     svnExport ${reportPythonScript}
-    LD_LIBRARY_PATH=${pythonHome}/lib \
-                    execute ${pythonHome}/bin/python getreport.py \
-                            ${kw_host} \
-                            ${kw_port} \
-                            ${kw_project} \
-                            LAST > ${WORKSPACE}/klocwork_result.xml
+    LD_LIBRARY_PATH=${pythonHome}/lib                                \
+                    execute -n ${pythonHome}/bin/python getreport.py \
+                                    ${kw_host}                       \
+                                    ${kw_port}                       \
+                                    ${kw_project}                    \
+                                    LAST > ${WORKSPACE}/klocwork_result.xml
 
     # cleanup old build reports
     local canDeleteBuilds=$(getConfig LFS_CI_uc_klocwork_can_delete_builds)
