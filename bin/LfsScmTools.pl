@@ -2416,7 +2416,7 @@ sub execute {
 
     foreach my $branch ( keys %{ $self->{branches} } ) {
         my $c = 0;
-        my @list = grep { $c++ > 14 }
+        my @list = grep { $c++ > 10 }
                    reverse
                    sort 
                    map  { $_->{base} }
@@ -2449,6 +2449,7 @@ use warnings;
 use parent qw( -norequire Object );
 
 use Log::Log4perl qw( :easy );
+use Data::Dumper;
 
 sub prepare {
     my $self = shift;

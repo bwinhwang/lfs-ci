@@ -15,6 +15,7 @@ ci_job_build() {
     local subTaskName=$(getSubTaskNameFromJobName)
     mustHaveValue "${subTaskName}"
 
+    execute rm -rf ${WORKSPACE}/revisions.txt
     createWorkspace
 
     # release label is stored in the artifacts of fsmci of the build job

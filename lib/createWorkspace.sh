@@ -122,6 +122,7 @@ createWorkspace() {
 
     local revision=$(latestRevisionFromRevisionStateFile)
     mustHaveValue "${revision}" "revision from revision state file"
+    info "using revision ${revision} from revision state file"
 
     setupNewWorkspace
     mustHaveWritableWorkspace

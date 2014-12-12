@@ -20,8 +20,8 @@ ci_job_release() {
     mustHaveCleanWorkspace
     mustHaveWorkspaceName
 
-    local subJob=$(getTargetBoardName)
-    mustHaveTargetBoardName
+    local subJob=$(getSubTaskNameFromJobName)
+    mustHaveValue "${subJob}" "subtask name"
 
     local location=$(getLocationName)
     mustHaveLocationName
