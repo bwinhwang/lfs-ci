@@ -124,7 +124,6 @@ execute -n /path/to/python/home/bin/python getreport.py klocwork_hostname 12345 
 getConfig LFS_CI_uc_klocwork_can_delete_builds
 createTempFile
 execute -n /path/to/bin/kwadmin --url http://klocwork_hostname:12345/ list-builds PS_LFS_DDAL
-execute -n sort -u
 execute sed -ine /^\(Bld\|Build\|Rev\|build_ci\)/ {17,$ p} /tmp/file
 createTempFile
 EOF
