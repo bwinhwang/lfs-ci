@@ -39,6 +39,7 @@ ci_job_package() {
     copyArchs
     copySysroot
     copyFactoryZip
+    copyGenericBuildResults
 
     # there are some symlinks in other directories, which are broken at the moment
     # so we are just removing / fixing symlinks in sys-root
@@ -52,6 +53,20 @@ ci_job_package() {
     copyReleaseCandidateToShare
 
     return 0
+}
+
+copyGenericBuildResults() {
+    local workspace=$(getWorkspaceName)
+    mustHaveWorkspaceName
+
+    local dst=${workspace}/upload/
+
+    for bldDirectory in ${workspace}/bld/bld-*-*/psl/ ; do
+        [[ -d ${bldDirectory} ]] || continue
+        info "copy generic build results from ${bldDirectory} to ${dst}"
+        execute rsync -av --exclude=.svn ${bldDirectory}/ ${dst}/
+    done
+    return
 }
 
 ## @fn      copyAddons()
