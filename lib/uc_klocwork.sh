@@ -173,7 +173,7 @@ ci_job_klocwork_build() {
         rawDebug ${buildsList}
         while read build ; do 
             info "remove build ${kw_project} / ${build}"
-            execute ${kw_admin} ${kw_url} delete-build ${kw_project} "${build}"
+            execute -i ${kw_admin} ${kw_url} delete-build ${kw_project} "${build}"
         done < ${buildsList}
     else
         warning "klocwork delete build is disabled via config"
