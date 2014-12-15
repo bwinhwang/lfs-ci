@@ -20,6 +20,11 @@ testAdminJobNames() {
     assertEquals "Admin"    "$(${LFS_CI_ROOT}/bin/getFromString.pl ${JOB_NAME} productName)"
     assertEquals "cleanup"  "$(${LFS_CI_ROOT}/bin/getFromString.pl ${JOB_NAME} taskName)"
     assertEquals "ulm"      "$(${LFS_CI_ROOT}/bin/getFromString.pl ${JOB_NAME} subTaskName)"
+
+    local JOB_NAME=Admin_-_cleanup
+    assertEquals "Admin"    "$(${LFS_CI_ROOT}/bin/getFromString.pl ${JOB_NAME} productName)"
+    assertEquals "cleanup"  "$(${LFS_CI_ROOT}/bin/getFromString.pl ${JOB_NAME} taskName)"
+    assertEquals ""         "$(${LFS_CI_ROOT}/bin/getFromString.pl ${JOB_NAME} subTaskName)"
 }
 testBuildJobName_Branch() {
     local JOB_NAME=LFS_CI_-_LRC_ABA_-_Build_-_FSM-r4_-_fsm4_axm
@@ -70,6 +75,15 @@ testJobNameWithNumbers() {
     assertEquals "FSM-r4"        "$(${LFS_CI_ROOT}/bin/getFromString.pl ${JOB_NAME} 3)"
     assertEquals "fsm4_axm"      "$(${LFS_CI_ROOT}/bin/getFromString.pl ${JOB_NAME} 4)"
     assertEquals "DDAL"          "$(${LFS_CI_ROOT}/bin/getFromString.pl ${JOB_NAME} 5)"
+}
+testJobNameAdminJobs_2() {
+    local JOB_NAME=Admin_-_cleanUp
+    assertEquals "Admin"     "$(${LFS_CI_ROOT}/bin/getFromString.pl ${JOB_NAME} 0)"
+    assertEquals "cleanUp"   "$(${LFS_CI_ROOT}/bin/getFromString.pl ${JOB_NAME} 1)"
+    assertEquals ""          "$(${LFS_CI_ROOT}/bin/getFromString.pl ${JOB_NAME} 2)"
+    assertEquals ""          "$(${LFS_CI_ROOT}/bin/getFromString.pl ${JOB_NAME} 3)"
+    assertEquals ""          "$(${LFS_CI_ROOT}/bin/getFromString.pl ${JOB_NAME} 4)"
+    assertEquals ""          "$(${LFS_CI_ROOT}/bin/getFromString.pl ${JOB_NAME} 5)"
 }
 
 source lib/shunit2

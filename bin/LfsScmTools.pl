@@ -2475,6 +2475,14 @@ sub execute {
     if( not $wantMap->{$wanted} and $wanted =~ m/^\d+$/ ) {
         $wantMap->{ $wanted } = $wanted;
     }
+    elsif( $string =~ m/^Admin/ ) {
+        $wantMap = {
+                        productName => 0,
+                        taskName    => 1,
+                        subTaskName => 2,
+                        platform    => 3,
+                    };
+    }
 
     my @resultArray = split( "_-_", $string );
 
@@ -2483,20 +2491,15 @@ sub execute {
         $wanted eq "0" ) {
         @resultArray = split( "_", $resultArray[ $wantMap->{$wanted} ] );
     }
-    if( $string =~ m/^Admin/ ) {
-        $wantMap = {
-                        productName => 0,
-                        taskName    => 1,
-                        subTaskName => 2,
-                        platform    => 3,
-                    };
-    }
     
     my $result = $resultArray[ $wantMap->{$wanted} ];
 
     DEBUG sprintf( "wanted %s from \"%s\" ==> %s", $wanted, $string, $result || "not defined" );
     # required for real debugging in unit tests or something like this...
     # printf STDERR "%s\n", sprintf( "wanted %s from \"%s\" ==> %s", $wanted, $string, $result || "not defined" );
+    # print STDERR Dumper( \@resultArray );
+    # print STDERR Dumper( $wantMap );
+    # print STDERR "\n";
     printf "%s\n", $result || "";
 
     return;
