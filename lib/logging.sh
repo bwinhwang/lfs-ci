@@ -246,12 +246,14 @@ _stackTrace() {
 
 ## @fn      runAndLog()
 #  @brief   execute a command and put the output into the logfile
+#  @todo    replace this with execute -i
 #  @param   <command>    command, which should be logged
 #  @return  <none>
 runAndLog() {
     local command=$@
     local outputFile=$(createTempFile)
 
+    debug "DEPRECATED, use execute -i"
     debug "execute command ${command}"
 
     ${command} 1>${outputFile} 2>&1 

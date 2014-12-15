@@ -108,6 +108,13 @@ testExecute_redirect() {
     assertEquals "ok output" "$(cat ${file})" "ok"
 }
 
+testExecute_pipe() {
+    local rc=
+    execute -i falseCommand || rc=1
+
+    assertEquals "${rc}" "1" 
+}
+
 source lib/shunit2
 
 exit 0

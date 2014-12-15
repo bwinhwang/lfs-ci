@@ -145,7 +145,7 @@ makingTest_testFSM() {
 
     export LFS_CI_ERROR_CODE= 
     info "running test suite"
-    runAndLog ${make} --ignore-errors test-xmloutput || LFS_CI_ERROR_CODE=0 # also true
+    execute -i ${make} --ignore-errors test-xmloutput || LFS_CI_ERROR_CODE=0 # also true
 
     execute mkdir ${workspace}/xml-reports/
     execute cp -f ${testSuiteDirectory}/xml-reports/*.xml ${workspace}/xml-reports/
