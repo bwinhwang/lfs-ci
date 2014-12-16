@@ -108,6 +108,11 @@ synchronizeShare() {
     return
 }
 
+## @fn      genericShareCleanup()
+#  @brief   generic function to cleanup directories on local disks or shares
+#  @details TODO: demx2fk3 2014-12-16 
+#  @param   <none>
+#  @return  <none>
 genericShareCleanup() {
     requiredParameters JOB_NAME BUILD_NUMBER LFS_CI_ROOT WORKSPACE
 
@@ -316,9 +321,18 @@ cleanupOrphanJobDirectories() {
     return
 }
 
+## @fn      createLfsBaselineListFromEcl()
+#  @brief   create a list of all PS_LFS_REL releases, which are currently in use in all branches
+#  @param   <none>
+#  @return  <none>
 createLfsBaselineListFromEcl() {
+    requiredParameters ${WORKSPACE}
+
     cd ${WORKSPACE}
-    execute -n grep -e PS_LFS_OS -e PS_LFS_REL */ECL_BASE/ECL | execute -n cut -d= -f2 | execute -n sort -u > ${WORKSPACE}/usedBaselinesInEcl.txt
+
+    execute -n grep -e PS_LFS_OS -e PS_LFS_REL */ECL_BASE/ECL | \
+        execute -n cut -d= -f2 | \
+        execute -n sort -u     > ${WORKSPACE}/usedBaselinesInEcl.txt
     rawDebug ${WORKSPACE}/usedBaselinesInEcl.txt
 
     info "done."

@@ -1,6 +1,11 @@
 #!/bin/bash
 
-main() {
+## @fn      startJenkinsMasterServer()
+#  @brief   start the jenkins master server
+#  @param   <none>
+#  @return  <none>
+startJenkinsMasterServer() {
+    # TODO: demx2fk3 2014-12-16 can be removed??
     local LFS_CI_ROOT=/ps/lfs/ci
 
     source ${LFS_CI_ROOT}/lib/logging.sh
@@ -22,8 +27,6 @@ main() {
     unset CI_LOGGING_LOGFILENAME
     unset CI_LOGGING_DURATION_START_DATE
     unset LFS_CI_TEMPDIR
-
-    set -x
 
     mkdir -p ${JENKINS_HOME} ${JENKINS_ROOT} ${JENKINS_ROOT}/log
     ulimit -u 40960
@@ -51,9 +54,7 @@ main() {
             --httpsCertificate=${jenkinsMasterSslCertificate} \
             --httpsPrivateKey=${jenkinsMasterSslPrivateKey}   \
             > ${JENKINS_ROOT}/log/jenkins.log 2>&1 
-    set +x
-
 }
 
 export LFS_CI_ROOT=/ps/lfs/ci/
-main
+startJenkinsMasterServer

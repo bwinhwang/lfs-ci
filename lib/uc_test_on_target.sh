@@ -65,6 +65,10 @@ reserveTarget() {
     return
 }
 
+## @fn      uc_job_test_on_target_archive_logs()
+#  @brief   copy the results / logs / artifacts from the test job to the archive share (aka /build share)
+#  @param   <none>
+#  @return  <none>
 uc_job_test_on_target_archive_logs() {
 
     requiredParameters JOB_NAME BUILD_NUMBER LABEL
@@ -84,5 +88,6 @@ uc_job_test_on_target_archive_logs() {
     copyFileToArtifactDirectory ${workspace}/. 
     local artifactsPathOnShare=$(getConfig artifactesShare)/${jobName}/${BUILD_NUMBER}
     linkFileToArtifactsDirectory ${artifactsPathOnShare}/save
-    
+
+    return
 }

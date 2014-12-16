@@ -1,7 +1,16 @@
 #!/bin/bash
+#
+#
+#
 
 LFS_CI_SOURCE_makingtest='$Id$'
 
+## @fn      fmon_tests()
+#  @brief   running tests (FSM-r2) with fmon
+#  @todo    this function should be in a different place
+#           there is still a lot of hardcoded stuff in here...
+#  @param   <none>
+#  @return  <none>
 fmon_tests() {
     local targetName=$(sed "s/^Test-//" <<< ${JOB_NAME})
     mustHaveValue ${targetName} "target name"
@@ -43,6 +52,12 @@ fmon_tests() {
     return
 }
 
+## @fn      makingTest_checkUname()
+#  @brief   running a very basic startup test via making test on the target
+#  @details this test is starting the target with the new uImage and check, 
+#           if the uname -a output contains linux
+#  @param   <none>
+#  @return  <none>
 makingTest_checkUname() {
     requiredParameters JOB_NAME BUILD_NUMBER LABEL DELIVERY_DIRECTORY
 
@@ -86,6 +101,17 @@ makingTest_checkUname() {
     return 0
 }
 
+## @fn      makingTest_testFSM()
+#  @brief   running a whole test suite on the target with making test
+#  @details the following making tests commands are executed (simplified)
+#            $ make testconfig
+#            $ make powercycle
+#            $ make install
+#            $ make powercycle
+#            $ make test
+#            $ make poweroff
+#  @param   <none>
+#  @return  <none>
 makingTest_testFSM() {
     requiredParameters JOB_NAME DELIVERY_DIRECTORY
 
@@ -175,6 +201,11 @@ makingTest_testFSM() {
     return
 }
 
+
+
+# --------------------------------------------------------------------------------------
+# TODO: demx2fk3 2014-12-16 the LRC tests are not in use yet from here.
+#                           we are still using the legacy scripting in scripts/CLRC03_...
 makingTest_testLRC() {
 
     requiredParameters DELIVERY_DIRECTORY

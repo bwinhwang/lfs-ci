@@ -55,6 +55,12 @@ ci_job_package() {
     return 0
 }
 
+## @fn      copyGenericBuildResults()
+#  @brief   copy the build results from the bld/bld-*-*/results/psl directory
+#           in the regarding structure of the build
+#  @details see also the proposal from Reiner Huober about the cleanup of psl
+#  @param   <none>
+#  @return  <none>
 copyGenericBuildResults() {
     local workspace=$(getWorkspaceName)
     mustHaveWorkspaceName

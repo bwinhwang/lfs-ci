@@ -169,9 +169,19 @@ setupNewWorkspace() {
 }
 
 
+## @fn      createBasicWorkspace()
+#  @brief   create a new workspace with the given parameters
+#  @warning This can be only used, if you know, what you want. 
+#           This is not in use for creation of a build workspace.
+#           This can be used for create a workspace for running tests.
+#  @param   {opt}    option: -l <location name>
+#  @param   {components}    list of component names
+#  @return  <none>
 createBasicWorkspace() {
     local opt=$1
     local location=
+
+    # TODO: demx2fk3 2014-12-16 use getopt here
     if [[ ${opt} = "-l" ]] ; then
         location=$2
         shift 2
@@ -391,13 +401,18 @@ mustHaveNextCiLabelName() {
     return
 }
 
-## @fn      getJobNameFromUrl()
-#  @brief   get the current build directory of the jenkins jobs
+## @fn      getJenkinsJobBuildDirectory()
+#  @brief   get the build directory on jenkins master server
 #  @param   <none>
-#  @return  <none>
+#  @return  location of the build directory on jenkins master server
 getJenkinsJobBuildDirectory() {
+    requiredParameters JOB_NAME BUILD_NUMBER
+
     local serverPath=$(getConfig jenkinsMasterServerPath)
+    mustHaveValue "${serverPath}" "jenkins path on master"
+
     echo ${serverPath}/jobs/${JOB_NAME}/builds/${BUILD_NUMBER}/
+    return
 }
 
 ## @fn      mustHaveValue( $value )
@@ -651,6 +666,13 @@ _getUpstreamProjects() {
     return
 }
 
+## @fn      _getDownstreamProjects( $jobName, $buildNumber, $upstreamsFile )
+#  @brief   get the information about a finished downstream job. 
+#  @warning internal function
+#  @param   {jobName}          name of the job
+#  @param   {buildNumber}      build number of the job
+#  @param   {upstreamsFile}    file where to store the information
+#  @return  <none>
 _getDownstreamProjects() {
     local jobName=$1
     local buildNumber=$2
@@ -669,6 +691,13 @@ _getDownstreamProjects() {
     return
 }
 
+## @fn      getDownStreamProjectsData()
+#  @brief   get the down stream data of a project
+#  @details you have the project name and a build number and you want
+#           all jobs, which where triggered by this build job.
+#  @param   {jobName}        name of a project
+#  @param   {buildNumber}    number of a build job
+#  @return  all triggered subjobs
 getDownStreamProjectsData() {
     local jobName=$1
     local buildNumber=$2
@@ -778,7 +807,12 @@ getPackageJobNameFromUpstreamProject() {
 }
 
 
+## @fn      mustHaveAccessableServer( $serverName )
+#  @brief   ensure, that a server is accessable
+#  @param   {serverName}    name of the server, which should be accessable
+#  @return  <none>
 mustHaveAccessableServer() {
+    # TODO: demx2fk3 2014-12-16 not implemented yet
     return
 }
 

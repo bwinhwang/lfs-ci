@@ -169,9 +169,18 @@ createJenkinsJob() {
     return
 }
 
+## @fn      updateJenkinsJob( $jobName, $xmlConfigFile )
+#  @brief   updates the configuration of a jenkins job with the given xml config file
+#  @param   {jobName}    name of the jenkins project (aka job)
+#  @param   {xmlConfigFile}    location of the xml config file
+#  @return  <none>
 updateJenkinsJob() {
     local jobName=$1
     local xmlConfigFile=$2
+
+    mustHaveValue "${jobName}"       "job name"
+    mustHaveValue "${xmlConfigFile}" "xml config file"
+    mustExistFile "${xmlConfigFile}"
 
     executeJenkinsCli update-job "${jobName}" < ${xmlConfigFile}
     return
@@ -208,6 +217,9 @@ enableJob() {
     return
 }
 
+## @fn      setBuildResultUnstable()
+#  @brief   set the build result of the currently running build to unstable
+#  @param   <none>
 setBuildResultUnstable() {
     executeJenkinsCli set-build-result unstable
     return
