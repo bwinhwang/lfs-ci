@@ -123,10 +123,18 @@ makingTest_testFSM() {
     execute ${make} waitssh
 
     sleep 60
+    info "setup target"
+    execute ${make} setup
 
     local installOptions="$(getConfig LFS_CI_uc_test_making_test_install_options)"
     info "installing software using ${installOptions}"
     execute ${make} install ${installOptions}
+
+    local doFirmwareupgrade="$(getConfig LFS_CI_uc_test_making_test_do_firmwareupgrade)"
+    if [[ $doFirmwareupgrade ]]; then
+        info "perform firmware upgrade an all boards of $testTargetName."
+        execute ${make} firmewareupgrade
+    fi
 
     info "restarting the target"
     execute ${make} powercycle
