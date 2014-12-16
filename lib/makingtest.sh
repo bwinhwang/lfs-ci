@@ -165,7 +165,7 @@ makingTest_testFSM() {
     local doFirmwareupgrade="$(getConfig LFS_CI_uc_test_making_test_do_firmwareupgrade)"
     if [[ ${doFirmwareupgrade} ]] ; then
         info "perform firmware upgrade an all boards of $testTargetName."
-        execute ${make} firmwareupgrade FORCED_UPGRADE=true
+        execute ${make} firmwareupgrade
     fi
 
     info "restarting the target"
