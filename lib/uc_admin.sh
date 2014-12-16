@@ -121,6 +121,7 @@ genericShareCleanup() {
 
     # ADMIN_-_genericShareCleanup_-_Ul
     export siteName=$(getSubTaskNameFromJobName)
+    export upstreamSubTaskName=$(getSubTaskNameFromJobName ${UPSTREAM_PROJECT})
 
     local remoteServer=$(getConfig ADMIN_sync_share_remote_hostname)
     mustHaveValue "${remoteServer}" "remote server name"
@@ -154,15 +155,25 @@ genericShareCleanup() {
         fi
 
         debug "removing ${entry}"
-        if [[ -e ${entry} ]] ; then
-            local destination=$(echo ${entry} | sed "s:/:_:g")
-            $execute mv -f ${entry} /build/home/${USER}/genericCleanup/${destination}
-            $execute touch ${entry}
+        if [[ ${siteName} -eq "ul" ]] ; then
+            # make tarball
+            # entscheide, ob du loeschen sollst oder nicht
+            local canDelete=$(getConfig LFS_ADMIN_cleanup_share_can_delete)
+            if [[ ${canDelete} ]] ; then
+                if [[ -e ${entry} ]] ; then
+                    echo "$execute rm ${entry}"
+                fi
+            else
+                local destination=$(echo ${entry} | sed "s:/:_:g")
+                echo "$execute mv -f ${entry} /build/home/${USER}/genericCleanup/${destination}"
+                echo "$execute touch ${entry}"
+            fi
+        else
+            echo "siteName != ul, removing files"
+            local randomValue=${RANDOM}
+            $execute ssh ${remoteServer} mv -f ${entry} ${entry}.deleted.${randomValue}
+            $execute ssh ${remoteServer} rm -rf ${entry}.deleted.${randomValue}
         fi
-
-        local randomValue=${RANDOM}
-        $execute ssh ${remoteServer} mv -f ${entry} ${entry}.deleted.${randomValue}
-        $execute ssh ${remoteServer} rm -rf ${entry}.deleted.${randomValue}
     done
 
     # next: modified and added stuff
