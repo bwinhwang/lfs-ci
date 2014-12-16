@@ -102,6 +102,12 @@ makingTest_testFSM() {
 	export targetName=$(sed "s/^Test-//" <<< ${JOB_NAME})
     mustHaveValue "${testTargetName}" "test target name"
 
+    # we can not use location here, because the job name is "Test-ABC".
+    # there is no location in the job name. So we have to use the
+    # location of the upstream job.
+    export branchName=$(getLocationName ${UPSTREAM_PROJECT})
+    mustHaveValue "${branchName}" "branch name"
+
 	local testSuiteDirectory=${workspace}/$(getConfig LFS_CI_uc_test_making_test_suite_dir)
     mustExistDirectory ${testSuiteDirectory}
 	mustExistFile ${testSuiteDirectory}/testsuite.mk
@@ -131,7 +137,7 @@ makingTest_testFSM() {
     execute ${make} install ${installOptions}
 
     local doFirmwareupgrade="$(getConfig LFS_CI_uc_test_making_test_do_firmwareupgrade)"
-    if [[ $doFirmwareupgrade ]]; then
+    if [[ ${doFirmwareupgrade} ]] ; then
         info "perform firmware upgrade an all boards of $testTargetName."
         execute ${make} firmewareupgrade
     fi
