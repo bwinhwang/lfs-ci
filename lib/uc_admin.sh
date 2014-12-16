@@ -165,8 +165,11 @@ genericShareCleanup() {
                 fi
             else
                 local destination=$(echo ${entry} | sed "s:/:_:g")
-                echo "$execute mv -f ${entry} /build/home/${USER}/genericCleanup/${destination}"
-                echo "$execute touch ${entry}"
+                "$execute mv -f ${entry} /build/home/${USER}/genericCleanup/${destination}"
+                "$execute tar cgf /build/home/${USER}/genericCleanup/${destination}.tar.gz \
+                    /build/home/${USER}/genericCleanup/${destination}
+                "$execute rm /build/home/${USER}/genericCleanup/${destination}
+                "$execute touch ${entry}"
             fi
         else
             echo "siteName != ul, removing files"
