@@ -15,7 +15,7 @@ exit_add() {
     local functionName=$1
 	CI_EXIT_HANDLER_METHODS="${functionName} ${CI_EXIT_HANDLER_METHODS}"
 	trace "exit: methods now '${CI_EXIT_HANDLER_METHODS}'"
-    exit
+    return
 }
 
 ## @fn      exit_handler( $msg, $showStacktrace, $exitCode )
