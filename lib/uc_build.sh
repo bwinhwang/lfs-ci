@@ -175,7 +175,7 @@ _build() {
     return 0
 }
 
-## @fn      postCheckoutPatchWorkspace()
+## @fn      preCheckoutPatchWorkspace()
 #  @brief   apply patches before the checkout of the workspace to the workspace
 #  @param   <none>
 #  @return  <none>

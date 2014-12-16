@@ -155,8 +155,21 @@ svnRemove() {
     return
 }
 
+## @fn      svnExport( $args )
+#  @brief   executes an svn export command
+#  @param   {args}    args for the svn export command
+#  @return  <none>
 svnExport() {
     svnCommand export $@
+    return
+}
+
+## @fn      svnLog( $args )
+#  @brief   executes an svn log command
+#  @param   {args}    args for the svn propset command
+#  @return  <none>
+svnLog() {
+    execute -n -r 3 svn log --non-interactive --trust-server-cert $@
     return
 }
 
@@ -177,10 +190,6 @@ shouldNotExistsInSubversion() {
         exit 1
     fi
     return 0
-}
-
-svnLog() {
-    execute -n -r 3 svn log $@
 }
 
 ## @fn      existsInSubversion( $url, $pathOrFile )
@@ -225,6 +234,13 @@ mustExistInSubversion() {
 
     return 0
 }
+
+## @fn      mustExistBranchInSubversion( $url, $branch )
+#  @brief   ensures, that a branch exists in subversion
+#  @details if the branch does not exists, the branch will be created (simple mkdir command)
+#  @param   {url}           subversion url
+#  @param   {branchName}    name of the branch
+#  @return  <none>
 mustExistBranchInSubversion() {
     local url=$1
     local branch=$2

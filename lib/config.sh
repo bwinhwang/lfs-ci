@@ -67,6 +67,10 @@ getTargetBoardName() {
 }
 
 
+## @fn      getProductNameFromJobName()
+#  @brief   get the product name from the job name
+#  @param   <none>
+#  @return  name of the product
 getProductNameFromJobName() {
     local jobName=${1:-${JOB_NAME}}
     ${LFS_CI_ROOT}/bin/getFromString.pl "${jobName}" productName

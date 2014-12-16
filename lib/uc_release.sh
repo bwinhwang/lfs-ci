@@ -130,7 +130,16 @@ ci_job_release() {
     return
 }
 
+## @fn      prereleaseChecks()
+#  @brief   run some pre release checks
+#  @details checks, if the release can be released or not
+#           this is an early exit, if there is a major problem
+#  @todo    extent this tests / checks!
+#  @param   <none>
+#  @return  <none>
+#  @throws  raise an error, if there is a major problem with the release
 prereleaseChecks() {
+    requiredParameters LFS_PROD_RELEASE_PREVIOUS_TAG_NAME LFS_PROD_RELEASE_PREVIOUS_TAG_NAME_REL
 
     local exitCode=0
     if ! existsBaselineInWorkflowTool ${LFS_PROD_RELEASE_PREVIOUS_TAG_NAME} ; then
@@ -212,6 +221,14 @@ extractArtifactsOnReleaseShare() {
     return
 }
 
+## @fn      extractArtifactsOnReleaseShareKernelSources( $jobName, $buildNumber )
+#  @brief   extract the artifacts (linux kernel sources only!!) of build job on the 
+#           local workspace and copy the artifacts to the /build share.
+#  @details structure on the share is
+#           bld-<ss>-<cfg>/<label>/results/...
+#  @param   {jobName}      name of the job
+#  @param   {buildNumber}  number of the build
+#  @return  <none>
 extractArtifactsOnReleaseShareKernelSources() {
     local testedJobName=$1
     local testedBuildNumber=$2

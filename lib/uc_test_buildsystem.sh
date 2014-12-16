@@ -3,6 +3,10 @@
 
 [[ -z ${LFS_CI_SOURCE_createWorkspace} ]] && source ${LFS_CI_ROOT}/lib/createWorkspace.sh
 
+## @fn      ci_job_test_buildsystem()
+#  @brief   test the build systems / dependency 
+#  @param   <none>
+#  @return  <none>
 ci_job_test_buildsystem() {
     local workspace=$(getWorkspaceName)
     mustHaveCleanWorkspace
