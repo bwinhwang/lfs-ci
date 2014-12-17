@@ -121,6 +121,7 @@ genericShareCleanup() {
 
     # ADMIN_-_genericShareCleanup_-_Ul
     export siteName=$(getSubTaskNameFromJobName)
+    export upstreamSubTaskName=$(getSubTaskNameFromJobName ${UPSTREAM_PROJECT})
 
     local remoteServer=$(getConfig ADMIN_sync_share_remote_hostname)
     mustHaveValue "${remoteServer}" "remote server name"
@@ -134,7 +135,8 @@ genericShareCleanup() {
 
     setBuildDescription ${JOB_NAME} ${BUILD_NUMBER} "triggered by ${UPSTREAM_PROJECT}/${UPSTREAM_BUILD}"
 
-    local execute=execute
+    # local execute=execute
+    local execute=info
     local max=$(wc -l ${tmpFile} | cut -d" " -f1)
     local cnt=0
     for entry in $(cat ${tmpFile}) ; do
@@ -142,27 +144,38 @@ genericShareCleanup() {
         info "[${cnt}/${max}] removing ${entry}"
 
         debug "fixing permissions on parent directory"
-        $execute ssh ${remoteServer} "[[ -w $(dirname ${entry}) ]] || chmod u+w $(dirname ${entry})"
+        ${execute} ssh ${remoteServer} "[[ -w $(dirname ${entry}) ]] || chmod u+w $(dirname ${entry})"
 
         debug "fixing permissions of removal candidate ${entry}"
         if [[ ${UPSTREAM_PROJECT} =~ "CI_LFS" ]] ; then
             # noop
             debug noop
         else
-            # $execute -i ssh ${remoteServer} "chmod -R u+w ${entry}"
+            # ${execute} -i ssh ${remoteServer} "chmod -R u+w ${entry}"
             ssh ${remoteServer} "chmod -R u+w ${entry}"
         fi
 
         debug "removing ${entry}"
-        if [[ -e ${entry} ]] ; then
-            local destination=$(echo ${entry} | sed "s:/:_:g")
-            $execute mv -f ${entry} /build/home/${USER}/genericCleanup/${destination}
-            $execute touch ${entry}
+        if [[ ${siteName} -eq "ul" ]] ; then
+            # make tarball
+            # entscheide, ob du loeschen sollst oder nicht
+            local canDelete=$(getConfig LFS_ADMIN_cleanup_share_can_delete)
+            if [[ -n "${canDelete}" && -e ${entry} ]] ; then
+                ${execute} rm ${entry}
+            else
+                local destination=$(echo ${entry} | sed "s:/:_:g")
+                local backupShare=/build/home/${USER}/genericCleanup
+                ${execute} mv -f ${entry} ${backupShare}/${destination}
+                ${execute} tar -czf ${backupShare}/${destination}.tar.gz \
+                    ${backupShare}/${destination}
+                ${execute} rm -rf ${backupShare}/${destination}
+            fi
+        else
+            debug "siteName != ul, removing files"
+            local randomValue=${RANDOM}
+            ${execute} ssh ${remoteServer} mv -f ${entry} ${entry}.deleted.${randomValue}
+            ${execute} ssh ${remoteServer} rm -rf ${entry}.deleted.${randomValue}
         fi
-
-        local randomValue=${RANDOM}
-        $execute ssh ${remoteServer} mv -f ${entry} ${entry}.deleted.${randomValue}
-        $execute ssh ${remoteServer} rm -rf ${entry}.deleted.${randomValue}
     done
 
     # next: modified and added stuff
@@ -176,10 +189,10 @@ genericShareCleanup() {
 #         info "transferting ${entry} to ${remoteServer}"
 # 
 #         debug "fixing permissions on parent directory"
-#         $execute ssh ${remoteServer} chmod u+w $(dirname ${entry})
+#         ${execute} ssh ${remoteServer} chmod u+w $(dirname ${entry})
 # 
 #         debug "creating new directory"
-#         $execute ssh ${remoteServer} mkdir -p ${remotePath}/${entry}
+#         ${execute} ssh ${remoteServer} mkdir -p ${remotePath}/${entry}
 # 
 #         debug "rsyncing ${entry}"
 #         info execute rsync -aHz -e ssh --stats ${entry}/ ${remoteServer}:${entry}/
