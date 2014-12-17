@@ -144,14 +144,14 @@ genericShareCleanup() {
         info "[${cnt}/${max}] removing ${entry}"
 
         debug "fixing permissions on parent directory"
-        $execute ssh ${remoteServer} "[[ -w $(dirname ${entry}) ]] || chmod u+w $(dirname ${entry})"
+        ${execute} ssh ${remoteServer} "[[ -w $(dirname ${entry}) ]] || chmod u+w $(dirname ${entry})"
 
         debug "fixing permissions of removal candidate ${entry}"
         if [[ ${UPSTREAM_PROJECT} =~ "CI_LFS" ]] ; then
             # noop
             debug noop
         else
-            # $execute -i ssh ${remoteServer} "chmod -R u+w ${entry}"
+            # ${execute} -i ssh ${remoteServer} "chmod -R u+w ${entry}"
             ssh ${remoteServer} "chmod -R u+w ${entry}"
         fi
 
@@ -160,23 +160,21 @@ genericShareCleanup() {
             # make tarball
             # entscheide, ob du loeschen sollst oder nicht
             local canDelete=$(getConfig LFS_ADMIN_cleanup_share_can_delete)
-            if [[ ${canDelete} ]] ; then
-                if [[ -e ${entry} ]] ; then
-                    echo "$execute rm ${entry}"
-                fi
+            if [[ -n ${canDelete} -a -e ${entry} ]] ; then
+                ${execute} rm ${entry}
             else
                 local destination=$(echo ${entry} | sed "s:/:_:g")
-                "$execute mv -f ${entry} /build/home/${USER}/genericCleanup/${destination}"
-                "$execute tar cgf /build/home/${USER}/genericCleanup/${destination}.tar.gz \
-                    /build/home/${USER}/genericCleanup/${destination}
-                "$execute rm /build/home/${USER}/genericCleanup/${destination}
-                "$execute touch ${entry}"
+                local backupShare=/build/home/${USER}/genericCleanup
+                ${execute} mv -f ${entry} ${backupShare}/${destination}
+                ${execute} tar -cgzf ${backupShare}/${destination}.tar.gz \
+                    ${backupShare}/${destination}
+                ${execute} rm -rf ${backupShare}/${destination}
             fi
         else
-            echo "siteName != ul, removing files"
+            debug "siteName != ul, removing files"
             local randomValue=${RANDOM}
-            $execute ssh ${remoteServer} mv -f ${entry} ${entry}.deleted.${randomValue}
-            $execute ssh ${remoteServer} rm -rf ${entry}.deleted.${randomValue}
+            ${execute} ssh ${remoteServer} mv -f ${entry} ${entry}.deleted.${randomValue}
+            ${execute} ssh ${remoteServer} rm -rf ${entry}.deleted.${randomValue}
         fi
     done
 
@@ -191,10 +189,10 @@ genericShareCleanup() {
 #         info "transferting ${entry} to ${remoteServer}"
 # 
 #         debug "fixing permissions on parent directory"
-#         $execute ssh ${remoteServer} chmod u+w $(dirname ${entry})
+#         ${execute} ssh ${remoteServer} chmod u+w $(dirname ${entry})
 # 
 #         debug "creating new directory"
-#         $execute ssh ${remoteServer} mkdir -p ${remotePath}/${entry}
+#         ${execute} ssh ${remoteServer} mkdir -p ${remotePath}/${entry}
 # 
 #         debug "rsyncing ${entry}"
 #         info execute rsync -aHz -e ssh --stats ${entry}/ ${remoteServer}:${entry}/
