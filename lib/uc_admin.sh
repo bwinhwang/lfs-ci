@@ -166,7 +166,7 @@ genericShareCleanup() {
                 local destination=$(echo ${entry} | sed "s:/:_:g")
                 local backupShare=/build/home/${USER}/genericCleanup
                 ${execute} mv -f ${entry} ${backupShare}/${destination}
-                ${execute} tar -cgzf ${backupShare}/${destination}.tar.gz \
+                ${execute} tar -czf ${backupShare}/${destination}.tar.gz \
                     ${backupShare}/${destination}
                 ${execute} rm -rf ${backupShare}/${destination}
             fi
