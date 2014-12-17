@@ -123,14 +123,18 @@ sub _updateDependencies() {
         svn up
         COMMITBEFORE=$(cat $GITREVISION)
         cd ../src
+
         git rev-parse HEAD > ../$SVNDIR/$GITREVISION
         COMMITAFTER=$(cat ../$SVNDIR/$GITREVISION)
         git log $COMMITBEFORE..$COMMITAFTER | sed -e 's,^    %,%,' > ../$SVNDIR/gitlog
+
         cd ../$SVNDIR
         sed -i -e "
+
         s|^PKGLABEL *?=.*|PKGLABEL ?= $RELSTR|
         s|^LRCPKGLABEL *?=.*|LRCPKGLABEL ?= $RELSTR|
         s|^hint *bld/pkgpool .*|hint bld/pkgpool $RELSTR|
+
         " $RELFILE
         if ! svn commit -F gitlog $RELFILE $GITREVISION 2> stderr; then
             java -jar "$JENKINS_ROOT/jenkins-cli.jar" set-build-result unstable
