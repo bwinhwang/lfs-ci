@@ -21,10 +21,10 @@ ci_job_ecl() {
     mustHaveValue "${eclKeysToUpdate}"
 
     # find the related jobs of the build
-    local buildJobName=$(     getBuildJobNameFromUpstreamProject     ${UPSTREAM_PROJECT} ${UPSTREAM_BUILD})
-    local buildBuildNumber=$( getBuildBuildNumberFromUpstreamProject ${UPSTREAM_PROJECT} ${UPSTREAM_BUILD})
-    local testJobName=$(      getTestJobNameFromUpstreamProject      ${UPSTREAM_PROJECT} ${UPSTREAM_BUILD})
-    local testBuildNumber=$(  getTestBuildNumberFromUpstreamProject  ${UPSTREAM_PROJECT} ${UPSTREAM_BUILD})
+    local buildJobName=$(    getBuildJobNameFromUpstreamProject     ${UPSTREAM_PROJECT} ${UPSTREAM_BUILD})
+    local buildBuildNumber=$(getBuildBuildNumberFromUpstreamProject ${UPSTREAM_PROJECT} ${UPSTREAM_BUILD})
+    local testJobName=$(     getTestJobNameFromUpstreamProject      ${UPSTREAM_PROJECT} ${UPSTREAM_BUILD})
+    local testBuildNumber=$( getTestBuildNumberFromUpstreamProject  ${UPSTREAM_PROJECT} ${UPSTREAM_BUILD})
     local packageJobName=
     local packageBuildNumber=
     
@@ -49,8 +49,8 @@ ci_job_ecl() {
         mustHaveValue "${packageJobName}"     "package job name"
         mustHaveValue "${packageBuildNumber}" "package job build number"
         
-        buildJobName=$(      getBuildJobNameFromUpstreamProject     ${packageJobName} ${packageBuildNumber})
-        buildBuildNumber=$(  getBuildBuildNumberFromUpstreamProject ${packageJobName} ${packageBuildNumber})
+        buildJobName=$(    getBuildJobNameFromUpstreamProject     ${packageJobName} ${packageBuildNumber})
+        buildBuildNumber=$(getBuildBuildNumberFromUpstreamProject ${packageJobName} ${packageBuildNumber})
         
     fi  
     

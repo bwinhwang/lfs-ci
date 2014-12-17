@@ -18,6 +18,9 @@ ci_job_test() {
     local upstreamBuildNumber=${UPSTREAM_BUILD}
     info "upstreamProject data: ${upstreamProject} / ${upstreamBuildNumber}"
 
+    local requiredArtifacts=$(getConfig LFS_CI_UC_test_required_artifacts)
+    copyArtifactsToWorkspace "${upstreamProject}" "${upstreamBuildNumber}" "${requiredArtifacts}"
+
     # structure of jobs
     # Test
     #  |--- FSM-r2 summary
