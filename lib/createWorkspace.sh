@@ -165,11 +165,13 @@ createWorkspace() {
 #           contains all the used svn urls and revisions
 #  @return  latest revision number
 latestRevisionFromRevisionStateFile() {
-    requiredParameters UPSTREAM_PROJECT UPSTREAM_BUILD WORKSPACE
+    requiredParameters WORKSPACE
 
     local revision=
 
     if [[ ! -f ${WORKSPACE}/revisions.txt ]] ; then
+        requiredParameters UPSTREAM_PROJECT UPSTREAM_BUILD 
+
         local jobName=$(getBuildJobNameFromUpstreamProject ${UPSTREAM_PROJECT} ${UPSTREAM_BUILD})
         local buildNumber=$(getBuildBuildNumberFromUpstreamProject ${UPSTREAM_PROJECT} ${UPSTREAM_BUILD})
 
