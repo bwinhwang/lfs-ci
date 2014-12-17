@@ -160,7 +160,7 @@ genericShareCleanup() {
             # make tarball
             # entscheide, ob du loeschen sollst oder nicht
             local canDelete=$(getConfig LFS_ADMIN_cleanup_share_can_delete)
-            if [[ -n ${canDelete} -a -e ${entry} ]] ; then
+            if [[ -n "${canDelete}" -a -e ${entry} ]] ; then
                 ${execute} rm ${entry}
             else
                 local destination=$(echo ${entry} | sed "s:/:_:g")
