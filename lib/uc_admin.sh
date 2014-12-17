@@ -135,7 +135,8 @@ genericShareCleanup() {
 
     setBuildDescription ${JOB_NAME} ${BUILD_NUMBER} "triggered by ${UPSTREAM_PROJECT}/${UPSTREAM_BUILD}"
 
-    local execute=execute
+    # local execute=execute
+    local execute=info
     local max=$(wc -l ${tmpFile} | cut -d" " -f1)
     local cnt=0
     for entry in $(cat ${tmpFile}) ; do
