@@ -161,7 +161,7 @@ genericShareCleanup() {
             # entscheide, ob du loeschen sollst oder nicht
             local canDelete=$(getConfig LFS_ADMIN_cleanup_share_can_delete)
             if [[ -n "${canDelete}" && -e ${entry} ]] ; then
-                ${execute} rm ${entry}
+                ${execute} rm -rf ${entry}
             else
                 local destination=$(echo ${entry} | sed "s:/:_:g")
                 local backupShare=/build/home/${USER}/genericCleanup
