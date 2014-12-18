@@ -298,13 +298,16 @@ copyFactoryZip() {
     mustHaveWorkspaceName
 
     # TODO: demx2fk3 2014-05-27 fixme
-    local dst=${workspace}/upload/platforms/fsm3_octeon2
-
-    if [[ -d ${dst} ]] ; then
-        execute cd ${dst}
-        execute zip -r factory.zip factory
-        execute cd $OLDPWD
-    fi
+    for dst in ${workspace}/upload/platforms/fsm3_octeon2 \
+               ${workspace}/upload/platforms/fsm4_axm     \
+               ${workspace}/upload/platforms/fsm4_k2
+    do
+        if [[ -d ${dst} ]] ; then
+            execute cd ${dst}
+            execute zip -r factory.zip factory
+            execute cd $OLDPWD
+        fi
+    done
 
     return
 }
