@@ -418,6 +418,7 @@ copyVersionFile() {
     info "copy verson control file..."
     for file in ${workspace}/bld/bld-fsmpsl-fct/results/doc/versions/version_control.xml \
                 ${workspace}/bld/bld-fsmpsl-fct/results/doc/versions/ptsw_fsmr3_version_control.xml \
+                ${workspace}/bld/bld-fsmpsl-fct/results/doc/versions/ptsw_fsmr4_version_control.xml \
                 ${workspace}/bld/bld-fsmpsl-fct/results/doc/versions/ptsw_urec_version_control.xml
     do
         [[ -e ${file} ]] || continue
