@@ -2483,6 +2483,11 @@ sub execute {
                         platform    => 3,
                     };
     }
+    if( not exists $wantMap->{$wanted} ) {
+        # if we don't know the key, we set it to something empty
+        # hopefully nobody will ever use 999x_-_ :)
+        $wantMap->{$wanted} = 999;
+    }
 
     my @resultArray = split( "_-_", $string );
 
