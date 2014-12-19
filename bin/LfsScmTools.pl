@@ -2481,7 +2481,6 @@ sub execute {
                         taskName    => 1,
                         subTaskName => 2,
                         platform    => 3,
-                        location    => 999, # not defined element
                     };
     }
     if( not exists $wantMap->{$wanted} ) {
