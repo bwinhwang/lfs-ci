@@ -155,7 +155,7 @@ genericShareCleanup() {
         fi
 
         debug "removing ${entry}"
-        if [[ ${siteName} -eq "ul" ]] ; then
+        if [[ ${siteName} = "ul" ]] ; then
             # make tarball
             # entscheide, ob du loeschen sollst oder nicht
             local canDelete=$(getConfig LFS_ADMIN_cleanup_share_can_delete)
