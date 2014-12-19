@@ -338,7 +338,7 @@ cleanupOrphanJobDirectories() {
 #  @param   <none>
 #  @return  <none>
 createLfsBaselineListFromEcl() {
-    requiredParameters ${WORKSPACE}
+    requiredParameters WORKSPACE
 
     cd ${WORKSPACE}
 
