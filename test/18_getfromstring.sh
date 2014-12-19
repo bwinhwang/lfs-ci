@@ -85,6 +85,10 @@ testJobNameAdminJobs_2() {
     assertEquals ""          "$(${LFS_CI_ROOT}/bin/getFromString.pl ${JOB_NAME} 4)"
     assertEquals ""          "$(${LFS_CI_ROOT}/bin/getFromString.pl ${JOB_NAME} 5)"
 }
+testJobNameAdminJobs_3() {
+    local JOB_NAME=Admin_-_cleanUp
+    assertEquals ""    "$(${LFS_CI_ROOT}/bin/getFromString.pl ${JOB_NAME} location)"
+}
 
 source lib/shunit2
 
