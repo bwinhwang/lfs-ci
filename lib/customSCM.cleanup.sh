@@ -142,7 +142,7 @@ _ciLfsNotReleasedBuilds() {
     done
 
     sort -u ${tmpFile} > ${tmpFileA}
-    find ${directoryToCleanup} -mindepth 2 -maxdepth 2 -mtime +7 -type d -printf "%p\n" | sort -u > ${tmpFileB}
+    find ${directoryToCleanup} -mindepth 2 -maxdepth 2 -mtime +5 -type d -printf "%p\n" | sort -u > ${tmpFileB}
 
     debug "list from find"
     rawDebug ${tmpFileB}
