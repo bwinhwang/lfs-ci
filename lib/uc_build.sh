@@ -2,6 +2,7 @@
 
 [[ -z ${LFS_CI_SOURCE_artifacts}       ]] && source ${LFS_CI_ROOT}/lib/artifacts.sh
 [[ -z ${LFS_CI_SOURCE_createWorkspace} ]] && source ${LFS_CI_ROOT}/lib/createWorkspace.sh
+[[ -z ${LFS_CI_SOURCE_database}        ]] && source ${LFS_CI_ROOT}/lib/database.sh
 
 ## @fn      ci_job_build()
 #  @brief   usecase job ci build
@@ -88,6 +89,8 @@ ci_job_build_version() {
     createArtifactArchive
 
     setBuildDescription "${JOB_NAME}" "${BUILD_NUMBER}" "${label}"
+
+    databaseEventBuildStarted
 
     return
 }

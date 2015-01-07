@@ -38,7 +38,7 @@ exit_handler() {
 	[ ${rc} -ne 0 ] && trace "$(_stackTrace)"
 
 	for m in ${CI_EXIT_HANDLER_METHODS}; do
-		$m
+		$m ${rc}
 	done
 
 	exit ${rc:-3}

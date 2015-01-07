@@ -4,6 +4,7 @@
 [[ -z ${LFS_CI_SOURCE_subversion}   ]] && source ${LFS_CI_ROOT}/lib/subversion.sh
 [[ -z ${LFS_CI_SOURCE_subversion}   ]] && source ${LFS_CI_ROOT}/lib/jenkins.sh
 [[ -z ${LFS_CI_SOURCE_workflowtool} ]] && source ${LFS_CI_ROOT}/lib/workflowtool.sh
+[[ -z ${LFS_CI_SOURCE_database}     ]] && source ${LFS_CI_ROOT}/lib/database.sh
 
 ## @fn      ci_job_release()
 #  @brief   dispatcher for the release jobs
@@ -116,10 +117,12 @@ ci_job_release() {
         ;;
         pre_release_checks)
             prereleaseChecks
+            databaseEventReleaseStarted
         ;;
         summary)
             sendReleaseNote "${TESTED_BUILD_JOBNAME}" "${TESTED_BUILD_NUMBER}" \
                             "${buildJobName}"         "${buildBuildNumber}"
+            databaseEventReleaseFinished
         ;;
         *)
             error "subJob not known (${subJob})"
@@ -382,7 +385,6 @@ sendReleaseNote() {
     executeOnMaster ln -sf ${remoteDirectory} ${artifactsPathOnMaster}/release
 
     appproveReleaseForPsScm ${osTagName}
-    createReleaseInStatisticDatabase ${buildJobName} ${buildBuildNumber}
 
     info "release is done."
     return
@@ -889,31 +891,3 @@ appproveReleaseForPsScm() {
     return
 }
 
-## @fn      createReleaseInStatisticDatabase()
-#  @brief   create release in statistic database for statistic purposes
-#  @param   <none>
-#  @return  <none>
-createReleaseInStatisticDatabase() {
-    requiredParameters LFS_CI_ROOT LFS_PROD_RELEASE_CURRENT_TAG_NAME
-
-    local buildJobsName=$1
-    local buildJobBuild=$2
-
-    local location=$(getLocationName)
-    mustHaveLocationName
-
-    local label=${LFS_PROD_RELEASE_CURRENT_TAG_NAME}
-    mustHaveValue "${label}" "label name"
-
-    local date=$(date "+%Y-%m-%d %H:%M:%S")
-
-    copyFileFromBuildDirectoryToWorkspace ${buildJobsName} ${buildJobBuild} revisionstate.xml
-    local revision=$(cut -d" " -f 3 ${WORKSPACE}/revisionstate.xml | sort -nu | tail -n 1)
-    mustHaveValue "${revision}" "revision from revision state file"
-
-    info "create release in statistic database"
-    # TODO: demx2fk3 2014-12-01 add execute -i here
-    execute ${LFS_CI_ROOT}/bin/createReleaseInDatabase.pl -n ${label} -b ${location} -d \"${date}\" -r ${revision}
-
-    return
-}
