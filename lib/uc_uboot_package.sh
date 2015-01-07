@@ -2,6 +2,7 @@
 
 [[ -z ${LFS_CI_SOURCE_artifacts} ]] && source ${LFS_CI_ROOT}/lib/artifacts.sh
 [[ -z ${LFS_CI_SOURCE_package}   ]] && source ${LFS_CI_ROOT}/lib/package.sh
+[[ -z ${LFS_CI_SOURCE_database}  ]] && source ${LFS_CI_ROOT}/lib/database.sh
 
 ## @fn      ci_job_package()
 #  @brief   create a package from the build results for the testing / release process
@@ -24,6 +25,8 @@ ci_job_package() {
     local label=$(getNextCiLabelName)
     setBuildDescription "${JOB_NAME}" "${BUILD_NUMBER}" "${label}"
     info "label name is ${label}"
+
+    databaseEventBuildFinished
 
     local localDirectory=${workspace}/upload
     execute mkdir -p ${localDirectory}

@@ -1,5 +1,7 @@
 #!/bin/bash
 
+LFS_CI_SOURCE_database='$Id$'
+
 ## @fn      databaseEventBuildStarted()
 #  @brief   create an entry in the database table build_events for a started build
 #  @param   <none>
