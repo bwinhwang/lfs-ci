@@ -32,10 +32,10 @@ sub prepare {
     if( not $self->{dbi} ) {
 
         my $dbiString = sprintf( "DBI:%s:%s:%s:%s",
-                "mysql",   # database driver
-                "lfspt",   # database
+                "mysql",     # database driver
+                "lfspt",     # database
                 "ulwiki02",  # database host
-                3306,      # db port
+                3306,        # db port
                 );
         my $userName = "lfspt";
         my $password = "pt";
@@ -48,19 +48,37 @@ sub prepare {
     return $self->{dbi}->prepare( $sql ) or LOGDIE $DBI::errstr;
 }
 
-sub createNewReleaseInDatabase {
+sub newBuildEvent {
     my $self         = shift;
     my $param        = { @_ };
     my $baselineName = $param->{baselineName};
-    my $creationDate = $param->{creationDate};
     my $branchName   = $param->{branchName};
     my $revision     = $param->{revision};
+    my $comment      = $param->{comment};
+    my $action       = $param->{action};
+    my $method       = "";
+
+    if( $action eq "build_started" ) {
+        $method = "build_started( ?, ?, ?, ? )";
+    } elsif ( $action eq "build_finished" ) {
+        $method = "build_finished( ?, ? )",
+    } elsif ( $action eq "build_failed" ) {
+        $method = "build_failed( ?, ? )",
+    } elsif ( $action eq "release_started" ) {
+        $method = "release_started( ?, ? )",
+    } elsif ( $action eq "release_finished" ) {
+        $method = "release_finished( ?, ? )",
+    }
 
     my $sth = $self->prepare( 
-        "insert into Releases ( Name, DateTime, Branch, SvnRevision ) values ( ?, ?, ?, ? )"
+        "call $method" 
     );
 
-    $sth->execute( $baselineName, $creationDate, $branchName, $revision ) or LOGDIE sprintf( "can not insert data\n%s\n", $sth->errstr() );
+    if( $action eq "build_started" ) {
+        $sth->execute( $baselineName, $comment, $branchName, $revision ) or LOGDIE sprintf( "can not insert data\n%s\n", $sth->errstr() );
+    } else {
+        $sth->execute( $baselineName, $comment ) or LOGDIE sprintf( "can not insert data\n%s\n", $sth->errstr() );
+    }
 
     return;
 }
@@ -71,7 +89,7 @@ use strict;
 use warnings;
 use parent qw( -norequire Object );
 
-sub createNewRelease {
+sub newBuildEvent {
     my $self = shift;
     my $param = { @_ };
     my $release = $param->{release};
@@ -80,10 +98,11 @@ sub createNewRelease {
         $self->{store} = Store::Database->new();
     }
 
-    $self->{store}->createNewReleaseInDatabase( baselineName => $release->baselineName(),
-                                                creationDate => $release->creationDate(),
-                                                branchName   => $release->branchName(),
-                                                revision     => $release->revision() );
+    $self->{store}->newBuildEvent( baselineName => $release->baselineName(),
+                                   branchName   => $release->branchName(),
+                                   revision     => $release->revision(),
+                                   action       => $param->{action},
+                                   comment      => $release->comment() );
     return;
 }
 
@@ -95,8 +114,8 @@ use parent qw( -norequire Object );
 
 sub baselineName { my $self = shift; return $self->{baselineName}; }
 sub branchName   { my $self = shift; return $self->{branchName};   }
-sub creationDate { my $self = shift; return $self->{creationDate}; }
 sub revision     { my $self = shift; return $self->{revision};     }
+sub comment      { my $self = shift; return $self->{comment};     }
 
 package main;
 
@@ -117,26 +136,25 @@ Log::Log4perl::init( \%l4p_config );
 
 my $opt_name     = "";
 my $opt_branch   = "";
-my $opt_date     = "";
 my $opt_revision = "";
+my $opt_action   = "";
+my $opt_comment   = "";
 
 GetOptions( 'n=s', \$opt_name,
             'b=s', \$opt_branch,
-            'd=s', \$opt_date,
             'r=s', \$opt_revision,
+            'a=s', \$opt_action,
+            'c=s', \$opt_comment,
         ) or LOGDIE "invalid option";
 
-if( not $opt_name or not $opt_branch or not $opt_date ) {
-    ERROR "wrong usage: $0 -n <name> -b <branch> -d <date> -r <revision>";
+if( not $opt_name or not $opt_action ) {
+    ERROR "wrong usage: $0 -n <name> -b <branch> -r <revision> -a <action>";
     exit 0
 }
 
-my $release = Model::Release->new( baselineName => $opt_name, 
-                                   branchName   => $opt_branch, 
-                                   creationDate => $opt_date,
-                                   revision     => $opt_revision );
-my $handler = Handler::Database->new();
-
-$handler->createNewRelease( release => $release );
-
+Handler::Database->new()->newBuildEvent( action  => $opt_action,
+                                         release => Model::Release->new( baselineName => $opt_name, 
+                                                                         branchName   => $opt_branch, 
+                                                                         revision     => $opt_revision,
+                                                                         comment      => $opt_comment ) );
 exit 0;
