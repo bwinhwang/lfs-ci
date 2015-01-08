@@ -124,7 +124,7 @@ testDatabaseTestResults() {
 
     local expect=$(createTempFile)
     cat <<EOF > ${expect}
-execute -i /home/bm/projekte/work/nsn/ci.git/bin/newBuildEvent.pl -a new_test_result -n PS_LFS_OS_9999_88_7777 --resultFile=resultFile --testSuiteName=testSuite --targetName=targetName --targetType=targetType
+execute -i ${LFS_CI_ROOT}/bin/newBuildEvent.pl -a new_test_result -n PS_LFS_OS_9999_88_7777 --resultFile=resultFile --testSuiteName=testSuite --targetName=targetName --targetType=targetType
 EOF
 
     assertEquals "$(cat ${expect})" "$(cat ${UT_MOCKED_COMMANDS})"
