@@ -32,10 +32,10 @@ sub prepare {
     if( not $self->{dbi} ) {
 
         my $dbiString = sprintf( "DBI:%s:%s:%s:%s",
-                "mysql",     # database driver
-                "lfspt",     # database
-                "ulwiki02",  # database host
-                3306,        # db port
+                "mysql",                      # database driver
+                "lfspt",                      # database
+                "ulwiki02.emea.nsn-net.net",  # database host
+                3306,                         # database port
                 );
         my $userName = "lfspt";
         my $password = "pt";
