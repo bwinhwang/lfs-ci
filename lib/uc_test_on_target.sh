@@ -27,10 +27,10 @@ ci_job_test_on_target() {
     info "create workspace for testing on ${branchName}"
     createBasicWorkspace -l ${branchName} src-test
 
-    databaseEventTestStarted ${LABEL} ${testTargetName}
-
     export testTargetName=${targetName}
     local testType=$(getConfig LFS_CI_uc_test_making_test_type)
+
+    databaseEventTestStarted ${LABEL} ${testTargetName}
 
     for type in $(getConfig LFS_CI_uc_test_making_test_type) ; do
         info "running test type ${type} on target ${testTargetName}"
