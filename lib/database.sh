@@ -98,3 +98,20 @@ databaseEventTestFinished() {
     return
 }
 
+databaseTestResults() {
+    local label=$1
+    local testSuiteName=$2
+    local targetName=$3
+    local targetType=$4
+    local resultFile=$5
+
+    execute -i ${LFS_CI_ROOT}/bin/newBuildEvent.pl \
+            -a new_test_result                     \
+            -n ${label}                            \
+            --resultFile=${resultFile}             \
+            --testSuiteName=${testSuiteName}       \
+            --targetName=${targetName}             \
+            --targetType=${targetType} 
+
+    return
+}

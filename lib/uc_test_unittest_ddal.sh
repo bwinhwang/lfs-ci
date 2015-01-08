@@ -26,7 +26,6 @@ ci_job_test_unittest() {
 
     source ${WORKSPACE}/properties
 
-
     local revision=$(latestRevisionFromRevisionStateFile)
     mustHaveValue "${revision}" "revision"
 
@@ -85,6 +84,18 @@ ci_job_test_unittest() {
     set -- $(grep 'functions.*: ' lcov.summary | sed -e 's/[()%]//g')
     local FUNCTIONS_COVERED=$3
     local FUNCTIONS_TOTAL=$5
+
+    local resultFile=$(createTempFile)
+    echo "lines_covered;${LINES_COVERED}"          > ${resultFile}
+    echo "lines_total;${LINES_TOTAL}"             >> ${resultFile}
+    echo "functions_covered;${FUNCTIONS_COVERED}" >> ${resultFile}
+    echo "functions_total;${FUNCTIONS_TOTAL}"     >> ${resultFile}
+
+    databaseTestResults ${LABEL}      \
+                        makingTest    \
+                        localhost-x86 \
+                        FSM-r3        \
+                        ${resultFile}
 
     info "testing done."
 

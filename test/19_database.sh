@@ -119,6 +119,17 @@ EOF
     assertEquals "$(cat ${expect})" "$(cat ${UT_MOCKED_COMMANDS})"
 }
 
+testDatabaseTestResults() {
+    assertTrue "databaseTestResults PS_LFS_OS_9999_88_7777 testSuite targetName targetType resultFile"
+
+    local expect=$(createTempFile)
+    cat <<EOF > ${expect}
+execute -i /home/bm/projekte/work/nsn/ci.git/bin/newBuildEvent.pl -a new_test_result -n PS_LFS_OS_9999_88_7777 --resultFile=resultFile --testSuiteName=testSuite --targetName=targetName --targetType=targetType
+EOF
+
+    assertEquals "$(cat ${expect})" "$(cat ${UT_MOCKED_COMMANDS})"
+}
+
 source lib/shunit2
 
 exit 0
