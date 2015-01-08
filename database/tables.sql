@@ -49,7 +49,7 @@ CREATE TABLE test_executions (
     target_name     VARCHAR(128) NOT NULL,
     target_type     VARCHAR(128) NOT NULL,
 
-    PRIMARY KEY (id) 
+    PRIMARY KEY (id), 
     FOREIGN KEY (build_name)
         REFERENCES builds(build_name)
 );

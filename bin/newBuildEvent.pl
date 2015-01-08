@@ -42,10 +42,46 @@ sub prepare {
         my $dbiArgs  = { AutoCommit => 1,
                          PrintError => 1 };
 
-            $self->{dbi} = DBI->connect( $dbiString, $userName, $password, $dbiArgs ) or LOGDIE $DBI::errstr;
+        $self->{dbi} = DBI->connect( $dbiString, $userName, $password, $dbiArgs ) or LOGDIE $DBI::errstr;
     }
 
     return $self->{dbi}->prepare( $sql ) or LOGDIE $DBI::errstr;
+}
+
+sub newTestExecution {
+    my $self  = shift;
+    my $param = { @_ };
+
+    my $buildName     = $param->{buildName};
+    my $testSuiteName = $param->{testSuiteName};
+    my $targetName    = $param->{targetName};
+    my $targetType    = $param->{targetType};
+
+    my $sth = $self->prepare( 
+        'CALL add_new_test_execution( ?, ?, ?, ?, @id )'
+    );
+    $sth->execute( $buildName, $testSuiteName, $targetName, $targetType ) 
+        or LOGDIE sprintf( "can not insert test execution: %s, %s, %s, %s", $buildName, $testSuiteName, $targetName, $targetType);
+    my $id = $self->{dbi}->selectrow_array('SELECT @id');
+
+    return $id;
+}
+
+sub newTestResult {
+    my $self  = shift;
+    my $param = { @_ };
+
+    my $testExecutionId = $param->{testExecutionId};
+    my $testResultName  = $param->{testResultName};
+    my $testResultValue = $param->{testResultValue};
+
+    my $sth = $self->prepare( 
+        'CALL add_new_test_result( ?, ?, ? )'
+    );
+    $sth->execute( $testExecutionId, $testResultName, $testResultValue ) 
+        or LOGDIE sprintf( "can not insert test result: %s, %s, %s", $testExecutionId, $testResultName, $testResultValue );
+
+    return;
 }
 
 sub newBuildEvent {
@@ -75,9 +111,11 @@ sub newBuildEvent {
     );
 
     if( $action eq "build_started" ) {
-        $sth->execute( $baselineName, $comment, $branchName, $revision ) or LOGDIE sprintf( "can not insert data\n%s\n", $sth->errstr() );
+        $sth->execute( $baselineName, $comment, $branchName, $revision ) 
+            or LOGDIE sprintf( "can not insert data\n%s\n", $sth->errstr() );
     } else {
-        $sth->execute( $baselineName, $comment ) or LOGDIE sprintf( "can not insert data\n%s\n", $sth->errstr() );
+        $sth->execute( $baselineName, $comment ) 
+            or LOGDIE sprintf( "can not insert data\n%s\n", $sth->errstr() );
     }
 
     return;
@@ -88,6 +126,43 @@ package Handler::Database;
 use strict;
 use warnings;
 use parent qw( -norequire Object );
+
+sub newTestResult {
+    my $self  = shift;
+    my $param = { @_ };
+
+    my $testExecutionId = $param->{testExecutionId};
+    my $testResultName  = $param->{testResultName};
+    my $testResultValue = $param->{testResultValue};
+
+    if( not $self->{store} ) {
+        $self->{store} = Store::Database->new();
+    }
+
+    $self->{store}->newTestResult( testExecutionId => $testExecutionId,
+                                   testResultName  => $testResultName,
+                                   testResultValue => $testResultValue, );
+    return;
+}
+sub newTestExecution {
+    my $self  = shift;
+    my $param = { @_ };
+
+    my $buildName     = $param->{buildName};
+    my $testSuiteName = $param->{testSuiteName};
+    my $targetName    = $param->{targetName};
+    my $targetType    = $param->{targetType};
+
+    if( not $self->{store} ) {
+        $self->{store} = Store::Database->new();
+    }
+
+    my $id = $self->{store}->newTestExecution( buildName     => $param->{buildName},
+                                               testSuiteName => $param->{testSuiteName},
+                                               targetName    => $param->{targetName},
+                                               targetType    => $param->{targetType},);
+    return $id;
+}
 
 sub newBuildEvent {
     my $self = shift;
@@ -106,7 +181,7 @@ sub newBuildEvent {
     return;
 }
 
-package Model::Release;
+package Model::Build;
 
 use strict;
 use warnings;
@@ -115,7 +190,7 @@ use parent qw( -norequire Object );
 sub baselineName { my $self = shift; return $self->{baselineName}; }
 sub branchName   { my $self = shift; return $self->{branchName};   }
 sub revision     { my $self = shift; return $self->{revision};     }
-sub comment      { my $self = shift; return $self->{comment};     }
+sub comment      { my $self = shift; return $self->{comment};      }
 
 package main;
 
@@ -134,17 +209,25 @@ my %l4p_config = (
 
 Log::Log4perl::init( \%l4p_config );
 
-my $opt_name     = "";
-my $opt_branch   = "";
-my $opt_revision = "";
-my $opt_action   = "";
-my $opt_comment   = "";
+my $opt_name          = "";
+my $opt_branch        = "";
+my $opt_revision      = "";
+my $opt_action        = "";
+my $opt_comment       = "";
+my $opt_resultFile    = "";
+my $opt_testSuiteName = "";
+my $opt_targetName    = "";
+my $opt_targetType    = "";
 
-GetOptions( 'n=s', \$opt_name,
-            'b=s', \$opt_branch,
-            'r=s', \$opt_revision,
-            'a=s', \$opt_action,
-            'c=s', \$opt_comment,
+GetOptions( 'n=s',             \$opt_name,
+            'b=s',             \$opt_branch,
+            'r=s',             \$opt_revision,
+            'a=s',             \$opt_action,
+            'c=s',             \$opt_comment,
+            'resultFile=s',    \$opt_resultFile,
+            'testSuiteName=s', \$opt_testSuiteName,
+            'targetName=s',    \$opt_targetName,
+            'targetType=s',    \$opt_targetType,
         ) or LOGDIE "invalid option";
 
 if( not $opt_name or not $opt_action ) {
@@ -152,9 +235,31 @@ if( not $opt_name or not $opt_action ) {
     exit 0
 }
 
-Handler::Database->new()->newBuildEvent( action  => $opt_action,
-                                         release => Model::Release->new( baselineName => $opt_name, 
-                                                                         branchName   => $opt_branch, 
-                                                                         revision     => $opt_revision,
-                                                                         comment      => $opt_comment ) );
+if( $opt_action eq "new_test_result" ) {
+    my $handler = Handler::Database->new();
+
+    my $id = $handler->newTestExecution( buildName     => $opt_name,
+                                         testSuiteName => $opt_testSuiteName,
+                                         targetName    => $opt_targetName,
+                                         targetType    => $opt_targetType, );
+
+    open FILE, $opt_resultFile or LOGDIE "can not open $opt_resultFile";
+    while( <FILE> ) {
+        chomp;
+        my ( $resultName, $resultValue ) = split( ";", $_ );
+        $handler->newTestResult( testExecutionId => $id,
+                                 testResultName  => $resultName,
+                                 testResultValue => $resultValue );
+    }
+    close FILE;
+
+} else {
+
+    Handler::Database->new()->newBuildEvent( action  => $opt_action,
+                                             release => Model::Build->new( baselineName => $opt_name, 
+                                                                           branchName   => $opt_branch, 
+                                                                           revision     => $opt_revision,
+                                                                           comment      => $opt_comment ) );
+}
+
 exit 0;

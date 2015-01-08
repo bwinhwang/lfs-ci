@@ -2,8 +2,8 @@ DROP PROCEDURE IF EXISTS new_build_event;
 DELIMITER //
 CREATE PROCEDURE new_build_event( IN in_build_name VARCHAR(128), IN in_event VARCHAR(128), IN in_comment TEXT)
    BEGIN
-   DECLARE cnt_event_id int;
-   DECLARE var_event_id int;
+   DECLARE cnt_event_id INT;
+   DECLARE var_event_id INT;
 
    SELECT count(id) INTO cnt_event_id FROM events WHERE event_name = in_event;
    IF cnt_event_id = 0 THEN
@@ -104,9 +104,9 @@ CREATE PROCEDURE add_new_test_result( IN test_execution_id    INT,
                                       IN in_test_result_value INT )
 BEGIN
 
-    DECLARE cnt_test_result_name_id int;
-    DECLARE var_test_result_name_id int;
-    DECLARE var_test_suite_name     text;
+    DECLARE cnt_test_result_name_id INT;
+    DECLARE var_test_result_name_id INT;
+    DECLARE var_test_suite_name     TEXT;
 
     SELECT test_suite_name INTO var_test_suite_name FROM test_executions WHERE id = test_execution_id;
     /* add check here */ 
