@@ -93,8 +93,8 @@ uc_job_test_on_target_archive_logs() {
     local resultFile=$(createTempFile)
     local test_total=$(grep '<testcase ' ${workspace}/ftcm_junit.xml | wc -l)
     local test_failed=$(grep '<failure>' ${workspace}/ftcm_junit.xml | wc -l)
-    echo "test_failed:${test_failed}" > ${resultFile}
-    echo "test_total:${test_total}" > ${resultFile}
+    echo "test_failed;${test_failed}" > ${resultFile}
+    echo "test_total;${test_total}" > ${resultFile}
     rawDebug ${resultFile}
 
     databaseTestResults ${LABEL}     \
