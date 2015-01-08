@@ -104,6 +104,10 @@ sub newBuildEvent {
         $method = "release_started( ?, ? )",
     } elsif ( $action eq "release_finished" ) {
         $method = "release_finished( ?, ? )",
+    } elsif ( $action eq "test_started" ) {
+        $method = "test_started( ?, ? )",
+    } elsif ( $action eq "test_finished" ) {
+        $method = "test_finished( ?, ? )",
     }
 
     my $sth = $self->prepare( 
