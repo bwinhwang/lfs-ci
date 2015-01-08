@@ -19,10 +19,6 @@ oneTimeSetUp() {
         mockCommand "mustHaveLocationName $@"
         return
     }
-    latestRevisionFromRevisionStateFile() {
-        mockCommand "latestRevisionFromRevisionStateFile $@"
-        echo 123456
-    }
     mustHaveNextCiLabelName() {
         mockCommand "mustHaveNextCiLabelName $@"
         return
@@ -41,6 +37,10 @@ oneTimeSetUp() {
 
 setUp() {
     cp -f /dev/null ${UT_MOCKED_COMMANDS}
+
+    export WORKSPACE=$(createTempDirectory)
+    echo "src-bos foo 123456" > ${WORKSPACE}/revision_state.txt
+
     return
 }
 
@@ -55,7 +55,6 @@ testDatabaseEventBuildStarted_ok() {
     cat <<EOF > ${expect}
 getLocationName
 mustHaveLocationName
-latestRevisionFromRevisionStateFile
 mustHaveNextCiLabelName
 getNextCiLabelName
 execute -i ${LFS_CI_ROOT}/bin/newBuildEvent.pl -n PS_LFS_OS_9999_88_7777 -b trunk -r 123456 -a build_started

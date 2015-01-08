@@ -12,7 +12,7 @@ databaseEventBuildStarted() {
     local branch=$(getLocationName)
     mustHaveLocationName
 
-    local revision=$(latestRevisionFromRevisionStateFile)
+    local revision=$(cut -d" " -f 3 ${WORKSPACE}/revision_state.txt | sort -n -u | tail -n 1)
     mustHaveValue "${revision}" "revision from revision state file"
 
     mustHaveNextCiLabelName
