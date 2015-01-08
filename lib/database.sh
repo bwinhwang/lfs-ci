@@ -82,3 +82,19 @@ databaseEventReleaseFinished() {
     execute -i ${LFS_CI_ROOT}/bin/newBuildEvent.pl -n ${label} -a release_finished
     return
 }
+
+databaseEventTestStarted() {
+    local label=$1
+    local targetName=$2
+    execute -i ${LFS_CI_ROOT}/bin/newBuildEvent.pl -n ${label} -c ${targetName} -a test_started
+    return
+}
+
+
+databaseEventTestFinished() {
+    local label=$1
+    local targetName=$2
+    execute -i ${LFS_CI_ROOT}/bin/newBuildEvent.pl -n ${label} -c ${targetName} -a test_finished
+    return
+}
+

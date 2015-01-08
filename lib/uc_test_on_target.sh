@@ -3,6 +3,7 @@
 [[ -z ${LFS_CI_SOURCE_artifacts}  ]] && source ${LFS_CI_ROOT}/lib/artifacts.sh
 [[ -z ${LFS_CI_SOURCE_jenkins}    ]] && source ${LFS_CI_ROOT}/lib/jenkins.sh
 [[ -z ${LFS_CI_SOURCE_makingtest} ]] && source ${LFS_CI_ROOT}/lib/makingtest.sh
+[[ -z ${LFS_CI_SOURCE_database}   ]] && source ${LFS_CI_ROOT}/lib/database.sh
 
 ## @fn      ci_job_test_on_target()
 #  @brief   usecase test on target
@@ -26,6 +27,8 @@ ci_job_test_on_target() {
     info "create workspace for testing on ${branchName}"
     createBasicWorkspace -l ${branchName} src-test
 
+    databaseEventTestStarted ${LABEL} ${testTargetName}
+
     export testTargetName=${targetName}
     local testType=$(getConfig LFS_CI_uc_test_making_test_type)
 
@@ -34,13 +37,13 @@ ci_job_test_on_target() {
         case ${testType} in
             checkUname)        makingTest_checkUname ;;
             testProductionLRC) makingTest_testLRC ;;
-            testProductionFSM) 
-                               makingTest_testFSM
-            ;;
+            testProductionFSM) makingTest_testFSM ;;
             testWithoutTarget) makingTest_testsWithoutTarget ;;
-            *) fatal "unknown testType"; ;;
+            *)                 fatal "unknown testType"; ;;
         esac
     done
+
+    databaseEventTestFinished ${LABEL} ${testTargetName}
 
     info "testing done."
 
