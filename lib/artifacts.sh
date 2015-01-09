@@ -44,8 +44,7 @@ Please check the artifacts of the package job
 [1] https://www.youtube.com/watch?v=DIzAaY2Jm-s&t=190
 EOF
 
-    copyFileToArtifactDirectory $(basename ${readmeFile})
-
+    # copyFileToArtifactDirectory $(basename ${readmeFile})
 
     local artifactsPathOnShare=$(getConfig artifactesShare)/${JOB_NAME}/${BUILD_NUMBER}
     linkFileToArtifactsDirectory ${artifactsPathOnShare}
