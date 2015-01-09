@@ -34,7 +34,6 @@ ci_job_release() {
     mustHaveValue "${branch}" "branch name"
 
     # find the related jobs of the build
-
     local packageJobName=$(getPackageJobNameFromUpstreamProject         ${TESTED_BUILD_JOBNAME} ${TESTED_BUILD_NUMBER})
     local packageBuildNumber=$(getPackageBuildNumberFromUpstreamProject ${TESTED_BUILD_JOBNAME} ${TESTED_BUILD_NUMBER})
     local buildJobName=$(getBuildJobNameFromUpstreamProject             ${TESTED_BUILD_JOBNAME} ${TESTED_BUILD_NUMBER})
@@ -116,8 +115,8 @@ ci_job_release() {
             createTagOnSourceRepository ${buildJobName} ${buildBuildNumber}
         ;;
         pre_release_checks)
-            prereleaseChecks
             databaseEventReleaseStarted
+            prereleaseChecks
         ;;
         summary)
             sendReleaseNote "${TESTED_BUILD_JOBNAME}" "${TESTED_BUILD_NUMBER}" \
@@ -144,19 +143,18 @@ ci_job_release() {
 prereleaseChecks() {
     requiredParameters LFS_PROD_RELEASE_PREVIOUS_TAG_NAME LFS_PROD_RELEASE_PREVIOUS_TAG_NAME_REL
 
-    local exitCode=0
     if ! existsBaselineInWorkflowTool ${LFS_PROD_RELEASE_PREVIOUS_TAG_NAME} ; then
         error "previous Version ${LFS_PROD_RELEASE_PREVIOUS_TAG_NAME} does not exist in WFT"
-        exitCode=1
+        exit 1
     fi
     if [[ $(getProductNameFromJobName) =~ LFS ]] ; then
         if ! existsBaselineInWorkflowTool ${LFS_PROD_RELEASE_PREVIOUS_TAG_NAME_REL} ; then
             error "previous Release Version ${LFS_PROD_RELEASE_PREVIOUS_TAG_NAME_REL} does not exist in WFT"
-            exitCode=1
+            exit 1
         fi                
     fi
-
-    exit ${exitCode}
+    
+    return
 }
 
 ## @fn      extractArtifactsOnReleaseShare( $jobName, $buildNumber )
