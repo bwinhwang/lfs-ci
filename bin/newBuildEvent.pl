@@ -32,10 +32,10 @@ sub prepare {
     if( not $self->{dbi} ) {
 
         my $dbiString = sprintf( "DBI:%s:%s:%s:%s",
-                "mysql",     # database driver
-                "lfspt",     # database
-                "ulwiki02",  # database host
-                3306,        # db port
+                "mysql",                      # database driver
+                "lfspt",                      # database
+                "ulwiki02.emea.nsn-net.net",  # database host
+                3306,                         # database port
                 );
         my $userName = "lfspt";
         my $password = "pt";
@@ -223,11 +223,11 @@ my $opt_testSuiteName = "";
 my $opt_targetName    = "";
 my $opt_targetType    = "";
 
-GetOptions( 'n=s',             \$opt_name,
-            'b=s',             \$opt_branch,
-            'r=s',             \$opt_revision,
-            'a=s',             \$opt_action,
-            'c=s',             \$opt_comment,
+GetOptions( 'buildName=s',     \$opt_name,
+            'branchName=s',    \$opt_branch,
+            'revision=s',      \$opt_revision,
+            'action=s',        \$opt_action,
+            'comment=s',       \$opt_comment,
             'resultFile=s',    \$opt_resultFile,
             'testSuiteName=s', \$opt_testSuiteName,
             'targetName=s',    \$opt_targetName,

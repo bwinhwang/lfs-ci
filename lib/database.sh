@@ -19,7 +19,7 @@ databaseEventBuildStarted() {
     local label=$(getNextCiLabelName)
     mustHaveValue ${label} "label name"
 
-    execute -i ${LFS_CI_ROOT}/bin/newBuildEvent.pl -n ${label} -b ${branch} -r ${revision} -a build_started
+    execute -i ${LFS_CI_ROOT}/bin/newBuildEvent.pl --buildName=${label} --branchName=${branch} --revision=${revision} --action=build_started
 
     return
 }
@@ -35,7 +35,7 @@ databaseEventBuildFinished() {
     local label=$(getNextCiLabelName)
     mustHaveValue ${label} "label name"
 
-    execute -i ${LFS_CI_ROOT}/bin/newBuildEvent.pl -n ${label} -a build_finished
+    execute -i ${LFS_CI_ROOT}/bin/newBuildEvent.pl --buildName=${label} --action=build_finished
     return
 }
 
@@ -55,7 +55,7 @@ databaseEventBuildFailed() {
     local label=$(getNextCiLabelName)
     mustHaveValue ${label} "label name"
 
-    execute -i ${LFS_CI_ROOT}/bin/newBuildEvent.pl -n ${label} -a build_failed
+    execute -i ${LFS_CI_ROOT}/bin/newBuildEvent.pl --buildName=${label} --action=build_failed
     return
 }
 
@@ -67,7 +67,7 @@ databaseEventReleaseStarted() {
     requiredParameters LFS_PROD_RELEASE_CURRENT_TAG_NAME
     local label=${LFS_PROD_RELEASE_CURRENT_TAG_NAME}
 
-    execute -i ${LFS_CI_ROOT}/bin/newBuildEvent.pl -n ${label} -a release_started
+    execute -i ${LFS_CI_ROOT}/bin/newBuildEvent.pl --buildName=${label} --action=release_started
     return
 }
 
@@ -79,14 +79,14 @@ databaseEventReleaseFinished() {
     requiredParameters LFS_PROD_RELEASE_CURRENT_TAG_NAME
     local label=${LFS_PROD_RELEASE_CURRENT_TAG_NAME}
 
-    execute -i ${LFS_CI_ROOT}/bin/newBuildEvent.pl -n ${label} -a release_finished
+    execute -i ${LFS_CI_ROOT}/bin/newBuildEvent.pl --buildName=${label} --action=release_finished
     return
 }
 
 databaseEventTestStarted() {
     local label=$1
     local targetName=$2
-    execute -i ${LFS_CI_ROOT}/bin/newBuildEvent.pl -n ${label} -c ${targetName} -a test_started
+    execute -i ${LFS_CI_ROOT}/bin/newBuildEvent.pl --buildName=${label} --comment=${targetName} --action=test_started
     return
 }
 
@@ -94,7 +94,7 @@ databaseEventTestStarted() {
 databaseEventTestFinished() {
     local label=$1
     local targetName=$2
-    execute -i ${LFS_CI_ROOT}/bin/newBuildEvent.pl -n ${label} -c ${targetName} -a test_finished
+    execute -i ${LFS_CI_ROOT}/bin/newBuildEvent.pl --buildName=${label} --comment=${targetName} --action=test_finished
     return
 }
 
@@ -106,8 +106,8 @@ databaseTestResults() {
     local resultFile=$5
 
     execute -i ${LFS_CI_ROOT}/bin/newBuildEvent.pl \
-            -a new_test_result                     \
-            -n ${label}                            \
+            --action=new_test_result               \
+            --buildName=${label}                            \
             --resultFile=${resultFile}             \
             --testSuiteName=${testSuiteName}       \
             --targetName=${targetName}             \

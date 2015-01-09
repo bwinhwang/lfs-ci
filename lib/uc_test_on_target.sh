@@ -27,10 +27,10 @@ ci_job_test_on_target() {
     info "create workspace for testing on ${branchName}"
     createBasicWorkspace -l ${branchName} src-test
 
-    databaseEventTestStarted ${LABEL} ${testTargetName}
-
     export testTargetName=${targetName}
     local testType=$(getConfig LFS_CI_uc_test_making_test_type)
+
+    databaseEventTestStarted ${LABEL} ${testTargetName}
 
     for type in $(getConfig LFS_CI_uc_test_making_test_type) ; do
         info "running test type ${type} on target ${testTargetName}"
@@ -87,6 +87,21 @@ uc_job_test_on_target_archive_logs() {
     execute rsync -LavrPe ssh \
         moritz:/lvol2/production_jenkins/test-repos/src-fsmtest/${LABEL}-${jobName}/.  \
         ${workspace}/.
+
+    # store results in metric database
+    info "storing result numbers in metric database"
+    local resultFile=$(createTempFile)
+    local test_total=$(grep '<testcase ' ${workspace}/ftcm_junit.xml | wc -l)
+    local test_failed=$(grep '<failure>' ${workspace}/ftcm_junit.xml | wc -l)
+    echo "test_failed;${test_failed}" >> ${resultFile}
+    echo "test_total;${test_total}"   >> ${resultFile}
+    rawDebug ${resultFile}
+
+    databaseTestResults ${LABEL}     \
+                        FMON         \
+                        ${jobName}   \
+                        FSM-r3       \
+                        ${resultFile}
 
     copyFileToArtifactDirectory ${workspace}/. 
     local artifactsPathOnShare=$(getConfig artifactesShare)/${jobName}/${BUILD_NUMBER}
