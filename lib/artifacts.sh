@@ -34,6 +34,19 @@ createArtifactArchive() {
         copyFileToArtifactDirectory ${dir}.tar.gz
     done
 
+    local readmeFile=${workspace}/bld/00_README_do_not_use_tarballs.txt
+    cat > ${readmeFile} <<EOF
+Dear User,
+
+These aren't the files you're looking for[1].
+Please check the artifacts of the package job
+
+[1] https://www.youtube.com/watch?v=DIzAaY2Jm-s&t=190
+EOF
+
+    copyFileToArtifactDirectory 00_README_do_not_use_tarballs.txt
+
+
     local artifactsPathOnShare=$(getConfig artifactesShare)/${JOB_NAME}/${BUILD_NUMBER}
     linkFileToArtifactsDirectory ${artifactsPathOnShare}
 
