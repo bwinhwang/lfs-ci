@@ -440,11 +440,13 @@ copyVersionFile() {
 #  @param   <none>
 #  @return  <none>
 copyDocumentation() {
+    requiredParameters WORKSPACE UPSTREAM_BUILD UPSTREAM_PROJECT
+
     local workspace=$(getWorkspaceName)
     mustHaveWorkspaceName
 
     local dst=${workspace}/upload/doc
-    mkdir -p ${dst}
+    execute mkdir -p ${dst}
 
     info "copy doc..."
 
@@ -462,6 +464,16 @@ copyDocumentation() {
         fi
     done
 
+    execute mkdir -p ${dst}/scripts/
+    for file in ${workspace}/bld/bld-externalComponents-*/workdir_*.sh ; do
+        [[ -f ${file} ]] || continue
+        debug "copy $(basename ${file}) to documentation"
+        execute cp ${file} ${dst}/scripts/
+    done
+
+    debug "copy revision state file to documentation"
+    copyRevisionStateFileToWorkspace ${UPSTREAM_BUILD} ${UPSTREAM_PROJECT}
+    execute cp -f ${WORKSPACE}/revisions.txt ${dst}/scripts/
 
     return
 }
