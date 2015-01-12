@@ -122,6 +122,9 @@ getConfig() {
 
 # ....
 declare -A platformMap=(         ["fct"]="fsm3_octeon2" \
+                        ["fsm3_octeon2"]="fsm3_octeon2" \
+                                ["qemu"]="qemu"         \
+                             ["qemu_64"]="qemu_64"      \
                            ["qemu_i386"]="qemu"         \
                          ["qemu_x86_64"]="qemu_64"      \
                                 ["fspc"]="fspc"         \
@@ -134,11 +137,16 @@ declare -A platformMap=(         ["fct"]="fsm3_octeon2" \
                             ["fsm4_arm"]="fsm4_k2"      \
                                  ["arm"]="fsm4_k2"      \
                                 ["lcpa"]="lrc-octeon2"  \
+                         ["lrc-octeon2"]="lrc-octeon2"  \
 )
 
 # ....
 declare -A archMap=(         ["fct"]="mips64-octeon2-linux-gnu"      \
+                    ["fsm3_octeon2"]="mips64-octeon2-linux-gnu"      \
                             ["lcpa"]="mips64-octeon2-linux-gnu"      \
+                     ["lrc-octeon2"]="mips64-octeon2-linux-gnu"      \
+                            ["qemu"]="i686-pc-linux-gnu"             \
+                         ["qemu_64"]="x86_64-pc-linux-gnu"           \
                        ["qemu_i386"]="i686-pc-linux-gnu"             \
                      ["qemu_x86_64"]="x86_64-pc-linux-gnu"           \
                             ["fspc"]="powerpc-e500-linux-gnu"        \
