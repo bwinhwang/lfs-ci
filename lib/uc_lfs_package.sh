@@ -472,7 +472,7 @@ copyDocumentation() {
     done
 
     debug "copy revision state file to documentation"
-    copyRevisionStateFileToWorkspace ${UPSTREAM_BUILD} ${UPSTREAM_PROJECT}
+    copyRevisionStateFileToWorkspace ${UPSTREAM_PROJECT} ${UPSTREAM_BUILD} 
     execute cp -f ${WORKSPACE}/revisions.txt ${dst}/scripts/
 
     return
