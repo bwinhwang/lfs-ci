@@ -2060,7 +2060,9 @@ sub prepare {
     $self->{data}{SVN_OS_TAGS_URL_WITH_REVISION} = $svnUrl;
 
     # __SVN_REL_REPOS_URL__
-    $self->{data}{SVN_REL_REPOS_URL} = $config->getConfig( name => "LFS_PROD_svn_delivery_release_repos_url" );
+    $self->{data}{SVN_REL_REPOS_URL}  = $config->getConfig( name => "LFS_PROD_svn_delivery_release_repos_url" );
+    # __SVN_REL_REPOS_NAME__
+    $self->{data}{SVN_REL_REPOS_NAME} = $config->getConfig( name => "LFS_PROD_svn_delivery_repos_name" );
     # __SVN_REL_REPOS_REVISION__
     $svnUrl = sprintf( "%s/tags/%s", 
                          $self->{data}{SVN_REL_REPOS_URL},
@@ -2225,6 +2227,7 @@ sub prepare {
     close RELEASENOTE;
 
     $self->{data}{DELIVERY_REPOS}       = $config->getConfig( name => "LFS_PROD_svn_delivery_release_repos_url" );
+    $self->{data}{SVN_REL_REPOS_NAME}   = $config->getConfig( name => "LFS_PROD_svn_delivery_repos_name" );
     $self->{data}{SOURCE_REPOS}         = $config->getConfig( name => "LFS_PROD_svn_delivery_os_repos_url" );
     $self->{data}{TAGNAME}              = $self->{tagName};
     $self->{data}{SVN_EXTERNALS}        = Singleton::svn()->propget( property => "svn:externals",
