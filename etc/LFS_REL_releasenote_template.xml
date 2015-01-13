@@ -47,7 +47,13 @@
     </module>
   </restrictions>
   <download>
-    <downloadItem storage="SVN"             name="PS_LFS_OS">__SVN_REL_TAGS_URL_WITH_REVISION__</downloadItem>
+    <downloadItem storage="SVN Bejing"      name="PS_LFS_OS">https://beisop60.china.nsn-net.net/isource/svnroot/__SVN_REL_REPOS_NAME__/tags/__TAGNAME__</downloadItem>
+    <downloadItem storage="SVN Bangalore"   name="PS_LFS_OS">https://bhisop60.apac.nsn-net.net/isource/svnroot/__SVN_REL_REPOS_NAME__/tags/__TAGNAME__</downloadItem>
+    <downloadItem storage="SVN Chigaco"     name="PS_LFS_OS">https://chisop60.americas.nsn-net.net/isource/svnroot/__SVN_REL_REPOS_NAME__/tags/__TAGNAME__</downloadItem>
+    <downloadItem storage="SVN Duesseldorf" name="PS_LFS_OS">https://duscmi.inside.nsn.com/isource/svnroot/__SVN_REL_REPOS_NAME__/tags/__TAGNAME__</downloadItem>
+    <downloadItem storage="SVN Espoo"       name="PS_LFS_OS">https://svne1.access.nsn.com/isource/svnroot/__SVN_REL_REPOS_NAME__/tags/__TAGNAME__</downloadItem>
+    <downloadItem storage="SVN Ulm"         name="PS_LFS_OS">https://ulscmi.inside.nsn.com/isource/svnroot__SVN_REL_REPOS_NAME__/tags/__TAGNAME__</downloadItem>
+    <downloadItem storage="SVN Wrozlaw"     name="PS_LFS_OS">https://wrscmi.inside.nsn.com/isource/svnroot/__SVN_REL_REPOS_NAME__/tags/__TAGNAME__</downloadItem>
     <downloadItem storage="FILE CI_LFS"     name="PS_LFS_OS">/build/home/CI_LFS/Release/__LFS_PROD_RELEASE_CURRENT_TAG_NAME_REL__</downloadItem>
     <downloadItem storage="FILE ltesdkroot" name="PS_LFS_OS">/ltesdkroot/ltesdkroot/Platforms/PS_LFS_REL/__LFS_PROD_RELEASE_CURRENT_TAG_NAME_REL__-LTE/</downloadItem>
   </download>
