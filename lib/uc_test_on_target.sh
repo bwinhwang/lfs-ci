@@ -45,11 +45,16 @@ ci_job_test_on_target() {
 
     databaseEventTestFinished ${LABEL} ${testTargetName}
 
+#     addTestResultsToMetricDatabase ${workspace}/TODO.xml \
+#                                    ${LABEL}              \
+#                                    "TMF_${testType}"     \
+#                                    "${testTargetName}"   \
+#                                    "FSMr-x"
     info "testing done."
-
     return
-
 }
+
+
 
 ## @fn      reserveTarget
 #  @brief   make a reserveration from TAToo to get a target

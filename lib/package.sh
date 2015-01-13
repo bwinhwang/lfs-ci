@@ -12,8 +12,8 @@ LFS_CI_SOURCE_package='$Id$'
 #  @return  architecture
 getArchitectureFromDirectory() {
     local directory=$1
-    baseName=$(basename ${directory})
-    directoryPlatform=$(cut -d- -f3 <<< ${baseName})
+    local baseName=$(basename ${directory})
+    local directoryPlatform=$(cut -d- -f3 <<< ${baseName})
     echo ${archMap["${directoryPlatform}"]}
     return
 }
@@ -26,9 +26,9 @@ getArchitectureFromDirectory() {
 #  @return  platform
 getPlatformFromDirectory() {
     local directory=$1
-    baseName=$(basename ${directory})
-    directoryPlatform=$(cut -d- -f3 <<< ${baseName})
-    destinationsPlatform=${platformMap["${directoryPlatform}"]}
+    local baseName=$(basename ${directory})
+    local directoryPlatform=$(cut -d- -f3 <<< ${baseName})
+    local destinationsPlatform=${platformMap["${directoryPlatform}"]}
     echo ${destinationsPlatform}
     return
 }
@@ -126,17 +126,10 @@ copyReleaseCandidateToShare() {
         if [[ ${sdk} = sdk3 && -z ${sdkValue} ]] ; then
             sdkValue=$(getConfig sdk ${commonentsFile})
         fi
-        mustHaveValue "${sdkValue}" "sdk value"
-        mustExistDirectory ../../../SDKs/${sdkValue}
+        mustHaveSdkOnShare ${sdkValue}
         execute ln -sf ../../../SDKs/${sdkValue} ${sdk}
     done
 
-    # move this in to a seperate section / function
-    local linkDirectory=$(getConfig LFS_CI_UC_package_copy_to_share_link_location)
-    local pathToLink=../../$(getConfig LFS_CI_UC_package_copy_to_share_path_name)/${label}
-    # get the latest used revision in this build
-    local revision=$(cut -d" " -f 3 ${workspace}/bld/bld-externalComponents-*/usedRevisions.txt | sort -u | tail -n 1)
-    mustHaveValue "${revision}" "latest used revision"
 
     # this is only for internal use!
     info "creating link for internal usage"
@@ -145,10 +138,31 @@ copyReleaseCandidateToShare() {
     execute ln -sf ${remoteDirectory} ${internalLinkDirectory}/build_${BUILD_NUMBER}
 
     # TODO: demx2fk3 2014-07-15 FIXME : createSymlinksToArtifactsOnShare ${remoteDirectory}
-    local artifactesShare=$(getConfig artifactesShare)
     local artifactsPathOnMaster=$(getBuildDirectoryOnMaster)/archive
     executeOnMaster ln -sf ${remoteDirectory} ${artifactsPathOnMaster}
+
+    # TODO: demx2fk3 2015-01-09 create also link to the build jobs
 
     return
 }
 
+## @fn      mustHaveSdkOnShare( $sdkBaseline )
+#  @brief   ensures, that the sdk baseline is on the CI_LFS/SDKs share
+#  @param   {sdkBaseline}    name of the sdk baseline
+#  @return  <none>
+mustHaveSdkOnShare() {
+    local sdkBaseline=$1
+    mustHaveValue "${sdkBaseline}" "sdk baseline"
+
+    local ciLfsLocation=$(getConfig LFS_CI_UC_package_copy_to_share_name)
+    mustExistDirectory ${ciLfsLocation}
+    mustExistDirectory ${ciLfsLocation}/SDKs
+
+    [[ -d ${ciLfsLocation}/SDKs/${sdkBaseline} ]] && return
+
+    local sdkSvnLocation=$(getConfig LFS_CI_UC_package_sdk_svn_location)
+
+    svnExport {sdkSvnLocation}/tags/${sdkBaseline} ${ciLfsLocation}/SDKs/${sdkBaseline}
+    
+    return
+}

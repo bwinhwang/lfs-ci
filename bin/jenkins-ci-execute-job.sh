@@ -94,6 +94,10 @@ case "${JOB_NAME}" in
         source ${LFS_CI_ROOT}/lib/uc_test_on_target.sh
         ci_job_test_on_target || exit 1 
     ;;
+    *_CI_*_Test*metrics)
+        source ${LFS_CI_ROOT}/lib/uc_test.sh
+        ci_job_test_collect_metrics || exit 1 
+    ;;
     *_CI_*_Test*)
         source ${LFS_CI_ROOT}/lib/uc_test.sh
         ci_job_test    || exit 1 

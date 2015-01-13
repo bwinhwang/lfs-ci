@@ -115,3 +115,27 @@ databaseTestResults() {
 
     return
 }
+
+addTestResultsToMetricDatabase() {
+    local resultFileXml=${1}
+    local baselineName=${2}
+    local testSuite=${3}
+    local targetName=${4}
+    local targetTYpe=${5}
+
+    # store results in metric database
+    info "storing result numbers in metric database"
+    local resultFile=$(createTempFile)
+    local test_total=$(grep '<testcase ' ${resultFileXml} | wc -l)
+    local test_failed=$(grep '<failure>' ${resultFileXml} | wc -l)
+    printf "test_failed;%d\ntest_total;%d" ${test_failed} ${test_total} > ${resultFile}
+    rawDebug ${resultFile}
+
+    databaseTestResults ${baselineName} \
+                        ${testSuite}    \
+                        ${targetName}   \
+                        ${targetTYpe}   \
+                        ${resultFile}
+
+    return
+}

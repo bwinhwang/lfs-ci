@@ -91,3 +91,19 @@ ci_job_test() {
     return
 }
 
+
+ci_job_test_collect_metrics() {
+    requiredParameters UPSTREAM_PROJECT UPSTREAM_BUILD
+
+    local testJobData=$(getDownStreamProjectsData ${UPSTREAM_PROJECT} ${UPSTREAM_BUILD})
+    info ${testJobData}
+
+    local buildJobName=$(getBuildJobNameFromUpstreamProject)
+    local buildBuildNumber=$(getBuildBuildNumberFromUpstreamProject)
+    info "build job ${buildJobName} ${buildBuildNumber}"
+
+    local downStreamData=$(getDownStreamProjectsData ${buildJobName} ${buildBuildNumber})
+    info ${downStreamData}
+
+    return
+}
