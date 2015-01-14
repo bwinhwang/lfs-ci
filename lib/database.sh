@@ -7,12 +7,13 @@ LFS_CI_SOURCE_database='$Id$'
 #  @param   <none>
 #  @return  <none>
 databaseEventBuildStarted() {
-    requiredParameters LFS_CI_ROOT
+    requiredParameters LFS_CI_ROOT JOB_NAME BUILD_NUMBER
 
     local branch=$(getLocationName)
     mustHaveLocationName
 
-    local revision=$(cut -d" " -f 3 ${WORKSPACE}/revision_state.txt | sort -n -u | tail -n 1)
+    local buildDirectory=$(getBuildDirectoryOnMaster ${JOB_NAME} ${BUILD_NUMBER})
+    local revision=$(runOnMaster cut -d" " -f3 ${buildDirectory}/revisionstate.xml | sort -n -u | tail -n 1)
     mustHaveValue "${revision}" "revision from revision state file"
 
     mustHaveNextCiLabelName
