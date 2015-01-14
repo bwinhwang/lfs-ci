@@ -13,7 +13,7 @@ databaseEventBuildStarted() {
     mustHaveLocationName
 
     local buildDirectory=$(getBuildDirectoryOnMaster ${JOB_NAME} ${BUILD_NUMBER})
-    local revision=$(runOnMaster cut -d" " -f3 ${buildDirectory}/revisionstate.xml | sort -n -u | tail -n 1)
+    local revision=$(runOnMaster cat ${buildDirectory}/revisionstate.xml | cut -d" " -f 3 | sort -n -u | tail -n 1)
     mustHaveValue "${revision}" "revision from revision state file"
 
     mustHaveNextCiLabelName

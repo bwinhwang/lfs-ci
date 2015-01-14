@@ -63,10 +63,10 @@ testDatabaseEventBuildStarted_ok() {
 getLocationName
 mustHaveLocationName
 getLocationName
-runOnMaster cut -d -f3 /var/fpwork/psulm/lfs-jenkins/home/jobs/Build_Job/builds/123/revisionstate.xml
+runOnMaster cat /var/fpwork/psulm/lfs-jenkins/home/jobs/Build_Job/builds/123/revisionstate.xml
 mustHaveNextCiLabelName
 getNextCiLabelName
-execute -i ${LFS_CI_ROOT}/bin/newBuildEvent.pl --buildName=PS_LFS_OS_9999_88_7777 --branchName=trunk --revision=src-project http-url 123456 --action=build_started
+execute -i ${LFS_CI_ROOT}/bin/newBuildEvent.pl --buildName=PS_LFS_OS_9999_88_7777 --branchName=trunk --revision=123456 --action=build_started
 EOF
 
     assertEquals "$(cat ${expect})" "$(cat ${UT_MOCKED_COMMANDS})"

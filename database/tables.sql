@@ -29,7 +29,7 @@ CREATE TABLE events (
 DROP TABLE IF EXISTS build_events;
 CREATE TABLE build_events (
     id         INT NOT NULL AUTO_INCREMENT,
-    build_name VARCHAR(128) NOT NULL,
+    build_id   INT NOT NULL,
     event_id   INT NOT NULL,
     timestamp  DATETIME NOT NULL,
     comment    TEXT,
@@ -37,21 +37,32 @@ CREATE TABLE build_events (
     PRIMARY KEY (id),
     FOREIGN KEY (event_id)
         REFERENCES events(id),
-    FOREIGN KEY (build_name)
-        REFERENCES builds(build_name)
+    FOREIGN KEY (build_id)
+        REFERENCES builds(id)
 );
 
 DROP TABLE IF EXISTS test_executions;
 CREATE TABLE test_executions (
     id              INT NOT NULL AUTO_INCREMENT,
-    build_name      VARCHAR(128) NOT NULL,
+    build_id        INT NOT NULL,
     test_suite_name VARCHAR(128) NOT NULL,
     target_name     VARCHAR(128) NOT NULL,
     target_type     VARCHAR(128) NOT NULL,
 
     PRIMARY KEY (id), 
-    FOREIGN KEY (build_name)
-        REFERENCES builds(build_name)
+    FOREIGN KEY (build_id)
+        REFERENCES builds(id)
+);
+
+
+
+DROP TABLE IF EXISTS test_result_names;
+CREATE TABLE test_result_names (
+    id               INT NOT NULL AUTO_INCREMENT,
+    test_suite_name  VARCHAR(128) NOT NULL,
+    test_result_name VARCHAR(128) NOT NULL,
+
+    PRIMARY KEY (id)
 );
 
 DROP TABLE IF EXISTS test_results;
@@ -67,13 +78,3 @@ CREATE TABLE test_results (
     FOREIGN KEY (test_result_name_id)
         REFERENCES test_result_names(id)
 );
-
-DROP TABLE IF EXISTS test_result_names;
-CREATE TABLE test_result_names (
-    id               INT NOT NULL AUTO_INCREMENT,
-    test_suite_name  VARCHAR(128) NOT NULL,
-    test_result_name VARCHAR(128) NOT NULL,
-
-    PRIMARY KEY (id)
-);
-

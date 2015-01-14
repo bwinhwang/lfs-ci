@@ -4,14 +4,25 @@ CREATE PROCEDURE new_build_event( IN in_build_name VARCHAR(128), IN in_event VAR
    BEGIN
    DECLARE cnt_event_id INT;
    DECLARE var_event_id INT;
+   DECLARE cnt_build_id INT;
+   DECLARE var_build_id INT;
 
    SELECT count(id) INTO cnt_event_id FROM events WHERE event_name = in_event;
    IF cnt_event_id = 0 THEN
        INSERT INTO events ( event_name ) VALUES ( in_event );
    END IF;
    SELECT id INTO var_event_id FROM events WHERE event_name = in_event;
+
+   SELECT count(id) INTO cnt_build_id FROM builds WHERE build_name = in_build_name;
+   -- check if build name exists
+   IF cnt_build_id = 0 THEN
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'build_name does not exist';
+   END IF;
+   -- more code below
+   -- TODO: demx2fk3 2015-01-13 this is an hack, there is no better way to ghet the latest build id
+   SELECT max(id) INTO var_build_id FROM builds WHERE build_name = in_build_name;
    
-   INSERT INTO build_events (event_id, build_name, timestamp, comment) VALUES ( var_event_id, in_build_name, now(), in_comment );
+   INSERT INTO build_events (event_id, build_id, timestamp, comment) VALUES ( var_event_id, var_build_id, now(), in_comment );
    
    END //
 DELIMITER ;
