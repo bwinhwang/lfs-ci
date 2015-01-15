@@ -69,10 +69,25 @@ DROP PROCEDURE IF EXISTS test_finished;
 DELIMITER //
 CREATE PROCEDURE test_finished( IN in_build_name VARCHAR(128), IN in_comment TEXT )
 BEGIN
-    CALL new_build_event( in_build_name, 'test finished', in_comment );
+    CALL new_build_event( in_build_name, 'test finished with success', in_comment );
 END //
 DELIMITER ;
 
+DROP PROCEDURE IF EXISTS test_failed;
+DELIMITER //
+CREATE PROCEDURE test_finished( IN in_build_name VARCHAR(128), IN in_comment TEXT )
+BEGIN
+    CALL new_build_event( in_build_name, 'test finished with error', in_comment );
+END //
+DELIMITER ;
+
+DROP PROCEDURE IF EXISTS test_unstable;
+DELIMITER //
+CREATE PROCEDURE test_finished( IN in_build_name VARCHAR(128), IN in_comment TEXT )
+BEGIN
+    CALL new_build_event( in_build_name, 'test finished unstable', in_comment );
+END //
+DELIMITER ;
 
 DROP PROCEDURE IF EXISTS release_started;
 DELIMITER //
