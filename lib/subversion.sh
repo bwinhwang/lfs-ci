@@ -47,6 +47,10 @@ uploadToSubversion() {
     export TMPDIR=/dev/shm/${JOB_NAME}.${USER}/tmp
     debug "cleanup tmp directory"
 
+    # TMPDIR is not handled/created via createTempDirectory. So we have to
+    # take care to clean up the temp directory after exit and failure
+    exit_add subversionUploadCleanupTempDirectory
+
     rm -rf ${TMPDIR}
     mkdir -p ${TMPDIR}
     
@@ -80,6 +84,14 @@ uploadToSubversion() {
     info "upload done";
 
     return
+}
+
+## @fn      subversion()
+#  @brief   cleanup the created temp directory in svn upload function
+#  @param   <none>
+#  @return  <none>
+subversionUploadCleanupTempDirectory() {
+    [[ -d ${TMPDIR} ]] && rm -rf ${TMPDIR}
 }
 
 ## @fn      svnCommand( $args )
