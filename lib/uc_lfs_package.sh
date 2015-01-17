@@ -55,7 +55,7 @@ ci_job_package() {
 
     copyReleaseCandidateToShare
 
-    return 0
+    return
 }
 
 ## @fn      copyGenericBuildResults()

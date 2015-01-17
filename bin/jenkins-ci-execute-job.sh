@@ -68,6 +68,10 @@ case "${JOB_NAME}" in
     Test-lcpa878) ${LFS_CI_ROOT}/scripts/CLRC02_Test_Release_Candidate_LRC || exit 1 ;;
     Test-lcpa914) ${LFS_CI_ROOT}/scripts/CLRC02_Test_Release_Candidate_LRC || exit 1 ;;
     
+    LFS_KNIFE_-knife_-_*_Build) 
+        source ${LFS_CI_ROOT}/lib/uc_knife_build.sh
+        ci_job_knife_build_version || exit 1 
+    ;;
     *_CI_*_Build) 
         source ${LFS_CI_ROOT}/lib/uc_build.sh
         ci_job_build_version || exit 1 
