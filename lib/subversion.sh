@@ -49,7 +49,7 @@ uploadToSubversion() {
 
     # TMPDIR is not handled/created via createTempDirectory. So we have to
     # take care to clean up the temp directory after exit and failure
-    exit_add subversionUploadCleanupTempDirectory
+    # exit_add subversionUploadCleanupTempDirectory
 
     rm -rf ${TMPDIR}
     mkdir -p ${TMPDIR}
@@ -91,7 +91,7 @@ uploadToSubversion() {
 #  @param   <none>
 #  @return  <none>
 subversionUploadCleanupTempDirectory() {
-    [[ -d ${TMPDIR} ]] && rm -rf ${TMPDIR}
+    # [[ -d ${TMPDIR} ]] && rm -rf ${TMPDIR}
 }
 
 ## @fn      svnCommand()
