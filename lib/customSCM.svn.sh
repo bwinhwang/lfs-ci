@@ -152,7 +152,7 @@ actionCalculate() {
     return 
 }
 
-## @fn      _createRevisionsTxtFile( $fileName )
+## @fn      _createRevisionsTxtFile()
 #  @brief   create the revisions.txt file 
 #  @details see actionCompare for more details
 #  @param   {fileName}    file name
@@ -223,7 +223,7 @@ _createRevisionsTxtFile() {
     return
 }
 
-## @fn      _createChangelogXmlFileFromSubversion( $oldRevisionStateFile, $revisionStateFile, $changelogFile )
+## @fn      _createChangelogXmlFileFromSubversion()
 #  @brief   create the changelog.xml file from subversion 
 #  @details the method creates the changelog.xml out from subversion based on the differences
 #           in the old revision state file and the revision state file.

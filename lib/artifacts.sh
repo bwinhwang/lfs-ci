@@ -70,7 +70,7 @@ mustHaveBuildArtifactsFromUpstream() {
     return
 }
 
-## @fn      copyAndExtractBuildArtifactsFromProject( $jobName, $buildName )
+## @fn      copyAndExtractBuildArtifactsFromProject()
 #  @brief   copy and untar the build artifacts from a jenkins job from the master artifacts share 
 #           into the workspace
 #  @param   {jobName}       jenkins job name
@@ -134,7 +134,6 @@ copyAndExtractBuildArtifactsFromProject() {
 ## @fn      copyArtifactsToWorkspace()
 #  @brief   copy artifacts of all releated jenkins tasks of a build to the workspace
 #           based on the upstream job
-#  @details «full description»
 #  @param   <none>
 #  @return  <none>
 copyArtifactsToWorkspace() {
@@ -191,7 +190,7 @@ copyArtifactsToWorkspace() {
     return
 }
 
-## @fn      copyFileToArtifactDirectory( $fileName )
+## @fn      copyFileToArtifactDirectory()
 #  @brief   copy a file to the artifacts directory of the current build
 #  @param   {fileName}    path and name of the file
 #  @detail  see also linkFileToArtifactsDirectory
@@ -212,7 +211,7 @@ copyFileToArtifactDirectory() {
     return
 }
 
-## @fn      linkFileToArtifactsDirectory( $fileName )
+## @fn      linkFileToArtifactsDirectory()
 #  @brief   create a symlkink from the given name to the artifacts folder on the master.
 #  @warning the given fileName must be accessable via nfs from the master. otherwise, the
 #           link will not work in jenkins

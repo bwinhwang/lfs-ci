@@ -2,7 +2,7 @@
 
 LFS_CI_SOURCE_subversion='$Id$'
 
-## @fn      uploadToSubversion( $pathToUpload, $branchToUpload, $commitMessage )
+## @fn      uploadToSubversion()
 #  @brief   uploads a directory to the specified svn location and commit it
 #  @details this method upload a directory to subversion using the script svn_load_dirs.pl
 #           which is part of the subversion source package.
@@ -94,7 +94,7 @@ subversionUploadCleanupTempDirectory() {
     [[ -d ${TMPDIR} ]] && rm -rf ${TMPDIR}
 }
 
-## @fn      svnCommand( $args )
+## @fn      svnCommand()
 #  @brief   execute the given subversion command with the specified parameters
 #  @param   {args}    command and arguments of the svn command
 #  @return  <none>
@@ -104,7 +104,7 @@ svnCommand() {
     return
 }
 
-## @fn      svnCheckout( $args )
+## @fn      svnCheckout()
 #  @brief   check out a repository
 #  @param   {args}  args for the svn co command
 #  @return  <none>
@@ -113,7 +113,7 @@ svnCheckout() {
     return
 }
 
-## @fn      svnCommit( $args )
+## @fn      svnCommit()
 #  @brief   executes an svn commit command
 #  @param   {args}    args for the svn commit command
 #  @return  <none>
@@ -122,7 +122,7 @@ svnCommit() {
     return
 }
 
-## @fn      svnMkdir( $args )
+## @fn      svnMkdir()
 #  @brief   executes an svn mkdir command
 #  @param   {args}    args for the svn mkdir command
 #  @return  <none>
@@ -131,7 +131,7 @@ svnMkdir() {
     return
 }
 
-## @fn      svnCopy( $args )
+## @fn      svnCopy()
 #  @brief   executes an svn copy command
 #  @param   {args}    args for the svn copy command
 #  @return  <none>
@@ -140,7 +140,7 @@ svnCopy() {
     return
 }
 
-## @fn      svnDiff( $args )
+## @fn      svnDiff()
 #  @brief   executes an svn diff command
 #  @param   {args}    args for the svn diff command
 #  @return  <none>
@@ -149,7 +149,7 @@ svnDiff() {
     return
 }
 
-## @fn      svnPropSet( $args )
+## @fn      svnPropSet()
 #  @brief   executes an svn propset command
 #  @param   {args}    args for the svn propset command
 #  @return  <none>
@@ -158,7 +158,7 @@ svnPropSet() {
     return
 }
 
-## @fn      svnRemove( $args )
+## @fn      svnRemove()
 #  @brief   executes an svn remove command
 #  @param   {args}    args for the svn remove command
 #  @return  <none>
@@ -167,7 +167,7 @@ svnRemove() {
     return
 }
 
-## @fn      svnExport( $args )
+## @fn      svnExport()
 #  @brief   executes an svn export command
 #  @param   {args}    args for the svn export command
 #  @return  <none>
@@ -176,7 +176,7 @@ svnExport() {
     return
 }
 
-## @fn      svnLog( $args )
+## @fn      svnLog()
 #  @brief   executes an svn log command
 #  @param   {args}    args for the svn propset command
 #  @return  <none>
@@ -185,7 +185,7 @@ svnLog() {
     return
 }
 
-## @fn      shouldNotExistsInSubversion( $url, $pathOrFile )
+## @fn      shouldNotExistsInSubversion()
 #  @brief   checks, if the path/file exists in svn 
 #  @detail  if you want to check http://server/path/to/repos/foo, the
 #           input url is:  http://server/path/to/repos
@@ -204,7 +204,7 @@ shouldNotExistsInSubversion() {
     return 0
 }
 
-## @fn      existsInSubversion( $url, $pathOrFile )
+## @fn      existsInSubversion()
 #  @brief   checks, if the path/file exists in svn 
 #  @detail  if you want to check http://server/path/to/repos/foo, the
 #           input url is:  http://server/path/to/repos
@@ -227,7 +227,7 @@ existsInSubversion() {
     return 1
 }
 
-## @fn      mustExistInSubversion( $url, $pathOrFile )
+## @fn      mustExistInSubversion()
 #  @brief   ensure, that the path/file exists in svn 
 #  @detail  if you want to check http://server/path/to/repos/foo, the
 #           input url is:  http://server/path/to/repos
@@ -247,7 +247,7 @@ mustExistInSubversion() {
     return 0
 }
 
-## @fn      mustExistBranchInSubversion( $url, $branch )
+## @fn      mustExistBranchInSubversion()
 #  @brief   ensures, that a branch exists in subversion
 #  @details if the branch does not exists, the branch will be created (simple mkdir command)
 #  @param   {url}           subversion url
@@ -269,7 +269,7 @@ mustExistBranchInSubversion() {
     return 0
 }
 
-## @fn      getSvnUrl( $url )
+## @fn      getSvnUrl()
 #  @brief   get the svn url for a svn url
 #  @details hae? why url from a url? Cause the url can be also a location in the filesystem
 #           input url: /path/to/workspace
@@ -282,7 +282,7 @@ getSvnUrl() {
     return
 }
 
-## @fn      getSvnRevision( $url )
+## @fn      getSvnRevision()
 #  @brief   get the revision for a svn url
 #  @param   {url}    a svn url
 #  @return  the svn revision
@@ -292,7 +292,7 @@ getSvnRevision() {
     return
 }
 
-## @fn      getSvnLastChangedRevision( $url )
+## @fn      getSvnLastChangedRevision()
 #  @brief   get the last changed revision for a svn url
 #  @param   {url}    a svn url
 #  @return  the last changed revision 
@@ -302,7 +302,7 @@ getSvnLastChangedRevision() {
     return
 }
 
-## @fn      getSvnInfo( $url, $xmlPath )
+## @fn      getSvnInfo()
 #  @brief   get a specific information out of the svn info output for a svn url
 #  @param   {url}      a svn url
 #  @param   {xmlPath}  a xml path, e.g. /info/entry/commit/@revision for last changed revision   
@@ -318,7 +318,7 @@ getSvnInfo() {
     return
 }
 
-## @fn      normalizeSvnUrl( $url )
+## @fn      normalizeSvnUrl()
 #  @brief   normalize a svn url, replace the hostname with the master server host name
 #  @param   {url}    a svn url
 #  @return  a normalized (master server) svn url

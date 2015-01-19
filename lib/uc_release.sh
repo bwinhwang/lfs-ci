@@ -157,7 +157,7 @@ prereleaseChecks() {
     return
 }
 
-## @fn      extractArtifactsOnReleaseShare( $jobName, $buildNumber )
+## @fn      extractArtifactsOnReleaseShare()
 #  @brief   extract the artifacts of build job on the local workspace and copy the artifacts to the
 #           /build share.
 #  @details structure on the share is
@@ -222,7 +222,7 @@ extractArtifactsOnReleaseShare() {
     return
 }
 
-## @fn      extractArtifactsOnReleaseShareKernelSources( $jobName, $buildNumber )
+## @fn      extractArtifactsOnReleaseShareKernelSources()
 #  @brief   extract the artifacts (linux kernel sources only!!) of build job on the 
 #           local workspace and copy the artifacts to the /build share.
 #  @details structure on the share is
@@ -388,7 +388,7 @@ sendReleaseNote() {
     return
 }
 
-## @fn      _createLfsOsReleaseNote( $buildJobName, $buildBuildNumber )
+## @fn      _createLfsOsReleaseNote()
 #  @brief   create an PS_LFS_OS release note 
 #  @param   {buildJobName}     project name of the build job
 #  @param   {buildBuildNumber} build number of the build job   
@@ -443,7 +443,7 @@ _createLfsOsReleaseNote() {
     return
 }
 
-## @fn      _createLfsRelReleaseNote( $buildJobName, $buildBuildNumber )
+## @fn      _createLfsRelReleaseNote()
 #  @brief   create an PSLFS_REL release note 
 #  @param   {buildJobName}     project name of the build job
 #  @param   {buildBuildNumber} build number of the build job   
@@ -479,7 +479,7 @@ _createLfsRelReleaseNoteXml() {
 }
 
 
-## @fn      createTagOnSourceRepository( $jobName, $buildNumber )
+## @fn      createTagOnSourceRepository()
 #  @brief   create a tag(s) on source repository 
 #  @details create tags in the source repository (os/tags) and subsystems (subsystems/tags)
 #  @param   {jobName}        a job name
@@ -732,7 +732,7 @@ createReleaseTag() {
     return
 }
 
-## @fn      mustHaveWorkspaceWithArtefactsFromUpstreamProjects( $jobsName, $buildNumber )
+## @fn      mustHaveWorkspaceWithArtefactsFromUpstreamProjects()
 #  @brief   ensures, that a new workspace will be created with artifacts of the upstream project
 #  @param   {jobsName}     a job name
 #  @param   {buildNumber}  a build number
@@ -811,7 +811,7 @@ createProxyReleaseTag() {
     return
 }
 
-## @fn      updateDependencyFiles( $jobName, $buildNumber )
+## @fn      updateDependencyFiles()
 #  @brief   update the dependency files for all components of a build
 #  @param   {jobName}        name of the build job
 #  @param   {buildNumber}    numfer of the build job
@@ -875,7 +875,7 @@ updateDependencyFiles() {
     return
 }
 
-## @fn      appproveReleaseForPsScm( $tagName )
+## @fn      appproveReleaseForPsScm()
 #  @brief   approves the release for Platform Services SCM team
 #  @param   {tagName}    name of the release
 #  @return  <none>

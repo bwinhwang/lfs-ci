@@ -2,7 +2,7 @@
 
 LFS_CI_SOURCE_workflowtool='$Id$'
 
-## @fn      createReleaseInWorkflowTool( $tagName, $fileName )
+## @fn      createReleaseInWorkflowTool()
 #  @brief   creates a release in the workflow tool based on a tagName and 
 #           the xml release note
 #  @param   {tagName}    name of the tag
@@ -45,7 +45,7 @@ createReleaseInWorkflowTool() {
 
     return
 }
-## @fn      uploadToWorkflowTool( $tagName, $fileName )
+## @fn      uploadToWorkflowTool()
 #  @brief   uploads a file as attachment to a release in workflow tool
 #  @param   {tagName}    name of the release
 #  @param   {fileName}   name of the xml release note
@@ -87,7 +87,7 @@ uploadToWorkflowTool() {
     return
 }
 
-## @fn      existsBaselineInWorkflowTool( tagName )
+## @fn      existsBaselineInWorkflowTool()
 #  @brief   checks, if the given release / tagName exists in the workflowtool
 #  @param   {tagName}    name of the release
 #  @return  1 if release existss in WFT, 0 otherwise
@@ -111,7 +111,7 @@ existsBaselineInWorkflowTool() {
     fatal "this part of the code is not reachable. something went VERY wrong!"
 }
 
-## @fn      mustBeValidXmlReleaseNote( $fileName )
+## @fn      mustBeValidXmlReleaseNote()
 #  @brief   validates a xml release note via xsd and workflowtool
 #  @param   {fileName}    name of the xml release note
 #  @return  raise an error, if xml release note is not valid

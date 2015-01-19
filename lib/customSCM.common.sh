@@ -1,6 +1,6 @@
 #!/bin/bash
 
-## @fn      dumpCustomScmEnvironmentVariables(  )
+## @fn      dumpCustomScmEnvironmentVariables()
 #  @brief   dump / show all environment variables which are related to Custom SCM Jenkins Plugin
 #  @param   <none>
 #  @return  <none>
@@ -41,7 +41,7 @@ createPropertiesFileForBuild() {
     return
 }
 
-## @fn      getBuildNumberFromUrl( $url  )
+## @fn      getBuildNumberFromUrl()
 #  @brief   get the build number out of a jenkins url
 #  @details the format is
 #           http://maxi.emea.nsn-net.net:1280/job/custom_SCM_test_-_down/634/
@@ -53,7 +53,7 @@ getBuildNumberFromUrl() {
     return
 }
 
-## @fn      getJobNameFromUrl( $url  )
+## @fn      getJobNameFromUrl()
 #  @brief   get the job name out of a jenkins url
 #  @details the format is
 #           http://maxi.emea.nsn-net.net:1280/job/custom_SCM_test_-_down/634/
@@ -65,7 +65,7 @@ getJobNameFromUrl() {
     return
 }
 
-## @fn      getUpstreamProjectName( $jobName )
+## @fn      getUpstreamProjectName()
 #  @brief   get the upstream project name of the (optional) jobName / current job
 #  @details this function is required, if the job was triggered by hand. we have to found out
 #           what is the upstream job name to get everything working - like getting change notes

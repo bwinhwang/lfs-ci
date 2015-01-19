@@ -4,7 +4,7 @@ LFS_CI_SOURCE_package='$Id$'
 
 [[ -z ${LFS_CI_SOURCE_artifacts} ]] && source ${LFS_CI_ROOT}/lib/artifacts.sh
 
-## @fn      getArchitectureFromDirectory( $dir )
+## @fn      getArchitectureFromDirectory()
 #  @brief   get the arcitecture from the bld directory
 #  @details maps e.g. fct to mips64-octeon2-linux-gnu
 #           see also mapping on config.sh
@@ -18,7 +18,7 @@ getArchitectureFromDirectory() {
     return
 }
 
-## @fn      getPlatformFromDirectory( $dir )
+## @fn      getPlatformFromDirectory()
 #  @brief   get the platform from the bld directory
 #  @details maps e.g. fct to fsm3_octeon2
 #           see also mapping in config.sh
@@ -33,7 +33,7 @@ getPlatformFromDirectory() {
     return
 }
 
-## @fn      mustHaveArchitectureFromDirectory( $dir, $arch )
+## @fn      mustHaveArchitectureFromDirectory()
 #  @brief   ensure, that there is a architecture name
 #  @param   {dir}             the bld directory name
 #  @param   {architecture}    the architecture
@@ -49,7 +49,7 @@ mustHaveArchitectureFromDirectory() {
     return
 }
 
-## @fn      mustHavePlatformFromDirectory( $dir, $arch )
+## @fn      mustHavePlatformFromDirectory()
 #  @brief   ensure, that there is a platform name
 #  @param   {dir}             the bld directory name
 #  @param   {architecture}    the platform
@@ -67,8 +67,6 @@ mustHavePlatformFromDirectory() {
 
 ## @fn      copyReleaseCandidateToShare()
 #  @brief   copy the release candidate to the build share
-#  @details «full description»
-#  @todo    «description of incomplete business»
 #  @param   <none>
 #  @return  <none>
 copyReleaseCandidateToShare() {
@@ -146,7 +144,7 @@ copyReleaseCandidateToShare() {
     return
 }
 
-## @fn      mustHaveSdkOnShare( $sdkBaseline )
+## @fn      mustHaveSdkOnShare()
 #  @brief   ensures, that the sdk baseline is on the CI_LFS/SDKs share
 #  @param   {sdkBaseline}    name of the sdk baseline
 #  @return  <none>

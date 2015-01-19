@@ -4,10 +4,9 @@ LFS_CI_SOURCE_jenkins='$Id$'
 
 [[ -z ${LFS_CI_SOURCE_subversion} ]] && source ${LFS_CI_ROOT}/lib/subversion.sh
 
-## @fn      executeJenkinsCli( command, parameters )
+## @fn      executeJenkinsCli()
 #  @brief   execute a command via the jenkins CLI with some parameters
-#  @details «full description»
-#           build                    Builds a job, and optionally waits until its completion.
+#  @details build                    Builds a job, and optionally waits until its completion.
 #           cancel-quiet-down        Cancel the effect of the "quiet-down" command.
 #           clear-queue              Clears the build queue
 #           connect-node             Reconnect to a node
@@ -67,7 +66,7 @@ executeJenkinsCli() {
     return
 }
 
-## @fn      runJenkinsCli( args )
+## @fn      runJenkinsCli()
 #  @brief   runs a jenkins cli command and returns the output to the caller
 #  @param   {jenkins cli args}    list of arguments for the jenkins cli
 #  @param   <none>
@@ -88,7 +87,7 @@ runJenkinsCli() {
     return
 }
 
-## @fn      setBuildDescription( jobName, buildNumber, description )
+## @fn      setBuildDescription()
 #  @brief   set the description of a build job
 #  @param   {jobName}      name of the job
 #  @param   {buildNumber}  number of the build
@@ -104,7 +103,7 @@ setBuildDescription() {
     return
 }
 
-## @fn      startBuildJobs( $jobName )
+## @fn      startBuildJobs()
 #  @brief   start a jenkins job with a specified job name
 #  @param   {jobName}    name of the job
 #  @return  <none>
@@ -126,7 +125,7 @@ listJobNames() {
     runOnMaster ls ${serverPath}/jobs
 }
 
-## @fn      getJob( $jobName, $outputFileName )
+## @fn      getJob()
 #  @brief   get the configuration of the jenkins project as xml.
 #  @details the xml configuration will be written into the specified file
 #  @param   {jobName}    name of the jenkins projekt
@@ -141,7 +140,7 @@ getJob() {
     return
 }
 
-## @fn      existsJenkinsJob( $jobName )
+## @fn      existsJenkinsJob()
 #  @brief   checks, if the jenkins projekt / job exists or not
 #  @param   {jobName}    name of the jenkins project
 #  @return  <none>
@@ -156,7 +155,7 @@ existsJenkinsJob() {
     return 1
 }
 
-## @fn      createJenkinsJob( $jobName, $fileName  )
+## @fn      createJenkinsJob()
 #  @brief   creates a jenkins job with the specified name and config
 #  @param   {jobName}    name of the new jenkins project
 #  @param   {fileName}   filename, which contains the config for the new jenkins project
@@ -169,7 +168,7 @@ createJenkinsJob() {
     return
 }
 
-## @fn      updateJenkinsJob( $jobName, $xmlConfigFile )
+## @fn      updateJenkinsJob()
 #  @brief   updates the configuration of a jenkins job with the given xml config file
 #  @param   {jobName}    name of the jenkins project (aka job)
 #  @param   {xmlConfigFile}    location of the xml config file
@@ -186,7 +185,7 @@ updateJenkinsJob() {
     return
 }
 
-## @fn      deleteJenkinsJob( $jobName )
+## @fn      deleteJenkinsJob()
 #  @brief   delete a jenkins job with the specified name
 #  @param   {jobName}     name of the jenkins project
 #  @return  <none>
@@ -197,7 +196,7 @@ deleteJenkinsJob() {
     return
 }
 
-## @fn      disableJob( $jobName )
+## @fn      disableJob()
 #  @brief   disable the jenkins job
 #  @param   {jobName}    name of the job
 #  @return  <none>
@@ -207,7 +206,7 @@ disableJob() {
     return
 }
 
-## @fn      enableJob( $jobName )
+## @fn      enableJob()
 #  @brief   enable the jenkins job
 #  @param   {jobName}    name of the job
 #  @return  <none>

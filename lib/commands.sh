@@ -6,7 +6,7 @@ LFS_CI_SOURCE_commands='$Id$'
 
 # TODO: demx2fk3 2014-10-27 source logging.sh is missing
 
-## @fn      execute( command )
+## @fn      execute()
 #  @brief   executes the given command in a shell
 #  @details this method executes a given command in the same shell. The
 #           output (stderr and stdout) will be written into the logfile.
@@ -85,7 +85,7 @@ execute() {
     return ${exitCode}
 }
 
-## @fn      executeOnMaster( command )
+## @fn      executeOnMaster()
 #  @brief   executes the given command on the master servers
 #  @warning the output will be stored in the logfile and will not given back to the user.
 #           if there is an error, the programm will raise an error
@@ -100,7 +100,7 @@ executeOnMaster() {
     return
 }
 
-## @fn      runOnMaster( command )
+## @fn      runOnMaster()
 #  @brief   ron a command on the master server and show the results.
 #  @param   {command}    command string
 #  @return  exit code of the command

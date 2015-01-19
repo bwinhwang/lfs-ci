@@ -1,0 +1,17 @@
+
+
+* keep it simple
+* keep it readable
+* do tests
+
+* use readable function and variable names
+ - e.g.: createWorkspace should just create the workspace and
+   should not build something within the workspace
+ => no side effects
+
+ - no TLA
+ => src => source
+ => 
+
+* 
+

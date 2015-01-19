@@ -271,7 +271,7 @@ mustHaveLocalSdks() {
     return
 }
 
-## @fn      synchroniceToLocalPath( localPath )
+## @fn      synchroniceToLocalPath()
 #  @brief   syncronice the given local path from there to the local cache directory
 #  @details in bld, there are links to the build share. We want to avoid using build
 #           share, because it's to slow. So we are rsyncing the directories from the
