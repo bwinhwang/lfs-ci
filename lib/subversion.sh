@@ -11,7 +11,7 @@ LFS_CI_SOURCE_subversion='$Id$'
 #  @param   {commitMessage}   commit message
 #  @return  <none>
 uploadToSubversion() {
-    requiredParameters LFS_CI_ROOT 
+    requiredParameters LFS_CI_ROOT JOB_NAME USER
 
     local pathToUpload=$1
     local branchToUpload=$2
@@ -91,7 +91,10 @@ uploadToSubversion() {
 #  @param   <none>
 #  @return  <none>
 subversionUploadCleanupTempDirectory() {
-    # [[ -d ${TMPDIR} ]] && rm -rf ${TMPDIR}
+    requiredParameters JOB_NAME USER
+
+    local tmpDirectory=/dev/shm/${JOB_NAME}.${USER}
+    [[ -d ${tmpDirectory} ]] && rm -rf ${tmpDirectory}
 }
 
 ## @fn      svnCommand()
