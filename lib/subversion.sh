@@ -95,6 +95,8 @@ subversionUploadCleanupTempDirectory() {
 
     local tmpDirectory=/dev/shm/${JOB_NAME}.${USER}
     [[ -d ${tmpDirectory} ]] && rm -rf ${tmpDirectory}
+
+    return
 }
 
 ## @fn      svnCommand()
