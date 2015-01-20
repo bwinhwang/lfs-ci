@@ -73,8 +73,8 @@ copyReleaseCandidateToShare() {
     local workspace=$(getWorkspaceName)
     mustHaveWorkspaceName
 
-    local shouldCopyToShare=$(getConfig LFS_CI_UC_package_copy_to_share_real_location)
-    if [[ ! ${shouldCopyToShare} ]] ; then
+    local shouldCopyToShare=$(getConfig LFS_CI_UC_package_should_copy_to_share)
+    if [[ ${shouldCopyToShare} ]] ; then
         debug "will not copy this production to CI_LFS share"
         return
     fi
@@ -116,18 +116,10 @@ copyReleaseCandidateToShare() {
     execute cd ${remoteDirectory}
 
     info "linking sdk"
-    local commonentsFile=${workspace}/bld/bld-externalComponents-summary/externalComponents 
-    mustExistFile ${commonentsFile}
-    for sdk in $(getConfig LFS_CI_UC_package_linking_component) ; do
-        local sdkValue=$(getConfig ${sdk} ${commonentsFile})
-        # TODO: demx2fk3 2014-08-26 hack place make this different
-        if [[ ${sdk} = sdk3 && -z ${sdkValue} ]] ; then
-            sdkValue=$(getConfig sdk ${commonentsFile})
-        fi
+    for sdk in $(getUsedSdkVersions) ; do
         mustHaveSdkOnShare ${sdkValue}
         execute ln -sf ../../../SDKs/${sdkValue} ${sdk}
     done
-
 
     # this is only for internal use!
     info "creating link for internal usage"
@@ -142,6 +134,26 @@ copyReleaseCandidateToShare() {
     # TODO: demx2fk3 2015-01-09 create also link to the build jobs
 
     return
+}
+
+getUsedSdkVersions() {
+    local workspace=$(getWorkspaceName)
+    mustHaveWorkspaceName
+
+    local commonentsFile=${workspace}/bld/bld-externalComponents-summary/externalComponents 
+    mustExistFile ${commonentsFile}
+
+    local usedSdks=
+    for sdk in $(getConfig LFS_CI_UC_package_linking_component) ; do
+        local sdkValue=$(getConfig ${sdk} ${commonentsFile})
+        # TODO: demx2fk3 2014-08-26 hack place make this different
+        if [[ ${sdk} = sdk3 && -z ${sdkValue} ]] ; then
+            sdkValue=$(getConfig sdk ${commonentsFile})
+        fi
+        usedSdks="${usedSdks} ${sdkValue}"
+    done
+
+    echo ${usedSdks}
 }
 
 ## @fn      mustHaveSdkOnShare()

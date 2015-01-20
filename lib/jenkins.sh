@@ -3,6 +3,7 @@
 LFS_CI_SOURCE_jenkins='$Id$'
 
 [[ -z ${LFS_CI_SOURCE_subversion} ]] && source ${LFS_CI_ROOT}/lib/subversion.sh
+[[ -z ${LFS_CI_SOURCE_config}     ]] && source ${LFS_CI_ROOT}/lib/config.sh
 
 ## @fn      executeJenkinsCli()
 #  @brief   execute a command via the jenkins CLI with some parameters
@@ -97,6 +98,10 @@ setBuildDescription() {
     local jobName=$1
     local buildNumber=$2
     local description="$3"
+
+    local canSetBuildDescription=$(getConfig JENKINS_can_set_build_description)
+
+    [[ -z ${canSetBuildDescription} ]] && return
 
     echo ${description} | executeJenkinsCli set-build-description "${jobName}" "${buildNumber}" =
 

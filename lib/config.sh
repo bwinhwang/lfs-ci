@@ -23,16 +23,20 @@ LFS_CI_SOURCE_config='$Id$'
 #  @return  location name
 getLocationName() {
     local jobName=${1:-${JOB_NAME}}
-    local location=$(${LFS_CI_ROOT}/bin/getFromString.pl "${jobName}" location)
 
-    # 2014-02-17 demx2fk3 TODO do this in a better wa
-    case ${location} in
-        fsmr4)    echo FSM_R4_DEV      ;;
-        kernel3x) echo KERNEL_3.x_DEV  ;;
-        trunk)    echo pronb-developer ;;
-        *)        echo ${location}     ;;
-    esac
+    if [[ -z ${LFS_CI_GLOBAL_BRANCH_NAME} ]] ; then
+        local location=$(${LFS_CI_ROOT}/bin/getFromString.pl "${jobName}" location)
 
+        # 2014-02-17 demx2fk3 TODO do this in a better wa
+        case ${location} in
+            fsmr4)    location=FSM_R4_DEV      ;;
+            kernel3x) location=KERNEL_3.x_DEV  ;;
+            trunk)    location=pronb-developer ;;
+        esac
+        export LFS_CI_GLOBAL_BRANCH_NAME=${location}
+    fi
+
+    echo ${LFS_CI_GLOBAL_BRANCH_NAME}
     return
 }
 

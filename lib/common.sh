@@ -258,8 +258,11 @@ checkoutSubprojectDirectories() {
     local workspace=$(getWorkspaceName) 
     local project=$1
     local revision=$2
-    if [[ ${revision} ]] ; then
+    if [[ ${revision} && ${revision} =~ ^[0-9]$ ]] ; then
         optRev="--revision=${revision}"
+    elif [[ ${revision} ]] ; then
+        # not a numeric revision, so it should be a tag
+        optRev="${revision}"
     fi
 
     debug "checking out ${project} with revision ${revision:-latest}"

@@ -247,6 +247,9 @@ mustHaveLocalSdks() {
 
     debug "checking for links in bld"
 
+    local canCopySdksToLocalDisk=$(getConfig LFS_CI_uc_build_can_copy_sdks_to_local_harddisk)
+    [[ ${canCopySdksToLocalDisk} ]] && return
+
     for bld in ${workspace}/bld/*
     do
         [[ -e ${bld} ]] || continue

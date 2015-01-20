@@ -61,6 +61,26 @@ if [[ "${UPSTREAM_PROJECT}" && "${UPSTREAM_BUILD}" ]] ; then
     info "upstream job ${UPSTREAM_PROJECT} / ${UPSTREAM_BUILD}"
 fi
 
+# new part here
+# each job defines a set of environment variables, which defines
+# the actions of jobs.
+# * LFS_CI_GLOBAL_USECASE
+# * LFS_CI_GLOBAL_BRANCH
+# * LFS_CI_GLOBAL_PRODUCT
+# * LFS_CI_GLOBAL_BUILD_CONFIG
+# ...
+if [[ ${LFS_CI_GLOBAL_USECASE} ]] ; then
+    info "running usecase ${LFS_CI_GLOBAL_USECASE}"
+
+    sourceFile=$(getConfig LFS_CI_usecase_file)
+    mustExistFile ${LFS_CI_ROOT}/lib/${sourceFile}
+
+    source ${LFS_CI_ROOT}/lib/${sourceFile}
+
+    usecase_${LFS_CI_GLOBAL_USECASE}
+    exit 0
+fi
+
 # first dispatcher, calling the correct script or function
 case "${JOB_NAME}" in
 
@@ -68,10 +88,6 @@ case "${JOB_NAME}" in
     Test-lcpa878) ${LFS_CI_ROOT}/scripts/CLRC02_Test_Release_Candidate_LRC || exit 1 ;;
     Test-lcpa914) ${LFS_CI_ROOT}/scripts/CLRC02_Test_Release_Candidate_LRC || exit 1 ;;
     
-    LFS_KNIFE_-knife_-_*_Build) 
-        source ${LFS_CI_ROOT}/lib/uc_knife_build.sh
-        ci_job_knife_build_version || exit 1 
-    ;;
     *_CI_*_Build) 
         source ${LFS_CI_ROOT}/lib/uc_build.sh
         ci_job_build_version || exit 1 
@@ -137,7 +153,6 @@ case "${JOB_NAME}" in
         ci_job_release || exit 1 
     ;;
     *)
-
         # legacy call for the old scripting...
         for pathName in ${LFS_CI_ROOT}/scripts/ ${LFS_CI_ROOT}/legacy
         do
