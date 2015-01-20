@@ -50,7 +50,6 @@
 #   - LFS_KNIFE_-_knife_-_Build_-_FSM-r4_-_fsm4_k2
 #   - LFS_KNIFE_-_knife_-_Package_-_package
 
-
 # build names
 #  - PS_LFS_OS_2015_01_0001 => 15010001
 #  - FB_PS_LFS_OS_2015_01_0001 => fb15010001
@@ -199,4 +198,3 @@ applyKnifePatches() {
 
     return
 }
-
