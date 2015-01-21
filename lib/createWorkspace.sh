@@ -290,7 +290,7 @@ synchroniceToLocalPath() {
     local remotePath=$(readlink ${localPath})
     local subsystem=$(basename ${localPath})
     local tag=$(basename ${remotePath})
-    local serverName=$(getConfig linseeUlmServer)
+    local serverName=$(getConfig LINSEE_server)
 
     requiredParameters LFS_CI_SHARE_MIRROR
 
