@@ -99,8 +99,8 @@ setBuildDescription() {
     local buildNumber=$2
     local description="$3"
 
+    # in some cases (development, ...) we want to avoid the error message 
     local canSetBuildDescription=$(getConfig JENKINS_can_set_build_description)
-
     [[ -z ${canSetBuildDescription} ]] && return
 
     echo ${description} | executeJenkinsCli set-build-description "${jobName}" "${buildNumber}" =

@@ -155,6 +155,7 @@ mustBeValidXmlReleaseNote() {
     return 
 }
 
+# TODO: demx2fk3 2015-01-21 not in use
 baselineNameOfSystemComponentFromWorkflowTool() {
     local systemComponent=${1}
     local baselineName=${2}
@@ -168,9 +169,10 @@ baselineNameOfSystemComponentFromWorkflowTool() {
 
     echo ${resultBaseline}
 
-    return;
+    return
 }
 
+# TODO: demx2fk3 2015-01-21 not in use
 _wftGetBuildContent() {
     local baselineName=${1}
     local resultFile=${2}

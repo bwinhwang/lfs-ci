@@ -116,10 +116,18 @@ copyReleaseCandidateToShare() {
     execute cd ${remoteDirectory}
 
     info "linking sdk"
-    for sdk in $(getUsedSdkVersions) ; do
+    local commonentsFile=${workspace}/bld/bld-externalComponents-summary/externalComponents 
+    mustExistFile ${commonentsFile}
+    for sdk in $(getConfig LFS_CI_UC_package_linking_component) ; do
+        local sdkValue=$(getConfig ${sdk} ${commonentsFile})
+        # TODO: demx2fk3 2014-08-26 hack place make this different
+        if [[ ${sdk} = sdk3 && -z ${sdkValue} ]] ; then
+            sdkValue=$(getConfig sdk ${commonentsFile})
+        fi
         mustHaveSdkOnShare ${sdkValue}
         execute ln -sf ../../../SDKs/${sdkValue} ${sdk}
     done
+
 
     # this is only for internal use!
     info "creating link for internal usage"
@@ -136,6 +144,10 @@ copyReleaseCandidateToShare() {
     return
 }
 
+## @fn      getUsedSdkVersions()
+#  @brief   get the use sdk version in the build
+#  @param   <none>
+#  @return  list of used sdk version 
 getUsedSdkVersions() {
     local workspace=$(getWorkspaceName)
     mustHaveWorkspaceName

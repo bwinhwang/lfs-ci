@@ -7,7 +7,6 @@
 [[ -z ${LFS_CI_SOURCE_build}           ]] && source ${LFS_CI_ROOT}/lib/build.sh
 [[ -z ${LFS_CI_SOURCE_uc_lfs_package}  ]] && source ${LFS_CI_ROOT}/lib/uc_lfs_package.sh
 
-
 # workflow
 # * triggered via WFT 
 # * runnins as a Jenkins project in LFS CI
@@ -33,7 +32,6 @@
 #     src-bos <url> <LABEL>
 #     src-kernelsources <url> <LABEL>
 #     ...
-
 
 # Limitations
 #  - only on branches, which are compartible with the new CI
@@ -63,7 +61,7 @@
 #   - /var/fpwork/${USER}/lfs-knife-workspaces/knifes.<dateTime>.<requestor>.<knifeId>
 # * knife workspaces can be deleted after building (no matter if it is successful or not)
 
-## @fn      ci_job_knife_build()
+## @fn      usecase_LFS_KNIFE_BUILD_PLATFORM()
 #  @brief   build a lfs knife
 #  @param   <none>
 #  @return  <none>
@@ -82,6 +80,9 @@ usecase_LFS_KNIFE_BUILD_PLATFORM() {
 
     # faking the branch name for workspace creation...
     export LFS_CI_GLOBAL_BRANCH_NAME=$(getConfig LFS_PROD_tag_to_branch)
+    if [[ -z ${LFS_CI_GLOBAL_BRANCH_NAME} ]] ; then
+        fatal "this branch is not prepared to build knives"
+    fi
 
     createWorkspace
 
@@ -103,6 +104,10 @@ usecase_LFS_KNIFE_BUILD_PLATFORM() {
     return
 }
 
+## @fn      usecase_LFS_KNIFE_BUILD()
+#  @brief   run the usecase LFS Knife Build
+#  @param   <none>
+#  @return  <none>
 usecase_LFS_KNIFE_BUILD() {
 
     requiredParameters KNIFE_LFS_BASELINE 
@@ -121,6 +126,9 @@ usecase_LFS_KNIFE_BUILD() {
     echo ${label}      > ${workspace}/bld/bld-fsmci-summary/label
     echo ${oldLabel}   > ${workspace}/bld/bld-fsmci-summary/oldLabel
 
+    info "storing knife input as artifacts"
+    execute mkdir -p ${workspace}/bld/bld-knife-all/
+
     info "upload results to artifakts share."
     createArtifactArchive
 
@@ -133,6 +141,10 @@ usecase_LFS_KNIFE_BUILD() {
     return
 }
 
+## @fn      usecase_LFS_KNIFE_PACKAGE()
+#  @brief   run the usecase LFS Knife package
+#  @param   <none>
+#  @return  <none>
 usecase_LFS_KNIFE_PACKAGE() {
     local workspace=$(getWorkspaceName)
     mustHaveWorkspaceName
@@ -158,14 +170,30 @@ usecase_LFS_KNIFE_PACKAGE() {
     info "compressing lfs-knife.tar..."
     execute gzip ${workspace}/lfs-knife.tar
 
-    info "upload knife to S3"
+    info "upload knife to storage"
     uploadKnifeToStorage
+
+    execute mkdir -p ${workspace}/bld/
+    local readmeFile=${workspace}/bld/.00_README_knife_result.txt
+    cat > ${readmeFile} <<EOF
+Dear User,
+
+The knife results are located in ...
+
+Your LFS SCM Team
+EOF
+
+    copyFileToArtifactDirectory $(basename ${readmeFile})
 
     info "knife done."
 
     return
 }
 
+## @fn      uploadKnifeToStorage()
+#  @brief   upload the knife results to the storage
+#  @param   <none>
+#  @return  <none>
 uploadKnifeToStorage() {
     local workspace=$(getWorkspaceName)
     mustHaveWorkspaceName
@@ -177,21 +205,24 @@ uploadKnifeToStorage() {
 
     return
 }
-
+## @fn      applyKnifePatches()
+#  @brief   apply the patches from the knife input to the workspace
+#  @param   <none>
+#  @return  <none>
 applyKnifePatches() {
     local workspace=$(getWorkspaceName)
     mustHaveWorkspaceName
 
     info "applying patches to workspace..."
 
-    if [[ -e ${workspace}/knife.tar.gz ]] ; then
+    if [[ -e ${workspace}/bld/bld-knife-all/knife.tar.gz ]] ; then
         info "extracting knife.tar.gz..."
-        execute tar -xvz -C ${workspace} -f knife.tar.gz
+        execute tar -xvz -C ${workspace} -f ${workspace}/bld/bld-knife-all/knife.tar.gz
     fi
 
-    if [[ -e ${workspace}/knife.patch ]] ; then
+    if [[ -e ${workspace}/bld/bld-knife-all/knife.patch ]] ; then
         info "applying knife.patch file..."
-        execute patch -d ${workspace} < ${workspace}/knife.patch
+        execute patch -d ${workspace} < ${workspace}/bld/bld-knife-all/knife.patch
     fi
 
     # add more stuff here
