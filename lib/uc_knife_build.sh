@@ -123,18 +123,22 @@ usecase_LFS_KNIFE_BUILD() {
 
     debug "writing new label file in workspace ${workspace}"
     execute mkdir -p ${workspace}/bld/bld-fsmci-summary/
-    echo ${label}      > ${workspace}/bld/bld-fsmci-summary/label
-    echo ${oldLabel}   > ${workspace}/bld/bld-fsmci-summary/oldLabel
+    echo ${label}              > ${workspace}/bld/bld-fsmci-summary/label
+    echo ${KNIFE_LFS_BASELINE} > ${workspace}/bld/bld-fsmci-summary/oldLabel
+
+    debug "create own revision control file"
+    echo "src-foo http://fakeurl/ ${baseLabel}" > ${WORKSPACE}/revisionstate.xml
+    copyFileFromWorkspaceToBuildDirectory ${JOB_NAME} ${BUILD_NUMBER} revisionstate.xml
+    
 
     info "storing knife input as artifacts"
     execute mkdir -p ${workspace}/bld/bld-knife-all/
+    execute -i cp -a ${WORKSPACE}/lfs.patch ${workspace}/bld/bld-knife-all/
 
     info "upload results to artifakts share."
     createArtifactArchive
 
-    # TODO: demx2fk3 2015-01-16 should we add the requestor her?
-    # setBuildDescription "${JOB_NAME}" "${BUILD_NUMBER}" "${label}<br>${KNIFE_REQUESTOR}"
-    setBuildDescription "${JOB_NAME}" "${BUILD_NUMBER}" "${label}"
+    setBuildDescription "${JOB_NAME}" "${BUILD_NUMBER}" "${label}<br>${KNIFE_REQUESTOR}"
 
     info "build preparation done."
 
@@ -142,7 +146,7 @@ usecase_LFS_KNIFE_BUILD() {
 }
 
 ## @fn      usecase_LFS_KNIFE_PACKAGE()
-#  @brief   run the usecase LFS Knife package
+#  @brief   run the usecase lfs knife package
 #  @param   <none>
 #  @return  <none>
 usecase_LFS_KNIFE_PACKAGE() {
@@ -159,22 +163,21 @@ usecase_LFS_KNIFE_PACKAGE() {
                 -f ${workspace}/lfs-knife.tar \
                 .
 
-    info "adding sdk to tarball..."
-    for sdk in $(getUsedSdkVersions) ; do
-        execute tar -rv \
-                    --transform='s:^\./:sdk3/:' \
-                    -C /build/home/CI_LFS/SDKs/${sdk}/ \
-                    -f ${workspace}/lfs-knife.tar \
-                    .
-    done
+#    info "adding sdk to tarball..."
+#    for sdk in $(getUsedSdkVersions) ; do
+#        execute tar -rv \
+#                    --transform='s:^\./:sdk3/:' \
+#                    -C /build/home/CI_LFS/SDKs/${sdk}/ \
+#                    -f ${workspace}/lfs-knife.tar \
+#                    .
+#    done
     info "compressing lfs-knife.tar..."
     execute gzip ${workspace}/lfs-knife.tar
 
     info "upload knife to storage"
     uploadKnifeToStorage
 
-    execute mkdir -p ${workspace}/bld/
-    local readmeFile=${workspace}/bld/.00_README_knife_result.txt
+    local readmeFile=${WORKSPACE}/.00_README_knife_result.txt
     cat > ${readmeFile} <<EOF
 Dear User,
 

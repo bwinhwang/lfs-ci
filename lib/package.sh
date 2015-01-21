@@ -73,8 +73,9 @@ copyReleaseCandidateToShare() {
     local workspace=$(getWorkspaceName)
     mustHaveWorkspaceName
 
-    local shouldCopyToShare=$(getConfig LFS_CI_UC_package_should_copy_to_share)
-    if [[ ${shouldCopyToShare} ]] ; then
+    local canCopyToShare=$(getConfig LFS_CI_UC_package_can_copy_to_share)
+    info "LFS_CI_UC_package_should_copy_to_share = ${canCopyToShare}"
+    if [[ -z ${canCopyToShare} ]] ; then
         debug "will not copy this production to CI_LFS share"
         return
     fi
