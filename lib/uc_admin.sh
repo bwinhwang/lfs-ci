@@ -310,7 +310,7 @@ cleanupBaselineShares() {
         info "changing write permissions..."
 
         local baselineDirectories=$(createTempFile)
-        execute -n find ${LFS_CI_SHARE_MIRROR}/${USER}/lfs-ci-local/*/data -mindepth 1 -maxdepth 1 -mtime +2 > ${baselineDirectories}
+        execute -n find ${LFS_CI_SHARE_MIRROR}/${USER}/lfs-ci-local/*/data -mindepth 1 -maxdepth 1 -mtime +5 > ${baselineDirectories}
         for directory in $(cat ${baselineDirectories}) ; do
             info "removing ${directory}";
             execute chmod -R u+w ${directory}
