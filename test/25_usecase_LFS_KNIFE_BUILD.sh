@@ -27,6 +27,9 @@ oneTimeSetUp() {
     setBuildDescription() {
         mockedCommand "setBuildDescription $@"
     }
+    copyFileFromWorkspaceToBuildDirectory() {
+        mockedCommand "copyFileFromWorkspaceToBuildDirectory $@"
+    }
     createArtifactArchive() {
         mockedCommand "createArtifactArchive $@"
     }
@@ -52,6 +55,7 @@ test1() {
     export UPSTREAM_PROJECT=upstream_project
     export UPSTREAM_BUILD=123
     export JOB_NAME=LFS_KNIFE_-_knife_-_Build
+    export KNIFE_REQUESTOR="knife requestor"
 
     assertTrue "usecase_LFS_KNIFE_BUILD"
 
@@ -59,9 +63,11 @@ test1() {
 cat <<EOF > ${expect}
 execute mkdir -p ${WORKSPACE}/workspace
 execute mkdir -p ${WORKSPACE}/workspace/bld/bld-fsmci-summary/
+copyFileFromWorkspaceToBuildDirectory LFS_KNIFE_-_knife_-_Build revisionstate.xml
 execute mkdir -p ${WORKSPACE}/workspace/bld/bld-knife-all/
+execute -i cp -a ${WORKSPACE}/lfs.patch ${WORKSPACE}/workspace/bld/bld-knife-all/
 createArtifactArchive 
-setBuildDescription LFS_KNIFE_-_knife_-_Build  KNIFE_PS_LFS_OS_2014_01_0001.date
+setBuildDescription LFS_KNIFE_-_knife_-_Build  KNIFE_PS_LFS_OS_2014_01_0001.date<br>knife requestor
 EOF
     assertEquals "$(cat ${expect})" "$(cat ${UT_MOCKED_COMMANDS})"
 

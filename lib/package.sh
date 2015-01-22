@@ -74,7 +74,6 @@ copyReleaseCandidateToShare() {
     mustHaveWorkspaceName
 
     local canCopyToShare=$(getConfig LFS_CI_UC_package_can_copy_to_share)
-    info "LFS_CI_UC_package_should_copy_to_share = ${canCopyToShare}"
     if [[ -z ${canCopyToShare} ]] ; then
         debug "will not copy this production to CI_LFS share"
         return
@@ -147,6 +146,7 @@ copyReleaseCandidateToShare() {
 
 ## @fn      getUsedSdkVersions()
 #  @brief   get the use sdk version in the build
+#  @todo    this is not working as it should supose to be
 #  @param   <none>
 #  @return  list of used sdk version 
 getUsedSdkVersions() {

@@ -51,15 +51,17 @@ test1() {
     assertTrue "usecase_LFS_KNIFE_PACKAGE"
 
     local expect=$(createTempFile)
+
+# getUsedSdkVersions 
+# execute tar -rv --transform=s:^\./:sdk3/: -C /build/home/CI_LFS/SDKs/SDK1/ -f ${WORKSPACE}/workspace/lfs-knife.tar .
+# execute tar -rv --transform=s:^\./:sdk3/: -C /build/home/CI_LFS/SDKs/SDK2/ -f ${WORKSPACE}/workspace/lfs-knife.tar .
+# execute mkdir -p ${WORKSPACE}/workspace/bld/
+
 cat <<EOF > ${expect}
 ci_job_package 
 execute tar -cv --transform=s:^\./:os/: -C ${WORKSPACE}/workspace/upload/ -f ${WORKSPACE}/workspace/lfs-knife.tar .
-getUsedSdkVersions 
-execute tar -rv --transform=s:^\./:sdk3/: -C /build/home/CI_LFS/SDKs/SDK1/ -f ${WORKSPACE}/workspace/lfs-knife.tar .
-execute tar -rv --transform=s:^\./:sdk3/: -C /build/home/CI_LFS/SDKs/SDK2/ -f ${WORKSPACE}/workspace/lfs-knife.tar .
 execute gzip ${WORKSPACE}/workspace/lfs-knife.tar
 uploadKnifeToStorage 
-execute mkdir -p ${WORKSPACE}/workspace/bld/
 copyFileToArtifactDirectory .00_README_knife_result.txt
 EOF
     assertEquals "$(cat ${expect})" "$(cat ${UT_MOCKED_COMMANDS})"

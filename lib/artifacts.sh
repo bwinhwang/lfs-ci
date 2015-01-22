@@ -154,7 +154,7 @@ copyArtifactsToWorkspace() {
     mustHaveWorkspaceName
 
     # TODO: demx2fk3 2014-10-14 use getDownStreamProjectsData
-    runOnMaster /ps/lfs/ci/bin/getDownStreamProjects -j ${jobName}     \
+    runOnMaster ${LFS_CI_ROOT}/bin/getDownStreamProjects -j ${jobName}     \
                                                          -b ${buildNumber} \
                                                          -h ${serverPath} > ${downStreamprojectsFile}
 

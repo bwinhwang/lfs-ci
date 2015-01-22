@@ -27,7 +27,7 @@ getLocationName() {
     if [[ -z ${LFS_CI_GLOBAL_BRANCH_NAME} ]] ; then
         local location=$(${LFS_CI_ROOT}/bin/getFromString.pl "${jobName}" location)
 
-        # 2014-02-17 demx2fk3 TODO do this in a better wa
+        # 2014-02-17 demx2fk3 TODO do this in a better way
         case ${location} in
             fsmr4)    location=FSM_R4_DEV      ;;
             kernel3x) location=KERNEL_3.x_DEV  ;;

@@ -658,7 +658,7 @@ _getUpstreamProjects() {
     mustHaveValue "${serverPath}" "server path"
 
     # find the related jobs of the build
-    runOnMaster /ps/lfs/ci/bin/getUpStreamProject \
+    runOnMaster ${LFS_CI_ROOT}/bin/getUpStreamProject \
                     -j ${jobName}                     \
                     -b ${buildNumber}                 \
                     -h ${serverPath} > ${upstreamsFile}
@@ -686,7 +686,7 @@ _getDownstreamProjects() {
     local serverPath=$(getConfig jenkinsMasterServerPath)
     mustHaveValue "${serverPath}" "server path"
 
-    runOnMaster /ps/lfs/ci/bin/getDownStreamProjects -j ${jobName}    \
+    runOnMaster ${LFS_CI_ROOT}/bin/getDownStreamProjects -j ${jobName}    \
                                                         -b ${buildNumber} \
                                                         -h ${serverPath}  > ${downstreamFile}
     rawDebug ${downstreamFile}

@@ -110,7 +110,7 @@ usecase_LFS_KNIFE_BUILD_PLATFORM() {
 #  @return  <none>
 usecase_LFS_KNIFE_BUILD() {
 
-    requiredParameters KNIFE_LFS_BASELINE 
+    requiredParameters KNIFE_LFS_BASELINE  KNIFE_REQUESTOR
 
     local currentDateTime=$(date +%Y%m%d-%H%M%S)
     local label=$(printf "KNIFE_%s.%s" ${KNIFE_LFS_BASELINE} ${currentDateTime})
