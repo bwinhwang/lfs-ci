@@ -1,4 +1,4 @@
-.PHONY: all test tags
+.PHONY: all test tags doc
 all:
 	echo nothing todo...
 
@@ -7,3 +7,6 @@ test:
 
 tags:
 	ctags lib/*.sh bin/*.sh
+
+doc:
+	doxygen doc/Doxyfile

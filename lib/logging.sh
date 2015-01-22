@@ -73,7 +73,7 @@ stopLogfile() {
     unset CI_LOGGING_LOGFILENAME
 }
 
-## @fn      trace( message )
+## @fn      trace()
 #  @brief   shows a trace message
 #  @param   {message}    a text message
 #  @return  <none>
@@ -81,7 +81,7 @@ trace() {
     message "TRACE" "$@"
 }
 
-## @fn      debug( message )
+## @fn      debug()
 #  @brief   shows a debug message
 #  @param   {message}    a text message
 #  @return  <none>
@@ -89,7 +89,7 @@ debug() {
     message "DEBUG" "$@"
 }
 
-## @fn      info( message )
+## @fn      info()
 #  @brief   shows a info message
 #  @param   {message}    a text message
 #  @return  <none>
@@ -97,7 +97,7 @@ info() {
     message "INFO" "$@"
 }
 
-## @fn      error( message )
+## @fn      error()
 #  @brief   shows a error message
 #  @param   {message}    a text message
 #  @return  <none>
@@ -106,7 +106,7 @@ error() {
     _stackTrace
 }
 
-## @fn      warning( message )
+## @fn      warning()
 #  @brief   shows a warning message
 #  @param   {message}  a text message
 #  @return  <none>
@@ -114,7 +114,7 @@ warning() {
     message "WARNING" "$@"
 }
 
-## @fn      fatal( message )
+## @fn      fatal()
 #  @brief   shows a fatal message
 #  @param   {message}  a fatal message
 #  @return  <none>
@@ -123,7 +123,7 @@ fatal() {
     exit 1
 }
 
-## @fn      message( logType, logMessage )
+## @fn      message()
 #  @brief   shows a warning message
 #  @detail  
 #  @param   {logType}    type of the message
@@ -208,7 +208,7 @@ message() {
     fi
 }
 
-## @fn      _loggingLine( logType, logMessage )
+## @fn      _loggingLine()
 #  @brief   format a log line
 #  @param   {logType}    type of the message
 #  @param   {logMessage} a text message
@@ -274,7 +274,7 @@ runAndLog() {
     return ${rc}
 }
 
-## @fn      rawDebug( $fileName )
+## @fn      rawDebug()
 #  @brief   put the content of the file into the logfile
 #  @param   {fileName}    name of the file
 #  @param   <none>
@@ -296,7 +296,7 @@ rawDebug() {
     return
 }
 
-## @fn      rawOutput( $fileName )
+## @fn      rawOutput()
 #  @brief   put the content of the file on the console
 #  @param   {fileName}    name of the file
 #  @param   <none>

@@ -7,7 +7,7 @@ export CI_EXIT_HANDLER_METHODS=''
 # print stacktrace using trace logging. this enables trace log output
 # automatically
 
-## @fn      exit_add( $functionName )
+## @fn      exit_add()
 #  @brief   register a function to be executed in the exit handler
 #  @param   {functionName}    name of the function
 #  @return  <none>
@@ -18,7 +18,7 @@ exit_add() {
     return
 }
 
-## @fn      exit_handler( $msg, $showStacktrace, $exitCode )
+## @fn      exit_handler()
 #  @brief   exit handler, run the registered traps
 #  @details TODO: demx2fk3 2014-12-16 
 #  @param   {msg}               log message to print
@@ -38,7 +38,7 @@ exit_handler() {
 	[ ${rc} -ne 0 ] && trace "$(_stackTrace)"
 
 	for m in ${CI_EXIT_HANDLER_METHODS}; do
-		$m ${rc}
+		${m} ${rc}
 	done
 
 	exit ${rc:-3}

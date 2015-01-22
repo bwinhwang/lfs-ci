@@ -64,7 +64,6 @@ actionCheckout() {
 
 ## @fn      actionCalculate()
 #  @brief   action ...
-#  @details «full description»
 #  @param   <none>
 #  @return  <none>
 actionCalculate() {

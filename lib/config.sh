@@ -77,9 +77,8 @@ getProductNameFromJobName() {
     return
 }
 
-## @fn      getConfig( key )
+## @fn      getConfig()
 #  @brief   get the configuration to the requested key
-#  @details «full description»
 #  @todo    move this into a generic module. make it also more configureable
 #  @param   {key}    key name of the requested value
 #  @return  value for the key
@@ -160,7 +159,7 @@ declare -A archMap=(         ["fct"]="mips64-octeon2-linux-gnu"      \
 )
 
 
-## @fn      getDeliveryRepositoryName( tagName )
+## @fn      getDeliveryRepositoryName()
 #  @brief   get the subversion binary delivery repos name based on the defined regex
 #  @param   {tagName}    name of the tag
 #  @return  repos name

@@ -6,3 +6,5 @@ log/ci*.log
 tags
 TAGS
 log
+doc/html
+doc/latex

@@ -315,7 +315,7 @@ copyFactoryZip() {
     return
 }
 
-## @fn      copyPlatform(  )
+## @fn      copyPlatform()
 #  @brief   handle the platform directory in the delivery structure
 #  @details 
 #  @param   <none>
