@@ -658,7 +658,9 @@ _getUpstreamProjects() {
     mustHaveValue "${serverPath}" "server path"
 
     # find the related jobs of the build
-    runOnMaster ${LFS_CI_ROOT}/bin/getUpStreamProject \
+    # TODO: demx2fk3 2015-01-23 KNIFE FIXME
+    # runOnMaster ${LFS_CI_ROOT}/bin/getUpStreamProject \
+    runOnMaster /ps/lfs/ci/bin/getUpStreamProject \
                     -j ${jobName}                     \
                     -b ${buildNumber}                 \
                     -h ${serverPath} > ${upstreamsFile}
@@ -686,7 +688,9 @@ _getDownstreamProjects() {
     local serverPath=$(getConfig jenkinsMasterServerPath)
     mustHaveValue "${serverPath}" "server path"
 
-    runOnMaster ${LFS_CI_ROOT}/bin/getDownStreamProjects -j ${jobName}    \
+    # TODO: demx2fk3 2015-01-23 KNIFE FIXME
+    # runOnMaster ${LFS_CI_ROOT}/bin/getDownStreamProjects -j ${jobName}    \
+    runOnMaster /ps/lfs/ci/bin/getDownStreamProjects -j ${jobName}     \
                                                         -b ${buildNumber} \
                                                         -h ${serverPath}  > ${downstreamFile}
     rawDebug ${downstreamFile}
