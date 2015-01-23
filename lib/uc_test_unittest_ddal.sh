@@ -15,7 +15,8 @@
 #  @return  <none>
 ci_job_test_unittest() {
 
-    requiredParameters UPSTREAM_PROJECT UPSTREAM_BUILD
+    requiredParameters UPSTREAM_PROJECT UPSTREAM_BUILD JOB_NAME BUILD_NUMBER
+
     local workspace=$(getWorkspaceName)
     mustHaveWorkspaceName
 
@@ -85,7 +86,7 @@ ci_job_test_unittest() {
     copyFileToArtifactDirectory coverage.xml
 
     # TODO: demx2fk3 2015-01-23 make this in a function
-    local artifactsPathOnShare=$(getConfig artifactesShare)/${jobName}/${BUILD_NUMBER}
+    local artifactsPathOnShare=$(getConfig artifactesShare)/${JOB_NAME}/${BUILD_NUMBER}
     linkFileToArtifactsDirectory ${artifactsPathOnShare}/save
 
     # TODO add data to database
