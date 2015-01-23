@@ -74,6 +74,18 @@ usecase_LFS_KNIFE_BUILD_PLATFORM() {
 
     local baseLabel=${KNIFE_LFS_BASELINE}
 
+    # we have to figure out, if we need to build something.
+    # e.g.: if the knife baseline is a LRC baseline, we 
+    # do not need to build FSM-r2,3,4.
+    # also for FSM-r4, we need a different location.
+    local subTaskName=$(getSubTaskNameFromJobName)
+    mustHaveValue "${subTaskName}" "subTaskName"
+
+    if [[ ${baseLabel} =~ LRC_LCP && ${subTaskName} != LRC ]] ; then
+        warning "Knife baseline is an LRC-baseline, but build is not required for LRC"
+        exit 0
+    fi
+
     # create a workspace
     debug "create own revision control file"
     echo "src-foo http://fakeurl/ ${baseLabel}" > ${WORKSPACE}/revisions.txt

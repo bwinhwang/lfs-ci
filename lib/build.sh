@@ -21,6 +21,7 @@ buildLfs() {
     mustHaveTargetBoardName
 
     local subTaskName=$(getSubTaskNameFromJobName)
+    mustHaveValue "${subTaskName}" "subTaskName"
     local productName=$(getProductNameFromJobName)
     mustHaveValue "${productName}" "productName"
 
