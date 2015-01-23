@@ -84,6 +84,10 @@ ci_job_test_unittest() {
     mustExistFile coverage.xml
     copyFileToArtifactDirectory coverage.xml
 
+    # TODO: demx2fk3 2015-01-23 make this in a function
+    local artifactsPathOnShare=$(getConfig artifactesShare)/${jobName}/${BUILD_NUMBER}
+    linkFileToArtifactsDirectory ${artifactsPathOnShare}/save
+
     # TODO add data to database
     set -- $(grep 'lines.*: ' lcov.summary | sed -e 's/[()%]//g')
     local LINES_COVERED=$3
