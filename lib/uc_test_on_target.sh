@@ -94,6 +94,7 @@ uc_job_test_on_target_archive_logs() {
         ${workspace}/.
 
     copyFileToArtifactDirectory ${workspace}/. 
+    # TODO: demx2fk3 2015-01-23 make this in a function
     local artifactsPathOnShare=$(getConfig artifactesShare)/${jobName}/${BUILD_NUMBER}
     linkFileToArtifactsDirectory ${artifactsPathOnShare}/save
 

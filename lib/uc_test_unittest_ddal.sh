@@ -15,7 +15,8 @@
 #  @return  <none>
 ci_job_test_unittest() {
 
-    requiredParameters UPSTREAM_PROJECT UPSTREAM_BUILD
+    requiredParameters UPSTREAM_PROJECT UPSTREAM_BUILD JOB_NAME BUILD_NUMBER
+
     local workspace=$(getWorkspaceName)
     mustHaveWorkspaceName
 
@@ -57,6 +58,8 @@ ci_job_test_unittest() {
     mustExistFile ${lcov}
     local genHtml=${workspace}/src-unittests/src/frameworks/lcov/bin/genhtml
     mustExistFile ${genHtml}
+    local lcov_cobertura=${workspace}/src-unittests/src/frameworks/lcov_cobertura/bin/lcov_cobertura.py
+    mustExistFile ${lcov_cobertura}
 
     info "analysing results..."
     execute rm -rf ${workspace}/html
@@ -71,12 +74,20 @@ ci_job_test_unittest() {
 
     cd ${workspace}/html
     execute ${genHtml} lcov.out
+    execute python ${lcov_cobertura} lcov.out
     execute sed -i -e 's/#FFFFFF/#FFFFEE/' gcov.css
 
     execute -n find . -name '*.html' | execute xargs -n1 sed -i -e "s/LCOV -/${LABEL} DDAL Unittests -/"
     execute -n ${lcov} --summary lcov.out > lcov.summary
 
     rawDebug lcov.summary
+
+    mustExistFile coverage.xml
+    copyFileToArtifactDirectory coverage.xml
+
+    # TODO: demx2fk3 2015-01-23 make this in a function
+    local artifactsPathOnShare=$(getConfig artifactesShare)/${JOB_NAME}/${BUILD_NUMBER}
+    linkFileToArtifactsDirectory ${artifactsPathOnShare}/save
 
     # TODO add data to database
     set -- $(grep 'lines.*: ' lcov.summary | sed -e 's/[()%]//g')
