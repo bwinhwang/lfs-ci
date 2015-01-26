@@ -41,6 +41,26 @@ ci_job_build() {
     return
 }
 
+## @fn      usecase_LFS_BUILD_FAILED()
+#  @brief   execute the usecase LFS_BUILD_FAILED
+#  @details this is just for recoding the failed build
+#  @param   <none>
+#  @return  <none>
+usecase_LFS_BUILD_FAILED() {
+    databaseEventBuildFailed
+    return
+}
+
+## @fn      usecase_LFS_BUILD_SUCCESSFUL()
+#  @brief   execute the usecase LFS_BUILD_SUCCESSFUL
+#  @details this is just for recoding the  build was successful
+#  @param   <none>
+#  @return  <none>
+usecase_LFS_BUILD_SUCCESSFUL() {
+    databaseEventTestFinished
+    return
+}
+
 ## @fn      ci_job_build_version()
 #  @brief   usecase which creates the version label
 #  @details the usecase get the last label name from the last successful build and calculates

@@ -30,8 +30,6 @@ ci_job_package() {
     local requiredArtifacts=$(getConfig LFS_CI_UC_package_required_artifacts)
     copyArtifactsToWorkspace "${UPSTREAM_PROJECT}" "${UPSTREAM_BUILD}" "${requiredArtifacts}"
 
-    databaseEventBuildFinished
-
     mustHaveNextCiLabelName
     local label=$(getNextReleaseLabel)
 

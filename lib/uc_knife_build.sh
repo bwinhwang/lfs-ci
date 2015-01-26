@@ -90,7 +90,7 @@ usecase_LFS_KNIFE_BUILD_PLATFORM() {
 
     # create a workspace
     debug "create own revision control file"
-    echo "src-foo http://fakeurl/ ${baseLabel}" > ${WORKSPACE}/revisions.txt
+    echo "src-fake http://fakeurl/ ${baseLabel}" > ${WORKSPACE}/revisions.txt
 
     # faking the branch name for workspace creation...
     export LFS_CI_GLOBAL_BRANCH_NAME=$(getConfig LFS_PROD_tag_to_branch)
@@ -146,8 +146,8 @@ usecase_LFS_KNIFE_BUILD() {
     
 
     info "storing knife input as artifacts"
-    execute mkdir -p ${workspace}/bld/bld-knife-all/
-    execute -i cp -a ${WORKSPACE}/lfs.patch ${workspace}/bld/bld-knife-all/
+    execute mkdir -p ${workspace}/bld/bld-knife-input/
+    execute -i cp -a ${WORKSPACE}/lfs.patch ${workspace}/bld/bld-knife-input/
 
     info "upload results to artifakts share."
     createArtifactArchive
@@ -218,7 +218,8 @@ uploadKnifeToStorage() {
     knifeFile=${workspace}/lfs-knife.tar.gz
     mustExistFile ${knifeFile}
 
-    execute ncftpput -m -C mailarchiv.emea.nsn-net.net ${knifeFile} /public/BernhardMinks/knife
+    warning "upload is not implemented"
+    # execute ncftpput -m -C mailarchiv.emea.nsn-net.net ${knifeFile} /public/BernhardMinks/knife
 
     return
 }
@@ -232,14 +233,14 @@ applyKnifePatches() {
 
     info "applying patches to workspace..."
 
-    if [[ -e ${workspace}/bld/bld-knife-all/knife.tar.gz ]] ; then
+    if [[ -e ${workspace}/bld/bld-knife-input/knife.tar.gz ]] ; then
         info "extracting knife.tar.gz..."
-        execute tar -xvz -C ${workspace} -f ${workspace}/bld/bld-knife-all/knife.tar.gz
+        execute tar -xvz -C ${workspace} -f ${workspace}/bld/bld-knife-input/knife.tar.gz
     fi
 
-    if [[ -e ${workspace}/bld/bld-knife-all/knife.patch ]] ; then
+    if [[ -e ${workspace}/bld/bld-knife-input/knife.patch ]] ; then
         info "applying knife.patch file..."
-        execute patch -d ${workspace} < ${workspace}/bld/bld-knife-all/knife.patch
+        execute patch -d ${workspace} < ${workspace}/bld/bld-knife-input/knife.patch
     fi
 
     # add more stuff here

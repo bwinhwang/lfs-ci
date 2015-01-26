@@ -47,11 +47,6 @@ databaseEventBuildFinished() {
 databaseEventBuildFailed() {
     requiredParameters LFS_CI_ROOT
 
-    local rc=$1
-
-    # call only if test failed
-    [[ ${rc} -eq 0 ]] || return 0
-
     mustHaveNextCiLabelName
     local label=$(getNextCiLabelName)
     mustHaveValue ${label} "label name"
