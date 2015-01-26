@@ -1,4 +1,6 @@
 #!/bin/bash
+## @file  uc_release.sh
+#  @brief usecase release 
 
 [[ -z ${LFS_CI_SOURCE_artifacts}    ]] && source ${LFS_CI_ROOT}/lib/artifacts.sh
 [[ -z ${LFS_CI_SOURCE_subversion}   ]] && source ${LFS_CI_ROOT}/lib/subversion.sh

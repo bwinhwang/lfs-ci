@@ -1,4 +1,6 @@
 #!/bin/bash
+## @file  uc_ecl.sh
+#  @brief usecase update ECL with a new LFS production
 
 [[ -z ${LFS_CI_SOURCE_artifacts}  ]] && source ${LFS_CI_ROOT}/lib/artifacts.sh
 [[ -z ${LFS_CI_SOURCE_subversion} ]] && source ${LFS_CI_ROOT}/lib/subversion.sh

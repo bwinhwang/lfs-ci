@@ -81,11 +81,11 @@ usecase_LFS_KNIFE_BUILD_PLATFORM() {
     local subTaskName=$(getSubTaskNameFromJobName)
     mustHaveValue "${subTaskName}" "subTaskName"
 
-    if [[ ${baseLabel} =~ LRC_LCP && ${subTaskName} = LRC ]] ; then
-        debug "it's a LRC build, everything is fine."
-    else
+    if [[ ${baseLabel} =~ LRC_LCP && ${subTaskName} != LRC ]] ; then
+        echo ${baseLabel} ${subTaskName}
         warning "Knife baseline is an LRC-baseline, but build is not required for LRC"
-        exit 0
+    else
+        debug "it's a LRC build, everything is fine."
     fi
 
     # create a workspace

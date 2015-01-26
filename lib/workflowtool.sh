@@ -1,4 +1,6 @@
 #!/bin/bash
+## @file  workflowtool.sh
+#  @brief common functions for workflowtool 
 
 LFS_CI_SOURCE_workflowtool='$Id$'
 

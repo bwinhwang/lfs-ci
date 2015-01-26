@@ -21,7 +21,7 @@
 #           In the exit handler, the logfile will be gzipped.
 #           
 #           You can also influence the format of the log file. See CI_LOGGING_CONFIG for details.
-
+#
 
 LFS_CI_SOURCE_logging='$Id$'
 

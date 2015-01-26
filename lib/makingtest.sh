@@ -1,7 +1,6 @@
 #!/bin/bash
-#
-#
-#
+## @file  makingtest.sh
+#  @brief common functions for the making test framework
 
 LFS_CI_SOURCE_makingtest='$Id$'
 

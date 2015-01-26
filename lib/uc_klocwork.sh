@@ -1,4 +1,6 @@
 #!/bin/bash
+## @file  uc_klocwork.sh
+#  @brief usecase build and upload klocwork
 
 [[ -z ${LFS_CI_SOURCE_artifacts}       ]] && source ${LFS_CI_ROOT}/lib/artifacts.sh
 [[ -z ${LFS_CI_SOURCE_createWorkspace} ]] && source ${LFS_CI_ROOT}/lib/createWorkspace.sh

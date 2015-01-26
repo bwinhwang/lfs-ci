@@ -1,4 +1,7 @@
 #!/bin/bash
+## @file    uc_admin.sh
+#  @brief   usecase admin
+#  @details just a list of adminstration usecases for jenkins
 
 [[ -z ${LFS_CI_SOURCE_artifacts} ]] && source ${LFS_CI_ROOT}/lib/jenkins.sh
 

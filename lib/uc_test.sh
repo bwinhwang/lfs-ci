@@ -1,4 +1,6 @@
 #!/bin/bash
+## @file  uc_test
+#  @brief the test usecase
 
 [[ -z ${LFS_CI_SOURCE_jenkins}   ]] && source ${LFS_CI_ROOT}/lib/jenkins.sh
 [[ -z ${LFS_CI_SOURCE_artifacts} ]] && source ${LFS_CI_ROOT}/lib/artifacts.sh

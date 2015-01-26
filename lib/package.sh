@@ -1,4 +1,8 @@
 #!/bin/bash
+## @file    package.sh
+#  @brief   common package functiond
+#  @details common functions which are required to package the build artifacts
+#           into a LFS release. See also the uc_lfs_package.sh and uc_ubooot_package.sh
 
 LFS_CI_SOURCE_package='$Id$'
 

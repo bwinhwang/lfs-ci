@@ -1,4 +1,8 @@
 #!/bin/bash
+## @file    subversion.sh
+#  @brief   common subversion wrapper functions
+#  @details functions which makes the handling of subversion a little bit
+#           simplier.
 
 LFS_CI_SOURCE_subversion='$Id$'
 

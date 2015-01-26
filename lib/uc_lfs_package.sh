@@ -1,4 +1,6 @@
 #!/bin/bash
+## @file  uc_lfs_package.sh
+#  @brief usecase lfs packing
 
 LFS_CI_SOURCE_uc_lfs_package='$Id$'
 

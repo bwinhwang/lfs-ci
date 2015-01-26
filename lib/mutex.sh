@@ -1,13 +1,21 @@
 #!/bin/bash
+## @file    mutex.sh
+#  @brief   a mutex implementation
+#  @details based on: http://wiki.bash-hackers.org/howto/mutex 
 
-# based on: http://wiki.bash-hackers.org/howto/mutex 
-
-
+## @fn      mutex_exit()
+#  @brief   mutex exit handler
+#  @param   <none>
+#  @return  <none>
 mutex_exit() {
     info "Removing lock ${LOCKDIR}"
     rm -rf "${LOCKDIR}"
 }
 
+## @fn      mutex_lock()
+#  @brief   lock a mutex
+#  @param   {lockName}   name of the mutex lock
+#  @return  <none>
 mutex_lock() {
 
     local lockName=${1:-noName}
@@ -25,8 +33,6 @@ mutex_lock() {
     ###
     ### start locking attempt
     ###
-    
-    
     if mkdir "${LOCKDIR}" &>/dev/null; then
     
         # lock succeeded, install signal handlers before storing the PID just in case 
@@ -64,6 +70,11 @@ mutex_lock() {
     
     fi
 }
+
+## @fn      mutex_unlock()
+#  @brief   unlock a mutex
+#  @param   <none>
+#  @return  <none>
 mutex_unlock() {
         rm -rf "${LOCKDIR}"
 }

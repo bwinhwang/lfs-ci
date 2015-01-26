@@ -1,4 +1,7 @@
 #!/bin/bash
+## @file    uc_build.sh
+#  @brief   usecase build
+#  @details the build usecase for lfs, ltk and uboot.
 
 [[ -z ${LFS_CI_SOURCE_artifacts}       ]] && source ${LFS_CI_ROOT}/lib/artifacts.sh
 [[ -z ${LFS_CI_SOURCE_createWorkspace} ]] && source ${LFS_CI_ROOT}/lib/createWorkspace.sh
