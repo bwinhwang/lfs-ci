@@ -1,4 +1,8 @@
 #!/bin/bash
+## @file      build.sh
+#  @brief     common function for the usecaes build
+#  @details   the usecase build is doing (simplified) the following things:
+#             ... example code from CI INFO page ...
 
 LFS_CI_SOURCE_build='$Id$'
 

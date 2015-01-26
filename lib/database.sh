@@ -1,4 +1,6 @@
 #!/bin/bash
+## @file  database.sh
+#  @brief handling of metrics to the database 
 
 LFS_CI_SOURCE_database='$Id$'
 

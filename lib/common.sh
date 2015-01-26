@@ -1,4 +1,6 @@
 #!/bin/bash
+## @file  common.sh
+#  @brief common functions
 
 LFS_CI_SOURCE_common='$Id$'
 

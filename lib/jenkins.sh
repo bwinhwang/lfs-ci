@@ -1,4 +1,6 @@
 #!/bin/bash
+## @file  jenkins.sh
+#  @brief handling of the jenkins CLI
 
 LFS_CI_SOURCE_jenkins='$Id$'
 

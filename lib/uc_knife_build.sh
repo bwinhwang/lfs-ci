@@ -1,13 +1,7 @@
 #!/bin/bash
-# usecase for create a lfs knife build
-
-[[ -z ${LFS_CI_SOURCE_artifacts}       ]] && source ${LFS_CI_ROOT}/lib/artifacts.sh
-[[ -z ${LFS_CI_SOURCE_createWorkspace} ]] && source ${LFS_CI_ROOT}/lib/createWorkspace.sh
-[[ -z ${LFS_CI_SOURCE_database}        ]] && source ${LFS_CI_ROOT}/lib/database.sh
-[[ -z ${LFS_CI_SOURCE_build}           ]] && source ${LFS_CI_ROOT}/lib/build.sh
-[[ -z ${LFS_CI_SOURCE_uc_lfs_package}  ]] && source ${LFS_CI_ROOT}/lib/uc_lfs_package.sh
-
-# workflow
+## @file uc_knife_build.sh
+#  @brief usecase for create a lfs knife build
+#  @details  workflow
 # * triggered via WFT 
 # * runnins as a Jenkins project in LFS CI
 #   - INPUT
@@ -32,10 +26,10 @@
 #     src-bos <url> <LABEL>
 #     src-kernelsources <url> <LABEL>
 #     ...
-
+#
 # Limitations
 #  - only on branches, which are compartible with the new CI
-
+#
 # in Jenkins 
 # * jobnames
 #   - LFS_KNIFE_-_knife_-_Build
@@ -47,12 +41,12 @@
 #   - LFS_KNIFE_-_knife_-_Build_-_FSM-r4_-_fsm4_axm
 #   - LFS_KNIFE_-_knife_-_Build_-_FSM-r4_-_fsm4_k2
 #   - LFS_KNIFE_-_knife_-_Package_-_package
-
+#
 # build names
 #  - PS_LFS_OS_2015_01_0001 => 15010001
 #  - FB_PS_LFS_OS_2015_01_0001 => fb15010001
 #  - KNIFE_<id>_PS_LFS_OS_2015_01_0001 => knife<id>15010001
-
+#
 # Brain storming
 # * we want to use as much code as possible from usecases build and package
 # * we should think about to have a own configuation for a knife, which is overwriting the default values
@@ -60,6 +54,12 @@
 # * workspaces are unique
 #   - /var/fpwork/${USER}/lfs-knife-workspaces/knifes.<dateTime>.<requestor>.<knifeId>
 # * knife workspaces can be deleted after building (no matter if it is successful or not)
+
+[[ -z ${LFS_CI_SOURCE_artifacts}       ]] && source ${LFS_CI_ROOT}/lib/artifacts.sh
+[[ -z ${LFS_CI_SOURCE_createWorkspace} ]] && source ${LFS_CI_ROOT}/lib/createWorkspace.sh
+[[ -z ${LFS_CI_SOURCE_database}        ]] && source ${LFS_CI_ROOT}/lib/database.sh
+[[ -z ${LFS_CI_SOURCE_build}           ]] && source ${LFS_CI_ROOT}/lib/build.sh
+[[ -z ${LFS_CI_SOURCE_uc_lfs_package}  ]] && source ${LFS_CI_ROOT}/lib/uc_lfs_package.sh
 
 ## @fn      usecase_LFS_KNIFE_BUILD_PLATFORM()
 #  @brief   build a lfs knife

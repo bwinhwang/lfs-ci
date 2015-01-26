@@ -1,3 +1,7 @@
+#!/bin/bash
+## @file  createWorkspace.sh 
+#  @brief creating or updating a workspace
+
 LFS_CI_SOURCE_createWorkspace='$Id$'
 
 [[ -z ${LFS_CI_SOURCE_artifacts} ]] && source ${LFS_CI_ROOT}/lib/artifacts.sh

@@ -1,12 +1,12 @@
 #!/bin/bash
 # ---------------------------------------------------------------------
 # LFS CI scripting 
-# (c) 2014 Nokia 
+# (c) 2014,2015 Nokia 
 # ---------------------------------------------------------------------
 # contact: lfs-ci-dev@mlist.intra.nsn-net.net
 # ---------------------------------------------------------------------
 #
-# start skript for jenkins.
+# start skript for jenkins jobs.
 #
 
 if [[ -z "${LFS_CI_ROOT}" ]] ; then
@@ -34,7 +34,7 @@ startLogfile
 # and end it, if the script exited in some way
 exit_add stopLogfile
 
-# TODO: demx2fk3 2014-03-31 fixme
+# TODO: demx2fk3 2014-03-31 FIXME
 # cleanupEnvironmentVariables
 
 # for better debugging
@@ -44,8 +44,12 @@ export PS4
 LFS_CI_git_version=$(cd ${LFS_CI_ROOT} ; git describe)
 debug "used lfs ci git version ${LFS_CI_git_version}"
 
-JENKINS_SVN_REVISION=${SVN_REVISION}
-export JENKINS_SVN_REVISION
+# we do not want to have modifications in ${LFS_CI_ROOT}
+LFS_CI_git_local_modifications=$(cd ${LFS_CI_ROOT} ; git status --short | wc -l)
+if [[ ${LFS_CI_git_local_modifications} -gt 0 ]] ; then
+    fatal "the are local modifications in ${LFS_CI_ROOT}, which are not commited. "\
+          "CI is rejecting such kind of working mode and refused to work until the modifications are commited."
+fi
 
 if [[ ! -z "${1}" ]] ; then
     export JOB_NAME=$1
@@ -84,7 +88,7 @@ fi
 # first dispatcher, calling the correct script or function
 case "${JOB_NAME}" in
 
-    # hack
+    # TODO: demx2fk3 2015-01-26 remove this hack
     Test-lcpa878) ${LFS_CI_ROOT}/scripts/CLRC02_Test_Release_Candidate_LRC || exit 1 ;;
     Test-lcpa914) ${LFS_CI_ROOT}/scripts/CLRC02_Test_Release_Candidate_LRC || exit 1 ;;
     
@@ -163,7 +167,7 @@ case "${JOB_NAME}" in
                 $pathName/${JOB_NAME} $@ || exit 1
                 break
             else
-                # fixme
+                # TODO: demx2fk3 2015-01-26 FIXME
                 error "don't know what I shall do for job \"${JOB_NAME}\"" 
                 exit 1
             fi

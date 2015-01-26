@@ -1,4 +1,14 @@
 #!/bin/bash
+## @file    artifacts.sh
+#  @brief   handling of artifacts of a build
+#  @details There is/was a problem in jenkins with artifacts handling.
+#           Espesally if we handling very big artifacts bigger than a few hundert MB.
+#           So we doing the handling of artifacts by yourself within the scripting.
+#           The artifacts are stored on the linsee share /build/home/psulm/LFS_internal/artifacts
+#           with the <jobName>/<buildNumber>.
+#           
+#           The cleanup of the share will be handled within the uc_admin.sh.
+#           
 
 LFS_CI_SOURCE_artifacts='$Id$'
 

@@ -1,4 +1,6 @@
 #!/bin/bash
+## @file  config.sh
+#  @brief handling of configuration
 
 LFS_CI_SOURCE_config='$Id$'
 
