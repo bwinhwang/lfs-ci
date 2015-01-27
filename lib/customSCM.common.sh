@@ -79,19 +79,12 @@ getUpstreamProjectName() {
         requiredParameters JOB_NAME
         jobName=${JOB_NAME}
     fi
+    local branchName=$(getBranchName)
 
     case ${jobName} in
-        LFS_CI_-_*_-_Test)
-            local branchName=$(getBranchName)
-            echo LFS_CI_-_${branchName}_-_Package_-_package
-        ;;
-        UBOOT_CI_-_*_-_Test)
-            local branchName=$(getBranchName)
-            echo UBOOT_CI_-_${branchName}_-_Package_-_package
-        ;;
-        *)
-            fatal "no rule to get the upstream job for ${jobName}"
-        ;;
+        LFS_CI_-_*_-_Test)   echo LFS_CI_-_${branchName}_-_Package_-_package   ;;
+        UBOOT_CI_-_*_-_Test) echo UBOOT_CI_-_${branchName}_-_Package_-_package ;;
+        *) fatal "no rule to get the upstream job for ${jobName}"              ;;
     esac
 
     return        
