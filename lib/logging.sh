@@ -69,7 +69,8 @@ stopLogfile() {
         printf -- "ending logfile\n"                                                      >> ${CI_LOGGING_LOGFILENAME}
         printf -- "-------------------------------------------------------------------\n" >> ${CI_LOGGING_LOGFILENAME}
 
-        gzip ${CI_LOGGING_LOGFILENAME}
+        # disabled gzipping..
+        # gzip ${CI_LOGGING_LOGFILENAME}
     fi
     
     unset CI_LOGGING_LOGFILENAME
