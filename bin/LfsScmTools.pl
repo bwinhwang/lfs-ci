@@ -1958,6 +1958,15 @@ use Data::Dumper;
 use POSIX qw(strftime);
 use Getopt::Std;
 
+sub quote {
+    my $self = shift;
+    my $data = shift;
+    $data =~ s/&/&amp;/g;
+    $data =~ s/</&lt;/g;
+    $data =~ s/>/&gt;/g;
+    return $data;
+}
+
 sub prepare {
     my $self = shift;
     my %duplicates;
@@ -1990,30 +1999,30 @@ sub prepare {
                         : $entry->{msg}->[0] ;
 
         if( $msg =~ m/[\%\#]REM (.*)/) {
-            $self->{releaseNote}->addImportantNoteMessage( $1 );
+            $self->{releaseNote}->addImportantNoteMessage( $self->quote( $1 ) );
         }
         # jira stuff
         if( $msg =~ m/^.*(BTS[A-Z]*-[0-9]*)\s*PR\s*([^ :]*)(.*$)/  ) {
             push @{ $self->{PR} }, { jira => $1,
                                      nr   => $2,
-                                     text => $3, };
+                                     text => $self->quote( $3 ), };
         }
         # change note
         elsif( $msg =~ m/^.*(BTS[A-Z]-[0-9]*)\s*CN\s*([^ :]*)(.*$)/ ) {
             push @{ $self->{CN}}, { jira => $1,
                                     nr   => $2,
-                                    text => $3, };
+                                    text => $self->quote( $3 ), };
         }
         # new feature
         if( $msg =~ m/^.*(BTS[A-Z]-[0-9]*)\s*NF\s*([^ :]*)(.*$)/ ) {
             push @{ $self->{NF}}, { jira => $1,
                                     nr   => $2,
-                                    text => $3, };
+                                    text => $self->quote( $3 ), };
         }
         # %FIN PR=PR123456 foobar
         elsif( $msg =~ m/\s*[#%]FIN\s+[%@](PR|NF|CN)=(\w+)(.*)/ ) {
             push @{ $self->{ $1 } }, { nr   => $2,
-                                       text => $2 . $3, };
+                                       text => $self->quote( $2 . $3 ) , };
         }
         # notes
         if( $msg =~ m/Transport Drivers/ ) {
