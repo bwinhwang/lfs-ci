@@ -127,6 +127,7 @@ ci_job_test_collect_metrics() {
         [[ "${jobName}" =~ target$     ]] && continue
 
         [[ "${state}"   = FAILURE   ]] && continue
+        [[ "${state}"   = ABORTED   ]] && continue
         [[ "${state}"   = NOT_BUILT ]] && continue
 
         storeMetricsForTestJob ${jobName} ${buildNumber}
