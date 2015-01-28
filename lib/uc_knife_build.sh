@@ -92,8 +92,8 @@ usecase_LFS_KNIFE_BUILD_PLATFORM() {
     debug "create own revision control file"
     export tagName=${baseLabel}
     local svnReposUrl=$(getConfig LFS_PROD_svn_delivery_os_repos_url)
-    mustExistInSubversion ${svnReposUrl}/tags/${baseLabel}/docs/scripts/ revisions.txt
-    local revision=$(svnCat ${svnReposUrl}/tags/${baseLabel}/docs/scripts/revisions.txt | cut -d" " -f3 | sort -nu | tail -n 1)
+    mustExistInSubversion ${svnReposUrl}/tags/${baseLabel}/doc/scripts/ revisions.txt
+    local revision=$(svnCat ${svnReposUrl}/tags/${baseLabel}/doc/scripts/revisions.txt | cut -d" " -f3 | sort -nu | tail -n 1)
     echo "src-knife ${svnReposUrl}/tags/${baseLabel} ${revision}" > ${WORKSPACE}/revisions.txt
 
     # faking the branch name for workspace creation...
