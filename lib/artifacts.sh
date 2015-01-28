@@ -213,7 +213,8 @@ copyFileToArtifactDirectory() {
 
     local serverName=$(getConfig LINSEE_server)
     local artifactsPathOnShare=$(getConfig artifactesShare)/${JOB_NAME}/${BUILD_NUMBER}
-    executeOnMaster mkdir -p ${artifactsPathOnShare}/save
+    # executeOnMaster mkdir -p ${artifactsPathOnShare}/save
+    execute ssh ${serverName} mkdir -p ${artifactsPathOnShare}/save
 
     # sometimes, the remote host closes connection, so we try to retry...
     execute -r 10 rsync --archive --verbose --rsh=ssh -P  \
