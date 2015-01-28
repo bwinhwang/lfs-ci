@@ -83,12 +83,34 @@ usecase_LFS_KNIFE_BUILD_PLATFORM() {
 
     info "baseLabel ${baseLabel}"
     info "subTaskName ${subTaskName}"
+   
+    # short names: stn := subTaskName
+    #              bl  := baseLabel
+    #
+    #  results: build should be done := 1
+    #           build not required   := 0
+    #
+    #            | stn == LRC | stn != LRC 
+    # -------------------------------------
+    #  bl =  LRC |      1     |      0
+    # -------------------------------------
+    #  bl != LRC |      0     |      1
+    # -------------------------------------
 
-    if [[ ${baseLabel} =~ LRC_LCP && ${subTaskName} != LRC ]] ; then
-        echo ${baseLabel} ${subTaskName}
-        warning "Knife baseline is an LRC-baseline, but build is not required for LRC"
+    if [[ ${baseLabel} =~ LRC_LCP ]] ; then
+        if [[ ${subTaskName} = LRC ]] ; then
+            debug "it's a LRC build, everything is fine."
+        else
+            warning "Knife baseline is an LRC-baseline, but build is not required for LRC"
+            exit 0
+        fi
     else
-        debug "it's a LRC build, everything is fine."
+        if [[ ${subTaskName} = LRC ]] ; then
+            warning "Knife baseline is an LRC-baseline, but build is not required for LRC"
+            exit 0
+        else
+            debug "it's a normal FSMr-x build, everything is fine."
+        fi
     fi
 
     # create a workspace
