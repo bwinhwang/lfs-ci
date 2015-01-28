@@ -25,7 +25,7 @@ createArtifactArchive() {
     requiredParameters JOB_NAME BUILD_NUMBER
 
     local workspace=$(getWorkspaceName)
-    local serverName=$(getConfig LINSEE_server)
+    local serverName=$(getConfig LFS_CI_artifacts_storage_host)
     mustHaveWorkspaceName
 
     mustExistDirectory "${workspace}/bld/"
@@ -96,7 +96,7 @@ copyAndExtractBuildArtifactsFromProject() {
 
     local artifactesShare=$(getConfig artifactesShare)
     local artifactsPathOnMaster=${artifactesShare}/${jobName}/${buildNumber}/save/
-    local serverName=$(getConfig LINSEE_server)
+    local serverName=$(getConfig LFS_CI_artifacts_storage_host)
 
     local files=$(runOnMaster ls ${artifactsPathOnMaster})
 
@@ -211,7 +211,7 @@ copyFileToArtifactDirectory() {
     requiredParameters JOB_NAME BUILD_NUMBER
     local fileName=$1
 
-    local serverName=$(getConfig LINSEE_server)
+    local serverName=$(getConfig LFS_CI_artifacts_storage_host)
     local artifactsPathOnShare=$(getConfig artifactesShare)/${JOB_NAME}/${BUILD_NUMBER}
     # executeOnMaster mkdir -p ${artifactsPathOnShare}/save
     execute ssh ${serverName} mkdir -p ${artifactsPathOnShare}/save
