@@ -16,7 +16,7 @@ https://beisop60.china.nsn-net.net/isource/svnroot/__SVN_REL_REPOS_NAME__/tags/_
 https://bhisop60.apac.nsn-net.net/isource/svnroot/__SVN_REL_REPOS_NAME__/tags/__LFS_PROD_RELEASE_CURRENT_TAG_NAME_REL__
 https://chisop60.americas.nsn-net.net/isource/svnroot/__SVN_REL_REPOS_NAME__/tags/__LFS_PROD_RELEASE_CURRENT_TAG_NAME_REL__
 https://duscmi.inside.nsn.com/isource/svnroot/__SVN_REL_REPOS_NAME__/tags/__LFS_PROD_RELEASE_CURRENT_TAG_NAME_REL__
-https://ulscmi.inside.nsn.com/isource/svnroot__SVN_REL_REPOS_NAME__/tags/__LFS_PROD_RELEASE_CURRENT_TAG_NAME_REL__
+https://ulscmi.inside.nsn.com/isource/svnroot/__SVN_REL_REPOS_NAME__/tags/__LFS_PROD_RELEASE_CURRENT_TAG_NAME_REL__
 https://wrscmi.inside.nsn.com/isource/svnroot/__SVN_REL_REPOS_NAME__/tags/__LFS_PROD_RELEASE_CURRENT_TAG_NAME_REL__
 
 === __LFS_PROD_RELEASE_CURRENT_TAG_NAME__ ===

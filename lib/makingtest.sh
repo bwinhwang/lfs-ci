@@ -147,6 +147,8 @@ makingTest_testFSM() {
     info "powercycle the target to get it in a defined state"
     execute ${make} powercycle
 
+    sleep 10
+
     info "waiting for prompt"
     execute ${make} waitprompt
     # workaround for broken waitprompt / moxa: It seems, that moxa is buffering some data.
@@ -169,6 +171,7 @@ makingTest_testFSM() {
 
     info "restarting the target"
     execute ${make} powercycle
+    sleep 10
     execute ${make} waitprompt
     # workaround for broken waitprompt / moxa: It seems, that moxa is buffering some data.
     execute ${make} waitprompt

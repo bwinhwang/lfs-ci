@@ -63,7 +63,10 @@ startLogfile() {
         export CI_LOGGING_DURATION_START_DATE=$(date +%s.%N)
         
 
+        echo 1>&2 "-------------------------------------------------------------------------------------------------------------------------------------------------------------"
         echo 1>&2 "logfile is ${CI_LOGGING_LOGFILENAME}"
+        echo 1>&2 "http://ullinn11.emea.nsn-net.net/lfs/ci/log/${datePath}/$(basename ${CI_LOGGING_LOGFILENAME})"
+        echo 1>&2 "-------------------------------------------------------------------------------------------------------------------------------------------------------------"
         printf -- "------------------------------------------------------------------\n" >  ${CI_LOGGING_LOGFILENAME}
         printf -- "starting logfile\n"                                                   >> ${CI_LOGGING_LOGFILENAME}
         printf -- "  script: $0\n"                                                       >> ${CI_LOGGING_LOGFILENAME}
@@ -90,7 +93,8 @@ stopLogfile() {
         printf -- "ending logfile\n"                                                      >> ${CI_LOGGING_LOGFILENAME}
         printf -- "-------------------------------------------------------------------\n" >> ${CI_LOGGING_LOGFILENAME}
 
-        gzip ${CI_LOGGING_LOGFILENAME}
+        # disabled gzipping..
+        # gzip ${CI_LOGGING_LOGFILENAME}
     fi
     
     unset CI_LOGGING_LOGFILENAME

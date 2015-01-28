@@ -87,12 +87,15 @@ uc_job_test_on_target_archive_logs() {
     local jobName=$(sed "s/_archiveLogs$//" <<< ${JOB_NAME})
     # set the correct jobName
     export JOB_NAME=${jobName}
+
+    local testReposPathOnMoritz=$(getConfig LFS_CI_uc_test_on_target_test_repos_on_moritz)
+    mustHaveValue "${testReposPathOnMoritz}" "test-repos path on moritz"
     
     execute rsync -LavrPe ssh \
         moritz:/lvol2/production_jenkins/jenkins-home/jobs/${jobName}/workspace/. \
         ${workspace}/.
     execute rsync -LavrPe ssh \
-        moritz:/lvol2/production_jenkins/test-repos/src-fsmtest/${LABEL}-${jobName}/.  \
+        moritz:${testReposPathOnMoritz}/src-fsmtest/${LABEL}-${jobName}/.  \
         ${workspace}/.
 
     copyFileToArtifactDirectory ${workspace}/. 
