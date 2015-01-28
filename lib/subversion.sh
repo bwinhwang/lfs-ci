@@ -193,6 +193,10 @@ svnLog() {
     execute -n -r 3 svn log --non-interactive --trust-server-cert $@
     return
 }
+svnCat() {
+    execute -n -r 3 svn cat --non-interactive --trust-server-cert $@
+    return
+}
 
 ## @fn      shouldNotExistsInSubversion()
 #  @brief   checks, if the path/file exists in svn 
