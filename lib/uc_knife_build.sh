@@ -179,7 +179,7 @@ usecase_LFS_KNIFE_BUILD() {
     execute mkdir -p ${workspace}/bld/bld-fsmci-summary/
     echo ${label}              > ${workspace}/bld/bld-fsmci-summary/label
     echo ${KNIFE_LFS_BASELINE} > ${workspace}/bld/bld-fsmci-summary/oldLabel
-    echo <<EOF > ${workspace}/bld/bld-knife-input/knife-requestor.txt
+    cat > ${workspace}/bld/bld-knife-input/knife-requestor.txt <<EOF
 KNIFE_REQUESTOR="${KNIFE_REQUESTOR}"
 KNIFE_REQUESTOR_FIRST_NAME="${KNIFE_REQUESTOR_FIRST_NAME}"
 KNIFE_REQUESTOR_LAST_NAME="${KNIFE_REQUESTOR_LAST_NAME}"
