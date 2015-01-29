@@ -30,6 +30,8 @@ getLocationName() {
         fsmr4)    echo FSM_R4_DEV      ;;
         kernel3x) echo KERNEL_3.x_DEV  ;;
         trunk)    echo pronb-developer ;;
+        20M2_09)  echo PS_LFS_OS_20M2_09 ;;
+        20M2_12)  echo PS_LFS_OS_20M2_12 ;;
         *)        echo ${location}     ;;
     esac
 
