@@ -196,6 +196,11 @@ usecase_LFS_KNIFE_PACKAGE() {
     local workspace=$(getWorkspaceName)
     mustHaveWorkspaceName
 
+    export LFS_CI_GLOBAL_BRANCH_NAME=$(getConfig LFS_PROD_tag_to_branch)
+    if [[ -z ${LFS_CI_GLOBAL_BRANCH_NAME} ]] ; then
+        fatal "this branch is not prepared to build knives"
+    fi
+
     info "running usecase LFS package"
     ci_job_package
 
