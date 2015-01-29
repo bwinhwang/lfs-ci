@@ -98,7 +98,7 @@ copyAndExtractBuildArtifactsFromProject() {
     local artifactsPathOnMaster=${artifactesShare}/${jobName}/${buildNumber}/save/
     local serverName=$(getConfig LFS_CI_artifacts_storage_host)
 
-    local files=$(runOnMaster ls ${artifactsPathOnMaster})
+    local files=$(runOnMaster ls ${artifactsPathOnMaster} 2>/dev/null)
 
     local workspace=$(getWorkspaceName)
     mustHaveWorkspaceName
