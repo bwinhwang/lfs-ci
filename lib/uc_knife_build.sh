@@ -179,6 +179,13 @@ usecase_LFS_KNIFE_BUILD() {
     execute mkdir -p ${workspace}/bld/bld-fsmci-summary/
     echo ${label}              > ${workspace}/bld/bld-fsmci-summary/label
     echo ${KNIFE_LFS_BASELINE} > ${workspace}/bld/bld-fsmci-summary/oldLabel
+    echo <<EOF > ${workspace}/bld/bld-knife-input/knife-requestor.txt
+KNIFE_REQUESTOR="${KNIFE_REQUESTOR}"
+KNIFE_REQUESTOR_FIRST_NAME="${KNIFE_REQUESTOR_FIRST_NAME}"
+KNIFE_REQUESTOR_LAST_NAME="${KNIFE_REQUESTOR_LAST_NAME}"
+KNIFE_REQUESTOR_USERID="${KNIFE_REQUESTOR_USERID}"
+KNIFE_REQUESTOR_EMAIL="${KNIFE_REQUESTOR_EMAIL}"
+EOF
 
     debug "create own revision control file"
     echo "src-foo http://fakeurl/ ${baseLabel}" > ${WORKSPACE}/revisionstate.xml
@@ -214,6 +221,8 @@ usecase_LFS_KNIFE_PACKAGE() {
 
     info "running usecase LFS package"
     ci_job_package
+
+    mustExistFile ${workspace}/bld/bld-knife-input/knife-requestor.txt
 
     info "creating tarball with lfs load..."
     execute tar -cv \
