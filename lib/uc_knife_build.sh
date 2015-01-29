@@ -97,6 +97,7 @@ usecase_LFS_KNIFE_BUILD_PLATFORM() {
     #  bl != LRC |      0     |      1
     # -------------------------------------
 
+
     if [[ ${baseLabel} =~ LRC_LCP ]] ; then
         if [[ ${subTaskName} = LRC ]] ; then
             debug "it's a LRC build, everything is fine."
@@ -122,10 +123,20 @@ usecase_LFS_KNIFE_BUILD_PLATFORM() {
     echo "src-knife ${svnReposUrl}/tags/${baseLabel} ${revision}" > ${WORKSPACE}/revisions.txt
 
     # faking the branch name for workspace creation...
-    export LFS_CI_GLOBAL_BRANCH_NAME=$(getConfig LFS_PROD_tag_to_branch)
+    LFS_CI_GLOBAL_BRANCH_NAME=$(getConfig LFS_PROD_tag_to_branch)
+
     if [[ -z ${LFS_CI_GLOBAL_BRANCH_NAME} ]] ; then
         fatal "this branch is not prepared to build knives"
     fi
+
+    # for FSM-r4, it's have to do this in a different way..
+    if [[ ${subTaskName} = "FSM-r4" ]] ; then
+        case ${LFS_CI_GLOBAL_BRANCH_NAME} in
+            trunk) LFS_CI_GLOBAL_BRANCH_NAME=FSM_R4_DEV ;;
+            *)     LFS_CI_GLOBAL_BRANCH_NAME=${LFS_CI_GLOBAL_BRANCH_NAME}_FSMR4 ;;
+        esac
+    fi
+    export LFS_CI_GLOBAL_BRANCH_NAME
 
     createWorkspace
 
