@@ -1,0 +1,191 @@
+///////////////////////////////////////////////////////////////////////////////
+//
+// Groovy script to crate a new branch in the LFS CI.
+//
+// 1. Take the parameters from the Jenkins job.
+// 2. Creagte a list view and name it after the new branch.
+// 3. Add this new list view to the SCM view.
+// 4. Copy the jobs and replace $src_branch with $new_branch
+//    in the job name.
+// 5. On the new job update the custom workspace if existing.
+// 6. Reconfigure the new job by editing config.xml.
+// 7. Reload the job configuration
+///////////////////////////////////////////////////////////////////////////////
+
+import hudson.model.*
+import jenkins.model.Jenkins
+import hudson.model.ParametersAction
+import hudson.model.ListView
+import javax.xml.transform.stream.StreamSource
+import java.io.FileInputStream;
+
+
+println("\nGROOVY SCRIPT")
+
+def env = System.getenv()
+
+def jenkinsHome = env['JENKINS_HOME']
+
+def j = Jenkins.instance
+
+def thr = Thread.currentThread()
+
+def build = thr?.executable
+
+def scm_view = "SCM"
+  
+def scm_view_obj = null
+
+def trunk_view = "trunk"
+
+def branch_view = ""
+  
+def src_branch = ""
+
+def new_branch = ""
+  
+def enable_jobs = false
+
+def fsmr4_jobs = false
+
+def lrc_jobs = false
+
+def new_branch_view_obj = null
+
+def src_branch_view_obj = null
+
+scm_view_obj = j.getView(scm_view)
+
+// Parameters from Jenkins job
+def parameters = build?.actions.find{ it instanceof ParametersAction }?.parameters
+parameters.each {
+    if(it.name == "NEW_BRANCH") {
+        new_branch = it.value
+    }
+  
+    if(it.name == "SRC_BRANCH") {
+        src_branch = it.value
+    }
+
+    if(it.name == "FSMR4") {
+        fsmr4_jobs = it.value
+    }
+
+    if(it.name == "LRC") {
+        lrc_jobs = it.value
+    }
+
+    if(it.name == "ENABLE_JOBS") {
+        enable_jobs = it.value
+    }
+}
+
+if(!new_branch) {
+    throw new RuntimeException("Parameter NEW_BRANCH is missing")
+}
+if(!src_branch) {
+    throw new RuntimeException("Parameter SRC_BRANCH is missing")
+}
+
+// Source branch Jenkins view 
+src_branch_view_obj = scm_view_obj.getView(src_branch.toUpperCase())
+
+// Add branch view to SCM view.
+new_branch_view_obj = new ListView(new_branch, scm_view_obj)
+scm_view_obj.addView(new_branch_view_obj)
+println("Added view $new_branch to $scm_view view")
+
+
+// Copy the jobs, add them to the view SCM/$new_branch
+// and reconfigure them.
+
+def processFileInplace(file, Closure processText) {
+    def text = file.text
+    file.write(processText(text))
+}
+
+jobs_list = []
+for(job in src_branch_view_obj.getItems()) {
+    if(job.getName().find(src_branch)) {
+        jobs_list.add(job)
+    }
+    // Add jobs for fsmr4 if requested
+    if(fsmr4_jobs && job.getName().find("fsmr4")) {
+        jobs_list.add(job)
+    }
+    // Add jobs for LRC if requested
+    if(lrc_jobs && job.getName().find("LRC")) {
+        jobs_list.add(job)
+    }
+}
+
+for(job in jobs_list) {
+//if(job.name == "LFS_CI_-_trunk_-_Build") {
+    // copy the jobs
+    def new_job = null
+    def new_name = null
+    if (job.getName().find("fsmr4") && fsmr4_jobs) {
+        new_name = job.getName().replace("fsmr4", new_branch + "_FSMR4")
+        new_job = Jenkins.instance.copy(job, new_name)
+    }
+    else if (job.getName().find("LRC") && lrc_jobs) {
+        new_name = job.getName().replace("LRC", "LRC_" + new_branch)
+        new_job = Jenkins.instance.copy(job, new_name)
+    }
+    else {
+        new_name = job.getName().replace(src_branch, new_branch)
+        new_job = Jenkins.instance.copy(job, new_name)
+    }
+
+    // set the jobs display name
+    new_job.setDisplayName(job.getDisplayName().replace(src_branch, new_branch))
+    new_job.save()
+    new_branch_view_obj.doAddJobToView(new_job.getName())
+
+    // enable / disable the job in Jenkins
+    if (!enable_jobs) {
+        new_job.disabled = true
+    } else {
+        new_job.disabled = false
+    }
+
+    // update the workspace to avoid having two projects point to the same location
+    AbstractProject project = new_job
+    def new_workspace = project.getCustomWorkspace()
+    if(new_workspace) {
+        new_workspace.replace(src_branch, new_branch)
+        project.setCustomWorkspace(new_workspace)
+        project.save()
+    }
+    println("copied \"$job.name\" -> \"$new_name\" and added it to view \"$new_branch_view_obj.name\"")
+
+    // Update job configuration
+    def configXMLFile = new_job.getConfigFile();
+    def file = configXMLFile.getFile();
+    processFileInplace(file) { text ->
+        text.replaceAll(src_branch, new_branch)
+    }
+
+    // Create promotions if there are any
+    def promoDir = new File("${jenkinsHome}/jobs/${new_job.name}/promotions")
+    if(promoDir.exists()) {
+        println("$new_job.name has promotions.")
+        promoDirs = promoDir.list()
+        for(d in promoDirs)  {
+            def dstFile = new File(promoDir.getAbsolutePath() + "/" + d + "/config.xml")
+            println("replacing \"$src_branch\" by \"$new_branch\" in file " + dstFile.getAbsolutePath())
+            processFileInplace(dstFile) { text ->
+                text.replaceAll(src_branch, new_branch)
+            }
+        }
+        println("configured promotions for job \"$new_name\"")
+    } else {
+        println("Job \"$new_job.name\" does not have a promotion.")
+    }
+    // Reload job configuration
+    InputStream is = new FileInputStream(file);
+    new_job.updateByXml(new StreamSource(is));
+    new_job.save();
+    println("configured job \"$new_name\"")
+}
+//}
