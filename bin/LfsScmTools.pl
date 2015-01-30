@@ -1487,7 +1487,7 @@ sub execute {
     $dir->loadDependencyTree();
 
     # use YAML;
-    # print STDERR Dump($dir);
+    # print STDERR Dumper($dir);
 
     printf( "%s %s", join( " ", $dir->getSourceDirectoriesFromDependencies() ),
                      $subDir,

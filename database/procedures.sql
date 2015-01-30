@@ -16,7 +16,7 @@ CREATE PROCEDURE new_build_event( IN in_build_name VARCHAR(128), IN in_event VAR
    SELECT count(id) INTO cnt_build_id FROM builds WHERE build_name = in_build_name;
    -- check if build name exists
    IF cnt_build_id = 0 THEN
-        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'build_name does not exist';
+       SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'build_name does not exist';
    END IF;
    -- more code below
    -- TODO: demx2fk3 2015-01-13 this is an hack, there is no better way to ghet the latest build id
@@ -64,30 +64,30 @@ BEGIN
 END //
 DELIMITER ;
 
-
-DROP PROCEDURE IF EXISTS test_finished;
+DROP PROCEDURE IF EXISTS test_unstable;
 DELIMITER //
-CREATE PROCEDURE test_finished( IN in_build_name VARCHAR(128), IN in_comment TEXT )
+CREATE PROCEDURE test_unstable( IN in_build_name VARCHAR(128), IN in_comment TEXT )
 BEGIN
-    CALL new_build_event( in_build_name, 'test finished with success', in_comment );
+    CALL new_build_event( in_build_name, 'test finished unstable', in_comment );
 END //
 DELIMITER ;
 
 DROP PROCEDURE IF EXISTS test_failed;
 DELIMITER //
-CREATE PROCEDURE test_finished( IN in_build_name VARCHAR(128), IN in_comment TEXT )
+CREATE PROCEDURE test_failed( IN in_build_name VARCHAR(128), IN in_comment TEXT )
 BEGIN
-    CALL new_build_event( in_build_name, 'test finished with error', in_comment );
+    CALL new_build_event( in_build_name, 'test finished wirh error', in_comment );
 END //
 DELIMITER ;
 
-DROP PROCEDURE IF EXISTS test_unstable;
+DROP PROCEDURE IF EXISTS test_finished;
 DELIMITER //
 CREATE PROCEDURE test_finished( IN in_build_name VARCHAR(128), IN in_comment TEXT )
 BEGIN
-    CALL new_build_event( in_build_name, 'test finished unstable', in_comment );
+    CALL new_build_event( in_build_name, 'test finished successful', in_comment );
 END //
 DELIMITER ;
+
 
 DROP PROCEDURE IF EXISTS release_started;
 DELIMITER //
@@ -115,8 +115,19 @@ CREATE PROCEDURE add_new_test_execution( IN in_build_name          VARCHAR(128),
                                          IN in_target_type         VARCHAR(128),
                                          OUT out_test_execution_id INT )
 BEGIN
+   DECLARE cnt_build_id INT;
+   DECLARE var_build_id INT;
+
+   SELECT count(id) INTO cnt_build_id FROM builds WHERE build_name = in_build_name;
+   -- check if build name exists
+   IF cnt_build_id = 0 THEN
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'build_name does not exist';
+   END IF;
+   -- more code below
+   -- TODO: demx2fk3 2015-01-13 this is an hack, there is no better way to ghet the latest build id
+   SELECT max(id) INTO var_build_id FROM builds WHERE build_name = in_build_name;
     
-    INSERT INTO test_executions ( build_name, test_suite_name, target_name, target_type ) VALUES ( in_build_name, in_test_suite_name, in_target_name, in_target_type );
+    INSERT INTO test_executions ( build_id, test_suite_name, target_name, target_type ) VALUES ( var_build_id, in_test_suite_name, in_target_name, in_target_type );
     SET out_test_execution_id = LAST_INSERT_ID();
 
 END //
@@ -148,4 +159,33 @@ BEGIN
 
 END //
 DELIMITER ;
+
+
+DROP PROCEDURE IF EXISTS test_results;
+DELIMITER //
+CREATE PROCEDURE test_results()
+BEGIN
+
+SET @sql = NULL;
+
+set session group_concat_max_len = 40000;
+SELECT GROUP_CONCAT(DISTINCT
+         CONCAT('MAX(CASE WHEN test_result_name = ''', test_result_name,
+         ''' THEN test_result_value END) `', test_result_name, '`'))
+  INTO @sql
+  FROM v_test_results;
+
+SET @sql =
+        CONCAT('CREATE TEMPORARY TABLE tmp_test_results
+            SELECT test_execution_id, ', @sql, '
+                     FROM v_test_results
+                    GROUP BY test_execution_id');
+
+PREPARE stmt FROM @sql;
+EXECUTE stmt;
+DEALLOCATE PREPARE stmt;
+
+END //
+DELIMITER ;
+
 
