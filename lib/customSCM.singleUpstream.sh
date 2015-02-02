@@ -87,5 +87,7 @@ actionCalculate() {
     echo UPSTREAM_PROJECT=${upstreamProjectName} > ${WORKSPACE}/.properties
     echo UPSTREAM_BUILD=${upstreamBuildNumber}   >> ${WORKSPACE}/.properties
 
+    rawDebug ${WORKSPACE}/.properties
+
     return 
 }
