@@ -42,8 +42,10 @@ actionCheckout() {
 
 
     if [[ -z ${upstreamProjectName} || -z ${upstreamBuildNumber} ]] ; then
-        error "didn't find the upstream build"
-        exit 1
+        upstreamProjectName=$(getUpstreamProjectName)
+        local buildPath=$(getBuildDirectoryOnMaster ${upstreamProjectName} lastSuccessfulBuild)
+        upstreamBuildNumber=$(runOnMaster readlink ${buildPath}) 
+        warning "didn't find the upstream build, using ${upstreamProjectName} / ${upstreamBuildNumber}"
     fi
 
     info "getting changelog.xml from ${buildDirectory} on ${server}"
