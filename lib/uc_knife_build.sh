@@ -179,13 +179,6 @@ usecase_LFS_KNIFE_BUILD() {
     execute mkdir -p ${workspace}/bld/bld-fsmci-summary/
     echo ${label}              > ${workspace}/bld/bld-fsmci-summary/label
     echo ${KNIFE_LFS_BASELINE} > ${workspace}/bld/bld-fsmci-summary/oldLabel
-    cat > ${workspace}/bld/bld-knife-input/knife-requestor.txt <<EOF
-KNIFE_REQUESTOR="${KNIFE_REQUESTOR}"
-KNIFE_REQUESTOR_FIRST_NAME="${KNIFE_REQUESTOR_FIRST_NAME}"
-KNIFE_REQUESTOR_LAST_NAME="${KNIFE_REQUESTOR_LAST_NAME}"
-KNIFE_REQUESTOR_USERID="${KNIFE_REQUESTOR_USERID}"
-KNIFE_REQUESTOR_EMAIL="${KNIFE_REQUESTOR_EMAIL}"
-EOF
 
     debug "create own revision control file"
     echo "src-foo http://fakeurl/ ${baseLabel}" > ${WORKSPACE}/revisionstate.xml
@@ -195,6 +188,13 @@ EOF
     info "storing knife input as artifacts"
     execute mkdir -p ${workspace}/bld/bld-knife-input/
     execute -i cp -a ${WORKSPACE}/lfs.patch ${workspace}/bld/bld-knife-input/
+    cat > ${workspace}/bld/bld-knife-input/knife-requestor.txt <<EOF
+KNIFE_REQUESTOR="${KNIFE_REQUESTOR}"
+KNIFE_REQUESTOR_FIRST_NAME="${KNIFE_REQUESTOR_FIRST_NAME}"
+KNIFE_REQUESTOR_LAST_NAME="${KNIFE_REQUESTOR_LAST_NAME}"
+KNIFE_REQUESTOR_USERID="${KNIFE_REQUESTOR_USERID}"
+KNIFE_REQUESTOR_EMAIL="${KNIFE_REQUESTOR_EMAIL}"
+EOF
 
     info "upload results to artifakts share."
     createArtifactArchive
