@@ -81,6 +81,9 @@ getUpstreamProjectName() {
     fi
 
     case ${jobName} in
+        LFS_KNIFE_-_knife_-_Package_-_package)
+            echo LFS_KNIFE_-_Build
+        ;;
         LFS_CI_-_*_-_Test)
             local branchName=$(getBranchName)
             echo LFS_CI_-_${branchName}_-_Package_-_package
