@@ -261,7 +261,7 @@ backupJenkinsMasterServerInstallation() {
     done
 
     local date=$(date +%Y%m%d-%H%M%S)
-    local latestBackup=$(ls -d ${backupPath}/backup.daily.* | tail -n -1) 
+    local latestBackup=$(ls -d ${backupPath}/backup.daily.* | tail -n 1) 
     local newBackup=${backupPath}/backup.daily.${date}
 
     if [[ -d ${latestBackup} ]] ; then
