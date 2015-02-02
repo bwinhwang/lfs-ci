@@ -52,7 +52,7 @@ trace "===== action = ${action} ====="
 trace "workspace = ${WORKSPACE}"
 
 # TODO: demx2fk3 2014-04-08 for debugging
-# dumpCustomScmEnvironmentVariables
+dumpCustomScmEnvironmentVariables
 
 if [[ ${action} == compare ]] ; then
     actionCompare
