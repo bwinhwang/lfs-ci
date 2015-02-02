@@ -71,7 +71,10 @@ actionCalculate() {
     local upstreamBuildNumber=${UPSTREAM_BUILD:-${TESTED_BUILD_NUMBER}}
 
     if [[ -z ${upstreamProjectName} || -z ${upstreamBuildNumber} ]] ; then
-        error "didn't find the upstream build"
+        upstreamProjectName=$(getUpstreamProjectName)
+        local buildPath=$(getBuildDirectoryOnMaster ${upstreamProjectName} lastSuccessfulBuild)
+        upstreamBuildNumber=$(runOnMaster readlink ${buildPath}) 
+        warning "didn't find the upstream build, using ${upstreamProjectName} / ${upstreamBuildNumber}"
         # exit 1
     fi
 
