@@ -70,6 +70,7 @@ actionCalculate() {
     local upstreamProjectName=${UPSTREAM_PROJECT:-${TESTED_BUILD_JOBNAME}}
     local upstreamBuildNumber=${UPSTREAM_BUILD:-${TESTED_BUILD_NUMBER}}
 
+    info "upstreamProjectName ${upstreamProjectName} / upstreamBuildNumber ${upstreamBuildNumber}"
     if [[ -z ${upstreamProjectName} || -z ${upstreamBuildNumber} ]] ; then
         upstreamProjectName=$(getUpstreamProjectName)
         local buildPath=$(getBuildDirectoryOnMaster ${upstreamProjectName} lastSuccessfulBuild)
