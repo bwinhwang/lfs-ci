@@ -251,26 +251,28 @@ backupJenkinsMasterServerInstallation() {
 
     local backupPath=$(getConfig jenkinsMasterServerBackupPath)
     local serverPath=$(getConfig jenkinsMasterServerPath)
-
     mustHaveValue ${backupPath}
     mustHaveValue ${serverPath}
 
-    execute rm -rf ${backupPath}/backup.11
-
-    for i in $(seq 0 10 | tac) ; do
-        [[ -d ${backupPath}/backup.${i} ]] || continue
-        old=$(( i + 1 ))
-        execute mv -f ${backupPath}/backup.${i} ${backupPath}/backup.${old}
+    info "remove old stuff"
+    for path in $(ls -d ${backupPath}/backup.daily.* | head -n -10) ; do
+        info "removing ${path}"
+        execute rm -rf ${path}
     done
 
-    if [[ -d ${backupPath}/backup.1 ]] ; then
-        execute cp -rl ${backupPath}/backup.1 ${backupPath}/backup.0
+    local date=$(date +%Y%m%d-%H%M%S)
+    local latestBackup=$(ls -d ${backupPath}/backup.daily.* | tail -n 1) 
+    local newBackup=${backupPath}/backup.daily.${date}
+
+    if [[ -d ${latestBackup} ]] ; then
+        execute cp -rl ${latestBackup} ${newBackup}
     else
-        execute mkdir -p ${backupPath}/backup.0/
+        execute mkdir -p ${newBackup}
     fi
 
-    execute rsync -av --delete --exclude=workspace ${serverPath}/. ${backupPath}/backup.0/.
-    execute touch ${backupPath}/backup.0
+    info "copy ${serverPath} to ${newBackup}"
+    execute rsync -av --delete --exclude=workspace ${serverPath}/. ${newBackup}/.
+    execute touch ${newBackup}
 
     info "backup done"
 
