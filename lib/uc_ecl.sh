@@ -78,16 +78,7 @@ ci_job_ecl() {
     local labelName=$(getNextReleaseLabel)
     setBuildDescription ${JOB_NAME} ${BUILD_NUMBER} ${labelName}
 
-    # TODO: demx2fk3 2014-07-22 remove this, if PS SCM can handle the load of LFSes...
-    local number=$(getConfig LFS_CI_uc_update_ecl_update_promote_every_xth_release)
-    if [[ $(( BUILD_NUMBER % ${number} )) != 0 ]] ; then
-        # as agreement with PS SCM, we are just promoting every 4th build.
-        # otherwise, we will spam ECL
-        warning "not promoting this build. ONLY EVERY ${number} build will be promoted"
-        setBuildDescription ${JOB_NAME} ${BUILD_NUMBER} "${labelName}<br>not promoted"
-        setBuildResultUnstable
-        exit 0
-    fi
+    mustHavePermissionToRelease
 
     local linkDirectory=$(getConfig LFS_CI_UC_package_copy_to_share_link_location)
     local pathToLink=../../$(getConfig LFS_CI_UC_package_copy_to_share_path_name)/${labelName}
@@ -184,4 +175,33 @@ getEclValue() {
     return
 }
 
+mustHavePermissionToRelease() {
+    # TODO: demx2fk3 2014-07-22 remove this, if PS SCM can handle the load of LFSes...
+    local number=$(getConfig LFS_CI_uc_update_ecl_update_promote_every_xth_release)
+    if [[ $(( BUILD_NUMBER % ${number} )) != 0 ]] ; then
+        # as agreement with PS SCM, we are just promoting every 4th build.
+        # otherwise, we will spam ECL
+        # btw: 0 % 4 == 0 
 
+        local lastBuildDirectory=$(getBuildDirectoryOnMaster ${JOB_NAME} lastSuccessfulBuild)
+
+        # unix time stamp in milliseconds: 1422347953131
+        local lastBuildDate=$(runOnMaster ${LFS_CI_ROOT}/bin/xpath -q -e '/build/startTime/node()' ${lastBuildDirectory}/build.xml )
+        mustHaveValue "${lastBuildDate}" "last build date in ms"
+
+        local currentDate=$(( $(date +%s) * 1000 ))
+        mustHaveValue "${currentDate}" "current build date in ms"
+
+        local maxDiff=$(getConfig LFS_CI_uc_ecl_maximum_time_between_two_releases))
+        local diff=$(( ${currentDate} - ${lastBuildDate} ))
+
+        if [[ ${diff} -lt ${maxDiff} ]] ; then
+            warning "not promoting this build. ONLY EVERY ${number} build will be promoted"
+            setBuildDescription ${JOB_NAME} ${BUILD_NUMBER} "${labelName}<br>not promoted"
+            setBuildResultUnstable
+            exit 0
+        fi
+    fi
+
+    return
+}
