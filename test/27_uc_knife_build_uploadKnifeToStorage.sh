@@ -42,8 +42,8 @@ test1() {
     local expect=$(createTempFile)
 cat <<EOF > ${expect}
 mustExistFile ${WORKSPACE}/workspace/lfs-knife.tar.gz
-execute ncftpput -m -C mailarchiv.emea.nsn-net.net ${WORKSPACE}/workspace/lfs-knife.tar.gz /public/BernhardMinks/knife
 EOF
+# execute ncftpput -m -C mailarchiv.emea.nsn-net.net ${WORKSPACE}/workspace/lfs-knife.tar.gz /public/BernhardMinks/knife
     assertEquals "$(cat ${expect})" "$(cat ${UT_MOCKED_COMMANDS})"
 
     return

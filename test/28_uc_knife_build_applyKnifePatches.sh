@@ -37,14 +37,14 @@ test1() {
     export UPSTREAM_BUILD=123
     export JOB_NAME=LFS_KNIFE_-_knife_-_Build
 
-    mkdir -p ${WORKSPACE}/workspace/bld/bld-knife-all/
-    touch ${WORKSPACE}/workspace/bld/bld-knife-all/knife.tar.gz
+    mkdir -p ${WORKSPACE}/workspace/bld/bld-knife-input/
+    touch ${WORKSPACE}/workspace/bld/bld-knife-input/knife.tar.gz
 
     assertTrue "applyKnifePatches"
 
     local expect=$(createTempFile)
 cat <<EOF > ${expect}
-execute tar -xvz -C ${WORKSPACE}/workspace -f ${WORKSPACE}/workspace/bld/bld-knife-all/knife.tar.gz
+execute tar -xvz -C ${WORKSPACE}/workspace -f ${WORKSPACE}/workspace/bld/bld-knife-input/knife.tar.gz
 EOF
     assertEquals "$(cat ${expect})" "$(cat ${UT_MOCKED_COMMANDS})"
 
@@ -58,15 +58,15 @@ test2() {
     export UPSTREAM_BUILD=123
     export JOB_NAME=LFS_KNIFE_-_knife_-_Build
 
-    mkdir -p ${WORKSPACE}/workspace/bld/bld-knife-all/
-    touch ${WORKSPACE}/workspace/bld/bld-knife-all/knife.tar.gz
-    touch ${WORKSPACE}/workspace/bld/bld-knife-all/knife.patch
+    mkdir -p ${WORKSPACE}/workspace/bld/bld-knife-input/
+    touch ${WORKSPACE}/workspace/bld/bld-knife-input/knife.tar.gz
+    touch ${WORKSPACE}/workspace/bld/bld-knife-input/knife.patch
 
     assertTrue "applyKnifePatches"
 
     local expect=$(createTempFile)
 cat <<EOF > ${expect}
-execute tar -xvz -C ${WORKSPACE}/workspace -f ${WORKSPACE}/workspace/bld/bld-knife-all/knife.tar.gz
+execute tar -xvz -C ${WORKSPACE}/workspace -f ${WORKSPACE}/workspace/bld/bld-knife-input/knife.tar.gz
 execute patch -d ${WORKSPACE}/workspace
 EOF
     assertEquals "$(cat ${expect})" "$(cat ${UT_MOCKED_COMMANDS})"
@@ -82,8 +82,8 @@ test3() {
     export UPSTREAM_BUILD=123
     export JOB_NAME=LFS_KNIFE_-_knife_-_Build
 
-    mkdir -p ${WORKSPACE}/workspace/bld/bld-knife-all/
-    touch ${WORKSPACE}/workspace/bld/bld-knife-all/knife.patch
+    mkdir -p ${WORKSPACE}/workspace/bld/bld-knife-input/
+    touch ${WORKSPACE}/workspace/bld/bld-knife-input/knife.patch
 
     assertTrue "applyKnifePatches"
 

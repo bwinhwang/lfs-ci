@@ -64,8 +64,8 @@ cat <<EOF > ${expect}
 execute mkdir -p ${WORKSPACE}/workspace
 execute mkdir -p ${WORKSPACE}/workspace/bld/bld-fsmci-summary/
 copyFileFromWorkspaceToBuildDirectory LFS_KNIFE_-_knife_-_Build revisionstate.xml
-execute mkdir -p ${WORKSPACE}/workspace/bld/bld-knife-all/
-execute -i cp -a ${WORKSPACE}/lfs.patch ${WORKSPACE}/workspace/bld/bld-knife-all/
+execute mkdir -p ${WORKSPACE}/workspace/bld/bld-knife-input/
+execute -i cp -a ${WORKSPACE}/lfs.patch ${WORKSPACE}/workspace/bld/bld-knife-input/
 createArtifactArchive 
 setBuildDescription LFS_KNIFE_-_knife_-_Build  KNIFE_PS_LFS_OS_2014_01_0001.date<br>knife requestor
 EOF
