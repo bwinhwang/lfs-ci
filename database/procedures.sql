@@ -166,6 +166,7 @@ DELIMITER //
 CREATE PROCEDURE test_results()
 BEGIN
 
+<<<<<<< HEAD
 SET @sql = NULL;
 
 set session group_concat_max_len = 40000;
@@ -184,6 +185,27 @@ SET @sql =
 PREPARE stmt FROM @sql;
 EXECUTE stmt;
 DEALLOCATE PREPARE stmt;
+=======
+    SET @sql = NULL;
+
+    set session group_concat_max_len = 40000;
+    SELECT GROUP_CONCAT(DISTINCT
+            CONCAT('MAX(CASE WHEN test_result_name = ''', test_result_name,
+            ''' THEN test_result_value END) `', test_result_name, '`'))
+    INTO @sql
+    FROM v_test_results;
+
+    DROP TABLE IF EXISTS tmp_test_results;
+    SET @sql =
+            CONCAT('CREATE TEMPORARY TABLE tmp_test_results
+                SELECT test_execution_id, ', @sql, '
+                        FROM v_test_results
+                        GROUP BY test_execution_id');
+
+    PREPARE stmt FROM @sql;
+    EXECUTE stmt;
+    DEALLOCATE PREPARE stmt;
+>>>>>>> 5260c86... remove tmp table, if exists
 
 END //
 DELIMITER ;
