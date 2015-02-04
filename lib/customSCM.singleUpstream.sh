@@ -42,8 +42,10 @@ actionCheckout() {
 
 
     if [[ -z ${upstreamProjectName} || -z ${upstreamBuildNumber} ]] ; then
-        error "didn't find the upstream build"
-        exit 1
+        upstreamProjectName=$(getUpstreamProjectName)
+        local buildPath=$(getBuildDirectoryOnMaster ${upstreamProjectName} lastSuccessfulBuild)
+        upstreamBuildNumber=$(runOnMaster readlink ${buildPath}) 
+        warning "didn't find the upstream build, using ${upstreamProjectName} / ${upstreamBuildNumber}"
     fi
 
     info "getting changelog.xml from ${buildDirectory} on ${server}"
@@ -70,8 +72,12 @@ actionCalculate() {
     local upstreamProjectName=${UPSTREAM_PROJECT:-${TESTED_BUILD_JOBNAME}}
     local upstreamBuildNumber=${UPSTREAM_BUILD:-${TESTED_BUILD_NUMBER}}
 
+    info "upstreamProjectName ${upstreamProjectName} / upstreamBuildNumber ${upstreamBuildNumber}"
     if [[ -z ${upstreamProjectName} || -z ${upstreamBuildNumber} ]] ; then
-        error "didn't find the upstream build"
+        upstreamProjectName=$(getUpstreamProjectName)
+        local buildPath=$(getBuildDirectoryOnMaster ${upstreamProjectName} lastSuccessfulBuild)
+        upstreamBuildNumber=$(runOnMaster readlink ${buildPath}) 
+        warning "didn't find the upstream build, using ${upstreamProjectName} / ${upstreamBuildNumber}"
         # exit 1
     fi
 
@@ -83,6 +89,8 @@ actionCalculate() {
     debug "storing upstream info in .properties"
     echo UPSTREAM_PROJECT=${upstreamProjectName} > ${WORKSPACE}/.properties
     echo UPSTREAM_BUILD=${upstreamBuildNumber}   >> ${WORKSPACE}/.properties
+
+    rawDebug ${WORKSPACE}/.properties
 
     return 
 }
