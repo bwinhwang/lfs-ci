@@ -1,35 +1,42 @@
 #!/bin/bash
 
-SVN=${SVN_SERVER_1}
-SVN_DIR="isource/svnroot/BTS_SC_LFS/os"
-SVN_TOOLS="trunk/bldtools"
+source ${LFS_CI_ROOT}/lib/common.sh
+source ${LFS_CI_ROOT}/lib/logging.sh
 
-deleteInSvn() {
-    svn --username eambrosc --password jesusih --trust-server-cert --non-interactive ls ${SVN}/${SVN_DIR}/${BRANCH} && {
-        echo svn move ${SVN}/${SVN_DIR}/${BRANCH} ${SVN}/${SVN_DIR}/obsolete;
-        echo "deleted branch $BRANCH in svn";
+SVN_SERVER=$(getConfig lfsSourceRepos)
+SVN_DIR="os"
+SVN_BLD_DIR="trunk/bldtools"
+
+## @fn      deleteBranchInSvn()
+#  @brief   delete $BRANCH in svn
+#  @param   <none>
+#  @return  <none>
+deleteBranchInSvn() {
+    svn ls ${SVN_CREDS} ${SVN_SERVER}/${SVN_DIR}/${BRANCH} && {
+        echo svn move -m "moved ${BRANCH} to obsolete" ${SVN_SERVER}/${SVN_DIR}/${BRANCH} ${SVN_SERVER}/${SVN_DIR}/obsolete;
     }
 
-#    svn ls ${SVN}/${SVN_DIR}/${SVN_TOOLS}/locations-${BRANCH} && {
-#        echo svn move ${SVN}/${SVN_DIR}/${SVN_TOOLS}/locations-${BRANCH} ${SVN}/${SVN_DIR}/${SVN_TOOLS}/obsolete;
-#        echo "deleted locations-${BRANCH} in svn";
-#    }
-#
-#    svn ls ${SVN}/${SVN_DIR}/${SVN_TOOLS}/locations-${BRANCH}_FSMR4 && {
-#        echo svn move ${SVN}/${SVN_DIR}/${SVN_TOOLS}/locations-${BRANCH}_FSMR4 ${SVN}/${SVN_DIR}/${SVN_TOOLS}/obsolete;
-#        echo "deleted locations-${BRANCH}_FSMR4 in svn";
-#    }
-#
-#    svn ls ${SVN}/${SVN_DIR}/${SVN_TOOLS}/locations-LRC_${BRANCH} && {
-#        echo svn move ${SVN}/${SVN_DIR}/${SVN_TOOLS}/locations-LRC_${BRANCH} ${SVN}/${SVN_DIR}/${SVN_TOOLS}/obsolete;
-#        echo "deleted locations-LRC_${BRANCH}_FSMR4 in svn";
-#    }
+    svn ls ${SVN_CREDS} ${SVN_SERVER}/${SVN_DIR}/${SVN_BLD_DIR}/locations-${BRANCH} && {
+        echo svn move -m "moved locations-${BRANCH} to obsolete" ${SVN_SERVER}/${SVN_DIR}/${SVN_BLD_DIR}/locations-${BRANCH} ${SVN_SERVER}/${SVN_DIR}/${SVN_BLD_DIR}/obsolete;
+    }
+
+    svn ls ${SVN_CREDS} ${SVN_SERVER}/${SVN_DIR}/${SVN_BLD_DIR}/locations-${BRANCH}_FSMR4 && {
+        echo svn move -m "moved locations-${BRANCH}_FSMR4 to obsolete" ${SVN_SERVER}/${SVN_DIR}/${SVN_BLD_DIR}/locations-${BRANCH}_FSMR4 ${SVN_SERVER}/${SVN_DIR}/${SVN_BLD_DIR}/obsolete;
+    }
+
+    svn ls ${SVN_CREDS} ${SVN_SERVER}/${SVN_DIR}/${SVN_BLD_DIR}/locations-LRC_${BRANCH} && {
+        echo svn move -m "moved locations-LRC_${BRANCH} to obsolete" ${SVN_SERVER}/${SVN_DIR}/${SVN_BLD_DIR}/locations-LRC_${BRANCH} ${SVN_SERVER}/${SVN_DIR}/${SVN_BLD_DIR}/obsolete;
+    }
+    return 0
 }
 
-deleteOnShare() {
-    echo "TODO"
+## @fn      deleteBranchOnShare()
+#  @brief   delete $BRANCH on share
+#  @param   <none>
+#  @return  <none>
+deleteBranchOnShare() {
+    info "TODO: function deleteOnShare"
 }
 
-deleteInSvn
-deleteOnShare
-
+deleteBranchInSvn
+deleteBranchOnShare
