@@ -304,6 +304,10 @@ synchroniceToLocalPath() {
         local rsync_opts=-L
     fi        
 
+    if [[ ! -d ${localCacheDir}/data ]] ; then
+        execute mkdir -p ${localCacheDir}/data
+    fi
+
     if [[ ! -e ${localCacheDir}/${tag} ]] ; then
         progressFile=${localCacheDir}/data/${tag}.in_progress
 

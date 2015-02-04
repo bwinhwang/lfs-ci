@@ -92,7 +92,7 @@ usecase_LFS_KNIFE_BUILD_PLATFORM() {
     #
     #            | stn == LRC | stn != LRC 
     # -------------------------------------
-    #  bl =  LRC |      1     |      0
+    #  bl  = LRC |      1     |      0
     # -------------------------------------
     #  bl != LRC |      0     |      1
     # -------------------------------------
@@ -133,7 +133,8 @@ usecase_LFS_KNIFE_BUILD_PLATFORM() {
     if [[ ${subTaskName} = "FSM-r4" ]] ; then
         case ${LFS_CI_GLOBAL_BRANCH_NAME} in
             trunk) LFS_CI_GLOBAL_BRANCH_NAME=FSM_R4_DEV ;;
-            *)     LFS_CI_GLOBAL_BRANCH_NAME=${LFS_CI_GLOBAL_BRANCH_NAME}_FSMR4 ;;
+            *)     # TODO: demx2fk3 2015-02-03 add check, if new location exists, otherwise no build
+                   LFS_CI_GLOBAL_BRANCH_NAME=${LFS_CI_GLOBAL_BRANCH_NAME}_FSMR4 ;;
         esac
     fi
     export LFS_CI_GLOBAL_BRANCH_NAME
@@ -222,7 +223,13 @@ usecase_LFS_KNIFE_PACKAGE() {
     info "running usecase LFS package"
     ci_job_package
 
+    mustHaveNextCiLabelName
+    local label=$(getNextCiLabelName)
+    mustHaveValue ${label} "label name"
+
     mustExistFile ${workspace}/bld/bld-knife-input/knife-requestor.txt
+
+    source ${workspace}/bld/bld-knife-input/knife-requestor.txt
 
     info "creating tarball with lfs load..."
     execute tar -cv \
@@ -255,6 +262,11 @@ Your LFS SCM Team
 EOF
 
     copyFileToArtifactDirectory $(basename ${readmeFile})
+
+    execute ${LFS_CI_ROOT}/bin/sendReleaseNote -r ${WORKSPACE}/.00_README_knife_result.txt \
+                                               -t ${label}                                 \
+                                               -n                                          \
+                                               -f ${LFS_CI_ROOT}/etc/file.cfg
 
     info "knife done."
 
