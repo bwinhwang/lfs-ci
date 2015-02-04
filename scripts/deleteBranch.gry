@@ -1,0 +1,53 @@
+import jenkins.model.Jenkins
+import hudson.model.ParametersAction
+
+
+def j = Jenkins.instance
+
+def thr = Thread.currentThread()
+
+def build = thr?.executable
+
+def parameters = build?.actions.find{ it instanceof ParametersAction }?.parameters
+
+parameters.each {
+    if(it.name == "BRANCH") {
+        branch = it.value
+        if(branch) {
+            println("got parameter BRANCH:  " + branch)
+        } else {
+            throw new RuntimeException("BRANCH is not specified")
+        }
+    }
+}
+
+//
+// delete jobs with branch in its name
+//
+
+for(p in jenkins.model.Jenkins.theInstance.getProjects()) {
+    if(p.getName().find(branch)) {
+        p.delete()
+        println("deleted $p.name")
+    }
+}
+
+
+//
+// delete view
+//
+
+def scm_view = "SCM"
+
+def scm_view_obj = null
+
+def branch_view = branch
+
+def branch_view_obj = null
+
+scm_view_obj = j.getView(scm_view)
+
+branch_view_obj = scm_view_obj.getView(branch_view)
+scm_view_obj.deleteView(branch_view_obj)
+println("deleted view $branch_view in $scm_view view")
+
