@@ -91,6 +91,9 @@ ci_job_test() {
         local labelName=${LABEL}
     fi
 
+    info "copy dummy test junit xml file into workspace"
+    execute cp ${LFS_CI_ROOT}/junit_dummy.xml ${WORKSPACE}
+
     setBuildDescription "${JOB_NAME}" "${BUILD_NUMBER}" "${labelName}"
     return
 }

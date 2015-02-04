@@ -341,10 +341,16 @@ createLfsBaselineListFromEcl() {
     requiredParameters WORKSPACE
 
     cd ${WORKSPACE}
+    local tmpFile1=$(createTempFile)
+    local tmpFile2=$(createTempFile)
 
     execute -n grep -e PS_LFS_OS -e PS_LFS_REL */ECL_BASE/ECL | \
         execute -n cut -d= -f2 | \
-        execute -n sort -u     > ${WORKSPACE}/usedBaselinesInEcl.txt
+        execute -n sort -u     > ${tmpFile1}
+
+    execute -n sed "s/PS_LFS_REL/PS_LFS_OS/g" \
+                ${WORKSPACE}/usedBaselinesInEcl.txt > ${tmpFile2}
+    execute -n cat ${tmpFile2} ${tmpFile1} > ${WORKSPACE}/usedBaselinesInEcl.txt
     rawDebug ${WORKSPACE}/usedBaselinesInEcl.txt
 
     info "done."
