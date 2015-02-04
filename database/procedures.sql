@@ -175,6 +175,7 @@ BEGIN
     INTO @sql
     FROM v_test_results;
 
+    DROP TABLE IF EXISTS tmp_test_results;
     SET @sql =
             CONCAT('CREATE TEMPORARY TABLE tmp_test_results
                 SELECT test_execution_id, ', @sql, '
