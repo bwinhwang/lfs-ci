@@ -28,7 +28,7 @@ import javax.xml.transform.stream.StreamSource
 import java.io.FileInputStream;
 
 
-println("\nGROOVY SCRIPT")
+println("\n\nGROOVY SCRIPT")
 
 def env = System.getenv()
 
@@ -173,26 +173,28 @@ def copyPromotions(job, new_job) {
         println("Source job \"$job.name\" has promotions.")
         promoDirs = promoSrcDir.list()
         for(d in promoDirs)  {
-            new File(promoDstDir.getAbsolutePath()+"/"+d).mkdirs()
-            builder = new AntBuilder()
-            builder.sequential {
-                copy(tofile: promoDstDir.getAbsolutePath()+"/"+d+"/config.xml",
-                     file:   promoSrcDir.getAbsolutePath()+"/"+d+"/config.xml",
-                     overwrite: true)
-            } 
-            def dstFile = new File(promoDstDir.getAbsolutePath()+"/"+d+"/config.xml")
-            println("configuring file "+dstFile.getAbsolutePath())
-            if (job.getName().find("fsmr4") && fsmr4_jobs) {
-                processFileInplace(dstFile) { text ->
-                    text.replaceAll("-_"+src_branch+"_-", "-_"+new_branch+"_-")
-                }
-            } else if (job.getName().find("LRC") && lrc_jobs) {
-                processFileInplace(dstFile) { text ->
-                    text.replaceAll("LFS_CI_-_LRC_-", "LFS_CI_-_LRC_"+new_branch+"_-")
-                }
-            } else {
-                processFileInplace(dstFile) { text ->
-                    text.replaceAll("-_"+src_branch+"_-", "-_"+new_branch+"_-")
+            if(!d.find(" ")) {
+                new File(promoDstDir.getAbsolutePath()+"/"+d).mkdirs()
+                builder = new AntBuilder()
+                builder.sequential {
+                    copy(tofile: promoDstDir.getAbsolutePath()+"/"+d+"/config.xml",
+                         file:   promoSrcDir.getAbsolutePath()+"/"+d+"/config.xml",
+                         overwrite: true)
+                } 
+                def dstFile = new File(promoDstDir.getAbsolutePath()+"/"+d+"/config.xml")
+                println("configuring file "+dstFile.getAbsolutePath())
+                if (job.getName().find("fsmr4") && fsmr4_jobs) {
+                    processFileInplace(dstFile) { text ->
+                        text.replaceAll("-_"+src_branch+"_-", "-_"+new_branch+"_-")
+                    }
+                } else if (job.getName().find("LRC") && lrc_jobs) {
+                    processFileInplace(dstFile) { text ->
+                        text.replaceAll("LFS_CI_-_LRC_-", "LFS_CI_-_LRC_"+new_branch+"_-")
+                    }
+                } else {
+                    processFileInplace(dstFile) { text ->
+                        text.replaceAll("-_"+src_branch+"_-", "-_"+new_branch+"_-")
+                    }
                 }
             }
         }
