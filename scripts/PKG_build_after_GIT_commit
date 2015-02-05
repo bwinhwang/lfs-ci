@@ -1,166 +1,161 @@
 #!/bin/bash
 
-test "$RELEASEPREFIX" || RELEASEPREFIX=PS_LFS_PKG
-test "$SVNTAGDIR" || SVNTAGDIR="
-	https://svne1.access.nokiasiemensnetworks.com/isource/svnroot/BTS_SC_LFS/os/trunk/main/src-project
-    file:///build/home/foobar/
-	"
-# test "$SVNKERNELDIR" || SVNKERNELDIR=https://svne1.access.nokiasiemensnetworks.com/isource/svnroot/BTS_SC_LFS/os/trunk/main/src-kernelsources
+## @file    uc_pkgpool.sh
+#  @brief   build and release a pkgpool release
+#  @details The usecase will build and release a pkgpool release.
+#            
+#           * creation of workspace is done by jenkins git plugin
+# 
+# jenkins job names: PKGPOOL_CI_-_trunk_-_Build
+#                    PKGPOOL_CI_-_trunk_-_Test
+#                    PKGPOOL_PROD_-_trunk_-_Release
 
-test "$SVNTAGDIR" = NONE && SVNTAGDIR=
+ci_job_build_and_release_pkgpool() {
+    _buildPkgpool
+    _createRelease
+    _updateDependencies
+}
 
-set -eu
-
-local RELEASEPREFIX=$(getConfig LFS_PROD_uc_pkgpool_release_prefix)
-mustHaveValue "${RELEASEPREFIX}" "release prefix"
-
-local SVNTAGDIR=$(getConfig LFS_PROD_uc_pkgpool_svn_tag_directories)
-mustHaveValue "${SVNTAGDIR}" "svn tag diretories"
-
-_buildPkgpool
-_createTagInGit
-_createRelease
-_updateDependencies
-
-sub _buildPkgpool() {
+_buildPkgpool() {
     requiredParameters WORKSPACE
 
-    execute rm -rf ${WORKSPACE}/bld
-    execute mkdir ${WORKSPACE}/bld
-    execute cd ${WORKSPACE}/src
-    execute rm -rf src
-    execute git reset --hard                                                                                   
-    execute ./bootstrap                                                                               
-    execute cd ../bld                                                         
-    execute -n ../src/build --prepopulate --release="$RELEASEPREFIX" > ../buildlog
-    RELSTR="$(sed -ne 's,^release \([^ ]*\) complete$,\1,p' ../buildlog)"
-    if test -z "$RELSTR"; then
-        for log in logs/*.log ; do
-            [[ -e ${log} ]] || continue
-            rawOutput ${log}
+    local releasePrefix=$(getConfig PKGPOOL_PROD_release_prefix)
+    mustHaveValue "${releasePrefix}" "pkgpool release prefix"
+    
+    local buildLogFile=$(createTempFile)
+
+    local workspace=$(getWorkspaceName)
+    mustHaveCleanWorkspace
+    mustHaveWorkspaceName
+
+    # git clone, created by jenkins git plugin
+    mustExistDirectory ${WORKSPACE}/src
+
+    cd ${WORKSPACE}/src
+    execute rm -rf ${WORKSPACE}/src/src
+    gitReset --hard
+
+    execute ./bootstrap
+    cd ${workspace}
+    execute -n ${WORKSPACE}/src/build --prepopulate --release="${releasePrefix}" > ${buildLogFile}
+    rawDebug ${buildLogFile}
+
+    local releaseString="$(execute -n sed -ne 's,^release \([^ ]*\) complete$,\1,p' ${buildLogFile})"
+    if [[ -z ${releaseString} ]] ; then
+        for logFile in logs/*.log ; do
+            [[ -e ${logFile} ]] || continue
+            rawOutput ${logFile}
         done
         fatal "release complate not found in logfile"
     fi
-    execute touch /build/home/SC_LFS/pkgpool/.hashpool
-
-    setBuildDescription "${JOB_NAME}" "${BUILD_NUMBER}" "${RELSTR}"
-
-    return
-}
-
-
-sub _createTagInGit() {
-    requiredParameters WORKSPACE
 
     cd ${WORKSPACE}/src
+    local oldRelease=$(gitDescribe --abbrev=0)
+    gitTagAndPushToOrigin
 
-    DATETIME=$(date -u +'%F/%T')
-    BASED_ON=$(git describe --abbrev=0)
+    setBuildDescription "${JOB_NAME}" "${BUILD_NUMBER}" "${releaseString}"
 
-    execute git tag -a -m $RELSTR $RELSTR
-    execute git push origin $RELSTR
+    # required to start the sync 
+    execute touch /build/home/SC_LFS/pkgpool/.hashpool
+
+    mkdir -p ${workspace}/bld/bld-pkgpool-release/
+    echo ${oldRelease}    > ${workspace}/bld/bld-pkgpool-release/oldLabel
+    echo ${releaseString} > ${workspace}/bld/bld-pkgpool-release/label
+    execute sed -ne 's|^src [^ ]* \(.*\)$|PS_LFS_PKG = \1|p' ${workspace}/pool/*.meta \
+        > ${workspace}/bld/bld-pkgpool-release/forReleaseNote.txt
+>> relnote.xml
 
     return
 }
 
-sub _createRelease() {
-cat > relnote.xml <<EOT
-<releasenote version="9">
-  <name>$RELSTR</name>
-  <system>PS_LFS</system>
-  <releaseDate>${DATETIME/\/*}</releaseDate>
-  <releaseTime>${DATETIME/*\/}Z</releaseTime>
-  <authorEmail>robert.schiele@nsn.com</authorEmail>
-  <basedOn>$BASED_ON</basedOn>
-  <branchFor><branch>PS_Basic</branch></branchFor>
-  <importantNotes>
-    <note name="PS_LFS_PKG">
-    </note>
-  </importantNotes>
-  <repositoryUrl>/build/home/SC_LFS/pkgpool</repositoryUrl>
-  <repositoryBranch></repositoryBranch>
-  <repositoryRevision>$RELSTR</repositoryRevision>
-  <correctedFaults>
-    <module name="$RELSTR">
-    </module>
-  </correctedFaults>
-  <baselines>
-EOT
+_releasePkgpool() {
+    requiredParameters LFS_CI_ROOT UPSTREAM_PROJECT UPSTREAM_BUILD
 
-sed -ne 's|^src [^ ]* \(.*\)$|<baseline name="PS_LFS_PKG" auto_create="true">\1</baseline>|p' bld/pool/*.meta |
-sort -u >> relnote.xml
+    local workspace=$(getWorkspaceName)
+    mustHaveCleanWorkspace
 
-cat >> relnote.xml <<EOT
-  </baselines>
-  <download>
-    <downloadItem storage="FILE" name="SC_LFS">/build/home/SC_LFS/pkgpool/$RELSTR</downloadItem>
-  </download>
-  <features>
-  </features>
-</releasenote>
-EOT
+    copyArtifactsToWorkspace ${UPSTREAM_PROJECT} ${UPSTREAM_BUILD} "pkgpool"
 
-curl -k https://wft.inside.nsn.com/ext/api/xml -F "access_key=lL0CWZcUtyAFu7yRhmStEhTlJOd7LLbReA5RcGo4" -F "file=@relnote.xml"
+    local label=$(cat ${workspace}/bld/bld-pkgpool-release/label)
+    mustHaveValue "${label}" "label"
+
+    local oldLabel=$(cat ${workspace}/bld/bld-pkgpool-release/oldLabel)
+    mustHaveValue "${oldLabel}" "old label"
+
+    # TODO: demx2fk3 2015-02-05 baselines list missing
+    execute -n ${LFS_CI_ROOT}/bin/getReleaseNoteXML \
+                -t ${label}                         \
+                -o ${oldLabel}                      \
+                -f ${LFS_CI_ROOT}/etc/file.cfg > ${workspace}/releasenote.xml
+    
+    rawDebug ${workspace}/releasenote.xml
+
+    mustBeValidXmlReleaseNote ${workspace}/releasenote.xml
+
+    createReleaseInWorkflowTool ${label} ${workspace}/releasenote.xml
+    uploadToWorkflowTool        ${label} ${workspace}/releasenote.xml
+
+    return
 }
-sub _updateDependencies() {
-    for ONESVNTAGDIR in $SVNTAGDIR; do
-        SVNDIR=${ONESVNTAGDIR//[\/:]/_}
-        GITREVISION=src/gitrevision
-        case "$ONESVNTAGDIR" in
-            */src-rfs)
-            RELFILE=Buildfile
-            ;;
-            */src-project)
-            RELFILE=Dependencies
-            ;;
-            *)
-            echo "SVNTAGDIR incorrect: $ONESVNTAGDIR"
-            break
-            ;;
-        esac
-        test -d $SVNDIR || svn co "$ONESVNTAGDIR" $SVNDIR
-        cd $SVNDIR
-        svn up
-        COMMITBEFORE=$(cat $GITREVISION)
+
+_updateDependencies() {
+
+    local svnUrlsToUpdate=$(getConfig PKGPOOL_PROD_uc_update_dependencies_svn_urls)
+    mustHaveValue "${svnUrlsToUpdate}" "svn urls for pkgpool"
+
+    local urlToUpdate=""
+
+    for urlToUpdate in ${svnUrlsToUpdate} ; do
+        local releaseFile=$(basename ${ONESVNTAGDIR})
+        local svnUrl=$(dirname ${ONESVNTAGDIR})
+
+        local workspace=$(getWorkspaceName)
+        mustHaveWorkspaceName
+
+        svnCheckout ${svnCheckout} ${workspace}
+
+        local oldGitRevision=$(cat ${workspace}/src/gitrevision)
+        local newGitRevision=$(git rev-parse HEAD)
+        local gitLog=$(createTempFile)
+
         cd ../src
+        local newGitRevision=$(execute -n git rev-parse HEAD)
+        execute -n git log $oldGitRevision..$newGitRevision | \
+            execute -n sed -e 's,^    %,%,' > ${gitLog}
+        rawDebug ${gitLog}
 
-        git rev-parse HEAD > ../$SVNDIR/$GITREVISION
-        COMMITAFTER=$(cat ../$SVNDIR/$GITREVISION)
-        git log $COMMITBEFORE..$COMMITAFTER | sed -e 's,^    %,%,' > ../$SVNDIR/gitlog
+        cd ${workspace}
+        execute sed -i -e "
+            s|^PKGLABEL *?=.*|PKGLABEL ?= $RELSTR|
+            s|^LRCPKGLABEL *?=.*|LRCPKGLABEL ?= $RELSTR|
+            s|^hint *bld/pkgpool .*|hint bld/pkgpool $RELSTR|
+        " $releaseFile
 
-        cd ../$SVNDIR
-        sed -i -e "
-
-        s|^PKGLABEL *?=.*|PKGLABEL ?= $RELSTR|
-        s|^LRCPKGLABEL *?=.*|LRCPKGLABEL ?= $RELSTR|
-        s|^hint *bld/pkgpool .*|hint bld/pkgpool $RELSTR|
-
-        " $RELFILE
-        if ! svn commit -F gitlog $RELFILE $GITREVISION 2> stderr; then
-            java -jar "$JENKINS_ROOT/jenkins-cli.jar" set-build-result unstable
-            NUM=$(sed -ne 's,^Error in line \([0-9]\+\) : .*,\1,p' stderr)
-            if test -z "$NUM"; then
-            cd ..
-            echo "SVN rejected our commit message for a reason we didn't understand:"
-            echo
-            cat stderr
-            break
+        try
+        (
+            svnCommit -F gitlog ${releaseFile} ${workspace}/src/gitrevision
+        )
+        catch ||
+        (
+            setBuildResultUnstable
+            local errorLineNumber=$(sed -ne 's,^Error in line \([0-9]\+\) : .*,\1,p' stderr)
+            if [[ -z "${errorLineNumber}" ]] ; then
+                fatal "SVN rejected our commit message for a reason we didn't understand. (see logfile)"
             fi
-            for ANUM in $NUM; do
-            sed -i -e "$ANUM{s,%,o/o,g;s,^,SVN REJECTED: ,}" gitlog
+
+            for lineNumber in ${errorLineNumber} ; do
+                execute sed -i -e "${lineNumber}{s,%,o/o,g;s,^,SVN REJECTED: ,}" gitlog
             done
-            echo "SVN rejected some of your commit notes for the release notes."
-            echo "If you need them in the release note please do another commit"
-            echo "with corrected syntax:"
-            echo
-            cat stderr
-            echo
-            echo "We try to submit now:"
-            echo
-            cat gitlog
-            svn commit -F gitlog $RELFILE $GITREVISION
-        fi
-        cd ..
+
+            info "SVN rejected some of your commit notes for the release note."
+            info "If you need them in the release note please do another commit"
+            info "with corrected syntax."
+            info "We try to commit with corrected notes."
+            rawDebug gitlog
+
+            svnCommit -F gitlog ${releaseFile} ${workspace}/src/gitrevision
+        )
+
     done
 }
-exit 0
+
