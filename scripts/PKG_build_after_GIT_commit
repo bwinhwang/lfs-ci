@@ -10,13 +10,14 @@
 #                    PKGPOOL_CI_-_trunk_-_Test
 #                    PKGPOOL_PROD_-_trunk_-_Release
 
-ci_job_build_and_release_pkgpool() {
-    _buildPkgpool
-    _createRelease
-    _updateDependencies
-}
+[[ -z ${LFS_CI_SOURCE_artifacts}    ]] && source ${LFS_CI_ROOT}/lib/artifacts.sh
+[[ -z ${LFS_CI_SOURCE_workflowtool} ]] && source ${LFS_CI_ROOT}/lib/workflowtool.sh
+[[ -z ${LFS_CI_SOURCE_jenkins}      ]] && source ${LFS_CI_ROOT}/lib/jenkins.sh
+[[ -z ${LFS_CI_SOURCE_subversion}   ]] && source ${LFS_CI_ROOT}/lib/subversion.sh
+[[ -z ${LFS_CI_SOURCE_git}          ]] && source ${LFS_CI_ROOT}/lib/git.sh
+[[ -z ${LFS_CI_SOURCE_try}          ]] && source ${LFS_CI_ROOT}/lib/try.sh
 
-_buildPkgpool() {
+usecase_PKGPOOL_BUILD() {
     requiredParameters WORKSPACE
 
     local releasePrefix=$(getConfig PKGPOOL_PROD_release_prefix)
@@ -28,16 +29,18 @@ _buildPkgpool() {
     mustHaveCleanWorkspace
     mustHaveWorkspaceName
 
-    # git clone, created by jenkins git plugin
-    mustExistDirectory ${WORKSPACE}/src
+    local gitWorkspace=${WORKSPACE}/src
 
-    cd ${WORKSPACE}/src
-    execute rm -rf ${WORKSPACE}/src/src
+    # git clone, created by jenkins git plugin
+    mustExistDirectory ${gitWorkspace}
+
+    cd ${gitWorkspace}
+    execute rm -rf ${gitWorkspace}/src
     gitReset --hard
 
     execute ./bootstrap
     cd ${workspace}
-    execute -n ${WORKSPACE}/src/build --prepopulate --release="${releasePrefix}" > ${buildLogFile}
+    execute -n ${gitWorkspace}/build --prepopulate --release="${releasePrefix}" > ${buildLogFile}
     rawDebug ${buildLogFile}
 
     local releaseString="$(execute -n sed -ne 's,^release \([^ ]*\) complete$,\1,p' ${buildLogFile})"
@@ -49,7 +52,7 @@ _buildPkgpool() {
         fatal "release complate not found in logfile"
     fi
 
-    cd ${WORKSPACE}/src
+    cd ${gitWorkspace}
     local oldRelease=$(gitDescribe --abbrev=0)
     gitTagAndPushToOrigin
 
@@ -63,12 +66,21 @@ _buildPkgpool() {
     echo ${releaseString} > ${workspace}/bld/bld-pkgpool-release/label
     execute sed -ne 's|^src [^ ]* \(.*\)$|PS_LFS_PKG = \1|p' ${workspace}/pool/*.meta \
         > ${workspace}/bld/bld-pkgpool-release/forReleaseNote.txt
->> relnote.xml
 
     return
 }
 
-_releasePkgpool() {
+usecase_PKGPOOL_TEST() {
+    requiredParameters UPSTREAM_PROJECT UPSTREAM_BUILD
+    local workspace=$(getWorkspaceName)
+    mustHaveCleanWorkspace
+
+    copyArtifactsToWorkspace ${UPSTREAM_PROJECT} ${UPSTREAM_BUILD} "pkgpool"
+    createArtifactArchive
+    return
+}
+
+usecase_PKGPOOL_RELEASE() {
     requiredParameters LFS_CI_ROOT UPSTREAM_PROJECT UPSTREAM_BUILD
 
     local workspace=$(getWorkspaceName)
@@ -95,10 +107,19 @@ _releasePkgpool() {
     createReleaseInWorkflowTool ${label} ${workspace}/releasenote.xml
     uploadToWorkflowTool        ${label} ${workspace}/releasenote.xml
 
+    copyFileToArtifactDirectory releasenote.xml
+
+    local artifactsPathOnShare=$(getConfig artifactesShare)/${JOB_NAME}/${BUILD_NUMBER}
+    linkFileToArtifactsDirectory ${artifactsPathOnShare}
+
     return
 }
 
-_updateDependencies() {
+usecase_PKGPOOL_UDPATE_DEPS() {
+    requiredParameters LFS_CI_ROOT UPSTREAM_PROJECT UPSTREAM_BUILD
+
+    local workspace=$(getWorkspaceName)
+    mustHaveCleanWorkspace
 
     local svnUrlsToUpdate=$(getConfig PKGPOOL_PROD_uc_update_dependencies_svn_urls)
     mustHaveValue "${svnUrlsToUpdate}" "svn urls for pkgpool"
@@ -157,5 +178,7 @@ _updateDependencies() {
         )
 
     done
+
+    return
 }
 
