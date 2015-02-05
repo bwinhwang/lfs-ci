@@ -58,8 +58,6 @@ fsmr4_jobs = false
 
 lrc_jobs = false
 
-debug = true
-
 scm_view_obj = j.getView(scm_view)
 
 // Parameters from Jenkins job
@@ -75,14 +73,8 @@ parameters.each {
         lrc_jobs = it.value
     else if(it.name == "ENABLE_JOBS")
         enable_jobs = it.value
-    else if(it.name == "DEBUG")
-        debug = it.value
 }
 
-if(debug) {
-    println("DEBUG is true - stop working.")
-    return 0
-}
 if(!new_branch) {
     throw new RuntimeException("Parameter NEW_BRANCH is missing")
 }
