@@ -169,7 +169,7 @@ ci_job_test_collect_metrics() {
 
         rawDebug ${resultFile}
 
-        databaseTestResults ${label} "Build" ${jobName} "TODO" ${resultFile}
+        databaseTestResults ${label} "Build" ${jobName} "host" ${resultFile}
     done
 
     local packageJobName=$(getPackageJobNameFromUpstreamProject ${UPSTREAM_PROJECT} ${UPSTREAM_BUILD})
@@ -182,8 +182,7 @@ ci_job_test_collect_metrics() {
     local resultFile=$(createTempFile)
     local duration=$(${LFS_CI_ROOT}/bin/xpath -q -e '/build/duration/node()' ${workspace}/${packageJobName}_build.xml)
     printf "duration;%s\n" ${duration} >> ${resultFile}
-    databaseTestResults ${label} "Package" ${packageJobName} "TODO" ${resultFile}
-
+    databaseTestResults ${label} "Package" ${packageJobName} "host" ${resultFile}
 
     return
 }
@@ -225,7 +224,8 @@ storeMetricsForTestJob() {
 
     rawDebug ${resultFile}
 
-    databaseTestResults ${label} ${testSuiteType} ${jobName} "TODO" ${resultFile}
+    local targetType=$(getConfig LFS_CI_uc_test_target_type_mapping)
+    databaseTestResults ${label} ${testSuiteType} ${jobName} "${targetType}" ${resultFile}
 
     return
 }
