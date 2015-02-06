@@ -25,28 +25,34 @@ deleteJobs = false
 
 LRC_deleteJobs = false
 
+debug = true
+
 
 parameters.each {
     if(it.name == "BRANCH") {
         branch = it.value
         if(branch) {
-            println("got parameter BRANCH:  " + branch)
+            println("[INFO] got parameter BRANCH:  " + branch)
         } else {
             throw new RuntimeException("BRANCH is not specified")
         }
     }
     if(it.name == "DELETE_JOBS") {
         deleteJobs = it.value
-        println("got parameter DELETE_JOBS: $deleteJobs")
+        println("[INFO] got parameter DELETE_JOBS: $deleteJobs")
     }
     if(it.name == "LRC_DELETE_JOBS") {
         LRC_deleteJobs = it.value
-        println("got parameter LRC_DELETE_JOBS: $LRC_deleteJobs")
+        println("[INFO] got parameter LRC_DELETE_JOBS: $LRC_deleteJobs")
+    }
+    if(it.name == "DEBUG") {
+        debug = it.value
+        println("[INFO] got parameter DEBUG: $debug")
     }
 }
 
 if(!deleteJobs && !LRC_deleteJobs) {
-    println("Nothing should be deleted.")
+    println("[INFO] Nothing should be deleted.")
     return 0
 }
 
@@ -64,8 +70,12 @@ def deleteView() {
     def branch_view_obj = null
     scm_view_obj = j.getView(scm_view)
     branch_view_obj = scm_view_obj.getView(branch_view)
-    scm_view_obj.deleteView(branch_view_obj)
-    println("deleted view: $branch_view in $scm_view view")
+    if(debug) {
+        println("[DEBUG] delete view: $branch_view in $scm_view")
+    } else {
+        scm_view_obj.deleteView(branch_view_obj)
+        println("[INFO] deleted view: $branch_view in $scm_view view")
+    }
 }
 
 // Delete none LRC jobs.
@@ -74,8 +84,12 @@ if(deleteJobs || LRC_deleteJobs) {
     for(p in jenkins.model.Jenkins.theInstance.getProjects()) {
         job_name = p.getName()
         if(deleteJobs && job_name.find("_"+branch+"_") && !job_name.find("LFS_CI_-_LRC_")) {
-                p.delete()
-                println("deleted job: $p.name")
+                if(debug) {
+                    println("[DEBUG] delete job: $p.name")
+                } else {
+                    p.delete()
+                    println("[INFO] deleted job: $p.name")
+                }
         }
         else if(job_name.find("_"+branch+"_") && job_name.find("LFS_CI_-_LRC_")) {
             lrc_jobs.add(p)
@@ -90,8 +104,12 @@ if(deleteJobs || LRC_deleteJobs) {
 // Delete LRC jobs.
 if(LRC_deleteJobs && lrc_jobs) {
     for(p in lrc_jobs) {
-        p.delete()
-        println("deleted LRC job: $p.name")
+        if(debug) {
+            println("[DEBUG] delete LRC job: $p.name")
+        } else {
+            p.delete()
+            println("[INFO] deleted LRC job: $p.name")
+        }
     }
     // No more jobs, delete view
     deleteView()
