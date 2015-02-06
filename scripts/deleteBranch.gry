@@ -1,3 +1,12 @@
+///////////////////////////////////////////////////////////////////////////////
+//
+// Groovy script to delete a branch in the LFS CI.
+//
+// 1. Take the parameters from the Jenkins job.
+// 2. Check which jobs to be deleted.
+// 3. If no jobs left also delete the view of the job.
+///////////////////////////////////////////////////////////////////////////////
+
 import jenkins.model.Jenkins
 import hudson.model.ParametersAction
 
@@ -60,6 +69,7 @@ def deleteView() {
 }
 
 // Delete none LRC jobs.
+// Collect LRC jobs in a list.
 if(deleteJobs || LRC_deleteJobs) {
     for(p in jenkins.model.Jenkins.theInstance.getProjects()) {
         job_name = p.getName()
