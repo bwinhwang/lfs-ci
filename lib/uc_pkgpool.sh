@@ -25,15 +25,13 @@
 usecase_PKGPOOL_BUILD() {
     requiredParameters WORKSPACE
 
-    local releasePrefix=$(getConfig PKGPOOL_PROD_release_prefix)
-    mustHaveValue "${releasePrefix}" "pkgpool release prefix"
-    
-    local buildLogFile=$(createTempFile)
-
     local workspace=$(getWorkspaceName)
     mustHaveCleanWorkspace
-    mustHaveWorkspaceName
 
+    local releasePrefix=$(getConfig PKGPOOL_PROD_release_prefix)
+    mustHaveValue "${releasePrefix}" "pkgpool release prefix"
+
+    local buildLogFile=$(createTempFile)
     local gitWorkspace=${WORKSPACE}/src
 
     # git clone, created by jenkins git plugin
@@ -61,6 +59,7 @@ usecase_PKGPOOL_BUILD() {
     local oldRelease=$(gitDescribe --abbrev=0)
     gitTagAndPushToOrigin
 
+    info "new pkgpool release tag: ${releaseString}"
     setBuildDescription "${JOB_NAME}" "${BUILD_NUMBER}" "${releaseString}"
 
     # required to start the sync 
@@ -71,6 +70,8 @@ usecase_PKGPOOL_BUILD() {
     echo ${releaseString} > ${workspace}/bld/bld-pkgpool-release/label
     execute sed -ne 's|^src [^ ]* \(.*\)$|PS_LFS_PKG = \1|p' ${workspace}/pool/*.meta \
         > ${workspace}/bld/bld-pkgpool-release/forReleaseNote.txt
+
+    rawDebug ${workspace}/bld/bld-pkgpool-release/forReleaseNote.txt
 
     return
 }
@@ -144,8 +145,8 @@ usecase_PKGPOOL_UDPATE_DEPS() {
     local urlToUpdate=""
 
     for urlToUpdate in ${svnUrlsToUpdate} ; do
-        local releaseFile=$(basename ${ONESVNTAGDIR})
-        local svnUrl=$(dirname ${ONESVNTAGDIR})
+        local releaseFile=$(basename ${urlToUpdate})
+        local svnUrl=$(dirname ${urlToUpdate})
 
         local workspace=$(getWorkspaceName)
         mustHaveWorkspaceName
@@ -158,16 +159,16 @@ usecase_PKGPOOL_UDPATE_DEPS() {
 
         cd ../src
         local newGitRevision=$(execute -n git rev-parse HEAD)
-        execute -n git log $oldGitRevision..$newGitRevision | \
+        execute -n git log ${oldGitRevision}..${newGitRevision} | \
             execute -n sed -e 's,^    %,%,' > ${gitLog}
         rawDebug ${gitLog}
 
         cd ${workspace}
         execute sed -i -e "
-            s|^PKGLABEL *?=.*|PKGLABEL ?= $RELSTR|
-            s|^LRCPKGLABEL *?=.*|LRCPKGLABEL ?= $RELSTR|
-            s|^hint *bld/pkgpool .*|hint bld/pkgpool $RELSTR|
-        " $releaseFile
+            s|^PKGLABEL *?=.*|PKGLABEL ?= ${releaseString}|
+            s|^LRCPKGLABEL *?=.*|LRCPKGLABEL ?= ${releaseString}|
+            s|^hint *bld/pkgpool .*|hint bld/pkgpool ${releaseString}|
+        " ${releaseFile}
 
         try
         (
