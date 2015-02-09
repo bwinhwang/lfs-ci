@@ -348,8 +348,7 @@ createLfsBaselineListFromEcl() {
         execute -n cut -d= -f2 | \
         execute -n sort -u     > ${tmpFile1}
 
-    execute -n sed "s/PS_LFS_REL/PS_LFS_OS/g" \
-                ${WORKSPACE}/usedBaselinesInEcl.txt > ${tmpFile2}
+    execute -n sed "s/PS_LFS_REL/PS_LFS_OS/g" ${tmpFile1} > ${tmpFile2}
     execute -n cat ${tmpFile2} ${tmpFile1} > ${WORKSPACE}/usedBaselinesInEcl.txt
     rawDebug ${WORKSPACE}/usedBaselinesInEcl.txt
 
