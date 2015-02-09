@@ -225,6 +225,8 @@ storeMetricsForTestJob() {
     rawDebug ${resultFile}
 
     local targetType=$(getConfig LFS_CI_uc_test_target_type_mapping)
+    mustHaveValue "${targetType}" "target type"
+
     databaseTestResults ${label} ${testSuiteType} ${jobName} "${targetType}" ${resultFile}
 
     return
