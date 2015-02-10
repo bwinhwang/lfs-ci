@@ -1,0 +1,117 @@
+///////////////////////////////////////////////////////////////////////////////
+//
+// Groovy script to delete a branch in the LFS CI.
+//
+// 1. Take the parameters from the Jenkins job.
+// 2. Check which jobs to be deleted.
+// 3. If no jobs left also delete the view of the job.
+///////////////////////////////////////////////////////////////////////////////
+
+import jenkins.model.Jenkins
+import hudson.model.ParametersAction
+
+
+j = Jenkins.instance
+
+def thr = Thread.currentThread()
+
+def build = thr?.executable
+
+def parameters = build?.actions.find{ it instanceof ParametersAction }?.parameters
+
+branch = ""
+
+deleteJobs = false
+
+LRC_deleteJobs = false
+
+debug = true
+
+
+parameters.each {
+    if(it.name == "BRANCH") {
+        branch = it.value
+        if(branch) {
+            println("[INFO] got parameter BRANCH:  " + branch)
+        } else {
+            throw new RuntimeException("BRANCH is not specified")
+        }
+    }
+    if(it.name == "DELETE_JOBS") {
+        deleteJobs = it.value
+        println("[INFO] got parameter DELETE_JOBS: $deleteJobs")
+    }
+    if(it.name == "LRC_DELETE_JOBS") {
+        LRC_deleteJobs = it.value
+        println("[INFO] got parameter LRC_DELETE_JOBS: $LRC_deleteJobs")
+    }
+    if(it.name == "DEBUG") {
+        debug = it.value
+        println("[INFO] got parameter DEBUG: $debug")
+    }
+}
+
+if(!deleteJobs && !LRC_deleteJobs) {
+    println("[INFO] Nothing should be deleted.")
+    return 0
+}
+
+///////////////////////////////////////////////////////////////////////
+// Delete
+///////////////////////////////////////////////////////////////////////
+
+lrc_jobs = []
+
+// Delete the branchs view
+def deleteView() {
+    def scm_view = "SCM"
+    def scm_view_obj = null
+    def branch_view = branch
+    def branch_view_obj = null
+    scm_view_obj = j.getView(scm_view)
+    branch_view_obj = scm_view_obj.getView(branch_view)
+    if(debug) {
+        println("[DEBUG] delete view: $branch_view in $scm_view")
+    } else {
+        scm_view_obj.deleteView(branch_view_obj)
+        println("[INFO] deleted view: $branch_view in $scm_view view")
+    }
+}
+
+// Delete none LRC jobs.
+// Collect LRC jobs in a list.
+if(deleteJobs || LRC_deleteJobs) {
+    for(p in jenkins.model.Jenkins.theInstance.getProjects()) {
+        job_name = p.getName()
+        if(deleteJobs && job_name.find("_"+branch+"_") && !job_name.find("LFS_CI_-_LRC_")) {
+                if(debug) {
+                    println("[DEBUG] delete job: $p.name")
+                } else {
+                    p.delete()
+                    println("[INFO] deleted job: $p.name")
+                }
+        }
+        else if(job_name.find("_"+branch+"_") && job_name.find("LFS_CI_-_LRC_")) {
+            lrc_jobs.add(p)
+        }
+    }
+    // No more jobs, delete view
+    if(!lrc_jobs) {
+        deleteView()
+    }
+}
+
+// Delete LRC jobs.
+if(LRC_deleteJobs && lrc_jobs) {
+    for(p in lrc_jobs) {
+        if(debug) {
+            println("[DEBUG] delete LRC job: $p.name")
+        } else {
+            p.delete()
+            println("[INFO] deleted LRC job: $p.name")
+        }
+    }
+    // No more jobs, delete view
+    deleteView()
+}
+

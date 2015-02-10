@@ -28,7 +28,7 @@ import javax.xml.transform.stream.StreamSource
 import java.io.FileInputStream;
 
 
-println("\nGROOVY SCRIPT")
+println("\n\nGROOVY SCRIPT")
 
 def env = System.getenv()
 
@@ -88,7 +88,7 @@ src_branch_view_obj = scm_view_obj.getView(src_branch.toUpperCase())
 // Add branch view to SCM view.
 new_branch_view_obj = new ListView(new_branch, scm_view_obj)
 scm_view_obj.addView(new_branch_view_obj)
-println("Added view $new_branch to $scm_view view")
+println("[INFO] Added view $new_branch to $scm_view view")
 
 def processFileInplace(file, Closure processText) {
     def text = file.text
@@ -136,7 +136,7 @@ def updateWorkspace(job) {
         project.setCustomWorkspace(new_workspace)
         project.save()
     }
-    println("copied \"$job.name\" -> \"$new_name\" and added it to view \"$new_branch_view_obj.name\"")
+    println("[INFO] copied \"$job.name\" -> \"$new_name\" and added it to view \"$new_branch_view_obj.name\"")
 }
 
 def updateJobConfig(job, new_job) {
@@ -155,7 +155,7 @@ def updateJobConfig(job, new_job) {
             text.replaceAll("-_"+src_branch+"_-", "-_"+new_branch+"_-")
         }
     }
-    println("updated job configuration for job \"$new_name\"")
+    println("[INFO] updated job configuration for job \"$new_name\"")
     return config_file
 }
 
@@ -163,36 +163,38 @@ def reloadJobConfig(job, config_file) {
     InputStream is = new FileInputStream(config_file);
     job.updateByXml(new StreamSource(is));
     job.save();
-    println("reloaded config for job \"$new_name\"")
+    println("[INFO] reloaded config for job \"$new_name\"")
 }
 
 def copyPromotions(job, new_job) {
     def promoSrcDir = new File("${jenkinsHome}/jobs/${job.name}/promotions")
     def promoDstDir = new File("${jenkinsHome}/jobs/${new_job.name}/promotions")
     if(promoSrcDir.exists()) {
-        println("Source job \"$job.name\" has promotions.")
+        println("[INFO] Source job \"$job.name\" has promotions.")
         promoDirs = promoSrcDir.list()
         for(d in promoDirs)  {
-            new File(promoDstDir.getAbsolutePath()+"/"+d).mkdirs()
-            builder = new AntBuilder()
-            builder.sequential {
-                copy(tofile: promoDstDir.getAbsolutePath()+"/"+d+"/config.xml",
-                     file:   promoSrcDir.getAbsolutePath()+"/"+d+"/config.xml",
-                     overwrite: true)
-            } 
-            def dstFile = new File(promoDstDir.getAbsolutePath()+"/"+d+"/config.xml")
-            println("configuring file "+dstFile.getAbsolutePath())
-            if (job.getName().find("fsmr4") && fsmr4_jobs) {
-                processFileInplace(dstFile) { text ->
-                    text.replaceAll("-_"+src_branch+"_-", "-_"+new_branch+"_-")
-                }
-            } else if (job.getName().find("LRC") && lrc_jobs) {
-                processFileInplace(dstFile) { text ->
-                    text.replaceAll("LFS_CI_-_LRC_-", "LFS_CI_-_LRC_"+new_branch+"_-")
-                }
-            } else {
-                processFileInplace(dstFile) { text ->
-                    text.replaceAll("-_"+src_branch+"_-", "-_"+new_branch+"_-")
+            if(!d.find(" ")) {
+                new File(promoDstDir.getAbsolutePath()+"/"+d).mkdirs()
+                builder = new AntBuilder()
+                builder.sequential {
+                    copy(tofile: promoDstDir.getAbsolutePath()+"/"+d+"/config.xml",
+                         file:   promoSrcDir.getAbsolutePath()+"/"+d+"/config.xml",
+                         overwrite: true)
+                } 
+                def dstFile = new File(promoDstDir.getAbsolutePath()+"/"+d+"/config.xml")
+                println("[INFO] configuring file "+dstFile.getAbsolutePath())
+                if (job.getName().find("fsmr4") && fsmr4_jobs) {
+                    processFileInplace(dstFile) { text ->
+                        text.replaceAll("-_"+src_branch+"_-", "-_"+new_branch+"_-")
+                    }
+                } else if (job.getName().find("LRC") && lrc_jobs) {
+                    processFileInplace(dstFile) { text ->
+                        text.replaceAll("LFS_CI_-_LRC_-", "LFS_CI_-_LRC_"+new_branch+"_-")
+                    }
+                } else {
+                    processFileInplace(dstFile) { text ->
+                        text.replaceAll("-_"+src_branch+"_-", "-_"+new_branch+"_-")
+                    }
                 }
             }
         }
