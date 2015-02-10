@@ -824,4 +824,35 @@ mustHaveAccessableServer() {
     return
 }
 
+## @fn      getBranchPart()
+#  @brief   provides the parts of a branch name
+#  @param   <branch> the name of a branch eg FB1408
+#  @param   <what> the part to get. Can be YY | YYYY | MM | NR | TYPE
+#           NR is only valid for MD branches.
+#  @return  <none>
+getBranchPart() {
+    local branch=$1
+    local what=$2
+    local branch_type=$(echo ${branch} | cut -c1,2)
+
+    if [ "${branch_type}" == "FB" ]; then
+        local yy=$(echo ${branch}  | cut -c3,4)
+        local mm=$(echo ${branch}  | cut -c5,6)
+        local yyyy=$((2000+yy))
+    elif [ "${branch_type}" == "MD" ]; then
+        local yy=$(echo ${branch}  | cut -c4,5)
+        local nr=$(echo ${branch}  | cut -c3)
+        local mm=$(echo ${branch}  | cut -c6,7)
+        local yyyy=$((2000+yy))
+    else
+        error "Only FB and MD branches are supported."
+        return 1
+    fi
+
+    [[ ${what} == YY ]] && echo ${yy}
+    [[ ${what} == YYYY ]] && echo ${yyyy}
+    [[ ${what} == MM ]] && echo ${mm}
+    [[ ${what} == TYPE ]] && echo ${branch_type}
+    [[ ${what} == NR ]] && echo ${nr}
+}
 
