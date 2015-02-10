@@ -139,7 +139,7 @@ test4() {
 cat <<EOF > ${expect}
 getConfig LFS_CI_uc_update_ecl_update_promote_every_xth_release
 getBuildDirectoryOnMaster lastSuccessfulBuild
-runOnMaster /home/bm/projekte/work/nsn/ci.git/bin/xpath -q -e /build/startTime/node() /path/to/last/build/build.xml
+runOnMaster ${LFS_CI_ROOT}/bin/xpath -q -e /build/startTime/node() /path/to/last/build/build.xml
 date +%s
 getConfig LFS_CI_uc_ecl_maximum_time_between_two_releases
 setBuildDescription 1 <br>not promoted
