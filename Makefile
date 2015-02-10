@@ -6,7 +6,7 @@ test:
 	LFS_CI_ROOT=${PWD} bin/unitTest.sh
 
 tags:
-	ctags lib/*.sh bin/*.sh
+	ctags lib/*.sh bin/*.sh test/common.sh
 
 doc:
 	doxygen doc/Doxyfile

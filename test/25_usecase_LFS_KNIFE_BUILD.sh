@@ -1,12 +1,8 @@
 #!/bin/bash
 
-source lib/common.sh
-
-initTempDirectory
+source test/common.sh
 
 source lib/uc_knife_build.sh
-
-export UT_MOCKED_COMMANDS=$(createTempFile)
 
 oneTimeSetUp() {
     mockedCommand() {
@@ -55,6 +51,7 @@ test1() {
     export UPSTREAM_PROJECT=upstream_project
     export UPSTREAM_BUILD=123
     export JOB_NAME=LFS_KNIFE_-_knife_-_Build
+    export BUILD_NUMBER=123
     export KNIFE_REQUESTOR="knife requestor"
 
     assertTrue "usecase_LFS_KNIFE_BUILD"
@@ -63,13 +60,13 @@ test1() {
 cat <<EOF > ${expect}
 execute mkdir -p ${WORKSPACE}/workspace
 execute mkdir -p ${WORKSPACE}/workspace/bld/bld-fsmci-summary/
-copyFileFromWorkspaceToBuildDirectory LFS_KNIFE_-_knife_-_Build revisionstate.xml
+copyFileFromWorkspaceToBuildDirectory LFS_KNIFE_-_knife_-_Build 123 revisionstate.xml
 execute mkdir -p ${WORKSPACE}/workspace/bld/bld-knife-input/
 execute -i cp -a ${WORKSPACE}/lfs.patch ${WORKSPACE}/workspace/bld/bld-knife-input/
 createArtifactArchive 
-setBuildDescription LFS_KNIFE_-_knife_-_Build  KNIFE_PS_LFS_OS_2014_01_0001.date<br>knife requestor
+setBuildDescription LFS_KNIFE_-_knife_-_Build 123 KNIFE_PS_LFS_OS_2014_01_0001.date<br>knife requestor
 EOF
-    assertEquals "$(cat ${expect})" "$(cat ${UT_MOCKED_COMMANDS})"
+    assertExecutedCommands ${expect}
 
     return
 }
