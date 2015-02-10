@@ -98,6 +98,8 @@ test1() {
     export UPSTREAM_PROJECT=PKGPOOL_CI_-_trunk_-_Test
     export UPSTREAM_BUILD=1234
     export UT_CONFIG_URLS=http://host/path/file
+    export BUILD_NUMBER=123
+    export JOB_NAME=LFS_CI_-_trunk_-_Build
 
     export UT_SVN_EXIT_CODE=0
 
@@ -109,7 +111,7 @@ test1() {
     cat <<EOF > ${expect}
 mustHaveCleanWorkspace
 copyArtifactsToWorkspace PKGPOOL_CI_-_trunk_-_Test 1234 pkgpool
-setBuildDescription LABEL
+setBuildDescription LFS_CI_-_trunk_-_Build 123 LABEL
 getConfig PKGPOOL_PROD_uc_update_dependencies_svn_urls
 svnCheckout http://host/path ${WORKSPACE}/workspace
 gitRevParse HEAD
@@ -134,6 +136,8 @@ test2() {
     export UPSTREAM_PROJECT=PKGPOOL_CI_-_trunk_-_Test
     export UPSTREAM_BUILD=1234
     export UT_CONFIG_URLS=http://host/path/file
+    export BUILD_NUMBER=123
+    export JOB_NAME=LFS_CI_-_trunk_-_Build
 
     echo "Error in line 1 : foobar asdf" > ${WORKSPACE}/svn_error_1
     echo "Error in line 2 : foobar asdf" > ${WORKSPACE}/svn_error_2
@@ -147,7 +151,7 @@ test2() {
     cat <<EOF > ${expect}
 mustHaveCleanWorkspace
 copyArtifactsToWorkspace PKGPOOL_CI_-_trunk_-_Test 1234 pkgpool
-setBuildDescription LABEL
+setBuildDescription LFS_CI_-_trunk_-_Build 123 LABEL
 getConfig PKGPOOL_PROD_uc_update_dependencies_svn_urls
 svnCheckout http://host/path ${WORKSPACE}/workspace
 gitRevParse HEAD
@@ -174,6 +178,8 @@ test3() {
     export UPSTREAM_PROJECT=PKGPOOL_CI_-_trunk_-_Test
     export UPSTREAM_BUILD=1234
     export UT_CONFIG_URLS=http://host/path/file
+    export BUILD_NUMBER=123
+    export JOB_NAME=LFS_CI_-_trunk_-_Build
 
     echo "Error in line 1 : foobar asdf" > ${WORKSPACE}/svn_error_1
 
@@ -185,7 +191,7 @@ test3() {
     cat <<EOF > ${expect}
 mustHaveCleanWorkspace
 copyArtifactsToWorkspace PKGPOOL_CI_-_trunk_-_Test 1234 pkgpool
-setBuildDescription LABEL
+setBuildDescription LFS_CI_-_trunk_-_Build 123 LABEL
 getConfig PKGPOOL_PROD_uc_update_dependencies_svn_urls
 svnCheckout http://host/path ${WORKSPACE}/workspace
 gitRevParse HEAD
@@ -212,6 +218,8 @@ test4() {
     export UPSTREAM_PROJECT=PKGPOOL_CI_-_trunk_-_Test
     export UPSTREAM_BUILD=1234
     export UT_CONFIG_URLS="http://host/path/file http://host/path2/file2"
+    export BUILD_NUMBER=123
+    export JOB_NAME=LFS_CI_-_trunk_-_Build
 
     mkdir -p ${WORKSPACE}/src
 
@@ -221,7 +229,7 @@ test4() {
     cat <<EOF > ${expect}
 mustHaveCleanWorkspace
 copyArtifactsToWorkspace PKGPOOL_CI_-_trunk_-_Test 1234 pkgpool
-setBuildDescription LABEL
+setBuildDescription LFS_CI_-_trunk_-_Build 123 LABEL
 getConfig PKGPOOL_PROD_uc_update_dependencies_svn_urls
 svnCheckout http://host/path ${WORKSPACE}/workspace
 gitRevParse HEAD
@@ -253,6 +261,8 @@ test5() {
     export UPSTREAM_PROJECT=PKGPOOL_CI_-_trunk_-_Test
     export UPSTREAM_BUILD=1234
     export UT_CONFIG_URLS=http://host/path/file
+    export BUILD_NUMBER=123
+    export JOB_NAME=LFS_CI_-_trunk_-_Build
 
     mkdir -p ${WORKSPACE}/src
     echo "fail" > ${WORKSPACE}/svn_error_1
@@ -263,7 +273,7 @@ test5() {
     cat <<EOF > ${expect}
 mustHaveCleanWorkspace
 copyArtifactsToWorkspace PKGPOOL_CI_-_trunk_-_Test 1234 pkgpool
-setBuildDescription LABEL
+setBuildDescription LFS_CI_-_trunk_-_Build 123 LABEL
 getConfig PKGPOOL_PROD_uc_update_dependencies_svn_urls
 svnCheckout http://host/path ${WORKSPACE}/workspace
 gitRevParse HEAD
