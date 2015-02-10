@@ -26,7 +26,6 @@ LFS_CI_SOURCE_config='$Id$'
 getLocationName() {
     local jobName=${1:-${JOB_NAME}}
 
-<<<<<<< HEAD
     if [[ -z ${LFS_CI_GLOBAL_BRANCH_NAME} ]] ; then
         local location=$(${LFS_CI_ROOT}/bin/getFromString.pl "${jobName}" location)
 
