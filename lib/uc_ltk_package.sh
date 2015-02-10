@@ -1,4 +1,6 @@
 #!/bin/bash
+## @file  uc_ltk_package.sh
+#  @brief usecase ltk packing
 
 [[ -z ${LFS_CI_SOURCE_artifacts} ]] && source ${LFS_CI_ROOT}/lib/artifacts.sh
 [[ -z ${LFS_CI_SOURCE_package}   ]] && source ${LFS_CI_ROOT}/lib/package.sh

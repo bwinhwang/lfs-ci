@@ -1,4 +1,6 @@
 #!/bin/bash
+## @file  exit_handling.sh
+#  @brief handling of the exit trap
 
 LFS_CI_SOURCE_exit_handling='$Id$'
 

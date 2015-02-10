@@ -1,4 +1,14 @@
 #!/bin/bash
+## @file    artifacts.sh
+#  @brief   handling of artifacts of a build
+#  @details There is/was a problem in jenkins with artifacts handling.
+#           Espesally if we handling very big artifacts bigger than a few hundert MB.
+#           So we doing the handling of artifacts by yourself within the scripting.
+#           The artifacts are stored on the linsee share /build/home/psulm/LFS_internal/artifacts
+#           with the <jobName>/<buildNumber>.
+#           
+#           The cleanup of the share will be handled within the uc_admin.sh.
+#           
 
 LFS_CI_SOURCE_artifacts='$Id$'
 
@@ -15,7 +25,7 @@ createArtifactArchive() {
     requiredParameters JOB_NAME BUILD_NUMBER
 
     local workspace=$(getWorkspaceName)
-    local serverName=$(getConfig linseeUlmServer)
+    local serverName=$(getConfig LINSEE_server)
     mustHaveWorkspaceName
 
     mustExistDirectory "${workspace}/bld/"
@@ -86,7 +96,7 @@ copyAndExtractBuildArtifactsFromProject() {
 
     local artifactesShare=$(getConfig artifactesShare)
     local artifactsPathOnMaster=${artifactesShare}/${jobName}/${buildNumber}/save/
-    local serverName=$(getConfig linseeUlmServer)
+    local serverName=$(getConfig LINSEE_server)
 
     local files=$(runOnMaster ls ${artifactsPathOnMaster})
 
@@ -154,7 +164,9 @@ copyArtifactsToWorkspace() {
     mustHaveWorkspaceName
 
     # TODO: demx2fk3 2014-10-14 use getDownStreamProjectsData
-    runOnMaster ${LFS_CI_ROOT}/bin/getDownStreamProjects -j ${jobName}     \
+    # runOnMaster ${LFS_CI_ROOT}/bin/getDownStreamProjects -j ${jobName}     \
+    # TODO: demx2fk3 2015-01-23 KNIFE FIXME
+    runOnMaster /ps/lfs/ci/bin/getDownStreamProjects -j ${jobName}     \
                                                          -b ${buildNumber} \
                                                          -h ${serverPath} > ${downStreamprojectsFile}
 
@@ -199,7 +211,7 @@ copyFileToArtifactDirectory() {
     requiredParameters JOB_NAME BUILD_NUMBER
     local fileName=$1
 
-    local serverName=$(getConfig linseeUlmServer)
+    local serverName=$(getConfig LINSEE_server)
     local artifactsPathOnShare=$(getConfig artifactesShare)/${JOB_NAME}/${BUILD_NUMBER}
     executeOnMaster mkdir -p ${artifactsPathOnShare}/save
 

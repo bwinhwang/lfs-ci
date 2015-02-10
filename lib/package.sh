@@ -1,4 +1,8 @@
 #!/bin/bash
+## @file    package.sh
+#  @brief   common package functiond
+#  @details common functions which are required to package the build artifacts
+#           into a LFS release. See also the uc_lfs_package.sh and uc_ubooot_package.sh
 
 LFS_CI_SOURCE_package='$Id$'
 
@@ -73,8 +77,8 @@ copyReleaseCandidateToShare() {
     local workspace=$(getWorkspaceName)
     mustHaveWorkspaceName
 
-    local shouldCopyToShare=$(getConfig LFS_CI_UC_package_copy_to_share_real_location)
-    if [[ ! ${shouldCopyToShare} ]] ; then
+    local canCopyToShare=$(getConfig LFS_CI_UC_package_can_copy_to_share)
+    if [[ -z ${canCopyToShare} ]] ; then
         debug "will not copy this production to CI_LFS share"
         return
     fi
@@ -142,6 +146,31 @@ copyReleaseCandidateToShare() {
     # TODO: demx2fk3 2015-01-09 create also link to the build jobs
 
     return
+}
+
+## @fn      getUsedSdkVersions()
+#  @brief   get the use sdk version in the build
+#  @todo    this is not working as it should supose to be
+#  @param   <none>
+#  @return  list of used sdk version 
+getUsedSdkVersions() {
+    local workspace=$(getWorkspaceName)
+    mustHaveWorkspaceName
+
+    local commonentsFile=${workspace}/bld/bld-externalComponents-summary/externalComponents 
+    mustExistFile ${commonentsFile}
+
+    local usedSdks=
+    for sdk in $(getConfig LFS_CI_UC_package_linking_component) ; do
+        local sdkValue=$(getConfig ${sdk} ${commonentsFile})
+        # TODO: demx2fk3 2014-08-26 hack place make this different
+        if [[ ${sdk} = sdk3 && -z ${sdkValue} ]] ; then
+            sdkValue=$(getConfig sdk ${commonentsFile})
+        fi
+        usedSdks="${usedSdks} ${sdkValue}"
+    done
+
+    echo ${usedSdks}
 }
 
 ## @fn      mustHaveSdkOnShare()

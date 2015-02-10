@@ -1,4 +1,6 @@
 #!/bin/bash
+## @file  uc_uboot_package.sh
+#  @brief the uboot packaging usecase
 
 [[ -z ${LFS_CI_SOURCE_artifacts} ]] && source ${LFS_CI_ROOT}/lib/artifacts.sh
 [[ -z ${LFS_CI_SOURCE_package}   ]] && source ${LFS_CI_ROOT}/lib/package.sh

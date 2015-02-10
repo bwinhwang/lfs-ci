@@ -1,4 +1,6 @@
 #!/bin/bash
+## @file  database.sh
+#  @brief handling of metrics to the database 
 
 LFS_CI_SOURCE_database='$Id$'
 
@@ -46,11 +48,6 @@ databaseEventBuildFinished() {
 #  @return  <none>
 databaseEventBuildFailed() {
     requiredParameters LFS_CI_ROOT
-
-    local rc=$1
-
-    # call only if test failed
-    [[ ${rc} -eq 0 ]] || return 0
 
     mustHaveNextCiLabelName
     local label=$(getNextCiLabelName)

@@ -1,5 +1,7 @@
 #!/bin/bash
 
+
+
 ## @fn      actionCompare()
 #  @brief   this command is called by jenkins custom scm plugin via a
 #           polling trigger. It should decide, if a build is required
@@ -45,16 +47,16 @@ actionCompare() {
 
 ## @fn      actionCheckout()
 #  @brief   action which is called by custom scm jenkins plugin to create or update a workspace and create the changelog
-#  @details the create workspace task is empty here. We just calculate the changelog
+#  @details - create workspace handling: not used here. 
+#           - changelog handling:
+#             idea: the upstream project has the correct change log. We have to get it from them.
+#             For this, we get the old revision state file and the revision state file.
+#             This includes the upstream project name and the upstream build number.
+#             So the job is easy: get the changelog of the upstream project builds between old and new
 #  @param   <none>
 #  @return  <none>
 actionCheckout() {
-    # changelog handling
-    # idea: the upstream project has the correct change log. We have to get it from them.
-    # For this, we get the old revision state file and the revision state file.
-    # This includes the upstream project name and the upstream build number.
-    # So the job is easy: get the changelog of the upstream project builds between old and new
-    #
+    
     # create a new changelog file
     cat < /dev/null > "${CHANGELOG}"
 
@@ -65,6 +67,8 @@ actionCheckout() {
       read oldUpstreamBuildNumber ;  } < "${OLD_REVISION_STATE_FILE}"
     debug "old upstream project data are: ${oldUpstreamProjectName} / ${oldUpstreamBuildNumber}"
 
+    # in case of a parameterized build (aka test job), we get the parameter
+    # TESTED_BUILD_JOBNAME from the upstream
     local upstreamProjectName=${UPSTREAM_PROJECT:-${TESTED_BUILD_JOBNAME}}
     local upstreamBuildNumber=${UPSTREAM_BUILD:-${TESTED_BUILD_NUMBER}}
 

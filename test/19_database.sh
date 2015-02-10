@@ -102,11 +102,6 @@ EOF
     assertEquals "$(cat ${expect})" "$(cat ${UT_MOCKED_COMMANDS})"
 }
 
-testDatabaseEventBuildFailed_failed() {
-    assertTrue "databaseEventBuildFailed 1"
-    assertEquals "" "$(cat ${UT_MOCKED_COMMANDS})"
-}
-
 testdatabaseEventReleaseStarted() {
     export LFS_PROD_RELEASE_CURRENT_TAG_NAME=PS_LFS_OS_9999_88_7777
     assertTrue "databaseEventReleaseStarted"

@@ -1,10 +1,15 @@
 #!/bin/bash
+## @file    commands.sh
+#  @brief   handling of executing commands and handle the errors in a proper way
+#  @details The main function here is the execute function. This function should
+#           help the developer to execute a command in the correct way including
+#           logging of the command and the proper error handling.
 
-[[ -z ${LFS_CI_SOURCE_common} ]] && source ${LFS_CI_ROOT}/lib/common.sh
+
+[[ -z ${LFS_CI_SOURCE_common}  ]] && source ${LFS_CI_ROOT}/lib/common.sh
+[[ -z ${LFS_CI_SOURCE_logging} ]] && source ${LFS_CI_ROOT}/lib/logging.sh
 
 LFS_CI_SOURCE_commands='$Id$'
-
-# TODO: demx2fk3 2014-10-27 source logging.sh is missing
 
 ## @fn      execute()
 #  @brief   executes the given command in a shell
@@ -14,6 +19,8 @@ LFS_CI_SOURCE_commands='$Id$'
 #           If there is an error (exit code != 0) in the command, an
 #           error will be raised and logged. The scripting ends here!
 #  @param   {opt}    -n flag - turn the default redirection of stdout off
+#  @param   {opt}    -i flag - ignore the error code from the command and continue
+#  @param   {opt}    -r parameter - retry the command, if it failed x times. After this it will fail.
 #  @param   {command}    a command string
 #  @return  <none>
 #  @throws  raise an error, if the command exits with an exit code != 0

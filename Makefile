@@ -10,3 +10,4 @@ tags:
 
 doc:
 	doxygen doc/Doxyfile
+	${MAKE} -C doc/latex

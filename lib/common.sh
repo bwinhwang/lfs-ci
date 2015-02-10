@@ -1,4 +1,6 @@
 #!/bin/bash
+## @file  common.sh
+#  @brief common functions
 
 LFS_CI_SOURCE_common='$Id$'
 
@@ -258,8 +260,11 @@ checkoutSubprojectDirectories() {
     local workspace=$(getWorkspaceName) 
     local project=$1
     local revision=$2
-    if [[ ${revision} ]] ; then
+    if [[ ${revision} && ${revision} =~ ^[0-9]*$ ]] ; then
         optRev="--revision=${revision}"
+    elif [[ ${revision} ]] ; then
+        # not a numeric revision, so it should be a tag
+        optRev="${revision}"
     fi
 
     debug "checking out ${project} with revision ${revision:-latest}"
@@ -655,7 +660,9 @@ _getUpstreamProjects() {
     mustHaveValue "${serverPath}" "server path"
 
     # find the related jobs of the build
-    runOnMaster ${LFS_CI_ROOT}/bin/getUpStreamProject \
+    # TODO: demx2fk3 2015-01-23 KNIFE FIXME
+    # runOnMaster ${LFS_CI_ROOT}/bin/getUpStreamProject \
+    runOnMaster /ps/lfs/ci/bin/getUpStreamProject \
                     -j ${jobName}                     \
                     -b ${buildNumber}                 \
                     -h ${serverPath} > ${upstreamsFile}
@@ -683,7 +690,9 @@ _getDownstreamProjects() {
     local serverPath=$(getConfig jenkinsMasterServerPath)
     mustHaveValue "${serverPath}" "server path"
 
-    runOnMaster ${LFS_CI_ROOT}/bin/getDownStreamProjects -j ${jobName}    \
+    # TODO: demx2fk3 2015-01-23 KNIFE FIXME
+    # runOnMaster ${LFS_CI_ROOT}/bin/getDownStreamProjects -j ${jobName}    \
+    runOnMaster /ps/lfs/ci/bin/getDownStreamProjects -j ${jobName}     \
                                                         -b ${buildNumber} \
                                                         -h ${serverPath}  > ${downstreamFile}
     rawDebug ${downstreamFile}

@@ -1,4 +1,6 @@
 #!/bin/bash
+## @file  workflowtool.sh
+#  @brief common functions for workflowtool 
 
 LFS_CI_SOURCE_workflowtool='$Id$'
 
@@ -155,3 +157,33 @@ mustBeValidXmlReleaseNote() {
     return 
 }
 
+# TODO: demx2fk3 2015-01-21 not in use
+baselineNameOfSystemComponentFromWorkflowTool() {
+    local systemComponent=${1}
+    local baselineName=${2}
+
+    local query=$(printf "'/info/content/baseline[@sc=\"%s\"]/node()'" ${systemComponent})
+
+    local buildContentFile=$(createTempFile)
+    _wftGetBuildContent ${baselineName} ${buildContentFile}
+
+    local resultBaseline=$(${LFS_CI_ROOT}/bin/xpath -q -e ${query} ${buildContentFile})
+
+    echo ${resultBaseline}
+
+    return
+}
+
+# TODO: demx2fk3 2015-01-21 not in use
+_wftGetBuildContent() {
+    local baselineName=${1}
+    local resultFile=${2}
+
+    # https://wft.inside.nsn.com/ext/build_content/LN6.0_ENB_1311_630_12
+
+    local wftApiKey=$(getConfig WORKFLOWTOOL_api_key)
+    local wftBuildContent=$(getConfig WORKFLOWTOOL_url_build_content)
+    execute -n curl -sf -k ${wftBuildContent}/${baselineName}  > ${resultFile}
+
+    return
+}

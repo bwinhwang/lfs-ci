@@ -188,3 +188,55 @@ BEGIN
 END //
 DELIMITER ;
 
+
+DROP FUNCTION IF EXISTS isFailed;
+DELIMITER //
+
+CREATE FUNCTION isFailed(in_build_id int) RETURNS int
+    DETERMINISTIC
+BEGIN
+    DECLARE cnt_isFailed1 int;
+    DECLARE cnt_isFailed2 int;
+    DECLARE isFailed INT;
+
+    SELECT count(*) INTO cnt_isFailed1 FROM build_events WHERE build_id = in_build_id AND event_id = 3;
+    IF cnt_isFailed1 >= 1 THEN
+        SET isFailed = 1;
+    ELSE
+        SELECT count(*) INTO cnt_isFailed2 FROM build_events 
+        WHERE build_id = in_build_id AND event_id NOT IN (1, 2) AND TIMESTAMPDIFF(HOUR, timestamp, NOW() ) > 2;
+
+        IF cnt_isFailed2 >= 1 THEN
+            SET isFailed = 1;
+        ELSE
+            SET isFailed = 0;
+        END IF;
+    END IF;
+
+RETURN (isFailed);
+END //
+DELIMITER ;
+
+DROP PROCEDURE IF EXISTS build_results;
+DELIMITER //
+CREATE PROCEDURE build_results()
+BEGIN
+
+    DROP TABLE IF EXISTS tmp_build_results;
+    CREATE TEMPORARY TABLE tmp_build_results
+    SELECT b.id, b.build_name, b.branch_name, b.revision, b.comment, 
+           be1.timestamp AS build_started, 
+           CASE isFailed( b.id )
+                WHEN 0 THEN be2.timestamp
+                ELSE IF( be3.timestamp, be3.timestamp, DATE_ADD( be1.timestamp, INTERVAL 2 HOUR) )
+        END AS build_ended,
+        isFailed( b.id ) AS isFailed
+    FROM builds b
+    LEFT JOIN build_events be1 ON (b.id = be1.build_id AND be1.event_id = 1 )
+    LEFT JOIN build_events be2 ON (b.id = be2.build_id AND be2.event_id = 2 )
+    LEFT JOIN build_events be3 ON (b.id = be3.build_id AND be3.event_id = 3 )
+    ;
+
+END //
+DELIMITER ;
+

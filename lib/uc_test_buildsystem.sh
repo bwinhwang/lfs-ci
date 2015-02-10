@@ -1,5 +1,7 @@
 #!/bin/bash
-# LFS_Post_-_trunk_-_TestBuildsystem_-_Dependencies_Ulm
+## @file  uc_test_buildsystem
+#  @brief the test buildsystem usecase
+#  @details job name : LFS_Post_-_trunk_-_TestBuildsystem_-_Dependencies_Ulm
 
 [[ -z ${LFS_CI_SOURCE_createWorkspace} ]] && source ${LFS_CI_ROOT}/lib/createWorkspace.sh
 
