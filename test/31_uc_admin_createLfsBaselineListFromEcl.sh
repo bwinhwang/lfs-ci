@@ -1,15 +1,12 @@
 #!/bin/bash
 
-source lib/common.sh
-initTempDirectory
+source test/common.sh
 
 source lib/uc_admin.sh
 
-export UNITTEST_COMMAND=$(createTempFile)
-
 oneTimeSetUp() {
     mockedCommand() {
-        echo "$@" >> ${UNITTEST_COMMAND}
+        echo "$@" >> ${UT_MOCKED_COMMANDS}
     }
     execute() {
         mockedCommand "execute $@"
@@ -23,11 +20,11 @@ oneTimeSetUp() {
 }
 
 setUp() {
-    cp -f /dev/null ${UNITTEST_COMMAND}
+    cp -f /dev/null ${UT_MOCKED_COMMANDS}
 }
 
 tearDown() {
-    rm -rf ${UNITTEST_COMMAND}
+    rm -rf ${UT_MOCKED_COMMANDS}
 }
 
 test1() {
@@ -43,8 +40,9 @@ execute -n grep -e PS_LFS_OS -e PS_LFS_REL */ECL_BASE/ECL
 execute -n cut -d= -f2
 execute -n cat /path/to/tmp /path/to/tmp
 EOF
-    assertEquals "$(cat ${expect})" "$(cat ${UNITTEST_COMMAND})"
-    rm -rf ${expect}
+    assertExecutedCommands ${expect}
+
+    return
 }
 
 source lib/shunit2
