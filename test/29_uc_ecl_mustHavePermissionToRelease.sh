@@ -1,12 +1,8 @@
 #!/bin/bash
 
-source lib/common.sh
-
-initTempDirectory
+source test/common.sh
 
 source lib/uc_ecl.sh
-
-export UT_MOCKED_COMMANDS=$(createTempFile)
 
 oneTimeSetUp() {
     mockedCommand() {
@@ -72,7 +68,7 @@ test1() {
 cat <<EOF > ${expect}
 getConfig LFS_CI_uc_update_ecl_update_promote_every_xth_release
 EOF
-    assertEquals "$(cat ${expect})" "$(cat ${UT_MOCKED_COMMANDS})"
+    assertExecutedCommands ${expect}
 
     return
 }
@@ -88,7 +84,7 @@ test2() {
 cat <<EOF > ${expect}
 getConfig LFS_CI_uc_update_ecl_update_promote_every_xth_release
 EOF
-    assertEquals "$(cat ${expect})" "$(cat ${UT_MOCKED_COMMANDS})"
+    assertExecutedCommands ${expect}
 
     return
 }
@@ -115,7 +111,7 @@ runOnMaster ${LFS_CI_ROOT}/bin/xpath -q -e /build/startTime/node() ${UT_LAST_BUI
 date +%s
 getConfig LFS_CI_uc_ecl_maximum_time_between_two_releases
 EOF
-    assertEquals "$(cat ${expect})" "$(cat ${UT_MOCKED_COMMANDS})"
+    assertExecutedCommands ${expect}
 
     return
 }
@@ -145,7 +141,7 @@ getConfig LFS_CI_uc_ecl_maximum_time_between_two_releases
 setBuildDescription 1 <br>not promoted
 setBuildResultUnstable 
 EOF
-    assertEquals "$(cat ${expect})" "$(cat ${UT_MOCKED_COMMANDS})"
+    assertExecutedCommands ${expect}
 
     return
 }
