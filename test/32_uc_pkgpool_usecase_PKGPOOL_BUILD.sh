@@ -49,12 +49,11 @@ tearDown() {
 test1() {
     export WORKSPACE=$(createTempDirectory)
     export JOB_NAME=PKGPOOL_CI_-_trunk_-_Build
+    export BUILD_NUMBER=123
 
     mkdir ${WORKSPACE}/src/
 
-
-    # assertTrue "ci_job_klocwork_build"
-    usecase_PKGPOOL_BUILD
+    assertTrue "usecase_PKGPOOL_BUILD"
 
     local expect=$(createTempFile)
     cat <<EOF > ${expect}
@@ -65,7 +64,7 @@ execute -n ${WORKSPACE}/src/build -j24 --prepopulate --release=PKGPOOL_
 execute -n sed -ne s,^release \([^ ]*\) complete$,\1,p TempFile
 gitDescribe --abbrev=0
 gitTagAndPushToOrigin 
-setBuildDescription PKGPOOL_CI_-_trunk_-_Build  PKGPOOL_FOO
+setBuildDescription PKGPOOL_CI_-_trunk_-_Build 123 PKGPOOL_FOO
 execute touch /build/home/SC_LFS/pkgpool/.hashpool
 execute sed -ne s|^src [^ ]* \(.*\)$|PS_LFS_PKG = \1|p ${WORKSPACE}/workspace/pool/*.meta
 EOF
