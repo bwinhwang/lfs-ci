@@ -1,11 +1,8 @@
 #!/bin/bash
 
-source lib/common.sh
-initTempDirectory
+source test/common.sh
 
 source lib/uc_pkgpool.sh
-
-export UT_MOCKED_COMMANDS=$(createTempFile)
 
 oneTimeSetUp() {
     mockedCommand() {
@@ -17,10 +14,9 @@ oneTimeSetUp() {
     }
     getConfig() {
         mockedCommand "getConfig $@"
-        echo 1>&2 foo $1
         case $1 in 
             PKGPOOL_PROD_uc_update_dependencies_svn_urls) 
-                echo http://host/path/file
+                echo ${UT_CONFIG_URLS}
             ;;
             *) echo $1 ;;
         esac
@@ -70,12 +66,14 @@ oneTimeSetUp() {
     svnCommit() {
         mockedCommand "svnCommit $@"
         if [[ -e ${WORKSPACE}/svn_error_1 ]] ; then
-            cat ${WORKSPACE}/svn_error_1
-            return 1
+            cat ${WORKSPACE}/svn_error_1 > ${LFS_CI_LAST_EXECUTE_LOGFILE}
+            rm -rf ${WORKSPACE}/svn_error_1
+            exit 1
         fi
         if [[ -e ${WORKSPACE}/svn_error_2 ]] ; then
-            cat ${WORKSPACE}/svn_error_2
-            return 1
+            cat ${WORKSPACE}/svn_error_2 > ${LFS_CI_LAST_EXECUTE_LOGFILE}
+            rm -rf ${WORKSPACE}/svn_error_2
+            exit 1
         fi
     }
     setBuildResultUnstable() {
@@ -99,6 +97,7 @@ test1() {
     export WORKSPACE=$(createTempDirectory)
     export UPSTREAM_PROJECT=PKGPOOL_CI_-_trunk_-_Test
     export UPSTREAM_BUILD=1234
+    export UT_CONFIG_URLS=http://host/path/file
 
     export UT_SVN_EXIT_CODE=0
 
@@ -115,7 +114,6 @@ getConfig PKGPOOL_PROD_uc_update_dependencies_svn_urls
 svnCheckout http://host/path ${WORKSPACE}/workspace
 gitRevParse HEAD
 gitLog oldRevision..HEAD
-execute -n sed -e s,^    %,%,
 execute sed -i -e 
             s|^PKGLABEL *?=.*|PKGLABEL ?= |
             s|^LRCPKGLABEL *?=.*|LRCPKGLABEL ?= |
@@ -123,18 +121,61 @@ execute sed -i -e
          file
 svnCommit -F gitlog file ${WORKSPACE}/workspace/src/gitrevision
 EOF
-    assertEquals "$(cat ${expect})" "$(cat ${UT_MOCKED_COMMANDS})"
+
+    assertExecutedCommands ${expect}
 
     return
 }
 
 test2() {
+    # usecase: the commits will fail twice to svn
+    # => result: exit 1 and failure of the usecase
     export WORKSPACE=$(createTempDirectory)
     export UPSTREAM_PROJECT=PKGPOOL_CI_-_trunk_-_Test
     export UPSTREAM_BUILD=1234
+    export UT_CONFIG_URLS=http://host/path/file
 
-    echo "Error in line 12345 : foobar asdf" > ${WORKSPACE}/svn_error_1
-    echo "Error in line 12345 : foobar asdf" > ${WORKSPACE}/svn_error_2
+    echo "Error in line 1 : foobar asdf" > ${WORKSPACE}/svn_error_1
+    echo "Error in line 2 : foobar asdf" > ${WORKSPACE}/svn_error_2
+
+    mkdir -p ${WORKSPACE}/src
+
+    # usecase_PKGPOOL_UDPATE_DEPS
+    assertFalse "usecase_PKGPOOL_UDPATE_DEPS"
+
+    local expect=$(createTempFile)
+    cat <<EOF > ${expect}
+mustHaveCleanWorkspace
+copyArtifactsToWorkspace PKGPOOL_CI_-_trunk_-_Test 1234 pkgpool
+setBuildDescription LABEL
+getConfig PKGPOOL_PROD_uc_update_dependencies_svn_urls
+svnCheckout http://host/path ${WORKSPACE}/workspace
+gitRevParse HEAD
+gitLog oldRevision..HEAD
+execute sed -i -e 
+            s|^PKGLABEL *?=.*|PKGLABEL ?= |
+            s|^LRCPKGLABEL *?=.*|LRCPKGLABEL ?= |
+            s|^hint *bld/pkgpool .*|hint bld/pkgpool |
+         file
+svnCommit -F gitlog file ${WORKSPACE}/workspace/src/gitrevision
+setBuildResultUnstable
+execute sed -i -e 1{s,%,o/o,g;s,^,SVN REJECTED: ,} gitlog
+svnCommit -F gitlog file ${WORKSPACE}/workspace/src/gitrevision
+EOF
+    assertExecutedCommands ${expect}
+
+    return
+}
+
+test3() {
+    # usecase: the commits will fail twice to svn
+    # => result: exit 1 and failure of the usecase
+    export WORKSPACE=$(createTempDirectory)
+    export UPSTREAM_PROJECT=PKGPOOL_CI_-_trunk_-_Test
+    export UPSTREAM_BUILD=1234
+    export UT_CONFIG_URLS=http://host/path/file
+
+    echo "Error in line 1 : foobar asdf" > ${WORKSPACE}/svn_error_1
 
     mkdir -p ${WORKSPACE}/src
 
@@ -142,8 +183,100 @@ test2() {
 
     local expect=$(createTempFile)
     cat <<EOF > ${expect}
+mustHaveCleanWorkspace
+copyArtifactsToWorkspace PKGPOOL_CI_-_trunk_-_Test 1234 pkgpool
+setBuildDescription LABEL
+getConfig PKGPOOL_PROD_uc_update_dependencies_svn_urls
+svnCheckout http://host/path ${WORKSPACE}/workspace
+gitRevParse HEAD
+gitLog oldRevision..HEAD
+execute sed -i -e 
+            s|^PKGLABEL *?=.*|PKGLABEL ?= |
+            s|^LRCPKGLABEL *?=.*|LRCPKGLABEL ?= |
+            s|^hint *bld/pkgpool .*|hint bld/pkgpool |
+         file
+svnCommit -F gitlog file ${WORKSPACE}/workspace/src/gitrevision
+setBuildResultUnstable
+execute sed -i -e 1{s,%,o/o,g;s,^,SVN REJECTED: ,} gitlog
+svnCommit -F gitlog file ${WORKSPACE}/workspace/src/gitrevision
 EOF
-    assertEquals "$(cat ${expect})" "$(cat ${UT_MOCKED_COMMANDS})"
+    assertExecutedCommands ${expect}
+
+    return
+}
+
+test4() {
+    # usecase: the commits will fail twice to svn
+    # => result: exit 1 and failure of the usecase
+    export WORKSPACE=$(createTempDirectory)
+    export UPSTREAM_PROJECT=PKGPOOL_CI_-_trunk_-_Test
+    export UPSTREAM_BUILD=1234
+    export UT_CONFIG_URLS="http://host/path/file http://host/path2/file2"
+
+    mkdir -p ${WORKSPACE}/src
+
+    assertTrue "usecase_PKGPOOL_UDPATE_DEPS"
+
+    local expect=$(createTempFile)
+    cat <<EOF > ${expect}
+mustHaveCleanWorkspace
+copyArtifactsToWorkspace PKGPOOL_CI_-_trunk_-_Test 1234 pkgpool
+setBuildDescription LABEL
+getConfig PKGPOOL_PROD_uc_update_dependencies_svn_urls
+svnCheckout http://host/path ${WORKSPACE}/workspace
+gitRevParse HEAD
+gitLog oldRevision..HEAD
+execute sed -i -e 
+            s|^PKGLABEL *?=.*|PKGLABEL ?= |
+            s|^LRCPKGLABEL *?=.*|LRCPKGLABEL ?= |
+            s|^hint *bld/pkgpool .*|hint bld/pkgpool |
+         file
+svnCommit -F gitlog file ${WORKSPACE}/workspace/src/gitrevision
+svnCheckout http://host/path2 ${WORKSPACE}/workspace
+gitRevParse HEAD
+gitLog oldRevision..HEAD
+execute sed -i -e 
+            s|^PKGLABEL *?=.*|PKGLABEL ?= |
+            s|^LRCPKGLABEL *?=.*|LRCPKGLABEL ?= |
+            s|^hint *bld/pkgpool .*|hint bld/pkgpool |
+         file2
+svnCommit -F gitlog file2 ${WORKSPACE}/workspace/src/gitrevision
+EOF
+    assertExecutedCommands ${expect}
+
+    return
+}
+
+test5() {
+    # fails. no auto correction possbile
+    export WORKSPACE=$(createTempDirectory)
+    export UPSTREAM_PROJECT=PKGPOOL_CI_-_trunk_-_Test
+    export UPSTREAM_BUILD=1234
+    export UT_CONFIG_URLS=http://host/path/file
+
+    mkdir -p ${WORKSPACE}/src
+    echo "fail" > ${WORKSPACE}/svn_error_1
+
+    assertFalse "usecase_PKGPOOL_UDPATE_DEPS"
+
+    local expect=$(createTempFile)
+    cat <<EOF > ${expect}
+mustHaveCleanWorkspace
+copyArtifactsToWorkspace PKGPOOL_CI_-_trunk_-_Test 1234 pkgpool
+setBuildDescription LABEL
+getConfig PKGPOOL_PROD_uc_update_dependencies_svn_urls
+svnCheckout http://host/path ${WORKSPACE}/workspace
+gitRevParse HEAD
+gitLog oldRevision..HEAD
+execute sed -i -e 
+            s|^PKGLABEL *?=.*|PKGLABEL ?= |
+            s|^LRCPKGLABEL *?=.*|LRCPKGLABEL ?= |
+            s|^hint *bld/pkgpool .*|hint bld/pkgpool |
+         file
+svnCommit -F gitlog file ${WORKSPACE}/workspace/src/gitrevision
+setBuildResultUnstable
+EOF
+    assertExecutedCommands ${expect}
 
     return
 }

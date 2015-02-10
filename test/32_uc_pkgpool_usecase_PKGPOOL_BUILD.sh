@@ -1,11 +1,8 @@
 #!/bin/bash
 
-source lib/common.sh
-initTempDirectory
+source test/common.sh
 
 source lib/uc_pkgpool.sh
-
-export UT_MOCKED_COMMANDS=$(createTempFile)
 
 oneTimeSetUp() {
     mockedCommand() {
@@ -64,7 +61,7 @@ test1() {
 execute rm -rf ${WORKSPACE}/src/src
 gitReset --hard
 execute ./bootstrap
-execute -n ${WORKSPACE}/src/build --prepopulate --release=PKGPOOL_
+execute -n ${WORKSPACE}/src/build -j24 --prepopulate --release=PKGPOOL_
 execute -n sed -ne s,^release \([^ ]*\) complete$,\1,p TempFile
 gitDescribe --abbrev=0
 gitTagAndPushToOrigin 
@@ -72,7 +69,7 @@ setBuildDescription PKGPOOL_CI_-_trunk_-_Build  PKGPOOL_FOO
 execute touch /build/home/SC_LFS/pkgpool/.hashpool
 execute sed -ne s|^src [^ ]* \(.*\)$|PS_LFS_PKG = \1|p ${WORKSPACE}/workspace/pool/*.meta
 EOF
-    assertEquals "$(cat ${expect})" "$(cat ${UT_MOCKED_COMMANDS})"
+    assertExecutedCommands ${expect}
 
     return
 }

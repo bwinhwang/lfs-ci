@@ -176,7 +176,7 @@ usecase_PKGPOOL_UDPATE_DEPS() {
 
         cd ${WORKSPACE}/src
         gitLog ${oldGitRevision}..${newGitRevision} | \
-            execute -n sed -e 's,^    %,%,' > ${gitLog}
+            sed -e 's,^    %,%,' > ${gitLog}
         rawDebug ${gitLog}
 
         cd ${workspace}
@@ -186,14 +186,22 @@ usecase_PKGPOOL_UDPATE_DEPS() {
             s|^hint *bld/pkgpool .*|hint bld/pkgpool ${releaseString}|
         " ${releaseFile}
 
+        export LFS_CI_LAST_EXECUTE_LOGFILE=$(createTempFile)
         try
         (
             svnCommit -F gitlog ${releaseFile} ${workspace}/src/gitrevision
         )
         catch ||
         (
+            warning "first svn commit failed, try to correct from error log"
+
+            # logfile from the last execution command (in svnCommit)
+            errorLogFile=$(lastExecuteLogFile)
+            mustExistFile ${errorLogFile}
+
             setBuildResultUnstable
-            local errorLineNumber=$(sed -ne 's,^Error in line \([0-9]\+\) : .*,\1,p' stderr)
+
+            local errorLineNumber=$(sed -ne 's,^Error in line \([0-9]\+\) : .*,\1,p' ${errorLogFile})
             if [[ -z "${errorLineNumber}" ]] ; then
                 fatal "SVN rejected our commit message for a reason we didn't understand. (see logfile)"
             fi
@@ -202,15 +210,16 @@ usecase_PKGPOOL_UDPATE_DEPS() {
                 execute sed -i -e "${lineNumber}{s,%,o/o,g;s,^,SVN REJECTED: ,}" gitlog
             done
 
-            info "SVN rejected some of your commit notes for the release note."
-            info "If you need them in the release note please do another commit"
-            info "with corrected syntax."
-            info "We try to commit with corrected notes."
+            warning "SVN rejected some of your commit notes for the release note."
+            warning "If you need them in the release note please do another commit"
+            warning "with corrected syntax."
+            warning "We try to commit with corrected notes."
             rawDebug gitlog
 
             svnCommit -F gitlog ${releaseFile} ${workspace}/src/gitrevision
-        )
+        ) || exit 1 # when catch part also fails, we exit the usecase
 
+        info "update done for ${urlToUpdate}"
     done
 
     return
