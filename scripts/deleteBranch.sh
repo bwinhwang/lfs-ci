@@ -33,38 +33,6 @@ PKG_SHARE="/build/home/SC_LFS/pkgpool"
 #######################################################################
 
 
-## @fn      getBranchPart()
-#  @brief   provides the parts of a branch name
-#  @param   <branch> the name of a branch eg FB1408
-#  @param   <what> the part to get. Can be YY | YYYY | MM | NR | TYPE
-#           NR is only valid for MD branches.
-#  @return  <none>
-getBranchPart() {
-    local branch=$1
-    local what=$2
-    local branch_type=$(echo ${branch} | cut -c1,2)
-
-    if [ "${branch_type}" == "FB" ]; then
-        local yy=$(echo ${branch}  | cut -c3,4)
-        local mm=$(echo ${branch}  | cut -c5,6)
-        local yyyy=$((2000+yy))
-    elif [ "${branch_type}" == "MD" ]; then
-        local yy=$(echo ${branch}  | cut -c4,5)
-        local nr=$(echo ${branch}  | cut -c3)
-        local mm=$(echo ${branch}  | cut -c6,7)
-        local yyyy=$((2000+yy))
-    else
-        error "Only FB and MD branches are supported."
-        return 1
-    fi
-
-    [[ ${what} == YY ]] && echo ${yy}
-    [[ ${what} == YYYY ]] && echo ${yyyy}
-    [[ ${what} == MM ]] && echo ${mm}
-    [[ ${what} == TYPE ]] && echo ${branch_type}
-    [[ ${what} == NR ]] && echo ${nr}
-}
-
 ## @fn      getEclValue()
 #  @brief   get value from ecl for key
 #  @param   {key} the key in the ECL file
@@ -74,7 +42,7 @@ getEclValue() {
     local key=$1
     local branch=$2
     local svnEclRepo=$(echo ${SVN_REPO} | awk -F/ '{print $1"//"$2$3}')
-    local value=$(svn cat --username eambrosc --password jesusih --non-interactive --trust-server-cert ${svnEclRepo}/isource/svnroot/BTS_SCM_PS/ECL/${branch}/ECL_BASE/ECL | grep ${key} | cut -d'=' -f2)
+    local value=$(svn cat ${svnEclRepo}/isource/svnroot/BTS_SCM_PS/ECL/${branch}/ECL_BASE/ECL | grep ${key} | cut -d'=' -f2)
     echo ${value}
 }
 
@@ -115,17 +83,17 @@ __cmd() {
 #  @param   <none>
 #  @return  <none>
 moveBranchSvn() {
-    svn ls ${SVN_CREDS} ${SVN_REPO}/${SVN_DIR}/${BRANCH} && {
+    svn ls ${SVN_REPO}/${SVN_DIR}/${BRANCH} && {
         __cmd svn move -m \"moved ${BRANCH} to obsolete\" \
             ${SVN_REPO}/${SVN_DIR}/${BRANCH} ${SVN_REPO}/${SVN_DIR}/obsolete;
     }
 
-    svn ls ${SVN_CREDS} ${SVN_REPO}/${SVN_DIR}/${SVN_BLD_DIR}/locations-${BRANCH} && {
+    svn ls ${SVN_REPO}/${SVN_DIR}/${SVN_BLD_DIR}/locations-${BRANCH} && {
         __cmd svn move -m \"moved locations-${BRANCH} to obsolete\" \
             ${SVN_REPO}/${SVN_DIR}/${SVN_BLD_DIR}/locations-${BRANCH} ${SVN_REPO}/${SVN_DIR}/${SVN_BLD_DIR}/obsolete;
     }
 
-    svn ls ${SVN_CREDS} ${SVN_REPO}/${SVN_DIR}/${SVN_BLD_DIR}/locations-${BRANCH}_FSMR4 && {
+    svn ls ${SVN_REPO}/${SVN_DIR}/${SVN_BLD_DIR}/locations-${BRANCH}_FSMR4 && {
         __cmd svn move -m \"moved locations-${BRANCH}_FSMR4 to obsolete\" \
             ${SVN_REPO}/${SVN_DIR}/${SVN_BLD_DIR}/locations-${BRANCH}_FSMR4 ${SVN_REPO}/${SVN_DIR}/${SVN_BLD_DIR}/obsolete;
     }
@@ -137,7 +105,7 @@ moveBranchSvn() {
 #  @param   <none>
 #  @return  <none>
 LRC_moveBranchSvn() {
-    svn ls ${SVN_CREDS} ${SVN_REPO}/${SVN_DIR}/${SVN_BLD_DIR}/locations-LRC_${BRANCH} && {
+    svn ls ${SVN_REPO}/${SVN_DIR}/${SVN_BLD_DIR}/locations-LRC_${BRANCH} && {
         __cmd svn move -m \"moved locations-LRC_${BRANCH} to obsolete\" \
             ${SVN_REPO}/${SVN_DIR}/${SVN_BLD_DIR}/locations-LRC_${BRANCH} ${SVN_REPO}/${SVN_DIR}/${SVN_BLD_DIR}/obsolete;
     }

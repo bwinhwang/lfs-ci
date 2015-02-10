@@ -30,6 +30,8 @@ import java.io.FileInputStream;
 
 println("\n\nGROOVY SCRIPT")
 
+return 0
+
 def env = System.getenv()
 
 jenkinsHome = env['JENKINS_HOME']
