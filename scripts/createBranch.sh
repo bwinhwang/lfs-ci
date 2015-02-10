@@ -95,3 +95,22 @@ echo svn co ${SVN_SERVER}/${SVN_DIR}/${NEW_BRANCH}/trunk/main/${PROJECT_DIR}
     warning "Directory $PROJECT_DIR does not exist";
 }
 
+BLD_TOOLS="bldtools"
+LOC_TXT="locations.txt"
+info "Add ${NEW_BRANCH} to trunk/${BLD_TOOLS}/${LOC_TXT}"
+mkdir ${BLD_TOOLS}
+svn co --depth empty ${SVN_SERVER}/${SVN_DIR}/trunk/${BLD_TOOLS} ${BLD_TOOLS}
+cd ${BLD_TOOLS}
+svn update ${LOC_TXT}
+if [[ "${FSMR4}" == "true" ]] && [[ "$(echo ${NEW_BRANCH} | cut -c1,2)" == "MD" ]]; then
+    echo "${NEW_BRANCH}_FSMR4                    Feature Build ${NEW_BRANCH} FSM-r4 stuff only (bi-weekly branch)" >> ${LOC_TXT}
+fi
+if [[ "${FSMR4}" == "true" ]] && [[ "$(echo ${NEW_BRANCH} | cut -c1,2)" == "FB" ]]; then
+    echo "${NEW_BRANCH}                          Feature Build ${NEW_BRANCH} stuff only (bi-weekly branch)" >> ${LOC_TXT}
+fi
+if [[ "${LRC}" == "true" ]]; then
+    echo "LRC_${NEW_BRANCH}                      LRC locations (special LRC for ${NEW_BRANCH} only)" >> ${LOC_TXT}
+fi
+echo "${NEW_BRANCH}                          Feature Build ${NEW_BRANCH} (all FB_PS_LFS_REL_2014_12_xx...)" >> ${LOC_TXT}
+echo svn commit -m "Added ${NEW_BRANCH} to file ${LOC_TXT}" ${LOC_TXT}
+
