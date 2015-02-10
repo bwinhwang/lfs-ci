@@ -127,8 +127,10 @@ ci_job_test_collect_metrics() {
         [[ "${jobName}" =~ _Test$      ]] && continue
         [[ "${jobName}" =~ makingTest$ ]] && continue
         [[ "${jobName}" =~ target$     ]] && continue
+        [[ "${jobName}" =~ lcpa$       ]] && continue
 
         [[ "${state}"   = FAILURE   ]] && continue
+        [[ "${state}"   = ABORTED   ]] && continue
         [[ "${state}"   = NOT_BUILT ]] && continue
 
         storeMetricsForTestJob ${jobName} ${buildNumber}
