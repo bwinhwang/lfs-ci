@@ -10,7 +10,7 @@ oneTimeSetUp() {
     }
     execute() {
         mockedCommand "execute $@"
-        sleep 1
+        sleep 4
     }
     createTempFile() {
         echo /path/to/tmp
