@@ -10,6 +10,9 @@
 #                    PKGPOOL_CI_-_trunk_-_Test
 #                    PKGPOOL_PROD_-_trunk_-_Release
 #                    PKGPOOL_PROD_-_trunk_-_Update_Dependencies
+#
+# Fingerprint file: workspace/bld/bld-pkgpool-release/label
+#
 
 [[ -z ${LFS_CI_SOURCE_artifacts}    ]] && source ${LFS_CI_ROOT}/lib/artifacts.sh
 [[ -z ${LFS_CI_SOURCE_workflowtool} ]] && source ${LFS_CI_ROOT}/lib/workflowtool.sh
@@ -43,17 +46,13 @@ usecase_PKGPOOL_BUILD() {
 
     execute ./bootstrap
     cd ${workspace}
-    execute -n ${gitWorkspace}/build --prepopulate --release="${releasePrefix}" > ${buildLogFile}
+
+    # TODO: demx2fk3 2015-02-09 use different path for testing ci jobs
+    execute -n ${gitWorkspace}/build -j24 --prepopulate --release="${releasePrefix}" > ${buildLogFile}
     rawDebug ${buildLogFile}
 
     local releaseString="$(execute -n sed -ne 's,^release \([^ ]*\) complete$,\1,p' ${buildLogFile})"
-    if [[ -z ${releaseString} ]] ; then
-        for logFile in logs/*.log ; do
-            [[ -e ${logFile} ]] || continue
-            rawOutput ${logFile}
-        done
-        fatal "release complate not found in logfile"
-    fi
+    mustHaveValue "${releaseString}" "release string"
 
     cd ${gitWorkspace}
     local oldRelease=$(gitDescribe --abbrev=0)
@@ -95,7 +94,8 @@ usecase_PKGPOOL_TEST() {
 #  @param   <none>
 #  @return  <none>
 usecase_PKGPOOL_RELEASE() {
-    requiredParameters LFS_CI_ROOT UPSTREAM_PROJECT UPSTREAM_BUILD
+    requiredParameters LFS_CI_ROOT UPSTREAM_PROJECT UPSTREAM_BUILD \
+                       JOB_NAME BUILD_NUMBER
 
     local workspace=$(getWorkspaceName)
     mustHaveCleanWorkspace
@@ -104,6 +104,8 @@ usecase_PKGPOOL_RELEASE() {
 
     local label=$(cat ${workspace}/bld/bld-pkgpool-release/label)
     mustHaveValue "${label}" "label"
+
+    setBuildDescription ${JOB_NAME} ${BUILD_NUMBER} ${label}
 
     local oldLabel=$(cat ${workspace}/bld/bld-pkgpool-release/oldLabel)
     mustHaveValue "${oldLabel}" "old label"
@@ -139,27 +141,41 @@ usecase_PKGPOOL_UDPATE_DEPS() {
     local workspace=$(getWorkspaceName)
     mustHaveCleanWorkspace
 
+    local gitWorkspace=${WORKSPACE}/src
+    mustExistDirectory ${gitWorkspace}
+
+    copyArtifactsToWorkspace ${UPSTREAM_PROJECT} ${UPSTREAM_BUILD} "pkgpool"
+
+    local label=$(cat ${workspace}/bld/bld-pkgpool-release/label)
+    mustHaveValue "${label}" "label"
+
+    setBuildDescription ${JOB_NAME} ${BUILD_NUMBER} ${label}
+
+    local oldLabel=$(cat ${workspace}/bld/bld-pkgpool-release/oldLabel)
+    mustHaveValue "${oldLabel}" "old label"
+
     local svnUrlsToUpdate=$(getConfig PKGPOOL_PROD_uc_update_dependencies_svn_urls)
     mustHaveValue "${svnUrlsToUpdate}" "svn urls for pkgpool"
 
     local urlToUpdate=""
 
     for urlToUpdate in ${svnUrlsToUpdate} ; do
+        info "url to update ${urlToUpdate}"
+
         local releaseFile=$(basename ${urlToUpdate})
         local svnUrl=$(dirname ${urlToUpdate})
 
         local workspace=$(getWorkspaceName)
         mustHaveWorkspaceName
 
-        svnCheckout ${svnCheckout} ${workspace}
+        svnCheckout ${svnUrl} ${workspace}
 
         local oldGitRevision=$(cat ${workspace}/src/gitrevision)
-        local newGitRevision=$(git rev-parse HEAD)
+        local newGitRevision=$(gitRevParse HEAD)
         local gitLog=$(createTempFile)
 
-        cd ../src
-        local newGitRevision=$(execute -n git rev-parse HEAD)
-        execute -n git log ${oldGitRevision}..${newGitRevision} | \
+        cd ${WORKSPACE}/src
+        gitLog ${oldGitRevision}..${newGitRevision} | \
             execute -n sed -e 's,^    %,%,' > ${gitLog}
         rawDebug ${gitLog}
 

@@ -39,4 +39,10 @@ gitReset() {
 #  @return  description from git
 gitDescribe() {
     execute -n git describe $@
+    return
+}
+
+gitRevParser() {
+    execute git rev-parse $@
+    return
 }
