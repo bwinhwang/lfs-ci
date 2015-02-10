@@ -95,9 +95,9 @@ getConfig() {
     local file=${2:-${LFS_CI_CONFIG_FILE}}
 
     local productName=$(getProductNameFromJobName)
+    local location=$(getLocationName)
     local taskName=$(getTaskNameFromJobName)
     local subTaskName=$(getSubTaskNameFromJobName)
-    local location=$(getLocationName)
     local config=$(getTargetBoardName)
 
     # TODO: demx2fk3 2014-08-05 this should be always commented out, only required for debugging
