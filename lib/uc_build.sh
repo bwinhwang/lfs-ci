@@ -20,6 +20,9 @@ ci_job_build() {
     local subTaskName=$(getSubTaskNameFromJobName)
     mustHaveValue "${subTaskName}"
 
+    # for the metrics database, we are installing a own exit handler to record the end of this job
+    exit_add _recordBuildEndEvent
+
     execute rm -rf ${WORKSPACE}/revisions.txt
     createWorkspace
 
@@ -57,6 +60,9 @@ ci_job_build_version() {
     mustHaveWorkspaceName
 
     info "workspace is ${workspace}"
+
+    # for the metrics database, we are installing a own exit handler to record the end of this job
+    exit_add _recordBuildEndEvent
 
     local jobDirectory=$(getBuildDirectoryOnMaster)
     local lastSuccessfulJobDirectory=$(getBuildDirectoryOnMaster ${JOB_NAME} lastSuccessfulBuild)
@@ -139,7 +145,7 @@ _build_fsmddal_pdf() {
     return
 }
 
-_buildFailedInDatabase() {
+_recordBuildEndEvent() {
     local rc=${1}
     if [[ ${rc} -gt 0 ]] ; then
         databaseEventBuildFailed
