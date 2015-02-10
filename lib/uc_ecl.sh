@@ -200,7 +200,7 @@ mustHavePermissionToRelease() {
         local lastBuildDirectory=$(getBuildDirectoryOnMaster ${JOB_NAME} lastSuccessfulBuild)
 
         # unix time stamp in milliseconds: 1422347953131
-        local lastBuildDate=$(runOnMaster ${LFS_CI_ROOT}/bin/xpath -q -e '/build/startTime/node()' ${lastBuildDirectory}/build.xml )
+        local lastBuildDate=$(runOnMaster ${LFS_CI_ROOT}/bin/xpath -q -e "/build/startTime/node()" ${lastBuildDirectory}/build.xml )
         mustHaveValue "${lastBuildDate}" "last build date in ms"
 
         local currentDate=$(( $(date +%s) * 1000 ))
