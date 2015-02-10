@@ -90,6 +90,7 @@ EOF
 }
 
 test3() {
+    export JOB_NAME=LFS_CI_-_trunk_-_Build
     export BUILD_NUMBER=1
     export UT_CONFIG_EVERY_X_RELEASE=4
     export UT_CONFIG_MAX_TIME=10000
@@ -106,7 +107,7 @@ test3() {
     local expect=$(createTempFile)
 cat <<EOF > ${expect}
 getConfig LFS_CI_uc_update_ecl_update_promote_every_xth_release
-getBuildDirectoryOnMaster lastSuccessfulBuild
+getBuildDirectoryOnMaster LFS_CI_-_trunk_-_Build lastSuccessfulBuild
 runOnMaster ${LFS_CI_ROOT}/bin/xpath -q -e /build/startTime/node() ${UT_LAST_BUILD_DIRECTORY}/build.xml
 date +%s
 getConfig LFS_CI_uc_ecl_maximum_time_between_two_releases
@@ -117,6 +118,7 @@ EOF
 }
 
 test4() {
+    export JOB_NAME=LFS_CI_-_trunk_-_Build
     export BUILD_NUMBER=1
     export UT_CONFIG_EVERY_X_RELEASE=4
     export UT_CONFIG_MAX_TIME=10000
@@ -134,11 +136,11 @@ test4() {
     local expect=$(createTempFile)
 cat <<EOF > ${expect}
 getConfig LFS_CI_uc_update_ecl_update_promote_every_xth_release
-getBuildDirectoryOnMaster lastSuccessfulBuild
+getBuildDirectoryOnMaster LFS_CI_-_trunk_-_Build lastSuccessfulBuild
 runOnMaster ${LFS_CI_ROOT}/bin/xpath -q -e /build/startTime/node() /path/to/last/build/build.xml
 date +%s
 getConfig LFS_CI_uc_ecl_maximum_time_between_two_releases
-setBuildDescription 1 <br>not promoted
+setBuildDescription LFS_CI_-_trunk_-_Build 1 <br>not promoted
 setBuildResultUnstable 
 EOF
     assertExecutedCommands ${expect}
