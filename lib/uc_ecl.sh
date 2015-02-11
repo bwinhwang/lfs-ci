@@ -197,11 +197,14 @@ mustHavePermissionToRelease() {
         # as agreement with PS SCM, we are just promoting every 4th build.
         # otherwise, we will spam ECL
         # btw: 0 % 4 == 0 
-        local lastBuildDirectory=$(getBuildDirectoryOnMaster ${JOB_NAME} lastSuccessfulBuild)
+
+        requiredParameters WORKSPACE JOB_NAME BUILD_NUMBER LFS_CI_ROOT
 
         # unix time stamp in milliseconds: 1422347953131
-        local lastBuildDate=$(runOnMaster ${LFS_CI_ROOT}/bin/xpath -q -e "/build/startTime/node()" ${lastBuildDirectory}/build.xml )
+        copyFileFromBuildDirectoryToWorkspace ${JOB_NAME} lastSuccessfulBuild ${WORKSPACE}/build.xml
+        local lastBuildDate=$(execute -n ${LFS_CI_ROOT}/bin/xpath -q -e "/build/startTime/node()" ${WORKSPACE}/build.xml)
         mustHaveValue "${lastBuildDate}" "last build date in ms"
+        rm -rf ${WORKSPACE}/build.xml
 
         local currentDate=$(( $(date +%s) * 1000 ))
         mustHaveValue "${currentDate}" "current build date in ms"
