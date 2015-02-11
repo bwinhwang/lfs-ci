@@ -1417,10 +1417,10 @@ SOURCES:
 
             printf "%s: LABEL := %s\n\n", $source->{directory}, $label;
 
-            if( grep { $_ eq $goal } $source->platforms() ) {
+            if( $source->matchesPlatform( $goal ) ) {
                 printf ".PHONY: %s\n\n", $source->{directory};
                 printf "%s: ", $source->{directory};
-                foreach my $platform ( sort grep { $_ eq $goal } $source->platforms() ) {
+                foreach my $platform ( sort $source->matchingPlatform( $goal ) ) {
                     printf "%s-%s ", $source->{directory}, $platform;
                 }
                 printf "\n";
