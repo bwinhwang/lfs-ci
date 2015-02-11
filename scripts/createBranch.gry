@@ -46,17 +46,19 @@ def scm_view_obj = null
 
 def trunk_view = "trunk"
 
-def branch_view = ""
-  
 src_branch = ""
 
 new_branch = ""
   
-enable_jobs = false
-
 fsmr4_jobs = false
 
 lrc_jobs = false
+if(build.getEnvironment(listener).get("LRC") == "true") {
+    lrc_jobs = true
+}
+println("[INFO] lrc_jobs: $lrc_jobs")
+
+comment = ""
 
 scm_view_obj = j.getView(scm_view)
 
@@ -69,10 +71,6 @@ parameters.each {
         src_branch = it.value
     else if(it.name == "FSMR4")
         fsmr4_jobs = it.value
-    else if(it.name == "LRC")
-        lrc_jobs = it.value
-    else if(it.name == "ENABLE_JOBS")
-        enable_jobs = it.value
 }
 
 if(!new_branch) {
@@ -86,9 +84,15 @@ if(!src_branch || src_branch != "trunk") {
 src_branch_view_obj = scm_view_obj.getView(src_branch.toUpperCase())
 
 // Add branch view to SCM view.
-new_branch_view_obj = new ListView(new_branch, scm_view_obj)
-scm_view_obj.addView(new_branch_view_obj)
-println("[INFO] Added view $new_branch to $scm_view view")
+try {
+    new_branch_view_obj = scm_view_obj.getView(new_branch)
+    println("[INFO] view $new_branch already exists.")
+}
+catch(NullPointerException e) {
+    new_branch_view_obj = new ListView(new_branch, scm_view_obj)
+    scm_view_obj.addView(new_branch_view_obj)
+    println("[INFO] Added view $new_branch to $scm_view view")
+}
 
 def processFileInplace(file, Closure processText) {
     def text = file.text
@@ -96,37 +100,32 @@ def processFileInplace(file, Closure processText) {
 }
 
 def copyJob(job) {
+    def new_name = ""
+    def new_job = null
     if (job.getName().find("fsmr4") && fsmr4_jobs) {
         new_name = job.getName().replaceFirst("-_fsmr4_-", "-_"+new_branch+"_FSMR4_-")
         new_job = Jenkins.instance.copy(job, new_name)
+        new_job.setDisplayName(job.getDisplayName().replaceFirst("- "+src_branch+" -", "- "+new_branch+" -"))
     } else if (job.getName().find("LRC") && lrc_jobs) {
         new_name = job.getName().replaceFirst("-_LRC_-", "-_LRC_"+new_branch+"_-")
         new_job = Jenkins.instance.copy(job, new_name)
-    }
-    else {
+        new_job.setDisplayName(job.getDisplayName().replaceFirst("- LRC "+src_branch+" -", "- LRC "+new_branch+" -"))
+    } else if (!lrc_jobs) {
         new_name = job.getName().replaceFirst("-_"+src_branch+"_-", "-_"+new_branch+"_-")
         new_job = Jenkins.instance.copy(job, new_name)
+        new_job.setDisplayName(job.getDisplayName().replaceFirst(src_branch, new_branch))
     }
     println("[INFO] copied job \"$job.name\" -> \"$new_name\"")
     return new_job
 }
 
-def alterDisplayName(job) {
-    if (job.getName().find("fsmr4") && fsmr4_jobs) {
-        new_job.setDisplayName(job.getDisplayName().replaceFirst("- "+src_branch+" -", "- "+new_branch+" -"))
-    } else if (job.getName().find("LRC") && lrc_jobs) {
-        new_job.setDisplayName(job.getDisplayName().replaceFirst("- LRC "+src_branch+" -", "- LRC "+new_branch+" -"))
-    }
-    else {
-        new_job.setDisplayName(job.getDisplayName().replaceFirst(src_branch, new_branch))
-    }
-}
-
 def enableDisableJob(job) {
-    if (!enable_jobs)
-        job.disabled = true
-    else
-        job.disabled = false
+    if (job.getName().find("ECL")) {
+        println("[INFO] Disable job $job.name")
+        job.disable()
+    } else {
+        job.enable()
+    }
 }
 
 def updateWorkspace(job) {
@@ -150,12 +149,12 @@ def updateJobConfig(job, new_job) {
         processFileInplace(config_file) { text ->
             text.replaceAll("LFS_CI_-_LRC_-", "LFS_CI_-_LRC_"+new_branch+"_-")
         }
-    } else {
+    } else if (!lrc_jobs) {
         processFileInplace(config_file) { text ->
             text.replaceAll("-_"+src_branch+"_-", "-_"+new_branch+"_-")
         }
     }
-    println("[INFO] updated job configuration for job \"$new_name\"")
+    println("[INFO] updated job configuration for job \"$new_job.name\"")
     return config_file
 }
 
@@ -163,7 +162,7 @@ def reloadJobConfig(job, config_file) {
     InputStream is = new FileInputStream(config_file);
     job.updateByXml(new StreamSource(is));
     job.save();
-    println("[INFO] reloaded config for job \"$new_name\"")
+    println("[INFO] reloaded config for job \"$job.name\"")
 }
 
 def copyPromotions(job, new_job) {
@@ -171,7 +170,7 @@ def copyPromotions(job, new_job) {
     def promoDstDir = new File("${jenkinsHome}/jobs/${new_job.name}/promotions")
     for(property in job.getAllProperties()) {
         if(property.getClass() == hudson.plugins.promoted_builds.JobPropertyImpl) {
-            println("[INFO] Source job \"$job.name\" has promotions.")
+            println("[INFO] Job \"$job.name\" has promotions.")
             for(action in property.getJobActions())  {
                 for(process in action.getProcesses()) {
                     if(process.getClass() == hudson.plugins.promoted_builds.PromotionProcess) {
@@ -192,7 +191,7 @@ def copyPromotions(job, new_job) {
                             processFileInplace(dstFile) { text ->
                                 text.replaceAll("LFS_CI_-_LRC_-", "LFS_CI_-_LRC_"+new_branch+"_-")
                             }
-                        } else {
+                        } else if (!lrc_jobs) {
                             processFileInplace(dstFile) { text ->
                                 text.replaceAll("-_"+src_branch+"_-", "-_"+new_branch+"_-")
                             }
@@ -204,15 +203,13 @@ def copyPromotions(job, new_job) {
     }
 }
 
-jobs_list = []
+def jobs_list = []
 for(job in src_branch_view_obj.getItems()) {
-    if(job.getName().find(src_branch)) {
+    if(job.getName().find(src_branch) && !lrc_jobs) {
         jobs_list.add(job)
-    }
-    if(fsmr4_jobs && job.getName().find("fsmr4")) {
+    } else if(fsmr4_jobs && job.getName().find("fsmr4")) {
         jobs_list.add(job)
-    }
-    if(lrc_jobs && job.getName().find("LRC")) {
+    } else if(lrc_jobs && job.getName().find("LRC")) {
         jobs_list.add(job)
     }
 }
@@ -222,13 +219,12 @@ for(job in jobs_list) {
     //if(job.name == "LFS_CI_-_${src_branch}_-_Test") {
     //if(job.name.find("LRC")) {
     //if(job.name.find("fsmr4")) {
-    new_job = copyJob(job)
-    alterDisplayName(new_job)
+    def new_job = copyJob(job)
     new_job.save()
     enableDisableJob(new_job)
     // avoid having two projects point to the same location
     updateWorkspace(new_job)
-    config_file = updateJobConfig(job, new_job)
+    def config_file = updateJobConfig(job, new_job)
     copyPromotions(job, new_job)
     reloadJobConfig(new_job, config_file)
     new_branch_view_obj.doAddJobToView(new_job.getName())
