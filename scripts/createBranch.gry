@@ -107,6 +107,7 @@ def copyJob(job) {
         new_name = job.getName().replaceFirst("-_"+src_branch+"_-", "-_"+new_branch+"_-")
         new_job = Jenkins.instance.copy(job, new_name)
     }
+    println("[INFO] copied job \"$job.name\" -> \"$new_name\"")
     return new_job
 }
 
@@ -136,7 +137,6 @@ def updateWorkspace(job) {
         project.setCustomWorkspace(new_workspace)
         project.save()
     }
-    println("[INFO] copied \"$job.name\" -> \"$new_name\" and added it to view \"$new_branch_view_obj.name\"")
 }
 
 def updateJobConfig(job, new_job) {
@@ -169,31 +169,34 @@ def reloadJobConfig(job, config_file) {
 def copyPromotions(job, new_job) {
     def promoSrcDir = new File("${jenkinsHome}/jobs/${job.name}/promotions")
     def promoDstDir = new File("${jenkinsHome}/jobs/${new_job.name}/promotions")
-    if(promoSrcDir.exists()) {
-        println("[INFO] Source job \"$job.name\" has promotions.")
-        promoDirs = promoSrcDir.list()
-        for(d in promoDirs)  {
-            if(!d.find(" ")) {
-                new File(promoDstDir.getAbsolutePath()+"/"+d).mkdirs()
-                builder = new AntBuilder()
-                builder.sequential {
-                    copy(tofile: promoDstDir.getAbsolutePath()+"/"+d+"/config.xml",
-                         file:   promoSrcDir.getAbsolutePath()+"/"+d+"/config.xml",
-                         overwrite: true)
-                } 
-                def dstFile = new File(promoDstDir.getAbsolutePath()+"/"+d+"/config.xml")
-                println("[INFO] configuring file "+dstFile.getAbsolutePath())
-                if (job.getName().find("fsmr4") && fsmr4_jobs) {
-                    processFileInplace(dstFile) { text ->
-                        text.replaceAll("-_"+src_branch+"_-", "-_"+new_branch+"_-")
-                    }
-                } else if (job.getName().find("LRC") && lrc_jobs) {
-                    processFileInplace(dstFile) { text ->
-                        text.replaceAll("LFS_CI_-_LRC_-", "LFS_CI_-_LRC_"+new_branch+"_-")
-                    }
-                } else {
-                    processFileInplace(dstFile) { text ->
-                        text.replaceAll("-_"+src_branch+"_-", "-_"+new_branch+"_-")
+    for(property in job.getAllProperties()) {
+        if(property.getClass() == hudson.plugins.promoted_builds.JobPropertyImpl) {
+            println("[INFO] Source job \"$job.name\" has promotions.")
+            for(action in property.getJobActions())  {
+                for(process in action.getProcesses()) {
+                    if(process.getClass() == hudson.plugins.promoted_builds.PromotionProcess) {
+                        new File(promoDstDir.getAbsolutePath()+"/"+process.getName()).mkdirs()
+                        builder = new AntBuilder()
+                        builder.sequential {
+                            copy(tofile: promoDstDir.getAbsolutePath()+"/"+process.getName()+"/config.xml",
+                                 file:   promoSrcDir.getAbsolutePath()+"/"+process.getName()+"/config.xml",
+                                 overwrite: true)
+                        } 
+                        def dstFile = new File(promoDstDir.getAbsolutePath()+"/"+process.getName()+"/config.xml")
+                        println("[INFO] configuring file "+dstFile.getAbsolutePath())
+                        if (job.getName().find("fsmr4") && fsmr4_jobs) {
+                            processFileInplace(dstFile) { text ->
+                                text.replaceAll("-_"+src_branch+"_-", "-_"+new_branch+"_-")
+                            }
+                        } else if (job.getName().find("LRC") && lrc_jobs) {
+                            processFileInplace(dstFile) { text ->
+                                text.replaceAll("LFS_CI_-_LRC_-", "LFS_CI_-_LRC_"+new_branch+"_-")
+                            }
+                        } else {
+                            processFileInplace(dstFile) { text ->
+                                text.replaceAll("-_"+src_branch+"_-", "-_"+new_branch+"_-")
+                            }
+                        }
                     }
                 }
             }
@@ -229,5 +232,6 @@ for(job in jobs_list) {
     copyPromotions(job, new_job)
     reloadJobConfig(new_job, config_file)
     new_branch_view_obj.doAddJobToView(new_job.getName())
+    println("[INFO] added job $new_job.name to view \"$new_branch_view_obj.name\"")
     //}
 }
