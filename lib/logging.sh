@@ -1,4 +1,27 @@
 #!/bin/bash
+## @file    logging.sh
+#  @brief   handling of output and logfiles
+#  @details The scripting should avoid to use echo or printf to print out information to the console.
+#           For this, we are using the following function:
+#           - info
+#           - error
+#           - fatail
+#           - warning
+#           - debug
+#           - trace
+#           - rawDebug
+# 
+#           These function are doing this for you in the correct way. The message will be written to
+#           the logfile and - dependend to the loglevel - to the console / jenkins output.
+#           The logging functions are also adding the data to each message.
+#
+#           e.g.: 2015-01-26 06:34:33.693662137 UTC [    0.006] [ERROR]    this is an error.
+#
+#           The logfile will be written into the global log directory in the /ps/lfs/ci share.
+#           In the exit handler, the logfile will be gzipped.
+#           
+#           You can also influence the format of the log file. See CI_LOGGING_CONFIG for details.
+#
 
 LFS_CI_SOURCE_logging='$Id$'
 

@@ -1,8 +1,7 @@
 #!/bin/bash
-
-#
-# LFS_CI_-_trunk_-_Unittest_-_FSM-r3_-_fsm3_octeon2_-_ddal
-#
+## @file    uc_test_unittest_ddal.sh
+#  @brief   the unittest ddal usecase
+#  @details job name: LFS_CI_-_trunk_-_Unittest_-_FSM-r3_-_fsm3_octeon2_-_ddal
 
 [[ -z ${LFS_CI_SOURCE_common}          ]] && source ${LFS_CI_ROOT}/lib/common.sh
 [[ -z ${LFS_CI_SOURCE_createWorkspace} ]] && source ${LFS_CI_ROOT}/lib/createWorkspace.sh

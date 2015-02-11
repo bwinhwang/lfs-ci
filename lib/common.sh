@@ -1,4 +1,6 @@
 #!/bin/bash
+## @file  common.sh
+#  @brief common functions
 
 LFS_CI_SOURCE_common='$Id$'
 
@@ -258,8 +260,11 @@ checkoutSubprojectDirectories() {
     local workspace=$(getWorkspaceName) 
     local project=$1
     local revision=$2
-    if [[ ${revision} ]] ; then
+    if [[ ${revision} && ${revision} =~ ^[0-9]*$ ]] ; then
         optRev="--revision=${revision}"
+    elif [[ ${revision} ]] ; then
+        # not a numeric revision, so it should be a tag
+        optRev="${revision}"
     fi
 
     debug "checking out ${project} with revision ${revision:-latest}"
@@ -655,7 +660,9 @@ _getUpstreamProjects() {
     mustHaveValue "${serverPath}" "server path"
 
     # find the related jobs of the build
-    runOnMaster ${LFS_CI_ROOT}/bin/getUpStreamProject \
+    # TODO: demx2fk3 2015-01-23 KNIFE FIXME
+    # runOnMaster ${LFS_CI_ROOT}/bin/getUpStreamProject \
+    runOnMaster /ps/lfs/ci/bin/getUpStreamProject \
                     -j ${jobName}                     \
                     -b ${buildNumber}                 \
                     -h ${serverPath} > ${upstreamsFile}
@@ -683,7 +690,9 @@ _getDownstreamProjects() {
     local serverPath=$(getConfig jenkinsMasterServerPath)
     mustHaveValue "${serverPath}" "server path"
 
-    runOnMaster ${LFS_CI_ROOT}/bin/getDownStreamProjects -j ${jobName}    \
+    # TODO: demx2fk3 2015-01-23 KNIFE FIXME
+    # runOnMaster ${LFS_CI_ROOT}/bin/getDownStreamProjects -j ${jobName}    \
+    runOnMaster /ps/lfs/ci/bin/getDownStreamProjects -j ${jobName}     \
                                                         -b ${buildNumber} \
                                                         -h ${serverPath}  > ${downstreamFile}
     rawDebug ${downstreamFile}
@@ -815,4 +824,35 @@ mustHaveAccessableServer() {
     return
 }
 
+## @fn      getBranchPart()
+#  @brief   provides the parts of a branch name
+#  @param   <branch> the name of a branch eg FB1408
+#  @param   <what> the part to get. Can be YY | YYYY | MM | NR | TYPE
+#           NR is only valid for MD branches.
+#  @return  <none>
+getBranchPart() {
+    local branch=$1
+    local what=$2
+    local branch_type=$(echo ${branch} | cut -c1,2)
+
+    if [ "${branch_type}" == "FB" ]; then
+        local yy=$(echo ${branch}  | cut -c3,4)
+        local mm=$(echo ${branch}  | cut -c5,6)
+        local yyyy=$((2000+yy))
+    elif [ "${branch_type}" == "MD" ]; then
+        local yy=$(echo ${branch}  | cut -c4,5)
+        local nr=$(echo ${branch}  | cut -c3)
+        local mm=$(echo ${branch}  | cut -c6,7)
+        local yyyy=$((2000+yy))
+    else
+        error "Only FB and MD branches are supported."
+        return 1
+    fi
+
+    [[ ${what} == YY ]] && echo ${yy}
+    [[ ${what} == YYYY ]] && echo ${yyyy}
+    [[ ${what} == MM ]] && echo ${mm}
+    [[ ${what} == TYPE ]] && echo ${branch_type}
+    [[ ${what} == NR ]] && echo ${nr}
+}
 

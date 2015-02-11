@@ -1,4 +1,6 @@
 #!/bin/bash
+## @file  config.sh
+#  @brief handling of configuration
 
 LFS_CI_SOURCE_config='$Id$'
 
@@ -23,18 +25,22 @@ LFS_CI_SOURCE_config='$Id$'
 #  @return  location name
 getLocationName() {
     local jobName=${1:-${JOB_NAME}}
-    local location=$(${LFS_CI_ROOT}/bin/getFromString.pl "${jobName}" location)
 
-    # 2014-02-17 demx2fk3 TODO do this in a better wa
-    case ${location} in
-        fsmr4)    echo FSM_R4_DEV      ;;
-        kernel3x) echo KERNEL_3.x_DEV  ;;
-        trunk)    echo pronb-developer ;;
-        20M2_09)  echo PS_LFS_OS_20M2_09 ;;
-        20M2_12)  echo PS_LFS_OS_20M2_12 ;;
-        *)        echo ${location}     ;;
-    esac
+    if [[ -z ${LFS_CI_GLOBAL_BRANCH_NAME} ]] ; then
+        local location=$(${LFS_CI_ROOT}/bin/getFromString.pl "${jobName}" location)
 
+        # 2014-02-17 demx2fk3 TODO do this in a better way
+        case ${location} in
+            fsmr4)    location=FSM_R4_DEV        ;;
+            kernel3x) location=KERNEL_3.x_DEV    ;;
+            trunk)    location=pronb-developer   ;;
+            20M2_09)  location=PS_LFS_OS_20M2_09 ;;
+            20M2_12)  location=PS_LFS_OS_20M2_12 ;;
+        esac
+        export LFS_CI_GLOBAL_BRANCH_NAME=${location}
+    fi
+
+    echo ${LFS_CI_GLOBAL_BRANCH_NAME}
     return
 }
 
@@ -89,9 +95,9 @@ getConfig() {
     local file=${2:-${LFS_CI_CONFIG_FILE}}
 
     local productName=$(getProductNameFromJobName)
+    local location=$(getLocationName)
     local taskName=$(getTaskNameFromJobName)
     local subTaskName=$(getSubTaskNameFromJobName)
-    local location=$(getLocationName)
     local config=$(getTargetBoardName)
 
     # TODO: demx2fk3 2014-08-05 this should be always commented out, only required for debugging
