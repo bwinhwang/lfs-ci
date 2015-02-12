@@ -25,7 +25,6 @@ createArtifactArchive() {
     requiredParameters JOB_NAME BUILD_NUMBER
 
     local workspace=$(getWorkspaceName)
-    local serverName=$(getConfig LINSEE_server)
     mustHaveWorkspaceName
 
     mustExistDirectory "${workspace}/bld/"
