@@ -82,6 +82,7 @@ svnCopyLocations() {
 
     svn copy -m "copy locations branch ${newBranch}" ${SVN_SERVER}/${SVN_DIR}/trunk/bldtools/locations-${LOCATIONS} \
         ${SVN_SERVER}/${SVN_DIR}/trunk/bldtools/locations-${newBranch}
+    sleep 5
     svnCheckout ${SVN_SERVER}/${SVN_DIR}/trunk/bldtools/locations-${newBranch}
     cd locations-${newBranch}
     sed -i -e "s/\/${srcBranch}\//\/${newBranch}\/trunk\//" Dependencies
@@ -111,6 +112,7 @@ svnCopyLocationsFSMR4() {
         svn copy -m "copy locations branch ${newBranch}" ${SVN_SERVER}/${SVN_DIR}/trunk/bldtools/locations-${srcBranch}_FSMR4 \
             ${SVN_SERVER}/${SVN_DIR}/trunk/bldtools/locations-${newBranch}_FSMR4
     fi
+    sleep 5
     svnCheckout ${SVN_SERVER}/${SVN_DIR}/trunk/bldtools/locations-${newBranch}_FSMR4
     cd locations-${newBranch}_FSMR4
     sed -i -e "s/\/${srcBranch}\//\/${newBranch}\/trunk\//" Dependencies
@@ -163,6 +165,7 @@ svnCopyLocationsLRC() {
             ${SVN_SERVER}/${SVN_DIR}/trunk/bldtools/locations-LRC_${newBranch}
     fi
 
+    sleep 5
     svnCheckout ${SVN_SERVER}/${SVN_DIR}/trunk/bldtools/locations-LRC_${newBranch}
     cd locations-LRC_${newBranch}
     sed -i -e "s/\/${srcBranch}\//\/${newBranch}\/trunk\//" Dependencies
