@@ -37,7 +37,9 @@ fi
 #  @param   <newBranch> new name
 #  @return  <none>
 svnCopyBranch() {
-    info "BRANCH stuff"
+    info "--------------------------------------------------------"
+    info "SVN: create branch for"
+    info "--------------------------------------------------------"
 
     local srcBranch=$1
     local newBranch=$2
@@ -58,7 +60,9 @@ svnCopyBranch() {
 #  @param   <newBranch> new name
 #  @return  <none>
 svnCopyLocations() {
-    info "LOCATIONS stuff"
+    info "--------------------------------------------------------"
+    info "SVN: create locations for branch"
+    info "--------------------------------------------------------"
 
     local srcBranch=$1
     local newBranch=$2
@@ -80,7 +84,9 @@ svnCopyLocations() {
 #  @param   <newBranch> new name
 #  @return  <none>
 svnCopyLocationsFSMR4() {
-    info "FSMR4 stuff"
+    info "--------------------------------------------------------"
+    info "SVN: create locations for FSMR4"
+    info "--------------------------------------------------------"
 
     local srcBranch=$1
     local newBranch=$2
@@ -106,7 +112,9 @@ svnCopyLocationsFSMR4() {
 #  @param   <newBranch> new name
 #  @return  <none>
 svnCopyBranchLRC() {
-    info "BRANCH LRC stuff"
+    info "--------------------------------------------------------"
+    info "SVN: create branch for LRC"
+    info "--------------------------------------------------------"
 
     local srcBranch=$1
     local newBranch="LRC_$2"
@@ -127,7 +135,9 @@ svnCopyBranchLRC() {
 #  @param   <newBranch> new name
 #  @return  <none>
 svnCopyLocationsLRC() {
-    info "LRC stuff"
+    info "--------------------------------------------------------"
+    info "SVN: create locations for LRC"
+    info "--------------------------------------------------------"
 
     local srcBranch=$1
     local newBranch=$2
@@ -153,21 +163,26 @@ svnCopyLocationsLRC() {
 #  @param   <newBranch> new branch name
 #  @return  <none>
 createBranchInGit() {
-    info "GIT stuff"
+    info "--------------------------------------------------------"
+    info "GIT: create branch"
+    info "--------------------------------------------------------"
 
     local newBranch=$1
     mustHaveValue "${newBranch}" "new branch"
     # TODO: get GIT server from config
     local gitServer="psulm.nsn-net.net"
 
-    echo GIT_REVISION=\$\(svnCommand cat ${SVN_SERVER}/${SVN_PATH}/main/${SRC_PROJECT}/src/gitrevision\)
+    echo gitRevision=\$\(svnCommand cat ${SVN_SERVER}/${SVN_PATH}/main/${SRC_PROJECT}/src/gitrevision\)
+    info "GIT revision: ${gitRevision}"
     echo git checkout ssh://git@${gitServer}/build/build
-    echo git branch $newBranch $GIT_REVISION
+    echo git branch $newBranch $gitRevision
     echo git push origin $newBranch
 }
 
-dummyCommit() {
-    info "DUMMY commit on $SRC_PROJECT"
+svnDummyCommit() {
+    info "--------------------------------------------------------"
+    info "SVN: dummy commit on $SRC_PROJECT"
+    info "--------------------------------------------------------"
 
     local newBranch=$1
     mustHaveValue "${newBranch}" "new branch"
@@ -182,8 +197,10 @@ dummyCommit() {
     fi
 }
 
-dummyCommitLRC() {
-    info "DUMMY commit on $SRC_PROJECT for LRC"
+svnDummyCommitLRC() {
+    info "--------------------------------------------------------"
+    info "SVN: dummy commit on $SRC_PROJECT for LRC"
+    info "--------------------------------------------------------"
 
     local newBranch="LRC_$1"
     mustHaveValue "${newBranch}" "new branch"
@@ -198,9 +215,11 @@ dummyCommitLRC() {
     fi
 }
 
-editLocationsTxtFile() {
+svnEditLocationsTxtFile() {
     # TODO: Create locations.txt from DB
-    info "EDIT locations.txt file"
+    info "--------------------------------------------------------"
+    info "SVN: edit locations.txt file"
+    info "--------------------------------------------------------"
 
     local newBranch=$1
     mustHaveValue "${newBranch}" "new branch"
@@ -213,17 +232,46 @@ editLocationsTxtFile() {
     cd ${bldTools}
     svn update ${locationsTxt}
     echo >> ${locationsTxt}
+
+    if [[ ! "${LRC}" ]]; then
+        echo "${newBranch}                           Feature Build ${newBranch} (all FB_PS_LFS_REL_2014_12_xx...)" >> ${locationsTxt}
+    fi
     if [[ "${FSMR4}" == "true" ]] && [[ "$(echo ${newBranch} | cut -c1,2)" == "MD" ]]; then
-        echo "${newBranch}_FSMR4                    Feature Build ${newBranch} FSM-r4 stuff only (bi-weekly branch)" >> ${locationsTxt}
+        echo "${newBranch}_FSMR4                     Feature Build ${newBranch} FSM-r4 stuff only (bi-weekly branch)" >> ${locationsTxt}
     fi
     if [[ "${FSMR4}" == "true" ]] && [[ "$(echo ${newBranch} | cut -c1,2)" == "FB" ]]; then
-        echo "${newBranch}                          Feature Build ${newBranch} stuff only (bi-weekly branch)" >> ${locationsTxt}
+        echo "${newBranch}                           Feature Build ${newBranch} stuff only (bi-weekly branch)" >> ${locationsTxt}
     fi
     if [[ "${LRC}" == "true" ]]; then
-        echo "LRC_${newBranch}                      LRC locations (special LRC for ${newBranch} only)" >> ${locationsTxt}
+        echo "LRC_${newBranch}                       LRC locations (special LRC for ${newBranch} only)" >> ${locationsTxt}
     fi
-    echo "${newBranch}                          Feature Build ${newBranch} (all FB_PS_LFS_REL_2014_12_xx...)" >> ${locationsTxt}
     echo svnCommit -m \"Added ${newBranch} to file ${locationsTxt}\" ${locationsTxt}
+}
+
+svnCopyDelivery() {
+    info "--------------------------------------------------------"
+    info "SVN: copy delivery repository"
+    info "--------------------------------------------------------"
+
+    local srcBranch=$1
+    local newBranch=$2
+    local yyyy=$(getBranchPart ${newBranch} YYYY)
+    local mm=$(getBranchPart ${newBranch} MM)
+    local svnAddress="https://svne1.access.nokiasiemensnetworks.com/isource/svnroot"
+    mustHaveValue "${yyyy}" "yyyy"
+    mustHaveValue "${mm}" "mm"
+
+    if [[ "$srcBranch" == "trunk" ]]; then
+        svn ls ${svnAddress}/BTS_D_SC_LFS_${yyyy}_${mm}/os/branches/PS_LFS_OS_${newBranch} || {
+            echo svnCopy ${svnAddress}/BTS_D_SC_LFS_${yyyy}_${mm}/os/branches/PS_LFS_OS_MAINBRANCH \
+            ${svnAddress}/BTS_D_SC_LFS_${yyyy}_${mm}/os/branches/PS_LFS_OS_${newBranch};
+        }
+    else
+        svn ls ${svnAddress}/BTS_D_SC_LFS_${yyyy}_${mm}/os/branches/PS_LFS_OS_${newBranch} || {
+            echo svnCopy ${svnAddress}/BTS_D_SC_LFS_${yyyy}_${mm}/os/branches/PS_LFS_OS_${srcBranch} \
+            ${svnAddress}/BTS_D_SC_LFS_${yyyy}_${mm}/os/branches/PS_LFS_OS_${newBranch};
+        }
+    fi
 }
 
 
@@ -236,16 +284,18 @@ main() {
         svnCopyBranch ${SRC_BRANCH} ${NEW_BRANCH}
         svnCopyLocations ${SRC_BRANCH} ${NEW_BRANCH}
         createBranchInGit ${NEW_BRANCH}
-        dummyCommit ${NEW_BRANCH}
-        editLocationsTxtFile ${NEW_BRANCH}
+        svnDummyCommit ${NEW_BRANCH}
         if [[ "${FSMR4}" == "true" ]]; then
             svnCopyLocationsFSMR4 ${SRC_BRANCH} ${NEW_BRANCH}
         fi
     elif [[ ${LRC} == "true" ]]; then
         svnCopyBranchLRC ${SRC_BRANCH} ${NEW_BRANCH}
         svnCopyLocationsLRC ${SRC_BRANCH} ${NEW_BRANCH}
-        dummyCommitLRC ${NEW_BRANCH}
+        svnDummyCommitLRC ${NEW_BRANCH}
     fi
+
+    svnEditLocationsTxtFile ${NEW_BRANCH}
+    svnCopyDelivery ${SRC_BRANCH} ${NEW_BRANCH}
 }
 
 main
