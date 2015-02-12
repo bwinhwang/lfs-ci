@@ -168,7 +168,7 @@ svnCopyLocationsLRC() {
     sleep 5
     svnCheckout ${SVN_SERVER}/${SVN_DIR}/trunk/bldtools/locations-LRC_${newBranch}
     cd locations-LRC_${newBranch}
-    sed -i -e "s/\/${srcBranch}\//\/${newBranch}\/trunk\//" Dependencies
+    sed -i -e "s/\/${srcBranch}\//\/LRC_${newBranch}\/trunk\//" Dependencies
     svn commit -m "added new location LRC_${newBranch}."
 }
 
@@ -278,18 +278,17 @@ svnCopyDelivery() {
     mustHaveValue "${mm}" "mm"
 
     if [[ "$srcBranch" == "trunk" ]]; then
-        svn ls ${svnAddress}/BTS_D_SC_LFS_${yyyy}_${mm}/os/branches/PS_LFS_OS_MAINBRANCH || {
+        svn ls ${svnAddress}/BTS_D_SC_LFS_${yyyy}_${mm}/os/branches/PS_LFS_OS_MAINBRANCH && {
             svn copy -m "copy delivery repo" ${svnAddress}/BTS_D_SC_LFS_${yyyy}_${mm}/os/branches/PS_LFS_OS_MAINBRANCH \
             ${svnAddress}/BTS_D_SC_LFS_${yyyy}_${mm}/os/branches/PS_LFS_OS_${newBranch};
         }
     else
-        svn ls ${svnAddress}/BTS_D_SC_LFS_${yyyy}_${mm}/os/branches/PS_LFS_OS_${newBranch} || {
+        svn ls ${svnAddress}/BTS_D_SC_LFS_${yyyy}_${mm}/os/branches/PS_LFS_OS_${newBranch} && {
             svn copy -m "copy delivery repo" ${svnAddress}/BTS_D_SC_LFS_${yyyy}_${mm}/os/branches/PS_LFS_OS_${srcBranch} \
             ${svnAddress}/BTS_D_SC_LFS_${yyyy}_${mm}/os/branches/PS_LFS_OS_${newBranch};
         }
     fi
 }
-
 
 svnCopyDeliveryLRC() {
     info "--------------------------------------------------------"
