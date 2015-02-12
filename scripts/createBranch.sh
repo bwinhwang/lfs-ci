@@ -81,7 +81,7 @@ svnCopyLocations() {
     mustHaveValue "${srcBranch}" "source branch"
     mustHaveValue "${newBranch}" "new branch"
 
-    svnCopy -m \"copy locations for ${newBranch}\" ${SVN_SERVER}/${SVN_DIR}/trunk/bldtools/locations-${LOCATIONS} \
+    svnCopy -m \"copy locations branch ${newBranch}\" ${SVN_SERVER}/${SVN_DIR}/trunk/bldtools/locations-${LOCATIONS} \
         ${SVN_SERVER}/${SVN_DIR}/trunk/bldtools/locations-${newBranch}
     svnCheckout ${SVN_SERVER}/${SVN_DIR}/trunk/bldtools/locations-${newBranch}
     cd locations-${newBranch}
