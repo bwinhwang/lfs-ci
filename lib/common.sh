@@ -835,11 +835,11 @@ getBranchPart() {
     local what=$2
     local branch_type=$(echo ${branch} | cut -c1,2)
 
-    if [ "${branch_type}" == "FB" ]; then
+    if [[ "${branch_type}" == "FB" ]]; then
         local yy=$(echo ${branch}  | cut -c3,4)
         local mm=$(echo ${branch}  | cut -c5,6)
         local yyyy=$((2000+yy))
-    elif [ "${branch_type}" == "MD" ]; then
+    elif [[ "${branch_type}" == "MD" ]]; then
         local yy=$(echo ${branch}  | cut -c4,5)
         local nr=$(echo ${branch}  | cut -c3)
         local mm=$(echo ${branch}  | cut -c6,7)

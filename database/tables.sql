@@ -4,19 +4,34 @@ DROP TABLE IF EXISTS test_executions;
 DROP TABLE IF EXISTS build_events;
 DROP TABLE IF EXISTS events;
 DROP TABLE IF EXISTS builds;
+DROP TABLE IF EXISTS branches;
+
+DROP TABLE IF EXISTS branches;
+CREATE TABLE branches (
+    id            INT NOT NULL AUTO_INCREMENT,
+    branch_name   VARCHAR(128) NOT NULL,
+    location_name VARCHAR(128) NOT NULL,
+    date_created  DATETIME NOT NULL,
+    date_closed   DATETIME NOT NULL,
+    comment       TEXT,
+
+    PRIMARY KEY (id),
+    INDEX(branch_name)
+);
 
 DROP TABLE IF EXISTS builds;
 CREATE TABLE builds (
     id          INT NOT NULL AUTO_INCREMENT,
     build_name  VARCHAR(128) NOT NULL,
-    branch_name VARCHAR(128) NOT NULL,
+    branch_id   VARCHAR(128) NOT NULL,
     revision    INT NOT NULL,
     comment     TEXT,
 
     PRIMARY KEY (id),
-    INDEX(build_name)
+    INDEX(build_name),
+    FOREIGN KEY (branch_id)
+        REFERENCES branches(id),
 );
-
 
 DROP TABLE IF EXISTS events;
 CREATE TABLE events (

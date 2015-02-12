@@ -27,16 +27,32 @@ CREATE PROCEDURE new_build_event( IN in_build_name VARCHAR(128), IN in_event VAR
    END //
 DELIMITER ;
 
+DROP PROCEDURE IF EXISTS new_build;
+DELIMITER //
+CREATE PROCEDURE new_build( IN in_build_name VARCHAR(128), IN in_branch_name VARCHAR(128), IN in_comment TEXT, IN in_revision INT )
+   BEGIN
+   DECLARE cnt_branch_id INT;
+   DECLARE var_branch_id INT;
+
+   SELECT count(id) INTO cnt_branch_id FROM branches WHERE branch_name = in_branch_name;
+   IF cnt_branch_id = 0 THEN
+       INSERT INTO branches ( branch_name, date_created, comment ) VALUES ( in_branch_name, NOW(), in_comment );
+   END IF;
+   SELECT id INTO var_branch_id FROM branches WHERE branch_name = in_branch_name;
+
+   INSERT INTO builds (build_name, branch_id, revision, comment) VALUES ( in_build_name, var_branch_id, in_revision, in_comment );
+   
+   END //
+DELIMITER ;
 
 DROP PROCEDURE IF EXISTS build_started;
 DELIMITER //
 CREATE PROCEDURE build_started( IN in_build_name VARCHAR(128), IN in_comment TEXT, IN in_branch_name VARCHAR(128), IN in_revision INT )
 BEGIN
-   INSERT INTO builds (build_name, branch_name, revision, comment) VALUES ( in_build_name, in_branch_name, in_revision, in_comment );
+   CALL new_build( in_build_name, in_branch_name, in_comment, in_revision);
    CALL new_build_event( in_build_name, 'build started', in_comment );
 END //
 DELIMITER ;
-
 
 DROP PROCEDURE IF EXISTS build_finished;
 DELIMITER //
