@@ -33,8 +33,6 @@ ci_job_package() {
     local localDirectory=${workspace}/upload
     execute mkdir -p ${localDirectory}
 
-    find ${workspace}
-
     for bldDirectory in ${workspace}/bld/bld-*brm*-* ; do
         info "bldDirectory is ${bldDirectory}"
         [[ -d ${bldDirectory} ]] || continue
