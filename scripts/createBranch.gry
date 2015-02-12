@@ -50,15 +50,14 @@ src_branch = ""
 
 new_branch = ""
   
+comment = ""
+
 fsmr4_jobs = false
 
 lrc_jobs = false
 if(build.getEnvironment(listener).get("LRC") == "true") {
     lrc_jobs = true
 }
-println("[INFO] lrc_jobs: $lrc_jobs")
-
-comment = ""
 
 scm_view_obj = j.getView(scm_view)
 
@@ -71,6 +70,8 @@ parameters.each {
         src_branch = it.value
     else if(it.name == "FSMR4")
         fsmr4_jobs = it.value
+    else if(it.name == "COMMENT")
+        comment = it.value
 }
 
 if(!new_branch) {
@@ -80,7 +81,9 @@ if(!src_branch || src_branch != "trunk") {
     throw new RuntimeException("Parameter SRC_BRANCH is missing or is not \"trunk\"")
 }
 
-// Source branch Jenkins view 
+println("[INFO] lrc_jobs: $lrc_jobs")
+println("[INFO] fsmr4_jobs: $fsmr4_jobs")
+
 src_branch_view_obj = scm_view_obj.getView(src_branch.toUpperCase())
 
 // Add branch view to SCM view.
@@ -114,6 +117,10 @@ def copyJob(job) {
         new_name = job.getName().replaceFirst("-_"+src_branch+"_-", "-_"+new_branch+"_-")
         new_job = Jenkins.instance.copy(job, new_name)
         new_job.setDisplayName(job.getDisplayName().replaceFirst(src_branch, new_branch))
+    }
+    if(new_name.find("LFS_CI_-_${new_branch}_-_Build") || new_name.find("LFS_CI_-_LRC_${new_branch}_-_Build")) {
+        new_job.setDescription("Comment: ${comment}")
+        println("[INFO] set description for job \"$new_name\"")
     }
     println("[INFO] copied job \"$job.name\" -> \"$new_name\"")
     return new_job
