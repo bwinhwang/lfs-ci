@@ -62,7 +62,7 @@ svnCopyBranch() {
     DESCRIPTION: svn cp -r${REVISION} --parents ${SVN_SERVER}/${SVN_PATH} ${SVN_SERVER}/${SVN_DIR}/${newBranch}/trunk. \
     $COMMENT"
 
-    echo svnCopy -r${REVISION} -m \"${message}\" --parents ${SVN_SERVER}/${SVN_PATH} \
+    svnCopy -r${REVISION} -m \"${message}\" --parents ${SVN_SERVER}/${SVN_PATH} \
         ${SVN_SERVER}/${SVN_DIR}/${newBranch}/trunk
 }
 
@@ -81,13 +81,13 @@ svnCopyLocations() {
     mustHaveValue "${srcBranch}" "source branch"
     mustHaveValue "${newBranch}" "new branch"
 
-    echo svnCopy -m \"copy locations for ${newBranch}\" ${SVN_SERVER}/${SVN_DIR}/trunk/bldtools/locations-${LOCATIONS} \
+    svnCopy -m \"copy locations for ${newBranch}\" ${SVN_SERVER}/${SVN_DIR}/trunk/bldtools/locations-${LOCATIONS} \
         ${SVN_SERVER}/${SVN_DIR}/trunk/bldtools/locations-${newBranch}
-    echo svnCheckout ${SVN_SERVER}/${SVN_DIR}/trunk/bldtools/locations-${newBranch}
-    echo cd locations-${newBranch}
-    echo sed -i -e "s/\/${srcBranch}\//\/${newBranch}\/trunk\//" Dependencies
-    echo svnCommit -m \"added new location ${newBranch}.\"
-    echo svnCommand delete -m \"removed bldtools, because they are used always from MAINTRUNK\" ${SVN_SERVER}/${SVN_DIR}/${newBranch}/trunk/bldtools
+    svnCheckout ${SVN_SERVER}/${SVN_DIR}/trunk/bldtools/locations-${newBranch}
+    cd locations-${newBranch}
+    sed -i -e "s/\/${srcBranch}\//\/${newBranch}\/trunk\//" Dependencies
+    svnCommit -m \"added new location ${newBranch}.\"
+    svnCommand delete -m \"removed bldtools, because they are used always from MAINTRUNK\" ${SVN_SERVER}/${SVN_DIR}/${newBranch}/trunk/bldtools
 }
 
 ## @fn      svnCopyLocationsFSMR4()
@@ -105,17 +105,17 @@ svnCopyLocationsFSMR4() {
     mustHaveValue "${srcBranch}" "source branch"
     mustHaveValue "${newBranch}" "new branch"
 
-    if [[ $srcBranch == "trunk" ]]; then
-        echo svnCopy -m \"copy locations for ${newBranch}\" ${SVN_SERVER}/${SVN_DIR}/trunk/bldtools/locations-FSM_R4_DEV \
+    if [[ "${srcBranch}" == "trunk" ]]; then
+        svnCopy -m \"copy locations branch ${newBranch}\" ${SVN_SERVER}/${SVN_DIR}/trunk/bldtools/locations-FSM_R4_DEV \
             ${SVN_SERVER}/${SVN_DIR}/trunk/bldtools/locations-${newBranch}_FSMR4
     else
-        echo svnCopy -m \"copy locations for ${newBranch}\" ${SVN_SERVER}/${SVN_DIR}/trunk/bldtools/locations-${srcBranch}_FSMR4 \
+        svnCopy -m \"copy locations branch ${newBranch}\" ${SVN_SERVER}/${SVN_DIR}/trunk/bldtools/locations-${srcBranch}_FSMR4 \
             ${SVN_SERVER}/${SVN_DIR}/trunk/bldtools/locations-${newBranch}_FSMR4
     fi
-    echo svnCheckout ${SVN_SERVER}/${SVN_DIR}/trunk/bldtools/locations-${newBranch}_FSMR4
-    echo cd locations-${newBranch}_FSMR4
-    echo sed -i -e "s/\/${srcBranch}\//\/${newBranch}\/trunk\//" Dependencies
-    echo svnCommit -m \"added new location ${newBranch}_FSMR4.\"
+    svnCheckout ${SVN_SERVER}/${SVN_DIR}/trunk/bldtools/locations-${newBranch}_FSMR4
+    cd locations-${newBranch}_FSMR4
+    sed -i -e "s/\/${srcBranch}\//\/${newBranch}\/trunk\//" Dependencies
+    svnCommit -m \"added new location ${newBranch}_FSMR4.\"
 }
 
 ## @fn      svnCopyBranchLRC()
@@ -137,7 +137,7 @@ svnCopyBranchLRC() {
     DESCRIPTION: svn cp -r${REVISION} --parents ${SVN_SERVER}/${SVN_PATH} ${SVN_SERVER}/${SVN_DIR}/${newBranch}/trunk. \
     $COMMENT"
 
-    echo svnCopy -r${REVISION} -m \"${message}\" --parents ${SVN_SERVER}/${SVN_PATH} \
+    svnCopy -r${REVISION} -m \"${message}\" --parents ${SVN_SERVER}/${SVN_PATH} \
         ${SVN_SERVER}/${SVN_DIR}/${newBranch}/trunk
 }
 
@@ -157,17 +157,17 @@ svnCopyLocationsLRC() {
     mustHaveValue "${newBranch}" "new branch"
 
     if [[ $srcBranch == "trunk" ]]; then
-        echo svnCopy -m \"copy locations for ${newBranch}\" ${SVN_SERVER}/${SVN_DIR}/trunk/bldtools/locations-LRC \
+        svnCopy -m \"copy locations branch ${newBranch}\" ${SVN_SERVER}/${SVN_DIR}/trunk/bldtools/locations-LRC \
             ${SVN_SERVER}/${SVN_DIR}/trunk/bldtools/locations-LRC_${newBranch}
     else
-        echo svnCopy -m \"copy locations for ${newBranch}\" ${SVN_SERVER}/${SVN_DIR}/trunk/bldtools/locations-LRC_${srcBranch} \
+        svnCopy -m \"copy locations branch ${newBranch}\" ${SVN_SERVER}/${SVN_DIR}/trunk/bldtools/locations-LRC_${srcBranch} \
             ${SVN_SERVER}/${SVN_DIR}/trunk/bldtools/locations-LRC_${newBranch}
     fi
 
-    echo svnCheckout ${SVN_SERVER}/${SVN_DIR}/trunk/bldtools/locations-LRC_${newBranch}
-    echo cd locations-LRC_${newBranch}
-    echo sed -i -e "s/\/${srcBranch}\//\/${newBranch}\/trunk\//" Dependencies
-    echo svnCommit -m \"added new location LRC_${newBranch}.\"
+    svnCheckout ${SVN_SERVER}/${SVN_DIR}/trunk/bldtools/locations-LRC_${newBranch}
+    cd locations-LRC_${newBranch}
+    sed -i -e "s/\/${srcBranch}\//\/${newBranch}\/trunk\//" Dependencies
+    svnCommit -m \"added new location LRC_${newBranch}.\"
 }
 
 ## @fn      createBranchInGit()
@@ -184,11 +184,11 @@ createBranchInGit() {
     # TODO: get GIT server from config
     local gitServer="psulm.nsn-net.net"
 
-    echo gitRevision=\$\(svnCommand cat ${SVN_SERVER}/${SVN_PATH}/main/${SRC_PROJECT}/src/gitrevision\)
+    gitRevision=$(svn cat ${SVN_SERVER}/${SVN_PATH}/main/${SRC_PROJECT}/src/gitrevision)
     info "GIT revision: ${gitRevision}"
-    echo git checkout ssh://git@${gitServer}/build/build
-    echo git branch $newBranch $gitRevision
-    echo git push origin $newBranch
+    git checkout ssh://git@${gitServer}/build/build
+    git branch $newBranch $gitRevision
+    git push origin $newBranch
 }
 
 svnDummyCommit() {
@@ -199,11 +199,11 @@ svnDummyCommit() {
     local newBranch=$1
     mustHaveValue "${newBranch}" "new branch"
 
-    echo svnCheckout ${SVN_SERVER}/${SVN_DIR}/${newBranch}/trunk/main/${SRC_PROJECT}
+    svnCheckout ${SVN_SERVER}/${SVN_DIR}/${newBranch}/trunk/main/${SRC_PROJECT}
     if [[ -d ${SRC_PROJECT} ]]; then
-        echo cd ${SRC_PROJECT}
-        echo echo >> src/README
-        echo svnCommit -m \"dummy commit\" src/README
+        cd ${SRC_PROJECT}
+        echo >> src/README
+        svnCommit -m \"dummy commit\" src/README
     else
         warning "Directory $SRC_PROJECT does not exist"
     fi
@@ -217,11 +217,11 @@ svnDummyCommitLRC() {
     local newBranch="LRC_$1"
     mustHaveValue "${newBranch}" "new branch"
 
-    echo svnCheckout ${SVN_SERVER}/${SVN_DIR}/${newBranch}/trunk/lrc/${SRC_PROJECT}
+    svnCheckout ${SVN_SERVER}/${SVN_DIR}/${newBranch}/trunk/lrc/${SRC_PROJECT}
     if [[ -d ${SRC_PROJECT} ]]; then
-        echo cd ${SRC_PROJECT}
-        echo echo >> src/README
-        echo svnCommit -m \"dummy commit for LRC\" src/README
+        cd ${SRC_PROJECT}
+        echo >> src/README
+        svnCommit -m \"dummy commit LRC\" src/README
     else
         warning "Directory $SRC_PROJECT does not exist"
     fi
@@ -259,7 +259,7 @@ svnEditLocationsTxtFile() {
     if [[ "${LRC}" == "true" ]]; then
         echo "LRC_${newBranch}                       LRC locations (special LRC for ${newBranch} only)" >> ${locationsTxt}
     fi
-    echo svnCommit -m \"Added ${newBranch} to file ${locationsTxt}\" ${locationsTxt}
+    svnCommit -m \"Added ${newBranch} to file ${locationsTxt}\" ${locationsTxt}
 }
 
 svnCopyDelivery() {
@@ -277,12 +277,12 @@ svnCopyDelivery() {
 
     if [[ "$srcBranch" == "trunk" ]]; then
         svn ls ${svnAddress}/BTS_D_SC_LFS_${yyyy}_${mm}/os/branches/PS_LFS_OS_MAINBRANCH || {
-            echo svnCopy ${svnAddress}/BTS_D_SC_LFS_${yyyy}_${mm}/os/branches/PS_LFS_OS_MAINBRANCH \
+            svnCopy ${svnAddress}/BTS_D_SC_LFS_${yyyy}_${mm}/os/branches/PS_LFS_OS_MAINBRANCH \
             ${svnAddress}/BTS_D_SC_LFS_${yyyy}_${mm}/os/branches/PS_LFS_OS_${newBranch};
         }
     else
         svn ls ${svnAddress}/BTS_D_SC_LFS_${yyyy}_${mm}/os/branches/PS_LFS_OS_${newBranch} || {
-            echo svnCopy ${svnAddress}/BTS_D_SC_LFS_${yyyy}_${mm}/os/branches/PS_LFS_OS_${srcBranch} \
+            svnCopy ${svnAddress}/BTS_D_SC_LFS_${yyyy}_${mm}/os/branches/PS_LFS_OS_${srcBranch} \
             ${svnAddress}/BTS_D_SC_LFS_${yyyy}_${mm}/os/branches/PS_LFS_OS_${newBranch};
         }
     fi
@@ -304,12 +304,12 @@ svnCopyDeliveryLRC() {
 
     if [[ "$srcBranch" == "trunk" ]]; then
         svn ls ${svnAddress}/BTS_D_SC_LFS_${yyyy}_${mm}/os/branches/PS_LFS_OS_LRC || {
-            echo svnCopy ${svnAddress}/BTS_D_SC_LFS_${yyyy}_${mm}/os/branches/PS_LFS_OS_LRC \
+            svnCopy ${svnAddress}/BTS_D_SC_LFS_${yyyy}_${mm}/os/branches/PS_LFS_OS_LRC \
             ${svnAddress}/BTS_D_SC_LFS_${yyyy}_${mm}/os/branches/PS_LFS_OS_LRC_${newBranch};
         }
     else
         svn ls ${svnAddress}/BTS_D_SC_LFS_${yyyy}_${mm}/os/branches/PS_LFS_OS_LRC_${newBranch} || {
-            echo svnCopy ${svnAddress}/BTS_D_SC_LFS_${yyyy}_${mm}/os/branches/PS_LFS_OS_LRC_${srcBranch} \
+            svnCopy ${svnAddress}/BTS_D_SC_LFS_${yyyy}_${mm}/os/branches/PS_LFS_OS_LRC_${srcBranch} \
             ${svnAddress}/BTS_D_SC_LFS_${yyyy}_${mm}/os/branches/PS_LFS_OS_LRC_${newBranch};
         }
     fi
