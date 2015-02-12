@@ -56,7 +56,7 @@ getEclValue() {
 
 __checkParams() {
     [[ ! "$BRANCH" ]] && { error "BRANCH must be specified"; return 1; }
-    echo $BRANCH | grep -e "^FB[0-9]\{4\}\|^MD[0-9]\{4\}\|TEST_ERWIN" || { error "$BRANCH is not valid."; return 1; }
+    echo $BRANCH | grep -e "^FB[0-9]\{4\}\|^MD[0-9]\{4\}\|TEST_ERWIN\|TESTERWIN" || { error "$BRANCH is not valid."; return 1; }
 }
 
 __cmd() {
