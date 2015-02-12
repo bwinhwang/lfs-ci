@@ -1,7 +1,5 @@
 #!/bin/bash
 
-set -e
-
 source ${LFS_CI_ROOT}/lib/common.sh
 source ${LFS_CI_ROOT}/lib/logging.sh
 source ${LFS_CI_ROOT}/lib/subversion.sh
