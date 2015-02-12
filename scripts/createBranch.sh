@@ -18,6 +18,7 @@ info "# ECL_URLS:       $ECL_URLS"
 info "# COMMENT:        $COMMENT"
 info "###############################################################"
 
+initTempDirectory
 
 SVN_SERVER=$(getConfig lfsSourceRepos)
 SVN_DIR="os"
