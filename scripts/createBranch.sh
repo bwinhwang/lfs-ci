@@ -9,13 +9,13 @@ source ${LFS_CI_ROOT}/lib/subversion.sh
 info "###############################################################"
 info "# Variables from Jenkins"
 info "# ----------------------"
-info "# SRC_BRANCH:  $SRC_BRANCH"
-info "# NEW_BRANCH:  $NEW_BRANCH"
-info "# REVISION:    $REVISION"
-info "# FSMR4:       $FSMR4"
-info "# RELEASE:     $RELEASE_NAME"
-info "# ECL_FILE:    $ECL_FILES"
-info "# COMMENT:     $COMMENT"
+info "# SRC_BRANCH:     $SRC_BRANCH"
+info "# NEW_BRANCH:     $NEW_BRANCH"
+info "# REVISION:       $REVISION"
+info "# FSMR4:          $FSMR4"
+info "# SOURCE_RELEASE: $SOURCE_RELEASE"
+info "# ECL_URLS:       $ECL_URLS"
+info "# COMMENT:        $COMMENT"
 info "###############################################################"
 
 
@@ -30,6 +30,18 @@ else
     locations="${SRC_BRANCH}"
     SVN_PATH="${SVN_DIR}/${SRC_BRANCH}/trunk"
 fi
+
+
+__checkParams() {
+    [[ ! ${SRC_BRANCH} ]] && { echo "SRC_BRANCH is missing"; exit 1; }
+    [[ ! ${NEW_BRANCH} ]] && { echo "NEW_BRANCH is missing"; exit 1; }
+    [[ ! ${REVISION} ]] && { echo "REVISION is missing"; exit 1; }
+    [[ ! ${SOURCE_RELEASE} ]] && { echo "SOURCE_RELEASE is missing"; exit 1; }
+    [[ ! ${ECL_URLS} ]] && { echo "ECL_URLS is missing"; exit 1; }
+    [[ ! ${COMMENT} ]] && { echo "COMMENT is missing"; exit 1; }
+
+    return 0
+}
 
 ## @fn      svnCopyBranch()
 #  @brief   copy branch in SVN.
@@ -225,6 +237,8 @@ svnEditLocationsTxtFile() {
     mustHaveValue "${newBranch}" "new branch"
     local bldTools="bldtools"
     local locationsTxt="locations.txt"
+    local yyyy=$(getBranchPart ${newBranch} YYYY)
+    local mm=$(getBranchPart ${newBranch} MM)
 
     info "Add ${newBranch} to trunk/${bldTools}/${locationsTxt}"
     mkdir ${bldTools}
@@ -234,7 +248,7 @@ svnEditLocationsTxtFile() {
     echo >> ${locationsTxt}
 
     if [[ ! "${LRC}" ]]; then
-        echo "${newBranch}                           Feature Build ${newBranch} (all FB_PS_LFS_REL_2014_12_xx...)" >> ${locationsTxt}
+        echo "${newBranch}                           Feature Build ${newBranch} (all FB_PS_LFS_REL_${yyyy}_${mm}_xx...)" >> ${locationsTxt}
     fi
     if [[ "${FSMR4}" == "true" ]] && [[ "$(echo ${newBranch} | cut -c1,2)" == "MD" ]]; then
         echo "${newBranch}_FSMR4                     Feature Build ${newBranch} FSM-r4 stuff only (bi-weekly branch)" >> ${locationsTxt}
@@ -262,7 +276,7 @@ svnCopyDelivery() {
     mustHaveValue "${mm}" "mm"
 
     if [[ "$srcBranch" == "trunk" ]]; then
-        svn ls ${svnAddress}/BTS_D_SC_LFS_${yyyy}_${mm}/os/branches/PS_LFS_OS_${newBranch} || {
+        svn ls ${svnAddress}/BTS_D_SC_LFS_${yyyy}_${mm}/os/branches/PS_LFS_OS_MAINBRANCH || {
             echo svnCopy ${svnAddress}/BTS_D_SC_LFS_${yyyy}_${mm}/os/branches/PS_LFS_OS_MAINBRANCH \
             ${svnAddress}/BTS_D_SC_LFS_${yyyy}_${mm}/os/branches/PS_LFS_OS_${newBranch};
         }
@@ -275,16 +289,47 @@ svnCopyDelivery() {
 }
 
 
+svnCopyDeliveryLRC() {
+    info "--------------------------------------------------------"
+    info "SVN: copy delivery repository for LRC"
+    info "--------------------------------------------------------"
+
+    local srcBranch=$1
+    local newBranch=$2
+    local yyyy=$(getBranchPart ${newBranch} YYYY)
+    local mm=$(getBranchPart ${newBranch} MM)
+    local svnAddress="https://svne1.access.nokiasiemensnetworks.com/isource/svnroot"
+    mustHaveValue "${yyyy}" "yyyy"
+    mustHaveValue "${mm}" "mm"
+
+    if [[ "$srcBranch" == "trunk" ]]; then
+        svn ls ${svnAddress}/BTS_D_SC_LFS_${yyyy}_${mm}/os/branches/PS_LFS_OS_LRC || {
+            echo svnCopy ${svnAddress}/BTS_D_SC_LFS_${yyyy}_${mm}/os/branches/PS_LFS_OS_LRC \
+            ${svnAddress}/BTS_D_SC_LFS_${yyyy}_${mm}/os/branches/PS_LFS_OS_LRC_${newBranch};
+        }
+    else
+        svn ls ${svnAddress}/BTS_D_SC_LFS_${yyyy}_${mm}/os/branches/PS_LFS_OS_LRC_${newBranch} || {
+            echo svnCopy ${svnAddress}/BTS_D_SC_LFS_${yyyy}_${mm}/os/branches/PS_LFS_OS_LRC_${srcBranch} \
+            ${svnAddress}/BTS_D_SC_LFS_${yyyy}_${mm}/os/branches/PS_LFS_OS_LRC_${newBranch};
+        }
+    fi
+}
+
+
 #######################################################################
 # main
 #######################################################################
 
 main() {
+
+    __checkParams
+
     if [[ ! ${LRC} ]]; then
         svnCopyBranch ${SRC_BRANCH} ${NEW_BRANCH}
         svnCopyLocations ${SRC_BRANCH} ${NEW_BRANCH}
         createBranchInGit ${NEW_BRANCH}
         svnDummyCommit ${NEW_BRANCH}
+        svnCopyDelivery ${SRC_BRANCH} ${NEW_BRANCH}
         if [[ "${FSMR4}" == "true" ]]; then
             svnCopyLocationsFSMR4 ${SRC_BRANCH} ${NEW_BRANCH}
         fi
@@ -292,10 +337,10 @@ main() {
         svnCopyBranchLRC ${SRC_BRANCH} ${NEW_BRANCH}
         svnCopyLocationsLRC ${SRC_BRANCH} ${NEW_BRANCH}
         svnDummyCommitLRC ${NEW_BRANCH}
+        svnCopyDeliveryLRC ${SRC_BRANCH} ${NEW_BRANCH}
     fi
 
     svnEditLocationsTxtFile ${NEW_BRANCH}
-    svnCopyDelivery ${SRC_BRANCH} ${NEW_BRANCH}
 }
 
 main
