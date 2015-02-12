@@ -242,7 +242,7 @@ svnEditLocationsTxtFile() {
 
     info "Add ${newBranch} to trunk/${bldTools}/${locationsTxt}"
     mkdir ${bldTools}
-    svn checkout --depth empty ${SVN_SERVER}/${SVN_DIR}/trunk/${bldTools} ${bldTools}
+    svnCheckout --depth empty ${SVN_SERVER}/${SVN_DIR}/trunk/${bldTools} ${bldTools}
     cd ${bldTools}
     svn update ${locationsTxt}
     echo >> ${locationsTxt}
@@ -254,7 +254,7 @@ svnEditLocationsTxtFile() {
         echo "${newBranch}_FSMR4                     Feature Build ${newBranch} FSM-r4 stuff only (bi-weekly branch)" >> ${locationsTxt}
     fi
     if [[ "${FSMR4}" == "true" ]] && [[ "$(echo ${newBranch} | cut -c1,2)" == "FB" ]]; then
-        echo "${newBranch}                           Feature Build ${newBranch} stuff only (bi-weekly branch)" >> ${locationsTxt}
+        echo "${newBranch}_FSMR4                     Feature Build ${newBranch} FSM-r4 stuff only" >> ${locationsTxt}
     fi
     if [[ "${LRC}" == "true" ]]; then
         echo "LRC_${newBranch}                       LRC locations (special LRC for ${newBranch} only)" >> ${locationsTxt}
