@@ -181,6 +181,14 @@ createBranchInGit() {
     info "GIT: create branch"
     info "--------------------------------------------------------"
 
+    # TODO: check if branch already exists in GIT
+    local branchExists="no"
+
+    if [[ "${branchExists}" == "yes" ]]; then
+        info "Branch already exists in GIT"
+        return 0
+    fi
+
     local newBranch=$1
     mustHaveValue "${newBranch}" "new branch"
     # TODO: get GIT server from config
@@ -248,7 +256,6 @@ svnEditLocationsTxtFile() {
     svnCheckout --depth empty ${SVN_SERVER}/${SVN_DIR}/trunk/${bldTools} ${bldTools}
     cd ${bldTools}
     svn update ${locationsTxt}
-    echo >> ${locationsTxt}
 
     if [[ ! "${LRC}" ]]; then
         echo "${newBranch}                           Feature Build ${newBranch} (all FB_PS_LFS_REL_${yyyy}_${mm}_xx...)" >> ${locationsTxt}
@@ -326,23 +333,26 @@ main() {
 
     __checkParams
 
-    if [[ ! ${LRC} ]]; then
-        svnCopyBranch ${SRC_BRANCH} ${NEW_BRANCH}
-        svnCopyLocations ${SRC_BRANCH} ${NEW_BRANCH}
-        createBranchInGit ${NEW_BRANCH}
-        svnDummyCommit ${NEW_BRANCH}
-        svnCopyDelivery ${SRC_BRANCH} ${NEW_BRANCH}
-        if [[ "${FSMR4}" == "true" ]]; then
-            svnCopyLocationsFSMR4 ${SRC_BRANCH} ${NEW_BRANCH}
+    if [[ "${DO_SVN}" == "true" ]]; then
+        if [[ ! ${LRC} ]]; then
+            svnCopyBranch ${SRC_BRANCH} ${NEW_BRANCH}
+            svnCopyLocations ${SRC_BRANCH} ${NEW_BRANCH}
+            svnDummyCommit ${NEW_BRANCH}
+            svnCopyDelivery ${SRC_BRANCH} ${NEW_BRANCH}
+            if [[ "${FSMR4}" == "true" ]]; then
+                svnCopyLocationsFSMR4 ${SRC_BRANCH} ${NEW_BRANCH}
+            fi
+            createBranchInGit ${NEW_BRANCH}
+        elif [[ ${LRC} == "true" ]]; then
+            svnCopyBranchLRC ${SRC_BRANCH} ${NEW_BRANCH}
+            svnCopyLocationsLRC ${SRC_BRANCH} ${NEW_BRANCH}
+            svnDummyCommitLRC ${NEW_BRANCH}
+            svnCopyDeliveryLRC ${SRC_BRANCH} ${NEW_BRANCH}
         fi
-    elif [[ ${LRC} == "true" ]]; then
-        svnCopyBranchLRC ${SRC_BRANCH} ${NEW_BRANCH}
-        svnCopyLocationsLRC ${SRC_BRANCH} ${NEW_BRANCH}
-        svnDummyCommitLRC ${NEW_BRANCH}
-        svnCopyDeliveryLRC ${SRC_BRANCH} ${NEW_BRANCH}
+        svnEditLocationsTxtFile ${NEW_BRANCH}
+    else
+        info "$(basename $0): Nothing to do."
     fi
-
-    svnEditLocationsTxtFile ${NEW_BRANCH}
 }
 
 main
