@@ -2261,7 +2261,7 @@ sub execute {
     # no use here, we only want to load the module, if we need the module
     require Mail::Sender;
 
-    DEBUG Dumper( $self );
+    # DEBUG Dumper( $self );
     my $mua = Mail::Sender->new(
                                 { smtp      => $self->{smtpServer},
                                   from      => $self->{fromAddress}, 
