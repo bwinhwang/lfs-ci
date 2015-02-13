@@ -5,7 +5,6 @@
 #           help the developer to execute a command in the correct way including
 #           logging of the command and the proper error handling.
 
-
 [[ -z ${LFS_CI_SOURCE_common}  ]] && source ${LFS_CI_ROOT}/lib/common.sh
 [[ -z ${LFS_CI_SOURCE_logging} ]] && source ${LFS_CI_ROOT}/lib/logging.sh
 
@@ -69,6 +68,13 @@ execute() {
 
         trace "exit code of \"${command}\" was ${exitCode}"
 
+        # fucking stupid workaround to get the logfile for the command outside
+        # of the function.....
+        # TODO: demx2fk3 2015-02-10 find a better way to do this.
+        if [[ -e ${LFS_CI_LAST_EXECUTE_LOGFILE} ]] ; then
+            cat ${output} >> ${LFS_CI_LAST_EXECUTE_LOGFILE}
+        fi
+
         # in the last loop, don't wait, just exist
         if [[ ${retryCount} -gt 0 && ${exitCode} -gt 0 ]] ; then
             local randomSeconds=$((RANDOM % 20))
@@ -90,6 +96,11 @@ execute() {
     trace "normal return of execute method"
 
     return ${exitCode}
+}
+
+lastExecuteLogFile() {
+    echo ${LFS_CI_LAST_EXECUTE_LOGFILE}
+    return
 }
 
 ## @fn      executeOnMaster()

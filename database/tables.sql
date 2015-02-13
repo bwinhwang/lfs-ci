@@ -1,5 +1,8 @@
-DROP TABLE IF EXISTS events;
+DROP TABLE IF EXISTS test_results;
+DROP TABLE IF EXISTS test_result_names;
+DROP TABLE IF EXISTS test_executions;
 DROP TABLE IF EXISTS build_events;
+DROP TABLE IF EXISTS events;
 DROP TABLE IF EXISTS builds;
 
 DROP TABLE IF EXISTS builds;

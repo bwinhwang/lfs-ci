@@ -89,8 +89,9 @@ fi
 case "${JOB_NAME}" in
 
     # TODO: demx2fk3 2015-01-26 remove this hack
-    Test-lcpa878) ${LFS_CI_ROOT}/scripts/CLRC02_Test_Release_Candidate_LRC || exit 1 ;;
-    Test-lcpa914) ${LFS_CI_ROOT}/scripts/CLRC02_Test_Release_Candidate_LRC || exit 1 ;;
+    Test-lcpa878)  ${LFS_CI_ROOT}/scripts/CLRC02_Test_Release_Candidate_LRC || exit 1 ;;
+    Test-lcpa914)  ${LFS_CI_ROOT}/scripts/CLRC02_Test_Release_Candidate_LRC || exit 1 ;;
+    Test-lcpa1093) ${LFS_CI_ROOT}/scripts/CLRC02_Test_Release_Candidate_LRC || exit 1 ;;
     
     *_CI_*_Build) 
         source ${LFS_CI_ROOT}/lib/uc_build.sh

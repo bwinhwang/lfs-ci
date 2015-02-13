@@ -316,7 +316,7 @@ synchroniceToLocalPath() {
         sleep ${sleep}
 
         # mkdir is an atomic operation. if it exists, mkdir fails
-        if mkdir ${progressFile} 2>/dev/null ; then
+        if mkdir ${progressFile} 2> /dev/null ; then
 
             info "synchronice ${subsystem}/${tag} to local filesystem"
             execute mkdir -p ${localCacheDir}/data

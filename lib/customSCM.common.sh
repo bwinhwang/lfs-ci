@@ -82,6 +82,7 @@ getUpstreamProjectName() {
     local branchName=$(getBranchName)
 
     case ${jobName} in
+        LFS_Post_-_*)        echo LFS_Prod_-_${branchName}_-_Releasing_-_summary ;;
         LFS_CI_-_*_-_Test)   echo LFS_CI_-_${branchName}_-_Package_-_package   ;;
         UBOOT_CI_-_*_-_Test) echo UBOOT_CI_-_${branchName}_-_Package_-_package ;;
         *) fatal "no rule to get the upstream job for ${jobName}"              ;;

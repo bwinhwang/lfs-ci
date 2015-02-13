@@ -108,6 +108,10 @@ sub newBuildEvent {
         $method = "test_started( ?, ? )",
     } elsif ( $action eq "test_finished" ) {
         $method = "test_finished( ?, ? )",
+    } elsif ( $action eq "test_unstable" ) {
+        $method = "test_unstable( ?, ? )",
+    } elsif ( $action eq "test_failed" ) {
+        $method = "test_failed( ?, ? )",
     }
 
     my $sth = $self->prepare( 

@@ -161,6 +161,7 @@ genericShareCleanup() {
         if [[ ${siteName} = "ul" ]] ; then
             # make tarball
             # entscheide, ob du loeschen sollst oder nicht
+            export baselineName=$(basename ${entry})
             local canDelete=$(getConfig LFS_ADMIN_cleanup_share_can_delete)
             if [[ -n "${canDelete}" && -e ${entry} ]] ; then
                 ${execute} rm -rf ${entry}
@@ -344,10 +345,15 @@ createLfsBaselineListFromEcl() {
     requiredParameters WORKSPACE
 
     cd ${WORKSPACE}
+    local tmpFile1=$(createTempFile)
+    local tmpFile2=$(createTempFile)
 
     execute -n grep -e PS_LFS_OS -e PS_LFS_REL */ECL_BASE/ECL | \
         execute -n cut -d= -f2 | \
-        execute -n sort -u     > ${WORKSPACE}/usedBaselinesInEcl.txt
+        execute -n sort -u     > ${tmpFile1}
+
+    execute -n sed "s/PS_LFS_REL/PS_LFS_OS/g" ${tmpFile1} > ${tmpFile2}
+    execute -n cat ${tmpFile2} ${tmpFile1} > ${WORKSPACE}/usedBaselinesInEcl.txt
     rawDebug ${WORKSPACE}/usedBaselinesInEcl.txt
 
     info "done."

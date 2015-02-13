@@ -20,6 +20,9 @@ ci_job_build() {
     local subTaskName=$(getSubTaskNameFromJobName)
     mustHaveValue "${subTaskName}"
 
+    # for the metrics database, we are installing a own exit handler to record the end of this job
+    exit_add _recordBuildEndEvent
+
     execute rm -rf ${WORKSPACE}/revisions.txt
     createWorkspace
 
@@ -44,26 +47,6 @@ ci_job_build() {
     return
 }
 
-## @fn      usecase_LFS_BUILD_FAILED()
-#  @brief   execute the usecase LFS_BUILD_FAILED
-#  @details this is just for recoding the failed build
-#  @param   <none>
-#  @return  <none>
-usecase_LFS_BUILD_FAILED() {
-    databaseEventBuildFailed
-    return
-}
-
-## @fn      usecase_LFS_BUILD_SUCCESSFUL()
-#  @brief   execute the usecase LFS_BUILD_SUCCESSFUL
-#  @details this is just for recoding the  build was successful
-#  @param   <none>
-#  @return  <none>
-usecase_LFS_BUILD_SUCCESSFUL() {
-    databaseEventTestFinished
-    return
-}
-
 ## @fn      ci_job_build_version()
 #  @brief   usecase which creates the version label
 #  @details the usecase get the last label name from the last successful build and calculates
@@ -77,6 +60,9 @@ ci_job_build_version() {
     mustHaveWorkspaceName
 
     info "workspace is ${workspace}"
+
+    # for the metrics database, we are installing a own exit handler to record the end of this job
+    exit_add _recordBuildEndEvent
 
     local jobDirectory=$(getBuildDirectoryOnMaster)
     local lastSuccessfulJobDirectory=$(getBuildDirectoryOnMaster ${JOB_NAME} lastSuccessfulBuild)
@@ -158,6 +144,17 @@ _build_fsmddal_pdf() {
 
     return
 }
+
+_recordBuildEndEvent() {
+    local rc=${1}
+    if [[ ${rc} -gt 0 ]] ; then
+        databaseEventBuildFailed
+    else
+        databaseEventBuildFinished
+    fi
+    return
+}
+
 
 ## @fn      preCheckoutPatchWorkspace()
 #  @brief   apply patches before the checkout of the workspace to the workspace
