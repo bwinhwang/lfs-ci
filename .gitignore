@@ -8,3 +8,4 @@ TAGS
 log
 doc/html
 doc/latex
+bin/.nfs*

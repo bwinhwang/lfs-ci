@@ -25,7 +25,6 @@ createArtifactArchive() {
     requiredParameters JOB_NAME BUILD_NUMBER
 
     local workspace=$(getWorkspaceName)
-    local serverName=$(getConfig LFS_CI_artifacts_storage_host)
     mustHaveWorkspaceName
 
     mustExistDirectory "${workspace}/bld/"

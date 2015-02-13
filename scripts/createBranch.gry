@@ -2,7 +2,7 @@
 //
 // Groovy script to crate a new branch in the LFS CI.
 //
-// 1. Take the parameters from the Jenkins job.
+// 1. Take environment vars and parameters from Jenkins job.
 // 2. Creagte a list view and name it after the new branch.
 // 3. Add this new list view to the SCM view.
 // 4. Copy the jobs and replace $src_branch with $new_branch
@@ -54,6 +54,7 @@ comment = ""
 
 fsmr4_jobs = false
 
+// Environment vars
 lrc_jobs = false
 if(build.getEnvironment(listener).get("LRC") == "true") {
     lrc_jobs = true
@@ -74,11 +75,11 @@ parameters.each {
         comment = it.value
 }
 
-if(!new_branch) {
-    throw new RuntimeException("Parameter NEW_BRANCH is missing")
+if(!new_branch || !src_branch || !comment) {
+    throw new RuntimeException("Parameter is missing")
 }
-if(!src_branch || src_branch != "trunk") {
-    throw new RuntimeException("Parameter SRC_BRANCH is missing or is not \"trunk\"")
+if(src_branch != "trunk") {
+    throw new RuntimeException("Parameter SRC_BRANCH must be \"trunk\"")
 }
 
 println("[INFO] lrc_jobs: $lrc_jobs")
