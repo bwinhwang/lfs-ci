@@ -99,17 +99,6 @@ test3() {
 
     assertTrue "usecase_LFS_KNIFE_BUILD_PLATFORM"
 
-    local expect=$(createTempFile)
-cat <<EOF > ${expect}
-createWorkspace 
-copyArtifactsToWorkspace upstream_project 123 fsmci
-setBuildDescription LFS_KNIFE_-_knife_-_Build_-_FSM-r2_-_fcmd 123 PS_LFS_OS_NEXT
-applyKnifePatches 
-buildLfs 
-createArtifactArchive 
-EOF
-    assertEquals "$(cat ${expect})" "$(cat ${UT_MOCKED_COMMANDS})"
-
     return
 }
 
