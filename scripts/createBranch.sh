@@ -188,7 +188,8 @@ createBranchInGit() {
 
     gitRevision=$(svn cat ${SVN_SERVER}/${SVN_PATH}/main/${SRC_PROJECT}/src/gitrevision)
     info "GIT revision: ${gitRevision}"
-    git checkout ssh://git@${gitServer}/build/build
+    git clone ssh://git@${gitServer}/build/build
+    cd build
     git branch $newBranch $gitRevision
     git push origin $newBranch
 }
@@ -304,12 +305,12 @@ svnCopyDeliveryLRC() {
     mustHaveValue "${mm}" "mm"
 
     if [[ "$srcBranch" == "trunk" ]]; then
-        svn ls ${svnAddress}/BTS_D_SC_LFS_${yyyy}_${mm}/os/branches/PS_LFS_OS_LRC || {
+        svn ls ${svnAddress}/BTS_D_SC_LFS_${yyyy}_${mm}/os/branches/PS_LFS_OS_LRC && {
             svn copy -m "copy delivery repo" ${svnAddress}/BTS_D_SC_LFS_${yyyy}_${mm}/os/branches/PS_LFS_OS_LRC \
             ${svnAddress}/BTS_D_SC_LFS_${yyyy}_${mm}/os/branches/PS_LFS_OS_LRC_${newBranch};
         }
     else
-        svn ls ${svnAddress}/BTS_D_SC_LFS_${yyyy}_${mm}/os/branches/PS_LFS_OS_LRC_${newBranch} || {
+        svn ls ${svnAddress}/BTS_D_SC_LFS_${yyyy}_${mm}/os/branches/PS_LFS_OS_LRC_${newBranch} && {
             svn copy -m "copy delivery repo" ${svnAddress}/BTS_D_SC_LFS_${yyyy}_${mm}/os/branches/PS_LFS_OS_LRC_${srcBranch} \
             ${svnAddress}/BTS_D_SC_LFS_${yyyy}_${mm}/os/branches/PS_LFS_OS_LRC_${newBranch};
         }
