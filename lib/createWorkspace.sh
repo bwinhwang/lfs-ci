@@ -113,6 +113,7 @@ createWorkspace() {
 
     local location=$(getLocationName)
     mustHaveLocationName
+    info "location is ${location} / ${LFS_CI_GLOBAL_BRANCH_NAME}"
 
     local productName=$(getProductNameFromJobName)
     mustHaveValue "${productName}" "product name"
@@ -302,6 +303,10 @@ synchroniceToLocalPath() {
     if [[ ${subsystem} == "pkgpool" ]] ; then
         local rsync_opts=-L
     fi        
+
+    if [[ ! -d ${localCacheDir}/data ]] ; then
+        execute mkdir -p ${localCacheDir}/data
+    fi
 
     if [[ ! -e ${localCacheDir}/${tag} ]] ; then
         progressFile=${localCacheDir}/data/${tag}.in_progress

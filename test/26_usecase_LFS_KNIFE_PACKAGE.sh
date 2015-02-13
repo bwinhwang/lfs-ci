@@ -1,8 +1,6 @@
 #!/bin/bash
 
-source lib/common.sh
-
-initTempDirectory
+source test/common.sh
 
 source lib/uc_knife_build.sh
 
@@ -17,10 +15,15 @@ oneTimeSetUp() {
     }
     ci_job_package() {
         mockedCommand "ci_job_package $@"
+        mkdir -p ${WORKSPACE}/workspace/bld/bld-knife-input/
+        echo "foo=bar" > ${WORKSPACE}/workspace/bld/bld-knife-input/knife-requestor.txt
     }
     getUsedSdkVersions() {
         mockedCommand "getUsedSdkVersions $@"
         echo SDK1 SDK2
+    }
+    mustHaveNextCiLabelName() {
+        mockedCommand "mustHaveNextCiLabelName $@"
     }
     uploadKnifeToStorage() {
         mockedCommand "uploadKnifeToStorage $@"
@@ -47,6 +50,8 @@ test1() {
     export UPSTREAM_PROJECT=upstream_project
     export UPSTREAM_BUILD=123
     export JOB_NAME=LFS_KNIFE_-_knife_-_Build
+    export BUILD_NUMBER=1234
+    export LFS_CI_GLOBAL_BRANCH_NAME=trunk
 
     assertTrue "usecase_LFS_KNIFE_PACKAGE"
 
@@ -59,12 +64,14 @@ test1() {
 
 cat <<EOF > ${expect}
 ci_job_package 
+mustHaveNextCiLabelName 
 execute tar -cv --transform=s:^\./:os/: -C ${WORKSPACE}/workspace/upload/ -f ${WORKSPACE}/workspace/lfs-knife.tar .
 execute gzip ${WORKSPACE}/workspace/lfs-knife.tar
 uploadKnifeToStorage 
 copyFileToArtifactDirectory .00_README_knife_result.txt
+execute ${LFS_CI_ROOT}/bin/sendReleaseNote -r ${WORKSPACE}/.00_README_knife_result.txt -t -n -f ${LFS_CI_ROOT}/etc/file.cfg
 EOF
-    assertEquals "$(cat ${expect})" "$(cat ${UT_MOCKED_COMMANDS})"
+    assertExecutedCommands ${expect}
 
     return
 }

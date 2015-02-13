@@ -81,22 +81,63 @@ usecase_LFS_KNIFE_BUILD_PLATFORM() {
     local subTaskName=$(getSubTaskNameFromJobName)
     mustHaveValue "${subTaskName}" "subTaskName"
 
-    if [[ ${baseLabel} =~ LRC_LCP && ${subTaskName} != LRC ]] ; then
-        echo ${baseLabel} ${subTaskName}
-        warning "Knife baseline is an LRC-baseline, but build is not required for LRC"
+    info "baseLabel ${baseLabel}"
+    info "subTaskName ${subTaskName}"
+   
+    # short names: stn := subTaskName
+    #              bl  := baseLabel
+    #
+    #  results: build should be done := 1
+    #           build not required   := 0
+    #
+    #            | stn == LRC | stn != LRC 
+    # -------------------------------------
+    #  bl  = LRC |      1     |      0
+    # -------------------------------------
+    #  bl != LRC |      0     |      1
+    # -------------------------------------
+
+
+    if [[ ${baseLabel} =~ LRC_LCP ]] ; then
+        if [[ ${subTaskName} = LRC ]] ; then
+            debug "it's a LRC build, everything is fine."
+        else
+            warning "Knife baseline is an LRC-baseline, but build is not required for LRC"
+            exit 0
+        fi
     else
-        debug "it's a LRC build, everything is fine."
+        if [[ ${subTaskName} = LRC ]] ; then
+            warning "Knife baseline is an LRC-baseline, but build is not required for LRC"
+            exit 0
+        else
+            debug "it's a normal FSMr-x build, everything is fine."
+        fi
     fi
 
     # create a workspace
     debug "create own revision control file"
-    echo "src-fake http://fakeurl/ ${baseLabel}" > ${WORKSPACE}/revisions.txt
+    export tagName=${baseLabel}
+    local svnReposUrl=$(getConfig LFS_PROD_svn_delivery_os_repos_url)
+    mustExistInSubversion ${svnReposUrl}/tags/${baseLabel}/doc/scripts/ revisions.txt
+    local revision=$(svnCat ${svnReposUrl}/tags/${baseLabel}/doc/scripts/revisions.txt | cut -d" " -f3 | sort -nu | tail -n 1)
+    echo "src-knife ${svnReposUrl}/tags/${baseLabel} ${revision}" > ${WORKSPACE}/revisions.txt
 
     # faking the branch name for workspace creation...
-    export LFS_CI_GLOBAL_BRANCH_NAME=$(getConfig LFS_PROD_tag_to_branch)
+    LFS_CI_GLOBAL_BRANCH_NAME=$(getConfig LFS_PROD_tag_to_branch)
+
     if [[ -z ${LFS_CI_GLOBAL_BRANCH_NAME} ]] ; then
         fatal "this branch is not prepared to build knives"
     fi
+
+    # for FSM-r4, it's have to do this in a different way..
+    if [[ ${subTaskName} = "FSM-r4" ]] ; then
+        case ${LFS_CI_GLOBAL_BRANCH_NAME} in
+            trunk) LFS_CI_GLOBAL_BRANCH_NAME=FSM_R4_DEV ;;
+            *)     # TODO: demx2fk3 2015-02-03 add check, if new location exists, otherwise no build
+                   LFS_CI_GLOBAL_BRANCH_NAME=${LFS_CI_GLOBAL_BRANCH_NAME}_FSMR4 ;;
+        esac
+    fi
+    export LFS_CI_GLOBAL_BRANCH_NAME
 
     createWorkspace
 
@@ -148,6 +189,13 @@ usecase_LFS_KNIFE_BUILD() {
     info "storing knife input as artifacts"
     execute mkdir -p ${workspace}/bld/bld-knife-input/
     execute -i cp -a ${WORKSPACE}/lfs.patch ${workspace}/bld/bld-knife-input/
+    cat > ${workspace}/bld/bld-knife-input/knife-requestor.txt <<EOF
+KNIFE_REQUESTOR="${KNIFE_REQUESTOR}"
+KNIFE_REQUESTOR_FIRST_NAME="${KNIFE_REQUESTOR_FIRST_NAME}"
+KNIFE_REQUESTOR_LAST_NAME="${KNIFE_REQUESTOR_LAST_NAME}"
+KNIFE_REQUESTOR_USERID="${KNIFE_REQUESTOR_USERID}"
+KNIFE_REQUESTOR_EMAIL="${KNIFE_REQUESTOR_EMAIL}"
+EOF
 
     info "upload results to artifakts share."
     createArtifactArchive
@@ -167,8 +215,21 @@ usecase_LFS_KNIFE_PACKAGE() {
     local workspace=$(getWorkspaceName)
     mustHaveWorkspaceName
 
+    export LFS_CI_GLOBAL_BRANCH_NAME=$(getConfig LFS_PROD_tag_to_branch)
+    if [[ -z ${LFS_CI_GLOBAL_BRANCH_NAME} ]] ; then
+        fatal "this branch is not prepared to build knives"
+    fi
+
     info "running usecase LFS package"
     ci_job_package
+
+    mustHaveNextCiLabelName
+    local label=$(getNextCiLabelName)
+    mustHaveValue ${label} "label name"
+
+    mustExistFile ${workspace}/bld/bld-knife-input/knife-requestor.txt
+
+    source ${workspace}/bld/bld-knife-input/knife-requestor.txt
 
     info "creating tarball with lfs load..."
     execute tar -cv \
@@ -201,6 +262,11 @@ Your LFS SCM Team
 EOF
 
     copyFileToArtifactDirectory $(basename ${readmeFile})
+
+    execute ${LFS_CI_ROOT}/bin/sendReleaseNote -r ${WORKSPACE}/.00_README_knife_result.txt \
+                                               -t ${label}                                 \
+                                               -n                                          \
+                                               -f ${LFS_CI_ROOT}/etc/file.cfg
 
     info "knife done."
 
