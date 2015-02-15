@@ -124,6 +124,7 @@ makingTest_testFSM() {
     execute mkdir -p ${xmlOutputDirectory}
     mustExistDirectory ${xmlOutputDirectory}
 
+    # TODO: demx2fk3 2015-02-13 FIXME, wrong variables...
 	export targetName=$(sed "s/^Test-//" <<< ${JOB_NAME})
     mustHaveValue "${testTargetName}" "test target name"
 

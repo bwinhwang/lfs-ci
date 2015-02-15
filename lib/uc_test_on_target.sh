@@ -18,15 +18,16 @@ ci_job_test_on_target() {
     setBuildDescription ${JOB_NAME} ${BUILD_NUMBER} ${LABEL}
 
     local targetName=$(reserveTarget)
+    mustHaveValue "${targetName}" "target name"
+
     local workspace=$(getWorkspaceName)
     mustHaveCleanWorkspace
-    mustHaveWorkspaceName
-    mustHaveWritableWorkspace
 
     local branchName=$(getLocationName ${UPSTREAM_PROJECT})
     mustHaveValue "${branchName}" "branch name"
 
     info "create workspace for testing on ${branchName}"
+    # TODO: demx2fk3 2015-02-13 we are using the wrong revision to checkout src-test
     createBasicWorkspace -l ${branchName} src-test
 
     export testTargetName=${targetName}
@@ -47,16 +48,9 @@ ci_job_test_on_target() {
 
     databaseEventTestFinished ${LABEL} ${testTargetName}
 
-#     addTestResultsToMetricDatabase ${workspace}/TODO.xml \
-#                                    ${LABEL}              \
-#                                    "TMF_${testType}"     \
-#                                    "${testTargetName}"   \
-#                                    "FSMr-x"
     info "testing done."
     return
 }
-
-
 
 ## @fn      reserveTarget
 #  @brief   make a reserveration from TAToo to get a target
@@ -73,6 +67,10 @@ reserveTarget() {
     echo ${targetName}
    
     return
+}
+
+mustHaveReservedTarget() {
+    local attributes=$@
 }
 
 ## @fn      uc_job_test_on_target_archive_logs()
