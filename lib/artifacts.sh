@@ -133,7 +133,7 @@ copyAndExtractBuildArtifactsFromProject() {
         debug "untar ${file} from job ${jobName}"
         execute tar --directory ${workspace}/bld/ \
                     --extract                     \
-                    --use-compress-program=${LFS_CI_ROOT/bin/pigz \
+                    --use-compress-program=${LFS_CI_ROOT}/bin/pigz \
                     --file ${workspace}/bld/${file}
     done
 
