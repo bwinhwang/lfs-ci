@@ -492,6 +492,7 @@ createOsFileList() {
 
     local dst=${workspace}/upload
     execute -n find ${dst} -not -type d | sort | xargs md5sum 2>/dev/null | sed "s,${dst}/,,g" > ${dst}/doc/list_all_os_files.txt
+    execute -n find ${dst} -not -type d | sort | xargs du -k  2>/dev/null | sed "s,${dst}/,,g" > ${dst}/doc/list_all_os_sizes_of_files.txt
 
     return
 }
