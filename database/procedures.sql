@@ -240,3 +240,83 @@ BEGIN
 END //
 DELIMITER ;
 
+
+
+DROP PROCEDURE IF EXISTS build_workflow_per_branch;
+DELIMITER //
+CREATE PROCEDURE build_workflow_per_branch()
+BEGIN
+  DECLARE bDone             INT;
+
+  DECLARE tmp_branch_id     INT;
+  DECLARE tmp_build_id      INT;
+
+  DECLARE curs CURSOR FOR  SELECT max(builds.id) build_id, branch_id FROM builds GROUP BY branch_id;
+
+  DECLARE CONTINUE HANDLER FOR NOT FOUND SET bDone = 1;
+
+  DROP TEMPORARY TABLE IF EXISTS tmp_build_workflow_per_branch;
+  CREATE TEMPORARY TABLE IF NOT EXISTS tmp_build_workflow_per_branch  (
+      build_id     INT,
+      event_name   VARCHAR(128),
+      event_date   DATETIME
+  );
+
+  OPEN curs;
+
+  SET bDone = 0;
+  REPEAT
+    FETCH curs INTO tmp_build_id, tmp_branch_id;
+
+    INSERT INTO tmp_build_workflow_per_branch ( build_id, event_name, event_date )
+        SELECT tmp_build_id, event_name, timestamp from v_build_events where build_id = tmp_build_id;
+  UNTIL bDone END REPEAT;
+
+  CLOSE curs;
+
+    SET @sql = NULL;
+    SET SESSION group_concat_max_len = 40000;
+    SELECT GROUP_CONCAT(DISTINCT
+           CONCAT('MAX(CASE WHEN event_name = ''', event_name,
+           ''' THEN event_date END) `', REPLACE( event_name, " ", "_" ), '`'))
+    INTO @sql
+    FROM tmp_build_workflow_per_branch;
+
+    DROP TABLE IF EXISTS tmp_foobar;
+    SET @sql =
+        CONCAT('CREATE TEMPORARY TABLE tmp_foobar
+            SELECT build_id, ', @sql, '
+                     FROM tmp_build_workflow_per_branch
+                    GROUP BY build_id');
+
+    PREPARE stmt FROM @sql;
+    EXECUTE stmt;
+    DEALLOCATE PREPARE stmt;
+
+    
+
+END //
+DELIMITER ;
+
+
+SELECT tmp.build_id, 
+       build_name,
+       branch_name,
+       tmp.build_started, 
+       IF( tmp.build_finished_successfully, tmp.build_finished_successfully, tmp.build_finished_with_error) build_ended ,
+       "1" as build_status,
+       tmp.test_started,
+       IF( tmp.test_finished_wirh_error, tmp.test_finished_wirh_error,
+           IF( tmp.test_finished_successful, tmp.test_finished_successful,
+               IF( tmp.test_finished_unstable, tmp.test_finished_unstable, 'unknown' )
+               )
+           ) test_ended,
+       "1" as test_status,
+       IF( tmp.release_started, tmp.release_started, tmp.released ) as release_started,
+       tmp.released,
+       "1" as release_status
+FROM tmp_foobar tmp, builds b
+WHERE tmp.build_id = b.id 
+ORDER BY branch_name;
+
+
