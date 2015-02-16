@@ -62,7 +62,7 @@ ci_job_build_version() {
     mustHaveWorkspaceName
 
     if [[ ${BUILD_CAUSE_SCMTRIGGER} ]] ; then
-        copyChangelogToWorkspace
+        copyChangelogToWorkspace ${JOB_NAME} ${BUILD_NUMBER}
         local linesOfChangelog=$(wc -l ${WORKSPACE}/changelog.xml | cut -d" " -f 1)
         if [[ ${linesOfChangelog} = 1 ]] ; then
             WARNING "build was triggered by SCM change, but changelog is empty"
