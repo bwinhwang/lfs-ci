@@ -313,7 +313,7 @@ BEGIN
             IF( tmp.test_finished_successful, "ok", 
                 IF( tmp.test_finished_wirh_error, "error",
                     IF( tmp.test_finished_unstable, "unstable", 
-                        IF( tmp.test_started, "running", "unkown")
+                        IF( tmp.test_started, "running", "unknown")
                       )
                   )
               ) AS test_status,
