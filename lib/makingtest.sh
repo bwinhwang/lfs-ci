@@ -415,8 +415,13 @@ makingTest_testsWithoutTarget() {
     export LFS_CI_ERROR_CODE= 
     runAndLog ${make} --ignore-errors test-xmloutput || LFS_CI_ERROR_CODE=0 # also true
 
-    execute mkdir ${workspace}/xml-reports/
-    execute cp -f ${testSuiteDirectory}/xml-reports/*.xml ${workspace}/xml-reports/
+    execute mkdir -p ${workspace}/xml-reports/
+    execute mkdir -p ${workspace}/bld/bld-test-xmlreports/results
+    execute mkdir -p ${workspace}/bld/bld-test-localhost/results
+    execute cp -fr ${testSuiteDirectory}/__artifacts/* ${workspace}/bld/bld-test-localhost/results/
+    execute cp -fr ${testSuiteDirectory}/xml-reports/*.xml ${workspace}/bld/bld-test-xmlreports/results/
+    execute cp -f  ${testSuiteDirectory}/xml-reports/*.xml ${workspace}/xml-reports/
+    createArtifactArchive
 
     if [[ ${LFS_CI_ERROR_CODE} ]] ; then
         error "some errors in test cases. please see logfile"
