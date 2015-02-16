@@ -7,3 +7,5 @@ CREATE OR REPLACE VIEW v_releases AS
 CREATE VIEW v_test_results AS
     SELECT r.id, r.test_execution_id, n.test_result_name, r.test_result_value  FROM test_results r, test_result_names n WHERE r.test_result_name_id = n.id;
 
+CREATE OR REPLACE VIEW v_builds AS
+    SELECT * from builds;
