@@ -418,7 +418,9 @@ makingTest_testsWithoutTarget() {
     execute mkdir -p ${workspace}/xml-reports/
     execute mkdir -p ${workspace}/bld/bld-test-xmlreports/results
     execute mkdir -p ${workspace}/bld/bld-test-localhost/results
-    execute cp -fr ${testSuiteDirectory}/__artifacts/* ${workspace}/bld/bld-test-localhost/results/
+    if [[ -d ${testSuiteDirectory}/__artifacts ]] ; then
+        execute cp -fr ${testSuiteDirectory}/__artifacts/* ${workspace}/bld/bld-test-localhost/results/
+    fi
     execute cp -fr ${testSuiteDirectory}/xml-reports/*.xml ${workspace}/bld/bld-test-xmlreports/results/
     execute cp -f  ${testSuiteDirectory}/xml-reports/*.xml ${workspace}/xml-reports/
     createArtifactArchive
