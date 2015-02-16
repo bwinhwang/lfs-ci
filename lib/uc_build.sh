@@ -26,9 +26,6 @@ ci_job_build() {
     execute rm -rf ${WORKSPACE}/revisions.txt
     createWorkspace
 
-    # for the metrics database, we are installing a own exit handler to record the end of this job
-    exit_add _recordBuildEndEvent
-
     # release label is stored in the artifacts of fsmci of the build job
     # TODO: demx2fk3 2014-07-15 fix me - wrong function
     copyArtifactsToWorkspace "${UPSTREAM_PROJECT}" "${UPSTREAM_BUILD}" "fsmci"
