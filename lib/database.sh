@@ -32,13 +32,13 @@ databaseEventBuildStarted() {
 #  @param   <none>
 #  @return  <none>
 databaseEventBuildFinished() {
-    requiredParameters LFS_CI_ROOT
+    requiredParameters LFS_CI_ROOT JOB_NAME BUILD_NUMBER
 
     mustHaveNextCiLabelName
     local label=$(getNextCiLabelName)
     mustHaveValue ${label} "label name"
 
-    execute -i ${LFS_CI_ROOT}/bin/newBuildEvent.pl --buildName=${label} --action=build_finished
+    execute -i ${LFS_CI_ROOT}/bin/newBuildEvent.pl --buildName=${label} --action=build_finished --comment=${JOB_NAME}_${BUILD_NUMBER}
     return
 }
 
@@ -47,13 +47,13 @@ databaseEventBuildFinished() {
 #  @param   <none>
 #  @return  <none>
 databaseEventBuildFailed() {
-    requiredParameters LFS_CI_ROOT
+    requiredParameters LFS_CI_ROOT JOB_NAME BUILD_NUMBER
 
     mustHaveNextCiLabelName
     local label=$(getNextCiLabelName)
     mustHaveValue ${label} "label name"
 
-    execute -i ${LFS_CI_ROOT}/bin/newBuildEvent.pl --buildName=${label} --action=build_failed
+    execute -i ${LFS_CI_ROOT}/bin/newBuildEvent.pl --buildName=${label} --action=build_failed --comment=${JOB_NAME}_${BUILD_NUMBER}
     return
 }
 
