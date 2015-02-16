@@ -95,9 +95,9 @@ copyAndExtractBuildArtifactsFromProject() {
 
     local artifactesShare=$(getConfig artifactesShare)
     local artifactsPathOnMaster=${artifactesShare}/${jobName}/${buildNumber}/save/
-    local serverName=$(getConfig LINSEE_server)
+    local serverName=$(getConfig LFS_CI_artifacts_storage_host)
 
-    local files=$(runOnMaster ls ${artifactsPathOnMaster})
+    local files=$(runOnMaster ls ${artifactsPathOnMaster} 2>/dev/null)
 
     local workspace=$(getWorkspaceName)
     mustHaveWorkspaceName
@@ -210,9 +210,10 @@ copyFileToArtifactDirectory() {
     requiredParameters JOB_NAME BUILD_NUMBER
     local fileName=$1
 
-    local serverName=$(getConfig LINSEE_server)
+    local serverName=$(getConfig LFS_CI_artifacts_storage_host)
     local artifactsPathOnShare=$(getConfig artifactesShare)/${JOB_NAME}/${BUILD_NUMBER}
-    executeOnMaster mkdir -p ${artifactsPathOnShare}/save
+    # executeOnMaster mkdir -p ${artifactsPathOnShare}/save
+    execute ssh ${serverName} mkdir -p ${artifactsPathOnShare}/save
 
     # sometimes, the remote host closes connection, so we try to retry...
     execute -r 10 rsync --archive --verbose --rsh=ssh -P  \
