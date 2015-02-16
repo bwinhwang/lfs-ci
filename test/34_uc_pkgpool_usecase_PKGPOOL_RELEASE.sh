@@ -1,7 +1,6 @@
 #!/bin/bash
 
-source lib/common.sh
-initTempDirectory
+source test/common.sh
 
 source lib/uc_pkgpool.sh
 
@@ -78,7 +77,7 @@ uploadToWorkflowTool LABEL ${WORKSPACE}/workspace/releasenote.xml
 copyFileToArtifactDirectory releasenote.xml
 linkFileToArtifactsDirectory /build/home/psulm/LFS_internal/artifacts/PKGPOOL_PROD_-_trunk_-_Release/1234
 EOF
-    assertEquals "$(cat ${expect})" "$(cat ${UT_MOCKED_COMMANDS})"
+    assertExecutedCommands ${expect}
 
     return
 }
