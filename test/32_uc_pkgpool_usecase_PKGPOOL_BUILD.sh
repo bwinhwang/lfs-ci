@@ -60,7 +60,7 @@ test1() {
 execute rm -rf ${WORKSPACE}/src/src
 gitReset --hard
 execute ./bootstrap
-execute -n ${WORKSPACE}/src/build -j24 --prepopulate --release=PKGPOOL_
+execute ${WORKSPACE}/src/build -j100 --pkgpool=/build/home/psulm/SC_LFS/pkgpool --prepopulate --release=BM_PKGPOOL_
 execute -n sed -ne s,^release \([^ ]*\) complete$,\1,p TempFile
 gitDescribe --abbrev=0
 gitTagAndPushToOrigin 
