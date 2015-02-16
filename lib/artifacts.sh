@@ -39,7 +39,7 @@ createArtifactArchive() {
 
         local subsystem=$(cut -d- -f2 <<< ${dir})
         info "creating artifact archive for ${dir}"
-        execute tar --create --auto-compress --file "${dir}.tar.gz" "${dir}"
+        execute tar --create --use-compress-program=${LFS_CI_ROOT}/bin/pigz --file "${dir}.tar.gz" "${dir}"
         copyFileToArtifactDirectory ${dir}.tar.gz
     done
 
@@ -133,7 +133,7 @@ copyAndExtractBuildArtifactsFromProject() {
         debug "untar ${file} from job ${jobName}"
         execute tar --directory ${workspace}/bld/ \
                     --extract                     \
-                    --auto-compress               \
+                    --use-compress-program=${LFS_CI_ROOT/bin/pigz \
                     --file ${workspace}/bld/${file}
     done
 
