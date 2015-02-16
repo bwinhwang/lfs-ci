@@ -22,7 +22,7 @@ databaseEventBuildStarted() {
     local label=$(getNextCiLabelName)
     mustHaveValue ${label} "label name"
 
-    execute -i ${LFS_CI_ROOT}/bin/newBuildEvent.pl --buildName=${label} --branchName=${branch} --revision=${revision} --action=build_started
+    execute -i ${LFS_CI_ROOT}/bin/newBuildEvent.pl --buildName=${label} --branchName=${branch} --revision=${revision} --action=build_started --comment=${JOB_NAME}_${BUILD_NUMBER}
 
     return
 }
