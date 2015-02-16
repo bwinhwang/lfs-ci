@@ -34,25 +34,32 @@ usecase_PKGPOOL_BUILD() {
     local releasePrefix=$(getConfig PKGPOOL_PROD_release_prefix)
     mustHaveValue "${releasePrefix}" "pkgpool release prefix"
 
+    info "pkgpool release name prefix is ${releasePrefix}"
+
     local buildLogFile=$(createTempFile)
     local gitWorkspace=${WORKSPACE}/src
 
     # git clone, created by jenkins git plugin
     mustExistDirectory ${gitWorkspace}
 
+    info "preparing git workspace..."
     cd ${gitWorkspace}
     execute rm -rf ${gitWorkspace}/src
     gitReset --hard
 
+    info "bootstrap build environment..."
     execute ./bootstrap
     cd ${workspace}
 
+    info "building pkgpool..."
     # TODO: demx2fk3 2015-02-09 use different path for testing ci jobs
-    execute -n ${gitWorkspace}/build -j24 --prepopulate --release="${releasePrefix}" > ${buildLogFile}
+    execute  ${gitWorkspace}/build -j100 --pkgpool=/build/home/psulm/SC_LFS/pkgpool --prepopulate --release="${releasePrefix}" 
     rawDebug ${buildLogFile}
 
     local releaseString="$(execute -n sed -ne 's,^release \([^ ]*\) complete$,\1,p' ${buildLogFile})"
     mustHaveValue "${releaseString}" "release string"
+
+    info "pkgpool release name is ${releaseString}"
 
     cd ${gitWorkspace}
     local oldRelease=$(gitDescribe --abbrev=0)
