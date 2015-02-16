@@ -55,9 +55,21 @@ ci_job_build() {
 #  @param   <none>
 #  @return  <none>
 ci_job_build_version() {
+    requiredParameters JOB_NAME BUILD_NUMBER LFS_CI_ROOT 
+
     local workspace=$(getWorkspaceName)
     mustHaveCleanWorkspace
     mustHaveWorkspaceName
+
+    if [[ ${BUILD_CAUSE_SCMTRIGGER} ]] ; then
+        copyChangelogToWorkspace
+        local linesOfChangelog=$(wc -l ${WORKSPACE}/changelog.xml | cut -d" " -f 1)
+        if [[ ${linesOfChangelog} = 1 ]] ; then
+            WARNING "build was triggered by SCM change, but changelog is empty"
+            setBuildResultUnstable
+            exit 0
+        fi
+    fi
 
     info "workspace is ${workspace}"
 
