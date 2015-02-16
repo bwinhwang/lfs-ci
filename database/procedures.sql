@@ -15,9 +15,9 @@ CREATE PROCEDURE new_build_event( IN in_build_name VARCHAR(128), IN in_event VAR
 
    SELECT count(id) INTO cnt_build_id FROM builds WHERE build_name = in_build_name;
    -- check if build name exists
-   -- IF cnt_build_id = 0 THEN
-   --    SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'build_name does not exist';
-   -- END IF;
+   IF cnt_build_id = 0 THEN
+      SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'build_name does not exist';
+   END IF;
    -- more code below
    -- TODO: demx2fk3 2015-01-13 this is an hack, there is no better way to ghet the latest build id
    SELECT max(id) INTO var_build_id FROM builds WHERE build_name = in_build_name;
@@ -253,6 +253,32 @@ BEGIN
     LEFT JOIN build_events be3 ON (b.id = be3.build_id AND be3.event_id = 3 )
     ;
 
+END //
+DELIMITER ;
+
+
+DROP PROCEDURE migrateBranchData;
+DELIMITER //
+CREATE PROCEDURE migrateBranchData()
+BEGIN
+  DECLARE bDone INT;
+
+  DECLARE var1 TEXT;
+  DECLARE var2 INT;
+
+  DECLARE curs CURSOR FOR  select branch_name, min(revision) from builds group by branch_name;
+  DECLARE CONTINUE HANDLER FOR NOT FOUND SET bDone = 1;
+
+  OPEN curs;
+
+  SET bDone = 0;
+  REPEAT
+    FETCH curs INTO var1,var2;
+        INSERT INTO branches ( location_name, ps_branch_name, branch_name, based_on_revision, date_created) values ( var1, var1, var1, var2 , NOW());
+        UPDATE builds SET branch_id = LAST_INSERT_ID() WHERE branch_name = var1;
+  UNTIL bDone END REPEAT;
+
+  CLOSE curs;
 END //
 DELIMITER ;
 
