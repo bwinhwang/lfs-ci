@@ -76,7 +76,7 @@ DROP PROCEDURE IF EXISTS test_failed;
 DELIMITER //
 CREATE PROCEDURE test_failed( IN in_build_name VARCHAR(128), IN in_comment TEXT )
 BEGIN
-    CALL new_build_event( in_build_name, 'test finished wirh error', in_comment );
+    CALL new_build_event( in_build_name, 'test finished with error', in_comment );
 END //
 DELIMITER ;
 
@@ -305,13 +305,13 @@ BEGIN
                 IF( tmp.build_finished_with_error, "error", "running" ) 
               ) AS build_status,
             tmp.test_started,
-            IF( tmp.test_finished_wirh_error, tmp.test_finished_wirh_error,
+            IF( tmp.test_finished_with_error, tmp.test_finished_with_error,
                 IF( tmp.test_finished_successful, tmp.test_finished_successful,
                     IF( tmp.test_finished_unstable, tmp.test_finished_unstable, 'unknown' )
                   )
               ) AS test_ended,
             IF( tmp.test_finished_successful, "ok", 
-                IF( tmp.test_finished_wirh_error, "error",
+                IF( tmp.test_finished_with_error, "error",
                     IF( tmp.test_finished_unstable, "unstable", 
                         IF( tmp.test_started, "running", "unknown")
                       )
