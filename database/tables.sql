@@ -4,19 +4,39 @@ DROP TABLE IF EXISTS test_executions;
 DROP TABLE IF EXISTS build_events;
 DROP TABLE IF EXISTS events;
 DROP TABLE IF EXISTS builds;
+DROP TABLE IF EXISTS branches;
+
+DROP TABLE IF EXISTS branches;
+CREATE TABLE branches (
+    id                 INT NOT NULL AUTO_INCREMENT,
+    branch_name        VARCHAR(128) NOT NULL,
+    location_name      VARCHAR(128) NOT NULL,
+    ps_branch_name     VARCHAR(128) NOT NULL,
+    status             VARCHAR(16) NOT NULL DEFAULT 'open',
+    based_on_revision  INT NULL,
+    based_on_release   VARCHAR(128) NULL,
+    release_name_regex VARCHAR(128) NOT NULL DEFAULT 'PS_LFS_OS_$(date_Y)_$(date_m)_(\d\d\d\d)',
+    date_created       DATETIME NOT NULL,
+    date_closed        DATETIME NOT NULL DEFAULT '0000-00-00 00:00:00',
+    comment            TEXT,
+
+    PRIMARY KEY (id),
+    INDEX(branch_name)
+);
 
 DROP TABLE IF EXISTS builds;
 CREATE TABLE builds (
     id          INT NOT NULL AUTO_INCREMENT,
     build_name  VARCHAR(128) NOT NULL,
-    branch_name VARCHAR(128) NOT NULL,
+    branch_id   VARCHAR(128) NOT NULL,
     revision    INT NOT NULL,
     comment     TEXT,
 
     PRIMARY KEY (id),
-    INDEX(build_name)
+    INDEX(build_name),
+    FOREIGN KEY (branch_id)
+        REFERENCES branches(id)
 );
-
 
 DROP TABLE IF EXISTS events;
 CREATE TABLE events (
@@ -81,3 +101,30 @@ CREATE TABLE test_results (
     FOREIGN KEY (test_result_name_id)
         REFERENCES test_result_names(id)
 );
+
+
+DROP PROCEDURE migrateBranchData;
+DELIMITER //
+CREATE PROCEDURE migrateBranchData()
+BEGIN
+  DECLARE bDone INT;
+
+  DECLARE var1 TEXT;
+  DECLARE var2 INT;
+
+  DECLARE curs CURSOR FOR  select branch_name, min(revision) from builds group by branch_name;
+  DECLARE CONTINUE HANDLER FOR NOT FOUND SET bDone = 1;
+
+  OPEN curs;
+
+  SET bDone = 0;
+  REPEAT
+    FETCH curs INTO var1,var2;
+       INSERT INTO branches ( location_name, ps_branch_name, branch_name, based_on_revision, date_created) values ( var1, var1, var1, var2 , NOW());
+        UPDATE builds SET branch_id = LAST_INSERT_ID() WHERE branch_name = var1;
+        
+  UNTIL bDone END REPEAT;
+
+  CLOSE curs;
+   END //
+DELIMITER ;
