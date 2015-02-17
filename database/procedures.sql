@@ -247,7 +247,7 @@ BEGIN
                 ELSE IF( be3.timestamp, be3.timestamp, DATE_ADD( be1.timestamp, INTERVAL 2 HOUR) )
         END AS build_ended,
         isFailed( b.id ) AS isFailed
-    FROM builds b
+    FROM v_builds b
     LEFT JOIN build_events be1 ON (b.id = be1.build_id AND be1.event_id = 1 )
     LEFT JOIN build_events be2 ON (b.id = be2.build_id AND be2.event_id = 2 )
     LEFT JOIN build_events be3 ON (b.id = be3.build_id AND be3.event_id = 3 )

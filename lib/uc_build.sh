@@ -61,6 +61,7 @@ ci_job_build_version() {
     mustHaveCleanWorkspace
     mustHaveWorkspaceName
 
+    debug "BUILD CAUSE by SCM trigger is: ${BUILD_CAUSE_SCMTRIGGER}"
     if [[ ${BUILD_CAUSE_SCMTRIGGER} ]] ; then
         copyChangelogToWorkspace ${JOB_NAME} ${BUILD_NUMBER}
         local linesOfChangelog=$(wc -l ${WORKSPACE}/changelog.xml | cut -d" " -f 1)
