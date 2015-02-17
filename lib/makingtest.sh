@@ -189,7 +189,7 @@ makingTest_testFSM() {
     info "running test suite"
     execute -i ${make} --ignore-errors test-xmloutput || LFS_CI_ERROR_CODE=0 # also true
 
-    makingTest_copyResults
+    makingTest_copyResults ${testSuiteDirectory}
 
     if [[ ${LFS_CI_ERROR_CODE} ]] ; then
         error "some errors in test cases. please see logfile"
@@ -435,7 +435,7 @@ makingTest_testsWithoutTarget() {
     export LFS_CI_ERROR_CODE= 
     runAndLog ${make} --ignore-errors test-xmloutput || LFS_CI_ERROR_CODE=0 # also true
 
-    makingTest_copyResults
+    makingTest_copyResults ${testSuiteDirectory}
 
     if [[ ${LFS_CI_ERROR_CODE} ]] ; then
         error "some errors in test cases. please see logfile"
