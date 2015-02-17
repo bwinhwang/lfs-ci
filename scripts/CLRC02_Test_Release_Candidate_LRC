@@ -82,6 +82,7 @@ do
     "$MAKE" -C "$TESTSUITE_DIR" powercycle FORCE=yes
     "$MAKE" -C "$TESTSUITE_DIR" waitprompt
     "$MAKE" -C "$TESTSUITE_DIR" waitssh
+    sleep 60
     "$MAKE" -C "$TESTSUITE_DIR" setup || continue
     "$MAKE" -C "$TESTSUITE_DIR" check || continue
     break
@@ -90,6 +91,7 @@ set -x
 "$MAKE" -C "$TESTSUITE_DIR"     waitprompt 
 "$MAKE" -C "$TESTSUITE_DIR_SHP" waitssh   
 "$MAKE" -C "$TESTSUITE_DIR_AHP" waitssh  
+sleep 60
 "$MAKE" -C "$TESTSUITE_DIR_SHP" setup   
 "$MAKE" -C "$TESTSUITE_DIR_AHP" setup  
 "$MAKE" -C "$TESTSUITE_DIR_SHP" check 
