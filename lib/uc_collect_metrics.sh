@@ -45,7 +45,8 @@ usecase_LFS_COLLECT_METRICS() {
         [[ "${state}"   = ABORTED   ]] && continue
         [[ "${state}"   = NOT_BUILT ]] && continue
 
-        storeMetricsForTestJob ${jobName} ${buildNumber}
+        storeMetricsForTestJob    ${jobName} ${buildNumber}
+        storeMetricsFromArtifacts ${jobName} ${buildNumber}
 
     done
 
