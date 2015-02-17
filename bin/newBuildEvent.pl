@@ -254,6 +254,7 @@ if( $opt_action eq "new_test_result" ) {
     open FILE, $opt_resultFile or LOGDIE "can not open $opt_resultFile";
     while( <FILE> ) {
         chomp;
+        next if m/^#/;
         my ( $resultName, $resultValue ) = split( ";", $_ );
         $handler->newTestResult( testExecutionId => $id,
                                  testResultName  => $resultName,
