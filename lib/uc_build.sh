@@ -26,9 +26,6 @@ ci_job_build() {
     execute rm -rf ${WORKSPACE}/revisions.txt
     createWorkspace
 
-    # for the metrics database, we are installing a own exit handler to record the end of this job
-    exit_add _recordBuildEndEvent
-
     # release label is stored in the artifacts of fsmci of the build job
     # TODO: demx2fk3 2014-07-15 fix me - wrong function
     copyArtifactsToWorkspace "${UPSTREAM_PROJECT}" "${UPSTREAM_BUILD}" "fsmci"
@@ -58,9 +55,21 @@ ci_job_build() {
 #  @param   <none>
 #  @return  <none>
 ci_job_build_version() {
+    requiredParameters JOB_NAME BUILD_NUMBER LFS_CI_ROOT 
+
     local workspace=$(getWorkspaceName)
     mustHaveCleanWorkspace
     mustHaveWorkspaceName
+
+    if [[ ${BUILD_CAUSE_SCMTRIGGER} ]] ; then
+        copyChangelogToWorkspace ${JOB_NAME} ${BUILD_NUMBER}
+        local linesOfChangelog=$(wc -l ${WORKSPACE}/changelog.xml | cut -d" " -f 1)
+        if [[ ${linesOfChangelog} = 1 ]] ; then
+            WARNING "build was triggered by SCM change, but changelog is empty"
+            setBuildResultUnstable
+            exit 0
+        fi
+    fi
 
     info "workspace is ${workspace}"
 
