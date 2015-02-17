@@ -103,8 +103,7 @@ test3() {
     # now:        150
     # MAX TIME:    10 (10000 in ms)
 
-    mustHavePermissionToRelease
-    # assertTrue "mustHavePermissionToRelease"
+    assertTrue "mustHavePermissionToRelease"
 
     local expect=$(createTempFile)
 cat <<EOF > ${expect}

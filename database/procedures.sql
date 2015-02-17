@@ -16,7 +16,7 @@ CREATE PROCEDURE new_build_event( IN in_build_name VARCHAR(128), IN in_event VAR
    SELECT count(id) INTO cnt_build_id FROM builds WHERE build_name = in_build_name;
    -- check if build name exists
    IF cnt_build_id = 0 THEN
-       SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'build_name does not exist';
+      SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'build_name does not exist';
    END IF;
    -- more code below
    -- TODO: demx2fk3 2015-01-13 this is an hack, there is no better way to ghet the latest build id
@@ -27,16 +27,32 @@ CREATE PROCEDURE new_build_event( IN in_build_name VARCHAR(128), IN in_event VAR
    END //
 DELIMITER ;
 
+DROP PROCEDURE IF EXISTS new_build;
+DELIMITER //
+CREATE PROCEDURE new_build( IN in_build_name VARCHAR(128), IN in_branch_name VARCHAR(128), IN in_comment TEXT, IN in_revision INT )
+   BEGIN
+   DECLARE cnt_branch_id INT;
+   DECLARE var_branch_id INT;
+
+   SELECT count(id) INTO cnt_branch_id FROM branches WHERE location_name = in_branch_name;
+   IF cnt_branch_id = 0 THEN
+       INSERT INTO branches ( ps_branch_name, location_name, branch_name, date_created, comment ) VALUES ( in_branch_name, in_branch_name, in_branch_name, NOW(), in_comment );
+   END IF;
+   SELECT id INTO var_branch_id FROM branches WHERE location_name = in_branch_name;
+
+   INSERT INTO builds (build_name, branch_id, revision, comment) VALUES ( in_build_name, var_branch_id, in_revision, in_comment );
+   
+   END //
+DELIMITER ;
 
 DROP PROCEDURE IF EXISTS build_started;
 DELIMITER //
 CREATE PROCEDURE build_started( IN in_build_name VARCHAR(128), IN in_comment TEXT, IN in_branch_name VARCHAR(128), IN in_revision INT )
 BEGIN
-   INSERT INTO builds (build_name, branch_name, revision, comment) VALUES ( in_build_name, in_branch_name, in_revision, in_comment );
+   CALL new_build( in_build_name, in_branch_name, in_comment, in_revision);
    CALL new_build_event( in_build_name, 'build started', in_comment );
 END //
 DELIMITER ;
-
 
 DROP PROCEDURE IF EXISTS build_finished;
 DELIMITER //
@@ -331,4 +347,29 @@ BEGIN
 END //
 DELIMITER ;
 
+
+DROP PROCEDURE migrateBranchData;
+DELIMITER //
+CREATE PROCEDURE migrateBranchData()
+BEGIN
+  DECLARE bDone INT;
+
+  DECLARE var1 TEXT;
+  DECLARE var2 INT;
+
+  DECLARE curs CURSOR FOR  select branch_name, min(revision) from builds group by branch_name;
+  DECLARE CONTINUE HANDLER FOR NOT FOUND SET bDone = 1;
+
+  OPEN curs;
+
+  SET bDone = 0;
+  REPEAT
+    FETCH curs INTO var1,var2;
+        INSERT INTO branches ( location_name, ps_branch_name, branch_name, based_on_revision, date_created) values ( var1, var1, var1, var2 , NOW());
+        UPDATE builds SET branch_id = LAST_INSERT_ID() WHERE branch_name = var1;
+  UNTIL bDone END REPEAT;
+
+  CLOSE curs;
+END //
+DELIMITER ;
 
