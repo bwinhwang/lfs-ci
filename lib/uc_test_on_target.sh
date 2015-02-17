@@ -17,7 +17,19 @@ ci_job_test_on_target() {
 
     setBuildDescription ${JOB_NAME} ${BUILD_NUMBER} ${LABEL}
 
-    local targetName=$(reserveTarget)
+    local isBookingEnabled=$(getConfig LFS_uc_test_is_booking_enabled)
+    local targetName=""
+    if [[ ${isBookingEnabled} ]] ; then
+        # new method via booking from database
+        local targetFeatures="$(getConfig LFS_uc_test_booking_target_features)"
+        debug "requesting target with features ${targetFeatures}"
+
+        reserveTargetByFeature ${targetFeatures}
+        targetName=$(reservedTarget)
+    else
+        # old legacy method - from job name            
+        targetName=$(_reserveTarget)
+    fi
     mustHaveValue "${targetName}" "target name"
 
     local workspace=$(getWorkspaceName)
@@ -56,7 +68,7 @@ ci_job_test_on_target() {
 #  @brief   make a reserveration from TAToo to get a target
 #  @param   <none>
 #  @return  name of the target
-reserveTarget() {
+_reserveTarget() {
 
     requiredParameters JOB_NAME
 
@@ -69,9 +81,6 @@ reserveTarget() {
     return
 }
 
-mustHaveReservedTarget() {
-    local attributes=$@
-}
 
 ## @fn      uc_job_test_on_target_archive_logs()
 #  @brief   copy the results / logs / artifacts from the test job to the archive share (aka /build share)
