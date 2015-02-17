@@ -20,15 +20,17 @@
 #
 #           
 
+LFS_CI_SOURCE_booking='$Id$'
+
 reserveTargetByName() {
     local targetName=${1}
     mustHaveValue "${targetName}" "targetName"
 
     local counter=0
-    local sleepTime=$(getConfig LFS_CI_uc_test_booking_target_sleep_seconds)
+    local sleepTime=$(getConfig LFS_uc_test_booking_target_sleep_seconds)
     mustHaveValue "${sleepTime}" "sleep time"
 
-    local maxTryToGetTarget=$(getConfig LFS_CI_uc_test_booking_target_max_tries)
+    local maxTryToGetTarget=$(getConfig LFS_uc_test_booking_target_max_tries)
     mustHaveValue "${maxTryToGetTarget}" "max tries to get target"
 
     while [[ ${counter} -lt ${maxTryToGetTarget} ]] ; do
@@ -40,6 +42,7 @@ reserveTargetByName() {
             warning "reservation for target ${targetName} was not successful, retry in ${sleepTime} s"
             sleep ${sleepTime}
         fi
+        counter=$((counter + 1))
     done
 
     fatal "reservation for target ${targetName} was not successfully"
@@ -47,23 +50,38 @@ reserveTargetByName() {
 }
 
 reserveTargetByFeature() {
-    local featrues=${@}
-    mustHaveValue "${featrues}" "list of features"
+    local features=${@}
+    mustHaveValue "${features}" "list of features"
 
+    debug "features ${features}"
     local searchParameter=""
     for p in ${features} ; do
-        searchParameter="${searchParameter} --attribure=${p}"
+        searchParameter="${searchParameter} --attribute=${p}"
     done
 
-    local results=$(createTempFile)
-    for targetName in $(execute -n ysmv2.pl --action=searchTarget ${searchParameter} ) ; do
-        debug "try to reserve target ${targetName}"
+    debug "search parameter: ${searchParameter}"
 
-        if execute -i ${LFS_CI_ROOT}/bin/ysmv2.pl --action=reserveTarget --targetName=${targetName} ; then
-            info "reservation for target ${targetName} was successful"
-            export LFS_CI_BOOKING_RESERVED_TARGET=${targetName}
-            return
-        fi
+    local sleepTime=$(getConfig LFS_uc_test_booking_target_sleep_seconds)
+    mustHaveValue "${sleepTime}" "sleep time"
+
+    local maxTryToGetTarget=$(getConfig LFS_uc_test_booking_target_max_tries)
+    mustHaveValue "${maxTryToGetTarget}" "max tries to get target"
+
+    local counter=0
+
+    while [[ ${counter} -lt ${maxTryToGetTarget} ]] ; do
+        for targetName in $(execute -n ${LFS_CI_ROOT}/bin/ysmv2.pl --action=searchTarget ${searchParameter} ) ; do
+            info "try to reserve target ${targetName}"
+
+            if execute -i ${LFS_CI_ROOT}/bin/ysmv2.pl --action=reserveTarget --targetName=${targetName} ; then
+                info "reservation for target ${targetName} was successful"
+                export LFS_CI_BOOKING_RESERVED_TARGET=${targetName}
+                return
+            fi
+        done
+        info "no free target, will try in ${sleepTime} s (total try ${counter})"
+        counter=$((counter + 1))
+        sleep ${sleepTime}
     done
 
     fatal "reservation for target with features ${features} was not successfully"

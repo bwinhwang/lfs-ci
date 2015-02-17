@@ -124,9 +124,10 @@ makingTest_testFSM() {
     execute mkdir -p ${xmlOutputDirectory}
     mustExistDirectory ${xmlOutputDirectory}
 
-    # TODO: demx2fk3 2015-02-13 FIXME, wrong variables...
-	export targetName=$(sed "s/^Test-//" <<< ${JOB_NAME})
+	export targetName=$(_reserveTarget)
     mustHaveValue "${testTargetName}" "test target name"
+
+    info "test target name is ${targetName}"
 
     # we can not use location here, because the job name is "Test-ABC".
     # there is no location in the job name. So we have to use the
@@ -426,3 +427,27 @@ makingTest_testsWithoutTarget() {
 
     return
 }
+
+## @fn      reserveTarget
+#  @brief   make a reserveration from TAToo to get a target
+#  @param   <none>
+#  @return  name of the target
+_reserveTarget() {
+
+    requiredParameters JOB_NAME
+    local isBookingEnabled=$(getConfig LFS_uc_test_is_booking_enabled)
+    local targetName=""
+
+    if [[ ${isBookingEnabled} ]] ; then
+        # new method via booking from database
+        targetName=$(reservedTarget)
+    else
+        targetName=$(sed "s/^Test-//" <<< ${JOB_NAME})
+    fi
+    mustHaveValue ${targetName} "target name"
+
+    echo ${targetName}
+   
+    return
+}
+

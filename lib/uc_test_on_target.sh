@@ -6,6 +6,7 @@
 [[ -z ${LFS_CI_SOURCE_jenkins}    ]] && source ${LFS_CI_ROOT}/lib/jenkins.sh
 [[ -z ${LFS_CI_SOURCE_makingtest} ]] && source ${LFS_CI_ROOT}/lib/makingtest.sh
 [[ -z ${LFS_CI_SOURCE_database}   ]] && source ${LFS_CI_ROOT}/lib/database.sh
+[[ -z ${LFS_CI_SOURCE_booking}    ]] && source ${LFS_CI_ROOT}/lib/booking.sh
 
 ## @fn      ci_job_test_on_target()
 #  @brief   usecase test on target
@@ -26,6 +27,8 @@ ci_job_test_on_target() {
 
         reserveTargetByFeature ${targetFeatures}
         targetName=$(reservedTarget)
+
+        exit_add unreserveTarget
     else
         # old legacy method - from job name            
         targetName=$(_reserveTarget)
@@ -43,6 +46,7 @@ ci_job_test_on_target() {
     createBasicWorkspace -l ${branchName} src-test
 
     export testTargetName=${targetName}
+    info "target is testTargetName : ${testTargetName}"
     local testType=$(getConfig LFS_CI_uc_test_making_test_type)
 
     databaseEventTestStarted ${LABEL} ${testTargetName}
@@ -61,23 +65,6 @@ ci_job_test_on_target() {
     databaseEventTestFinished ${LABEL} ${testTargetName}
 
     info "testing done."
-    return
-}
-
-## @fn      reserveTarget
-#  @brief   make a reserveration from TAToo to get a target
-#  @param   <none>
-#  @return  name of the target
-_reserveTarget() {
-
-    requiredParameters JOB_NAME
-
-    local targetName=$(sed "s/^Test-//" <<< ${JOB_NAME})
-    mustHaveValue ${targetName} "target name"
-    info "testing on target ${targetName}"
-
-    echo ${targetName}
-   
     return
 }
 
