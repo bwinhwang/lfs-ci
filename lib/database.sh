@@ -103,6 +103,7 @@ databaseTestResults() {
     local targetType=$4
     local resultFile=$5
 
+    info "adding metrics for ${label}, ${testSuiteName}, ${targetName}/${targetType}"
     execute -i ${LFS_CI_ROOT}/bin/newBuildEvent.pl \
             --action=new_test_result               \
             --buildName=${label}                            \
@@ -119,7 +120,7 @@ addTestResultsToMetricDatabase() {
     local baselineName=${2}
     local testSuite=${3}
     local targetName=${4}
-    local targetTYpe=${5}
+    local targetType=${5}
 
     # store results in metric database
     info "storing result numbers in metric database"
@@ -132,7 +133,7 @@ addTestResultsToMetricDatabase() {
     databaseTestResults ${baselineName} \
                         ${testSuite}    \
                         ${targetName}   \
-                        ${targetTYpe}   \
+                        ${targetType}   \
                         ${resultFile}
 
     return
