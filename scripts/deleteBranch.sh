@@ -18,6 +18,8 @@ info "# DEBUG:            $DEBUG"
 info "# COMMENT:          $COMMENT"
 info "###############################################################"
 
+initTempDirectory
+
 SVN_REPO=$(getConfig lfsSourceRepos)
 SVN_DIR="os"
 SVN_BLD_DIR="trunk/bldtools"
@@ -33,16 +35,24 @@ PKG_SHARE="/build/home/SC_LFS/pkgpool"
 #######################################################################
 
 
-## @fn      getEclValue()
+## @fn      getValueFromEclFile()
 #  @brief   get value from ecl for key
 #  @param   {key} the key in the ECL file
 #  @param   {branch} the branch
 #  @return  <none>
-getEclValue() {
+getValueFromEclFile() {
     local key=$1
     local branch=$2
     local svnEclRepo=$(echo ${SVN_REPO} | awk -F/ '{print $1"//"$2$3}')
-    local value=$(svn cat ${svnEclRepo}/isource/svnroot/BTS_SCM_PS/ECL/${branch}/ECL_BASE/ECL | grep ${key} | cut -d'=' -f2)
+
+    svn ls ${svnEclRepo}/isource/svnroot/BTS_SCM_PS/ECL/${branch}/ECL_BASE/ECL
+    if [[ $? -eq 0 ]]; then
+        local value=$(svn cat ${svnEclRepo}/isource/svnroot/BTS_SCM_PS/ECL/${branch}/ECL_BASE/ECL | grep ${key} | cut -d'=' -f2)
+    else
+        info using ECL from obsolete
+        local value=$(svn cat ${svnEclRepo}/isource/svnroot/BTS_SCM_PS/ECL/obsolete/${branch}/ECL_BASE/ECL | grep ${key} | cut -d'=' -f2)
+    fi
+
     echo ${value}
 }
 
@@ -65,7 +75,6 @@ __cmd() {
         echo [DEBUG] $@
     else
         info runnig command: $@
-        echo runnig command: $@
         #eval $@
     fi
 }
@@ -120,7 +129,7 @@ deleteBranchShare() {
     local branchType=$(getBranchPart ${BRANCH} TYPE)
     local mm=$(getBranchPart ${BRANCH} MM)
     local yyyy=$(getBranchPart ${BRANCH} YYYY)
-    local keepRelease=$(getEclValue "ECL_PS_LFS_OS" ${BRANCH})
+    local keepRelease=$(getValueFromEclFile "ECL_PS_LFS_OS" ${BRANCH})
     local dirPattern="${branchType}_PS_LFS_OS_${yyyy}_${mm}*"
     local dirsToDelete=$(find ${SHARE} -maxdepth 2 -type d -name "${dirPattern}" | grep -v ${keepRelease})
 
@@ -140,7 +149,7 @@ deleteBranchBldShare() {
     local branchType=$(getBranchPart ${BRANCH} TYPE)
     local mm=$(getBranchPart ${BRANCH} MM)
     local yyyy=$(getBranchPart ${BRANCH} YYYY)
-    local keepRelease=$(getEclValue "ECL_PS_LFS_OS" ${BRANCH})
+    local keepRelease=$(getValueFromEclFile "ECL_PS_LFS_OS" ${BRANCH})
     local dirPattern="${branchType}_PS_LFS_OS_${yyyy}_${mm}*"
     local dirsToDelete=$(find ${BLD_SHARE} -maxdepth 2 -type d -name "${dirPattern}" | grep -v ${keepRelease})
 
@@ -178,7 +187,7 @@ LRC_deleteBranchShare() {
     local branchType=$(getBranchPart ${BRANCH} TYPE)
     local mm=$(getBranchPart ${BRANCH} MM)
     local yyyy=$(getBranchPart ${BRANCH} YYYY)
-    local keepRelease=$(getEclValue "ECL_PS_LRC_LCP_LFS_OS" ${BRANCH})
+    local keepRelease=$(getValueFromEclFile "ECL_PS_LRC_LCP_LFS_OS" ${BRANCH})
     local dirPattern="${branchType}_LRC_LCP_PS_LFS_OS_${yyyy}_${mm}*"
     local dirsToDelete=$(find ${SHARE} -maxdepth 2 -type d -name "${dirPattern}" | grep -v ${keepRelease})
 
@@ -198,7 +207,7 @@ LRC_deleteBranchBldShare() {
     local branchType=$(getBranchPart ${BRANCH} TYPE)
     local mm=$(getBranchPart ${BRANCH} MM)
     local yyyy=$(getBranchPart ${BRANCH} YYYY)
-    local keepRelease=$(getEclValue "ECL_PS_LRC_LCP_LFS_OS" ${BRANCH})
+    local keepRelease=$(getValueFromEclFile "ECL_PS_LRC_LCP_LFS_OS" ${BRANCH})
     local dirPattern="${branchType}_LRC_LCP_PS_LFS_OS_${yyyy}_${mm}*"
     local dirsToDelete=$(find ${BLD_SHARE} -maxdepth 2 -type d -name "${dirPattern}" | grep -v ${keepRelease})
 
@@ -213,7 +222,7 @@ LRC_deleteBranchBldShare() {
 __checkParams || { error "Params check failed."; exit 1; }
 
 [[ ${MOVE_SVN} == true ]] && moveBranchSvn || info "Not moving $BRANCH in repo"
-[[ ${DELETE_SHARE} == true ]] && { deleteBranchShare; deleteBranchBldShare; deleteBranchPkgShare; } || info "Not deleting $BRANCH on share"
+[[ ${DELETE_SHARE} == true ]] && { deleteBranchShare; deleteBranchBldShare; } || info "Not deleting $BRANCH on share"
 
 [[ ${LRC_MOVE_SVN} == true ]] && LRC_moveBranchSvn || info "Not moving $BRANCH in repo for LRC"
 [[ ${LRC_DELETE_SHARE} == true ]] && { LRC_deleteBranchShare; LRC_deleteBranchBldShare; } || info "Not deleting $BRANCH on share for LRC"
