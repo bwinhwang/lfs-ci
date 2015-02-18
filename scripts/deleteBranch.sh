@@ -93,17 +93,17 @@ __cmd() {
 #  @param   <none>
 #  @return  <none>
 moveBranchSvn() {
-    svn ${SVN_OPTS} ls ${SVN_REPO}/${SVN_DIR}/${BRANCH} && {
+    svn ls ${SVN_OPTS} ${SVN_REPO}/${SVN_DIR}/${BRANCH} && {
         __cmd svn ${SVN_OPTS} move -m "moved ${BRANCH} to obsolete" \
             ${SVN_REPO}/${SVN_DIR}/${BRANCH} ${SVN_REPO}/${SVN_DIR}/obsolete;
     }
 
-    svn ${SVN_OPTS} ls ${SVN_REPO}/${SVN_DIR}/${SVN_BLD_DIR}/locations-${BRANCH} && {
+    svn ls ${SVN_OPTS} ${SVN_REPO}/${SVN_DIR}/${SVN_BLD_DIR}/locations-${BRANCH} && {
         __cmd svn ${SVN_OPTS} move -m "moved locations-${BRANCH} to obsolete" \
             ${SVN_REPO}/${SVN_DIR}/${SVN_BLD_DIR}/locations-${BRANCH} ${SVN_REPO}/${SVN_DIR}/${SVN_BLD_DIR}/obsolete;
     }
 
-    svn ${SVN_OPTS} ls ${SVN_REPO}/${SVN_DIR}/${SVN_BLD_DIR}/locations-${BRANCH}_FSMR4 && {
+    svn ls ${SVN_OPTS} ${SVN_REPO}/${SVN_DIR}/${SVN_BLD_DIR}/locations-${BRANCH}_FSMR4 && {
         __cmd svn ${SVN_OPTS} move -m "moved locations-${BRANCH} FSMR4 to obsolete" \
             ${SVN_REPO}/${SVN_DIR}/${SVN_BLD_DIR}/locations-${BRANCH}_FSMR4 ${SVN_REPO}/${SVN_DIR}/${SVN_BLD_DIR}/obsolete;
     }
