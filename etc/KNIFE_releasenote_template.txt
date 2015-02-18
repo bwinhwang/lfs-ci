@@ -1,8 +1,9 @@
-Dear Colleagues,
+Dear Colleague,
 
-your knife is done
+your knife is ready for use. 
+
+__RELEASE_NOTE_CONTENT__
 
 Best Regards,
-
-PS LFS Knife Team
+PS LFS Knife Machine
 
