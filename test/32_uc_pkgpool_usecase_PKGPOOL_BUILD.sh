@@ -26,6 +26,9 @@ oneTimeSetUp() {
             echo PKGPOOL_FOO
         fi
     }
+    createArtifactArchive() {
+        mockedCommand "createArtifactArchive $@"
+    }
     mustHaveCleanWorkspace() {
         mkdir -p ${WORKSPACE}/workspace
     }
@@ -67,6 +70,7 @@ gitTagAndPushToOrigin PKGPOOL_FOO
 setBuildDescription PKGPOOL_CI_-_trunk_-_Build 123 PKGPOOL_FOO
 execute touch /build/home/psulm/SC_LFS/pkgpool/.hashpool
 execute sed -ne s|^src [^ ]* \(.*\)$|PS_LFS_PKG = \1|p ${WORKSPACE}/workspace/pool/*.meta
+createArtifactArchive 
 EOF
     assertExecutedCommands ${expect}
 
