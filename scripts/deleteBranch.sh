@@ -26,6 +26,7 @@ SVN_BLD_DIR="trunk/bldtools"
 SHARE="/build/home/CI_LFS/Release_Candidates"
 BLD_SHARE="/build/home/SC_LFS/releases/bld"
 PKG_SHARE="/build/home/SC_LFS/pkgpool"
+SVN_OPS="--non-interactive --trust-server-cert"
 
 
 #######################################################################
@@ -45,12 +46,12 @@ getValueFromEclFile() {
     local branch=$2
     local svnEclRepo=$(echo ${SVN_REPO} | awk -F/ '{print $1"//"$2$3}')
 
-    svn ls ${svnEclRepo}/isource/svnroot/BTS_SCM_PS/ECL/${branch}/ECL_BASE/ECL
+    svn ${SVN_OPTS} ls ${svnEclRepo}/isource/svnroot/BTS_SCM_PS/ECL/${branch}/ECL_BASE/ECL
     if [[ $? -eq 0 ]]; then
-        local value=$(svn cat ${svnEclRepo}/isource/svnroot/BTS_SCM_PS/ECL/${branch}/ECL_BASE/ECL | grep ${key} | cut -d'=' -f2)
+        local value=$(svn ${SVN_OPTS} cat ${svnEclRepo}/isource/svnroot/BTS_SCM_PS/ECL/${branch}/ECL_BASE/ECL | grep ${key} | cut -d'=' -f2)
     else
         info using ECL from obsolete
-        local value=$(svn cat ${svnEclRepo}/isource/svnroot/BTS_SCM_PS/ECL/obsolete/${branch}/ECL_BASE/ECL | grep ${key} | cut -d'=' -f2)
+        local value=$(svn ${SVN_OPTS} cat ${svnEclRepo}/isource/svnroot/BTS_SCM_PS/ECL/obsolete/${branch}/ECL_BASE/ECL | grep ${key} | cut -d'=' -f2)
     fi
 
     echo ${value}
@@ -92,18 +93,18 @@ __cmd() {
 #  @param   <none>
 #  @return  <none>
 moveBranchSvn() {
-    svn ls ${SVN_REPO}/${SVN_DIR}/${BRANCH} && {
-        __cmd svn move -m \"moved ${BRANCH} to obsolete\" \
+    svn ${SVN_OPTS} ls ${SVN_REPO}/${SVN_DIR}/${BRANCH} && {
+        __cmd svn ${SVN_OPTS} move -m \"moved ${BRANCH} to obsolete\" \
             ${SVN_REPO}/${SVN_DIR}/${BRANCH} ${SVN_REPO}/${SVN_DIR}/obsolete;
     }
 
-    svn ls ${SVN_REPO}/${SVN_DIR}/${SVN_BLD_DIR}/locations-${BRANCH} && {
-        __cmd svn move -m \"moved locations-${BRANCH} to obsolete\" \
+    svn ${SVN_OPTS} ls ${SVN_REPO}/${SVN_DIR}/${SVN_BLD_DIR}/locations-${BRANCH} && {
+        __cmd svn ${SVN_OPTS} move -m \"moved locations-${BRANCH} to obsolete\" \
             ${SVN_REPO}/${SVN_DIR}/${SVN_BLD_DIR}/locations-${BRANCH} ${SVN_REPO}/${SVN_DIR}/${SVN_BLD_DIR}/obsolete;
     }
 
-    svn ls ${SVN_REPO}/${SVN_DIR}/${SVN_BLD_DIR}/locations-${BRANCH}_FSMR4 && {
-        __cmd svn move -m \"moved locations-${BRANCH}_FSMR4 to obsolete\" \
+    svn ${SVN_OPTS} ls ${SVN_REPO}/${SVN_DIR}/${SVN_BLD_DIR}/locations-${BRANCH}_FSMR4 && {
+        __cmd svn ${SVN_OPTS} move -m \"moved locations-${BRANCH}_FSMR4 to obsolete\" \
             ${SVN_REPO}/${SVN_DIR}/${SVN_BLD_DIR}/locations-${BRANCH}_FSMR4 ${SVN_REPO}/${SVN_DIR}/${SVN_BLD_DIR}/obsolete;
     }
     return 0
@@ -114,8 +115,8 @@ moveBranchSvn() {
 #  @param   <none>
 #  @return  <none>
 LRC_moveBranchSvn() {
-    svn ls ${SVN_REPO}/${SVN_DIR}/${SVN_BLD_DIR}/locations-LRC_${BRANCH} && {
-        __cmd svn move -m \"moved locations-LRC_${BRANCH} to obsolete\" \
+    svn ${SVN_OPTS} ls ${SVN_REPO}/${SVN_DIR}/${SVN_BLD_DIR}/locations-LRC_${BRANCH} && {
+        __cmd svn ${SVN_OPTS} move -m \"moved locations-LRC_${BRANCH} to obsolete\" \
             ${SVN_REPO}/${SVN_DIR}/${SVN_BLD_DIR}/locations-LRC_${BRANCH} ${SVN_REPO}/${SVN_DIR}/${SVN_BLD_DIR}/obsolete;
     }
     return 0
