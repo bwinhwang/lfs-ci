@@ -254,11 +254,7 @@ usecase_LFS_KNIFE_PACKAGE() {
 
     local readmeFile=${WORKSPACE}/.00_README_knife_result.txt
     cat > ${readmeFile} <<EOF
-Dear User,
-
-The knife results are located in ...
-
-Your LFS SCM Team
+KNIFE LOCATION
 EOF
 
     copyFileToArtifactDirectory $(basename ${readmeFile})

@@ -34,43 +34,50 @@ usecase_PKGPOOL_BUILD() {
     local releasePrefix=$(getConfig PKGPOOL_PROD_release_prefix)
     mustHaveValue "${releasePrefix}" "pkgpool release prefix"
 
+    info "pkgpool release name prefix is ${releasePrefix}"
+
     local buildLogFile=$(createTempFile)
     local gitWorkspace=${WORKSPACE}/src
 
     # git clone, created by jenkins git plugin
     mustExistDirectory ${gitWorkspace}
 
+    info "preparing git workspace..."
     cd ${gitWorkspace}
     execute rm -rf ${gitWorkspace}/src
     gitReset --hard
 
+    info "bootstrap build environment..."
     execute ./bootstrap
     cd ${workspace}
 
+    info "building pkgpool..."
     # TODO: demx2fk3 2015-02-09 use different path for testing ci jobs
-    execute -n ${gitWorkspace}/build -j24 --prepopulate --release="${releasePrefix}" > ${buildLogFile}
-    rawDebug ${buildLogFile}
+    execute -l ${buildLogFile} ${gitWorkspace}/build -j100 --pkgpool=/build/home/psulm/SC_LFS/pkgpool --prepopulate --release="${releasePrefix}" 
 
-    local releaseString="$(execute -n sed -ne 's,^release \([^ ]*\) complete$,\1,p' ${buildLogFile})"
-    mustHaveValue "${releaseString}" "release string"
+    local releaseTag="$(execute -n sed -ne 's,^release \([^ ]*\) complete,\1,p' ${buildLogFile})"
+    mustHaveValue "${releaseTag}" "release tag"
+
+    info "new pkgpool release tag is ${releaseTag}"
 
     cd ${gitWorkspace}
-    local oldRelease=$(gitDescribe --abbrev=0)
-    gitTagAndPushToOrigin
+    local oldReleaseTag=$(gitDescribe --abbrev=0)
+    gitTagAndPushToOrigin ${releaseTag}
 
-    info "new pkgpool release tag: ${releaseString}"
-    setBuildDescription "${JOB_NAME}" "${BUILD_NUMBER}" "${releaseString}"
+    setBuildDescription "${JOB_NAME}" "${BUILD_NUMBER}" "${releaseTag}"
 
     # required to start the sync 
-    execute touch /build/home/SC_LFS/pkgpool/.hashpool
+    execute touch /build/home/psulm/SC_LFS/pkgpool/.hashpool
 
     mkdir -p ${workspace}/bld/bld-pkgpool-release/
-    echo ${oldRelease}    > ${workspace}/bld/bld-pkgpool-release/oldLabel
-    echo ${releaseString} > ${workspace}/bld/bld-pkgpool-release/label
-    execute sed -ne 's|^src [^ ]* \(.*\)$|PS_LFS_PKG = \1|p' ${workspace}/pool/*.meta \
-        > ${workspace}/bld/bld-pkgpool-release/forReleaseNote.txt
+    echo ${oldReleaseTag} > ${workspace}/bld/bld-pkgpool-release/oldLabel
+    echo ${releaseTag}    > ${workspace}/bld/bld-pkgpool-release/label
+    execute sed -ne 's|^src [^ ]* \(.*\)$|PS_LFS_PKG = \1|p' ${workspace}/pool/*.meta |\
+        sort -u > ${workspace}/bld/bld-pkgpool-release/forReleaseNote.txt
 
     rawDebug ${workspace}/bld/bld-pkgpool-release/forReleaseNote.txt
+
+    createArtifactArchive
 
     return
 }

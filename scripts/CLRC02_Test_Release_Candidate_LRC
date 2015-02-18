@@ -49,6 +49,7 @@ set +e
 (
 
 set -e
+set -x
 
 # ======================================================================
 # heading make everything clean
@@ -69,22 +70,28 @@ unset TESTTARGET
 # SHP sometimes fails to be up when install is retried.
 # We try installation up to 4 times
 
-"$MAKE" -C "$TESTSUITE_DIR" setup
-for i in 1 2 3 4
-do
-"$MAKE" -C "$TESTSUITE_DIR" install FORCE=yes || { sleep 20 ; continue ; }
-"$MAKE" -C "$TESTSUITE_DIR" waitprompt
 "$MAKE" -C "$TESTSUITE_DIR" powercycle FORCE=yes
 "$MAKE" -C "$TESTSUITE_DIR" waitprompt
 "$MAKE" -C "$TESTSUITE_DIR" waitssh
-"$MAKE" -C "$TESTSUITE_DIR" setup || continue
-"$MAKE" -C "$TESTSUITE_DIR" check || continue
-break
+sleep 60
+"$MAKE" -C "$TESTSUITE_DIR" setup
+for i in 1 2 3 4
+do
+    "$MAKE" -C "$TESTSUITE_DIR" install FORCE=yes || { sleep 20 ; continue ; }
+    "$MAKE" -C "$TESTSUITE_DIR" waitprompt
+    "$MAKE" -C "$TESTSUITE_DIR" powercycle FORCE=yes
+    "$MAKE" -C "$TESTSUITE_DIR" waitprompt
+    "$MAKE" -C "$TESTSUITE_DIR" waitssh
+    sleep 60
+    "$MAKE" -C "$TESTSUITE_DIR" setup || continue
+    "$MAKE" -C "$TESTSUITE_DIR" check || continue
+    break
 done
 set -x
 "$MAKE" -C "$TESTSUITE_DIR"     waitprompt 
 "$MAKE" -C "$TESTSUITE_DIR_SHP" waitssh   
 "$MAKE" -C "$TESTSUITE_DIR_AHP" waitssh  
+sleep 60
 "$MAKE" -C "$TESTSUITE_DIR_SHP" setup   
 "$MAKE" -C "$TESTSUITE_DIR_AHP" setup  
 "$MAKE" -C "$TESTSUITE_DIR_SHP" check 

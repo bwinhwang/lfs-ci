@@ -189,8 +189,7 @@ makingTest_testFSM() {
     info "running test suite"
     execute -i ${make} --ignore-errors test-xmloutput || LFS_CI_ERROR_CODE=0 # also true
 
-    execute mkdir ${workspace}/xml-reports/
-    execute cp -f ${testSuiteDirectory}/xml-reports/*.xml ${workspace}/xml-reports/
+    makingTest_copyResults ${testSuiteDirectory}
 
     if [[ ${LFS_CI_ERROR_CODE} ]] ; then
         error "some errors in test cases. please see logfile"
@@ -203,7 +202,28 @@ makingTest_testFSM() {
     return
 }
 
+makingTest_copyResults() {
+    local workspace=$(getWorkspaceName)
+    mustHaveWorkspaceName
 
+    local testSuiteDirectory=$1
+    mustExistDirectory ${testSuiteDirectory}
+
+    execute mkdir -p ${workspace}/xml-reports/ \
+                     ${workspace}/bld/bld-test-xml/results \
+                     ${workspace}/bld/bld-test-artifacts/results
+
+    if [[ -d ${testSuiteDirectory}/__artifacts ]] ; then
+        execute cp -fr ${testSuiteDirectory}/__artifacts/* ${workspace}/bld/bld-test-artifacts/results/
+    fi
+
+    execute cp -fr ${testSuiteDirectory}/xml-reports/*.xml ${workspace}/bld/bld-test-xml/results/
+    execute cp -f  ${testSuiteDirectory}/xml-reports/*.xml ${workspace}/xml-reports/
+
+    createArtifactArchive
+
+    return
+}
 
 # --------------------------------------------------------------------------------------
 # TODO: demx2fk3 2014-12-16 the LRC tests are not in use yet from here.
@@ -415,8 +435,7 @@ makingTest_testsWithoutTarget() {
     export LFS_CI_ERROR_CODE= 
     runAndLog ${make} --ignore-errors test-xmloutput || LFS_CI_ERROR_CODE=0 # also true
 
-    execute mkdir ${workspace}/xml-reports/
-    execute cp -f ${testSuiteDirectory}/xml-reports/*.xml ${workspace}/xml-reports/
+    makingTest_copyResults ${testSuiteDirectory}
 
     if [[ ${LFS_CI_ERROR_CODE} ]] ; then
         error "some errors in test cases. please see logfile"
