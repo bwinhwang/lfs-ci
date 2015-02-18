@@ -46,7 +46,7 @@ getValueFromEclFile() {
     local branch=$2
     local svnEclRepo=$(echo ${SVN_REPO} | awk -F/ '{print $1"//"$2$3}')
 
-    svnCommand ls ${svnEclRepo}/isource/svnroot/BTS_SCM_PS/ECL/${branch}/ECL_BASE/ECL
+    svnCommand ls ${svnEclRepo}/isource/svnroot/BTS_SCM_PS/ECL/${branch}/ECL_BASE/ECL 2> /dev/null
     if [[ $? -eq 0 ]]; then
         local value=$(svnCommand cat ${svnEclRepo}/isource/svnroot/BTS_SCM_PS/ECL/${branch}/ECL_BASE/ECL | grep ${key} | cut -d'=' -f2)
     else
