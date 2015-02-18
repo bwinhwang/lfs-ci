@@ -77,6 +77,8 @@ usecase_PKGPOOL_BUILD() {
 
     rawDebug ${workspace}/bld/bld-pkgpool-release/forReleaseNote.txt
 
+    createArtifactArchive
+
     return
 }
 
