@@ -54,7 +54,6 @@ usecase_PKGPOOL_BUILD() {
     info "building pkgpool..."
     # TODO: demx2fk3 2015-02-09 use different path for testing ci jobs
     execute -l ${buildLogFile} ${gitWorkspace}/build -j100 --pkgpool=/build/home/psulm/SC_LFS/pkgpool --prepopulate --release="${releasePrefix}" 
-    rawDebug ${buildLogFile}
 
     local releaseTag="$(execute -n sed -ne 's,^release \([^ ]*\) complete,\1,p' ${buildLogFile})"
     mustHaveValue "${releaseTag}" "release tag"
@@ -73,8 +72,8 @@ usecase_PKGPOOL_BUILD() {
     mkdir -p ${workspace}/bld/bld-pkgpool-release/
     echo ${oldReleaseTag} > ${workspace}/bld/bld-pkgpool-release/oldLabel
     echo ${releaseTag}    > ${workspace}/bld/bld-pkgpool-release/label
-    execute sed -ne 's|^src [^ ]* \(.*\)$|PS_LFS_PKG = \1|p' ${workspace}/pool/*.meta \
-        > ${workspace}/bld/bld-pkgpool-release/forReleaseNote.txt
+    execute sed -ne 's|^src [^ ]* \(.*\)$|PS_LFS_PKG = \1|p' ${workspace}/pool/*.meta |\
+        sort -u > ${workspace}/bld/bld-pkgpool-release/forReleaseNote.txt
 
     rawDebug ${workspace}/bld/bld-pkgpool-release/forReleaseNote.txt
 
