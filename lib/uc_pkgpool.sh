@@ -56,7 +56,7 @@ usecase_PKGPOOL_BUILD() {
     execute -l ${buildLogFile} ${gitWorkspace}/build -j100 --pkgpool=/build/home/psulm/SC_LFS/pkgpool --prepopulate --release="${releasePrefix}" 
     rawDebug ${buildLogFile}
 
-    local releaseString="$(sed -ne 's,^release \([^ ]*\) complete$,\1,p' ${buildLogFile})"
+    local releaseString="$(execute -n sed -ne 's,^release \([^ ]*\) complete$,\1,p' ${buildLogFile})"
     mustHaveValue "${releaseString}" "release string"
 
     info "pkgpool release name is ${releaseString}"
