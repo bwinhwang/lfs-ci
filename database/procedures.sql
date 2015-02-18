@@ -338,7 +338,7 @@ BEGIN
             IF( tmp.released, "ok", 
                 IF( tmp.release_started, "error", "unknown" ) 
               ) AS release_status
-        FROM tmp_build_events_per_branches_latest_builds_rotated tmp, builds b
+        FROM tmp_build_events_per_branches_latest_builds_rotated tmp, v_builds b
         WHERE tmp.build_id = b.id 
         ORDER BY branch_name;
 
