@@ -26,6 +26,7 @@ SVN_BLD_DIR="trunk/bldtools"
 SHARE="/build/home/CI_LFS/Release_Candidates"
 BLD_SHARE="/build/home/SC_LFS/releases/bld"
 PKG_SHARE="/build/home/SC_LFS/pkgpool"
+SVN_OPTS="--non-interactive --trust-server-cert"
 
 
 #######################################################################
@@ -92,18 +93,18 @@ __cmd() {
 #  @param   <none>
 #  @return  <none>
 moveBranchSvn() {
-    svnCommand ls ${SVN_REPO}/${SVN_DIR}/${BRANCH} && {
-        __cmd svnCommand move -m moved_${BRANCH}_to_obsolete \
+    svn ${SVN_OPTS} ls ${SVN_REPO}/${SVN_DIR}/${BRANCH} && {
+        __cmd svn ${SVN_OPTS} move -m "moved ${BRANCH} to obsolete" \
             ${SVN_REPO}/${SVN_DIR}/${BRANCH} ${SVN_REPO}/${SVN_DIR}/obsolete;
     }
 
-    svnCommand ls ${SVN_REPO}/${SVN_DIR}/${SVN_BLD_DIR}/locations-${BRANCH} && {
-        __cmd svnCommand move -m moved_locations-${BRANCH}_to_obsolete \
+    svn ${SVN_OPTS} ls ${SVN_REPO}/${SVN_DIR}/${SVN_BLD_DIR}/locations-${BRANCH} && {
+        __cmd svn ${SVN_OPTS} move -m "moved locations-${BRANCH} to obsolete" \
             ${SVN_REPO}/${SVN_DIR}/${SVN_BLD_DIR}/locations-${BRANCH} ${SVN_REPO}/${SVN_DIR}/${SVN_BLD_DIR}/obsolete;
     }
 
-    svnCommand ls ${SVN_REPO}/${SVN_DIR}/${SVN_BLD_DIR}/locations-${BRANCH}_FSMR4 && {
-        __cmd svnCommand move -m moved_locations-${BRANCH}_FSMR4_to_obsolete \
+    svn ${SVN_OPTS} ls ${SVN_REPO}/${SVN_DIR}/${SVN_BLD_DIR}/locations-${BRANCH}_FSMR4 && {
+        __cmd svn ${SVN_OPTS} move -m "moved locations-${BRANCH} FSMR4 to obsolete" \
             ${SVN_REPO}/${SVN_DIR}/${SVN_BLD_DIR}/locations-${BRANCH}_FSMR4 ${SVN_REPO}/${SVN_DIR}/${SVN_BLD_DIR}/obsolete;
     }
     return 0
@@ -114,8 +115,8 @@ moveBranchSvn() {
 #  @param   <none>
 #  @return  <none>
 LRC_moveBranchSvn() {
-    svnCommand ls ${SVN_REPO}/${SVN_DIR}/${SVN_BLD_DIR}/locations-LRC_${BRANCH} && {
-        __cmd svnCommand move -m moved_locations-LRC_${BRANCH}_to_obsolete \
+    svn ${SVN_OPTS} ls ${SVN_REPO}/${SVN_DIR}/${SVN_BLD_DIR}/locations-LRC_${BRANCH} && {
+        __cmd svn ${SVN_OPTS} move -m "moved locations-LRC_${BRANCH} to obsolete" \
             ${SVN_REPO}/${SVN_DIR}/${SVN_BLD_DIR}/locations-LRC_${BRANCH} ${SVN_REPO}/${SVN_DIR}/${SVN_BLD_DIR}/obsolete;
     }
     return 0
