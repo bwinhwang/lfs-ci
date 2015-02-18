@@ -56,7 +56,7 @@ usecase_PKGPOOL_BUILD() {
     execute -l ${buildLogFile} ${gitWorkspace}/build -j100 --pkgpool=/build/home/psulm/SC_LFS/pkgpool --prepopulate --release="${releasePrefix}" 
     rawDebug ${buildLogFile}
 
-    local releaseString="$(execute -n sed -ne 's,^release \([^ ]*\) complete$,\1,p' ${buildLogFile})"
+    local releaseString="$(execute -n sed -ne 's,^release \([^ ]*\) complete,\1,p' ${buildLogFile})"
     mustHaveValue "${releaseString}" "release string"
 
     info "pkgpool release name is ${releaseString}"
@@ -69,7 +69,7 @@ usecase_PKGPOOL_BUILD() {
     setBuildDescription "${JOB_NAME}" "${BUILD_NUMBER}" "${releaseString}"
 
     # required to start the sync 
-    execute touch /build/home/SC_LFS/pkgpool/.hashpool
+    execute touch /build/home/psulm/SC_LFS/pkgpool/.hashpool
 
     mkdir -p ${workspace}/bld/bld-pkgpool-release/
     echo ${oldRelease}    > ${workspace}/bld/bld-pkgpool-release/oldLabel
