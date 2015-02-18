@@ -37,12 +37,12 @@ test_getBranchPartMD() {
 }
 
 test_getEclValue() {
-    local value=$(getEclValue "ECL_PS_LFS_OS" MAINBRANCH)
+    local value=$(getValueFromEclFile "ECL_PS_LFS_OS" MAINBRANCH)
     assertNotNull "Did not get a value from ECL." "${value}"
 }
 
 test_getEclValueLRC() {
-    local value=$(getEclValue "ECL_PS_LRC_LCP_LFS_OS" MAINBRANCH)
+    local value=$(getValueFromEclFile "ECL_PS_LRC_LCP_LFS_OS" MAINBRANCH)
     assertNotNull "Did not get a value from ECL." "${value}"
 }
 
