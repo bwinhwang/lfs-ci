@@ -13,7 +13,7 @@ info "# DELETE_JOBS:      $DELETE_JOBS"
 info "# DELETE_SHARE:     $DELETE_SHARE"
 info "# LRC_MOVE_SVN:     $LRC_MOVE_SVN"
 info "# LRC_DELETE_JOBS:  $LRC_DELETE_JOBS"
-info "# LRC_DELETE_SHARE: $DELETE_SHARE"
+info "# LRC_DELETE_SHARE: $LRC_DELETE_SHARE"
 info "# DEBUG:            $DEBUG"
 info "# COMMENT:          $COMMENT"
 info "###############################################################"
@@ -46,12 +46,12 @@ getValueFromEclFile() {
     local branch=$2
     local svnEclRepo=$(echo ${SVN_REPO} | awk -F/ '{print $1"//"$2$3}')
 
-    svn ls ${SVN_OPTS} ${svnEclRepo}/isource/svnroot/BTS_SCM_PS/ECL/${branch}/ECL_BASE/ECL
+    svnCommand ls ${svnEclRepo}/isource/svnroot/BTS_SCM_PS/ECL/${branch}/ECL_BASE/ECL
     if [[ $? -eq 0 ]]; then
-        local value=$(svn cat ${SVN_OPTS} ${svnEclRepo}/isource/svnroot/BTS_SCM_PS/ECL/${branch}/ECL_BASE/ECL | grep ${key} | cut -d'=' -f2)
+        local value=$(svnCommand ${SVN_OPTS} cat ${svnEclRepo}/isource/svnroot/BTS_SCM_PS/ECL/${branch}/ECL_BASE/ECL | grep ${key} | cut -d'=' -f2)
     else
         info using ECL from obsolete
-        local value=$(svn cat ${SVN_OPTS} ${svnEclRepo}/isource/svnroot/BTS_SCM_PS/ECL/obsolete/${branch}/ECL_BASE/ECL | grep ${key} | cut -d'=' -f2)
+        local value=$(svnCommand ${SVN_OPTS} cat ${svnEclRepo}/isource/svnroot/BTS_SCM_PS/ECL/obsolete/${branch}/ECL_BASE/ECL | grep ${key} | cut -d'=' -f2)
     fi
 
     echo ${value}
@@ -93,17 +93,17 @@ __cmd() {
 #  @param   <none>
 #  @return  <none>
 moveBranchSvn() {
-    svn ls ${SVN_OPTS} ${SVN_REPO}/${SVN_DIR}/${BRANCH} && {
+    svn ls ${SVN_OPTS} ${SVN_REPO}/${SVN_DIR}/${BRANCH} 2> /dev/null && {
         __cmd svn ${SVN_OPTS} move -m "moved ${BRANCH} to obsolete" \
             ${SVN_REPO}/${SVN_DIR}/${BRANCH} ${SVN_REPO}/${SVN_DIR}/obsolete;
     }
 
-    svn ls ${SVN_OPTS} ${SVN_REPO}/${SVN_DIR}/${SVN_BLD_DIR}/locations-${BRANCH} && {
+    svn ls ${SVN_OPTS} ${SVN_REPO}/${SVN_DIR}/${SVN_BLD_DIR}/locations-${BRANCH} 2> /dev/null && {
         __cmd svn ${SVN_OPTS} move -m "moved locations-${BRANCH} to obsolete" \
             ${SVN_REPO}/${SVN_DIR}/${SVN_BLD_DIR}/locations-${BRANCH} ${SVN_REPO}/${SVN_DIR}/${SVN_BLD_DIR}/obsolete;
     }
 
-    svn ls ${SVN_OPTS} ${SVN_REPO}/${SVN_DIR}/${SVN_BLD_DIR}/locations-${BRANCH}_FSMR4 && {
+    svn ls ${SVN_OPTS} ${SVN_REPO}/${SVN_DIR}/${SVN_BLD_DIR}/locations-${BRANCH}_FSMR4 2> /dev/null && {
         __cmd svn ${SVN_OPTS} move -m "moved locations-${BRANCH} FSMR4 to obsolete" \
             ${SVN_REPO}/${SVN_DIR}/${SVN_BLD_DIR}/locations-${BRANCH}_FSMR4 ${SVN_REPO}/${SVN_DIR}/${SVN_BLD_DIR}/obsolete;
     }
@@ -115,7 +115,7 @@ moveBranchSvn() {
 #  @param   <none>
 #  @return  <none>
 LRC_moveBranchSvn() {
-    svn ${SVN_OPTS} ls ${SVN_REPO}/${SVN_DIR}/${SVN_BLD_DIR}/locations-LRC_${BRANCH} && {
+    svn ${SVN_OPTS} ls ${SVN_REPO}/${SVN_DIR}/${SVN_BLD_DIR}/locations-LRC_${BRANCH} 2> /dev/null && {
         __cmd svn ${SVN_OPTS} move -m "moved locations-LRC_${BRANCH} to obsolete" \
             ${SVN_REPO}/${SVN_DIR}/${SVN_BLD_DIR}/locations-LRC_${BRANCH} ${SVN_REPO}/${SVN_DIR}/${SVN_BLD_DIR}/obsolete;
     }
