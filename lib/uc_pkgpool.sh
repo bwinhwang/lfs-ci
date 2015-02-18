@@ -56,24 +56,23 @@ usecase_PKGPOOL_BUILD() {
     execute -l ${buildLogFile} ${gitWorkspace}/build -j100 --pkgpool=/build/home/psulm/SC_LFS/pkgpool --prepopulate --release="${releasePrefix}" 
     rawDebug ${buildLogFile}
 
-    local releaseString="$(execute -n sed -ne 's,^release \([^ ]*\) complete,\1,p' ${buildLogFile})"
-    mustHaveValue "${releaseString}" "release string"
+    local releaseTag="$(execute -n sed -ne 's,^release \([^ ]*\) complete,\1,p' ${buildLogFile})"
+    mustHaveValue "${releaseTag}" "release tag"
 
-    info "pkgpool release name is ${releaseString}"
+    info "new pkgpool release tag is ${releaseTag}"
 
     cd ${gitWorkspace}
-    local oldRelease=$(gitDescribe --abbrev=0)
-    gitTagAndPushToOrigin
+    local oldReleaseTag=$(gitDescribe --abbrev=0)
+    gitTagAndPushToOrigin ${releaseTag}
 
-    info "new pkgpool release tag: ${releaseString}"
-    setBuildDescription "${JOB_NAME}" "${BUILD_NUMBER}" "${releaseString}"
+    setBuildDescription "${JOB_NAME}" "${BUILD_NUMBER}" "${releaseTag}"
 
     # required to start the sync 
     execute touch /build/home/psulm/SC_LFS/pkgpool/.hashpool
 
     mkdir -p ${workspace}/bld/bld-pkgpool-release/
-    echo ${oldRelease}    > ${workspace}/bld/bld-pkgpool-release/oldLabel
-    echo ${releaseString} > ${workspace}/bld/bld-pkgpool-release/label
+    echo ${oldReleaseTag} > ${workspace}/bld/bld-pkgpool-release/oldLabel
+    echo ${releaseTag}    > ${workspace}/bld/bld-pkgpool-release/label
     execute sed -ne 's|^src [^ ]* \(.*\)$|PS_LFS_PKG = \1|p' ${workspace}/pool/*.meta \
         > ${workspace}/bld/bld-pkgpool-release/forReleaseNote.txt
 

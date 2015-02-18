@@ -63,7 +63,7 @@ execute ./bootstrap
 execute -l TempFile ${WORKSPACE}/src/build -j100 --pkgpool=/build/home/psulm/SC_LFS/pkgpool --prepopulate --release=TST_CI_PKGPOOL
 execute -n sed -ne s,^release \([^ ]*\) complete,\1,p TempFile
 gitDescribe --abbrev=0
-gitTagAndPushToOrigin 
+gitTagAndPushToOrigin PKGPOOL_FOO
 setBuildDescription PKGPOOL_CI_-_trunk_-_Build 123 PKGPOOL_FOO
 execute touch /build/home/psulm/SC_LFS/pkgpool/.hashpool
 execute sed -ne s|^src [^ ]* \(.*\)$|PS_LFS_PKG = \1|p ${WORKSPACE}/workspace/pool/*.meta
