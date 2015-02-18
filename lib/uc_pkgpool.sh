@@ -53,8 +53,7 @@ usecase_PKGPOOL_BUILD() {
 
     info "building pkgpool..."
     # TODO: demx2fk3 2015-02-09 use different path for testing ci jobs
-    execute  ${gitWorkspace}/build -j100 --pkgpool=/build/home/psulm/SC_LFS/pkgpool --prepopulate --release="${releasePrefix}" 
-    rawDebug ${buildLogFile}
+    execute -l ${buildLogFile} ${gitWorkspace}/build -j100 --pkgpool=/build/home/psulm/SC_LFS/pkgpool --prepopulate --release="${releasePrefix}" 
 
     local releaseString="$(execute -n sed -ne 's,^release \([^ ]*\) complete$,\1,p' ${buildLogFile})"
     mustHaveValue "${releaseString}" "release string"

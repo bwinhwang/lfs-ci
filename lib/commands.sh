@@ -28,6 +28,7 @@ execute() {
     local noRedirect=
     local retryCount=1
     local ignoreError=
+    local logfile=
 
     # Note: we are not using getopt, because we have problems with parsing
     # the parameters from the command. We don't want that.
@@ -37,6 +38,7 @@ execute() {
             -n|--noredirect)   noRedirect=1  ;;
             -i|--ignore-error) ignoreError=1 ;;
             -r|--retry)        retryCount=$2 ; shift ;;
+            -l|--logfile)      logfile=$2    ; shift ;;
             --)                shift ; break ;;
             (-*)               fatal "unrecognized option $1" ;;
             *)                 break ;;
@@ -71,8 +73,8 @@ execute() {
         # fucking stupid workaround to get the logfile for the command outside
         # of the function.....
         # TODO: demx2fk3 2015-02-10 find a better way to do this.
-        if [[ -e ${LFS_CI_LAST_EXECUTE_LOGFILE} ]] ; then
-            cat ${output} >> ${LFS_CI_LAST_EXECUTE_LOGFILE}
+        if [[ -e ${logfile} ]] ; then
+            cat ${output} > ${logfile}
         fi
 
         # in the last loop, don't wait, just exist
