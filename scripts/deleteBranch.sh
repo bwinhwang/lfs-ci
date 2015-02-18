@@ -48,10 +48,10 @@ getValueFromEclFile() {
 
     svnCommand ls ${svnEclRepo}/isource/svnroot/BTS_SCM_PS/ECL/${branch}/ECL_BASE/ECL
     if [[ $? -eq 0 ]]; then
-        local value=$(svnCommand ${SVN_OPTS} cat ${svnEclRepo}/isource/svnroot/BTS_SCM_PS/ECL/${branch}/ECL_BASE/ECL | grep ${key} | cut -d'=' -f2)
+        local value=$(svnCommand cat ${svnEclRepo}/isource/svnroot/BTS_SCM_PS/ECL/${branch}/ECL_BASE/ECL | grep ${key} | cut -d'=' -f2)
     else
         info using ECL from obsolete
-        local value=$(svnCommand ${SVN_OPTS} cat ${svnEclRepo}/isource/svnroot/BTS_SCM_PS/ECL/obsolete/${branch}/ECL_BASE/ECL | grep ${key} | cut -d'=' -f2)
+        local value=$(svnCommand cat ${svnEclRepo}/isource/svnroot/BTS_SCM_PS/ECL/obsolete/${branch}/ECL_BASE/ECL | grep ${key} | cut -d'=' -f2)
     fi
 
     echo ${value}
