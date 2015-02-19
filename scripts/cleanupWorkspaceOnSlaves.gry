@@ -1,0 +1,78 @@
+///////////////////////////////////////////////////////////////////////////////
+//
+// Groovy script to cleanup the workspace on Jenkins slaves.
+//
+// On each Jenkins slave the directory of no longer existing jobs
+// will be deleted.
+//
+// If DEBUG is "true" nothing will be deleted. Set DEBUG="true" to
+// see which directories would be deleted on which slave.
+///////////////////////////////////////////////////////////////////////////////
+
+
+import hudson.model.ParametersAction
+
+def jenkins = jenkins.model.Jenkins.instance;
+
+def thr = Thread.currentThread()
+
+def build = thr?.executable
+
+def parameters = build?.actions.find{ it instanceof ParametersAction }?.parameters
+
+// Jobs which don't have a custom workspace
+def jobNames = jenkins.items.findAll { it instanceof hudson.model.AbstractProject && it.customWorkspace == null }.collect { it.name };
+
+def debug = true;
+
+parameters.each {
+    if(it.name == "DEBUG") {
+        debug = it.value
+        println("[INFO] got parameter DEBUG: $debug")
+    }
+}
+
+if(debug == true) {
+    println "** Execute in DEBUG mode - nothing will be deleted **";
+} 
+
+for(slave in jenkins.slaves) {
+    if(!slave.computer.online) {
+        println("Slave '$slave.nodeName' is currently offline - skip workspace cleanup");
+        continue;
+    }
+    // Retrieve the a FilePath to the workspace root
+    def wsRoot = slave.workspaceRoot;
+    if(wsRoot == null) {
+        printlnt("Slave '$slave.nodeName' has a <null> workspaceRoot - skip workspace cleanup");
+        continue;
+    } 
+
+    println("Slave '$slave.nodeName' is online - perform workspace cleanup:");
+
+    def subdirs = wsRoot.list();
+    if(subdirs.size() == 0) {
+        println(" (workspace is empty)");
+        continue;
+    } 
+
+    for(d in subdirs) {
+        // Remove any suffixes from the dir name
+        def dirName = d.name.split("@")[0];
+        // Find matching job
+        def jobMatch = jobNames.find { it == dirName };
+        if (jobMatch != null) {
+            println(" KEEP: $d --> job:$jobMatch");
+        }
+        else {
+            if( debug == true ) {
+                println(" [DEBUG] DELETE: $d (dryRun)");
+            }
+            else {
+                println(" [INFO] DELETE: $d");
+                d.deleteRecursive();
+            }
+        }
+    }
+}
+
