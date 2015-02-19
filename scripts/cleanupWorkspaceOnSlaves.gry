@@ -41,10 +41,6 @@ for(slave in jenkins.slaves) {
         println("Slave '$slave.nodeName' is currently offline - skip workspace cleanup");
         continue;
     }
-    if(slave.nodeName != "cibrown") {
-        println("Slave is not cibrown - skip workspace cleanup");
-        continue;
-    }
     // Retrieve the FilePath to the workspace root
     def wsRoot = slave.workspaceRoot;
     if(wsRoot == null) {
