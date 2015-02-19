@@ -2042,6 +2042,8 @@ sub prepare {
     # collect data
     # __TAGNAME__
     $self->{data}{TAGNAME} = $self->{tagName};
+    # __BRANCH__
+    $self->{data}{BRANCH}  = $config->getConfig( name => "LFS_PROD_ps_scm_branch_name" );
 
     # __LFS_PROD_RELEASE_CURRENT_TAG_NAME_REL__
     $self->{data}{LFS_PROD_RELEASE_CURRENT_TAG_NAME_REL} = $ENV{"LFS_PROD_RELEASE_CURRENT_TAG_NAME_REL"};
@@ -2051,8 +2053,6 @@ sub prepare {
     $self->{data}{TIME} = strftime( "%H:%M:%SZ", gmtime());
     # __BASED_ON__
     $self->{data}{BASED_ON} = $self->{basedOn};
-    # __BRANCH__
-    $self->{data}{BRANCH} = "Branch";
     # __IMPORTANT_NOTE__
     $self->{data}{IMPORTANT_NOTE} = $self->{releaseNote}->importantNote();
 
@@ -2074,8 +2074,8 @@ sub prepare {
     $self->{data}{SVN_REL_REPOS_NAME} = $config->getConfig( name => "LFS_PROD_svn_delivery_repos_name" );
     # __SVN_REL_REPOS_REVISION__
     $svnUrl = sprintf( "%s/tags/%s", 
-                         $self->{data}{SVN_REL_REPOS_URL},
-                         $self->{data}{LFS_PROD_RELEASE_CURRENT_TAG_NAME_REL},
+                         $self->{data}{SVN_REL_REPOS_URL} || "",
+                         $self->{data}{LFS_PROD_RELEASE_CURRENT_TAG_NAME_REL} || "",
                      );
     $self->{data}{SVN_REL_REPOS_REVISION} = ""; # $svn->info( url => $svnUrl )->{entry}->{commit}->{revision};
     # __SVN_REL_TAGS_URL_WITH_REVISION__
@@ -2114,9 +2114,9 @@ sub prepare {
                                     @{ $self->{NF} || [] }
                                   );
     # __BASELINES__
-    my @baselineFiles = qw ( bld/bld-externalComponents-summary/externalComponents );
+    my @baselineFiles =  glob( "bld/bld-externalComponents-summary/externalComponents*" );
     push @baselineFiles, glob( "bld/bld-*psl-*/results/doc/versions/fpga_baselines.txt" );
-    push @baselineFiles, glob( "bld/pkgpool*.txt" );
+    push @baselineFiles, glob( "bld/bld-pkgpool-release/forRe*.txt" );
 
     foreach my $file ( @baselineFiles ) {
         open FILE, $file or die "can not open file $file";

@@ -7,7 +7,7 @@
   <authorEmail>robert.schiele@nsn.com</authorEmail>
   <basedOn>__BASED_ON__</basedOn>
   <branchFor>
-    <branch>PS_Basic</branch>
+    <branch>__BRANCH__</branch>
   </branchFor>
   <importantNotes>
     <note name="PS_LFS_PKG">
@@ -16,16 +16,16 @@
   </importantNotes>
   <repositoryUrl>/build/home/SC_LFS/pkgpool</repositoryUrl>
   <repositoryBranch/>
-  <repositoryRevision>__TAG_NAME__</repositoryRevision>
+  <repositoryRevision>__TAGNAME__</repositoryRevision>
   <correctedFaults>
-    <module name="$RELSTR">
+    <module name="__TAGNAME__">
     </module>
   </correctedFaults>
   <baselines>
    __BASELINES__
   </baselines>
   <download>
-    <downloadItem storage="FILE" name="SC_LFS">/build/home/SC_LFS/pkgpool/__TAG_NAME__</downloadItem>
+    <downloadItem storage="FILE" name="SC_LFS">/build/home/SC_LFS/pkgpool/__TAGNAME__</downloadItem>
   </download>
   <features>
   </features>
