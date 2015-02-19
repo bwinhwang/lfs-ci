@@ -62,8 +62,8 @@ if(!deleteJobs && !LRC_deleteJobs) {
 // Delete
 ///////////////////////////////////////////////////////////////////////
 
-// Delete the branchs view
-def deleteView() {
+// Delete the branchs view within the SCM view.
+def deleteScmView() {
     def scm_view = "SCM"
     def scm_view_obj = null
     def branch_view = branch
@@ -75,6 +75,18 @@ def deleteView() {
     } else {
         scm_view_obj.deleteView(branch_view_obj)
         println("[INFO] deleted view: $branch_view in $scm_view view")
+    }
+}
+
+// Delete the branchs view
+def deleteView() {
+    def branch_view = branch[2..branch.length()-1]
+    if(debug) {
+        println("[DEBUG] delete view: $branch_view")
+    } else {
+        vc = Jenkins.instance.getView(branch_view).getOwner();
+        vc.deleteView(vc.getView(branch_view));
+        println("[INFO] deleted view: $branch_view")
     }
 }
 
@@ -98,6 +110,7 @@ if(deleteJobs || LRC_deleteJobs) {
     // No more jobs, delete view
     if(!lrc_jobs) {
         deleteView()
+        deleteScmView()
     }
 }
 
@@ -113,5 +126,6 @@ if(LRC_deleteJobs && lrc_jobs) {
     }
     // No more jobs, delete view
     deleteView()
+    deleteScmView()
 }
 
