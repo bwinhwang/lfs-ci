@@ -24,8 +24,13 @@ ci_job_test_unittest() {
     copyFileFromBuildDirectoryToWorkspace ${UPSTREAM_PROJECT} ${UPSTREAM_BUILD} properties 
     mustExistFile ${WORKSPACE}/properties
     rawDebug ${WORKSPACE}/properties
-
     source ${WORKSPACE}/properties
+
+    copyArtifactsToWorkspace ${UPSTREAM_BUILD} ${UPSTREAM_BUILD} "fsmci"
+
+    mustHaveNextCiLabelName
+    local label=$(getNextCiLabelName)
+    setBuildDescription ${JOB_NAME} ${BUILD_NUMBER} ${label}
 
     local revision=$(latestRevisionFromRevisionStateFile)
     mustHaveValue "${revision}" "revision"
