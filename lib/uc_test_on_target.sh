@@ -6,6 +6,7 @@
 [[ -z ${LFS_CI_SOURCE_jenkins}    ]] && source ${LFS_CI_ROOT}/lib/jenkins.sh
 [[ -z ${LFS_CI_SOURCE_makingtest} ]] && source ${LFS_CI_ROOT}/lib/makingtest.sh
 [[ -z ${LFS_CI_SOURCE_database}   ]] && source ${LFS_CI_ROOT}/lib/database.sh
+[[ -z ${LFS_CI_SOURCE_booking}    ]] && source ${LFS_CI_ROOT}/lib/booking.sh
 
 ## @fn      ci_job_test_on_target()
 #  @brief   usecase test on target
@@ -17,19 +18,35 @@ ci_job_test_on_target() {
 
     setBuildDescription ${JOB_NAME} ${BUILD_NUMBER} ${LABEL}
 
-    local targetName=$(reserveTarget)
+    local isBookingEnabled=$(getConfig LFS_uc_test_is_booking_enabled)
+    local targetName=""
+    if [[ ${isBookingEnabled} ]] ; then
+        # new method via booking from database
+        local targetFeatures="$(getConfig LFS_uc_test_booking_target_features)"
+        debug "requesting target with features ${targetFeatures}"
+
+        reserveTargetByFeature ${targetFeatures}
+        targetName=$(reservedTarget)
+
+        exit_add unreserveTarget
+    else
+        # old legacy method - from job name            
+        targetName=$(_reserveTarget)
+    fi
+    mustHaveValue "${targetName}" "target name"
+
     local workspace=$(getWorkspaceName)
     mustHaveCleanWorkspace
-    mustHaveWorkspaceName
-    mustHaveWritableWorkspace
 
     local branchName=$(getLocationName ${UPSTREAM_PROJECT})
     mustHaveValue "${branchName}" "branch name"
 
     info "create workspace for testing on ${branchName}"
+    # TODO: demx2fk3 2015-02-13 we are using the wrong revision to checkout src-test
     createBasicWorkspace -l ${branchName} src-test
 
     export testTargetName=${targetName}
+    info "target is testTargetName : ${testTargetName}"
     local testType=$(getConfig LFS_CI_uc_test_making_test_type)
 
     databaseEventTestStarted ${LABEL} ${testTargetName}
