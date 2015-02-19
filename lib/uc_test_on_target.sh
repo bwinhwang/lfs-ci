@@ -77,7 +77,8 @@ uc_job_test_on_target_archive_logs() {
 
     requiredParameters JOB_NAME BUILD_NUMBER LABEL
     local workspace=$(getWorkspaceName)
-    mustHaveCleanWorkspace
+    mustHaveWorkspaceName
+
     local jobName=$(sed "s/_archiveLogs$//" <<< ${JOB_NAME})
     # set the correct jobName
     export JOB_NAME=${jobName}
