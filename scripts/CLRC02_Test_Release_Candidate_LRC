@@ -116,6 +116,7 @@ cp -rf "$XML_REPORTS_TEST" "$XML_REPORTS_WORKSPACE/shp-common"
 sed -i -s 's/name="/name="shp_common_/g' "$XML_REPORTS_WORKSPACE"/shp-common/xml-reports/*.xml
 
 "$MAKE" -C "$TESTSUITE_DIR_AHP" waitssh  
+sleep 60
 "$MAKE" -C "$TESTSUITE_DIR_AHP" setup   
 "$MAKE" -C "$TESTSUITE_DIR_AHP" check
 
