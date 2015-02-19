@@ -108,7 +108,7 @@ test3() {
     local expect=$(createTempFile)
 cat <<EOF > ${expect}
 getConfig LFS_CI_uc_update_ecl_update_promote_every_xth_release
-copyFileFromBuildDirectoryToWorkspace ${JOB_NAME} lastSuccessfulBuild ${WORKSPACE}/build.xml
+copyFileFromBuildDirectoryToWorkspace ${JOB_NAME} lastSuccessfulBuild build.xml
 execute -n ${LFS_CI_ROOT}/bin/xpath -q -e /build/startTime/node() ${WORKSPACE}/build.xml
 date +%s
 getConfig LFS_CI_uc_ecl_maximum_time_between_two_releases
@@ -138,7 +138,7 @@ test4() {
     local expect=$(createTempFile)
 cat <<EOF > ${expect}
 getConfig LFS_CI_uc_update_ecl_update_promote_every_xth_release
-copyFileFromBuildDirectoryToWorkspace ${JOB_NAME} lastSuccessfulBuild ${WORKSPACE}/build.xml
+copyFileFromBuildDirectoryToWorkspace ${JOB_NAME} lastSuccessfulBuild build.xml
 execute -n ${LFS_CI_ROOT}/bin/xpath -q -e /build/startTime/node() ${WORKSPACE}/build.xml
 date +%s
 getConfig LFS_CI_uc_ecl_maximum_time_between_two_releases
