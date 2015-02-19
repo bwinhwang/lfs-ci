@@ -66,7 +66,7 @@ getLocationName
 runOnMaster cat /var/fpwork/psulm/lfs-jenkins/home/jobs/Build_Job/builds/123/revisionstate.xml
 mustHaveNextCiLabelName
 getNextCiLabelName
-execute -i ${LFS_CI_ROOT}/bin/newBuildEvent.pl --buildName=PS_LFS_OS_9999_88_7777 --branchName=trunk --revision=123456 --action=build_started
+execute -i ${LFS_CI_ROOT}/bin/newBuildEvent.pl --buildName=PS_LFS_OS_9999_88_7777 --branchName=trunk --revision=123456 --action=build_started --comment=Build_Job_123
 EOF
 
     assertEquals "$(cat ${expect})" "$(cat ${UT_MOCKED_COMMANDS})"
@@ -83,20 +83,23 @@ testDatabaseEventBuildFinished_ok() {
     cat <<EOF > ${expect}
 mustHaveNextCiLabelName
 getNextCiLabelName
-execute -i ${LFS_CI_ROOT}/bin/newBuildEvent.pl --buildName=PS_LFS_OS_9999_88_7777 --action=build_finished
+execute -i ${LFS_CI_ROOT}/bin/newBuildEvent.pl --buildName=PS_LFS_OS_9999_88_7777 --action=build_finished --comment=Build_Job_123
 EOF
 
     assertEquals "$(cat ${expect})" "$(cat ${UT_MOCKED_COMMANDS})"
 }
 
 testDatabaseEventBuildFailed_ok() {
+    export JOB_NAME=Build_Job
+    export BUILD_NUMBER=123
+
     assertTrue "databaseEventBuildFinished 0"
 
     local expect=$(createTempFile)
     cat <<EOF > ${expect}
 mustHaveNextCiLabelName
 getNextCiLabelName
-execute -i ${LFS_CI_ROOT}/bin/newBuildEvent.pl --buildName=PS_LFS_OS_9999_88_7777 --action=build_finished
+execute -i ${LFS_CI_ROOT}/bin/newBuildEvent.pl --buildName=PS_LFS_OS_9999_88_7777 --action=build_finished --comment=Build_Job_123
 EOF
 
     assertEquals "$(cat ${expect})" "$(cat ${UT_MOCKED_COMMANDS})"

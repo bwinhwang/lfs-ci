@@ -323,6 +323,16 @@ cleanupBaselineShares() {
         done
     fi
 
+    if [[ -d /var/fpwork/psulm/lfs-jenkins/workspace ]] ; then
+        local workspaceList=$(createTempFile)
+        execute -n find /var/fpwork/psulm/lfs-jenkins/workspace -maxdepth 1 -mindepth 1 -mtime +5 > ${workspaceList}
+        for directory in $(cat ${workspaceList}) ; do
+            info "removing ${directory}";
+            execute chmod -R u+w ${directory}
+            execute rm -rf ${directory}
+        done
+    fi
+
     return
 }
 

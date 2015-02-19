@@ -69,6 +69,23 @@ ci_job_test_on_target() {
 }
 
 
+## @fn      reserveTarget
+#  @brief   make a reserveration from TAToo to get a target
+#  @param   <none>
+#  @return  name of the target
+reserveTarget() {
+
+    requiredParameters JOB_NAME
+
+    local targetName=$(sed "s/^Test-//" <<< ${JOB_NAME})
+    mustHaveValue ${targetName} "target name"
+    info "testing on target ${targetName}"
+
+    echo ${targetName}
+   
+    return
+}
+
 ## @fn      uc_job_test_on_target_archive_logs()
 #  @brief   copy the results / logs / artifacts from the test job to the archive share (aka /build share)
 #  @param   <none>
@@ -77,7 +94,8 @@ uc_job_test_on_target_archive_logs() {
 
     requiredParameters JOB_NAME BUILD_NUMBER LABEL
     local workspace=$(getWorkspaceName)
-    mustHaveCleanWorkspace
+    mustHaveWorkspaceName
+
     local jobName=$(sed "s/_archiveLogs$//" <<< ${JOB_NAME})
     # set the correct jobName
     export JOB_NAME=${jobName}
