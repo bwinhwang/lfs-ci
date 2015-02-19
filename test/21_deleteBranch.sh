@@ -36,14 +36,14 @@ test_getBranchPartMD() {
   assertEquals "Branch NR does not match." "1" "$nr"
 }
 
-test_getEclValue() {
-    local value=$(getValueFromEclFile "ECL_PS_LFS_OS" MAINBRANCH)
-    assertNotNull "Did not get a value from ECL." "${value}"
-}
+#test_getEclValue() {
+#    local value=$(getValueFromEclFile "ECL_PS_LFS_OS" MAINBRANCH)
+#    assertNotNull "Did not get a value from ECL." "${value}"
+#}
  
-test_getEclValueLRC() {
-    local value=$(getValueFromEclFile "ECL_PS_LRC_LCP_LFS_OS" MAINBRANCH)
-    assertNotNull "Did not get a value from ECL." "${value}"
-}
+#test_getEclValueLRC() {
+#    local value=$(getValueFromEclFile "ECL_PS_LRC_LCP_LFS_OS" MAINBRANCH)
+#    assertNotNull "Did not get a value from ECL." "${value}"
+#}
 
 . lib/shunit2
