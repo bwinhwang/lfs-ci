@@ -46,11 +46,11 @@ debug "used lfs ci git version ${LFS_CI_git_version}"
 
 # we do not want to have modifications in ${LFS_CI_ROOT}
 LFS_CI_git_local_modifications=$(cd ${LFS_CI_ROOT} ; git status --short | wc -l)
-#if [[ ${LFS_CI_git_local_modifications} -gt 0 ]] ; then
-#    fatal "the are local modifications in ${LFS_CI_ROOT}, which are not commited. "\
-#          "CI is rejecting such kind of working mode and refused to work until the modifications are commited."
-#fi
-#
+if [[ ${LFS_CI_git_local_modifications} -gt 0 ]] ; then
+    fatal "the are local modifications in ${LFS_CI_ROOT}, which are not commited. "\
+          "CI is rejecting such kind of working mode and refused to work until the modifications are commited."
+fi
+
 if [[ ! -z "${1}" ]] ; then
     export JOB_NAME=$1
     shift

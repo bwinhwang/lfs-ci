@@ -33,7 +33,7 @@ sub prepare {
 
         my $dbiString = sprintf( "DBI:%s:%s:%s:%s",
                 "mysql",                      # database driver
-                "test_lfspt",                      # database
+                "lfspt",                      # database
                 "ulwiki02.emea.nsn-net.net",  # database host
                 3306,                         # database port
                 );

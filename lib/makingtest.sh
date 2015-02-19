@@ -83,6 +83,8 @@ makingTest_checkUname() {
     info "wait for prompt"
     execute ${make} waitprompt
     execute ${make} waitprompt
+
+    debug "sleep for 60 seconds..."
     sleep 60
     execute ${make} waitprompt
 
@@ -149,6 +151,7 @@ makingTest_testFSM() {
     info "powercycle the target to get it in a defined state"
     execute ${make} powercycle
 
+    debug "sleep for 10 seconds..."
     sleep 10
 
     info "waiting for prompt"
@@ -157,6 +160,7 @@ makingTest_testFSM() {
     execute ${make} waitprompt 
     execute ${make} waitssh
 
+    debug "sleep for 60 seconds..."
     sleep 60
     info "setup target"
     execute ${make} setup
@@ -173,12 +177,15 @@ makingTest_testFSM() {
 
     info "restarting the target"
     execute ${make} powercycle
+
+    debug "sleep for 10 seconds..."
     sleep 10
     execute ${make} waitprompt
     # workaround for broken waitprompt / moxa: It seems, that moxa is buffering some data.
     execute ${make} waitprompt
     execute ${make} waitssh
 
+    debug "sleep for 60 seconds..."
     sleep 60
 
     info "setup target"
@@ -245,7 +252,6 @@ makingTest_testLRC() {
     mustExistDirectory ${xmlOutputDirectory}
 
     # TODO: demx2fk3 2015-02-19 reserve target
-    local testTargetName=lcpa914 # TODO $(getConfig LFS_CI_uc_test_testTargetName)
     mustHaveValue "${testTargetName}" "test target name"
 
     local testSuiteDirectory=${workspace}/src-test/src/unittest/testsuites/continousintegration/production_ci_LRC
@@ -274,37 +280,37 @@ makingTest_testLRC() {
     execute make -C ${testSuiteDirectory} powercycle
     info "waiting for prompt"
     execute make -C ${testSuiteDirectory} waitssh
+
+    debug "sleep for 120 seconds..."
     sleep 120 
 
     info "installing software"
     makingTest_install ${testSuiteDirectory}
 
     info "checking the board for correct software"
-    makingTest_check   ${testSuiteDirectory}
+    makingTest_check   ${testSuiteDirectory}     ${testTargetName}
     info "checking the board for correct software SHP"
-    makingTest_check   ${testSuiteDirectory_SHP}
+    makingTest_check   ${testSuiteDirectory_SHP} ${testTargetName}_shp
     info "checking the board for correct software AHP"
-    makingTest_check   ${testSuiteDirectory_AHP}
+    makingTest_check   ${testSuiteDirectory_AHP} ${testTargetName}_ahp
 
-    export LFS_CI_ERROR_CODE=0
     makingTest_testLRC_subBoard ${testSuiteDirectory_SHP} ${testBuildDirectory} ${testTargetName}_shp shp        ${workspace}/xml-output/shp
     makingTest_testLRC_subBoard ${testSuiteDirectory}     ${testBuildDirectory} ${testTargetName}_shp shp-common ${workspace}/xml-output/shp-common
 
     execute make -C ${testSuiteDirectory_AHP} waitssh
+    debug "sleep for 60 seconds..."
+    sleep 60
     execute make -C ${testSuiteDirectory_AHP} setup
     execute make -C ${testSuiteDirectory_AHP} check
 
     makingTest_testLRC_subBoard ${testSuiteDirectory_AHP} ${testBuildDirectory} ${testTargetName}_ahp ahp        ${workspace}/xml-output/ahp
     makingTest_testLRC_subBoard ${testSuiteDirectory}     ${testBuildDirectory} ${testTargetName}_ahp ahp-common ${workspace}/xml-output/ahp-common
 
-    find ${workspace}/xml-output -name '*.xml' | while read file
-    do
+    find ${workspace}/xml-output -name '*.xml' | while read file ; do
         cat -v ${file} > ${file}.tmp && mv ${file}.tmp ${file}
     done
-    if [[ ${LFS_CI_ERROR_CODE} ]] ; then
-        error "some errors in test cases. please see logfile"
-        exit 1
-    fi
+
+    execute -i make -C ${testSuiteDirectory} poweroff
 
     return
 }
@@ -331,12 +337,12 @@ makingTest_testLRC_subBoard() {
 
     local make="make -C ${testSuiteDirectory}"
 
-    info "testing on target ${testTargetName} in testsuite ${testSuiteDirectory}"
+    info "running tests on target ${testTargetName} for testsuite ${testSuiteDirectory//${workspace}}"
     execute    ${make} clean
     execute    ${make} testconfig-overwrite TESTBUILD=${testBuildDirectory} TESTTARGET=${testTargetName}
     execute    ${make} setup
     execute    ${make} check
-    execute -i ${make} test-xmloutput       || LFS_CI_ERROR_CODE=0 # also true
+    execute -i ${make} -i test-xmloutput
 
     execute mkdir -p ${xmlReportDirectory}
     execute cp -rf ${testSuiteDirectory}/xml-reports/* ${xmlReportDirectory}/
@@ -346,12 +352,18 @@ makingTest_testLRC_subBoard() {
 }
 
 makingTest_check() {
-    local testSuiteDirectory=$1
+    local testSuiteDirectory=${1}
     mustExistDirectory ${testSuiteDirectory}
+
+    local testTargetName=${2}
+    mustHaveValue "${testTargetName}" "test target name"
+
+    local workspace=$(getWorkspaceName)
+    mustHaveWorkspaceName
 
     local make="make -C ${testSuiteDirectory}"
 
-    info "recreating testconfig for ${testSuiteDirectory} / ${testBuildDirectory} / ${testTargetName}"
+    info "recreating testconfig for ${testSuiteDirectory//${workspace}} / $(basename ${testBuildDirectory}) / ${testTargetName}"
     execute ${make} testconfig-overwrite TESTBUILD=${testBuildDirectory} TESTTARGET=${testTargetName}
 
     info "waiting for prompt"
@@ -360,6 +372,7 @@ makingTest_check() {
     info "waiting for ssh"
     execute ${make} waitssh
 
+    debug "sleep for 60 seconds..."
     sleep 60
 
     info "running setup"
@@ -396,9 +409,10 @@ makingTest_install() {
         info "wait for prompt"
         execute ${make} waitprompt
 
-        info "wait for setup"
+        info "wait for ssh"
         execute ${make} waitssh
 
+        debug "sleep for 60 seconds..."
         sleep 60
 
         info "running setup"
