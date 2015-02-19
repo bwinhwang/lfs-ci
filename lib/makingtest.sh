@@ -247,7 +247,7 @@ makingTest_testLRC() {
     local testBuildDirectory=${DELIVERY_DIRECTORY}
     mustExistDirectory ${testBuildDirectory}
 
-    local xmlOutputDirectory=${workspace}/xml-output
+    local xmlOutputDirectory=${workspace}/xml-reports
     execute mkdir -p ${xmlOutputDirectory}
     mustExistDirectory ${xmlOutputDirectory}
 
@@ -294,8 +294,8 @@ makingTest_testLRC() {
     info "checking the board for correct software AHP"
     makingTest_check   ${testSuiteDirectory_AHP} ${testTargetName}_ahp
 
-    makingTest_testLRC_subBoard ${testSuiteDirectory_SHP} ${testBuildDirectory} ${testTargetName}_shp shp        ${workspace}/xml-output/shp
-    makingTest_testLRC_subBoard ${testSuiteDirectory}     ${testBuildDirectory} ${testTargetName}_shp shp-common ${workspace}/xml-output/shp-common
+    makingTest_testLRC_subBoard ${testSuiteDirectory_SHP} ${testBuildDirectory} ${testTargetName}_shp shp        ${xmlOutputDirectory}/shp
+    makingTest_testLRC_subBoard ${testSuiteDirectory}     ${testBuildDirectory} ${testTargetName}_shp shp-common ${xmlOutputDirectory}/shp-common
 
     execute make -C ${testSuiteDirectory_AHP} waitssh
     debug "sleep for 60 seconds..."
@@ -303,8 +303,8 @@ makingTest_testLRC() {
     execute make -C ${testSuiteDirectory_AHP} setup
     execute make -C ${testSuiteDirectory_AHP} check
 
-    makingTest_testLRC_subBoard ${testSuiteDirectory_AHP} ${testBuildDirectory} ${testTargetName}_ahp ahp        ${workspace}/xml-output/ahp
-    makingTest_testLRC_subBoard ${testSuiteDirectory}     ${testBuildDirectory} ${testTargetName}_ahp ahp-common ${workspace}/xml-output/ahp-common
+    makingTest_testLRC_subBoard ${testSuiteDirectory_AHP} ${testBuildDirectory} ${testTargetName}_ahp ahp        ${xmlOutputDirectory}/ahp
+    makingTest_testLRC_subBoard ${testSuiteDirectory}     ${testBuildDirectory} ${testTargetName}_ahp ahp-common ${xmlOutputDirectory}/ahp-common
 
     find ${workspace}/xml-output -name '*.xml' | while read file ; do
         cat -v ${file} > ${file}.tmp && mv ${file}.tmp ${file}
