@@ -26,7 +26,7 @@ ci_job_test_unittest() {
     rawDebug ${WORKSPACE}/properties
     source ${WORKSPACE}/properties
 
-    # copyArtifactsToWorkspace ${UPSTREAM_BUILD} ${UPSTREAM_BUILD} "fsmci"
+    # copyArtifactsToWorkspace ${UPSTREAM_PROJECT} ${UPSTREAM_BUILD} "fsmci"
 
     # mustHaveNextCiLabelName
     # local label=$(getNextCiLabelName)
