@@ -108,10 +108,14 @@ usecase_PKGPOOL_RELEASE() {
     mustHaveCleanWorkspace
 
     copyArtifactsToWorkspace ${UPSTREAM_PROJECT} ${UPSTREAM_BUILD} "pkgpool"
+    local lastSuccessfulBuildDirectory=$(getBuildDirectoryOnMaster ${JOB_NAME} lastSuccessfulBuild)
+    if runOnMaster test -e ${lastSuccessfulBuildDirectory}/forReleaseNote.txt ; then
+        copyFileFromBuildDirectoryToWorkspace ${JOB_NAME} lastSuccessfulBuild forReleaseNote.txt
+        execute mv ${WORKSPACE}/forReleaseNote.txt ${workspace}/forReleaseNote.txt.old
+    else
+        execute touch ${workspace}/forReleaseNote.txt.old
+    fi
 
-    copyFileFromBuildDirectoryToWorkspace ${JOB_NAME} lastSuccessfulBuild forReleaseNote.txt
-    mv ${WORKSPACE}/forReleaseNote.txt ${workspace}/forReleaseNote.txt.old
-   
     local label=$(cat ${workspace}/bld/bld-pkgpool-release/label)
     mustHaveValue "${label}" "label"
 

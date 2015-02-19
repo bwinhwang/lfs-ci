@@ -41,6 +41,10 @@ oneTimeSetUp() {
     copyFileToArtifactDirectory() {
         mockedCommand "copyFileToArtifactDirectory $@"
     }
+    runOnMaster() {
+        mockedCommand "runOnMaster $@"
+        return 0
+    }
     copyFileFromBuildDirectoryToWorkspace() {
         mockedCommand "copyFileFromBuildDirectoryToWorkspace $@"
         touch ${WORKSPACE}/$3
@@ -76,7 +80,9 @@ test1() {
     cat <<EOF > ${expect}
 mustHaveCleanWorkspace
 copyArtifactsToWorkspace PKGPOOL_CI_-_trunk_-_Test 1234 pkgpool
+runOnMaster test -e /var/fpwork/psulm/lfs-jenkins/home/jobs/PKGPOOL_PROD_-_trunk_-_Release/builds/lastSuccessfulBuild/forReleaseNote.txt
 copyFileFromBuildDirectoryToWorkspace PKGPOOL_PROD_-_trunk_-_Release lastSuccessfulBuild forReleaseNote.txt
+execute mv ${WORKSPACE}/forReleaseNote.txt ${WORKSPACE}/workspace/forReleaseNote.txt.old
 setBuildDescription PKGPOOL_PROD_-_trunk_-_Release 1234 LABEL
 execute -n ${LFS_CI_ROOT}/bin/getReleaseNoteXML -t LABEL -o OLD_LABEL -f ${LFS_CI_ROOT}/etc/file.cfg
 mustBeValidXmlReleaseNote ${WORKSPACE}/workspace/releasenote.xml
