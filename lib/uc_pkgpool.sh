@@ -109,6 +109,9 @@ usecase_PKGPOOL_RELEASE() {
 
     copyArtifactsToWorkspace ${UPSTREAM_PROJECT} ${UPSTREAM_BUILD} "pkgpool"
 
+    copyFileFromBuildDirectoryToWorkspace ${JOB_NAME} lastSuccessfulBuild forReleaseNote.txt
+    mv ${WORKSPACE}/forReleaseNote.txt ${workspace}/forReleaseNote.txt.old
+   
     local label=$(cat ${workspace}/bld/bld-pkgpool-release/label)
     mustHaveValue "${label}" "label"
 
@@ -127,10 +130,25 @@ usecase_PKGPOOL_RELEASE() {
 
     mustBeValidXmlReleaseNote ${workspace}/releasenote.xml
 
-    createReleaseInWorkflowTool ${label} ${workspace}/releasenote.xml
-    uploadToWorkflowTool        ${label} ${workspace}/releasenote.xml
+    local releaseNoteTxt=${workspace}/releasenote.txt
 
-    copyFileToArtifactDirectory releasenote.xml
+    execute -i -l ${releaseNoteTxt} diff -y -W72 -t --suppress-common-lines \
+        ${workspace}/forReleaseNote.txt.old \
+        ${workspace}/bld/bld-pkgpool-release/forReleaseNote.txt
+
+    local canSendReleaseNote=$(getConfig LFS_CI_uc_release_can_send_release_note)
+    if [[ ${canSendReleaseNote} ]] ; then
+        createReleaseInWorkflowTool ${label} ${workspace}/releasenote.xml
+        uploadToWorkflowTool        ${label} ${workspace}/releasenote.xml
+
+        execute ${LFS_CI_ROOT}/bin/sendReleaseNote  -r ${workspace}/os/releasenote.txt \
+                                                    -t ${releaseTagName}               \
+                                                    -f ${LFS_CI_ROOT}/etc/file.cfg
+    fi
+
+    copyFileToArtifactDirectory ${workspace}/releasenote.xml
+    copyFileToArtifactDirectory ${workspace}/releasenote.txt
+    copyFileFromBuildDirectoryToWorkspace ${workspace}/bld/bld-pkgpool-release/forReleaseNote.txt
 
     local artifactsPathOnShare=$(getConfig artifactesShare)/${JOB_NAME}/${BUILD_NUMBER}
     linkFileToArtifactsDirectory ${artifactsPathOnShare}
