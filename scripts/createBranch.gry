@@ -25,10 +25,8 @@ import jenkins.model.Jenkins
 import hudson.model.ParametersAction
 import hudson.model.ListView
 import hudson.plugins.sectioned_view.SectionedView
-import hudson.plugins.sectioned_view.SectionedViewSection.Width
-import hudson.plugins.sectioned_view.SectionedViewSection.Positioning
-import hudson.plugins.sectioned_view.ListViewSection
 import javax.xml.transform.stream.StreamSource
+import java.io.File
 import java.io.FileInputStream;
 
 
@@ -106,12 +104,12 @@ def createScmView() {
     return new_branch_view_obj
 }
 
-// Create branch view - section view in the "Jenkins root".
-def createSectionView() {
-    def new_branch_section_view = new_branch[2..new_branch.length()-1]
+// Create sectioned view in the "Jenkins root".
+def createSectionedView() {
+    def new_branch_section_view = new_branch[2..-1]
     def trunk_view = "trunk"
     def new_branch_section_view_obj = Jenkins.instance.getView(new_branch_section_view)
-    def list_view_section_obj = null
+    //def list_view_section_obj = null
     if(new_branch_section_view_obj) {
         println("[INFO] view $new_branch_section_view already exists.")
     } else {
@@ -121,10 +119,6 @@ def createSectionView() {
         trunk_view_owner_obj.addView(new_branch_section_view_obj)
         println("[INFO] Created view $new_branch_section_view")
     }
-    // Add a "list view section" to the "section view" of the new branch
-    list_view_section_obj = new ListViewSection("CI Builds and Testing ("+new_branch+")", Width.HALF, Positioning.LEFT)
-    //new_branch_section_view_obj.addSections(list_view_section_obj)
-    return list_view_section_obj
 }
 
 def processFileInplace(file, Closure processText) {
@@ -255,6 +249,22 @@ def copyPromotions(job, new_job) {
     }
 }
 
+void configureSectionedView() {
+
+    def new_branch_section_view = new_branch[2..-1]
+    def name_section_testing = "CI Builds and Testing (${new_branch})"
+    def name_section_releasing = "Releasing (${new_branch})"
+    def jenkinsUrl = "http://ulegcpeag15:8090/view/${new_branch_section_view}/config.xml"
+
+    def config_xml = """<hudson.plugins.sectioned__view.SectionedView plugin="sectioned-view@1.18"><name>${new_branch_section_view}</name><filterExecutors>false</filterExecutors><filterQueue>false</filterQueue><properties class="hudson.model.View\$PropertyList"/><sections><hudson.plugins.sectioned__view.ListViewSection><jobNames><comparator class="hudson.util.CaseInsensitiveComparator"/></jobNames><jobFilters/><name>${name_section_testing}</name><includeRegex>LFS_CI_-_${new_branch}.*</includeRegex><width>HALF</width><alignment>LEFT</alignment><columns><hudson.views.StatusColumn/><hudson.views.WeatherColumn/><hudson.views.JobColumn/><hudson.views.LastSuccessColumn/><hudson.views.LastFailureColumn/><hudson.views.LastDurationColumn/><hudson.views.BuildButtonColumn/></columns></hudson.plugins.sectioned__view.ListViewSection><hudson.plugins.sectioned__view.ListViewSection><jobNames><comparator class="hudson.util.CaseInsensitiveComparator"/></jobNames><jobFilters/><name>${name_section_releasing}</name><includeRegex>LFS_Prod_-_${new_branch}_-_.*</includeRegex><width>HALF</width><alignment>LEFT</alignment><columns><hudson.views.StatusColumn/><hudson.views.WeatherColumn/><hudson.views.JobColumn/><hudson.views.LastSuccessColumn/><hudson.views.LastFailureColumn/><hudson.views.LastDurationColumn/><hudson.views.BuildButtonColumn/></columns></hudson.plugins.sectioned__view.ListViewSection></sections></hudson.plugins.sectioned__view.SectionedView>"""
+
+    def configurationFile = new File("config.xml")
+    configurationFile.write(config_xml)
+
+    def proc = ['curl', "-ueambrosc:c83b379dc70aa8aca6980666e11f941e", "${jenkinsUrl}", "--data-binary", "@config.xml"].execute()
+    proc.waitFor()
+}
+
 ///////////////////////////////////////////////////////////////////////
 //
 // HERE WE GO
@@ -262,7 +272,6 @@ def copyPromotions(job, new_job) {
 ///////////////////////////////////////////////////////////////////////
 
 new_branch_view_obj = createScmView()
-list_view_section_obj = createSectionView()
 
 // collect jobs to be created
 def jobs_list = []
@@ -278,7 +287,7 @@ for(job in src_branch_view_obj.getItems()) {
 
 for(job in jobs_list) {
     //if(job.name == "LFS_CI_-_${src_branch}_-_Build") {
-    if(job.name == "LFS_CI_-_${src_branch}_-_Test") {
+    //if(job.name == "LFS_CI_-_${src_branch}_-_Test") {
     //if(job.name.find("LRC")) {
     //if(job.name.find("fsmr4")) {
     def new_job = copyJob(job)
@@ -290,9 +299,8 @@ for(job in jobs_list) {
     copyPromotions(job, new_job)
     reloadJobConfig(new_job, config_file)
     new_branch_view_obj.doAddJobToView(new_job.getName())
-    //list_view_section_obj.doAddJobToView(new_job.getName())
     println("[INFO] added job $new_job.name to view \"$new_branch_view_obj.name\"")
-    }
+    //}
 }
 
 // enable previosly disabled jobs
@@ -300,3 +308,7 @@ for(disabled_job in jobs_to_enable) {
     disabled_job.enable()
     println("[INFO] enabled job \"$disabled_job.name\"")
 }
+
+createSectionedView()
+configureSectionedView()
+
