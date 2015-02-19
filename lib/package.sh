@@ -1,10 +1,14 @@
 #!/bin/bash
+## @file    package.sh
+#  @brief   common package functiond
+#  @details common functions which are required to package the build artifacts
+#           into a LFS release. See also the uc_lfs_package.sh and uc_ubooot_package.sh
 
 LFS_CI_SOURCE_package='$Id$'
 
 [[ -z ${LFS_CI_SOURCE_artifacts} ]] && source ${LFS_CI_ROOT}/lib/artifacts.sh
 
-## @fn      getArchitectureFromDirectory( $dir )
+## @fn      getArchitectureFromDirectory()
 #  @brief   get the arcitecture from the bld directory
 #  @details maps e.g. fct to mips64-octeon2-linux-gnu
 #           see also mapping on config.sh
@@ -18,7 +22,7 @@ getArchitectureFromDirectory() {
     return
 }
 
-## @fn      getPlatformFromDirectory( $dir )
+## @fn      getPlatformFromDirectory()
 #  @brief   get the platform from the bld directory
 #  @details maps e.g. fct to fsm3_octeon2
 #           see also mapping in config.sh
@@ -33,7 +37,7 @@ getPlatformFromDirectory() {
     return
 }
 
-## @fn      mustHaveArchitectureFromDirectory( $dir, $arch )
+## @fn      mustHaveArchitectureFromDirectory()
 #  @brief   ensure, that there is a architecture name
 #  @param   {dir}             the bld directory name
 #  @param   {architecture}    the architecture
@@ -49,7 +53,7 @@ mustHaveArchitectureFromDirectory() {
     return
 }
 
-## @fn      mustHavePlatformFromDirectory( $dir, $arch )
+## @fn      mustHavePlatformFromDirectory()
 #  @brief   ensure, that there is a platform name
 #  @param   {dir}             the bld directory name
 #  @param   {architecture}    the platform
@@ -67,16 +71,14 @@ mustHavePlatformFromDirectory() {
 
 ## @fn      copyReleaseCandidateToShare()
 #  @brief   copy the release candidate to the build share
-#  @details «full description»
-#  @todo    «description of incomplete business»
 #  @param   <none>
 #  @return  <none>
 copyReleaseCandidateToShare() {
     local workspace=$(getWorkspaceName)
     mustHaveWorkspaceName
 
-    local shouldCopyToShare=$(getConfig LFS_CI_UC_package_copy_to_share_real_location)
-    if [[ ! ${shouldCopyToShare} ]] ; then
+    local canCopyToShare=$(getConfig LFS_CI_UC_package_can_copy_to_share)
+    if [[ -z ${canCopyToShare} ]] ; then
         debug "will not copy this production to CI_LFS share"
         return
     fi
@@ -146,7 +148,32 @@ copyReleaseCandidateToShare() {
     return
 }
 
-## @fn      mustHaveSdkOnShare( $sdkBaseline )
+## @fn      getUsedSdkVersions()
+#  @brief   get the use sdk version in the build
+#  @todo    this is not working as it should supose to be
+#  @param   <none>
+#  @return  list of used sdk version 
+getUsedSdkVersions() {
+    local workspace=$(getWorkspaceName)
+    mustHaveWorkspaceName
+
+    local commonentsFile=${workspace}/bld/bld-externalComponents-summary/externalComponents 
+    mustExistFile ${commonentsFile}
+
+    local usedSdks=
+    for sdk in $(getConfig LFS_CI_UC_package_linking_component) ; do
+        local sdkValue=$(getConfig ${sdk} ${commonentsFile})
+        # TODO: demx2fk3 2014-08-26 hack place make this different
+        if [[ ${sdk} = sdk3 && -z ${sdkValue} ]] ; then
+            sdkValue=$(getConfig sdk ${commonentsFile})
+        fi
+        usedSdks="${usedSdks} ${sdkValue}"
+    done
+
+    echo ${usedSdks}
+}
+
+## @fn      mustHaveSdkOnShare()
 #  @brief   ensures, that the sdk baseline is on the CI_LFS/SDKs share
 #  @param   {sdkBaseline}    name of the sdk baseline
 #  @return  <none>

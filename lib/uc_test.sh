@@ -1,4 +1,6 @@
 #!/bin/bash
+## @file  uc_test
+#  @brief the test usecase
 
 [[ -z ${LFS_CI_SOURCE_jenkins}   ]] && source ${LFS_CI_ROOT}/lib/jenkins.sh
 [[ -z ${LFS_CI_SOURCE_artifacts} ]] && source ${LFS_CI_ROOT}/lib/artifacts.sh
@@ -91,6 +93,9 @@ ci_job_test() {
         local labelName=${LABEL}
     fi
 
+    info "copy dummy test junit xml file into workspace"
+    execute cp ${LFS_CI_ROOT}/etc/junit_dummytest.xml ${WORKSPACE}
+
     setBuildDescription "${JOB_NAME}" "${BUILD_NUMBER}" "${labelName}"
     return
 }
@@ -125,8 +130,10 @@ ci_job_test_collect_metrics() {
         [[ "${jobName}" =~ _Test$      ]] && continue
         [[ "${jobName}" =~ makingTest$ ]] && continue
         [[ "${jobName}" =~ target$     ]] && continue
+        [[ "${jobName}" =~ lcpa$       ]] && continue
 
         [[ "${state}"   = FAILURE   ]] && continue
+        [[ "${state}"   = ABORTED   ]] && continue
         [[ "${state}"   = NOT_BUILT ]] && continue
 
         storeMetricsForTestJob ${jobName} ${buildNumber}
@@ -167,7 +174,7 @@ ci_job_test_collect_metrics() {
 
         rawDebug ${resultFile}
 
-        databaseTestResults ${label} "Build" ${jobName} "TODO" ${resultFile}
+        databaseTestResults ${label} "Build" ${jobName} "host" ${resultFile}
     done
 
     local packageJobName=$(getPackageJobNameFromUpstreamProject ${UPSTREAM_PROJECT} ${UPSTREAM_BUILD})
@@ -180,8 +187,7 @@ ci_job_test_collect_metrics() {
     local resultFile=$(createTempFile)
     local duration=$(${LFS_CI_ROOT}/bin/xpath -q -e '/build/duration/node()' ${workspace}/${packageJobName}_build.xml)
     printf "duration;%s\n" ${duration} >> ${resultFile}
-    databaseTestResults ${label} "Package" ${packageJobName} "TODO" ${resultFile}
-
+    databaseTestResults ${label} "Package" ${packageJobName} "host" ${resultFile}
 
     return
 }
@@ -223,7 +229,11 @@ storeMetricsForTestJob() {
 
     rawDebug ${resultFile}
 
-    databaseTestResults ${label} ${testSuiteType} ${jobName} "TODO" ${resultFile}
+    export jobName
+    local targetType=$(getConfig LFS_CI_uc_test_target_type_mapping)
+    mustHaveValue "${targetType}" "target type"
+
+    databaseTestResults ${label} ${testSuiteType} ${jobName} "${targetType}" ${resultFile}
 
     return
 }

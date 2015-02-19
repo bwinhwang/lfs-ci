@@ -11,23 +11,23 @@ __SVN_EXTERNALS__
 
 SVN externals for SDK and OS from Subversion:
 __DELIVERY_REPOS__/tags/__LFS_PROD_RELEASE_CURRENT_TAG_NAME_REL__
+https://svne1.inside.nsn.com/isource/svnroot/__SVN_REL_REPOS_NAME__/tags/__LFS_PROD_RELEASE_CURRENT_TAG_NAME_REL__
 https://beisop60.china.nsn-net.net/isource/svnroot/__SVN_REL_REPOS_NAME__/tags/__LFS_PROD_RELEASE_CURRENT_TAG_NAME_REL__
 https://bhisop60.apac.nsn-net.net/isource/svnroot/__SVN_REL_REPOS_NAME__/tags/__LFS_PROD_RELEASE_CURRENT_TAG_NAME_REL__
 https://chisop60.americas.nsn-net.net/isource/svnroot/__SVN_REL_REPOS_NAME__/tags/__LFS_PROD_RELEASE_CURRENT_TAG_NAME_REL__
 https://duscmi.inside.nsn.com/isource/svnroot/__SVN_REL_REPOS_NAME__/tags/__LFS_PROD_RELEASE_CURRENT_TAG_NAME_REL__
-https://svne1.inside.nsn.com/isource/svnroot/__SVN_REL_REPOS_NAME__/tags/__LFS_PROD_RELEASE_CURRENT_TAG_NAME_REL__
-https://ulscmi.inside.nsn.com/isource/svnroot__SVN_REL_REPOS_NAME__/tags/__LFS_PROD_RELEASE_CURRENT_TAG_NAME_REL__
+https://ulscmi.inside.nsn.com/isource/svnroot/__SVN_REL_REPOS_NAME__/tags/__LFS_PROD_RELEASE_CURRENT_TAG_NAME_REL__
 https://wrscmi.inside.nsn.com/isource/svnroot/__SVN_REL_REPOS_NAME__/tags/__LFS_PROD_RELEASE_CURRENT_TAG_NAME_REL__
 
 === __LFS_PROD_RELEASE_CURRENT_TAG_NAME__ ===
 
 Download from Subversion:
+https://svne1.inside.nsn.com/isource/svnroot/__SVN_REL_REPOS_NAME__/os/tags/__LFS_PROD_RELEASE_CURRENT_TAG_NAME__
 https://beisop60.china.nsn-net.net/isource/svnroot/__SVN_REL_REPOS_NAME__/os/tags/__LFS_PROD_RELEASE_CURRENT_TAG_NAME__
 https://bhisop60.apac.nsn-net.net/isource/svnroot/__SVN_REL_REPOS_NAME__/os/tags/__LFS_PROD_RELEASE_CURRENT_TAG_NAME__
 https://chisop60.americas.nsn-net.net/isource/svnroot/__SVN_REL_REPOS_NAME__/os/tags/__LFS_PROD_RELEASE_CURRENT_TAG_NAME__
 https://duscmi.inside.nsn.com/isource/svnroot/__SVN_REL_REPOS_NAME__/os/tags/__LFS_PROD_RELEASE_CURRENT_TAG_NAME__
-https://svne1.inside.nsn.com/isource/svnroot/__SVN_REL_REPOS_NAME__/os/tags/__LFS_PROD_RELEASE_CURRENT_TAG_NAME__
-https://ulscmi.inside.nsn.com/isource/svnroot__SVN_REL_REPOS_NAME__/os/tags/__LFS_PROD_RELEASE_CURRENT_TAG_NAME__
+https://ulscmi.inside.nsn.com/isource/svnroot/__SVN_REL_REPOS_NAME__/os/tags/__LFS_PROD_RELEASE_CURRENT_TAG_NAME__
 https://wrscmi.inside.nsn.com/isource/svnroot/__SVN_REL_REPOS_NAME__/os/tags/__LFS_PROD_RELEASE_CURRENT_TAG_NAME__
 
 Best Regards,

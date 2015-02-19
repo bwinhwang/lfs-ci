@@ -1,4 +1,27 @@
 #!/bin/bash
+## @file    logging.sh
+#  @brief   handling of output and logfiles
+#  @details The scripting should avoid to use echo or printf to print out information to the console.
+#           For this, we are using the following function:
+#           - info
+#           - error
+#           - fatail
+#           - warning
+#           - debug
+#           - trace
+#           - rawDebug
+# 
+#           These function are doing this for you in the correct way. The message will be written to
+#           the logfile and - dependend to the loglevel - to the console / jenkins output.
+#           The logging functions are also adding the data to each message.
+#
+#           e.g.: 2015-01-26 06:34:33.693662137 UTC [    0.006] [ERROR]    this is an error.
+#
+#           The logfile will be written into the global log directory in the /ps/lfs/ci share.
+#           In the exit handler, the logfile will be gzipped.
+#           
+#           You can also influence the format of the log file. See CI_LOGGING_CONFIG for details.
+#
 
 LFS_CI_SOURCE_logging='$Id$'
 
@@ -40,7 +63,10 @@ startLogfile() {
         export CI_LOGGING_DURATION_START_DATE=$(date +%s.%N)
         
 
+        echo 1>&2 "-------------------------------------------------------------------------------------------------------------------------------------------------------------"
         echo 1>&2 "logfile is ${CI_LOGGING_LOGFILENAME}"
+        echo 1>&2 "http://ullinn11.emea.nsn-net.net/lfs/ci/log/${datePath}/$(basename ${CI_LOGGING_LOGFILENAME})"
+        echo 1>&2 "-------------------------------------------------------------------------------------------------------------------------------------------------------------"
         printf -- "------------------------------------------------------------------\n" >  ${CI_LOGGING_LOGFILENAME}
         printf -- "starting logfile\n"                                                   >> ${CI_LOGGING_LOGFILENAME}
         printf -- "  script: $0\n"                                                       >> ${CI_LOGGING_LOGFILENAME}
@@ -67,13 +93,14 @@ stopLogfile() {
         printf -- "ending logfile\n"                                                      >> ${CI_LOGGING_LOGFILENAME}
         printf -- "-------------------------------------------------------------------\n" >> ${CI_LOGGING_LOGFILENAME}
 
-        gzip ${CI_LOGGING_LOGFILENAME}
+        # disabled gzipping..
+        # gzip ${CI_LOGGING_LOGFILENAME}
     fi
     
     unset CI_LOGGING_LOGFILENAME
 }
 
-## @fn      trace( message )
+## @fn      trace()
 #  @brief   shows a trace message
 #  @param   {message}    a text message
 #  @return  <none>
@@ -81,7 +108,7 @@ trace() {
     message "TRACE" "$@"
 }
 
-## @fn      debug( message )
+## @fn      debug()
 #  @brief   shows a debug message
 #  @param   {message}    a text message
 #  @return  <none>
@@ -89,7 +116,7 @@ debug() {
     message "DEBUG" "$@"
 }
 
-## @fn      info( message )
+## @fn      info()
 #  @brief   shows a info message
 #  @param   {message}    a text message
 #  @return  <none>
@@ -97,7 +124,7 @@ info() {
     message "INFO" "$@"
 }
 
-## @fn      error( message )
+## @fn      error()
 #  @brief   shows a error message
 #  @param   {message}    a text message
 #  @return  <none>
@@ -106,7 +133,7 @@ error() {
     _stackTrace
 }
 
-## @fn      warning( message )
+## @fn      warning()
 #  @brief   shows a warning message
 #  @param   {message}  a text message
 #  @return  <none>
@@ -114,7 +141,7 @@ warning() {
     message "WARNING" "$@"
 }
 
-## @fn      fatal( message )
+## @fn      fatal()
 #  @brief   shows a fatal message
 #  @param   {message}  a fatal message
 #  @return  <none>
@@ -123,7 +150,7 @@ fatal() {
     exit 1
 }
 
-## @fn      message( logType, logMessage )
+## @fn      message()
 #  @brief   shows a warning message
 #  @detail  
 #  @param   {logType}    type of the message
@@ -208,7 +235,7 @@ message() {
     fi
 }
 
-## @fn      _loggingLine( logType, logMessage )
+## @fn      _loggingLine()
 #  @brief   format a log line
 #  @param   {logType}    type of the message
 #  @param   {logMessage} a text message
@@ -274,7 +301,7 @@ runAndLog() {
     return ${rc}
 }
 
-## @fn      rawDebug( $fileName )
+## @fn      rawDebug()
 #  @brief   put the content of the file into the logfile
 #  @param   {fileName}    name of the file
 #  @param   <none>
@@ -296,7 +323,7 @@ rawDebug() {
     return
 }
 
-## @fn      rawOutput( $fileName )
+## @fn      rawOutput()
 #  @brief   put the content of the file on the console
 #  @param   {fileName}    name of the file
 #  @param   <none>

@@ -1,4 +1,8 @@
 #!/bin/bash
+## @file  uc_lfs_package.sh
+#  @brief usecase lfs packing
+
+LFS_CI_SOURCE_uc_lfs_package='$Id$'
 
 [[ -z ${LFS_CI_SOURCE_artifacts} ]] && source ${LFS_CI_ROOT}/lib/artifacts.sh
 [[ -z ${LFS_CI_SOURCE_package}   ]] && source ${LFS_CI_ROOT}/lib/package.sh
@@ -28,8 +32,6 @@ ci_job_package() {
     local requiredArtifacts=$(getConfig LFS_CI_UC_package_required_artifacts)
     copyArtifactsToWorkspace "${UPSTREAM_PROJECT}" "${UPSTREAM_BUILD}" "${requiredArtifacts}"
 
-    databaseEventBuildFinished
-
     mustHaveNextCiLabelName
     local label=$(getNextReleaseLabel)
 
@@ -55,7 +57,7 @@ ci_job_package() {
 
     copyReleaseCandidateToShare
 
-    return 0
+    return
 }
 
 ## @fn      copyGenericBuildResults()
@@ -315,7 +317,7 @@ copyFactoryZip() {
     return
 }
 
-## @fn      copyPlatform(  )
+## @fn      copyPlatform()
 #  @brief   handle the platform directory in the delivery structure
 #  @details 
 #  @param   <none>
@@ -490,6 +492,7 @@ createOsFileList() {
 
     local dst=${workspace}/upload
     execute -n find ${dst} -not -type d | sort | xargs md5sum 2>/dev/null | sed "s,${dst}/,,g" > ${dst}/doc/list_all_os_files.txt
+    execute -n find ${dst} -not -type d | sort | xargs du -k  2>/dev/null | sed "s,${dst}/,,g" > ${dst}/doc/list_all_os_sizes_of_files.txt
 
     return
 }

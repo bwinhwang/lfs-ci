@@ -1417,10 +1417,10 @@ SOURCES:
 
             printf "%s: LABEL := %s\n\n", $source->{directory}, $label;
 
-            if( grep { $_ eq $goal } $source->platforms() ) {
+            if( $source->matchesPlatform( $goal ) ) {
                 printf ".PHONY: %s\n\n", $source->{directory};
                 printf "%s: ", $source->{directory};
-                foreach my $platform ( sort grep { $_ eq $goal } $source->platforms() ) {
+                foreach my $platform ( sort $source->matchingPlatform( $goal ) ) {
                     printf "%s-%s ", $source->{directory}, $platform;
                 }
                 printf "\n";
@@ -1487,7 +1487,7 @@ sub execute {
     $dir->loadDependencyTree();
 
     # use YAML;
-    # print STDERR Dump($dir);
+    # print STDERR Dumper($dir);
 
     printf( "%s %s", join( " ", $dir->getSourceDirectoriesFromDependencies() ),
                      $subDir,
@@ -1958,6 +1958,15 @@ use Data::Dumper;
 use POSIX qw(strftime);
 use Getopt::Std;
 
+sub quote {
+    my $self = shift;
+    my $data = shift;
+    $data =~ s/&/&amp;/g;
+    $data =~ s/</&lt;/g;
+    $data =~ s/>/&gt;/g;
+    return $data;
+}
+
 sub prepare {
     my $self = shift;
     my %duplicates;
@@ -1990,30 +1999,30 @@ sub prepare {
                         : $entry->{msg}->[0] ;
 
         if( $msg =~ m/[\%\#]REM (.*)/) {
-            $self->{releaseNote}->addImportantNoteMessage( $1 );
+            $self->{releaseNote}->addImportantNoteMessage( $self->quote( $1 ) );
         }
         # jira stuff
         if( $msg =~ m/^.*(BTS[A-Z]*-[0-9]*)\s*PR\s*([^ :]*)(.*$)/  ) {
             push @{ $self->{PR} }, { jira => $1,
                                      nr   => $2,
-                                     text => $3, };
+                                     text => $self->quote( $3 ), };
         }
         # change note
         elsif( $msg =~ m/^.*(BTS[A-Z]-[0-9]*)\s*CN\s*([^ :]*)(.*$)/ ) {
             push @{ $self->{CN}}, { jira => $1,
                                     nr   => $2,
-                                    text => $3, };
+                                    text => $self->quote( $3 ), };
         }
         # new feature
         if( $msg =~ m/^.*(BTS[A-Z]-[0-9]*)\s*NF\s*([^ :]*)(.*$)/ ) {
             push @{ $self->{NF}}, { jira => $1,
                                     nr   => $2,
-                                    text => $3, };
+                                    text => $self->quote( $3 ), };
         }
         # %FIN PR=PR123456 foobar
         elsif( $msg =~ m/\s*[#%]FIN\s+[%@](PR|NF|CN)=(\w+)(.*)/ ) {
             push @{ $self->{ $1 } }, { nr   => $2,
-                                       text => $2 . $3, };
+                                       text => $self->quote( $2 . $3 ) , };
         }
         # notes
         if( $msg =~ m/Transport Drivers/ ) {
@@ -2185,16 +2194,19 @@ use lib sprintf( "%s/lib/perl5/", $ENV{LFS_CI_ROOT} || "." );
 use XML::Simple;
 use Data::Dumper;
 use Getopt::Std;
+use Log::Log4perl qw( :easy );
 
 sub prepare {
     my $self = shift;
     
     # t: := tag name
     # r: := release note template file
-    getopts( "r:t:f:", \my %opts );
+    getopts( "r:t:f:n", \my %opts );
     $self->{releaseNoteFile} = $opts{r} || die "no r";
     $self->{tagName}         = $opts{t} || die "no t";
     $self->{configFileName}  = $opts{f} || die "no f";
+    $self->{configFileName}  = $opts{f} || die "no f";
+    $self->{noSvnActions}    = $opts{n};
 
     my $config = Singleton::config();
     $config->loadData( configFileName => $self->{configFileName} );
@@ -2226,15 +2238,16 @@ sub prepare {
     $self->{data}{RELEASE_NOTE_CONTENT} = join( "", <RELEASENOTE> );
     close RELEASENOTE;
 
-    $self->{data}{DELIVERY_REPOS}       = $config->getConfig( name => "LFS_PROD_svn_delivery_release_repos_url" );
-    $self->{data}{SVN_REL_REPOS_NAME}   = $config->getConfig( name => "LFS_PROD_svn_delivery_repos_name" );
-    $self->{data}{SOURCE_REPOS}         = $config->getConfig( name => "LFS_PROD_svn_delivery_os_repos_url" );
     $self->{data}{TAGNAME}              = $self->{tagName};
-    $self->{data}{SVN_EXTERNALS}        = Singleton::svn()->propget( property => "svn:externals",
-                                                                   url      => sprintf( "%s/tags/%s",
-                                                                                  $self->{data}{DELIVERY_REPOS},
-                                                                                  $self->{data}{TAGNAME} ) );
-
+    if( not $self->{noSvnActions} ) {
+        $self->{data}{DELIVERY_REPOS}       = $config->getConfig( name => "LFS_PROD_svn_delivery_release_repos_url" );
+        $self->{data}{SVN_REL_REPOS_NAME}   = $config->getConfig( name => "LFS_PROD_svn_delivery_repos_name" );
+        $self->{data}{SOURCE_REPOS}         = $config->getConfig( name => "LFS_PROD_svn_delivery_os_repos_url" );
+        $self->{data}{SVN_EXTERNALS}        = Singleton::svn()->propget( property => "svn:externals",
+                                                                         url      => sprintf( "%s/tags/%s",
+                                                                                     $self->{data}{DELIVERY_REPOS},
+                                                                                     $self->{data}{TAGNAME} ) );
+    }
 
     $self->{subject}     =~ s:__([A-Z_]*)__:  $self->{data}{$1} // $config->getConfig( name => $1 ) :eg; 
     $self->{releaseNote} =~ s:__([A-Z_]*)__:  $self->{data}{$1} // $config->getConfig( name => $1 ) :eg;  
@@ -2247,6 +2260,8 @@ sub execute {
 
     # no use here, we only want to load the module, if we need the module
     require Mail::Sender;
+
+    # DEBUG Dumper( $self );
     my $mua = Mail::Sender->new(
                                 { smtp      => $self->{smtpServer},
                                   from      => $self->{fromAddress}, 
@@ -2263,6 +2278,8 @@ sub execute {
                               msg  => $self->{releaseNote},
                             }
                           ); 
+    DEBUG "return code from mua was $rv";
+
     if( ! $rv ) {
         die "error in sending release note: rc $rv";
     }

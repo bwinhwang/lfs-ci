@@ -1,4 +1,6 @@
 #!/bin/bash
+## @file  uc_test_on_target.sh
+#  @brief the test on target usecase
 
 [[ -z ${LFS_CI_SOURCE_artifacts}  ]] && source ${LFS_CI_ROOT}/lib/artifacts.sh
 [[ -z ${LFS_CI_SOURCE_jenkins}    ]] && source ${LFS_CI_ROOT}/lib/jenkins.sh
@@ -45,15 +47,9 @@ ci_job_test_on_target() {
 
     databaseEventTestFinished ${LABEL} ${testTargetName}
 
-#     addTestResultsToMetricDatabase ${workspace}/TODO.xml \
-#                                    ${LABEL}              \
-#                                    "TMF_${testType}"     \
-#                                    "${testTargetName}"   \
-#                                    "FSMr-x"
     info "testing done."
     return
 }
-
 
 
 ## @fn      reserveTarget
@@ -81,19 +77,24 @@ uc_job_test_on_target_archive_logs() {
 
     requiredParameters JOB_NAME BUILD_NUMBER LABEL
     local workspace=$(getWorkspaceName)
-    mustHaveCleanWorkspace
+    mustHaveWorkspaceName
+
     local jobName=$(sed "s/_archiveLogs$//" <<< ${JOB_NAME})
     # set the correct jobName
     export JOB_NAME=${jobName}
+
+    local testReposPathOnMoritz=$(getConfig LFS_CI_uc_test_on_target_test_repos_on_moritz)
+    mustHaveValue "${testReposPathOnMoritz}" "test-repos path on moritz"
     
     execute rsync -LavrPe ssh \
         moritz:/lvol2/production_jenkins/jenkins-home/jobs/${jobName}/workspace/. \
         ${workspace}/.
     execute rsync -LavrPe ssh \
-        moritz:/lvol2/production_jenkins/test-repos/src-fsmtest/${LABEL}-${jobName}/.  \
+        moritz:${testReposPathOnMoritz}/src-fsmtest/${LABEL}-${jobName}/.  \
         ${workspace}/.
 
     copyFileToArtifactDirectory ${workspace}/. 
+    # TODO: demx2fk3 2015-01-23 make this in a function
     local artifactsPathOnShare=$(getConfig artifactesShare)/${jobName}/${BUILD_NUMBER}
     linkFileToArtifactsDirectory ${artifactsPathOnShare}/save
 

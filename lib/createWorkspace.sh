@@ -1,3 +1,7 @@
+#!/bin/bash
+## @file  createWorkspace.sh 
+#  @brief creating or updating a workspace
+
 LFS_CI_SOURCE_createWorkspace='$Id$'
 
 [[ -z ${LFS_CI_SOURCE_artifacts} ]] && source ${LFS_CI_ROOT}/lib/artifacts.sh
@@ -109,6 +113,7 @@ createWorkspace() {
 
     local location=$(getLocationName)
     mustHaveLocationName
+    info "location is ${location} / ${LFS_CI_GLOBAL_BRANCH_NAME}"
 
     local productName=$(getProductNameFromJobName)
     mustHaveValue "${productName}" "product name"
@@ -247,6 +252,12 @@ mustHaveLocalSdks() {
 
     debug "checking for links in bld"
 
+    # copy the sdk, pkgpool to local disk takes a lot of time
+    # in some cases (knife), we want to avoid this time and
+    # will use the sdk, pkgpool, ... from share
+    local canCopySdksToLocalDisk=$(getConfig LFS_CI_uc_build_can_copy_sdks_to_local_harddisk)
+    [[ ${canCopySdksToLocalDisk} ]] || return
+
     for bld in ${workspace}/bld/*
     do
         [[ -e ${bld} ]] || continue
@@ -271,7 +282,7 @@ mustHaveLocalSdks() {
     return
 }
 
-## @fn      synchroniceToLocalPath( localPath )
+## @fn      synchroniceToLocalPath()
 #  @brief   syncronice the given local path from there to the local cache directory
 #  @details in bld, there are links to the build share. We want to avoid using build
 #           share, because it's to slow. So we are rsyncing the directories from the
@@ -284,7 +295,7 @@ synchroniceToLocalPath() {
     local remotePath=$(readlink ${localPath})
     local subsystem=$(basename ${localPath})
     local tag=$(basename ${remotePath})
-    local serverName=$(getConfig linseeUlmServer)
+    local serverName=$(getConfig LINSEE_server)
 
     requiredParameters LFS_CI_SHARE_MIRROR
 
@@ -293,6 +304,10 @@ synchroniceToLocalPath() {
         local rsync_opts=-L
     fi        
 
+    if [[ ! -d ${localCacheDir}/data ]] ; then
+        execute mkdir -p ${localCacheDir}/data
+    fi
+
     if [[ ! -e ${localCacheDir}/${tag} ]] ; then
         progressFile=${localCacheDir}/data/${tag}.in_progress
 
@@ -300,12 +315,11 @@ synchroniceToLocalPath() {
         debug "sleeping ${sleep} s for sync based on ${progressFile}"
         sleep ${sleep}
 
-        if [[ ! -e ${progressFile} ]] ; then
+        # mkdir is an atomic operation. if it exists, mkdir fails
+        if mkdir ${progressFile} 2> /dev/null ; then
 
             info "synchronice ${subsystem}/${tag} to local filesystem"
-
             execute mkdir -p ${localCacheDir}/data
-            execute touch ${progressFile}
 
             execute rsync --archive --numeric-ids --delete-excluded --ignore-errors \
                 --hard-links --sparse --exclude=.svn --rsh=ssh                      \
@@ -314,7 +328,7 @@ synchroniceToLocalPath() {
                 ${localCacheDir}/data/${tag}/
 
             execute ln -sf data/${tag} ${localCacheDir}/${tag}
-            execute rm -f ${progressFile}
+            execute rm -rf ${progressFile}
         else
             info "waiting for ${tag} on local filesystem"
             # 2014-03-12 demx2fk3 TODO make this configurable

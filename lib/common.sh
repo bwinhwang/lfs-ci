@@ -1,4 +1,6 @@
 #!/bin/bash
+## @file  common.sh
+#  @brief common functions
 
 LFS_CI_SOURCE_common='$Id$'
 
@@ -133,7 +135,7 @@ removeWorkspace() {
     return
 }
 
-## @fn      switchToNewLocation( locationName )
+## @fn      switchToNewLocation()
 #  @brief   swtich to the new location / branch (aka build newlocation <branch>)
 #  @param   {locationName}   the new location name aka branch name
 #  @return  <none>
@@ -248,7 +250,7 @@ switchSvnServerInLocations() {
     return
 }
 
-## @fn      checkoutSubprojectDirectories( subsystem, revision )
+## @fn      checkoutSubprojectDirectories()
 #  @brief   checkout a subsystem of LFS using build command with a revision
 #  @param   {subsystem}    name of the src-directory
 #  @param   {revision}     revision number from svn, which should be used
@@ -258,8 +260,11 @@ checkoutSubprojectDirectories() {
     local workspace=$(getWorkspaceName) 
     local project=$1
     local revision=$2
-    if [[ ${revision} ]] ; then
+    if [[ ${revision} && ${revision} =~ ^[0-9]*$ ]] ; then
         optRev="--revision=${revision}"
+    elif [[ ${revision} ]] ; then
+        # not a numeric revision, so it should be a tag
+        optRev="${revision}"
     fi
 
     debug "checking out ${project} with revision ${revision:-latest}"
@@ -308,7 +313,7 @@ initTempDirectory() {
     return
 }
 
-## @fn      requiredParameters( list of variables )
+## @fn      requiredParameters()
 #  @brief   checks, if the given lists of variables names are set and have some valid values
 #  @param   list of variable names
 #  @return  <none>
@@ -415,7 +420,7 @@ getJenkinsJobBuildDirectory() {
     return
 }
 
-## @fn      mustHaveValue( $value )
+## @fn      mustHaveValue()
 #  @brief   ensure, that the value is a not empty string
 #  @param   {value}    just a value
 #  @return  <none>
@@ -432,7 +437,7 @@ mustHaveValue() {
     return
 }
 
-## @fn      mustHaveWritableFile( fileName )
+## @fn      mustHaveWritableFile()
 #  @brief   ensure, that the file is a writable file
 #  @param   {fileName}    name of the file
 #  @return  <none>
@@ -454,7 +459,7 @@ mustHaveWritableFile() {
     return
 }
 
-## @fn      mustExistDirectory( $directoryName )
+## @fn      mustExistDirectory()
 #  @brief   ensure, that the directory exists 
 #  @param   {directoryName}    name of the directory
 #  @return  <none>
@@ -469,7 +474,7 @@ mustExistDirectory() {
     return
 }
 
-## @fn      mustExistSymlink( $link )
+## @fn      mustExistSymlink()
 #  @brief   ensure, that the link is a symlink and exists
 #  @param   {link}    name of the symlink
 #  @return  <none>
@@ -484,7 +489,7 @@ mustExistSymlink() {
     return
 }
 
-## @fn      mustExistFile( $file )
+## @fn      mustExistFile()
 #  @brief   ensure, that the file exists
 #  @param   {file}    name of the file
 #  @return  <none>
@@ -499,7 +504,7 @@ mustExistFile() {
     return
 }
 
-## @fn      mustBeSuccessfull( $rc )
+## @fn      mustBeSuccessfull()
 #  @brief   ensures, that the given return code is 0, if not it will raise an error
 #  @param   {rc}         return code of the command
 #  @param   {message}    optional message, which will be displayed
@@ -515,7 +520,7 @@ mustBeSuccessfull() {
     return
 }
 
-## @fn      removeBrokenSymlinks( $dir  )
+## @fn      removeBrokenSymlinks()
 #  @brief   remove all broken links and fixes "stragne" links in a given directory
 #  @param   {dir}    directory to remove broken links
 #  @return  <none>
@@ -529,7 +534,7 @@ removeBrokenSymlinks() {
     return            
 }
 
-## @fn      getBuildDirectoryOnMaster( $jobName, $buildNumber )
+## @fn      getBuildDirectoryOnMaster()
 #  @brief   get the build directory in jenkins root on the master server
 #  @param   {jobName}        name of the job
 #  @param   {buildNumber}    number of the build
@@ -556,7 +561,7 @@ getWorkspaceDirectoryOfBuild() {
     return
 }
 
-## @fn      copyRevisionStateFileToWorkspace( $jobName, $buildNumber )
+## @fn      copyRevisionStateFileToWorkspace()
 #  @brief   copy the revision state file from the jenkins master build directory into the workspace
 #  @param   {jobName}       the name of the job
 #  @param   {buildNumber}   the number of the build job
@@ -574,7 +579,7 @@ copyRevisionStateFileToWorkspace() {
     return
 }
 
-## @fn      copyChangelogToWorkspace( $jobName, $buildNumber )
+## @fn      copyChangelogToWorkspace()
 #  @brief   copy the changelog from the master into the workspace
 #  @param   {jobName}        name of the job
 #  @param   {buildNumber}    number of the build
@@ -589,7 +594,7 @@ copyChangelogToWorkspace() {
     return
 }
 
-## @fn      copyFileFromBuildDirectoryToWorkspace( $jobName, $buildNumber, $fileName )
+## @fn      copyFileFromBuildDirectoryToWorkspace()
 #  @brief   copy a specified file from the build directory on the jenkins master to the
 #           workspace directory (on the slave)
 #  @param   {jobName}        name of the job
@@ -613,7 +618,7 @@ copyFileFromBuildDirectoryToWorkspace() {
     return        
 }
 
-## @fn      copyFileFromWorkspaceToBuildDirectory( $jobName, $buildNumber, $fileName )
+## @fn      copyFileFromWorkspaceToBuildDirectory()
 #  @brief   copy a specified file from the workspace to the build directory on the
 #           jenkins master server
 #  @param   {jobName}        name of the job
@@ -637,7 +642,7 @@ copyFileFromWorkspaceToBuildDirectory() {
     return        
 }
 
-## @fn      _getUpstreamProjects( $jobName, $buildNumber, $upstreamsFile )
+## @fn      _getUpstreamProjects()
 #  @brief   get the information about a finished upstream job. 
 #  @warning internal function
 #  @param   {jobName}          name of the job
@@ -655,7 +660,9 @@ _getUpstreamProjects() {
     mustHaveValue "${serverPath}" "server path"
 
     # find the related jobs of the build
-    runOnMaster ${LFS_CI_ROOT}/bin/getUpStreamProject \
+    # TODO: demx2fk3 2015-01-23 KNIFE FIXME
+    # runOnMaster ${LFS_CI_ROOT}/bin/getUpStreamProject \
+    runOnMaster /ps/lfs/ci/bin/getUpStreamProject \
                     -j ${jobName}                     \
                     -b ${buildNumber}                 \
                     -h ${serverPath} > ${upstreamsFile}
@@ -666,7 +673,7 @@ _getUpstreamProjects() {
     return
 }
 
-## @fn      _getDownstreamProjects( $jobName, $buildNumber, $upstreamsFile )
+## @fn      _getDownstreamProjects()
 #  @brief   get the information about a finished downstream job. 
 #  @warning internal function
 #  @param   {jobName}          name of the job
@@ -683,7 +690,9 @@ _getDownstreamProjects() {
     local serverPath=$(getConfig jenkinsMasterServerPath)
     mustHaveValue "${serverPath}" "server path"
 
-    runOnMaster ${LFS_CI_ROOT}/bin/getDownStreamProjects -j ${jobName}    \
+    # TODO: demx2fk3 2015-01-23 KNIFE FIXME
+    # runOnMaster ${LFS_CI_ROOT}/bin/getDownStreamProjects -j ${jobName}    \
+    runOnMaster /ps/lfs/ci/bin/getDownStreamProjects -j ${jobName}     \
                                                         -b ${buildNumber} \
                                                         -h ${serverPath}  > ${downstreamFile}
     rawDebug ${downstreamFile}
@@ -710,7 +719,7 @@ getDownStreamProjectsData() {
     return
 }
 
-## @fn      _getJobInformationFromUpstreamProject( $jobName, $buildNumber, $jobNamePart, $fieldNumber  )
+## @fn      _getJobInformationFromUpstreamProject()
 #  @brief   get the information about a job from a finished upstream job
 #  @warning internal function
 #  @param   {jobName}       name of the job
@@ -734,7 +743,7 @@ _getJobInformationFromUpstreamProject() {
     return
 }
 
-## @fn      getTestBuildNumberFromUpstreamProject( $jobName, $buildNumber )
+## @fn      getTestBuildNumberFromUpstreamProject()
 #  @brief   get the test job build number from specified, finished upstream project
 #  @param   {jobName}        name of the job
 #  @param   {buildNumber}    build number of the job
@@ -746,7 +755,7 @@ getTestBuildNumberFromUpstreamProject() {
     return
 }
 
-## @fn      getTestJobNameFromUpstreamProject( $jobName, $buildNumber )
+## @fn      getTestJobNameFromUpstreamProject()
 #  @brief   get the test job name from specified, finished upstream project
 #  @param   {jobName}        name of the job
 #  @param   {buildNumber}    build number of the job
@@ -758,7 +767,7 @@ getTestJobNameFromUpstreamProject() {
     return
 }
 
-## @fn      getBuildBuildNumberFromUpstreamProject( $jobName, $buildNumber )
+## @fn      getBuildBuildNumberFromUpstreamProject()
 #  @brief   get the build build number from specified, finished upstream project
 #  @param   {jobName}        name of the job
 #  @param   {buildNumber}    build number of the job
@@ -770,7 +779,7 @@ getBuildBuildNumberFromUpstreamProject() {
     return
 }
 
-## @fn      getBuildJobNameFromUpstreamProject( $jobName, $buildNumber )
+## @fn      getBuildJobNameFromUpstreamProject()
 #  @brief   get the build name from specified, finished upstream project
 #  @param   {jobName}        name of the job
 #  @param   {buildNumber}    build number of the job
@@ -782,7 +791,7 @@ getBuildJobNameFromUpstreamProject() {
     return
 }
 
-## @fn      getPackageBuildNumberFromUpstreamProject( $jobName, $buildNumber )
+## @fn      getPackageBuildNumberFromUpstreamProject()
 #  @brief   get the package build number from specified, finished upstream project
 #  @param   {jobName}        name of the job
 #  @param   {buildNumber}    build number of the job
@@ -794,7 +803,7 @@ getPackageBuildNumberFromUpstreamProject() {
     return
 }
 
-## @fn      getPackageJobNameFromUpstreamProject( $jobName, $buildNumber )
+## @fn      getPackageJobNameFromUpstreamProject()
 #  @brief   get the package build name from specified, finished upstream project
 #  @param   {jobName}        name of the job
 #  @param   {buildNumber}    build number of the job
@@ -806,8 +815,7 @@ getPackageJobNameFromUpstreamProject() {
     return
 }
 
-
-## @fn      mustHaveAccessableServer( $serverName )
+## @fn      mustHaveAccessableServer()
 #  @brief   ensure, that a server is accessable
 #  @param   {serverName}    name of the server, which should be accessable
 #  @return  <none>
@@ -816,4 +824,35 @@ mustHaveAccessableServer() {
     return
 }
 
+## @fn      getBranchPart()
+#  @brief   provides the parts of a branch name
+#  @param   <branch> the name of a branch eg FB1408
+#  @param   <what> the part to get. Can be YY | YYYY | MM | NR | TYPE
+#           NR is only valid for MD branches.
+#  @return  <none>
+getBranchPart() {
+    local branch=$1
+    local what=$2
+    local branch_type=$(echo ${branch} | cut -c1,2)
+
+    if [[ "${branch_type}" == "FB" ]]; then
+        local yy=$(echo ${branch}  | cut -c3,4)
+        local mm=$(echo ${branch}  | cut -c5,6)
+        local yyyy=$((2000+yy))
+    elif [[ "${branch_type}" == "MD" ]]; then
+        local yy=$(echo ${branch}  | cut -c4,5)
+        local nr=$(echo ${branch}  | cut -c3)
+        local mm=$(echo ${branch}  | cut -c6,7)
+        local yyyy=$((2000+yy))
+    else
+        error "Only FB and MD branches are supported."
+        return 1
+    fi
+
+    [[ ${what} == YY ]] && echo ${yy}
+    [[ ${what} == YYYY ]] && echo ${yyyy}
+    [[ ${what} == MM ]] && echo ${mm}
+    [[ ${what} == TYPE ]] && echo ${branch_type}
+    [[ ${what} == NR ]] && echo ${nr}
+}
 

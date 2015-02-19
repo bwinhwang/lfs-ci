@@ -1,4 +1,7 @@
 #!/bin/bash
+## @file    uc_admin.sh
+#  @brief   usecase admin
+#  @details just a list of adminstration usecases for jenkins
 
 [[ -z ${LFS_CI_SOURCE_artifacts} ]] && source ${LFS_CI_ROOT}/lib/jenkins.sh
 
@@ -158,6 +161,7 @@ genericShareCleanup() {
         if [[ ${siteName} = "ul" ]] ; then
             # make tarball
             # entscheide, ob du loeschen sollst oder nicht
+            export baselineName=$(basename ${entry})
             local canDelete=$(getConfig LFS_ADMIN_cleanup_share_can_delete)
             if [[ -n "${canDelete}" && -e ${entry} ]] ; then
                 ${execute} rm -rf ${entry}
@@ -310,12 +314,22 @@ cleanupBaselineShares() {
         info "changing write permissions..."
 
         local baselineDirectories=$(createTempFile)
-        execute -n find ${LFS_CI_SHARE_MIRROR}/${USER}/lfs-ci-local/*/data -mindepth 1 -maxdepth 1 -mtime +2 > ${baselineDirectories}
+        execute -n find ${LFS_CI_SHARE_MIRROR}/${USER}/lfs-ci-local/*/data -mindepth 1 -maxdepth 1 -mtime +5 > ${baselineDirectories}
         for directory in $(cat ${baselineDirectories}) ; do
             info "removing ${directory}";
             execute chmod -R u+w ${directory}
             execute rm -rf ${directory}
             execute symlinks -d ${LFS_CI_SHARE_MIRROR}/${USER}/lfs-ci-local/*
+        done
+    fi
+
+    if [[ -d /var/fpwork/psulm/lfs-jenkins/workspace ]] ; then
+        local workspaceList=$(createTempFile)
+        execute -n find /var/fpwork/psulm/lfs-jenkins/workspace -maxdepth 1 -mindepth 1 -mtime +5 > ${workspaceList}
+        for directory in $(cat ${workspaceList}) ; do
+            info "removing ${directory}";
+            execute chmod -R u+w ${directory}
+            execute rm -rf ${directory}
         done
     fi
 
@@ -341,10 +355,15 @@ createLfsBaselineListFromEcl() {
     requiredParameters WORKSPACE
 
     cd ${WORKSPACE}
+    local tmpFile1=$(createTempFile)
+    local tmpFile2=$(createTempFile)
 
     execute -n grep -e PS_LFS_OS -e PS_LFS_REL */ECL_BASE/ECL | \
         execute -n cut -d= -f2 | \
-        execute -n sort -u     > ${WORKSPACE}/usedBaselinesInEcl.txt
+        execute -n sort -u     > ${tmpFile1}
+
+    execute -n sed "s/PS_LFS_REL/PS_LFS_OS/g" ${tmpFile1} > ${tmpFile2}
+    execute -n cat ${tmpFile2} ${tmpFile1} > ${WORKSPACE}/usedBaselinesInEcl.txt
     rawDebug ${WORKSPACE}/usedBaselinesInEcl.txt
 
     info "done."

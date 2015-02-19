@@ -1,4 +1,6 @@
 #!/bin/bash
+## @file  database.sh
+#  @brief handling of metrics to the database 
 
 LFS_CI_SOURCE_database='$Id$'
 
@@ -7,19 +9,20 @@ LFS_CI_SOURCE_database='$Id$'
 #  @param   <none>
 #  @return  <none>
 databaseEventBuildStarted() {
-    requiredParameters LFS_CI_ROOT
+    requiredParameters LFS_CI_ROOT JOB_NAME BUILD_NUMBER
 
     local branch=$(getLocationName)
     mustHaveLocationName
 
-    local revision=$(cut -d" " -f 3 ${WORKSPACE}/revision_state.txt | sort -n -u | tail -n 1)
+    local buildDirectory=$(getBuildDirectoryOnMaster ${JOB_NAME} ${BUILD_NUMBER})
+    local revision=$(runOnMaster cat ${buildDirectory}/revisionstate.xml | cut -d" " -f 3 | sort -n -u | tail -n 1)
     mustHaveValue "${revision}" "revision from revision state file"
 
     mustHaveNextCiLabelName
     local label=$(getNextCiLabelName)
     mustHaveValue ${label} "label name"
 
-    execute -i ${LFS_CI_ROOT}/bin/newBuildEvent.pl --buildName=${label} --branchName=${branch} --revision=${revision} --action=build_started
+    execute -i ${LFS_CI_ROOT}/bin/newBuildEvent.pl --buildName=${label} --branchName=${branch} --revision=${revision} --action=build_started --comment=${JOB_NAME}_${BUILD_NUMBER}
 
     return
 }
@@ -29,13 +32,13 @@ databaseEventBuildStarted() {
 #  @param   <none>
 #  @return  <none>
 databaseEventBuildFinished() {
-    requiredParameters LFS_CI_ROOT
+    requiredParameters LFS_CI_ROOT JOB_NAME BUILD_NUMBER
 
     mustHaveNextCiLabelName
     local label=$(getNextCiLabelName)
     mustHaveValue ${label} "label name"
 
-    execute -i ${LFS_CI_ROOT}/bin/newBuildEvent.pl --buildName=${label} --action=build_finished
+    execute -i ${LFS_CI_ROOT}/bin/newBuildEvent.pl --buildName=${label} --action=build_finished --comment=${JOB_NAME}_${BUILD_NUMBER}
     return
 }
 
@@ -44,18 +47,13 @@ databaseEventBuildFinished() {
 #  @param   <none>
 #  @return  <none>
 databaseEventBuildFailed() {
-    requiredParameters LFS_CI_ROOT
-
-    local rc=$1
-
-    # call only if test failed
-    [[ ${rc} -eq 0 ]] || return 0
+    requiredParameters LFS_CI_ROOT JOB_NAME BUILD_NUMBER
 
     mustHaveNextCiLabelName
     local label=$(getNextCiLabelName)
     mustHaveValue ${label} "label name"
 
-    execute -i ${LFS_CI_ROOT}/bin/newBuildEvent.pl --buildName=${label} --action=build_failed
+    execute -i ${LFS_CI_ROOT}/bin/newBuildEvent.pl --buildName=${label} --action=build_failed --comment=${JOB_NAME}_${BUILD_NUMBER}
     return
 }
 
@@ -105,6 +103,7 @@ databaseTestResults() {
     local targetType=$4
     local resultFile=$5
 
+    info "adding metrics for ${label}, ${testSuiteName}, ${targetName}/${targetType}"
     execute -i ${LFS_CI_ROOT}/bin/newBuildEvent.pl \
             --action=new_test_result               \
             --buildName=${label}                            \
@@ -121,7 +120,7 @@ addTestResultsToMetricDatabase() {
     local baselineName=${2}
     local testSuite=${3}
     local targetName=${4}
-    local targetTYpe=${5}
+    local targetType=${5}
 
     # store results in metric database
     info "storing result numbers in metric database"
@@ -134,7 +133,7 @@ addTestResultsToMetricDatabase() {
     databaseTestResults ${baselineName} \
                         ${testSuite}    \
                         ${targetName}   \
-                        ${targetTYpe}   \
+                        ${targetType}   \
                         ${resultFile}
 
     return

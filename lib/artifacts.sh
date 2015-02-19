@@ -1,4 +1,14 @@
 #!/bin/bash
+## @file    artifacts.sh
+#  @brief   handling of artifacts of a build
+#  @details There is/was a problem in jenkins with artifacts handling.
+#           Espesally if we handling very big artifacts bigger than a few hundert MB.
+#           So we doing the handling of artifacts by yourself within the scripting.
+#           The artifacts are stored on the linsee share /build/home/psulm/LFS_internal/artifacts
+#           with the <jobName>/<buildNumber>.
+#           
+#           The cleanup of the share will be handled within the uc_admin.sh.
+#           
 
 LFS_CI_SOURCE_artifacts='$Id$'
 
@@ -15,7 +25,6 @@ createArtifactArchive() {
     requiredParameters JOB_NAME BUILD_NUMBER
 
     local workspace=$(getWorkspaceName)
-    local serverName=$(getConfig linseeUlmServer)
     mustHaveWorkspaceName
 
     mustExistDirectory "${workspace}/bld/"
@@ -30,7 +39,7 @@ createArtifactArchive() {
 
         local subsystem=$(cut -d- -f2 <<< ${dir})
         info "creating artifact archive for ${dir}"
-        execute tar --create --auto-compress --file "${dir}.tar.gz" "${dir}"
+        execute tar --create --use-compress-program=${LFS_CI_ROOT}/bin/pigz --file "${dir}.tar.gz" "${dir}"
         copyFileToArtifactDirectory ${dir}.tar.gz
     done
 
@@ -70,7 +79,7 @@ mustHaveBuildArtifactsFromUpstream() {
     return
 }
 
-## @fn      copyAndExtractBuildArtifactsFromProject( $jobName, $buildName )
+## @fn      copyAndExtractBuildArtifactsFromProject()
 #  @brief   copy and untar the build artifacts from a jenkins job from the master artifacts share 
 #           into the workspace
 #  @param   {jobName}       jenkins job name
@@ -86,9 +95,9 @@ copyAndExtractBuildArtifactsFromProject() {
 
     local artifactesShare=$(getConfig artifactesShare)
     local artifactsPathOnMaster=${artifactesShare}/${jobName}/${buildNumber}/save/
-    local serverName=$(getConfig linseeUlmServer)
+    local serverName=$(getConfig LFS_CI_artifacts_storage_host)
 
-    local files=$(runOnMaster ls ${artifactsPathOnMaster})
+    local files=$(runOnMaster ls ${artifactsPathOnMaster} 2>/dev/null)
 
     local workspace=$(getWorkspaceName)
     mustHaveWorkspaceName
@@ -124,7 +133,7 @@ copyAndExtractBuildArtifactsFromProject() {
         debug "untar ${file} from job ${jobName}"
         execute tar --directory ${workspace}/bld/ \
                     --extract                     \
-                    --auto-compress               \
+                    --use-compress-program=${LFS_CI_ROOT}/bin/pigz \
                     --file ${workspace}/bld/${file}
     done
 
@@ -134,7 +143,6 @@ copyAndExtractBuildArtifactsFromProject() {
 ## @fn      copyArtifactsToWorkspace()
 #  @brief   copy artifacts of all releated jenkins tasks of a build to the workspace
 #           based on the upstream job
-#  @details «full description»
 #  @param   <none>
 #  @return  <none>
 copyArtifactsToWorkspace() {
@@ -155,7 +163,9 @@ copyArtifactsToWorkspace() {
     mustHaveWorkspaceName
 
     # TODO: demx2fk3 2014-10-14 use getDownStreamProjectsData
-    runOnMaster ${LFS_CI_ROOT}/bin/getDownStreamProjects -j ${jobName}     \
+    # runOnMaster ${LFS_CI_ROOT}/bin/getDownStreamProjects -j ${jobName}     \
+    # TODO: demx2fk3 2015-01-23 KNIFE FIXME
+    runOnMaster /ps/lfs/ci/bin/getDownStreamProjects -j ${jobName}     \
                                                          -b ${buildNumber} \
                                                          -h ${serverPath} > ${downStreamprojectsFile}
 
@@ -191,7 +201,7 @@ copyArtifactsToWorkspace() {
     return
 }
 
-## @fn      copyFileToArtifactDirectory( $fileName )
+## @fn      copyFileToArtifactDirectory()
 #  @brief   copy a file to the artifacts directory of the current build
 #  @param   {fileName}    path and name of the file
 #  @detail  see also linkFileToArtifactsDirectory
@@ -200,9 +210,10 @@ copyFileToArtifactDirectory() {
     requiredParameters JOB_NAME BUILD_NUMBER
     local fileName=$1
 
-    local serverName=$(getConfig linseeUlmServer)
+    local serverName=$(getConfig LFS_CI_artifacts_storage_host)
     local artifactsPathOnShare=$(getConfig artifactesShare)/${JOB_NAME}/${BUILD_NUMBER}
-    executeOnMaster mkdir -p ${artifactsPathOnShare}/save
+    # executeOnMaster mkdir -p ${artifactsPathOnShare}/save
+    execute ssh ${serverName} mkdir -p ${artifactsPathOnShare}/save
 
     # sometimes, the remote host closes connection, so we try to retry...
     execute -r 10 rsync --archive --verbose --rsh=ssh -P  \
@@ -212,7 +223,7 @@ copyFileToArtifactDirectory() {
     return
 }
 
-## @fn      linkFileToArtifactsDirectory( $fileName )
+## @fn      linkFileToArtifactsDirectory()
 #  @brief   create a symlkink from the given name to the artifacts folder on the master.
 #  @warning the given fileName must be accessable via nfs from the master. otherwise, the
 #           link will not work in jenkins

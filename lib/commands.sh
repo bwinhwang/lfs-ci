@@ -1,12 +1,16 @@
 #!/bin/bash
+## @file    commands.sh
+#  @brief   handling of executing commands and handle the errors in a proper way
+#  @details The main function here is the execute function. This function should
+#           help the developer to execute a command in the correct way including
+#           logging of the command and the proper error handling.
 
-[[ -z ${LFS_CI_SOURCE_common} ]] && source ${LFS_CI_ROOT}/lib/common.sh
+[[ -z ${LFS_CI_SOURCE_common}  ]] && source ${LFS_CI_ROOT}/lib/common.sh
+[[ -z ${LFS_CI_SOURCE_logging} ]] && source ${LFS_CI_ROOT}/lib/logging.sh
 
 LFS_CI_SOURCE_commands='$Id$'
 
-# TODO: demx2fk3 2014-10-27 source logging.sh is missing
-
-## @fn      execute( command )
+## @fn      execute()
 #  @brief   executes the given command in a shell
 #  @details this method executes a given command in the same shell. The
 #           output (stderr and stdout) will be written into the logfile.
@@ -14,6 +18,8 @@ LFS_CI_SOURCE_commands='$Id$'
 #           If there is an error (exit code != 0) in the command, an
 #           error will be raised and logged. The scripting ends here!
 #  @param   {opt}    -n flag - turn the default redirection of stdout off
+#  @param   {opt}    -i flag - ignore the error code from the command and continue
+#  @param   {opt}    -r parameter - retry the command, if it failed x times. After this it will fail.
 #  @param   {command}    a command string
 #  @return  <none>
 #  @throws  raise an error, if the command exits with an exit code != 0
@@ -22,6 +28,7 @@ execute() {
     local noRedirect=
     local retryCount=1
     local ignoreError=
+    local logfile=
 
     # Note: we are not using getopt, because we have problems with parsing
     # the parameters from the command. We don't want that.
@@ -31,6 +38,7 @@ execute() {
             -n|--noredirect)   noRedirect=1  ;;
             -i|--ignore-error) ignoreError=1 ;;
             -r|--retry)        retryCount=$2 ; shift ;;
+            -l|--logfile)      logfile=$2    ; shift ;;
             --)                shift ; break ;;
             (-*)               fatal "unrecognized option $1" ;;
             *)                 break ;;
@@ -62,6 +70,13 @@ execute() {
 
         trace "exit code of \"${command}\" was ${exitCode}"
 
+        # fucking stupid workaround to get the logfile for the command outside
+        # of the function.....
+        # TODO: demx2fk3 2015-02-10 find a better way to do this.
+        if [[ -e ${logfile} ]] ; then
+            cat ${output} > ${logfile}
+        fi
+
         # in the last loop, don't wait, just exist
         if [[ ${retryCount} -gt 0 && ${exitCode} -gt 0 ]] ; then
             local randomSeconds=$((RANDOM % 20))
@@ -85,7 +100,12 @@ execute() {
     return ${exitCode}
 }
 
-## @fn      executeOnMaster( command )
+lastExecuteLogFile() {
+    echo ${LFS_CI_LAST_EXECUTE_LOGFILE}
+    return
+}
+
+## @fn      executeOnMaster()
 #  @brief   executes the given command on the master servers
 #  @warning the output will be stored in the logfile and will not given back to the user.
 #           if there is an error, the programm will raise an error
@@ -100,7 +120,7 @@ executeOnMaster() {
     return
 }
 
-## @fn      runOnMaster( command )
+## @fn      runOnMaster()
 #  @brief   ron a command on the master server and show the results.
 #  @param   {command}    command string
 #  @return  exit code of the command
