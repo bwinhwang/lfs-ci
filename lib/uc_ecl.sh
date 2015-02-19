@@ -201,7 +201,7 @@ mustHavePermissionToRelease() {
         requiredParameters WORKSPACE JOB_NAME BUILD_NUMBER LFS_CI_ROOT
 
         # unix time stamp in milliseconds: 1422347953131
-        copyFileFromBuildDirectoryToWorkspace ${JOB_NAME} lastSuccessfulBuild ${WORKSPACE}/build.xml
+        copyFileFromBuildDirectoryToWorkspace ${JOB_NAME} lastSuccessfulBuild build.xml
         local lastBuildDate=$(execute -n ${LFS_CI_ROOT}/bin/xpath -q -e "/build/startTime/node()" ${WORKSPACE}/build.xml)
         mustHaveValue "${lastBuildDate}" "last build date in ms"
         rm -rf ${WORKSPACE}/build.xml
