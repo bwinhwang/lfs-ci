@@ -218,6 +218,8 @@ mustHavePermissionToRelease() {
             setBuildResultUnstable
             exit 0
         fi
+
+        info "enforcing promotion of release. Last release is ${diff}s ago."
     fi
 
     return
