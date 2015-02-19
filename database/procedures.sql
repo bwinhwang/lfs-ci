@@ -257,6 +257,7 @@ END //
 DELIMITER ;
 
 
+
 DROP PROCEDURE IF EXISTS build_workflow_per_branch;
 DELIMITER //
 CREATE PROCEDURE build_workflow_per_branch()
@@ -342,11 +343,10 @@ BEGIN
         WHERE tmp.build_id = b.id 
         ORDER BY branch_name;
 
-        DROP TEMPORARY TABLE IF EXISTS tmp_build_events_per_branches_latest_builds_rotated;
-        DROP TEMPORARY TABLE IF EXISTS tmp_build_events_per_branches_latest_builds;
+        -- DROP TEMPORARY TABLE IF EXISTS tmp_build_events_per_branches_latest_builds_rotated;
+        -- DROP TEMPORARY TABLE IF EXISTS tmp_build_events_per_branches_latest_builds;
 END //
 DELIMITER ;
-
 
 DROP PROCEDURE migrateBranchData;
 DELIMITER //
