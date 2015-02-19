@@ -167,10 +167,10 @@ storeMetricsFromArtifacts() {
     debug "copy artifacts from ${jobName} ${buildNumber}..."
     copyArtifactsToWorkspace ${jobName} ${buildNumber} "test" 
 
-    [[ -d ${workspace}/bld-test-artifcats/         ]] || return
-    [[ -d ${workspace}/bld-test-artifcats/results/ ]] || return
+    [[ -d ${workspace}/bld/bld-test-artifacts/         ]] || return
+    [[ -d ${workspace}/bld/bld-test-artifacts/results/ ]] || return
 
-    for file in ${workspace}/bld-test-artifcats/results/*-metrics-database-values.txt ; do
+    for file in ${workspace}/bld/bld-test-artifacts/results/*-metrics-database-values.txt ; do
         [[ -e ${file} ]] || continue
         debug "adding values from ${file} to metrics database"
 
