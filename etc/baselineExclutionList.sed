@@ -26,6 +26,9 @@
 # needed by MD11408
 /PS_LFS_OS_2014_07_02/d
 
+# needed by Docomo FB1311_RLD8
+/LBT140201-ci1/d
+
 # temp. used by Dorosh, Sergiy - PL/Wroclaw for creating Knife
 /PS_LFS_OS_20M2_09_83/d
 

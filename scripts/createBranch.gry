@@ -24,6 +24,10 @@ import hudson.model.*
 import jenkins.model.Jenkins
 import hudson.model.ParametersAction
 import hudson.model.ListView
+import hudson.plugins.sectioned_view.SectionedView
+import hudson.plugins.sectioned_view.SectionedViewSection.Width
+import hudson.plugins.sectioned_view.SectionedViewSection.Positioning
+import hudson.plugins.sectioned_view.ListViewSection
 import javax.xml.transform.stream.StreamSource
 import java.io.FileInputStream;
 
@@ -40,12 +44,6 @@ def thr = Thread.currentThread()
 
 def build = thr?.executable
 
-def scm_view = "SCM"
-  
-def scm_view_obj = null
-
-def trunk_view = "trunk"
-
 src_branch = ""
 
 new_branch = ""
@@ -61,8 +59,6 @@ lrc_jobs = false
 if(build.getEnvironment(listener).get("LRC") == "true") {
     lrc_jobs = true
 }
-
-scm_view_obj = j.getView(scm_view)
 
 // Parameters from Jenkins job
 def parameters = build?.actions.find{ it instanceof ParametersAction }?.parameters
@@ -91,17 +87,44 @@ if(src_branch != "trunk") {
 println("[INFO] lrc_jobs: $lrc_jobs")
 println("[INFO] fsmr4_jobs: $fsmr4_jobs")
 
-src_branch_view_obj = scm_view_obj.getView(src_branch.toUpperCase())
 
-// Add branch view to SCM view.
-try {
+// Add branch list view to SCM view.
+def createScmView() {
+    def scm_view = "SCM"
+    def scm_view_obj = Jenkins.instance.getView(scm_view)
+    def new_branch_view_obj = null
+    src_branch_view_obj = scm_view_obj.getView(src_branch.toUpperCase())
     new_branch_view_obj = scm_view_obj.getView(new_branch)
-    println("[INFO] view $new_branch already exists.")
+    if(new_branch_view_obj) {
+        println("[INFO] view $new_branch already exists.")
+    }
+    else {
+        new_branch_view_obj = new ListView(new_branch, scm_view_obj)
+        scm_view_obj.addView(new_branch_view_obj)
+        println("[INFO] Added view $new_branch to $scm_view view")
+    }
+    return new_branch_view_obj
 }
-catch(NullPointerException e) {
-    new_branch_view_obj = new ListView(new_branch, scm_view_obj)
-    scm_view_obj.addView(new_branch_view_obj)
-    println("[INFO] Added view $new_branch to $scm_view view")
+
+// Create branch view - section view in the "Jenkins root".
+def createSectionView() {
+    def new_branch_section_view = new_branch[2..new_branch.length()-1]
+    def trunk_view = "trunk"
+    def new_branch_section_view_obj = Jenkins.instance.getView(new_branch_section_view)
+    def list_view_section_obj = null
+    if(new_branch_section_view_obj) {
+        println("[INFO] view $new_branch_section_view already exists.")
+    } else {
+        // Create a "section view" for the new branch
+        trunk_view_owner_obj = Jenkins.instance.getView(trunk_view).getOwner();
+        new_branch_section_view_obj = new SectionedView(new_branch_section_view)
+        trunk_view_owner_obj.addView(new_branch_section_view_obj)
+        println("[INFO] Created view $new_branch_section_view")
+    }
+    // Add a "list view section" to the "section view" of the new branch
+    list_view_section_obj = new ListViewSection("CI Builds and Testing ("+new_branch+")", Width.HALF, Positioning.LEFT)
+    //new_branch_section_view_obj.addSections(list_view_section_obj)
+    return list_view_section_obj
 }
 
 def processFileInplace(file, Closure processText) {
@@ -232,6 +255,16 @@ def copyPromotions(job, new_job) {
     }
 }
 
+///////////////////////////////////////////////////////////////////////
+//
+// HERE WE GO
+//
+///////////////////////////////////////////////////////////////////////
+
+new_branch_view_obj = createScmView()
+list_view_section_obj = createSectionView()
+
+// collect jobs to be created
 def jobs_list = []
 for(job in src_branch_view_obj.getItems()) {
     if(job.getName().find(src_branch) && !lrc_jobs) {
@@ -245,7 +278,7 @@ for(job in src_branch_view_obj.getItems()) {
 
 for(job in jobs_list) {
     //if(job.name == "LFS_CI_-_${src_branch}_-_Build") {
-    //if(job.name == "LFS_CI_-_${src_branch}_-_Test") {
+    if(job.name == "LFS_CI_-_${src_branch}_-_Test") {
     //if(job.name.find("LRC")) {
     //if(job.name.find("fsmr4")) {
     def new_job = copyJob(job)
@@ -257,8 +290,9 @@ for(job in jobs_list) {
     copyPromotions(job, new_job)
     reloadJobConfig(new_job, config_file)
     new_branch_view_obj.doAddJobToView(new_job.getName())
+    //list_view_section_obj.doAddJobToView(new_job.getName())
     println("[INFO] added job $new_job.name to view \"$new_branch_view_obj.name\"")
-    //}
+    }
 }
 
 // enable previosly disabled jobs
