@@ -242,6 +242,7 @@ makingTest_testLRC() {
     execute mkdir -p ${xmlOutputDirectory}
     mustExistDirectory ${xmlOutputDirectory}
 
+    # TODO: demx2fk3 2015-02-19 reserve target
     local testTargetName=lcpa914 # TODO $(getConfig LFS_CI_uc_test_testTargetName)
     mustHaveValue "${testTargetName}" "test target name"
 
@@ -256,22 +257,21 @@ makingTest_testLRC() {
 
     info "create testconfig for ${testSuiteDirectory}"
     execute make -C ${testSuiteDirectory} testconfig-overwrite \
-                TESTBUILD=${testBuildDirectory} \
+                TESTBUILD=${testBuildDirectory}                \
                 TESTTARGET=${testTargetName}
 
     execute make -C ${testSuiteDirectory_AHP} testconfig-overwrite \
-                TESTBUILD=${testBuildDirectory} \
+                TESTBUILD=${testBuildDirectory}                    \
                 TESTTARGET=${testTargetName}_ahp
 
     execute make -C ${testSuiteDirectory_SHP} testconfig-overwrite \
-                TESTBUILD=${testBuildDirectory} \
+                TESTBUILD=${testBuildDirectory}                    \
                 TESTTARGET=${testTargetName}_shp
 
-    # TODO: demx2fk3 2014-08-13 remove me
     info "powercycle the target to get it in a defined state"
     execute make -C ${testSuiteDirectory} powercycle
     info "waiting for prompt"
-    execute make -C ${testSuiteDirectory} waitprompt
+    execute make -C ${testSuiteDirectory} waitssh
     sleep 120 
 
     info "installing software"
@@ -330,9 +330,11 @@ makingTest_testLRC_subBoard() {
     local make="make -C ${testSuiteDirectory}"
 
     info "testing on target ${testTargetName} in testsuite ${testSuiteDirectory}"
-    execute   ${make} clean
-    execute   ${make} testconfig-overwrite TESTBUILD=${testBuildDirectory} TESTTARGET=${testTargetName}
-    runAndLog ${make} test-xmloutput       || LFS_CI_ERROR_CODE=0 # also true
+    execute    ${make} clean
+    execute    ${make} testconfig-overwrite TESTBUILD=${testBuildDirectory} TESTTARGET=${testTargetName}
+    execute    ${make} setup
+    execute    ${make} check
+    execute -i ${make} test-xmloutput       || LFS_CI_ERROR_CODE=0 # also true
 
     execute mkdir -p ${xmlReportDirectory}
     execute cp -rf ${testSuiteDirectory}/xml-reports/* ${xmlReportDirectory}/
@@ -355,6 +357,8 @@ makingTest_check() {
 
     info "waiting for ssh"
     execute ${make} waitssh
+
+    sleep 60
 
     info "running setup"
     execute ${make} setup
@@ -380,11 +384,8 @@ makingTest_install() {
     for i in $(seq 1 4) ; do
         info "install loop ${i}"
 
-        # please note: difference between execute and runAndLog.
-        # runAndLog will return the RC of the command. execute will fail, if command fails
-
         info "running install"
-        runAndLog ${make} install FORCE=yes || { sleep 20 ; continue ; }
+        execute -i ${make} install FORCE=yes || { sleep 20 ; continue ; }
         execute ${make} waitprompt
 
         info "rebooting target..."
@@ -396,11 +397,13 @@ makingTest_install() {
         info "wait for setup"
         execute ${make} waitssh
 
+        sleep 60
+
         info "running setup"
-        runAndLog ${make} setup || continue
+        execute -i ${make} setup || continue
 
         info "running check"
-        runAndLog ${make} check || continue
+        execute -i ${make} check || continue
 
         info "install was successful"
         break
