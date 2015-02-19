@@ -36,10 +36,10 @@ usecase_LFS_COLLECT_METRICS() {
         local jobName=$(cut -d: -f3 <<< ${line})
         local state=$(cut -d: -f2 <<< ${line})
 
-        [[ "${jobName}" =~ _Test$      ]] && continue
-        [[ "${jobName}" =~ makingTest$ ]] && continue
-        [[ "${jobName}" =~ target$     ]] && continue
-        [[ "${jobName}" =~ lcpa$       ]] && continue
+        [[ "${jobName}" =~ _Test$             ]] && continue
+        [[ "${jobName}" =~ makingTest$        ]] && continue
+        [[ "${jobName}" =~ target$            ]] && continue
+        [[ "${jobName}" =~ MakingTest_-_lcpa$ ]] && continue
 
         [[ "${state}"   = FAILURE   ]] && continue
         [[ "${state}"   = ABORTED   ]] && continue
