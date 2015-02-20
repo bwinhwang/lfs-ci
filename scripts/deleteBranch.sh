@@ -27,6 +27,7 @@ SHARE="/build/home/CI_LFS/Release_Candidates"
 BLD_SHARE="/build/home/SC_LFS/releases/bld"
 PKG_SHARE="/build/home/SC_LFS/pkgpool"
 SVN_OPTS="--non-interactive --trust-server-cert"
+ARCHIVE_BASE="/build/home/psulm/genericCleanup"
 
 
 #######################################################################
@@ -70,6 +71,10 @@ __checkParams() {
     echo $BRANCH | grep -e "^FB[0-9]\{4\}\|^MD[0-9]\{4\}\|TEST_ERWIN\|TESTERWIN" || { error "$BRANCH is not valid."; return 1; }
 }
 
+__checkOthers() {
+    [[ -d ${ARCHIVE_BASE} ]] || { error "archive dir ${ARCHIVE_BASE} does not exist."; return 1; }
+}
+
 __cmd() {
     if [ $DEBUG == true ]; then
         debug $@
@@ -94,17 +99,17 @@ __cmd() {
 #  @return  <none>
 moveBranchSvn() {
     svn ls ${SVN_OPTS} ${SVN_REPO}/${SVN_DIR}/${BRANCH} 2> /dev/null && {
-        __cmd svn ${SVN_OPTS} move -m "moved ${BRANCH} to obsolete" \
+        __cmd svn ${SVN_OPTS} move -m \"moved ${BRANCH} to obsolete\" \
             ${SVN_REPO}/${SVN_DIR}/${BRANCH} ${SVN_REPO}/${SVN_DIR}/obsolete;
     }
 
     svn ls ${SVN_OPTS} ${SVN_REPO}/${SVN_DIR}/${SVN_BLD_DIR}/locations-${BRANCH} 2> /dev/null && {
-        __cmd svn ${SVN_OPTS} move -m "moved locations-${BRANCH} to obsolete" \
+        __cmd svn ${SVN_OPTS} move -m \"moved locations-${BRANCH} to obsolete\" \
             ${SVN_REPO}/${SVN_DIR}/${SVN_BLD_DIR}/locations-${BRANCH} ${SVN_REPO}/${SVN_DIR}/${SVN_BLD_DIR}/obsolete;
     }
 
     svn ls ${SVN_OPTS} ${SVN_REPO}/${SVN_DIR}/${SVN_BLD_DIR}/locations-${BRANCH}_FSMR4 2> /dev/null && {
-        __cmd svn ${SVN_OPTS} move -m "moved locations-${BRANCH} FSMR4 to obsolete" \
+        __cmd svn ${SVN_OPTS} move -m \"moved locations-${BRANCH} FSMR4 to obsolete\" \
             ${SVN_REPO}/${SVN_DIR}/${SVN_BLD_DIR}/locations-${BRANCH}_FSMR4 ${SVN_REPO}/${SVN_DIR}/${SVN_BLD_DIR}/obsolete;
     }
     return 0
@@ -116,17 +121,17 @@ moveBranchSvn() {
 #  @return  <none>
 LRC_moveBranchSvn() {
     svn ${SVN_OPTS} ls ${SVN_REPO}/${SVN_DIR}/${SVN_BLD_DIR}/locations-LRC_${BRANCH} 2> /dev/null && {
-        __cmd svn ${SVN_OPTS} move -m "moved locations-LRC_${BRANCH} to obsolete" \
+        __cmd svn ${SVN_OPTS} move -m \"moved locations-LRC_${BRANCH} to obsolete\" \
             ${SVN_REPO}/${SVN_DIR}/${SVN_BLD_DIR}/locations-LRC_${BRANCH} ${SVN_REPO}/${SVN_DIR}/${SVN_BLD_DIR}/obsolete;
     }
     return 0
 }
 
-## @fn      deleteBranchShare()
+## @fn      archiveBranchShare()
 #  @brief   delete data for BRANCH on share
 #  @param   <none>
 #  @return  <none>
-deleteBranchShare() {
+archiveBranchShare() {
     local branchType=$(getBranchPart ${BRANCH} TYPE)
     local mm=$(getBranchPart ${BRANCH} MM)
     local yyyy=$(getBranchPart ${BRANCH} YYYY)
@@ -134,19 +139,20 @@ deleteBranchShare() {
     local dirPattern="${branchType}_PS_LFS_OS_${yyyy}_${mm}*"
     local dirsToDelete=$(find ${SHARE} -maxdepth 2 -type d -name "${dirPattern}" | grep -v ${keepRelease})
 
-    info "CLEAN $SHARE"
+    info "archive $SHARE"
     info "keep release: ${keepRelease}"
     for DIR in $dirsToDelete
     do
-        __cmd rm -rf $DIR
+        local archiveDir=$(echo $DIR | sed 's/\//_/g')
+        __cmd mv ${DIR} ${ARCHIVE_BASE}/${archiveDir}
     done
 }
 
-## @fn      deleteBranchBldShare()
+## @fn      archiveBranchBldShare()
 #  @brief   delete data for BRANCH on bld share
 #  @param   <none>
 #  @return  <none>
-deleteBranchBldShare() {
+archiveBranchBldShare() {
     local branchType=$(getBranchPart ${BRANCH} TYPE)
     local mm=$(getBranchPart ${BRANCH} MM)
     local yyyy=$(getBranchPart ${BRANCH} YYYY)
@@ -154,37 +160,39 @@ deleteBranchBldShare() {
     local dirPattern="${branchType}_PS_LFS_OS_${yyyy}_${mm}*"
     local dirsToDelete=$(find ${BLD_SHARE} -maxdepth 2 -type d -name "${dirPattern}" | grep -v ${keepRelease})
 
-    info "CLEAN $BLD_SHARE"
+    info "archive $BLD_SHARE"
     info "keep release: ${keepRelease}"
     for DIR in $dirsToDelete
     do
-        __cmd rm -rf $DIR
+        local archiveDir=$(echo $DIR | sed 's/\//_/g')
+        __cmd mv ${DIR} ${ARCHIVE_BASE}/${archiveDir}
     done
 }
 
-## @fn      deleteBranchPkgShare()
+## @fn      archiveBranchPkgShare()
 #  @brief   delete data for BRANCH on pkgpool share
 #  @param   <none>
 #  @return  <none>
-deleteBranchPkgShare() {
+archiveBranchPkgShare() {
     local branchType=$(getBranchPart ${BRANCH} TYPE)
     local mm=$(getBranchPart ${BRANCH} MM)
     local yyyy=$(getBranchPart ${BRANCH} YYYY)
     local dirPattern="${branchType}_PS_LFS_PKG_${yyyy}_${mm}*"
     local dirsToDelete=$(find ${PKG_SHARE} -maxdepth 1 -type d -name "${dirPattern}")
 
-    info "CLEAN $PKG_SHARE"
+    info "archive $PKG_SHARE"
     for DIR in $dirsToDelete
     do
-        __cmd rm -rf $DIR
+        local archiveDir=$(echo $DIR | sed 's/\//_/g')
+        __cmd mv ${DIR} ${ARCHIVE_BASE}/${archiveDir}
     done
 }
 
-## @fn      LRC_deleteBranchShare()
+## @fn      LRC_archiveBranchShare()
 #  @brief   delete date for BRANCH on share for LRC
 #  @param   <none>
 #  @return  <none>
-LRC_deleteBranchShare() {
+LRC_archiveBranchShare() {
     local branchType=$(getBranchPart ${BRANCH} TYPE)
     local mm=$(getBranchPart ${BRANCH} MM)
     local yyyy=$(getBranchPart ${BRANCH} YYYY)
@@ -192,19 +200,20 @@ LRC_deleteBranchShare() {
     local dirPattern="${branchType}_LRC_LCP_PS_LFS_OS_${yyyy}_${mm}*"
     local dirsToDelete=$(find ${SHARE} -maxdepth 2 -type d -name "${dirPattern}" | grep -v ${keepRelease})
 
-    info "CLEAN $SHARE LRC"
+    info "archive $SHARE LRC"
     info "keep LRC release: ${keepRelease}"
     for DIR in $dirsToDelete
     do
-        __cmd rm -rf $DIR
+        local archiveDir=$(echo $DIR | sed 's/\//_/g')
+        __cmd mv ${DIR} ${ARCHIVE_BASE}/${archiveDir}
     done
 }
 
-## @fn      LRC_deleteBranchBldShare()
+## @fn      LRC_archiveBranchBldShare()
 #  @brief   delete date for BRANCH on bld share for LRC
 #  @param   <none>
 #  @return  <none>
-LRC_deleteBranchBldShare() {
+LRC_archiveBranchBldShare() {
     local branchType=$(getBranchPart ${BRANCH} TYPE)
     local mm=$(getBranchPart ${BRANCH} MM)
     local yyyy=$(getBranchPart ${BRANCH} YYYY)
@@ -212,19 +221,21 @@ LRC_deleteBranchBldShare() {
     local dirPattern="${branchType}_LRC_LCP_PS_LFS_OS_${yyyy}_${mm}*"
     local dirsToDelete=$(find ${BLD_SHARE} -maxdepth 2 -type d -name "${dirPattern}" | grep -v ${keepRelease})
 
-    info "CLEAN $BLD_SHARE LRC"
+    info "archive $BLD_SHARE LRC"
     info "keep LRC release: ${keepRelease}"
     for DIR in $dirsToDelete
     do
-        __cmd rm -rf $DIR
+        local archiveDir=$(echo $DIR | sed 's/\//_/g')
+        __cmd mv ${DIR} ${ARCHIVE_BASE}/${archiveDir}
     done
 }
 
 __checkParams || { error "Params check failed."; exit 1; }
+__checkOthers || { error "Checking some stuff failed."; exit 1; }
 
 [[ ${MOVE_SVN} == true ]] && moveBranchSvn || info "Not moving $BRANCH in repo"
-[[ ${DELETE_SHARE} == true ]] && { deleteBranchShare; deleteBranchBldShare; } || info "Not deleting $BRANCH on share"
+[[ ${DELETE_SHARE} == true ]] && { archiveBranchShare; archiveBranchBldShare; } || info "Not archiving $BRANCH on share"
 
 [[ ${LRC_MOVE_SVN} == true ]] && LRC_moveBranchSvn || info "Not moving $BRANCH in repo for LRC"
-[[ ${LRC_DELETE_SHARE} == true ]] && { LRC_deleteBranchShare; LRC_deleteBranchBldShare; } || info "Not deleting $BRANCH on share for LRC"
+[[ ${LRC_DELETE_SHARE} == true ]] && { LRC_archiveBranchShare; LRC_archiveBranchBldShare; } || info "Not archiving $BRANCH on share for LRC"
 
