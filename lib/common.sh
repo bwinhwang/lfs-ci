@@ -106,6 +106,12 @@ mustHaveWritableWorkspace() {
 #  @param   <none>
 #  @return  <none>
 mustHaveCleanWorkspace() {
+
+    # we are using this function also as exit trap to cleanup the workspace on successfull build
+    if [[ $1 -gt 0 ]] ; then
+        return
+    fi
+    
     local workspace=$(getWorkspaceName) 
     mustHaveWorkspaceName
 
