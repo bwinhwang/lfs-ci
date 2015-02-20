@@ -43,9 +43,6 @@ ci_job_build() {
     info "upload results to artifakts share."
     createArtifactArchive
 
-    # cleanup the workspace
-    mustHaveCleanWorkspace
-
     info "build job finished."
     return
 }
