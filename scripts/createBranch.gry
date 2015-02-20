@@ -25,10 +25,8 @@ import jenkins.model.Jenkins
 import hudson.model.ParametersAction
 import hudson.model.ListView
 import hudson.plugins.sectioned_view.SectionedView
-import hudson.plugins.sectioned_view.SectionedViewSection.Width
-import hudson.plugins.sectioned_view.SectionedViewSection.Positioning
-import hudson.plugins.sectioned_view.ListViewSection
 import javax.xml.transform.stream.StreamSource
+import java.io.File
 import java.io.FileInputStream;
 
 
@@ -106,25 +104,20 @@ def createScmView() {
     return new_branch_view_obj
 }
 
-// Create branch view - section view in the "Jenkins root".
-def createSectionView() {
-    def new_branch_section_view = new_branch[2..new_branch.length()-1]
+// Create sectioned view
+def createSectionedView() {
+    def new_branch_section_view = new_branch[2..-1]
     def trunk_view = "trunk"
     def new_branch_section_view_obj = Jenkins.instance.getView(new_branch_section_view)
-    def list_view_section_obj = null
+    //def list_view_section_obj = null
     if(new_branch_section_view_obj) {
         println("[INFO] view $new_branch_section_view already exists.")
     } else {
-        // Create a "section view" for the new branch
         trunk_view_owner_obj = Jenkins.instance.getView(trunk_view).getOwner();
         new_branch_section_view_obj = new SectionedView(new_branch_section_view)
         trunk_view_owner_obj.addView(new_branch_section_view_obj)
         println("[INFO] Created view $new_branch_section_view")
     }
-    // Add a "list view section" to the "section view" of the new branch
-    list_view_section_obj = new ListViewSection("CI Builds and Testing ("+new_branch+")", Width.HALF, Positioning.LEFT)
-    //new_branch_section_view_obj.addSections(list_view_section_obj)
-    return list_view_section_obj
 }
 
 def processFileInplace(file, Closure processText) {
@@ -156,7 +149,7 @@ def copyJob(job) {
     if(new_name == "LFS_CI_-_${new_branch}_-_Build" || new_name == "LFS_CI_-_LRC_${new_branch}_-_Build") {
         new_job.setDescription("Comment: ${comment}")
         println("[INFO] set description for job \"$new_name\"")
-        // disable root jobs because not all jobs are created jet.
+        // disable build jobs because not all jobs are created jet.
         new_job.disable()
         println("[INFO] disabled job \"$new_job.name\"")
         jobs_to_enable.add(new_job)
@@ -255,6 +248,19 @@ def copyPromotions(job, new_job) {
     }
 }
 
+void configureSectionedView() {
+    def new_branch_section_view = new_branch[2..-1]
+    def jenkinsUrl = "http://ulegcpeag15:8090/view/${new_branch_section_view}/config.xml"
+    msv = new MySectionedView(new_branch)
+    config_xml = msv.getConfigXml("FSM")
+
+    def configurationFile = new File("config.xml")
+    configurationFile.write(config_xml)
+
+    def proc = ['curl', "-ueambrosc:c83b379dc70aa8aca6980666e11f941e", "${jenkinsUrl}", "--data-binary", "@config.xml"].execute()
+    proc.waitFor()
+}
+
 ///////////////////////////////////////////////////////////////////////
 //
 // HERE WE GO
@@ -262,7 +268,6 @@ def copyPromotions(job, new_job) {
 ///////////////////////////////////////////////////////////////////////
 
 new_branch_view_obj = createScmView()
-list_view_section_obj = createSectionView()
 
 // collect jobs to be created
 def jobs_list = []
@@ -290,7 +295,6 @@ for(job in jobs_list) {
     copyPromotions(job, new_job)
     reloadJobConfig(new_job, config_file)
     new_branch_view_obj.doAddJobToView(new_job.getName())
-    //list_view_section_obj.doAddJobToView(new_job.getName())
     println("[INFO] added job $new_job.name to view \"$new_branch_view_obj.name\"")
     }
 }
@@ -300,3 +304,91 @@ for(disabled_job in jobs_to_enable) {
     disabled_job.enable()
     println("[INFO] enabled job \"$disabled_job.name\"")
 }
+
+createSectionedView()
+configureSectionedView()
+
+
+///////////////////////////////////////////////////////////////////////
+//
+// CLASSES
+//
+///////////////////////////////////////////////////////////////////////
+
+class MySectionedView {
+
+    def branch
+    def regExLfsCi
+    def regExLfsProd
+    def nameSectionTesting
+    def nameSectionReleasing
+
+    MySectionedView(branch, programm) {
+        this.branch = branch
+        this.programm = programm
+        this.regExLfsCi = "LFS_CI_-_${this.branch}.*"
+        this.regExLfsProd = "LFS_Prod_-_${this.branch}_-_.*"
+        this.nameSectionTesting = "CI Builds and Testing (${this.branch})"
+        this.nameSectionReleasing = "Releasing (${this.branch})"
+
+        this.branchSectionView = this.branch[2..-1]
+        this.listWidth = "HALF"
+        this.listAlignment = "LEFT"
+        if(this.programm == "LRC")
+            this.listAlignment = "RIGHT"
+
+        // [LIST_VIEW_SECTIONS] -> get replaced by XML string for list-view-sections
+        this.sectionedViewXML = """ 
+            <hudson.plugins.sectioned__view.SectionedView plugin="sectioned-view@1.18">
+              <name>${this.branchSectionView}</name>
+              <filterExecutors>false</filterExecutors>
+              <filterQueue>false</filterQueue>
+              <properties class="hudson.model.View\$PropertyList"/>
+              <sections>
+                [LIST_VIEW_SECTIONS]
+              </sections>
+            </hudson.plugins.sectioned__view.SectionedView>
+        """
+    }   
+
+    def createListViewSectionsXml() {
+        return """
+            <hudson.plugins.sectioned__view.ListViewSection>
+              <jobNames><comparator class="hudson.util.CaseInsensitiveComparator"/></jobNames>
+              <jobFilters/>
+              <name>${this.nameSectionTesting}</name>
+              <includeRegex>${this.regExLfsCi}</includeRegex>
+              <width>${listWidth}</width>
+              <alignment>${this.listAlignment}</alignment>
+              <columns>
+                <hudson.views.StatusColumn/>
+                <hudson.views.WeatherColumn/>
+                <hudson.views.JobColumn/>
+                <hudson.views.LastSuccessColumn/>
+                <hudson.views.LastFailureColumn/>
+                <hudson.views.LastDurationColumn/>
+                <hudson.views.BuildButtonColumn/>
+              </columns>
+            </hudson.plugins.sectioned__view.ListViewSection>
+            <hudson.plugins.sectioned__view.ListViewSection>
+              <jobNames><comparator class="hudson.util.CaseInsensitiveComparator"/></jobNames>
+              <jobFilters/>
+              <name>${this.nameSectionReleasing}</name>
+              <includeRegex>${this.regExLfsProd}</includeRegex>
+              <width>${listWidth}</width>
+              <alignment>${this.listAlignment}</alignment>
+              <columns>
+                <hudson.views.StatusColumn/>
+                <hudson.views.WeatherColumn/>
+                <hudson.views.JobColumn/>
+                <hudson.views.LastSuccessColumn/><hudson.views.LastFailureColumn/><hudson.views.LastDurationColumn/><hudson.views.BuildButtonColumn/></columns>
+            </hudson.plugins.sectioned__view.ListViewSection>"""
+    }
+
+    def getCurrentListViewsSections() {
+        // Return list of list-views already configured.
+        // eg. return ["FB","MD"]
+        return []
+    }
+}
+

@@ -41,7 +41,7 @@ actionCompare() {
         exit 0
     fi
 
-    info "upstream build ${upstreamProjectName}#${upstreamBuildNumber} was already tested"
+    info "no pronto found between ${oldUpstreamProjectName}#${oldUpstreamBuildNumber} and ${upstreamProjectName}#${upstreamBuildNumber} => No build."
     exit 1
 }
 

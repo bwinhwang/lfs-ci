@@ -36,10 +36,10 @@ usecase_LFS_COLLECT_METRICS() {
         local jobName=$(cut -d: -f3 <<< ${line})
         local state=$(cut -d: -f2 <<< ${line})
 
-        [[ "${jobName}" =~ _Test$      ]] && continue
-        [[ "${jobName}" =~ makingTest$ ]] && continue
-        [[ "${jobName}" =~ target$     ]] && continue
-        [[ "${jobName}" =~ lcpa$       ]] && continue
+        [[ "${jobName}" =~ _Test$             ]] && continue
+        [[ "${jobName}" =~ makingTest$        ]] && continue
+        [[ "${jobName}" =~ target$            ]] && continue
+        [[ "${jobName}" =~ MakingTest_-_lcpa$ ]] && continue
 
         [[ "${state}"   = FAILURE   ]] && continue
         [[ "${state}"   = ABORTED   ]] && continue
@@ -167,10 +167,10 @@ storeMetricsFromArtifacts() {
     debug "copy artifacts from ${jobName} ${buildNumber}..."
     copyArtifactsToWorkspace ${jobName} ${buildNumber} "test" 
 
-    [[ -d ${workspace}/bld-test-artifcats/         ]] || return
-    [[ -d ${workspace}/bld-test-artifcats/results/ ]] || return
+    [[ -d ${workspace}/bld/bld-test-artifacts/         ]] || return
+    [[ -d ${workspace}/bld/bld-test-artifacts/results/ ]] || return
 
-    for file in ${workspace}/bld-test-artifcats/results/*-metrics-database-values.txt ; do
+    for file in ${workspace}/bld/bld-test-artifacts/results/*-metrics-database-values.txt ; do
         [[ -e ${file} ]] || continue
         debug "adding values from ${file} to metrics database"
 

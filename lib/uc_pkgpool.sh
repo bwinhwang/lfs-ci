@@ -72,7 +72,7 @@ usecase_PKGPOOL_BUILD() {
     mkdir -p ${workspace}/bld/bld-pkgpool-release/
     echo ${oldReleaseTag} > ${workspace}/bld/bld-pkgpool-release/oldLabel
     echo ${releaseTag}    > ${workspace}/bld/bld-pkgpool-release/label
-    execute sed -ne 's|^src [^ ]* \(.*\)$|PS_LFS_PKG = \1|p' ${workspace}/pool/*.meta |\
+    execute -n sed -ne 's|^src [^ ]* \(.*\)$|PS_LFS_PKG = \1|p' ${workspace}/pool/*.meta |\
         sort -u > ${workspace}/bld/bld-pkgpool-release/forReleaseNote.txt
 
     rawDebug ${workspace}/bld/bld-pkgpool-release/forReleaseNote.txt
@@ -107,7 +107,20 @@ usecase_PKGPOOL_RELEASE() {
     local workspace=$(getWorkspaceName)
     mustHaveCleanWorkspace
 
+    # location and product name is needed in sendReleaseNote
+    local productName=$(getProductNameFromJobName)
+    mustHaveValue "${productName}" "product name"
+    local location=$(getLocationName)
+    mustHaveValue "${location}" "location"
+
     copyArtifactsToWorkspace ${UPSTREAM_PROJECT} ${UPSTREAM_BUILD} "pkgpool"
+    local lastSuccessfulBuildDirectory=$(getBuildDirectoryOnMaster ${JOB_NAME} lastSuccessfulBuild)
+    if runOnMaster test -e ${lastSuccessfulBuildDirectory}/forReleaseNote.txt ; then
+        copyFileFromBuildDirectoryToWorkspace ${JOB_NAME} lastSuccessfulBuild forReleaseNote.txt
+        execute mv ${WORKSPACE}/forReleaseNote.txt ${workspace}/forReleaseNote.txt.old
+    else
+        execute touch ${workspace}/forReleaseNote.txt.old
+    fi
 
     local label=$(cat ${workspace}/bld/bld-pkgpool-release/label)
     mustHaveValue "${label}" "label"
@@ -118,6 +131,8 @@ usecase_PKGPOOL_RELEASE() {
     mustHaveValue "${oldLabel}" "old label"
 
     # TODO: demx2fk3 2015-02-05 baselines list missing
+    echo "<log/>" > ${workspace}/changelog.xml
+    cd ${workspace}
     execute -n ${LFS_CI_ROOT}/bin/getReleaseNoteXML \
                 -t ${label}                         \
                 -o ${oldLabel}                      \
@@ -127,10 +142,24 @@ usecase_PKGPOOL_RELEASE() {
 
     mustBeValidXmlReleaseNote ${workspace}/releasenote.xml
 
-    createReleaseInWorkflowTool ${label} ${workspace}/releasenote.xml
-    uploadToWorkflowTool        ${label} ${workspace}/releasenote.xml
+    local releaseNoteTxt=${workspace}/releasenote.txt
+    execute -i -l ${releaseNoteTxt} diff -y -W72 -t --suppress-common-lines \
+        ${workspace}/forReleaseNote.txt.old \
+        ${workspace}/bld/bld-pkgpool-release/forReleaseNote.txt
 
-    copyFileToArtifactDirectory releasenote.xml
+    local canSendReleaseNote=$(getConfig LFS_CI_uc_release_can_send_release_note)
+    if [[ ${canSendReleaseNote} ]] ; then
+        # createReleaseInWorkflowTool ${label} ${workspace}/releasenote.xml
+        # uploadToWorkflowTool        ${label} ${workspace}/releasenote.xml
+
+        execute ${LFS_CI_ROOT}/bin/sendReleaseNote  -r ${releaseNoteTxt}          \
+                                                    -t ${label}                   \
+                                                    -f ${LFS_CI_ROOT}/etc/file.cfg
+    fi
+
+    copyFileToArtifactDirectory ${workspace}/releasenote.xml
+    copyFileToArtifactDirectory ${workspace}/releasenote.txt
+    copyFileFromBuildDirectoryToWorkspace ${workspace}/bld/bld-pkgpool-release/forReleaseNote.txt
 
     local artifactsPathOnShare=$(getConfig artifactesShare)/${JOB_NAME}/${BUILD_NUMBER}
     linkFileToArtifactsDirectory ${artifactsPathOnShare}

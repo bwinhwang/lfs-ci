@@ -45,9 +45,9 @@ LFS_CI_git_version=$(cd ${LFS_CI_ROOT} ; git describe)
 debug "used lfs ci git version ${LFS_CI_git_version}"
 
 # we do not want to have modifications in ${LFS_CI_ROOT}
-#LFS_CI_git_local_modifications=$(cd ${LFS_CI_ROOT} ; git status --short | wc -l)
+LFS_CI_git_local_modifications=$(cd ${LFS_CI_ROOT} ; git status --short | wc -l)
 if [[ ${LFS_CI_git_local_modifications} -gt 0 ]] ; then
-    fatal "the are local modifications in ${LFS_CI_ROOT}, which are not commited. "\
+    info "the are local modifications in ${LFS_CI_ROOT}, which are not commited. "\
           "CI is rejecting such kind of working mode and refused to work until the modifications are commited."
 fi
 
@@ -93,7 +93,7 @@ case "${JOB_NAME}" in
     Test-lcpa914)  ${LFS_CI_ROOT}/scripts/CLRC02_Test_Release_Candidate_LRC || exit 1 ;;
     Test-lcpa1093) ${LFS_CI_ROOT}/scripts/CLRC02_Test_Release_Candidate_LRC || exit 1 ;;
     Test-lcpa1105) ${LFS_CI_ROOT}/scripts/CLRC02_Test_Release_Candidate_LRC || exit 1 ;;
-    Test-lcpa1239) ${LFS_CI_ROOT}/scripts/CLRC02_Test_Release_Candidate_LRC || exit 1 ;;
+    # Test-lcpa1239) ${LFS_CI_ROOT}/scripts/CLRC02_Test_Release_Candidate_LRC || exit 1 ;;
     
     *_CI_*_Build) 
         source ${LFS_CI_ROOT}/lib/uc_build.sh

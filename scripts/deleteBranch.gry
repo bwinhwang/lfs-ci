@@ -80,7 +80,7 @@ def deleteScmView() {
 
 // Delete the branchs view
 def deleteView() {
-    def branch_view = branch[2..branch.length()-1]
+    def branch_view = branch[2..-1]
     if(debug) {
         println("[DEBUG] delete view: $branch_view")
     } else {
