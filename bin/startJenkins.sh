@@ -45,7 +45,16 @@ startJenkinsMasterServer() {
 
 #            -XX:-UseGCOverheadLimit                           \
     cd ${JENKINS_HOME}
-    exec ${java}                                              \
+    #exec ${java}                                              \
+    #        -XX:PermSize=512M -XX:MaxPermSize=4096M -Xmn128M -Xms1024M -Xmx4096M \
+    #        -jar ${jenkins_war}                               \
+    #        --httpsPort=${jenkinsMasterServerHttpsPort}       \
+    #        --httpPort=${jenkinsMasterServerHttpPort}         \
+    #        --ajp13Port=-1                                    \
+    #        --httpsCertificate=${jenkinsMasterSslCertificate} \
+    #        --httpsPrivateKey=${jenkinsMasterSslPrivateKey}   \
+    #        > ${JENKINS_ROOT}/log/jenkins.log 2>&1 
+    nohup ${java}                                              \
             -XX:PermSize=512M -XX:MaxPermSize=4096M -Xmn128M -Xms1024M -Xmx4096M \
             -jar ${jenkins_war}                               \
             --httpsPort=${jenkinsMasterServerHttpsPort}       \
@@ -53,7 +62,7 @@ startJenkinsMasterServer() {
             --ajp13Port=-1                                    \
             --httpsCertificate=${jenkinsMasterSslCertificate} \
             --httpsPrivateKey=${jenkinsMasterSslPrivateKey}   \
-            > ${JENKINS_ROOT}/log/jenkins.log 2>&1 
+            > ${JENKINS_ROOT}/log/jenkins.log 2>&1 &
 }
 
 export LFS_CI_ROOT=/ps/lfs/ci/
