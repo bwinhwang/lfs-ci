@@ -243,8 +243,6 @@ if( not $opt_name or not $opt_action ) {
     exit 0
 }
 
-print "ok\n";
-exit 0;
 if( $opt_action eq "new_test_result" ) {
     my $handler = Handler::Database->new();
 
