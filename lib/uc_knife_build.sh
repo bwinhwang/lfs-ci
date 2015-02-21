@@ -212,6 +212,8 @@ EOF
 #  @param   <none>
 #  @return  <none>
 usecase_LFS_KNIFE_PACKAGE() {
+    requiredParameters LFS_CI_ROOT WORKSPACE
+
     local workspace=$(getWorkspaceName)
     mustHaveWorkspaceName
 
@@ -235,26 +237,18 @@ usecase_LFS_KNIFE_PACKAGE() {
     execute tar -cv \
                 --transform='s:^\./:os/:' \
                 -C ${workspace}/upload/ \
-                -f ${workspace}/lfs-knife.tar \
+                -f ${workspace}/lfs-knife_${label}.tar \
                 .
 
-#    info "adding sdk to tarball..."
-#    for sdk in $(getUsedSdkVersions) ; do
-#        execute tar -rv \
-#                    --transform='s:^\./:sdk3/:' \
-#                    -C /build/home/CI_LFS/SDKs/${sdk}/ \
-#                    -f ${workspace}/lfs-knife.tar \
-#                    .
-#    done
     info "compressing lfs-knife.tar..."
-    execute gzip ${workspace}/lfs-knife.tar
+    execute ${LFS_CI_ROOT}/bin/pigz ${workspace}/lfs-knife_${label}.tar
 
     info "upload knife to storage"
-    uploadKnifeToStorage
+    uploadKnifeToStorage ${workspace}/lfs-knife_${label}.tar.gz 
 
     local readmeFile=${WORKSPACE}/.00_README_knife_result.txt
     cat > ${readmeFile} <<EOF
-KNIFE LOCATION
+eslinn10.emea.nsn-net.net:/vol/eslinn10_bin/build/build/home/lfs_knives/${workspace}/lfs-knife_${label}.tar.gz
 EOF
 
     copyFileToArtifactDirectory $(basename ${readmeFile})
@@ -274,17 +268,14 @@ EOF
 #  @param   <none>
 #  @return  <none>
 uploadKnifeToStorage() {
-    local workspace=$(getWorkspaceName)
-    mustHaveWorkspaceName
-
-    knifeFile=${workspace}/lfs-knife.tar.gz
+    knifeFile=${1}
     mustExistFile ${knifeFile}
 
-    warning "upload is not implemented"
-    # execute ncftpput -m -C mailarchiv.emea.nsn-net.net ${knifeFile} /public/BernhardMinks/knife
+    execute rsync -avrPe ssh ${knifeFile} lfs_share_sync_host_espoo2:/build/home/lfs_knives/
 
     return
 }
+
 ## @fn      applyKnifePatches()
 #  @brief   apply the patches from the knife input to the workspace
 #  @param   <none>

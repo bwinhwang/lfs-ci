@@ -25,6 +25,9 @@ oneTimeSetUp() {
     mustHaveNextCiLabelName() {
         mockedCommand "mustHaveNextCiLabelName $@"
     }
+    getNextCiLabelName() {
+        echo KNIFE_LABEL
+    }
     uploadKnifeToStorage() {
         mockedCommand "uploadKnifeToStorage $@"
     }
@@ -65,11 +68,11 @@ test1() {
 cat <<EOF > ${expect}
 ci_job_package 
 mustHaveNextCiLabelName 
-execute tar -cv --transform=s:^\./:os/: -C ${WORKSPACE}/workspace/upload/ -f ${WORKSPACE}/workspace/lfs-knife.tar .
-execute gzip ${WORKSPACE}/workspace/lfs-knife.tar
-uploadKnifeToStorage 
+execute tar -cv --transform=s:^\./:os/: -C ${WORKSPACE}/workspace/upload/ -f ${WORKSPACE}/workspace/lfs-knife_KNIFE_LABEL.tar .
+execute ${LFS_CI_ROOT}/bin/pigz ${WORKSPACE}/workspace/lfs-knife_KNIFE_LABEL.tar
+uploadKnifeToStorage ${WORKSPACE}/workspace/lfs-knife_KNIFE_LABEL.tar.gz
 copyFileToArtifactDirectory .00_README_knife_result.txt
-execute ${LFS_CI_ROOT}/bin/sendReleaseNote -r ${WORKSPACE}/.00_README_knife_result.txt -t -n -f ${LFS_CI_ROOT}/etc/file.cfg
+execute ${LFS_CI_ROOT}/bin/sendReleaseNote -r ${WORKSPACE}/.00_README_knife_result.txt -t KNIFE_LABEL -n -f ${LFS_CI_ROOT}/etc/file.cfg
 EOF
     assertExecutedCommands ${expect}
 

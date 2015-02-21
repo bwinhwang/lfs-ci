@@ -37,13 +37,13 @@ test1() {
     export UPSTREAM_BUILD=123
     export JOB_NAME=LFS_KNIFE_-_knife_-_Build
 
-    assertTrue "uploadKnifeToStorage"
+    assertTrue "uploadKnifeToStorage /path/to/file"
 
     local expect=$(createTempFile)
 cat <<EOF > ${expect}
-mustExistFile ${WORKSPACE}/workspace/lfs-knife.tar.gz
+mustExistFile /path/to/file
+execute rsync -avrPe ssh /path/to/file lfs_share_sync_host_espoo2:/build/home/lfs_knives/
 EOF
-# execute ncftpput -m -C mailarchiv.emea.nsn-net.net ${WORKSPACE}/workspace/lfs-knife.tar.gz /public/BernhardMinks/knife
     assertEquals "$(cat ${expect})" "$(cat ${UT_MOCKED_COMMANDS})"
 
     return
