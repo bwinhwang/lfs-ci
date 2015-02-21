@@ -20,8 +20,6 @@ ci_job_build() {
     local subTaskName=$(getSubTaskNameFromJobName)
     mustHaveValue "${subTaskName}"
 
-    # exit functions are executed in reverse order
-    exit_add mustHaveCleanWorkspace
     # for the metrics database, we are installing a own exit handler to record the end of this job
     exit_add _recordBuildEndEvent
 
