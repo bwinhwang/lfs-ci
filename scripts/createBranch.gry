@@ -57,6 +57,7 @@ lrc_jobs = false
 if(build.getEnvironment(listener).get("LRC") == "true") {
     lrc_jobs = true
 }
+jenkinsUrl = build.getEnvironment(listener).get("JENKINS_URL")
 
 // Parameters from Jenkins job
 def parameters = build?.actions.find{ it instanceof ParametersAction }?.parameters
@@ -91,6 +92,7 @@ def createScmView() {
     def scm_view = "SCM"
     def scm_view_obj = Jenkins.instance.getView(scm_view)
     def new_branch_view_obj = null
+
     src_branch_view_obj = scm_view_obj.getView(src_branch.toUpperCase())
     new_branch_view_obj = scm_view_obj.getView(new_branch)
     if(new_branch_view_obj) {
@@ -248,19 +250,6 @@ def copyPromotions(job, new_job) {
     }
 }
 
-void configureSectionedView() {
-    def new_branch_section_view = new_branch[2..-1]
-    def jenkinsUrl = "http://ulegcpeag15:8090/view/${new_branch_section_view}/config.xml"
-    msv = new MySectionedView(new_branch)
-    config_xml = msv.getConfigXml("FSM")
-
-    def configurationFile = new File("config.xml")
-    configurationFile.write(config_xml)
-
-    def proc = ['curl', "-ueambrosc:c83b379dc70aa8aca6980666e11f941e", "${jenkinsUrl}", "--data-binary", "@config.xml"].execute()
-    proc.waitFor()
-}
-
 ///////////////////////////////////////////////////////////////////////
 //
 // HERE WE GO
@@ -283,7 +272,7 @@ for(job in src_branch_view_obj.getItems()) {
 
 for(job in jobs_list) {
     //if(job.name == "LFS_CI_-_${src_branch}_-_Build") {
-    if(job.name == "LFS_CI_-_${src_branch}_-_Test") {
+    if(job.name == "LFS_CI_-_${src_branch}_-_Test" || job.name == "LFS_Prod_-_trunk_-_Releasing_-_summary" || job.name == "LFS_CI_-_LRC_-_Build" || job.name == "LFS_Prod_-_LRC_-_Releasing_-_summary") {
     //if(job.name.find("LRC")) {
     //if(job.name.find("fsmr4")) {
     def new_job = copyJob(job)
@@ -306,7 +295,8 @@ for(disabled_job in jobs_to_enable) {
 }
 
 createSectionedView()
-configureSectionedView()
+new MySectionedView(new_branch, lrc_jobs, jenkinsUrl).addListViewSections()
+
 
 
 ///////////////////////////////////////////////////////////////////////
@@ -318,38 +308,44 @@ configureSectionedView()
 class MySectionedView {
 
     def branch
+    def lrc
     def regExLfsCi
     def regExLfsProd
     def nameSectionTesting
     def nameSectionReleasing
+    def branchSectionedView
+    def listWidth
+    def listAlignment
+    def jenkinsUrl
 
-    MySectionedView(branch, programm) {
+    MySectionedView(branch, lrc, jenkinsUrl) {
         this.branch = branch
-        this.programm = programm
+        this.lrc = lrc
+        this.jenkinsUrl = jenkinsUrl
+
         this.regExLfsCi = "LFS_CI_-_${this.branch}.*"
         this.regExLfsProd = "LFS_Prod_-_${this.branch}_-_.*"
         this.nameSectionTesting = "CI Builds and Testing (${this.branch})"
         this.nameSectionReleasing = "Releasing (${this.branch})"
 
-        this.branchSectionView = this.branch[2..-1]
+        this.branchSectionedView = this.branch[2..-1]
         this.listWidth = "HALF"
         this.listAlignment = "LEFT"
-        if(this.programm == "LRC")
+        if(this.lrc) {
             this.listAlignment = "RIGHT"
-
-        // [LIST_VIEW_SECTIONS] -> get replaced by XML string for list-view-sections
-        this.sectionedViewXML = """ 
-            <hudson.plugins.sectioned__view.SectionedView plugin="sectioned-view@1.18">
-              <name>${this.branchSectionView}</name>
-              <filterExecutors>false</filterExecutors>
-              <filterQueue>false</filterQueue>
-              <properties class="hudson.model.View\$PropertyList"/>
-              <sections>
-                [LIST_VIEW_SECTIONS]
-              </sections>
-            </hudson.plugins.sectioned__view.SectionedView>
-        """
+            this.regExLfsCi = "LFS_CI_-_LRC_${this.branch}.*"
+            this.regExLfsProd = "LFS_Prod_-_LRC_${this.branch}_-_.*"
+            this.nameSectionTesting = "CI Builds and Testing (LRC_${this.branch})"
+            this.nameSectionReleasing = "Releasing (LRC_${this.branch})"
+        }
     }   
+
+    def getCurrentXml() {
+        def requestUrl = "${this.jenkinsUrl}view/${this.branchSectionedView}/config.xml"
+        def proc = ['curl', "${requestUrl}"].execute()
+        def xmlString = proc.text
+        return xmlString
+    }
 
     def createListViewSectionsXml() {
         return """
@@ -385,10 +381,43 @@ class MySectionedView {
             </hudson.plugins.sectioned__view.ListViewSection>"""
     }
 
-    def getCurrentListViewsSections() {
-        // Return list of list-views already configured.
-        // eg. return ["FB","MD"]
-        return []
+    def hasListViewSection() {
+        if(this.getCurrentXml().find("<sections/>")) {
+            return false
+        } else {
+            return true
+        }
+    }
+
+    def addListViewSections() {
+        def requestUrl = "${this.jenkinsUrl}view/${this.branchSectionedView}/config.xml"
+        def currentXml = this.getCurrentXml()
+        def configurationFile = null
+        def newConfigXml = null
+        def proc = null
+
+        if(this.lrc) {
+            if(!this.hasListViewSection()) {
+                println("view has not list view sections")
+                newConfigXml = currentXml.replaceFirst("<sections/>", "<sections>\n"+this.createListViewSectionsXml()+"\n</sections>")
+            } else {
+                println("view already has list view sections")
+                newConfigXml = currentXml.replaceFirst("</sections>", this.createListViewSectionsXml()+"\n</sections>")
+            }
+        } else {
+            if(!this.hasListViewSection()) {
+                println("view has not list view sections")
+                newConfigXml = currentXml.replaceFirst("<sections/>", "<sections>\n"+this.createListViewSectionsXml()+"\n</sections>")
+            } else {
+                println("view already has list view sections")
+                newConfigXml = currentXml.replaceFirst("<sections>", "<sections>\n"+this.createListViewSectionsXml())
+            }
+        }
+
+        configurationFile = new File("config.xml")
+        configurationFile.write(newConfigXml)
+        proc = ['curl', "-ueambrosc:c83b379dc70aa8aca6980666e11f941e", "${requestUrl}", "--data-binary", "@config.xml"].execute()
+        proc.waitFor()
     }
 }
 
