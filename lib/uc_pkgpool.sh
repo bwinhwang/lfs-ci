@@ -152,7 +152,7 @@ usecase_PKGPOOL_RELEASE() {
         # createReleaseInWorkflowTool ${label} ${workspace}/releasenote.xml
         # uploadToWorkflowTool        ${label} ${workspace}/releasenote.xml
 
-        export productName=$(getProductNameFromJobName)
+        export productName=PKGPOOL
         execute ${LFS_CI_ROOT}/bin/sendReleaseNote  -r ${releaseNoteTxt}          \
                                                     -t ${label}                   \
                                                     -f ${LFS_CI_ROOT}/etc/file.cfg
