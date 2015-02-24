@@ -75,20 +75,23 @@ for(slave in jenkins.slaves) {
     for(d in subdirs) {
         // Remove any suffixes from the dir name
         def dirName = d.name.split("@")[0]
+        if(dirName in jobNames) {
+            println("[DEBUG] would delete job directory $d (dryRun)")
+        }
         // Find matching job
-        def jobMatch = jobNames.find { it == dirName }
-        if (jobMatch != null) {
-            println(" KEEP: $d --> job:$jobMatch")
-        }
-        else {
-            if( debug == true ) {
-                println(" [DEBUG] DELETE job: $d (dryRun)")
-            }
-            else {
-                //d.deleteRecursive()
-                println(" [INFO] DELETED job: $d")
-            }
-        }
+//        def jobMatch = jobNames.find { it == dirName }
+//        if (jobMatch != null) {
+//            println(" KEEP: $d --> job:$jobMatch")
+//        }
+//        else {
+//            if( debug == true ) {
+//                println(" [DEBUG] DELETE job: $d (dryRun)")
+//            }
+//            else {
+//                //d.deleteRecursive()
+//                println(" [INFO] DELETED job: $d")
+//            }
+//        }
     }
 }
 
