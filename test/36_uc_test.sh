@@ -22,6 +22,10 @@ oneTimeSetUp() {
     }
     copyArtifactsToWorkspace() {
         mockedCommand "copyArtifactsToWorkspace $@"
+        if [[ ${UT_NO_ARTIFACTS} ]] ; then
+            mkdir -p ${WORKSPACE}/workspace/bld/bld-fsmci-summary
+            echo PS_LFS_OS_2015_02_1234 > ${WORKSPACE}/workspace/bld/bld-fsmci-summary/label
+        fi
     }
     mustBeValidXmlReleaseNote() {
         mockedCommand "mustBeValidXmlReleaseNote $@"
@@ -60,8 +64,15 @@ oneTimeSetUp() {
         echo LFS_CI_-_trunk_-_Build
     }
     getBuildBuildNumberFromUpstreamProject() {
-        mockedCommand "getBuildJobNameFromUpstreamProject $@"
+        mockedCommand "getBuildBuildNumberFromUpstreamProject $@"
         echo 1234
+    }
+    getConfig() {
+        case $1 in 
+            LFS_CI_UC_package_internal_link)      echo ${UT_ARTIFACTS_SHARE} ;;
+            LFS_CI_UC_package_copy_to_share_name) echo ${UT_ARTIFACTS_SHARE} ;;
+            LFS_CI_UC_test_required_artifacts)    echo fsmci                 ;;
+        esac
     }
 
     return
@@ -79,31 +90,95 @@ tearDown() {
 
 test1() {
     export WORKSPACE=$(createTempDirectory)
-    export JOB_NAME=PKGPOOL_PROD_-_trunk_-_Release
+    export JOB_NAME=LFS_CI_-_trunk_-_Test
     export BUILD_NUMBER=1234
-    export UPSTREAM_PROJECT=PKGPOOL_CI_-_trunk_-_Test
+    export UPSTREAM_PROJECT=LFS_CI_-_trunk_-_Package_-_package
     export UPSTREAM_BUILD=1234
+    export UT_NO_ARTIFACTS=
 
-    mkdir -p ${WORKSPACE}/workspace/bld/bld-pkgpool-release/
-    echo LABEL > ${WORKSPACE}/workspace/bld/bld-pkgpool-release/label
-    echo OLD_LABEL > ${WORKSPACE}/workspace/bld/bld-pkgpool-release/oldLabel
+    export UT_ARTIFACTS_SHARE=$(createTempDirectory)
+    mkdir -p ${UT_ARTIFACTS_SHARE}/PS_LFS_OS_2015_02_1234
+    cd ${UT_ARTIFACTS_SHARE} 
+    ln -sf PS_LFS_OS_2015_02_1234 build_1234
+    cd - 1>/dev/null
 
     assertTrue "ci_job_test"
 
     local expect=$(createTempFile)
     cat <<EOF > ${expect}
 mustHaveCleanWorkspace
-getBuildJobNameFromUpstreamProject PKGPOOL_CI_-_trunk_-_Test 1234
-getBuildJobNameFromUpstreamProject PKGPOOL_CI_-_trunk_-_Test 1234
+getBuildJobNameFromUpstreamProject LFS_CI_-_trunk_-_Package_-_package 1234
+getBuildBuildNumberFromUpstreamProject LFS_CI_-_trunk_-_Package_-_package 1234
 copyArtifactsToWorkspace LFS_CI_-_trunk_-_Build 1234 fsmci
-copyFileFromBuildDirectoryToWorkspace PKGPOOL_CI_-_trunk_-_Test 1234 upstream
-copyFileFromBuildDirectoryToWorkspace PKGPOOL_CI_-_trunk_-_Test 1234 properties
-execute cp ${LFS_CI_ROOT}/etc/junit_dummytest.xml ${WORKSPACE}
-setBuildDescription PKGPOOL_PROD_-_trunk_-_Release 1234 
+copyFileFromWorkspaceToBuildDirectory LFS_CI_-_trunk_-_Test 1234 ${WORKSPACE}/workspace/upstream
+copyFileFromWorkspaceToBuildDirectory LFS_CI_-_trunk_-_Test 1234 ${WORKSPACE}/workspace/properties
+setBuildDescription LFS_CI_-_trunk_-_Test 1234 PS_LFS_OS_2015_02_1234
 createArtifactArchive 
 EOF
     assertExecutedCommands ${expect}
 
+    return
+}
+
+test2() {
+    export WORKSPACE=$(createTempDirectory)
+    export JOB_NAME=LFS_CI_-_trunk_-_Test
+    export BUILD_NUMBER=1234
+    export UPSTREAM_PROJECT=LFS_CI_-_trunk_-_Package_-_package
+    export UPSTREAM_BUILD=1234
+    export UT_NO_ARTIFACTS=1
+
+    export UT_ARTIFACTS_SHARE=$(createTempDirectory)
+    mkdir -p ${UT_ARTIFACTS_SHARE}/PS_LFS_OS_2015_02_1234
+    cd ${UT_ARTIFACTS_SHARE} 
+    ln -sf PS_LFS_OS_2015_02_1234 build_1234
+    cd - 1>/dev/null
+
+    assertTrue "ci_job_test"
+
+    local expect=$(createTempFile)
+    cat <<EOF > ${expect}
+mustHaveCleanWorkspace
+getBuildJobNameFromUpstreamProject LFS_CI_-_trunk_-_Package_-_package 1234
+getBuildBuildNumberFromUpstreamProject LFS_CI_-_trunk_-_Package_-_package 1234
+copyArtifactsToWorkspace LFS_CI_-_trunk_-_Build 1234 fsmci
+copyFileFromWorkspaceToBuildDirectory LFS_CI_-_trunk_-_Test 1234 ${WORKSPACE}/workspace/upstream
+copyFileFromWorkspaceToBuildDirectory LFS_CI_-_trunk_-_Test 1234 ${WORKSPACE}/workspace/properties
+setBuildDescription LFS_CI_-_trunk_-_Test 1234 PS_LFS_OS_2015_02_1234
+createArtifactArchive 
+EOF
+    assertExecutedCommands ${expect}
+
+    return
+}
+
+test3() {
+    export WORKSPACE=$(createTempDirectory)
+    export JOB_NAME=LFS_CI_-_trunk_-_Test_-_FSM-r3_-_Test_on_Target
+    export BUILD_NUMBER=1234
+    export UPSTREAM_PROJECT=LFS_CI_-_trunk_-_Test
+    export UPSTREAM_BUILD=1234
+
+    export UT_ARTIFACTS_SHARE=$(createTempDirectory)
+    mkdir -p ${UT_ARTIFACTS_SHARE}/PS_LFS_OS_2015_02_1234
+    cd ${UT_ARTIFACTS_SHARE} 
+    ln -sf PS_LFS_OS_2015_02_1234 build_1234
+    cd - 1>/dev/null
+
+    assertTrue "ci_job_test"
+
+    local expect=$(createTempFile)
+    cat <<EOF > ${expect}
+mustHaveCleanWorkspace
+getBuildJobNameFromUpstreamProject LFS_CI_-_trunk_-_Test 1234
+getBuildBuildNumberFromUpstreamProject LFS_CI_-_trunk_-_Test 1234
+copyArtifactsToWorkspace LFS_CI_-_trunk_-_Build 1234 fsmci
+copyFileFromBuildDirectoryToWorkspace LFS_CI_-_trunk_-_Test 1234 upstream
+copyFileFromBuildDirectoryToWorkspace LFS_CI_-_trunk_-_Test 1234 properties
+setBuildDescription LFS_CI_-_trunk_-_Test_-_FSM-r3_-_Test_on_Target 1234 PS_LFS_OS_2015_02_1234
+createArtifactArchive 
+EOF
+    assertExecutedCommands ${expect}
     return
 }
 
