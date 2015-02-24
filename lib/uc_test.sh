@@ -26,11 +26,10 @@ ci_job_test() {
     local upstreamBuildNumber=${UPSTREAM_BUILD}
     info "upstreamProject data: ${upstreamProject} / ${upstreamBuildNumber}"
 
-    local buildJobName=$(getBuildJobNameFromUpstreamProject ${upstreamProject} ${upstreamBuildNumber})
-    local buildBuildNumber=$(getBuildBuildNumberFromUpstreamProject ${upstreamProject} ${upstreamBuildNumber})
-
+    # we are ausing copyAndExtractBuildArtifactsFromProject and not copyArtifactsToWorkspace
+    # because copyArtifactsToWorkspace is doing some stuff more..
     local requiredArtifacts=$(getConfig LFS_CI_UC_test_required_artifacts)
-    copyArtifactsToWorkspace "${buildJobName}" "${buildBuildNumber}" "${requiredArtifacts}"
+    copyAndExtractBuildArtifactsFromProject "${upstreamProject}" "${upstreamBuildNumber}" "${requiredArtifacts}"
 
     # structure of jobs
     # Test
@@ -96,6 +95,7 @@ ci_job_test() {
         mustExistFile ${WORKSPACE}/properties
         rawDebug ${WORKSPACE}/properties
 
+        # TODO: demx2fk3 2015-02-24 find out, why this upstream file is used here...
         info "overwrite upstreamProject to ${upstreamProject} ${upstreamBuildNumber}"
         copyFileFromBuildDirectoryToWorkspace ${upstreamProject} ${upstreamBuildNumber} upstream 
         mustExistFile ${WORKSPACE}/upstream
