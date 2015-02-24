@@ -104,7 +104,7 @@ if(deleteJobs || LRC_deleteJobs) {
         job_name = p.getName()
         if(deleteJobs && job_name.find("_"+branch+"_") && !job_name.find("LFS_CI_-_LRC_") && !job_name.find("LFS_Prod_-_LRC_")) {
                 if(debug) {
-                    println("[DEBUG] delete job: $p.name")
+                    println("[DEBUG] delete job: $p.name (dry run)")
                 } else {
                     p.delete()
                     println("[INFO] deleted job: $p.name")
