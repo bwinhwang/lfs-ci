@@ -1,11 +1,11 @@
-///////////////////////////////////////////////////////////////////////////////
-//
-// Groovy script to delete a branch in the LFS CI.
-//
-// 1. Take the parameters from the Jenkins job.
-// 2. Check which jobs shall be deleted.
-// 3. If no jobs left also delete the view of the branch.
-///////////////////////////////////////////////////////////////////////////////
+/**
+ *
+ * Groovy script to delete a branch in the LFS CI.
+ *
+ * 1. Take the parameters from the Jenkins job.
+ * 2. Check which jobs shall be deleted.
+ * 3. If no jobs left also delete the view of the branch.
+ */
 
 import jenkins.model.Jenkins
 import hudson.model.ParametersAction
@@ -65,28 +65,35 @@ if(!deleteJobs && !LRC_deleteJobs) {
 // Delete the branchs view within the SCM view.
 def deleteScmView() {
     def scm_view = "SCM"
-    def scm_view_obj = null
     def branch_view = branch
+    def scm_view_obj = null
     def branch_view_obj = null
+
+    if(LRC_deleteJobs)
+        scm_view = "SCM_LRC"
+
     scm_view_obj = j.getView(scm_view)
     branch_view_obj = scm_view_obj.getView(branch_view)
+
     if(debug) {
-        println("[DEBUG] delete view: $branch_view in $scm_view")
+        println("[DEBUG] delete view: ${branch_view} in ${scm_view}")
     } else {
         scm_view_obj.deleteView(branch_view_obj)
-        println("[INFO] deleted view: $branch_view in $scm_view view")
+        println("[INFO] deleted view: ${branch_view} in ${scm_view} view")
     }
 }
 
-// Delete the branchs view
+// Delete the branch[2..-1] view
 def deleteView() {
     def branch_view = branch[2..-1]
     if(debug) {
         println("[DEBUG] delete view: $branch_view")
     } else {
-        vc = Jenkins.instance.getView(branch_view).getOwner();
-        vc.deleteView(vc.getView(branch_view));
-        println("[INFO] deleted view: $branch_view")
+        try {
+            vo = j.getView(branch_view).getOwner()
+            vo.deleteView(vo.getView(branch_view))
+            println("[INFO] deleted view: $branch_view")
+        } catch(e) {}
     }
 }
 

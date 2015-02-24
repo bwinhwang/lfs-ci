@@ -90,8 +90,14 @@ println("[INFO] fsmr4_jobs: $fsmr4_jobs")
 // Add branch list view to SCM view.
 def createScmView() {
     def scm_view = "SCM"
-    def scm_view_obj = Jenkins.instance.getView(scm_view)
+    def scm_view_obj = null
     def new_branch_view_obj = null
+
+    if(lrc_jobs) {
+        scm_view = "SCM_LRC"
+    }
+
+    scm_view_obj = Jenkins.instance.getView(scm_view)
 
     src_branch_view_obj = scm_view_obj.getView(src_branch.toUpperCase())
     new_branch_view_obj = scm_view_obj.getView(new_branch)
@@ -104,22 +110,6 @@ def createScmView() {
         println("[INFO] Added view $new_branch to $scm_view view")
     }
     return new_branch_view_obj
-}
-
-// Create sectioned view
-def createSectionedView() {
-    def new_branch_section_view = new_branch[2..-1]
-    def trunk_view = "trunk"
-    def new_branch_section_view_obj = Jenkins.instance.getView(new_branch_section_view)
-    //def list_view_section_obj = null
-    if(new_branch_section_view_obj) {
-        println("[INFO] view $new_branch_section_view already exists.")
-    } else {
-        trunk_view_owner_obj = Jenkins.instance.getView(trunk_view).getOwner();
-        new_branch_section_view_obj = new SectionedView(new_branch_section_view)
-        trunk_view_owner_obj.addView(new_branch_section_view_obj)
-        println("[INFO] Created view $new_branch_section_view")
-    }
 }
 
 def processFileInplace(file, Closure processText) {
@@ -272,7 +262,7 @@ for(job in src_branch_view_obj.getItems()) {
 
 for(job in jobs_list) {
     //if(job.name == "LFS_CI_-_${src_branch}_-_Build") {
-    if(job.name == "LFS_CI_-_${src_branch}_-_Test" || job.name == "LFS_Prod_-_trunk_-_Releasing_-_summary" || job.name == "LFS_CI_-_LRC_-_Build" || job.name == "LFS_Prod_-_LRC_-_Releasing_-_summary") {
+    //if(job.name == "LFS_CI_-_${src_branch}_-_Test" || job.name == "LFS_Prod_-_trunk_-_Releasing_-_summary" || job.name == "LFS_CI_-_LRC_-_Build" || job.name == "LFS_Prod_-_LRC_-_Releasing_-_summary") {
     //if(job.name.find("LRC")) {
     //if(job.name.find("fsmr4")) {
     def new_job = copyJob(job)
@@ -285,7 +275,7 @@ for(job in jobs_list) {
     reloadJobConfig(new_job, config_file)
     new_branch_view_obj.doAddJobToView(new_job.getName())
     println("[INFO] added job $new_job.name to view \"$new_branch_view_obj.name\"")
-    }
+    //}
 }
 
 // enable previosly disabled jobs
@@ -294,9 +284,9 @@ for(disabled_job in jobs_to_enable) {
     println("[INFO] enabled job \"$disabled_job.name\"")
 }
 
-createSectionedView()
-new MySectionedView(new_branch, lrc_jobs, jenkinsUrl).addListViewSections()
-
+sectionedView = new MySectionedView(new_branch, lrc_jobs, jenkinsUrl)
+sectionedView.createSectionedView()
+sectionedView.addListViewSections()
 
 
 ///////////////////////////////////////////////////////////////////////
@@ -305,6 +295,11 @@ new MySectionedView(new_branch, lrc_jobs, jenkinsUrl).addListViewSections()
 //
 ///////////////////////////////////////////////////////////////////////
 
+
+/**
+ * Class that can create a sectioned view and add list view sections 
+ * to it.
+ */
 class MySectionedView {
 
     def branch
@@ -318,6 +313,13 @@ class MySectionedView {
     def listAlignment
     def jenkinsUrl
 
+    /**
+     * Constructor
+     *
+     * @param branch Name of the branch (eg. FB1408).
+     * @param lrc true in case of LRC false otherwise.
+     * @param jenkinsUrl the Jenkins URL (eg. http://jenkins-server:8090/).
+     */
     MySectionedView(branch, lrc, jenkinsUrl) {
         this.branch = branch
         this.lrc = lrc
@@ -339,15 +341,23 @@ class MySectionedView {
             this.nameSectionReleasing = "Releasing (LRC_${this.branch})"
         }
     }   
-
-    def getCurrentXml() {
+    
+    /**
+     * @return String the config.xml for the sectioned view.
+     */
+    def String getCurrentXml() {
         def requestUrl = "${this.jenkinsUrl}view/${this.branchSectionedView}/config.xml"
         def proc = ['curl', "${requestUrl}"].execute()
         def xmlString = proc.text
         return xmlString
     }
 
-    def createListViewSectionsXml() {
+    /**
+     * Generates the XML String which can be used to update the config.xml file.
+     *
+     * @return String XML String defining list view sections.
+     */
+    def String createListViewSectionsXml() {
         return """
             <hudson.plugins.sectioned__view.ListViewSection>
               <jobNames><comparator class="hudson.util.CaseInsensitiveComparator"/></jobNames>
@@ -381,7 +391,12 @@ class MySectionedView {
             </hudson.plugins.sectioned__view.ListViewSection>"""
     }
 
-    def hasListViewSection() {
+    /**
+     * Check whether the sectioned view has a list view section or not.
+     *
+     * @return boolean true if the sectioned view has a list view section false otherwise.
+     */
+    def boolean hasListViewSection() {
         if(this.getCurrentXml().find("<sections/>")) {
             return false
         } else {
@@ -389,7 +404,29 @@ class MySectionedView {
         }
     }
 
-    def addListViewSections() {
+    /**
+     * Create the sectioned view for this.branch.
+     */
+    def void createSectionedView() {
+        def newBranchSectionView = this.branch[2..-1]
+        def trunk_view = "trunk"
+        def trunk_view_owner_obj = null
+        def newBranchSectionViewObj = Jenkins.instance.getView(newBranchSectionView)
+
+        if(newBranchSectionViewObj) {
+            println("[INFO] view ${newBranchSectionView} already exists.")
+        } else {
+            trunk_view_owner_obj = Jenkins.instance.getView(trunk_view).getOwner();
+            newBranchSectionViewObj = new SectionedView(newBranchSectionView)
+            trunk_view_owner_obj.addView(newBranchSectionViewObj)
+            println("[INFO] Created view ${newBranchSectionView}")
+        }
+    }
+
+    /**
+     * Add list view sections to the sectioned view.
+     */
+    def void addListViewSections() {
         def requestUrl = "${this.jenkinsUrl}view/${this.branchSectionedView}/config.xml"
         def currentXml = this.getCurrentXml()
         def configurationFile = null
