@@ -26,8 +26,8 @@ ci_job_test() {
     local upstreamBuildNumber=${UPSTREAM_BUILD}
     info "upstreamProject data: ${upstreamProject} / ${upstreamBuildNumber}"
 
-    local buildJobName=$(getBuildJobNameFromUpstreamProject ${UPSTREAM_PROJECT} ${UPSTREAM_BUILD})
-    local buildBuildNumber=$(getBuildBuildNumberFromUpstreamProject ${UPSTREAM_PROJECT} ${UPSTREAM_BUILD})
+    local buildJobName=$(getBuildJobNameFromUpstreamProject ${upstreamProject} ${upstreamBuildNumber})
+    local buildBuildNumber=$(getBuildBuildNumberFromUpstreamProject ${upstreamProject} ${upstreamBuildNumber})
 
     local requiredArtifacts=$(getConfig LFS_CI_UC_test_required_artifacts)
     copyArtifactsToWorkspace "${buildJobName}" "${buildBuildNumber}" "${requiredArtifacts}"
