@@ -74,7 +74,7 @@ for(slave in jenkins.slaves) {
         // Remove any suffixes from the dir name
         def dirName = d.name.split("@")[0]
         // Find matching job
-        def jobMatch = jobNames.find {
+        jobNames.find {
             if(it == dirName)
                 println("$it / $dirName")
         }
