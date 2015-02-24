@@ -28,10 +28,6 @@ ci_job_test() {
     local requiredArtifacts=$(getConfig LFS_CI_UC_test_required_artifacts)
     copyArtifactsToWorkspace "${buildJobName}" "${buildBuildNumber}" "${requiredArtifacts}"
 
-    local workspace=$(getWorkspaceName)
-    mustHaveWorkspaceName
-    mustHaveCleanWorkspace
-
     # structure of jobs
     # Test
     #  |--- FSM-r2 summary
@@ -49,58 +45,45 @@ ci_job_test() {
 
         debug "we are the summary test job"
 
-        local labelName=""
-        if [[ -e ${workspace}/bld/bld-fsmci-summary/label ]] ; then
-            mustHaveNextCiLabelName
-            labelName=$(getNextCiLabelName)
-        else
-            # TODO: demx2fk3 2015-02-24 should / can be removed
-            local ciBuildShare=$(getConfig LFS_CI_UC_package_internal_link)
-            local workspace=${ciBuildShare}/build_${upstreamBuildNumber}
-            mustExistSymlink ${workspace}
+        local ciBuildShare=$(getConfig LFS_CI_UC_package_internal_link)
+        local workspace=${ciBuildShare}/build_${upstreamBuildNumber}
+        mustExistSymlink ${workspace}
 
-            local realDirectory=$(readlink ${workspace})
-            labelName=$(basename ${realDirectory})
-        fi
+        local realDirectory=$(readlink ${workspace})
+        local labelName=$(basename ${realDirectory})
+        mustExistDirectory ${realDirectory}
+        mustHaveValue "${labelName}" "label name from ${workspace}"
 
-        mustHaveValue "${labelName}" "label name"
-
-        local deliveryDirectory=$(getConfig LFS_CI_UC_package_copy_to_share_name)/\
-                                $(getConfig LFS_CI_UC_package_copy_to_share_path_name)/\
-                                ${labelName}
-
-        mustExistDirectory ${deliveryDirectory}
-
-        info "using build ${labelName} in ${deliveryDirectory}"
+        info "using build ${labelName} in ${realDirectory}"
 
         info "creating upstream file in workspace"
+        execute rm -rf ${WORKSPACE}/upstream
+        echo "upstreamProject=${upstreamProject}"          > ${WORKSPACE}/upstream
+        echo "upstreamBuildNumber=${upstreamBuildNumber}" >> ${WORKSPACE}/upstream
+        rawDebug ${WORKSPACE}/upstream
 
-        echo "upstreamProject=${upstreamProject}"          > ${workspace}/upstream
-        echo "upstreamBuildNumber=${upstreamBuildNumber}" >> ${workspace}/upstream
-        rawDebug ${workspace}/upstream
+        copyFileFromWorkspaceToBuildDirectory ${JOB_NAME} ${BUILD_NUMBER} ${WORKSPACE}/upstream
 
-        copyFileFromWorkspaceToBuildDirectory ${JOB_NAME} ${BUILD_NUMBER} ${workspace}/upstream
+        execute rm -rf ${WORKSPACE}/properties
+        echo "LABEL=${labelName}"                   > ${WORKSPACE}/properties
+        echo "DELIVERY_DIRECTORY=${realDirectory}" >> ${WORKSPACE}/properties
+        rawDebug ${WORKSPACE}/properties
 
-
-        echo "LABEL=${labelName}"                       > ${workspace}/properties
-        echo "DELIVERY_DIRECTORY=${deliveryDirectory}" >> ${workspace}/properties
-        rawDebug ${workspace}/properties
-
-        copyFileFromWorkspaceToBuildDirectory ${JOB_NAME} ${BUILD_NUMBER} ${workspace}/properties
+        copyFileFromWorkspaceToBuildDirectory ${JOB_NAME} ${BUILD_NUMBER} ${WORKSPACE}/properties
 
     else
 
         debug "we are the slave test job"
 
         info "overwrite upstreamProject to ${upstreamProject} ${upstreamBuildNumber}"
-        copyFileFromBuildDirectoryToWorkspace ${upstreamProject} ${upstreamBuildNumber} upstream 
+        copyFileFromBuildDirectoryToWorkspace ${UPSTREAM_PROJECT} ${UPSTREAM_BUILD} upstream 
         mustExistFile ${WORKSPACE}/upstream
         rawDebug ${WORKSPACE}/upstream
 
         source ${WORKSPACE}/upstream
 
         info "overwrite upstreamProject to ${upstreamProject} ${upstreamBuildNumber}"
-        copyFileFromBuildDirectoryToWorkspace ${upstreamProject} ${upstreamBuildNumber} properties 
+        copyFileFromBuildDirectoryToWorkspace ${UPSTREAM_PROJECT} ${UPSTREAM_BUILD} properties 
         mustExistFile ${WORKSPACE}/properties
         rawDebug ${WORKSPACE}/properties
 
@@ -114,9 +97,6 @@ ci_job_test() {
     execute cp ${LFS_CI_ROOT}/etc/junit_dummytest.xml ${WORKSPACE}
 
     setBuildDescription "${JOB_NAME}" "${BUILD_NUMBER}" "${labelName}"
-
-    createArtifactArchive
-
     return
 }
 
