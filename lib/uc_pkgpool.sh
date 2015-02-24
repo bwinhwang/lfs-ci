@@ -144,6 +144,7 @@ usecase_PKGPOOL_RELEASE() {
     mustBeValidXmlReleaseNote ${workspace}/releasenote.xml
 
     local releaseNoteTxt=${workspace}/releasenote.txt
+    execute touch ${releaseNoteTxt}
     execute -i -l ${releaseNoteTxt} diff -y -W72 -t --suppress-common-lines \
         ${workspace}/forReleaseNote.txt.old \
         ${workspace}/bld/bld-pkgpool-release/forReleaseNote.txt
