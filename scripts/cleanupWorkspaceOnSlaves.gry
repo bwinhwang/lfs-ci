@@ -48,6 +48,7 @@ if(debug == true) {
 
 // Jobs which don't have a custom workspace
 jobNames = jenkins.items.findAll { it instanceof hudson.model.AbstractProject && it.customWorkspace == null && it.name.find(branch) }.collect { it.name }
+jobNames.push("LFS_CI_-_FB1412_FSMR4_-_Build_-_FSM-r4_-_fsm4_k2")
 println(jobNames)
 
 for(slave in jenkins.slaves) {
@@ -76,9 +77,7 @@ for(slave in jenkins.slaves) {
         // Find matching job
         for(jobName in jobNames) {
             if(jobName == dirName)
-                println("1. $jobName / $dirName")
-            else
-                println("2. $jobName / $dirName")
+                println("$jobName / $dirName")
         }
 //        if (jobMatch != null) {
 //            println(" KEEP: $d --> job:$jobMatch")
