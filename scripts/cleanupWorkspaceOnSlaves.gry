@@ -50,8 +50,6 @@ if(debug == true) {
 jobNames = jenkins.items.findAll { it instanceof hudson.model.AbstractProject && it.customWorkspace == null && it.name.find(branch) }.collect { it.name }
 println(jobNames)
 
-return 0
-
 for(slave in jenkins.slaves) {
     if(!slave.computer.online) {
         println("Slave '$slave.nodeName' is currently offline - skip workspace cleanup")
