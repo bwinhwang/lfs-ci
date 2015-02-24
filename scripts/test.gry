@@ -1,0 +1,70 @@
+import hudson.model.ListView
+import jenkins.model.Jenkins
+import hudson.plugins.nested_view.NestedView
+import hudson.model.ParametersAction
+
+
+def branches = ""
+def lrc = false
+def parameters = build?.actions.find{ it instanceof ParametersAction }?.parameters
+
+parameters.each {
+    if(it.name == "VIEW")
+        view = it.value
+    else if(it.name == "BRANCHES")
+        branches = it.value
+    else if(it.name == "LRC")
+        lrc = it.value
+}
+
+def createScmView() {
+    def scm_view = "SCM"
+    def new_branch = "FB1408"
+    def scm_view_obj = Jenkins.instance.getView(scm_view)
+    def new_branch_view_obj = null
+
+    new_branch_view_obj = scm_view_obj.getView(new_branch)
+    if(new_branch_view_obj) {
+        println("[INFO] view $new_branch already exists.")
+    }
+    else {
+        //new_branch_view_obj = new NestedView(new_branch, scm_view_obj)
+        new_branch_view_obj = new NestedView(new_branch[2..-1])
+        new_branch_view_obj.setOwner(scm_view_obj)
+        scm_view_obj.addView(new_branch_view_obj)
+        println("[INFO] Added view $new_branch to $scm_view view")
+
+        sub_view_obj = new ListView(new_branch, new_branch_view_obj)
+        //sub_view_obj.setOwner(new_branch_view_obj)
+        new_branch_view_obj.addView(sub_view_obj)
+        println("[INFO] Added view $sub_view_obj.name to view $new_branch_view_obj.name")
+    }
+
+}
+
+def branch2View(String branch, boolean lrc) {
+    println("----> $branch")
+    def scm_view = "SCM"
+    def scm_view_obj = null
+
+    if(lrc)
+        scm_view = "SCM"
+
+    scm_view_obj = Jenkins.instance.getView(scm_view)
+
+    branch_view_obj = new ListView(branch, scm_view_obj)
+    scm_view_obj.addView(branch_view_obj)
+    for(job in Jenkins.instance.getItems()) {
+        if(job.name.find("LFS_CI_-_${branch}_-_") || job.name.find("LFS_Prod_-_${branch}_-_")) {
+            println("adding job $job.name to view $branch_view_obj.name")
+            branch_view_obj.doAddJobToView(job.getName())
+        }
+    }
+}
+
+//createScmView()
+for(branch in branches.split(",")) {
+    println("--> $branch")
+    branch2View(branch, lrc)
+}
+
