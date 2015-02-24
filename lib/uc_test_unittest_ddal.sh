@@ -14,7 +14,7 @@
 #  @return  <none>
 ci_job_test_unittest() {
 
-    requiredParameters UPSTREAM_PROJECT UPSTREAM_BUILD JOB_NAME BUILD_NUMBER
+    requiredParameters UPSTREAM_PROJECT UPSTREAM_BUILD JOB_NAME BUILD_NUMBER WORKSPACE
 
     local workspace=$(getWorkspaceName)
     mustHaveWorkspaceName
