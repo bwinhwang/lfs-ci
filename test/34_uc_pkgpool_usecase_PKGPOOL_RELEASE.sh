@@ -45,6 +45,9 @@ oneTimeSetUp() {
         mockedCommand "runOnMaster $@"
         return 0
     }
+    copyFileFromWorkspaceToBuildDirectory() {
+        mockedCommand "copyFileFromWorkspaceToBuildDirectory $@"
+    }
     copyFileFromBuildDirectoryToWorkspace() {
         mockedCommand "copyFileFromBuildDirectoryToWorkspace $@"
         touch ${WORKSPACE}/$3
@@ -93,7 +96,7 @@ execute -i -l ${WORKSPACE}/workspace/releasenote.txt diff -y -W72 -t --suppress-
 execute ${LFS_CI_ROOT}/bin/sendReleaseNote -r ${WORKSPACE}/workspace/releasenote.txt -t LABEL -f ${LFS_CI_ROOT}/etc/file.cfg
 copyFileToArtifactDirectory ${WORKSPACE}/workspace/releasenote.xml
 copyFileToArtifactDirectory ${WORKSPACE}/workspace/releasenote.txt
-copyFileFromBuildDirectoryToWorkspace ${WORKSPACE}/workspace/bld/bld-pkgpool-release/forReleaseNote.txt
+copyFileFromWorkspaceToBuildDirectory ${JOB_NAME} ${BUILD_NUMBER} ${WORKSPACE}/workspace/bld/bld-pkgpool-release/forReleaseNote.txt
 linkFileToArtifactsDirectory /build/home/psulm/LFS_internal/artifacts/PKGPOOL_PROD_-_trunk_-_Release/1234
 EOF
     assertExecutedCommands ${expect}

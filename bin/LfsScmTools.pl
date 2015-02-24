@@ -2225,7 +2225,7 @@ sub prepare {
         die "no release note file";
     }
     if( not -f $self->{templateFile} ) {
-        die "no template  file";
+        die "no template file";
     }
 
     open( TEMPLATE, $self->{templateFile} ) 

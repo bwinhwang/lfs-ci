@@ -116,9 +116,11 @@ usecase_PKGPOOL_RELEASE() {
     copyArtifactsToWorkspace ${UPSTREAM_PROJECT} ${UPSTREAM_BUILD} "pkgpool"
     local lastSuccessfulBuildDirectory=$(getBuildDirectoryOnMaster ${JOB_NAME} lastSuccessfulBuild)
     if runOnMaster test -e ${lastSuccessfulBuildDirectory}/forReleaseNote.txt ; then
+        info "using old forReleaseNote.txt"
         copyFileFromBuildDirectoryToWorkspace ${JOB_NAME} lastSuccessfulBuild forReleaseNote.txt
         execute mv ${WORKSPACE}/forReleaseNote.txt ${workspace}/forReleaseNote.txt.old
     else
+        info "touch forReleaseNote.txt"
         execute touch ${workspace}/forReleaseNote.txt.old
     fi
 
@@ -163,7 +165,7 @@ usecase_PKGPOOL_RELEASE() {
 
     copyFileToArtifactDirectory ${workspace}/releasenote.xml
     copyFileToArtifactDirectory ${workspace}/releasenote.txt
-    copyFileFromBuildDirectoryToWorkspace ${workspace}/bld/bld-pkgpool-release/forReleaseNote.txt
+    copyFileFromWorkspaceToBuildDirectory ${JOB_NAME} ${BUILD_NUMBER} ${workspace}/bld/bld-pkgpool-release/forReleaseNote.txt
 
     local artifactsPathOnShare=$(getConfig artifactesShare)/${JOB_NAME}/${BUILD_NUMBER}
     linkFileToArtifactsDirectory ${artifactsPathOnShare}
