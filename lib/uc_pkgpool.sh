@@ -133,6 +133,7 @@ usecase_PKGPOOL_RELEASE() {
     # TODO: demx2fk3 2015-02-05 baselines list missing
     echo "<log/>" > ${workspace}/changelog.xml
     cd ${workspace}
+    export productName=PKGPOOL
     execute -n ${LFS_CI_ROOT}/bin/getReleaseNoteXML \
                 -t ${label}                         \
                 -o ${oldLabel}                      \
