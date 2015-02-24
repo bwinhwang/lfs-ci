@@ -48,7 +48,6 @@ if(debug == true) {
 
 // Jobs which don't have a custom workspace
 jobNames = jenkins.items.findAll { it instanceof hudson.model.AbstractProject && it.customWorkspace == null && it.name.find(branch) }.collect { it.name }
-println(jobNames)
 
 for(slave in jenkins.slaves) {
     if(!slave.computer.online) {
@@ -73,25 +72,17 @@ for(slave in jenkins.slaves) {
     for(d in subdirs) {
         // Remove any suffixes from the dir name
         def dirName = d.name.split("@")[0]
-        // Find matching job
         for(jobName in jobNames) {
-            if(jobName == dirName)
-                println("1. $jobName / $dirName")
-            else
-                println("2. $jobName / $dirName")
+            if(jobName == dirName) {
+                if(debug == true) {
+                    println(" [DEBUG] DELETE job: $d (dryRun)")
+                }
+                else {
+                    d.deleteRecursive()
+                    println(" [INFO] DELETED job directory: $d")
+                }
+            }
         }
-//        if (jobMatch != null) {
-//            println(" KEEP: $d --> job:$jobMatch")
-//        }
-//        else {
-//            if( debug == true ) {
-//                println(" [DEBUG] DELETE job: $d (dryRun)")
-//            }
-//            else {
-//                //d.deleteRecursive()
-//                println(" [INFO] DELETED job: $d")
-//            }
-//        }
     }
 }
 
