@@ -88,6 +88,7 @@ execute mv ${WORKSPACE}/forReleaseNote.txt ${WORKSPACE}/workspace/forReleaseNote
 setBuildDescription PKGPOOL_PROD_-_trunk_-_Release 1234 LABEL
 execute -n ${LFS_CI_ROOT}/bin/getReleaseNoteXML -t LABEL -o OLD_LABEL -f ${LFS_CI_ROOT}/etc/file.cfg
 mustBeValidXmlReleaseNote ${WORKSPACE}/workspace/releasenote.xml
+execute touch ${WORKSPACE}/workspace/releasenote.txt
 execute -i -l ${WORKSPACE}/workspace/releasenote.txt diff -y -W72 -t --suppress-common-lines ${WORKSPACE}/workspace/forReleaseNote.txt.old ${WORKSPACE}/workspace/bld/bld-pkgpool-release/forReleaseNote.txt
 execute ${LFS_CI_ROOT}/bin/sendReleaseNote -r ${WORKSPACE}/workspace/releasenote.txt -t LABEL -f ${LFS_CI_ROOT}/etc/file.cfg
 copyFileToArtifactDirectory ${WORKSPACE}/workspace/releasenote.xml
