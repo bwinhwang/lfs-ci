@@ -214,6 +214,7 @@ mustHavePermissionToRelease() {
 
         if [[ ${diff} -lt ${maxDiff} ]] ; then
             warning "not promoting this build. ONLY EVERY ${number} build will be promoted"
+            warning "timediff is too low: is ${diff}s must be ${maxDiff}s"
             setBuildDescription ${JOB_NAME} ${BUILD_NUMBER} "${labelName}<br>not promoted"
             setBuildResultUnstable
             exit 0
