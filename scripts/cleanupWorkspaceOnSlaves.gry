@@ -76,7 +76,7 @@ for(slave in jenkins.slaves) {
         // Remove any suffixes from the dir name
         def dirName = d.name.split("@")[0]
         if(dirName in jobNames) {
-            println("[DEBUG] would delete job directory $d (dryRun)")
+            println("[DEBUG] delete job directory $d (dryRun)")
         }
         // Find matching job
 //        def jobMatch = jobNames.find { it == dirName }
