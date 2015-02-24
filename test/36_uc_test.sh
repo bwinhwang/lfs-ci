@@ -173,8 +173,8 @@ mustHaveCleanWorkspace
 getBuildJobNameFromUpstreamProject LFS_CI_-_trunk_-_Test 1234
 getBuildBuildNumberFromUpstreamProject LFS_CI_-_trunk_-_Test 1234
 copyArtifactsToWorkspace LFS_CI_-_trunk_-_Build 1234 fsmci
-copyFileFromBuildDirectoryToWorkspace LFS_CI_-_trunk_-_Test 1234 upstream
 copyFileFromBuildDirectoryToWorkspace LFS_CI_-_trunk_-_Test 1234 properties
+copyFileFromBuildDirectoryToWorkspace LFS_CI_-_trunk_-_Test 1234 upstream
 setBuildDescription LFS_CI_-_trunk_-_Test_-_FSM-r3_-_Test_on_Target 1234 PS_LFS_OS_2015_02_1234
 createArtifactArchive 
 EOF

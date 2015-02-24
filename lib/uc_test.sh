@@ -90,19 +90,18 @@ ci_job_test() {
         labelName=$(getNextCiLabelName)
         mustHaveValue "${labelName}" "label name"
 
+        # contains LABEL and DELIVERY_DIRECTORY
+        info "overwrite upstreamProject to ${upstreamProject} ${upstreamBuildNumber}"
+        copyFileFromBuildDirectoryToWorkspace ${upstreamProject} ${upstreamBuildNumber} properties 
+        mustExistFile ${WORKSPACE}/properties
+        rawDebug ${WORKSPACE}/properties
+
         info "overwrite upstreamProject to ${upstreamProject} ${upstreamBuildNumber}"
         copyFileFromBuildDirectoryToWorkspace ${upstreamProject} ${upstreamBuildNumber} upstream 
         mustExistFile ${WORKSPACE}/upstream
         rawDebug ${WORKSPACE}/upstream
 
         source ${WORKSPACE}/upstream
-
-        info "overwrite upstreamProject to ${upstreamProject} ${upstreamBuildNumber}"
-        copyFileFromBuildDirectoryToWorkspace ${upstreamProject} ${upstreamBuildNumber} properties 
-        mustExistFile ${WORKSPACE}/properties
-        rawDebug ${WORKSPACE}/properties
-
-        source ${WORKSPACE}/properties
 
     fi
 
