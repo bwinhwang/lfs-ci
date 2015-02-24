@@ -48,6 +48,9 @@ if(debug == true) {
 
 // Jobs which don't have a custom workspace
 jobNames = jenkins.items.findAll { it instanceof hudson.model.AbstractProject && it.customWorkspace == null && it.name.find(branch) }.collect { it.name }
+println(jobNames)
+
+return 0
 
 for(slave in jenkins.slaves) {
     if(!slave.computer.online) {
@@ -82,7 +85,7 @@ for(slave in jenkins.slaves) {
                 println(" [DEBUG] DELETE job: $d (dryRun)")
             }
             else {
-                d.deleteRecursive()
+                //d.deleteRecursive()
                 println(" [INFO] DELETED job: $d")
             }
         }
