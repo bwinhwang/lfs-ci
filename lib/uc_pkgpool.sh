@@ -158,9 +158,11 @@ usecase_PKGPOOL_RELEASE() {
         # createReleaseInWorkflowTool ${label} ${workspace}/releasenote.xml
         # uploadToWorkflowTool        ${label} ${workspace}/releasenote.xml
 
-        execute ${LFS_CI_ROOT}/bin/sendReleaseNote  -r ${releaseNoteTxt}          \
-                                                    -t ${label}                   \
-                                                    -f ${LFS_CI_ROOT}/etc/file.cfg
+        if [[ -s ${releaseNoteTxt} ]] ; then
+            execute ${LFS_CI_ROOT}/bin/sendReleaseNote  -r ${releaseNoteTxt}          \
+                                                        -t ${label}                   \
+                                                        -f ${LFS_CI_ROOT}/etc/file.cfg
+        fi                                                            
     fi
 
     copyFileToArtifactDirectory ${workspace}/releasenote.xml

@@ -82,6 +82,7 @@ test1() {
     local expect=$(createTempFile)
 # createReleaseInWorkflowTool LABEL ${WORKSPACE}/workspace/releasenote.xml
 # uploadToWorkflowTool LABEL ${WORKSPACE}/workspace/releasenote.xml
+# execute ${LFS_CI_ROOT}/bin/sendReleaseNote -r ${WORKSPACE}/workspace/releasenote.txt -t LABEL -f ${LFS_CI_ROOT}/etc/file.cfg
     cat <<EOF > ${expect}
 mustHaveCleanWorkspace
 copyArtifactsToWorkspace PKGPOOL_CI_-_trunk_-_Test 1234 pkgpool
@@ -93,7 +94,6 @@ execute -n ${LFS_CI_ROOT}/bin/getReleaseNoteXML -t LABEL -o OLD_LABEL -f ${LFS_C
 mustBeValidXmlReleaseNote ${WORKSPACE}/workspace/releasenote.xml
 execute touch ${WORKSPACE}/workspace/releasenote.txt
 execute -i -l ${WORKSPACE}/workspace/releasenote.txt diff -y -W72 -t --suppress-common-lines ${WORKSPACE}/workspace/forReleaseNote.txt.old ${WORKSPACE}/workspace/bld/bld-pkgpool-release/forReleaseNote.txt
-execute ${LFS_CI_ROOT}/bin/sendReleaseNote -r ${WORKSPACE}/workspace/releasenote.txt -t LABEL -f ${LFS_CI_ROOT}/etc/file.cfg
 copyFileToArtifactDirectory ${WORKSPACE}/workspace/releasenote.xml
 copyFileToArtifactDirectory ${WORKSPACE}/workspace/releasenote.txt
 copyFileFromWorkspaceToBuildDirectory ${JOB_NAME} ${BUILD_NUMBER} ${WORKSPACE}/workspace/bld/bld-pkgpool-release/forReleaseNote.txt
