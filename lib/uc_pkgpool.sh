@@ -148,12 +148,13 @@ usecase_PKGPOOL_RELEASE() {
         ${workspace}/forReleaseNote.txt.old \
         ${workspace}/bld/bld-pkgpool-release/forReleaseNote.txt
 
+    rawDebug ${releaseNoteTxt}
+
     local canSendReleaseNote=$(getConfig LFS_CI_uc_release_can_send_release_note)
     if [[ ${canSendReleaseNote} ]] ; then
         # createReleaseInWorkflowTool ${label} ${workspace}/releasenote.xml
         # uploadToWorkflowTool        ${label} ${workspace}/releasenote.xml
 
-        export productName=PKGPOOL
         execute ${LFS_CI_ROOT}/bin/sendReleaseNote  -r ${releaseNoteTxt}          \
                                                     -t ${label}                   \
                                                     -f ${LFS_CI_ROOT}/etc/file.cfg
