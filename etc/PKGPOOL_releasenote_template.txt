@@ -5,9 +5,6 @@ The following package changes were done on LFS trunk:
 old version                        |    new version
 -----------------------------------+------------------------------------
 __RELEASE_NOTE_CONTENT__
-EOT
-        cat $VERDIFF
-        cat <<EOT
 
 You are getting this mail since you are on the list of people interested
 in this topic. If you want to get removed from this list or have another
