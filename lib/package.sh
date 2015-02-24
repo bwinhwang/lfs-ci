@@ -141,7 +141,9 @@ copyReleaseCandidateToShare() {
 
     # TODO: demx2fk3 2014-07-15 FIXME : createSymlinksToArtifactsOnShare ${remoteDirectory}
     local artifactsPathOnMaster=$(getBuildDirectoryOnMaster)/archive
-    executeOnMaster ln -sf ${remoteDirectory} ${artifactsPathOnMaster}
+    executeOnMaster ln -sf ${remoteDirectory} ${artifactsPathOnMaster}/release
+
+    copyFileToArtifactDirectory ${workspace}/bld/bld-fsmci-summary.tar.gz
 
     # TODO: demx2fk3 2015-01-09 create also link to the build jobs
 
