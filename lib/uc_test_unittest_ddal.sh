@@ -21,16 +21,9 @@ ci_job_test_unittest() {
 
     createOrUpdateWorkspace --allowUpdate
 
-    copyFileFromBuildDirectoryToWorkspace ${UPSTREAM_PROJECT} ${UPSTREAM_BUILD} properties 
-    mustExistFile ${WORKSPACE}/properties
-    rawDebug ${WORKSPACE}/properties
-    source ${WORKSPACE}/properties
-
-    # copyArtifactsToWorkspace ${UPSTREAM_PROJECT} ${UPSTREAM_BUILD} "fsmci"
-
-    # mustHaveNextCiLabelName
-    # local label=$(getNextCiLabelName)
-    # setBuildDescription ${JOB_NAME} ${BUILD_NUMBER} ${label}
+    mustHaveNextCiLabelName
+    local label=$(getNextCiLabelName)
+    setBuildDescription ${JOB_NAME} ${BUILD_NUMBER} ${label}
 
     local revision=$(latestRevisionFromRevisionStateFile)
     mustHaveValue "${revision}" "revision"
@@ -81,7 +74,7 @@ ci_job_test_unittest() {
     execute python ${lcov_cobertura} lcov.out
     execute sed -i -e 's/#FFFFFF/#FFFFEE/' gcov.css
 
-    execute -n find . -name '*.html' | execute xargs -n1 sed -i -e "s/LCOV -/${LABEL} DDAL Unittests -/"
+    execute -n find . -name '*.html' | execute xargs -n1 sed -i -e "s/LCOV -/${label} DDAL Unittests -/"
     execute -n ${lcov} --summary lcov.out > lcov.summary
 
     rawDebug lcov.summary
@@ -107,7 +100,7 @@ ci_job_test_unittest() {
     echo "functions_covered;${FUNCTIONS_COVERED}" >> ${resultFile}
     echo "functions_total;${FUNCTIONS_TOTAL}"     >> ${resultFile}
 
-    databaseTestResults ${LABEL}      \
+    databaseTestResults ${label}      \
                         makingTest    \
                         localhost-x86 \
                         FSM-r3        \
