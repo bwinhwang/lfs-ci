@@ -164,16 +164,24 @@ usecase_PKGPOOL_RELEASE() {
 
     rawDebug ${releaseNoteTxt}
 
-    local canSendReleaseNote=$(getConfig LFS_CI_uc_release_can_send_release_note)
-    if [[ ${canSendReleaseNote} ]] ; then
+    local canCreateReleaseinWft=$(getConfig LFS_CI_uc_release_can_create_release_in_wft)
+    if [[ ${canCreateReleaseinWft} ]] ; then
         # createReleaseInWorkflowTool ${label} ${workspace}/releasenote.xml
         # uploadToWorkflowTool        ${label} ${workspace}/releasenote.xml
+        true
+    else
+        warning "creating release not in WFT is disabled via config"
+    fi
 
+    local canSendReleaseNote=$(getConfig LFS_CI_uc_release_can_send_release_note)
+    if [[ ${canSendReleaseNote} ]] ; then
         if [[ -s ${releaseNoteTxt} ]] ; then
             execute ${LFS_CI_ROOT}/bin/sendReleaseNote  -r ${releaseNoteTxt}          \
                                                         -t ${label}                   \
                                                         -f ${LFS_CI_ROOT}/etc/file.cfg
         fi                                                            
+    else
+        warning "sending release note is disabled via config"
     fi
 
     copyFileToArtifactDirectory ${workspace}/releasenote.xml

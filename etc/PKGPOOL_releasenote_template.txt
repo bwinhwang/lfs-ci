@@ -1,6 +1,6 @@
 Hi,
 
-The following package changes were done on LFS trunk:
+The following package changes were done on LFS __BRANCH__:
 
 old version                        |    new version
 -----------------------------------+------------------------------------
@@ -9,8 +9,9 @@ __RELEASE_NOTE_CONTENT__
 You are getting this mail since you are on the list of people interested
 in this topic. If you want to get removed from this list or have another
 colleague that wants to get added please send a mail to
-robert.schiele@nsn.com.
+majordomo@mlist.emea.nsn-intra.net with content
+subscribe lfs-pkgpool-release
+or
+unsubscribe lfs-pkgpool-release
 
-Robert
-EOT
-
+LFS SCM Team
