@@ -248,7 +248,7 @@ usecase_LFS_KNIFE_PACKAGE() {
 
     local readmeFile=${WORKSPACE}/.00_README_knife_result.txt
     cat > ${readmeFile} <<EOF
-eslinn10.emea.nsn-net.net:/vol/eslinn10_bin/build/build/home/lfs_knives/${workspace}/lfs-knife_${label}.tar.gz
+eslinn10.emea.nsn-net.net:/vol/eslinn10_bin/build/build/home/lfs_knives/lfs-knife_${label}.tar.gz
 EOF
 
     copyFileToArtifactDirectory $(basename ${readmeFile})
