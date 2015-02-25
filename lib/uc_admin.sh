@@ -167,7 +167,7 @@ genericShareCleanup() {
                 ${execute} rm -rf ${entry}
             else
                 local destination=$(echo ${entry} | sed "s:/:_:g")
-                local backupShare=/build/home/${USER}/genericCleanup
+                local backupShare=$(getConfig ADMIN_archive_share)
                 ${execute} mv -f ${entry} ${backupShare}/${destination}
                 ${execute} tar -czf ${backupShare}/${destination}.tar.gz \
                     ${backupShare}/${destination}
