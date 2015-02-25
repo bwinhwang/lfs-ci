@@ -247,8 +247,7 @@ usecase_PKGPOOL_UDPATE_DEPS() {
         export LFS_CI_LAST_EXECUTE_LOGFILE=$(createTempFile)
         try
         (
-            # svnCommit -F gitlog ${releaseFile} ${workspace}/src/gitrevision
-            true
+            svnCommit -F gitlog ${releaseFile} ${workspace}/src/gitrevision
         )
         catch ||
         (

@@ -15,7 +15,7 @@ oneTimeSetUp() {
     getConfig() {
         mockedCommand "getConfig $@"
         case $1 in 
-            PKGPOOL_PROD_uc_update_dependencies_svn_urls) 
+            PKGPOOL_PROD_update_dependencies_svn_url) 
                 echo ${UT_CONFIG_URLS}
             ;;
             *) echo $1 ;;
@@ -112,7 +112,7 @@ test1() {
 mustHaveCleanWorkspace
 copyArtifactsToWorkspace PKGPOOL_CI_-_trunk_-_Test 1234 pkgpool
 setBuildDescription LFS_CI_-_trunk_-_Build 123 LABEL
-getConfig PKGPOOL_PROD_uc_update_dependencies_svn_urls
+getConfig PKGPOOL_PROD_update_dependencies_svn_url
 svnCheckout http://host/path ${WORKSPACE}/workspace
 gitRevParse HEAD
 gitLog oldRevision..HEAD
@@ -152,7 +152,7 @@ test2() {
 mustHaveCleanWorkspace
 copyArtifactsToWorkspace PKGPOOL_CI_-_trunk_-_Test 1234 pkgpool
 setBuildDescription LFS_CI_-_trunk_-_Build 123 LABEL
-getConfig PKGPOOL_PROD_uc_update_dependencies_svn_urls
+getConfig PKGPOOL_PROD_update_dependencies_svn_url
 svnCheckout http://host/path ${WORKSPACE}/workspace
 gitRevParse HEAD
 gitLog oldRevision..HEAD
@@ -192,7 +192,7 @@ test3() {
 mustHaveCleanWorkspace
 copyArtifactsToWorkspace PKGPOOL_CI_-_trunk_-_Test 1234 pkgpool
 setBuildDescription LFS_CI_-_trunk_-_Build 123 LABEL
-getConfig PKGPOOL_PROD_uc_update_dependencies_svn_urls
+getConfig PKGPOOL_PROD_update_dependencies_svn_url
 svnCheckout http://host/path ${WORKSPACE}/workspace
 gitRevParse HEAD
 gitLog oldRevision..HEAD
@@ -230,7 +230,7 @@ test4() {
 mustHaveCleanWorkspace
 copyArtifactsToWorkspace PKGPOOL_CI_-_trunk_-_Test 1234 pkgpool
 setBuildDescription LFS_CI_-_trunk_-_Build 123 LABEL
-getConfig PKGPOOL_PROD_uc_update_dependencies_svn_urls
+getConfig PKGPOOL_PROD_update_dependencies_svn_url
 svnCheckout http://host/path ${WORKSPACE}/workspace
 gitRevParse HEAD
 gitLog oldRevision..HEAD
@@ -274,7 +274,7 @@ test5() {
 mustHaveCleanWorkspace
 copyArtifactsToWorkspace PKGPOOL_CI_-_trunk_-_Test 1234 pkgpool
 setBuildDescription LFS_CI_-_trunk_-_Build 123 LABEL
-getConfig PKGPOOL_PROD_uc_update_dependencies_svn_urls
+getConfig PKGPOOL_PROD_update_dependencies_svn_url
 svnCheckout http://host/path ${WORKSPACE}/workspace
 gitRevParse HEAD
 gitLog oldRevision..HEAD
