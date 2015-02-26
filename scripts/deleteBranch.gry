@@ -83,16 +83,16 @@ def deleteScmView() {
     }
 }
 
-// Delete the branch[2..-1] view
 def deleteView() {
     def branch_view = branch[2..-1]
 
-    if(LRC_deleteJobs)
+    if(LRC_deleteJobs) {
         branch_view = branch[6..-1]
-
-    // TODO
-    println("[INFO] TODO: Remove list view section manually within sectioned view ${branch_view}.")
-    return 0
+        if(debug == false) {
+            println("[INFO] TODO: Remove list view section manually within sectioned view ${branch_view}.")
+        }
+        return 0
+    }
 
     if(debug) {
         println("[DEBUG] delete view: $branch_view")
@@ -105,8 +105,7 @@ def deleteView() {
     }
 }
 
-// Delete none LRC jobs.
-// Collect LRC jobs in a list.
+// Delete none LRC jobs and collect LRC jobs in a list.
 if(deleteJobs || LRC_deleteJobs) {
     for(p in jenkins.model.Jenkins.theInstance.getProjects()) {
         job_name = p.getName()
@@ -139,8 +138,9 @@ if(LRC_deleteJobs && lrc_jobs) {
             println("[INFO] deleted LRC job: $p.name")
         }
     }
-    // No more jobs, delete view
-    deleteView()
+    // If we would also delete list view sections for LRC here
+    // we would need to do it via XML api as we do it when we add
+    // list view sections to sectiond view MMYY.
     deleteScmView()
 }
 
