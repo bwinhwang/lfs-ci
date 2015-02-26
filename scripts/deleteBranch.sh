@@ -81,7 +81,7 @@ __cmd() {
         echo [DEBUG] $@
     else
         info runnig command: $@
-        #eval $@
+        eval $@
     fi
 }
 
@@ -135,12 +135,10 @@ archiveBranchShare() {
     local branchType=$(getBranchPart ${BRANCH} TYPE)
     local mm=$(getBranchPart ${BRANCH} MM)
     local yyyy=$(getBranchPart ${BRANCH} YYYY)
-    local keepRelease=$(getValueFromEclFile "ECL_PS_LFS_OS" ${BRANCH})
     local dirPattern="${branchType}_PS_LFS_OS_${yyyy}_${mm}*"
-    local dirsToDelete=$(find ${SHARE} -maxdepth 2 -type d -name "${dirPattern}" | grep -v ${keepRelease})
+    local dirsToDelete=$(find ${SHARE} -maxdepth 2 -type d -name "${dirPattern}")
 
     info "archive $SHARE"
-    info "keep release: ${keepRelease}"
     for DIR in $dirsToDelete
     do
         local archiveDir=$(echo $DIR | sed 's/\//_/g')
@@ -156,12 +154,10 @@ archiveBranchBldShare() {
     local branchType=$(getBranchPart ${BRANCH} TYPE)
     local mm=$(getBranchPart ${BRANCH} MM)
     local yyyy=$(getBranchPart ${BRANCH} YYYY)
-    local keepRelease=$(getValueFromEclFile "ECL_PS_LFS_OS" ${BRANCH})
     local dirPattern="${branchType}_PS_LFS_OS_${yyyy}_${mm}*"
-    local dirsToDelete=$(find ${BLD_SHARE} -maxdepth 2 -type d -name "${dirPattern}" | grep -v ${keepRelease})
+    local dirsToDelete=$(find ${BLD_SHARE} -maxdepth 2 -type d -name "${dirPattern}")
 
     info "archive $BLD_SHARE"
-    info "keep release: ${keepRelease}"
     for DIR in $dirsToDelete
     do
         local archiveDir=$(echo $DIR | sed 's/\//_/g')
@@ -196,12 +192,10 @@ LRC_archiveBranchShare() {
     local branchType=$(getBranchPart ${BRANCH} TYPE)
     local mm=$(getBranchPart ${BRANCH} MM)
     local yyyy=$(getBranchPart ${BRANCH} YYYY)
-    local keepRelease=$(getValueFromEclFile "ECL_PS_LRC_LCP_LFS_OS" ${BRANCH})
     local dirPattern="${branchType}_LRC_LCP_PS_LFS_OS_${yyyy}_${mm}*"
-    local dirsToDelete=$(find ${SHARE} -maxdepth 2 -type d -name "${dirPattern}" | grep -v ${keepRelease})
+    local dirsToDelete=$(find ${SHARE} -maxdepth 2 -type d -name "${dirPattern}")
 
     info "archive $SHARE LRC"
-    info "keep LRC release: ${keepRelease}"
     for DIR in $dirsToDelete
     do
         local archiveDir=$(echo $DIR | sed 's/\//_/g')
@@ -217,12 +211,10 @@ LRC_archiveBranchBldShare() {
     local branchType=$(getBranchPart ${BRANCH} TYPE)
     local mm=$(getBranchPart ${BRANCH} MM)
     local yyyy=$(getBranchPart ${BRANCH} YYYY)
-    local keepRelease=$(getValueFromEclFile "ECL_PS_LRC_LCP_LFS_OS" ${BRANCH})
     local dirPattern="${branchType}_LRC_LCP_PS_LFS_OS_${yyyy}_${mm}*"
-    local dirsToDelete=$(find ${BLD_SHARE} -maxdepth 2 -type d -name "${dirPattern}" | grep -v ${keepRelease})
+    local dirsToDelete=$(find ${BLD_SHARE} -maxdepth 2 -type d -name "${dirPattern}")
 
     info "archive $BLD_SHARE LRC"
-    info "keep LRC release: ${keepRelease}"
     for DIR in $dirsToDelete
     do
         local archiveDir=$(echo $DIR | sed 's/\//_/g')
