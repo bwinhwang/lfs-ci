@@ -21,9 +21,9 @@ def parameters = build?.actions.find{ it instanceof ParametersAction }?.paramete
 
 branch = ""
 
-deleteJobs = false
+moveJobs = false
 
-LRC_deleteJobs = false
+LRC_moveJobs = false
 
 debug = true
 
@@ -40,12 +40,12 @@ parameters.each {
         }
     }
     if(it.name == "DELETE_JOBS") {
-        deleteJobs = it.value
-        println("[INFO] got parameter DELETE_JOBS: $deleteJobs")
+        moveJobs = it.value
+        println("[INFO] got parameter DELETE_JOBS: $moveJobs")
     }
-    if(it.name == "LRC_DELETE_JOBS") {
-        LRC_deleteJobs = it.value
-        println("[INFO] got parameter LRC_DELETE_JOBS: $LRC_deleteJobs")
+    if(it.name == "LRC_MOVE_JOBS") {
+        LRC_moveJobs = it.value
+        println("[INFO] got parameter LRC_MOVE_JOBS: $LRC_moveJobs")
     }
     if(it.name == "DEBUG") {
         debug = it.value
@@ -53,7 +53,7 @@ parameters.each {
     }
 }
 
-if(!deleteJobs && !LRC_deleteJobs) {
+if(!moveJobs && !LRC_moveJobs) {
     println("[INFO] Nothing should be deleted.")
     return 0
 }
@@ -69,7 +69,7 @@ def deleteScmView() {
     def scm_view_obj = null
     def branch_view_obj = null
 
-    if(LRC_deleteJobs)
+    if(LRC_moveJobs)
         scm_view = "SCM_LRC"
 
     scm_view_obj = j.getView(scm_view)
@@ -85,7 +85,7 @@ def deleteScmView() {
 
 // Delete the branch[2..-1] view
 def deleteView() {
-    # TODO
+    // TODO
     println("[INFO] Remove sectioned view manually.")
     return 0
 
@@ -103,10 +103,10 @@ def deleteView() {
 
 // Delete none LRC jobs.
 // Collect LRC jobs in a list.
-if(deleteJobs || LRC_deleteJobs) {
+if(moveJobs || LRC_moveJobs) {
     for(p in jenkins.model.Jenkins.theInstance.getProjects()) {
         job_name = p.getName()
-        if(deleteJobs && job_name.find("_"+branch+"_") && !job_name.find("LFS_CI_-_LRC_") && !job_name.find("LFS_Prod_-_LRC_")) {
+        if(moveJobs && job_name.find("_"+branch+"_") && !job_name.find("LFS_CI_-_LRC_") && !job_name.find("LFS_Prod_-_LRC_")) {
                 if(debug) {
                     println("[DEBUG] delete job: $p.name (dry run)")
                 } else {
@@ -114,7 +114,7 @@ if(deleteJobs || LRC_deleteJobs) {
                     println("[INFO] deleted job: $p.name")
                 }
         }
-        else if(LRC_deleteJobs && (job_name.find("LFS_CI_-_LRC_"+branch+"_-") || job_name.find("LFS_Prod_-_LRC_"+branch+"_-"))) {
+        else if(LRC_moveJobs && (job_name.find("LFS_CI_-_LRC_"+branch+"_-") || job_name.find("LFS_Prod_-_LRC_"+branch+"_-"))) {
             lrc_jobs.add(p)
         }
     }
@@ -126,7 +126,7 @@ if(deleteJobs || LRC_deleteJobs) {
 }
 
 // Delete LRC jobs.
-if(LRC_deleteJobs && lrc_jobs) {
+if(LRC_moveJobs && lrc_jobs) {
     for(p in lrc_jobs) {
         if(debug) {
             println("[DEBUG] delete LRC job: $p.name")
