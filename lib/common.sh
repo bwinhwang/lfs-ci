@@ -845,7 +845,7 @@ getBranchPart() {
         local nr=$(echo ${branch}  | cut -c3)
         local mm=$(echo ${branch}  | cut -c6,7)
         local yyyy=$((2000+yy))
-        branchType=$(echo $branch | cut -c1,3)
+        branchType=$(echo $branch | cut -c1-3)
     else
         error "Only FB and MD branches are supported."
         return 1
