@@ -4,12 +4,25 @@
 # REQUESTOR_USERID=${BUILD_USER_ID}
 # REQUESTOR_EMAIL=${BUILD_USER_EMAIL}
 
+[[ -z ${LFS_CI_SOURCE_build}     ]] && source ${LFS_CI_ROOT}/lib/build.sh
+[[ -z ${LFS_CI_SOURCE_artifacts} ]] && source ${LFS_CI_ROOT}/lib/artifacts.sh
+[[ -z ${LFS_CI_SOURCE_common}    ]] && source ${LFS_CI_ROOT}/lib/common.sh
+
+LFS_CI_SOURCE_special_build='$Id$'
+
 specialBuildPreparation() {
 
     local buildType=${1}
+    mustHaveValue "${buildType}" "build type"
+
     local label=${2}
+    mustHaveValue "${label}" "label"
+
     local revision=${2} # or label name
+    mustHaveValue "${revision}" "revision"
+
     local location=${3}
+    mustHaveValue "${location}" "location"
 
     requiredParameters WORKSPACE            \
                        JOB_NAME             \
@@ -28,7 +41,8 @@ specialBuildPreparation() {
 
     debug "writing new label file in workspace ${workspace}"
     execute mkdir -p ${workspace}/bld/bld-fsmci-summary/
-    echo ${label} > ${workspace}/bld/bld-fsmci-summary/label
+    echo ${label}    > ${workspace}/bld/bld-fsmci-summary/label
+    echo ${location} > ${workspace}/bld/bld-fsmci-summary/location
 
     debug "create own revision control file"
     echo "src-fake http://fakeurl/ ${revision}" > ${WORKSPACE}/revisionstate.xml
@@ -51,7 +65,6 @@ EOF
     setBuildDescription "${JOB_NAME}" "${BUILD_NUMBER}" "${label}<br>${REQUESTOR}"
 
     info "build preparation done."
-
     return
 }
 
@@ -103,3 +116,25 @@ specialBuildisRequiredForLrc() {
     return 0
 }
 
+specialBuildCreateWorkspaceAndBuild() {
+    requiredParameters UPSTREAM_PROJECT UPSTREAM_BUILD
+
+    # create a workspace
+    createWorkspace
+
+    copyArtifactsToWorkspace "${UPSTREAM_PROJECT}" "${UPSTREAM_BUILD}" "fsmci"
+    mustHaveNextCiLabelName
+    local label=$(getNextCiLabelName)
+    mustHaveValue ${label} "label name"
+    setBuildDescription "${JOB_NAME}" "${BUILD_NUMBER}" "${label}"
+
+    # apply patches to the workspace
+    applyKnifePatches
+
+    buildLfs
+
+    info "upload results to artifakts share."
+    createArtifactArchive
+
+    return
+}

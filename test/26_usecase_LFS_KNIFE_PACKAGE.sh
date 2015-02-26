@@ -1,7 +1,6 @@
 #!/bin/bash
 
 source test/common.sh
-
 source lib/uc_knife_build.sh
 
 export UT_MOCKED_COMMANDS=$(createTempFile)
@@ -49,14 +48,15 @@ tearDown() {
 
 test1() {
     export WORKSPACE=$(createTempDirectory)
-    export KNIFE_LFS_BASELINE=PS_LFS_OS_2014_01_0001
+    export KNIFE_LFS_BASELINE=PS_LFS_OS_2015_01_0001
     export UPSTREAM_PROJECT=upstream_project
     export UPSTREAM_BUILD=123
     export JOB_NAME=LFS_KNIFE_-_knife_-_Build
     export BUILD_NUMBER=1234
     export LFS_CI_GLOBAL_BRANCH_NAME=trunk
 
-    assertTrue "usecase_LFS_KNIFE_PACKAGE"
+    # assertTrue "usecase_LFS_KNIFE_PACKAGE"
+    usecase_LFS_KNIFE_PACKAGE
 
     local expect=$(createTempFile)
 
