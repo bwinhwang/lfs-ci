@@ -4,6 +4,7 @@
 . lib/logging.sh
 
 oneTimeSetUp() {
+    export BRANCH="FB1408"
     . scripts/deleteBranch.sh
 }
 
