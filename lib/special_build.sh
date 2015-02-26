@@ -46,7 +46,7 @@ specialBuildPreparation() {
 
     debug "create own revision control file"
     echo "src-fake http://fakeurl/ ${revision}" > ${WORKSPACE}/revisionstate.xml
-    copyFileFromBuildDirectoryToWorkspace ${JOB_NAME} ${BUILD_NUMBER} revisionstate.xml
+    copyFileFromWorkspaceToBuildDirectory ${JOB_NAME} ${BUILD_NUMBER} revisionstate.xml
 
     info "storing input as artifacts"
     execute mkdir -p ${workspace}/bld/bld-${buildType,,}-input/

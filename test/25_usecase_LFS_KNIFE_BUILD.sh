@@ -27,8 +27,8 @@ oneTimeSetUp() {
     setBuildDescription() {
         mockedCommand "setBuildDescription $@"
     }
-    copyFileFromBuildDirectoryToWorkspace() {
-        mockedCommand "copyFileFromBuildDirectoryToWorkspace $@"
+    copyFileFromWorkspaceToBuildDirectory() {
+        mockedCommand "copyFileFromWorkspaceToBuildDirectory $@"
     }
     createArtifactArchive() {
         mockedCommand "createArtifactArchive $@"
@@ -69,7 +69,7 @@ test1() {
 cat <<EOF > ${expect}
 execute mkdir -p ${WORKSPACE}/workspace
 execute mkdir -p ${WORKSPACE}/workspace/bld/bld-fsmci-summary/
-copyFileFromBuildDirectoryToWorkspace LFS_KNIFE_-_knife_-_Build 123 revisionstate.xml
+copyFileFromWorkspaceToBuildDirectory LFS_KNIFE_-_knife_-_Build 123 revisionstate.xml
 execute mkdir -p ${WORKSPACE}/workspace/bld/bld-knife-input/
 execute -i cp -a ${WORKSPACE}/lfs.patch ${WORKSPACE}/workspace/bld/bld-knife-input/
 createArtifactArchive 
