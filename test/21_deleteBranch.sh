@@ -36,6 +36,17 @@ test_getBranchPartMD() {
   assertEquals "Branch NR does not match." "1" "$nr"
 }
 
+test_LRC_getBranchPartFB() {
+  local branchType=$(getBranchPart LRC_FB1408 TYPE)
+  assertEquals "Branch type does not match." "FB" "${branchType}"
+  local yy=$(getBranchPart LRC_FB1408 YY)
+  assertEquals "Branch YY does not match." "14" "$yy"
+  local yyyy=$(getBranchPart LRC_FB1408 YYYY)
+  assertEquals "Branch YYYY does not match." "2014" "$yyyy"
+  local mm=$(getBranchPart LRC_FB1408 MM)
+  assertEquals "Branch MM does not match." "08" "$mm"
+}
+
 #test_getEclValue() {
 #    local value=$(getValueFromEclFile "ECL_PS_LFS_OS" MAINBRANCH)
 #    assertNotNull "Did not get a value from ECL." "${value}"

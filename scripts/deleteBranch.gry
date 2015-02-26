@@ -86,6 +86,11 @@ def deleteScmView() {
 // Delete the branch[2..-1] view
 def deleteView() {
     def branch_view = branch[2..-1]
+
+    // TODO
+    println("[INFO] TODO: Remove list view section manually within sectioned view ${branch_view}.")
+    return 0
+
     if(debug) {
         println("[DEBUG] delete view: $branch_view")
     } else {

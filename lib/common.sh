@@ -833,6 +833,7 @@ mustHaveAccessableServer() {
 getBranchPart() {
     local branch=$1
     local what=$2
+    [[ $(echo $branch | cut -c1-4) == "LRC_" ]] && branch=$(echo $branch | cut -d'_' -f2)
     local branch_type=$(echo ${branch} | cut -c1,2)
 
     if [[ "${branch_type}" == "FB" ]]; then

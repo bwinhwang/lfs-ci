@@ -2,20 +2,22 @@
 
 source ${LFS_CI_ROOT}/lib/common.sh
 source ${LFS_CI_ROOT}/lib/logging.sh
-source ${LFS_CI_ROOT}/lib/subversion.sh
+source ${LFS_CI_ROOT}/lib/jenkins.sh
+
+setBuildDescription "${JOB_NAME}" "${BUILD_NUMBER}" "${BRANCH}"
 
 info "###############################################################"
 info "# Variables from Jenkins"
 info "# ----------------------"
-info "# BRANCH:           $NEW_BRANCH"
-info "# MOVE_SVN:         $MOVE_SVN"
-info "# DELETE_JOBS:      $DELETE_JOBS"
-info "# DELETE_SHARE:     $DELETE_SHARE"
-info "# LRC_MOVE_SVN:     $LRC_MOVE_SVN"
-info "# LRC_DELETE_JOBS:  $LRC_DELETE_JOBS"
-info "# LRC_DELETE_SHARE: $LRC_DELETE_SHARE"
-info "# DEBUG:            $DEBUG"
-info "# COMMENT:          $COMMENT"
+info "# BRANCH:          $BRANCH"
+info "# MOVE_SVN:        $MOVE_SVN"
+info "# DELETE_JOBS:     $DELETE_JOBS"
+info "# MOVE_SHARE:      $MOVE_SHARE"
+info "# LRC_MOVE_SVN:    $LRC_MOVE_SVN"
+info "# LRC_DELETE_JOBS: $LRC_DELETE_JOBS"
+info "# LRC_MOVE_SHARE:  $LRC_MOVE_SHARE"
+info "# DEBUG:           $DEBUG"
+info "# COMMENT:         $COMMENT"
 info "###############################################################"
 
 initTempDirectory
@@ -68,7 +70,7 @@ getValueFromEclFile() {
 
 __checkParams() {
     [[ ! "$BRANCH" ]] && { error "BRANCH must be specified"; return 1; }
-    echo $BRANCH | grep -e "^FB[0-9]\{4\}\|^MD[0-9]\{4\}\|TEST_ERWIN\|TESTERWIN" || { error "$BRANCH is not valid."; return 1; }
+    echo $BRANCH | grep -e "^FB[0-9]\{4\}\|^MD[0-9]\{5\}\|^LRC_FB[0-9]\{4\}\|TEST_ERWIN\|TESTERWIN" || { error "$BRANCH is not valid."; return 1; }
 }
 
 __checkOthers() {
@@ -120,10 +122,17 @@ moveBranchSvn() {
 #  @param   <none>
 #  @return  <none>
 LRC_moveBranchSvn() {
-    svn ${SVN_OPTS} ls ${SVN_REPO}/${SVN_DIR}/${SVN_BLD_DIR}/locations-LRC_${BRANCH} 2> /dev/null && {
-        __cmd svn ${SVN_OPTS} move -m \"moved locations-LRC_${BRANCH} to obsolete\" \
-            ${SVN_REPO}/${SVN_DIR}/${SVN_BLD_DIR}/locations-LRC_${BRANCH} ${SVN_REPO}/${SVN_DIR}/${SVN_BLD_DIR}/obsolete;
+    local branch="${BRANCH}"
+    svn ${SVN_OPTS} ls ${SVN_REPO}/${SVN_DIR}/${SVN_BLD_DIR}/locations-${branch} 2> /dev/null && {
+        __cmd svn ${SVN_OPTS} move -m \"moved locations-${branch} to obsolete\" \
+            ${SVN_REPO}/${SVN_DIR}/${SVN_BLD_DIR}/locations-${branch} ${SVN_REPO}/${SVN_DIR}/${SVN_BLD_DIR}/obsolete;
     }
+
+    svn ls ${SVN_OPTS} ${SVN_REPO}/${SVN_DIR}/${branch} 2> /dev/null && {
+        __cmd svn ${SVN_OPTS} move -m \"moved ${branch} to obsolete\" \
+            ${SVN_REPO}/${SVN_DIR}/${branch} ${SVN_REPO}/${SVN_DIR}/obsolete;
+    }
+
     return 0
 }
 
@@ -226,8 +235,8 @@ __checkParams || { error "Params check failed."; exit 1; }
 __checkOthers || { error "Checking some stuff failed."; exit 1; }
 
 [[ ${MOVE_SVN} == true ]] && moveBranchSvn || info "Not moving $BRANCH in repo"
-[[ ${DELETE_SHARE} == true ]] && { archiveBranchShare; archiveBranchBldShare; } || info "Not archiving $BRANCH on share"
+[[ ${MOVE_SHARE} == true ]] && { archiveBranchShare; archiveBranchBldShare; } || info "Not archiving $BRANCH on share"
 
 [[ ${LRC_MOVE_SVN} == true ]] && LRC_moveBranchSvn || info "Not moving $BRANCH in repo for LRC"
-[[ ${LRC_DELETE_SHARE} == true ]] && { LRC_archiveBranchShare; LRC_archiveBranchBldShare; } || info "Not archiving $BRANCH on share for LRC"
+[[ ${LRC_MOVE_SHARE} == true ]] && { LRC_archiveBranchShare; LRC_archiveBranchBldShare; } || info "Not archiving $BRANCH on share for LRC"
 
