@@ -7,6 +7,8 @@
  * 3. If no jobs left also delete the view of the branch.
  */
 
+println("\nRunning script deleteBranch.gry\n")
+
 import jenkins.model.Jenkins
 import hudson.model.ParametersAction
 

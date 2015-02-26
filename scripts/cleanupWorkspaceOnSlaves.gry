@@ -9,6 +9,7 @@
 // see which directories would be deleted on which slave.
 ///////////////////////////////////////////////////////////////////////////////
 
+println("\nRunning script cleanupWorkspaceOnSlaves.gry\n")
 
 import hudson.model.ParametersAction
 
