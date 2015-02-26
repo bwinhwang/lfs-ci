@@ -68,7 +68,7 @@ getValueFromEclFile() {
 
 __checkParams() {
     [[ ! "$BRANCH" ]] && { error "BRANCH must be specified"; return 1; }
-    echo $BRANCH | grep -e "^FB[0-9]\{4\}\|^MD[0-9]\{4\}\|TEST_ERWIN\|TESTERWIN" || { error "$BRANCH is not valid."; return 1; }
+    echo $BRANCH | grep -e "^FB[0-9]\{4\}\|^MD[0-9]\{5\}\|^LRC_FB[0-9]\{4\}\|TEST_ERWIN\|TESTERWIN" || { error "$BRANCH is not valid."; return 1; }
 }
 
 __checkOthers() {
@@ -120,7 +120,7 @@ moveBranchSvn() {
 #  @param   <none>
 #  @return  <none>
 LRC_moveBranchSvn() {
-    local branch="LRC_${BRANCH}"
+    local branch="${BRANCH}"
     svn ${SVN_OPTS} ls ${SVN_REPO}/${SVN_DIR}/${SVN_BLD_DIR}/locations-${branch} 2> /dev/null && {
         __cmd svn ${SVN_OPTS} move -m \"moved locations-${branch} to obsolete\" \
             ${SVN_REPO}/${SVN_DIR}/${SVN_BLD_DIR}/locations-${branch} ${SVN_REPO}/${SVN_DIR}/${SVN_BLD_DIR}/obsolete;

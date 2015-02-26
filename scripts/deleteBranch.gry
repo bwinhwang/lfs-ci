@@ -71,7 +71,6 @@ def deleteScmView() {
 
     if(LRC_deleteJobs)
         scm_view = "SCM_LRC"
-        branch_view = "LRC_" + branch
 
     scm_view_obj = j.getView(scm_view)
     branch_view_obj = scm_view_obj.getView(branch_view)
