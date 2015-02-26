@@ -91,24 +91,28 @@ println("[INFO] fsmr4_jobs: $fsmr4_jobs")
 def createScmView() {
     def scm_view = "SCM"
     def scm_view_obj = null
+    def branch_view_name = new_branch
     def new_branch_view_obj = null
 
     if(lrc_jobs) {
         scm_view = "SCM_LRC"
+        branch_view_name = "LRC_" + new_branch
     }
 
     scm_view_obj = Jenkins.instance.getView(scm_view)
 
     src_branch_view_obj = scm_view_obj.getView(src_branch.toUpperCase())
-    new_branch_view_obj = scm_view_obj.getView(new_branch)
+    new_branch_view_obj = scm_view_obj.getView(branch_view_name)
+
     if(new_branch_view_obj) {
-        println("[INFO] view $new_branch already exists.")
+        println("[INFO] view $branch_view_name already exists.")
     }
     else {
-        new_branch_view_obj = new ListView(new_branch, scm_view_obj)
+        new_branch_view_obj = new ListView(branch_view_name, scm_view_obj)
         scm_view_obj.addView(new_branch_view_obj)
-        println("[INFO] Added view $new_branch to $scm_view view")
+        println("[INFO] Added view $branch_view_name to $scm_view view")
     }
+
     return new_branch_view_obj
 }
 
