@@ -19,7 +19,7 @@ info "# COMMENT:         $COMMENT"
 info "###############################################################"
 
 initTempDirectory
-setBuildDescription "${JOB_NAME}" "${BUILD_NUMBER}" "${BRANCH}"
+setBuildDescription "${JOB_NAME}" "${BUILD_NUMBER}" "${BRANCH} DEBUG=${DEBUG}"
 
 SVN_REPO=$(getConfig lfsSourceRepos)
 SVN_DIR="os"
