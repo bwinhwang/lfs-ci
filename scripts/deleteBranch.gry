@@ -88,7 +88,7 @@ def deleteView() {
     def branch_view = branch[2..-1]
 
     if(LRC_deleteJobs)
-        branch_view = branch[4..-1]
+        branch_view = branch[6..-1]
 
     // TODO
     println("[INFO] TODO: Remove list view section manually within sectioned view ${branch_view}.")
