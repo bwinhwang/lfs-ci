@@ -4,8 +4,6 @@ source ${LFS_CI_ROOT}/lib/common.sh
 source ${LFS_CI_ROOT}/lib/logging.sh
 source ${LFS_CI_ROOT}/lib/jenkins.sh
 
-#setBuildDescription "${JOB_NAME}" "${BUILD_NUMBER}" "${BRANCH}"
-
 info "###############################################################"
 info "# Variables from Jenkins"
 info "# ----------------------"
@@ -21,6 +19,7 @@ info "# COMMENT:         $COMMENT"
 info "###############################################################"
 
 initTempDirectory
+setBuildDescription "${JOB_NAME}" "${BUILD_NUMBER}" "${BRANCH}"
 
 SVN_REPO=$(getConfig lfsSourceRepos)
 SVN_DIR="os"

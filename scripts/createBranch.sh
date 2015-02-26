@@ -4,7 +4,8 @@ source ${LFS_CI_ROOT}/lib/common.sh
 source ${LFS_CI_ROOT}/lib/logging.sh
 source ${LFS_CI_ROOT}/lib/jenkins.sh
 
-#setBuildDescription "${JOB_NAME}" "${BUILD_NUMBER}" "${BRANCH}"
+initTempDirectory
+setBuildDescription "${JOB_NAME}" "${BUILD_NUMBER}" "${BRANCH}"
 
 info "###############################################################"
 info "# Variables from Jenkins"
@@ -22,8 +23,6 @@ info "# DUMMY_COMMIT:        $DUMMY_COMMIT"
 info "# COPY_DELIVERY:       $COPY_DELIVERY"
 info "# UPDATE_LOCATIONS_TXT $UPDATE_LOCATIONS_TXT"
 info "###############################################################"
-
-initTempDirectory
 
 SVN_SERVER=$(getConfig lfsSourceRepos)
 SVN_DIR="os"
