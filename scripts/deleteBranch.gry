@@ -146,7 +146,7 @@ if(LRC_deleteJobs && lrc_jobs) {
     deleteScmView()
 }
 
-if(!lrc_jobs and !remaining_jobs) {
+if(!lrc_jobs && !remaining_jobs) {
     deleteView()
 }
 else {
