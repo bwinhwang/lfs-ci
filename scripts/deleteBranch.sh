@@ -21,7 +21,7 @@ info "###############################################################"
 initTempDirectory
 setBuildDescription "${JOB_NAME}" "${BUILD_NUMBER}" "${BRANCH} DEBUG=${DEBUG}"
 
-SVN_REPO=$(getConfig lfsSourceRepos)
+SVN_REPO="https://svne1.access.nsn.com/isource/svnroot/BTS_SC_LFS"
 SVN_DIR="os"
 SVN_BLD_DIR="trunk/bldtools"
 SHARE="/build/home/CI_LFS/Release_Candidates"
@@ -69,7 +69,7 @@ getValueFromEclFile() {
 
 __checkParams() {
     [[ ! "$BRANCH" ]] && { error "BRANCH must be specified"; return 1; }
-    echo $BRANCH | grep -e "^FB[0-9]\{4\}\|^MD[0-9]\{5\}\|^LRC_FB[0-9]\{4\}\|TEST_ERWIN\|TESTERWIN" || { error "$BRANCH is not valid."; return 1; }
+    echo $BRANCH | grep -q -e "^FB[0-9]\{4\}\|^MD[0-9]\{5\}\|^LRC_FB[0-9]\{4\}\|TEST_ERWIN\|TESTERWIN" || { error "$BRANCH is not valid."; return 1; }
 }
 
 __checkOthers() {
@@ -113,6 +113,7 @@ moveBranchSvn() {
         __cmd svn ${SVN_OPTS} move -m \"moved locations-${BRANCH} FSMR4 to obsolete\" \
             ${SVN_REPO}/${SVN_DIR}/${SVN_BLD_DIR}/locations-${BRANCH}_FSMR4 ${SVN_REPO}/${SVN_DIR}/${SVN_BLD_DIR}/obsolete;
     }
+
     return 0
 }
 

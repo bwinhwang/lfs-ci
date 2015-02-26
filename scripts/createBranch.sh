@@ -24,7 +24,7 @@ info "# COPY_DELIVERY:       $COPY_DELIVERY"
 info "# UPDATE_LOCATIONS_TXT $UPDATE_LOCATIONS_TXT"
 info "###############################################################"
 
-SVN_SERVER=$(getConfig lfsSourceRepos)
+SVN_REPO="https://svne1.access.nsn.com/isource/svnroot/BTS_SC_LFS"
 SVN_DIR="os"
 SRC_PROJECT="src-project"
 
@@ -68,12 +68,12 @@ svnCopyBranch() {
     mustHaveValue "${newBranch}" "new branch"
 
     local message="initial creation of ${newBranch} branch based on ${srcBranch} rev. ${REVISION}. \
-    DESCRIPTION: svn cp -r${REVISION} --parents ${SVN_SERVER}/${SVN_PATH} ${SVN_SERVER}/${SVN_DIR}/${newBranch}/trunk. \
+    DESCRIPTION: svn cp -r${REVISION} --parents ${SVN_REPO}/${SVN_PATH} ${SVN_REPO}/${SVN_DIR}/${newBranch}/trunk. \
     $COMMENT"
 
-    svn ls ${SVN_SERVER}/${SVN_DIR}/${newBranch} || {
-        svn copy -r ${REVISION} -m "${message}" --parents ${SVN_SERVER}/${SVN_PATH} \
-            ${SVN_SERVER}/${SVN_DIR}/${newBranch}/trunk;
+    svn ls ${SVN_REPO}/${SVN_DIR}/${newBranch} || {
+        svn copy -r ${REVISION} -m "${message}" --parents ${SVN_REPO}/${SVN_PATH} \
+            ${SVN_REPO}/${SVN_DIR}/${newBranch}/trunk;
     }
 }
 
@@ -92,16 +92,15 @@ svnCopyLocations() {
     mustHaveValue "${srcBranch}" "source branch"
     mustHaveValue "${newBranch}" "new branch"
 
-    svn ls ${SVN_SERVER}/${SVN_DIR}/trunk/bldtools/locations-${LOCATIONS} \
-        ${SVN_SERVER}/${SVN_DIR}/trunk/bldtools/locations-${newBranch} || {
-            svn copy -m "copy locations branch ${newBranch}" ${SVN_SERVER}/${SVN_DIR}/trunk/bldtools/locations-${LOCATIONS} \
-                ${SVN_SERVER}/${SVN_DIR}/trunk/bldtools/locations-${newBranch};
-            sleep 5;
-            svn checkout ${SVN_SERVER}/${SVN_DIR}/trunk/bldtools/locations-${newBranch};
+    svn ls ${SVN_REPO}/${SVN_DIR}/trunk/bldtools/locations-${LOCATIONS} \
+        ${SVN_REPO}/${SVN_DIR}/trunk/bldtools/locations-${newBranch} || {
+            svn copy -m "copy locations branch ${newBranch}" ${SVN_REPO}/${SVN_DIR}/trunk/bldtools/locations-${LOCATIONS} \
+                ${SVN_REPO}/${SVN_DIR}/trunk/bldtools/locations-${newBranch};
+            svn checkout ${SVN_REPO}/${SVN_DIR}/trunk/bldtools/locations-${newBranch};
             cd locations-${newBranch};
             sed -i -e "s/\/${srcBranch}\//\/${newBranch}\/trunk\//" Dependencies;
             svn commit -m "added new location ${newBranch}.";
-            svn delete -m "removed bldtools, because they are always used from MAINTRUNK" ${SVN_SERVER}/${SVN_DIR}/${newBranch}/trunk/bldtools;
+            svn delete -m "removed bldtools, because they are always used from MAINTRUNK" ${SVN_REPO}/${SVN_DIR}/${newBranch}/trunk/bldtools;
     }
 }
 
@@ -120,11 +119,10 @@ svnCopyLocationsFSMR4() {
     mustHaveValue "${srcBranch}" "source branch"
     mustHaveValue "${newBranch}" "new branch"
 
-    svn ls ${SVN_SERVER}/${SVN_DIR}/trunk/bldtools/${LOCATIONS_FSMR4} || {
-        svn copy -m "copy locations branch ${newBranch}" ${SVN_SERVER}/${SVN_DIR}/trunk/bldtools/${LOCATIONS_FSMR4} \
-            ${SVN_SERVER}/${SVN_DIR}/trunk/bldtools/locations-${newBranch}_FSMR4
-        sleep 5
-        svn checkout ${SVN_SERVER}/${SVN_DIR}/trunk/bldtools/locations-${newBranch}_FSMR4
+    svn ls ${SVN_REPO}/${SVN_DIR}/trunk/bldtools/${LOCATIONS_FSMR4} || {
+        svn copy -m "copy locations branch ${newBranch}" ${SVN_REPO}/${SVN_DIR}/trunk/bldtools/${LOCATIONS_FSMR4} \
+            ${SVN_REPO}/${SVN_DIR}/trunk/bldtools/locations-${newBranch}_FSMR4
+        svn checkout ${SVN_REPO}/${SVN_DIR}/trunk/bldtools/locations-${newBranch}_FSMR4
         cd locations-${newBranch}_FSMR4
         sed -i -e "s/\/${srcBranch}\//\/${newBranch}\/trunk\//" Dependencies
         svn commit -m "added new location ${newBranch}_FSMR4."
@@ -147,12 +145,12 @@ svnCopyBranchLRC() {
     mustHaveValue "${newBranch}" "new branch"
 
     local message="initial creation of ${newBranch} branch based on ${srcBranch} rev. ${REVISION}. \
-    DESCRIPTION: svn cp -r${REVISION} --parents ${SVN_SERVER}/${SVN_PATH} ${SVN_SERVER}/${SVN_DIR}/${newBranch}/trunk. \
+    DESCRIPTION: svn cp -r${REVISION} --parents ${SVN_REPO}/${SVN_PATH} ${SVN_REPO}/${SVN_DIR}/${newBranch}/trunk. \
     $COMMENT"
 
-    svn ls ${SVN_SERVER}/${SVN_PATH} || {
-        svn copy -r${REVISION} -m "${message}" --parents ${SVN_SERVER}/${SVN_PATH} \
-            ${SVN_SERVER}/${SVN_DIR}/${newBranch}/trunk
+    svn ls ${SVN_REPO}/${SVN_PATH} || {
+        svn copy -r${REVISION} -m "${message}" --parents ${SVN_REPO}/${SVN_PATH} \
+            ${SVN_REPO}/${SVN_DIR}/${newBranch}/trunk
     }
 }
 
@@ -171,16 +169,15 @@ svnCopyLocationsLRC() {
     mustHaveValue "${srcBranch}" "source branch"
     mustHaveValue "${newBranch}" "new branch"
 
-    svn ls ${SVN_SERVER}/${SVN_DIR}/trunk/bldtools/${LOCATIONS_LRC} || {
-        svn copy -m "copy locations branch ${newBranch}" ${SVN_SERVER}/${SVN_DIR}/trunk/bldtools/${LOCATIONS_LRC} \
-            ${SVN_SERVER}/${SVN_DIR}/trunk/bldtools/locations-${newBranch}
-        sleep 5
-        svn checkout ${SVN_SERVER}/${SVN_DIR}/trunk/bldtools/locations-${newBranch}
+    svn ls ${SVN_REPO}/${SVN_DIR}/trunk/bldtools/${LOCATIONS_LRC} || {
+        svn copy -m "copy locations branch ${newBranch}" ${SVN_REPO}/${SVN_DIR}/trunk/bldtools/${LOCATIONS_LRC} \
+            ${SVN_REPO}/${SVN_DIR}/trunk/bldtools/locations-${newBranch}
+        svn checkout ${SVN_REPO}/${SVN_DIR}/trunk/bldtools/locations-${newBranch}
         cd locations-${newBranch}
         sed -i -e "s/\/${srcBranch}\//\/${newBranch}\/trunk\//" Dependencies
         svn commit -m "added new location ${newBranch}."
     }
-    svn delete -m "removed bldtools, because they are always used from MAINTRUNK" ${SVN_SERVER}/${SVN_DIR}/${newBranch}/trunk/bldtools;
+    svn delete -m "removed bldtools, because they are always used from MAINTRUNK" ${SVN_REPO}/${SVN_DIR}/${newBranch}/trunk/bldtools;
 }
 
 ## @fn      createBranchInGit()
@@ -201,7 +198,7 @@ createBranchInGit() {
         # TODO: get GIT server from config
         local gitServer="psulm.nsn-net.net"
 
-        gitRevision=$(svn cat ${SVN_SERVER}/${SVN_PATH}/main/${SRC_PROJECT}/src/gitrevision)
+        gitRevision=$(svn cat ${SVN_REPO}/${SVN_PATH}/main/${SRC_PROJECT}/src/gitrevision)
         info "GIT revision: ${gitRevision}"
         git clone ssh://git@${gitServer}/build/build
         cd build
@@ -225,7 +222,7 @@ svnDummyCommit() {
     local newBranch=$1
     mustHaveValue "${newBranch}" "new branch"
 
-    svn checkout ${SVN_SERVER}/${SVN_DIR}/${newBranch}/trunk/main/${SRC_PROJECT}
+    svn checkout ${SVN_REPO}/${SVN_DIR}/${newBranch}/trunk/main/${SRC_PROJECT}
     if [[ -d ${SRC_PROJECT} ]]; then
         cd ${SRC_PROJECT}
         echo >> src/README
@@ -248,7 +245,7 @@ svnDummyCommitLRC() {
     local newBranch="LRC_$1"
     mustHaveValue "${newBranch}" "new branch"
 
-    svn checkout ${SVN_SERVER}/${SVN_DIR}/${newBranch}/trunk/lrc/${SRC_PROJECT}
+    svn checkout ${SVN_REPO}/${SVN_DIR}/${newBranch}/trunk/lrc/${SRC_PROJECT}
     if [[ -d ${SRC_PROJECT} ]]; then
         cd ${SRC_PROJECT}
         echo >> src/README
@@ -278,7 +275,7 @@ svnEditLocationsTxtFile() {
 
     info "Add ${newBranch} to trunk/${bldTools}/${locationsTxt}"
     mkdir ${bldTools}
-    svn checkout --depth empty ${SVN_SERVER}/${SVN_DIR}/trunk/${bldTools} ${bldTools}
+    svn checkout --depth empty ${SVN_REPO}/${SVN_DIR}/trunk/${bldTools} ${bldTools}
     cd ${bldTools}
     svn update ${locationsTxt}
 
@@ -311,7 +308,7 @@ svnCopyDelivery() {
     local newBranch=$2
     local yyyy=$(getBranchPart ${newBranch} YYYY)
     local mm=$(getBranchPart ${newBranch} MM)
-    local svnAddress=$(echo ${SVN_SERVER} | awk -F/ '{print $1"//"$2$3"/"$4"/"$5}')
+    local svnAddress=$(echo ${SVN_REPO} | awk -F/ '{print $1"//"$2$3"/"$4"/"$5}')
     mustHaveValue "${yyyy}" "yyyy"
     mustHaveValue "${mm}" "mm"
 
@@ -342,7 +339,7 @@ svnCopyDeliveryLRC() {
     local newBranch=$2
     local yyyy=$(getBranchPart ${newBranch} YYYY)
     local mm=$(getBranchPart ${newBranch} MM)
-    local svnAddress=$(echo ${SVN_SERVER} | awk -F/ '{print $1"//"$2$3"/"$4"/"$5}')
+    local svnAddress=$(echo ${SVN_REPO} | awk -F/ '{print $1"//"$2$3"/"$4"/"$5}')
     mustHaveValue "${yyyy}" "yyyy"
     mustHaveValue "${mm}" "mm"
 
