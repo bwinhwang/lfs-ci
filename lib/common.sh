@@ -835,6 +835,8 @@ getBranchPart() {
     local what=$2
     local branch_type=$(echo ${branch} | cut -c1,2)
 
+    [[ $(echo $branch | cut -c1-4) == "LRC_" ]] && branch=$(echo $branch | cut -d'_' -f2)
+
     if [[ "${branch_type}" == "FB" ]]; then
         local yy=$(echo ${branch}  | cut -c3,4)
         local mm=$(echo ${branch}  | cut -c5,6)
