@@ -2,7 +2,9 @@
 
 source ${LFS_CI_ROOT}/lib/common.sh
 source ${LFS_CI_ROOT}/lib/logging.sh
-source ${LFS_CI_ROOT}/lib/subversion.sh
+source ${LFS_CI_ROOT}/lib/jenkins.sh
+
+setBuildDescription "${JOB_NAME}" "${BUILD_NUMBER}" "${BRANCH}"
 
 info "###############################################################"
 info "# Variables from Jenkins"
@@ -96,7 +98,7 @@ svnCopyLocations() {
             svn copy -m "copy locations branch ${newBranch}" ${SVN_SERVER}/${SVN_DIR}/trunk/bldtools/locations-${LOCATIONS} \
                 ${SVN_SERVER}/${SVN_DIR}/trunk/bldtools/locations-${newBranch};
             sleep 5;
-            svnCheckout ${SVN_SERVER}/${SVN_DIR}/trunk/bldtools/locations-${newBranch};
+            svn checkout ${SVN_SERVER}/${SVN_DIR}/trunk/bldtools/locations-${newBranch};
             cd locations-${newBranch};
             sed -i -e "s/\/${srcBranch}\//\/${newBranch}\/trunk\//" Dependencies;
             svn commit -m "added new location ${newBranch}.";
@@ -123,7 +125,7 @@ svnCopyLocationsFSMR4() {
         svn copy -m "copy locations branch ${newBranch}" ${SVN_SERVER}/${SVN_DIR}/trunk/bldtools/${LOCATIONS_FSMR4} \
             ${SVN_SERVER}/${SVN_DIR}/trunk/bldtools/locations-${newBranch}_FSMR4
         sleep 5
-        svnCheckout ${SVN_SERVER}/${SVN_DIR}/trunk/bldtools/locations-${newBranch}_FSMR4
+        svn checkout ${SVN_SERVER}/${SVN_DIR}/trunk/bldtools/locations-${newBranch}_FSMR4
         cd locations-${newBranch}_FSMR4
         sed -i -e "s/\/${srcBranch}\//\/${newBranch}\/trunk\//" Dependencies
         svn commit -m "added new location ${newBranch}_FSMR4."
@@ -174,7 +176,7 @@ svnCopyLocationsLRC() {
         svn copy -m "copy locations branch ${newBranch}" ${SVN_SERVER}/${SVN_DIR}/trunk/bldtools/${LOCATIONS_LRC} \
             ${SVN_SERVER}/${SVN_DIR}/trunk/bldtools/locations-${newBranch}
         sleep 5
-        svnCheckout ${SVN_SERVER}/${SVN_DIR}/trunk/bldtools/locations-${newBranch}
+        svn checkout ${SVN_SERVER}/${SVN_DIR}/trunk/bldtools/locations-${newBranch}
         cd locations-${newBranch}
         sed -i -e "s/\/${srcBranch}\//\/${newBranch}\/trunk\//" Dependencies
         svn commit -m "added new location ${newBranch}."
@@ -224,7 +226,7 @@ svnDummyCommit() {
     local newBranch=$1
     mustHaveValue "${newBranch}" "new branch"
 
-    svnCheckout ${SVN_SERVER}/${SVN_DIR}/${newBranch}/trunk/main/${SRC_PROJECT}
+    svn checkout ${SVN_SERVER}/${SVN_DIR}/${newBranch}/trunk/main/${SRC_PROJECT}
     if [[ -d ${SRC_PROJECT} ]]; then
         cd ${SRC_PROJECT}
         echo >> src/README
@@ -247,7 +249,7 @@ svnDummyCommitLRC() {
     local newBranch="LRC_$1"
     mustHaveValue "${newBranch}" "new branch"
 
-    svnCheckout ${SVN_SERVER}/${SVN_DIR}/${newBranch}/trunk/lrc/${SRC_PROJECT}
+    svn checkout ${SVN_SERVER}/${SVN_DIR}/${newBranch}/trunk/lrc/${SRC_PROJECT}
     if [[ -d ${SRC_PROJECT} ]]; then
         cd ${SRC_PROJECT}
         echo >> src/README
@@ -277,7 +279,7 @@ svnEditLocationsTxtFile() {
 
     info "Add ${newBranch} to trunk/${bldTools}/${locationsTxt}"
     mkdir ${bldTools}
-    svnCheckout --depth empty ${SVN_SERVER}/${SVN_DIR}/trunk/${bldTools} ${bldTools}
+    svn checkout --depth empty ${SVN_SERVER}/${SVN_DIR}/trunk/${bldTools} ${bldTools}
     cd ${bldTools}
     svn update ${locationsTxt}
 
@@ -310,8 +312,7 @@ svnCopyDelivery() {
     local newBranch=$2
     local yyyy=$(getBranchPart ${newBranch} YYYY)
     local mm=$(getBranchPart ${newBranch} MM)
-    # TODO: get svn addr from config
-    local svnAddress="https://svne1.access.nokiasiemensnetworks.com/isource/svnroot"
+    local svnAddress=$(echo ${SVN_SERVER} | awk -F/ '{print $1"//"$2$3"/"$4"/"$5}')
     mustHaveValue "${yyyy}" "yyyy"
     mustHaveValue "${mm}" "mm"
 
@@ -342,7 +343,7 @@ svnCopyDeliveryLRC() {
     local newBranch=$2
     local yyyy=$(getBranchPart ${newBranch} YYYY)
     local mm=$(getBranchPart ${newBranch} MM)
-    local svnAddress="https://svne1.access.nokiasiemensnetworks.com/isource/svnroot"
+    local svnAddress=$(echo ${SVN_SERVER} | awk -F/ '{print $1"//"$2$3"/"$4"/"$5}')
     mustHaveValue "${yyyy}" "yyyy"
     mustHaveValue "${mm}" "mm"
 
