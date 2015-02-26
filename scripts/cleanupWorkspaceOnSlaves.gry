@@ -47,8 +47,6 @@ parameters.each {
 if(!branch) {
     println("[ERROR] BRANCH is not specified")
     return 1
-} else if(LRC_deleteJobs == true) {
-    branch = "LRC_" + branch
 }
 
 if(debug == true) {
