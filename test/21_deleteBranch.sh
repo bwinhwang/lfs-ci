@@ -25,7 +25,7 @@ test_getBranchPartFB() {
 
 test_getBranchPartMD() {
   local branchType=$(getBranchPart MD11408 TYPE)
-  assertEquals "Branch type does not match." "MD" "${branchType}"
+  assertEquals "Branch type does not match." "MD1" "${branchType}"
   local yy=$(getBranchPart MD11408 YY)
   assertEquals "Branch YY does not match." "14" "$yy"
   local yyyy=$(getBranchPart MD11408 YYYY)

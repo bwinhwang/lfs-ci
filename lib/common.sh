@@ -834,17 +834,18 @@ getBranchPart() {
     local branch=$1
     local what=$2
     [[ $(echo $branch | cut -c1-4) == "LRC_" ]] && branch=$(echo $branch | cut -d'_' -f2)
-    local branch_type=$(echo ${branch} | cut -c1,2)
+    local branchType=$(echo ${branch} | cut -c1,2)
 
-    if [[ "${branch_type}" == "FB" ]]; then
+    if [[ "${branchType}" == "FB" ]]; then
         local yy=$(echo ${branch}  | cut -c3,4)
         local mm=$(echo ${branch}  | cut -c5,6)
         local yyyy=$((2000+yy))
-    elif [[ "${branch_type}" == "MD" ]]; then
+    elif [[ "${branchType}" == "MD" ]]; then
         local yy=$(echo ${branch}  | cut -c4,5)
         local nr=$(echo ${branch}  | cut -c3)
         local mm=$(echo ${branch}  | cut -c6,7)
         local yyyy=$((2000+yy))
+        branchType=$(echo $branch | cut -c1,3)
     else
         error "Only FB and MD branches are supported."
         return 1
@@ -853,7 +854,7 @@ getBranchPart() {
     [[ ${what} == YY ]] && echo ${yy}
     [[ ${what} == YYYY ]] && echo ${yyyy}
     [[ ${what} == MM ]] && echo ${mm}
-    [[ ${what} == TYPE ]] && echo ${branch_type}
+    [[ ${what} == TYPE ]] && echo ${branchType}
     [[ ${what} == NR ]] && echo ${nr}
 }
 

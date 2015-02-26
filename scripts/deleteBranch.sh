@@ -136,7 +136,7 @@ LRC_moveBranchSvn() {
 }
 
 ## @fn      archiveBranchShare()
-#  @brief   delete data for BRANCH on share
+#  @brief   archive data for BRANCH on share
 #  @param   <none>
 #  @return  <none>
 archiveBranchShare() {
@@ -155,7 +155,7 @@ archiveBranchShare() {
 }
 
 ## @fn      archiveBranchBldShare()
-#  @brief   delete data for BRANCH on bld share
+#  @brief   archive data for BRANCH on bld share
 #  @param   <none>
 #  @return  <none>
 archiveBranchBldShare() {
@@ -174,7 +174,7 @@ archiveBranchBldShare() {
 }
 
 ## @fn      archiveBranchPkgShare()
-#  @brief   delete data for BRANCH on pkgpool share
+#  @brief   archive data for BRANCH on pkgpool share
 #  @param   <none>
 #  @return  <none>
 archiveBranchPkgShare() {
@@ -193,7 +193,7 @@ archiveBranchPkgShare() {
 }
 
 ## @fn      LRC_archiveBranchShare()
-#  @brief   delete date for BRANCH on share for LRC
+#  @brief   archive date for BRANCH on share for LRC
 #  @param   <none>
 #  @return  <none>
 LRC_archiveBranchShare() {
@@ -212,7 +212,7 @@ LRC_archiveBranchShare() {
 }
 
 ## @fn      LRC_archiveBranchBldShare()
-#  @brief   delete date for BRANCH on bld share for LRC
+#  @brief   archive date for BRANCH on bld share for LRC
 #  @param   <none>
 #  @return  <none>
 LRC_archiveBranchBldShare() {
