@@ -101,7 +101,7 @@ ci_job_test_unittest() {
     echo "functions_total;${FUNCTIONS_TOTAL}"     >> ${resultFile}
 
     databaseTestResults ${label}      \
-                        makingTest    \
+                        unittest_ddal \
                         localhost-x86 \
                         FSM-r3        \
                         ${resultFile}
