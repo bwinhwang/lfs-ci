@@ -140,78 +140,8 @@ usecase_LFS_KNIFE_PACKAGE() {
     info "running usecase LFS package"
     ci_job_package
 
-    mustHaveNextCiLabelName
-    local label=$(getNextCiLabelName)
-    mustHaveValue ${label} "label name"
+    specialBuildUploadAndNotifyUser
 
-    mustExistFile ${workspace}/bld/bld-knife-input/knife-requestor.txt
-
-    source ${workspace}/bld/bld-knife-input/knife-requestor.txt
-
-    info "creating tarball with lfs load..."
-    execute tar -cv \
-                --transform='s:^\./:os/:' \
-                -C ${workspace}/upload/ \
-                -f ${workspace}/lfs-knife_${label}.tar \
-                .
-
-    info "compressing lfs-knife.tar..."
-    execute ${LFS_CI_ROOT}/bin/pigz ${workspace}/lfs-knife_${label}.tar
-
-    info "upload knife to storage"
-    uploadKnifeToStorage ${workspace}/lfs-knife_${label}.tar.gz 
-
-    local readmeFile=${WORKSPACE}/.00_README_knife_result.txt
-    cat > ${readmeFile} <<EOF
-eslinn10.emea.nsn-net.net:/vol/eslinn10_bin/build/build/home/lfs_knives/lfs-knife_${label}.tar.gz
-or
-login to esling45.emea.nsn-net.net and download /build/home/lfs_knives/lfs-knife_${label}.tar.gz
-EOF
-
-    copyFileToArtifactDirectory $(basename ${readmeFile})
-
-    execute ${LFS_CI_ROOT}/bin/sendReleaseNote -r ${WORKSPACE}/.00_README_knife_result.txt \
-                                               -t ${label}                                 \
-                                               -n                                          \
-                                               -f ${LFS_CI_ROOT}/etc/file.cfg
     info "knife is done."
-    return
-}
-
-## @fn      uploadKnifeToStorage()
-#  @brief   upload the knife results to the storage
-#  @param   <none>
-#  @return  <none>
-uploadKnifeToStorage() {
-    knifeFile=${1}
-    mustExistFile ${knifeFile}
-
-    execute rsync -avrPe ssh ${knifeFile} lfs_share_sync_host_espoo2:/build/home/lfs_knives/
-
-    return
-}
-
-## @fn      applyKnifePatches()
-#  @brief   apply the patches from the knife input to the workspace
-#  @param   <none>
-#  @return  <none>
-applyKnifePatches() {
-    local workspace=$(getWorkspaceName)
-    mustHaveWorkspaceName
-
-    info "applying patches to workspace..."
-
-    if [[ -e ${workspace}/bld/bld-knife-input/knife.tar.gz ]] ; then
-        info "extracting knife.tar.gz..."
-        execute tar -xvz -C ${workspace} -f ${workspace}/bld/bld-knife-input/knife.tar.gz
-    fi
-
-    if [[ -e ${workspace}/bld/bld-knife-input/knife.patch ]] ; then
-        info "applying knife.patch file..."
-        execute patch -d ${workspace} < ${workspace}/bld/bld-knife-input/knife.patch
-    fi
-
-    # add more stuff here
-
     return
 }

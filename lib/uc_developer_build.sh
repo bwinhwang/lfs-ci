@@ -55,7 +55,14 @@ usecase_LFS_DEVELOPER_PACKAGE() {
     info "running usecase LFS package"
     ci_job_package
 
+    specialBuildUploadAndNotifyUser
+
+    mustHaveNextCiLabelName
+    local label=$(getNextCiLabelName)
+    mustHaveValue ${label} "label name"
+
+    linkFileToArtifactsDirectory /build/home/${USER}/private_builds/${label}.tar.gz
+
     info "developer build is done."
     return
 }
-

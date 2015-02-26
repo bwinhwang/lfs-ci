@@ -1,0 +1,9 @@
+Dear Colleague,
+
+your developer build is ready for use. 
+
+__RELEASE_NOTE_CONTENT__
+
+Best Regards,
+PS LFS CI Machine
+

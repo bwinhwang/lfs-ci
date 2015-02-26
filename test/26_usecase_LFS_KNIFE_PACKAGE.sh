@@ -68,11 +68,11 @@ test1() {
 cat <<EOF > ${expect}
 ci_job_package 
 mustHaveNextCiLabelName 
-execute tar -cv --transform=s:^\./:os/: -C ${WORKSPACE}/workspace/upload/ -f ${WORKSPACE}/workspace/lfs-knife_KNIFE_LABEL.tar .
-execute ${LFS_CI_ROOT}/bin/pigz ${WORKSPACE}/workspace/lfs-knife_KNIFE_LABEL.tar
-uploadKnifeToStorage ${WORKSPACE}/workspace/lfs-knife_KNIFE_LABEL.tar.gz
-copyFileToArtifactDirectory .00_README_knife_result.txt
-execute ${LFS_CI_ROOT}/bin/sendReleaseNote -r ${WORKSPACE}/.00_README_knife_result.txt -t KNIFE_LABEL -n -f ${LFS_CI_ROOT}/etc/file.cfg
+execute tar -cv --transform=s:^\./:os/: -C ${WORKSPACE}/workspace/upload/ -f ${WORKSPACE}/workspace/KNIFE_LABEL.tar .
+execute ${LFS_CI_ROOT}/bin/pigz ${WORKSPACE}/workspace/KNIFE_LABEL.tar
+uploadKnifeToStorage ${WORKSPACE}/workspace/KNIFE_LABEL.tar.gz
+copyFileToArtifactDirectory ${WORKSPACE}/workspace/.00_README.txt
+execute ${LFS_CI_ROOT}/bin/sendReleaseNote -r ${WORKSPACE}/workspace/.00_README.txt -t KNIFE_LABEL -n -f ${LFS_CI_ROOT}/etc/file.cfg
 EOF
     assertExecutedCommands ${expect}
 

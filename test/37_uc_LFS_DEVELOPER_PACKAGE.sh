@@ -12,6 +12,14 @@ oneTimeSetUp() {
     }
     ci_job_package() {
         mockedCommand "ci_job_package $@"
+        mkdir -p ${WORKSPACE}/workspace/bld/bld-fsmci-summary
+        echo LABEL > ${WORKSPACE}/workspace/bld/bld-fsmci-summary/label
+    }
+    specialBuildUploadAndNotifyUser() {
+        mockedCommand "specialBuildUploadAndNotifyUser $@"
+    }
+    linkFileToArtifactsDirectory() {
+        mockedCommand "linkFileToArtifactsDirectory $@"
     }
 
     return
@@ -19,6 +27,9 @@ oneTimeSetUp() {
 
 setUp() {
     cp -f /dev/null ${UT_MOCKED_COMMANDS}
+    export WORKSPACE=$(createTempDirectory)
+    export JOB_NAME=LFS_DEV_-_developer_-_Package_-_package
+    export BUILD_NUMBER=1234
     return
 }
 
@@ -33,6 +44,8 @@ test1() {
     local expect=$(createTempFile)
     cat <<EOF > ${expect}
 ci_job_package 
+specialBuildUploadAndNotifyUser 
+linkFileToArtifactsDirectory /build/home/${USER}/private_builds/LABEL.tar.gz
 EOF
     assertExecutedCommands ${expect}
 
