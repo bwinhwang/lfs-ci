@@ -71,6 +71,7 @@ def deleteScmView() {
 
     if(LRC_deleteJobs)
         scm_view = "SCM_LRC"
+        branch_view = "LRC_" + branch
 
     scm_view_obj = j.getView(scm_view)
     branch_view_obj = scm_view_obj.getView(branch_view)
@@ -85,11 +86,12 @@ def deleteScmView() {
 
 // Delete the branch[2..-1] view
 def deleteView() {
+    def branch_view = branch[2..-1]
+
     // TODO
-    println("[INFO] Remove sectioned view manually.")
+    println("[INFO] TODO: Remove list view section manually within sectioned view ${branch_view}.")
     return 0
 
-    def branch_view = branch[2..-1]
     if(debug) {
         println("[DEBUG] delete view: $branch_view")
     } else {
