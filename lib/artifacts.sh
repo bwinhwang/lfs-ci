@@ -166,8 +166,8 @@ copyArtifactsToWorkspace() {
     # runOnMaster ${LFS_CI_ROOT}/bin/getDownStreamProjects -j ${jobName}     \
     # TODO: demx2fk3 2015-01-23 KNIFE FIXME
     runOnMaster /ps/lfs/ci/bin/getDownStreamProjects -j ${jobName}     \
-                                                         -b ${buildNumber} \
-                                                         -h ${serverPath} > ${downStreamprojectsFile}
+                                                     -b ${buildNumber} \
+                                                     -h ${serverPath} > ${downStreamprojectsFile}
 
     if [[ $? -ne 0 ]] ; then
         error "error in getDownStreamProjects for ${jobName} #${buildNumber}"

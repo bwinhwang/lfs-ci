@@ -22,6 +22,10 @@ oneTimeSetUp() {
     }
     copyArtifactsToWorkspace() {
         mockedCommand "copyArtifactsToWorkspace $@"
+        mkdir -p ${WORKSPACE}/workspace/bld/bld-pkgpool-release/
+        echo LABEL > ${WORKSPACE}/workspace/bld/bld-pkgpool-release/label
+        echo OLD_LABEL > ${WORKSPACE}/workspace/bld/bld-pkgpool-release/oldLabel
+        echo gitrev > ${WORKSPACE}/workspace/bld/bld-pkgpool-release/gitrevision
     }
     mustBeValidXmlReleaseNote() {
         mockedCommand "mustBeValidXmlReleaseNote $@"
@@ -50,7 +54,7 @@ oneTimeSetUp() {
     }
     copyFileFromBuildDirectoryToWorkspace() {
         mockedCommand "copyFileFromBuildDirectoryToWorkspace $@"
-        touch ${WORKSPACE}/$3
+        echo abc >  ${WORKSPACE}/$3
     }
 
     return
@@ -73,9 +77,6 @@ test1() {
     export UPSTREAM_PROJECT=PKGPOOL_CI_-_trunk_-_Test
     export UPSTREAM_BUILD=1234
 
-    mkdir -p ${WORKSPACE}/workspace/bld/bld-pkgpool-release/
-    echo LABEL > ${WORKSPACE}/workspace/bld/bld-pkgpool-release/label
-    echo OLD_LABEL > ${WORKSPACE}/workspace/bld/bld-pkgpool-release/oldLabel
 
     usecase_PKGPOOL_RELEASE
 
@@ -89,6 +90,8 @@ copyArtifactsToWorkspace PKGPOOL_CI_-_trunk_-_Test 1234 pkgpool
 runOnMaster test -e /var/fpwork/psulm/lfs-jenkins/home/jobs/PKGPOOL_PROD_-_trunk_-_Release/builds/lastSuccessfulBuild/forReleaseNote.txt
 copyFileFromBuildDirectoryToWorkspace PKGPOOL_PROD_-_trunk_-_Release lastSuccessfulBuild forReleaseNote.txt
 execute mv ${WORKSPACE}/forReleaseNote.txt ${WORKSPACE}/workspace/forReleaseNote.txt.old
+copyFileFromBuildDirectoryToWorkspace PKGPOOL_PROD_-_trunk_-_Release lastSuccessfulBuild gitrevision
+execute mv ${WORKSPACE}/gitrevision ${WORKSPACE}/workspace/gitrevision.old
 setBuildDescription PKGPOOL_PROD_-_trunk_-_Release 1234 LABEL
 execute -n ${LFS_CI_ROOT}/bin/getReleaseNoteXML -t LABEL -o OLD_LABEL -f ${LFS_CI_ROOT}/etc/file.cfg
 mustBeValidXmlReleaseNote ${WORKSPACE}/workspace/releasenote.xml
@@ -97,6 +100,7 @@ execute -i -l ${WORKSPACE}/workspace/releasenote.txt diff -y -W72 -t --suppress-
 copyFileToArtifactDirectory ${WORKSPACE}/workspace/releasenote.xml
 copyFileToArtifactDirectory ${WORKSPACE}/workspace/releasenote.txt
 copyFileFromWorkspaceToBuildDirectory ${JOB_NAME} ${BUILD_NUMBER} ${WORKSPACE}/workspace/bld/bld-pkgpool-release/forReleaseNote.txt
+copyFileFromWorkspaceToBuildDirectory ${JOB_NAME} ${BUILD_NUMBER} ${WORKSPACE}/workspace/gitrevision
 linkFileToArtifactsDirectory /build/home/psulm/LFS_internal/artifacts/PKGPOOL_PROD_-_trunk_-_Release/1234
 EOF
     assertExecutedCommands ${expect}

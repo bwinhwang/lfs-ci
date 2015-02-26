@@ -13,7 +13,6 @@ LFS_CI_SOURCE_createWorkspace='$Id$'
 createOrUpdateWorkspace() {
     local workspace=$(getWorkspaceName)
     mustHaveWorkspaceName
-    # mustHaveWritableWorkspace
 
     local shouldUpdateWorkspace=
 
@@ -87,9 +86,31 @@ updateWorkspace() {
 
     # TODO: demx2fk3 2014-11-24 check, if this is working in update usecase
     mustHaveLocalSdks
-    # TODO: demx2fk3 2014-11-24 does not work in update usecase yet
+
+    cleanupBldDirectoryInWorkspace
     copyAndExtractBuildArtifactsFromProject ${UPSTREAM_PROJECT} ${UPSTREAM_BUILD}
 
+    return
+}
+
+## @fn      cleanupBldDirectoryInWorkspace()
+#  @brief   cleanup the bld directory of a workspace
+#  @details remove everything, which is a directory or a file
+#  @param   <none>
+#  @return  <none>
+cleanupBldDirectoryInWorkspace() {
+    local workspace=$(getWorkspaceName)
+    mustHaveWorkspaceName
+
+    [[ -d ${workspace}/bld ]] || return
+
+    for directory in ${workspace}/bld/* ; do
+        [[ ! -e ${directory} ]] && continue
+        [[   -L ${directory} ]] && continue
+        trace "removing ${directory}" 
+        execute rm -rf ${directory}
+    done
+        
     return
 }
 
@@ -261,10 +282,17 @@ mustHaveLocalSdks() {
     for bld in ${workspace}/bld/*
     do
         [[ -e ${bld} ]] || continue
-        [[ -d ${bld} ]] || continue
+        [[ -L ${bld} ]] || continue
+
         local pathToSdk=$(readlink ${bld})
+        mustExistDirectory ${pathToSdk}
+
         local tag=$(basename ${pathToSdk})
+        mustHaveValue "${tag}" "tag of used bld results"
+
         local subsystem=$(basename ${bld})
+        mustHaveValue "${subsystem}" "name of subsystem"
+
         local localCacheDir=${LFS_CI_SHARE_MIRROR}/${USER}/lfs-ci-local/${subsystem}
 
         info "checking for ${subsystem} / ${tag} on local disk"

@@ -64,14 +64,18 @@ usecase_PKGPOOL_BUILD() {
     local oldReleaseTag=$(gitDescribe --abbrev=0)
     gitTagAndPushToOrigin ${releaseTag}
 
+    local gitRevision=$(gitRevParse HEAD)
+
     setBuildDescription "${JOB_NAME}" "${BUILD_NUMBER}" "${releaseTag}"
 
+    # TODO: demx2fk3 2015-02-25 FIXME hardcoded path
     # required to start the sync 
     execute touch /build/home/psulm/SC_LFS/pkgpool/.hashpool
 
     mkdir -p ${workspace}/bld/bld-pkgpool-release/
     echo ${oldReleaseTag} > ${workspace}/bld/bld-pkgpool-release/oldLabel
     echo ${releaseTag}    > ${workspace}/bld/bld-pkgpool-release/label
+    echo ${gitRevision}   > ${workspace}/bld/bld-pkgpool-release/gitrevision
     execute -n sed -ne 's|^src [^ ]* \(.*\)$|PS_LFS_PKG = \1|p' ${workspace}/pool/*.meta |\
         sort -u > ${workspace}/bld/bld-pkgpool-release/forReleaseNote.txt
 
@@ -119,13 +123,20 @@ usecase_PKGPOOL_RELEASE() {
         info "using old forReleaseNote.txt"
         copyFileFromBuildDirectoryToWorkspace ${JOB_NAME} lastSuccessfulBuild forReleaseNote.txt
         execute mv ${WORKSPACE}/forReleaseNote.txt ${workspace}/forReleaseNote.txt.old
+
+        copyFileFromBuildDirectoryToWorkspace ${JOB_NAME} lastSuccessfulBuild gitrevision
+        execute mv ${WORKSPACE}/gitrevision ${workspace}/gitrevision.old
     else
         info "touch forReleaseNote.txt"
         execute touch ${workspace}/forReleaseNote.txt.old
+        execute touch ${workspace}/gitrevision.old
     fi
 
     local label=$(cat ${workspace}/bld/bld-pkgpool-release/label)
     mustHaveValue "${label}" "label"
+
+    local gitRevision=$(cat ${workspace}/bld/bld-pkgpool-release/gitrevision)
+    mustHaveValue "${gitRevision}" "gitRevision"
 
     setBuildDescription ${JOB_NAME} ${BUILD_NUMBER} ${label}
 
@@ -153,21 +164,32 @@ usecase_PKGPOOL_RELEASE() {
 
     rawDebug ${releaseNoteTxt}
 
-    local canSendReleaseNote=$(getConfig LFS_CI_uc_release_can_send_release_note)
-    if [[ ${canSendReleaseNote} ]] ; then
+    local canCreateReleaseinWft=$(getConfig LFS_CI_uc_release_can_create_release_in_wft)
+    if [[ ${canCreateReleaseinWft} ]] ; then
         # createReleaseInWorkflowTool ${label} ${workspace}/releasenote.xml
         # uploadToWorkflowTool        ${label} ${workspace}/releasenote.xml
+        true
+    else
+        warning "creating release not in WFT is disabled via config"
+    fi
 
+    local canSendReleaseNote=$(getConfig LFS_CI_uc_release_can_send_release_note)
+    if [[ ${canSendReleaseNote} ]] ; then
         if [[ -s ${releaseNoteTxt} ]] ; then
             execute ${LFS_CI_ROOT}/bin/sendReleaseNote  -r ${releaseNoteTxt}          \
                                                         -t ${label}                   \
                                                         -f ${LFS_CI_ROOT}/etc/file.cfg
         fi                                                            
+    else
+        warning "sending release note is disabled via config"
     fi
 
     copyFileToArtifactDirectory ${workspace}/releasenote.xml
     copyFileToArtifactDirectory ${workspace}/releasenote.txt
     copyFileFromWorkspaceToBuildDirectory ${JOB_NAME} ${BUILD_NUMBER} ${workspace}/bld/bld-pkgpool-release/forReleaseNote.txt
+
+    echo ${gitRevision} > ${workspace}/gitrevision
+    copyFileFromWorkspaceToBuildDirectory ${JOB_NAME} ${BUILD_NUMBER} ${workspace}/gitrevision
 
     local artifactsPathOnShare=$(getConfig artifactesShare)/${JOB_NAME}/${BUILD_NUMBER}
     linkFileToArtifactsDirectory ${artifactsPathOnShare}
@@ -185,9 +207,6 @@ usecase_PKGPOOL_UDPATE_DEPS() {
     local workspace=$(getWorkspaceName)
     mustHaveCleanWorkspace
 
-    local gitWorkspace=${WORKSPACE}/src
-    mustExistDirectory ${gitWorkspace}
-
     copyArtifactsToWorkspace ${UPSTREAM_PROJECT} ${UPSTREAM_BUILD} "pkgpool"
 
     local label=$(cat ${workspace}/bld/bld-pkgpool-release/label)
@@ -198,7 +217,7 @@ usecase_PKGPOOL_UDPATE_DEPS() {
     local oldLabel=$(cat ${workspace}/bld/bld-pkgpool-release/oldLabel)
     mustHaveValue "${oldLabel}" "old label"
 
-    local svnUrlsToUpdate=$(getConfig PKGPOOL_PROD_uc_update_dependencies_svn_urls)
+    local svnUrlsToUpdate=$(getConfig PKGPOOL_PROD_update_dependencies_svn_url)
     mustHaveValue "${svnUrlsToUpdate}" "svn urls for pkgpool"
 
     local urlToUpdate=""
@@ -214,11 +233,14 @@ usecase_PKGPOOL_UDPATE_DEPS() {
 
         svnCheckout ${svnUrl} ${workspace}
 
+        # TODO: demx2fk3 2015-02-25 fixme
         local oldGitRevision=$(cat ${workspace}/src/gitrevision)
         local newGitRevision=$(gitRevParse HEAD)
         local gitLog=$(createTempFile)
 
+        # TODO: demx2fk3 2015-02-25 fixme
         cd ${WORKSPACE}/src
+        # TODO: demx2fk3 2015-02-25 fixme
         gitLog ${oldGitRevision}..${newGitRevision} | \
             sed -e 's,^    %,%,' > ${gitLog}
         rawDebug ${gitLog}
