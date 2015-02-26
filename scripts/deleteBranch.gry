@@ -7,6 +7,8 @@
  * 3. If no jobs left also delete the view of the branch.
  */
 
+println("\nRunning script deleteBranch.gry\n")
+
 import jenkins.model.Jenkins
 import hudson.model.ParametersAction
 
@@ -28,6 +30,8 @@ LRC_deleteJobs = false
 debug = true
 
 lrc_jobs = []
+
+remaining_jobs = []
 
 
 parameters.each {
@@ -83,13 +87,12 @@ def deleteScmView() {
     }
 }
 
-// Delete the branch[2..-1] view
 def deleteView() {
     def branch_view = branch[2..-1]
 
-    // TODO
-    println("[INFO] TODO: Remove list view section manually within sectioned view ${branch_view}.")
-    return 0
+    if(branch[0..1] == "MD") {
+        branch_view = branch[3..-1]
+    }
 
     if(debug) {
         println("[DEBUG] delete view: $branch_view")
@@ -102,9 +105,15 @@ def deleteView() {
     }
 }
 
-// Delete none LRC jobs.
-// Collect LRC jobs in a list.
+// Delete none LRC jobs and collect LRC jobs in a list.
 if(deleteJobs || LRC_deleteJobs) {
+    def other_job_names = null
+    if(branch[0..1] == "FB") {
+        other_job_names = branch.replaceFirst("FB", "MD1")
+    } else if(branch[0..2] == "MD1") {
+        other_job_names = branch.replaceFirst("MD1", "FB")
+    }
+
     for(p in jenkins.model.Jenkins.theInstance.getProjects()) {
         job_name = p.getName()
         if(deleteJobs && job_name.find("_"+branch+"_") && !job_name.find("LFS_CI_-_LRC_") && !job_name.find("LFS_Prod_-_LRC_")) {
@@ -115,15 +124,15 @@ if(deleteJobs || LRC_deleteJobs) {
                     println("[INFO] deleted job: $p.name")
                 }
         }
-        else if(LRC_deleteJobs && (job_name.find("LFS_CI_-_LRC_"+branch+"_-") || job_name.find("LFS_Prod_-_LRC_"+branch+"_-"))) {
+        else if(LRC_deleteJobs && (job_name.find("LFS_CI_-_"+branch+"_-") || job_name.find("LFS_Prod_-_"+branch+"_-"))) {
             lrc_jobs.add(p)
         }
+        else if(job_name.find(other_job_names)) {
+            remaining_jobs.add(p)
+        }
     }
-    // No more jobs, delete view
-    if(!lrc_jobs) {
-        deleteView()
-        deleteScmView()
-    }
+
+    deleteScmView()
 }
 
 // Delete LRC jobs.
@@ -136,8 +145,12 @@ if(LRC_deleteJobs && lrc_jobs) {
             println("[INFO] deleted LRC job: $p.name")
         }
     }
-    // No more jobs, delete view
-    deleteView()
     deleteScmView()
 }
 
+if(!lrc_jobs && !remaining_jobs) {
+    deleteView()
+}
+else {
+    println("[INFO] Not deleting list view sections. There are still jobs from another branch.")
+}
