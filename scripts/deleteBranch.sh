@@ -81,7 +81,7 @@ __cmd() {
         echo [DEBUG] $@
     else
         info runnig command: $@
-        #eval $@
+        eval $@
     fi
 }
 
