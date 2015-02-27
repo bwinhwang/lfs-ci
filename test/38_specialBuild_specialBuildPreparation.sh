@@ -17,9 +17,8 @@ oneTimeSetUp() {
             mkdir $@
         fi
     }
-    copyFileFromBuildDirectoryToWorkspace() {
-        mockedCommand "copyFileFromBuildDirectoryToWorkspace $@"
-        echo "src-fake http://asdf 1234" > ${WORKSPACE}/revisionstate.xml
+    copyFileFromWorkspaceToBuildDirectory() {
+        mockedCommand "copyFileFromWorkspaceToBuildDirectory $@"
     }
     copyAndExtractBuildArtifactsFromProject() {
         mockedCommand "copyAndExtractBuildArtifactsFromProject $@"
@@ -67,7 +66,7 @@ test1() {
     cat <<EOF > ${expect}
 execute mkdir -p ${WORKSPACE}/workspace
 execute mkdir -p ${WORKSPACE}/workspace/bld/bld-fsmci-summary/
-copyFileFromBuildDirectoryToWorkspace LFS_DEV_-_DEVELOPER_-_Build 123 revisionstate.xml
+copyFileFromWorkspaceToBuildDirectory LFS_DEV_-_DEVELOPER_-_Build 123 ${WORKSPACE}/revisionstate.xml
 execute mkdir -p ${WORKSPACE}/workspace/bld/bld-dev-input/
 execute -i cp -a ${WORKSPACE}/lfs.patch ${WORKSPACE}/workspace/bld/bld-dev-input/
 createArtifactArchive 

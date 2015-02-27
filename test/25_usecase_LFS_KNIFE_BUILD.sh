@@ -69,7 +69,7 @@ test1() {
 cat <<EOF > ${expect}
 execute mkdir -p ${WORKSPACE}/workspace
 execute mkdir -p ${WORKSPACE}/workspace/bld/bld-fsmci-summary/
-copyFileFromWorkspaceToBuildDirectory LFS_KNIFE_-_knife_-_Build 123 revisionstate.xml
+copyFileFromWorkspaceToBuildDirectory LFS_KNIFE_-_knife_-_Build 123 ${WORKSPACE}/revisionstate.xml
 execute mkdir -p ${WORKSPACE}/workspace/bld/bld-knife-input/
 execute -i cp -a ${WORKSPACE}/lfs.patch ${WORKSPACE}/workspace/bld/bld-knife-input/
 createArtifactArchive 
@@ -82,7 +82,7 @@ EOF
     assertTrue "[[ -d ${WORKSPACE}/workspace/bld/bld-knife-input ]]"
     assertEquals "$(cat ${WORKSPACE}/workspace/bld/bld-fsmci-summary/label)" "KNIFE_PS_LFS_OS_2014_01_0001.date"
     assertEquals "$(cat ${WORKSPACE}/revisionstate.xml)" \
-                 "src-fake http://fakeurl/ KNIFE_PS_LFS_OS_2014_01_0001.date"
+                 "src-fake http://fakeurl/ PS_LFS_OS_2014_01_0001"
 
     return
 }

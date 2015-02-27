@@ -67,6 +67,7 @@ test1() {
 
     local expect=$(createTempFile)
     cat <<EOF > ${expect}
+execute rm -rf ${WORKSPACE}/revisions.txt
 createWorkspace 
 copyArtifactsToWorkspace LFS_DEV_-_DEVELOPER_-_Build 987 fsmci
 setBuildDescription LFS_DEV_-_DEVELOPER_-_Build_-_FSM-r2_-_fcmd 123 LABEL

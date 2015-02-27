@@ -4,9 +4,10 @@
 # REQUESTOR_USERID=${BUILD_USER_ID}
 # REQUESTOR_EMAIL=${BUILD_USER_EMAIL}
 
-[[ -z ${LFS_CI_SOURCE_build}     ]] && source ${LFS_CI_ROOT}/lib/build.sh
-[[ -z ${LFS_CI_SOURCE_artifacts} ]] && source ${LFS_CI_ROOT}/lib/artifacts.sh
-[[ -z ${LFS_CI_SOURCE_common}    ]] && source ${LFS_CI_ROOT}/lib/common.sh
+[[ -z ${LFS_CI_SOURCE_createworkspace} ]] && source ${LFS_CI_ROOT}/lib/createWorkspace.sh
+[[ -z ${LFS_CI_SOURCE_build}           ]] && source ${LFS_CI_ROOT}/lib/build.sh
+[[ -z ${LFS_CI_SOURCE_artifacts}       ]] && source ${LFS_CI_ROOT}/lib/artifacts.sh
+[[ -z ${LFS_CI_SOURCE_common}          ]] && source ${LFS_CI_ROOT}/lib/common.sh
 
 LFS_CI_SOURCE_special_build='$Id$'
 
@@ -18,10 +19,10 @@ specialBuildPreparation() {
     local label=${2}
     mustHaveValue "${label}" "label"
 
-    local revision=${2} # or label name
+    local revision=${3} # or label name
     mustHaveValue "${revision}" "revision"
 
-    local location=${3}
+    local location=${4}
     mustHaveValue "${location}" "location"
 
     requiredParameters WORKSPACE            \
@@ -32,6 +33,11 @@ specialBuildPreparation() {
                        REQUESTOR_LAST_NAME  \
                        REQUESTOR_USERID     \
                        REQUESTOR_EMAIL
+
+    debug "input parameter: buildType ${buildType}"
+    debug "input parameter: label ${label}"
+    debug "input parameter: revision ${revision}"
+    debug "input parameter: location ${location}"
 
     local workspace=$(getWorkspaceName)
     mustHaveCleanWorkspace
@@ -46,7 +52,8 @@ specialBuildPreparation() {
 
     debug "create own revision control file"
     echo "src-fake http://fakeurl/ ${revision}" > ${WORKSPACE}/revisionstate.xml
-    copyFileFromWorkspaceToBuildDirectory ${JOB_NAME} ${BUILD_NUMBER} revisionstate.xml
+    rawDebug ${WORKSPACE}/revisionstate.xml
+    copyFileFromWorkspaceToBuildDirectory ${JOB_NAME} ${BUILD_NUMBER} ${WORKSPACE}/revisionstate.xml
 
     info "storing input as artifacts"
     execute mkdir -p ${workspace}/bld/bld-${buildType,,}-input/
@@ -58,6 +65,7 @@ REQUESTOR_LAST_NAME="${REQUESTOR_LAST_NAME}"
 REQUESTOR_USERID="${REQUESTOR_USERID}"
 REQUESTOR_EMAIL="${REQUESTOR_EMAIL}"
 EOF
+    rawDebug ${workspace}/bld/bld-${buildType,,}-input/requestor.txt
 
     info "upload results to artifakts share."
     createArtifactArchive
@@ -119,6 +127,7 @@ specialBuildisRequiredForLrc() {
 specialBuildCreateWorkspaceAndBuild() {
     requiredParameters UPSTREAM_PROJECT UPSTREAM_BUILD
 
+    execute rm -rf ${WORKSPACE}/revisions.txt
     createWorkspace
     copyArtifactsToWorkspace "${UPSTREAM_PROJECT}" "${UPSTREAM_BUILD}" "fsmci"
 
