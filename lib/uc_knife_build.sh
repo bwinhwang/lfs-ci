@@ -97,23 +97,8 @@ usecase_LFS_KNIFE_BUILD_PLATFORM() {
     local revision=$(svnCat ${svnReposUrl}/tags/${baseLabel}/doc/scripts/revisions.txt | cut -d" " -f3 | sort -nu | tail -n 1)
     echo "src-knife ${svnReposUrl}/tags/${baseLabel} ${revision}" > ${WORKSPACE}/revisions.txt
 
-    # faking the branch name for workspace creation...
-    location=$(getConfig LFS_PROD_tag_to_branch)
-
-    if [[ -z ${location} ]] ; then
-        fatal "this branch is not prepared to build knives"
-    fi
-
-    # for FSM-r4, it's have to do this in a different way..
-    if [[ ${subTaskName} = "FSM-r4" ]] ; then
-        case ${location} in
-            trunk) location=FSM_R4_DEV ;;
-            *)     # TODO: demx2fk3 2015-02-03 add check, if new location exists, otherwise no build
-                   location=${location}_FSMR4 ;;
-        esac
-    fi
-    mustHaveValue "${location}" "location"
-    export LFS_CI_GLOBAL_BRANCH_NAME=${location}
+    mustHaveLocationFromBaseline ${baseLabel}
+    local location=${LFS_CI_GLOBAL_BRANCH_NAME}
 
     if ! specialBuildisRequiredForLrc ${location} ; then
         warning "build is not required."
@@ -145,3 +130,34 @@ usecase_LFS_KNIFE_PACKAGE() {
     info "knife is done."
     return
 }
+
+mustHaveLocationFromBaseline() {
+
+    local tagName=$1
+    mustHaveValue "${tagName}" "baseline"
+
+    export tagName
+
+    # faking the branch name for workspace creation...
+    location=$(getConfig LFS_PROD_tag_to_branch)
+
+    if [[ -z ${location} ]] ; then
+        fatal "this branch is not prepared to build knives"
+    fi
+
+    # for FSM-r4, it's have to do this in a different way..
+    if [[ ${subTaskName} = "FSM-r4" ]] ; then
+        case ${location} in
+            trunk)          location=FSM_R4_DEV ;;
+            pronb-deveoper) location=FSM_R4_DEV ;;
+            *)     # TODO: demx2fk3 2015-02-03 add check, if new location exists, otherwise no build
+                   location=${location}_FSMR4 ;;
+        esac
+    fi
+    mustHaveValue "${location}" "location"
+    export LFS_CI_GLOBAL_BRANCH_NAME=${location}
+
+    return
+}
+
+

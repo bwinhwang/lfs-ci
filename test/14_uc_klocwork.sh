@@ -78,8 +78,7 @@ testUsecaseKlocwork_part1() {
     export WORKSPACE=$(createTempDirectory)
     export BUILD_ID=1234
 
-    # assertTrue "ci_job_klocwork_build"
-    ci_job_klocwork_build
+    assertTrue "ci_job_klocwork_build"
 
     local expect=$(createTempFile)
     cat <<EOF > ${expect}
