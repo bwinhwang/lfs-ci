@@ -45,6 +45,8 @@ test1() {
 copyAndExtractBuildArtifactsFromProject fsmci
 EOF
     assertExecutedCommands ${expect}
+
+    mustHaveLocationForDeveloperBuild
     assertEquals "LOCATION" "${LFS_CI_GLOBAL_BRANCH_NAME}"
 
     return
@@ -53,14 +55,15 @@ EOF
 test2() {
     export JOB_NAME=LFS_DEV_-_developer_-_Build_-_FSM-r2_-_fcmd
     export UT_LOCATION=trunk
-    # assertTrue "mustHaveLocationForDeveloperBuild"
-    mustHaveLocationForDeveloperBuild
+    assertTrue "mustHaveLocationForDeveloperBuild"
 
     local expect=$(createTempFile)
     cat <<EOF > ${expect}
 copyAndExtractBuildArtifactsFromProject fsmci
 EOF
     assertExecutedCommands ${expect}
+
+    mustHaveLocationForDeveloperBuild
     assertEquals "trunk" "${LFS_CI_GLOBAL_BRANCH_NAME}"
 
     return
@@ -68,14 +71,15 @@ EOF
 test3() {
     export JOB_NAME=LFS_DEV_-_developer_-_Build_-_FSM-r2_-_fcmd
     export UT_LOCATION=pronb-developer
-    # assertTrue "mustHaveLocationForDeveloperBuild"
-    mustHaveLocationForDeveloperBuild
+    assertTrue "mustHaveLocationForDeveloperBuild"
 
     local expect=$(createTempFile)
     cat <<EOF > ${expect}
 copyAndExtractBuildArtifactsFromProject fsmci
 EOF
     assertExecutedCommands ${expect}
+
+    mustHaveLocationForDeveloperBuild
     assertEquals "pronb-developer" "${LFS_CI_GLOBAL_BRANCH_NAME}"
 
     return
@@ -84,14 +88,15 @@ EOF
 test4() {
     export JOB_NAME=LFS_DEV_-_developer_-_Build_-_FSM-r4_-_fcmd
     export UT_LOCATION=LOCATION
-    # assertTrue "mustHaveLocationForDeveloperBuild"
-    mustHaveLocationForDeveloperBuild
+    assertTrue "mustHaveLocationForDeveloperBuild"
 
     local expect=$(createTempFile)
     cat <<EOF > ${expect}
 copyAndExtractBuildArtifactsFromProject fsmci
 EOF
     assertExecutedCommands ${expect}
+
+    mustHaveLocationForDeveloperBuild
     assertEquals "LOCATION_FSMR4" "${LFS_CI_GLOBAL_BRANCH_NAME}"
 
     return
@@ -100,14 +105,15 @@ EOF
 test5() {
     export JOB_NAME=LFS_DEV_-_developer_-_Build_-_FSM-r4_-_fcmd
     export UT_LOCATION=trunk
-    # assertTrue "mustHaveLocationForDeveloperBuild"
-    mustHaveLocationForDeveloperBuild
+    assertTrue "mustHaveLocationForDeveloperBuild"
 
     local expect=$(createTempFile)
     cat <<EOF > ${expect}
 copyAndExtractBuildArtifactsFromProject fsmci
 EOF
     assertExecutedCommands ${expect}
+
+    mustHaveLocationForDeveloperBuild
     assertEquals "FSM_R4_DEV" "${LFS_CI_GLOBAL_BRANCH_NAME}"
 
     return
@@ -115,14 +121,15 @@ EOF
 test6() {
     export JOB_NAME=LFS_DEV_-_developer_-_Build_-_FSM-r4_-_fcmd
     export UT_LOCATION=pronb-developer
-    # assertTrue "mustHaveLocationForDeveloperBuild"
-    mustHaveLocationForDeveloperBuild
+    assertTrue "mustHaveLocationForDeveloperBuild"
 
     local expect=$(createTempFile)
     cat <<EOF > ${expect}
 copyAndExtractBuildArtifactsFromProject fsmci
 EOF
     assertExecutedCommands ${expect}
+
+    mustHaveLocationForDeveloperBuild
     assertEquals "FSM_R4_DEV" "${LFS_CI_GLOBAL_BRANCH_NAME}"
 
     return
