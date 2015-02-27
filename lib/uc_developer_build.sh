@@ -66,7 +66,6 @@ usecase_LFS_DEVELOPER_PACKAGE() {
 }
 
 mustHaveLocationForDeveloperBuild() {
-
     local workspace=$(getWorkspaceName)
     mustHaveWorkspaceName
 
@@ -77,10 +76,13 @@ mustHaveLocationForDeveloperBuild() {
     local location=$(cat ${workspace}/bld/bld-fsmci-summary/location)
     mustHaveValue "${location}" "location"
 
+    local subTaskName=$(getSubTaskNameFromJobName)
+    mustHaveValue "${subTaskName}" "sub task name"
+
     if [[ ${subTaskName} = "FSM-r4" ]] ; then
         case ${location} in
-            trunk)          location=FSM_R4_DEV ;;
-            pronb-deveoper) location=FSM_R4_DEV ;;
+            trunk)           location=FSM_R4_DEV ;;
+            pronb-developer) location=FSM_R4_DEV ;;
             *)     # TODO: demx2fk3 2015-02-03 add check, if new location exists, otherwise no build
                    location=${location}_FSMR4 ;;
         esac
