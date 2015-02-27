@@ -125,7 +125,7 @@ usecase_LFS_KNIFE_PACKAGE() {
     info "running usecase LFS package"
     ci_job_package
 
-    specialBuildUploadAndNotifyUser
+    specialBuildUploadAndNotifyUser KNIFE
 
     info "knife is done."
     return
