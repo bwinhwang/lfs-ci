@@ -34,6 +34,9 @@ ci_job_package() {
 
     mustHaveNextCiLabelName
     local label=$(getNextReleaseLabel)
+    local location=$(getLocationName)
+
+    info "label is ${label}/${location}"
 
     setBuildDescription "${JOB_NAME}" "${BUILD_NUMBER}" "${label}"
 
@@ -353,7 +356,10 @@ copyPlatform() {
             case ${platform} in 
                 qemu_64)
                     execute rsync -avr --exclude=.svn --exclude=addons --exclude=sys-root --exclude=rfs.init_sys-root.tar.gz ${bldDirectory}/results/. ${workspace}/upload/
-                    execute mv -f ${workspace}/upload/platforms/qemu_x86_64/* ${dst}
+                    for file in ${workspace}/upload/platforms/qemu_x86_64/* ; do
+                        [[ -e ${file} ]] || continue                                                                                
+                        execute mv -f ${file} ${dst}
+                    done
                     execute rmdir ${workspace}/upload/platforms/qemu_x86_64                                                                                 
 
                 ;;

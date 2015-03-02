@@ -17,10 +17,11 @@ LFS_CI_SOURCE_commands='$Id$'
 #           The output is not shown on the console.
 #           If there is an error (exit code != 0) in the command, an
 #           error will be raised and logged. The scripting ends here!
-#  @param   {opt}    -n flag - turn the default redirection of stdout off
-#  @param   {opt}    -i flag - ignore the error code from the command and continue
-#  @param   {opt}    -r parameter - retry the command, if it failed x times. After this it will fail.
-#  @param   {command}    a command string
+#  @param   {opt}     -n flag - turn the default redirection of stdout off
+#  @param   {opt}     -i flag - ignore the error code from the command and continue
+#  @param   {opt}     -r parameter - retry the command, if it failed x times. After this it will fail.
+#  @param   {opt}     -l parameter - write the output of the command into the given log file, the log must exists before.
+#  @param   {command} a command string
 #  @return  <none>
 #  @throws  raise an error, if the command exits with an exit code != 0
 execute() {

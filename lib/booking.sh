@@ -12,16 +12,22 @@
 #
 #           How it should work:
 #
-#           reserveTargetByName <targetName>
+#           reserveTargetByName targetName
 #            or
-#           reserveTargetByFeature <list of features>
+#           reserveTargetByFeature list of features
 #
-#           unreserveTarget <targetName>
+#           unreserveTarget targetName
 #
 #           
 
 LFS_CI_SOURCE_booking='$Id$'
 
+## @fn      reserveTargetByName()
+#  @brief   reserve target by a given name
+#  @details the function will try to reserve the given target. If it does not work, the function will retry
+#           up to a configured number of times. After this, it will raise an error.
+#  @param   {targetName}    name of the target
+#  @return  <none>
 reserveTargetByName() {
     local targetName=${1}
     mustHaveValue "${targetName}" "targetName"
@@ -49,6 +55,13 @@ reserveTargetByName() {
     return
 }
 
+## @fn      reserveTargetByFeature()
+#  @brief   reserve a target by a given list of features
+#  @details try to reserve a free target with the given features, if the target is not free, the function will
+#           retry it for a configrues amount of times. After this, it will raise an error.
+#           The name of the successful reserved target can be get via reservedTarget()
+#  @param   {features}    list of features
+#  @return  <none>
 reserveTargetByFeature() {
     local features=${@}
     mustHaveValue "${features}" "list of features"
@@ -88,11 +101,19 @@ reserveTargetByFeature() {
     return
 }
 
+## @fn      reservedTarget()
+#  @brief   return the name of the reserved target
+#  @param   <none>
+#  @return  name of the reserved target
 reservedTarget() {
     echo ${LFS_CI_BOOKING_RESERVED_TARGET}
     return
 }
 
+## @fn      unreserveTarget()
+#  @brief   unreserve a reserved target
+#  @param   <none>
+#  @return  <none>
 unreserveTarget() {
     requiredParameters LFS_CI_BOOKING_RESERVED_TARGET
     local targetName=${LFS_CI_BOOKING_RESERVED_TARGET}

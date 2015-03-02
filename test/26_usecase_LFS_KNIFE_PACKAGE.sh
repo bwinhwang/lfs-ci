@@ -1,7 +1,6 @@
 #!/bin/bash
 
 source test/common.sh
-
 source lib/uc_knife_build.sh
 
 export UT_MOCKED_COMMANDS=$(createTempFile)
@@ -16,7 +15,7 @@ oneTimeSetUp() {
     ci_job_package() {
         mockedCommand "ci_job_package $@"
         mkdir -p ${WORKSPACE}/workspace/bld/bld-knife-input/
-        echo "foo=bar" > ${WORKSPACE}/workspace/bld/bld-knife-input/knife-requestor.txt
+        echo "foo=bar" > ${WORKSPACE}/workspace/bld/bld-knife-input/requestor.txt
     }
     getUsedSdkVersions() {
         mockedCommand "getUsedSdkVersions $@"
@@ -49,7 +48,7 @@ tearDown() {
 
 test1() {
     export WORKSPACE=$(createTempDirectory)
-    export KNIFE_LFS_BASELINE=PS_LFS_OS_2014_01_0001
+    export KNIFE_LFS_BASELINE=PS_LFS_OS_2015_01_0001
     export UPSTREAM_PROJECT=upstream_project
     export UPSTREAM_BUILD=123
     export JOB_NAME=LFS_KNIFE_-_knife_-_Build
@@ -67,12 +66,13 @@ test1() {
 
 cat <<EOF > ${expect}
 ci_job_package 
+execute mkdir -p ${WORKSPACE}/workspace/bld/
 mustHaveNextCiLabelName 
-execute tar -cv --transform=s:^\./:os/: -C ${WORKSPACE}/workspace/upload/ -f ${WORKSPACE}/workspace/lfs-knife_KNIFE_LABEL.tar .
-execute ${LFS_CI_ROOT}/bin/pigz ${WORKSPACE}/workspace/lfs-knife_KNIFE_LABEL.tar
-uploadKnifeToStorage ${WORKSPACE}/workspace/lfs-knife_KNIFE_LABEL.tar.gz
-copyFileToArtifactDirectory .00_README_knife_result.txt
-execute ${LFS_CI_ROOT}/bin/sendReleaseNote -r ${WORKSPACE}/.00_README_knife_result.txt -t KNIFE_LABEL -n -f ${LFS_CI_ROOT}/etc/file.cfg
+execute tar -cv --transform=s:^\./:os/: -C ${WORKSPACE}/workspace/upload/ -f ${WORKSPACE}/workspace/KNIFE_LABEL.tar .
+execute ${LFS_CI_ROOT}/bin/pigz ${WORKSPACE}/workspace/KNIFE_LABEL.tar
+uploadKnifeToStorage ${WORKSPACE}/workspace/KNIFE_LABEL.tar.gz
+copyFileToArtifactDirectory ${WORKSPACE}/workspace/.00_README.txt
+execute ${LFS_CI_ROOT}/bin/sendReleaseNote -r ${WORKSPACE}/workspace/.00_README.txt -t KNIFE_LABEL -n -f ${LFS_CI_ROOT}/etc/file.cfg
 EOF
     assertExecutedCommands ${expect}
 
