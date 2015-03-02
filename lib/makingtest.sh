@@ -78,7 +78,8 @@ makingTest_checkUname() {
     execute ${make} install 
 
     info "powercycle target"
-    execute ${make} powercycle
+    local powercycleOptions=$(getConfig LFS_CI_uc_test_making_test_powercycle_options)
+    execute ${make} powercycle ${powercycleOptions} 
 
     info "wait for prompt"
     execute ${make} waitprompt
@@ -148,8 +149,9 @@ makingTest_testFSM() {
                 TESTBUILD=${testBuildDirectory} \
                 TESTTARGET=${testTargetName,,}
 
+    local powercycleOptions=$(getConfig LFS_CI_uc_test_making_test_powercycle_options)
     info "powercycle the target to get it in a defined state"
-    execute ${make} powercycle
+    execute ${make} powercycle ${powercycleOptions}
 
     debug "sleep for 10 seconds..."
     sleep 10
@@ -176,7 +178,8 @@ makingTest_testFSM() {
     fi
 
     info "restarting the target"
-    execute ${make} powercycle
+    local powercycleOptions=$(getConfig LFS_CI_uc_test_making_test_powercycle_options)
+    execute ${make} powercycle ${powercycleOptions}
 
     debug "sleep for 10 seconds..."
     sleep 10
@@ -277,7 +280,8 @@ makingTest_testLRC() {
                 TESTTARGET=${testTargetName}_shp
 
     info "powercycle the target to get it in a defined state"
-    execute make -C ${testSuiteDirectory} powercycle
+    local powercycleOptions=$(getConfig LFS_CI_uc_test_making_test_powercycle_options)
+    execute make -C ${testSuiteDirectory} powercycle ${powercycleOptions}
     info "waiting for prompt"
     execute make -C ${testSuiteDirectory} waitssh
 
@@ -404,7 +408,8 @@ makingTest_install() {
         execute ${make} waitprompt
 
         info "rebooting target..."
-        execute ${make} powercycle FORCE=yes
+        local powercycleOptions=$(getConfig LFS_CI_uc_test_making_test_powercycle_options)
+        execute ${make} powercycle ${powercycleOptions} FORCE=yes
 
         info "wait for prompt"
         execute ${make} waitprompt
