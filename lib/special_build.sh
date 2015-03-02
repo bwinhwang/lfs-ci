@@ -1,8 +1,12 @@
-# REQUESTOR=${BUILD_USER}
-# REQUESTOR_FIRST_NAME=${BUILD_USER_FIRST_NAME}
-# REQUESTOR_LAST_NAME=${BUILD_USER_LAST_NAME}
-# REQUESTOR_USERID=${BUILD_USER_ID}
-# REQUESTOR_EMAIL=${BUILD_USER_EMAIL}
+#!/bin/bash
+## @file special_build.sh
+#  @brief functions for special builds like knife build and developer build
+#  @details the following environment variables are used from a jenkins plugin
+#           REQUESTOR=${BUILD_USER}
+#           REQUESTOR_FIRST_NAME=${BUILD_USER_FIRST_NAME}
+#           REQUESTOR_LAST_NAME=${BUILD_USER_LAST_NAME}
+#           REQUESTOR_USERID=${BUILD_USER_ID}
+#           REQUESTOR_EMAIL=${BUILD_USER_EMAIL}
 
 [[ -z ${LFS_CI_SOURCE_createworkspace} ]] && source ${LFS_CI_ROOT}/lib/createWorkspace.sh
 [[ -z ${LFS_CI_SOURCE_build}           ]] && source ${LFS_CI_ROOT}/lib/build.sh
@@ -11,6 +15,13 @@
 
 LFS_CI_SOURCE_special_build='$Id$'
 
+## @fn      specialBuildPreparation()
+#  @brief   prepare the build 
+#  @param   {buildType}    type of the build (e.g. DEV, KNIFE)
+#  @param   {label}        name of the build label
+#  @param   {revision}     a revision number
+#  @param   {location}     the name of the location
+#  @return  <none>
 specialBuildPreparation() {
 
     local buildType=${1}
@@ -76,7 +87,11 @@ EOF
     return
 }
 
-
+## @fn      specialBuildisRequiredForLrc()
+#  @brief   checks, if the build requires a LRC build
+#  @param   {location}    the name of the location
+#  @param   <none>
+#  @return  <none>
 specialBuildisRequiredForLrc() {
     local location=${1}
     mustHaveValue "${location}" "location"
@@ -124,9 +139,14 @@ specialBuildisRequiredForLrc() {
     return 0
 }
 
+## @fn      specialBuildCreateWorkspaceAndBuild()
+#  @brief   create the workspaces and build the special build (knife or developer build)
+#  @param   <none>
+#  @return  <none>
 specialBuildCreateWorkspaceAndBuild() {
     requiredParameters UPSTREAM_PROJECT UPSTREAM_BUILD
 
+    # createWorkspace will copy the revision state file from the upstream job
     execute rm -rf ${WORKSPACE}/revisions.txt
     createWorkspace
     copyArtifactsToWorkspace "${UPSTREAM_PROJECT}" "${UPSTREAM_BUILD}" "fsmci"
@@ -187,6 +207,10 @@ applyKnifePatches() {
     return
 }
 
+## @fn      specialBuildUploadAndNotifyUser()
+#  @brief   upload the build result to the storage and notify the user
+#  @param   <none>
+#  @return  <none>
 specialBuildUploadAndNotifyUser() {
 
     requiredParameters LFS_CI_ROOT 
@@ -218,7 +242,7 @@ specialBuildUploadAndNotifyUser() {
 
     local readmeFile=${workspace}/.00_README.txt
     cat > ${readmeFile} <<EOF
-/build/home/${USER}/private_builds/${label}.tar.gz
+/build/home/${USER}/privateBuilds/${label}.tar.gz
 EOF
 
     copyFileToArtifactDirectory ${readmeFile}
@@ -230,5 +254,4 @@ EOF
             -f ${LFS_CI_ROOT}/etc/file.cfg
     return
 }
-
 

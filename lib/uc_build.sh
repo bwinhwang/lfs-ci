@@ -208,3 +208,13 @@ _applyPatchesInWorkspace() {
     return
 }
 
+usecase_LFS_BUILD_POSTACTION() {
+    local workspace=$(getWorkspaceName)
+
+    local label=$(getNextCiLabelName)
+    mustHaveValue "${label}" "label"
+
+    databaseEventBuildFinished
+
+    return
+}

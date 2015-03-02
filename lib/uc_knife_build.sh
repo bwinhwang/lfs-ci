@@ -131,6 +131,10 @@ usecase_LFS_KNIFE_PACKAGE() {
     return
 }
 
+## @fn      mustHaveLocationFromBaseline()
+#  @brief   ensure, that there is a location based on a baseline
+#  @param   {location}    name of location
+#  @return  <none>
 mustHaveLocationFromBaseline() {
 
     local tagName=$1
