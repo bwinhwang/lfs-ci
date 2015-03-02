@@ -50,7 +50,7 @@ test1() {
     cat <<EOF > ${expect}
 mustHaveLocationForDeveloperBuild 
 ci_job_package 
-specialBuildUploadAndNotifyUser 
+specialBuildUploadAndNotifyUser DEV
 linkFileToArtifactsDirectory /build/home/${USER}/private_builds/LABEL.tar.gz
 EOF
     assertExecutedCommands ${expect}

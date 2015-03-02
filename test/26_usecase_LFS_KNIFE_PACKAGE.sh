@@ -15,7 +15,7 @@ oneTimeSetUp() {
     ci_job_package() {
         mockedCommand "ci_job_package $@"
         mkdir -p ${WORKSPACE}/workspace/bld/bld-knife-input/
-        echo "foo=bar" > ${WORKSPACE}/workspace/bld/bld-knife-input/knife-requestor.txt
+        echo "foo=bar" > ${WORKSPACE}/workspace/bld/bld-knife-input/requestor.txt
     }
     getUsedSdkVersions() {
         mockedCommand "getUsedSdkVersions $@"
@@ -66,6 +66,7 @@ test1() {
 
 cat <<EOF > ${expect}
 ci_job_package 
+execute mkdir -p ${WORKSPACE}/workspace/bld/
 mustHaveNextCiLabelName 
 execute tar -cv --transform=s:^\./:os/: -C ${WORKSPACE}/workspace/upload/ -f ${WORKSPACE}/workspace/KNIFE_LABEL.tar .
 execute ${LFS_CI_ROOT}/bin/pigz ${WORKSPACE}/workspace/KNIFE_LABEL.tar

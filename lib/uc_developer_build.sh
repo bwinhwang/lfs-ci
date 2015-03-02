@@ -93,7 +93,8 @@ usecase_LFS_DEVELOPER_PACKAGE() {
 
     mustHaveLocationForDeveloperBuild
     ci_job_package
-    specialBuildUploadAndNotifyUser
+
+    specialBuildUploadAndNotifyUser DEV
 
     mustHaveNextCiLabelName
     local label=$(getNextCiLabelName)

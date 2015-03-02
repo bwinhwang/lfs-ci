@@ -1,8 +1,13 @@
-Dear Colleague,
+Dear __REQUESTOR_FIRST_NAME__,
 
 your developer build is ready for use. 
 
 __RELEASE_NOTE_CONTENT__
+
+You can download the artifacts from jenkins:
+https://lfs-ci.emea.nsn-net.net/job/__JOB_NAME__/__BUILD_NUMBER__/artifact/
+
+The artifacts will be deleted in three days.
 
 Best Regards,
 PS LFS CI Machine

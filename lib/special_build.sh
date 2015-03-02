@@ -212,18 +212,23 @@ applyKnifePatches() {
 #  @param   <none>
 #  @return  <none>
 specialBuildUploadAndNotifyUser() {
-
     requiredParameters LFS_CI_ROOT 
+
+    local buildType=$1
+    mustHaveValue "${buildType}" "build type"
 
     local workspace=$(getWorkspaceName)
     mustHaveWorkspaceName
+    copyAndExtractBuildArtifactsFromProject ${UPSTREAM_PROJECT} ${UPSTREAM_BUILD} "${buildType,,} fsmci"
 
     mustHaveNextCiLabelName
     local label=$(getNextCiLabelName)
     mustHaveValue ${label} "label name"
 
-    mustExistFile ${workspace}/bld/bld-knife-input/knife-requestor.txt
-    source ${workspace}/bld/bld-knife-input/knife-requestor.txt
+    mustExistFile ${workspace}/bld/bld-${buildType,,}-input/requestor.txt
+    rawDebug ${workspace}/bld/bld-${buildType,,}-input/requestor.txt
+    source ${workspace}/bld/bld-${buildType,,}-input/requestor.txt
+    export REQUESTOR REQUESTOR_FIRST_NAME REQUESTOR_LAST_NAME REQUESTOR_USERID REQUESTOR_EMAIL
 
     info "creating tarball with lfs load..."
     local tarOpt=$(getConfig LFS_CI_uc_special_build_package_tar_options)
@@ -234,7 +239,7 @@ specialBuildUploadAndNotifyUser() {
                 -f ${workspace}/${label}.tar \
                 .
 
-    info "compressing lfs-knife.tar..."
+    info "compressing ${label}.tar..."
     execute ${LFS_CI_ROOT}/bin/pigz ${workspace}/${label}.tar
 
     info "upload knife to storage"
