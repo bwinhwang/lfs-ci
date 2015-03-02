@@ -42,7 +42,7 @@ test1() {
 
     local expect=$(createTempFile)
     cat <<EOF > ${expect}
-copyAndExtractBuildArtifactsFromProject fsmci
+copyAndExtractBuildArtifactsFromProject ${UPSTREAM_PROJECT} ${UPSTREAM_BUILD} fsmci
 EOF
     assertExecutedCommands ${expect}
 
@@ -59,7 +59,7 @@ test2() {
 
     local expect=$(createTempFile)
     cat <<EOF > ${expect}
-copyAndExtractBuildArtifactsFromProject fsmci
+copyAndExtractBuildArtifactsFromProject ${UPSTREAM_PROJECT} ${UPSTREAM_BUILD} fsmci
 EOF
     assertExecutedCommands ${expect}
 
@@ -75,7 +75,7 @@ test3() {
 
     local expect=$(createTempFile)
     cat <<EOF > ${expect}
-copyAndExtractBuildArtifactsFromProject fsmci
+copyAndExtractBuildArtifactsFromProject ${UPSTREAM_PROJECT} ${UPSTREAM_BUILD} fsmci
 EOF
     assertExecutedCommands ${expect}
 
@@ -92,7 +92,7 @@ test4() {
 
     local expect=$(createTempFile)
     cat <<EOF > ${expect}
-copyAndExtractBuildArtifactsFromProject fsmci
+copyAndExtractBuildArtifactsFromProject ${UPSTREAM_PROJECT} ${UPSTREAM_BUILD} fsmci
 EOF
     assertExecutedCommands ${expect}
 
@@ -109,7 +109,7 @@ test5() {
 
     local expect=$(createTempFile)
     cat <<EOF > ${expect}
-copyAndExtractBuildArtifactsFromProject fsmci
+copyAndExtractBuildArtifactsFromProject ${UPSTREAM_PROJECT} ${UPSTREAM_BUILD} fsmci
 EOF
     assertExecutedCommands ${expect}
 

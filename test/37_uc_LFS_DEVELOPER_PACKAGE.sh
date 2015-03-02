@@ -21,6 +21,9 @@ oneTimeSetUp() {
     linkFileToArtifactsDirectory() {
         mockedCommand "linkFileToArtifactsDirectory $@"
     }
+    mustHaveLocationForDeveloperBuild() {
+        mockedCommand "mustHaveLocationForDeveloperBuild $@"
+    }
 
     return
 }
@@ -30,6 +33,8 @@ setUp() {
     export WORKSPACE=$(createTempDirectory)
     export JOB_NAME=LFS_DEV_-_developer_-_Package_-_package
     export BUILD_NUMBER=1234
+    export UPSTREAM_PROJECT=LFS_DEV_-_developer_-_Build
+    export UPSTREAM_BUILD=5432
     return
 }
 
@@ -43,6 +48,7 @@ test1() {
 
     local expect=$(createTempFile)
     cat <<EOF > ${expect}
+mustHaveLocationForDeveloperBuild 
 ci_job_package 
 specialBuildUploadAndNotifyUser 
 linkFileToArtifactsDirectory /build/home/${USER}/private_builds/LABEL.tar.gz
