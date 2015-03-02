@@ -2,17 +2,18 @@
 ## @file uc_developer_build.sh
 #  @brief usecase for create a lfs developer build
 #  @details  
-#  namings: LFS_DEV_-_developer_-_Build
-#           LFS_DEV_-_developer_-_Build_-_FSM-r2_-_fcmd
-#           LFS_DEV_-_developer_-_Build_-_FSM-r2_-_fspc
-#           LFS_DEV_-_developer_-_Build_-_FSM-r3_-_qemu
-#           LFS_DEV_-_developer_-_Build_-_FSM-r3_-_fsm3_octeon2
-#           LFS_DEV_-_developer_-_Build_-_FSM-r3_-_qemu_64
-#           LFS_DEV_-_developer_-_Build_-_FSM-r4_-_fsm4_k2
-#           LFS_DEV_-_developer_-_Build_-_FSM-r4_-_fsm4_axm
-#           LFS_DEV_-_developer_-_Build_-_LRC_-_lcpa
-#           LFS_DEV_-_developer_-_Build_-_LRC_-_qemu
-#           LFS_DEV_-_developer_-_Package_-_package
+#  namings: 
+#   - LFS_DEV_-_developer_-_Build
+#   - LFS_DEV_-_developer_-_Build_-_FSM-r2_-_fcmd
+#   - LFS_DEV_-_developer_-_Build_-_FSM-r2_-_fspc
+#   - LFS_DEV_-_developer_-_Build_-_FSM-r3_-_qemu
+#   - LFS_DEV_-_developer_-_Build_-_FSM-r3_-_fsm3_octeon2
+#   - LFS_DEV_-_developer_-_Build_-_FSM-r3_-_qemu_64
+#   - LFS_DEV_-_developer_-_Build_-_FSM-r4_-_fsm4_k2
+#   - LFS_DEV_-_developer_-_Build_-_FSM-r4_-_fsm4_axm
+#   - LFS_DEV_-_developer_-_Build_-_LRC_-_lcpa
+#   - LFS_DEV_-_developer_-_Build_-_LRC_-_qemu
+#   - LFS_DEV_-_developer_-_Package_-_package
 #
 # idea: developer build is quite the same as a knife build.
 # The developer choose a revision and a branch (aka location) and provides also

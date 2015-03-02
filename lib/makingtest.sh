@@ -4,53 +4,6 @@
 
 LFS_CI_SOURCE_makingtest='$Id$'
 
-## @fn      fmon_tests()
-#  @brief   running tests (FSM-r2) with fmon
-#  @todo    this function should be in a different place
-#           there is still a lot of hardcoded stuff in here...
-#  @param   <none>
-#  @return  <none>
-fmon_tests() {
-    local targetName=$(sed "s/^Test-//" <<< ${JOB_NAME})
-    mustHaveValue ${targetName} "target name"
-    info "testing on target ${targetName}"
-
-    local workspace=$(getWorkspaceName)
-    mustHaveWorkspaceName
-
-    local wbitSvnUrl=$(build location src-fsmwbit)
-    mustHaveValue "${wbitSvnUrl}" "svn ur of src-fsmwbit"
-
-    info "checking out src-fsmtest"
-    execute build adddir src-fsmtest
-    info "checking out src-ddal"
-    execute build adddir src-ddal
-    info "checking out src-fsmfmon"
-    execute build adddir src-fsmfmon
-    info "exporting src-fsmwbit"
-    execute build adddir src-fsmwbit
-    # execute svn co ${wbitSvnUrl}/src/tools            ${workspace}/src-fsmwbit/src/tools
-    # execute svn co ${wbitSvnUrl}/src/test_cases/share ${workspace}/src-fsmwbit/src/test_cases/share
-    # execute svn co ${wbitSvnUrl}/src/test_cases/lib   ${workspace}/src-fsmwbit/src/test_cases/lib
-    # execute svn co ${wbitSvnUrl}/src/test_cases/lib   ${workspace}/src-fsmwbit/src/test_cases/lib
-
-    execute mkdir -p ${workspace}/src-fsmwbit/src/log/
-    execute mkdir -p ${workspace}/xml-reports
-
-    info "start fmon tests..."
-    # tell the fmon scripting, where the workspace is. otherwise it will use
-    # the hardcoded path /lvol2/production_jenkins/test-repos/...
-    export TESTING_WORKSPACE=${workspace}
-    execute ${workspace}/src-fsmwbit/src/tools/ftcm/startftcm -cfg ${workspace}/src-fsmtest/src/test_scripts/configs/fcmd15.cfg
-    mustExistFile ${workspace}/src-fsmwbit/src/log/tcm2.log
-
-    info "converting fmon log to junit test xml file"
-    ${LFS_CI_ROOT}/bin/mkjunitxml.pl ${workspace}/src-fsmwbit/src/log/tcm2.log > ${workspace}/xml-reports/fsmr2.xml
-    mustBeSuccessfull "$?" "mkjunitxml.pl"
-
-    return
-}
-
 ## @fn      makingTest_checkUname()
 #  @brief   running a very basic startup test via making test on the target
 #  @details this test is starting the target with the new uImage and check, 
@@ -211,6 +164,10 @@ makingTest_testFSM() {
     return
 }
 
+## @fn      makingTest_copyResults()
+#  @brief   copy the results of a test into the artifacts folder
+#  @param   {testSuiteDirectory}    directory of the test suite
+#  @return  <none>
 makingTest_copyResults() {
     local workspace=$(getWorkspaceName)
     mustHaveWorkspaceName
@@ -234,9 +191,10 @@ makingTest_copyResults() {
     return
 }
 
-# --------------------------------------------------------------------------------------
-# TODO: demx2fk3 2014-12-16 the LRC tests are not in use yet from here.
-#                           we are still using the legacy scripting in scripts/CLRC03_...
+## @fn      makingTest_testLRC()
+#  @brief   making test calls for a LRC target
+#  @param   <none>
+#  @return  <none>
 makingTest_testLRC() {
 
     requiredParameters DELIVERY_DIRECTORY
@@ -315,6 +273,14 @@ makingTest_testLRC() {
     return
 }
 
+## @fn      makingTest_testLRC_subBoard()
+#  @brief   run a test suite for LRC on a LRC sub board (ahp, shp, ..)
+#  @param   {testSuiteDirectory}    directory of the test suite
+#  @param   {targetName}            name of the target
+#  @param   {testBuildDirectory}    directory of the build / software
+#  @param   {xmlNamePrefix}         prefix of the xml test results
+#  @param   {xmlReportDirectory}    directory of the xml report
+#  @return  <none>
 makingTest_testLRC_subBoard() {
     local testSuiteDirectory=$1
     mustExistDirectory ${testSuiteDirectory}
@@ -351,6 +317,12 @@ makingTest_testLRC_subBoard() {
     return
 }
 
+## @fn      makingTest_check()
+#  @brief   checks, if a target is up and running and is running with the
+#           correct software version
+#  @param   {testSuiteDirectory}  directory of the test suite
+#  @param   {targetName}          name of the target
+#  @return  <none>
 makingTest_check() {
     local testSuiteDirectory=${1}
     mustExistDirectory ${testSuiteDirectory}
@@ -384,6 +356,11 @@ makingTest_check() {
     return
 }
 
+## @fn      makingTest_install()
+#  @brief   install a software load via making test on the target
+#  @warning this is only used by LRC at the moment, but should also work for FSM
+#  @param   {testSuiteDirectory}    directory of a test suite
+#  @return  <none>
 makingTest_install() {
     local testSuiteDirectory=$1
     mustExistDirectory ${testSuiteDirectory}
@@ -428,6 +405,10 @@ makingTest_install() {
     return
 }
 
+## @fn      makingTest_testsWithoutTarget()
+#  @brief   run a test suite, which do not need a real target.
+#  @param   <none>
+#  @return  <none>
 makingTest_testsWithoutTarget() {
     requiredParameters JOB_NAME DELIVERY_DIRECTORY
 
@@ -452,7 +433,8 @@ makingTest_testsWithoutTarget() {
                 TESTBUILD=${testBuildDirectory} 
 
     export LFS_CI_ERROR_CODE= 
-    runAndLog ${make} --ignore-errors test-xmloutput || LFS_CI_ERROR_CODE=0 # also true
+    info "running test suite"
+    execute -i ${make} --ignore-errors test-xmloutput || LFS_CI_ERROR_CODE=0 # also true
 
     makingTest_copyResults ${testSuiteDirectory}
 
@@ -464,8 +446,8 @@ makingTest_testsWithoutTarget() {
     return
 }
 
-## @fn      reserveTarget
-#  @brief   make a reserveration from TAToo to get a target
+## @fn      _reserveTarget
+#  @brief   make a reserveration from TAToo/YSMv2 to get a target name
 #  @param   <none>
 #  @return  name of the target
 _reserveTarget() {

@@ -2,6 +2,62 @@
 ## @file    uc_build.sh
 #  @brief   usecase build
 #  @details the build usecase for lfs, ltk and uboot.
+#
+#  The build is splitted into several sub jobs - one for each architecutre (e.g. FSM-r2 fcmd).
+#  All the sub jobs are run in parallel and are independend from each other. 
+#  The sub jobs are triggerd by the main build job (function ci_job_build_version). 
+#  The main build job has the following tasks:
+#  - create the version number for the build
+#  - trigger the sub jobs (via jenkins)
+#  The main build job will the the state of the sub jobs. So if one of the sub jobs is failing,
+#  the main build job will also fail. If all sub jobs are green, the main build job will be also green.
+#
+#  naming for the main build job:
+#  - LFS_CI_-_trunk_-_Build
+# 
+# Each sub build job has the following tasks:
+#  - get the artifacts from the main build job (version number)
+#  - get the revision number from revision state files
+#  - do the build
+#     <pre>
+#     # path of the CI scripting
+#     export LFS_CI_ROOT=/ps/lfs/ci
+#     # product name, LFS or UBOOT
+#     product=LFS
+#     # module name (FSM-r2, FSM-r3, FSM-r4 or LRC)
+#     module=FSM-r3
+#     # name of the build target (fcmd, fspc, fsm3_octeon2, fsm4_axm or fsm4_k2)
+#     moduleTarget=fsm3_octeon2
+#     # branch / location name
+#     branch=trunk
+#     # production label (optional)
+#     productionLabel=PS_LFS_OS_$(date +%Y)_$(date +%m)_9999
+#     mkdir workspace
+#     cd workspace
+#     build setup
+#     build newlocations ${branch}
+#     build adddir src-project
+#     for src in $(build -C src-project src-list_${product}_${module}) ; do
+#     build adddir ${src}
+#     done
+#     /ps/lfs/ci/bin/sortBuildsFromDependencies ${moduleTarget} makefile ${productionLabel} > Makefile
+#     buildTarget=$(build -C src-project final-build-target_${product}_${module})
+#     make ${buildTarget}
+#     </pre>
+# 
+#  naming for the sub build jobs:
+#  - LFS_CI_-_trunk_-_Build_-_FSM-r4_-_fsm4_axm
+#  - LFS_CI_-_trunk_-_Build_-_FSM-r4_-_fsm4_k2
+#  - LFS_CI_-_trunk_-_Build_-_FSM-r3_-_fsm3_octeon2
+#  - LFS_CI_-_trunk_-_Build_-_FSM-r3_-_qemu_64
+#  - LFS_CI_-_trunk_-_Build_-_FSM-r2_-_fcmd
+#  - LFS_CI_-_trunk_-_Build_-_FSM-r2_-_fspc
+#  - LFS_CI_-_trunk_-_Build_-_FSM-r2_-_qemu
+#  - LFS_CI_-_LRC_-_Build_-_LRC_-_qemu_64
+#  - LFS_CI_-_LRC_-_Build_-_LRC_-_lcpa
+#
+# This build functions are also apply to LFS, UBOOT, LTK, UBOOT_FSMR4, ...
+#
 
 [[ -z ${LFS_CI_SOURCE_artifacts}       ]] && source ${LFS_CI_ROOT}/lib/artifacts.sh
 [[ -z ${LFS_CI_SOURCE_createWorkspace} ]] && source ${LFS_CI_ROOT}/lib/createWorkspace.sh

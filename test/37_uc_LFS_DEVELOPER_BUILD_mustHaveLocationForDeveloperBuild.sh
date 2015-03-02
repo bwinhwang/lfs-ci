@@ -24,8 +24,8 @@ oneTimeSetUp() {
 setUp() {
     cp -f /dev/null ${UT_MOCKED_COMMANDS}
     export WORKSPACE=$(createTempDirectory)
-    
-
+    export UPSTREAM_PROJECT=LFS_DEV_-_developer_-_Build
+    export UPSTREAM_BUILD=1234
     return
 }
 
@@ -125,7 +125,7 @@ test6() {
 
     local expect=$(createTempFile)
     cat <<EOF > ${expect}
-copyAndExtractBuildArtifactsFromProject fsmci
+copyAndExtractBuildArtifactsFromProject ${UPSTREAM_PROJECT} ${UPSTREAM_BUILD} fsmci
 EOF
     assertExecutedCommands ${expect}
 

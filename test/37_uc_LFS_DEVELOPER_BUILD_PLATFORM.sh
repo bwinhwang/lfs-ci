@@ -31,6 +31,7 @@ setUp() {
     export WORKSPACE=$(createTempDirectory)
     export UPSTREAM_PROJECT=LFS_DEV_-_DEVELOPER_-_Build
     export UPSTREAM_BUILD=123
+    export JOB_NAME=LFS_DEV_-_DEVELOPER_-_Build_-_FSM-r3_-_fsm3_octeon2
     
 
     return
