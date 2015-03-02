@@ -29,6 +29,9 @@
 # needed by Docomo FB1311_RLD8
 /LBT140201-ci1/d
 
+# needed by FB1311_LNT4OPTUS
+/LBT140210-ci1/d
+
 # temp. used by Dorosh, Sergiy - PL/Wroclaw for creating Knife
 /PS_LFS_OS_20M2_09_83/d
 
