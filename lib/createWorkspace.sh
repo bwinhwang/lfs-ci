@@ -349,7 +349,8 @@ synchroniceToLocalPath() {
             info "synchronice ${subsystem}/${tag} to local filesystem"
             execute mkdir -p ${localCacheDir}/data
 
-            execute rsync --archive --numeric-ids --delete-excluded --ignore-errors \
+            execute -r 10 \
+                rsync --archive --numeric-ids --delete-excluded --ignore-errors     \
                 --hard-links --sparse --exclude=.svn --rsh=ssh                      \
                 ${rsync_opts}                                                       \
                 ${serverName}:${remotePath}/                                        \

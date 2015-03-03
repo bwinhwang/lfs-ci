@@ -1,7 +1,7 @@
-#!/usr/bin/perl 
+#!/usr/bin/perl
 package Object;
 
-use strict; 
+use strict;
 use warnings;
 
 sub new {
@@ -57,14 +57,34 @@ sub newTestExecution {
     my $targetName    = $param->{targetName};
     my $targetType    = $param->{targetType};
 
-    my $sth = $self->prepare( 
+    my $sth = $self->prepare(
         'CALL add_new_test_execution( ?, ?, ?, ?, @id )'
     );
-    $sth->execute( $buildName, $testSuiteName, $targetName, $targetType ) 
+    $sth->execute( $buildName, $testSuiteName, $targetName, $targetType )
         or LOGDIE sprintf( "can not insert test execution: %s, %s, %s, %s", $buildName, $testSuiteName, $targetName, $targetType);
     my $id = $self->{dbi}->selectrow_array('SELECT @id');
 
     return $id;
+}
+
+sub newSubversionCommit {
+    my $self  = shift;
+    my $param = { @_ };
+
+    my $baselineName  = $param->{baselineName};
+    my $revision      = $param->{revision};
+    my $author        = $param->{author};
+    my $date          = $param->{date};
+    my $msg           = $param->{msg};
+
+    my $sth = $self->prepare(
+        'CALL add_new_subversion_commit( ?, ?, ?, ?, ? )'
+    );
+    print "$baselineName $revision $author $date\n";
+    $sth->execute( $baselineName, $revision, $author, $date, $msg )
+        or LOGDIE sprintf( "can not insert test execution: %s, %s, %s, %s", $baselineName, $revision, $author, $author);
+
+    return;
 }
 
 sub newTestResult {
@@ -75,10 +95,10 @@ sub newTestResult {
     my $testResultName  = $param->{testResultName};
     my $testResultValue = $param->{testResultValue};
 
-    my $sth = $self->prepare( 
+    my $sth = $self->prepare(
         'CALL add_new_test_result( ?, ?, ? )'
     );
-    $sth->execute( $testExecutionId, $testResultName, $testResultValue ) 
+    $sth->execute( $testExecutionId, $testResultName, $testResultValue )
         or LOGDIE sprintf( "can not insert test result: %s, %s, %s", $testExecutionId, $testResultName, $testResultValue );
 
     return;
@@ -114,15 +134,15 @@ sub newBuildEvent {
         $method = "test_failed( ?, ? )",
     }
 
-    my $sth = $self->prepare( 
-        "call $method" 
+    my $sth = $self->prepare(
+        "call $method"
     );
 
     if( $action eq "build_started" ) {
-        $sth->execute( $baselineName, $comment, $branchName, $revision ) 
+        $sth->execute( $baselineName, $comment, $branchName, $revision )
             or LOGDIE sprintf( "can not insert data\n%s\n", $sth->errstr() );
     } else {
-        $sth->execute( $baselineName, $comment ) 
+        $sth->execute( $baselineName, $comment )
             or LOGDIE sprintf( "can not insert data\n%s\n", $sth->errstr() );
     }
 
@@ -189,6 +209,22 @@ sub newBuildEvent {
     return;
 }
 
+sub newSubversionCommit {
+    my $self  = shift;
+    my $param = { @_ };
+
+    if( not $self->{store} ) {
+        $self->{store} = Store::Database->new();
+    }
+
+    $self->{store}->newSubversionCommit( baselineName => $param->{baselineName},
+                                         msg          => $param->{logentry}->{msg}->[0],
+                                         author       => $param->{logentry}->{author}->[0],
+                                         date         => $param->{logentry}->{date}->[0],
+                                         revision     => $param->{logentry}->{revision}, );
+    return;
+}
+
 package Model::Build;
 
 use strict;
@@ -206,6 +242,8 @@ use strict;
 use warnings;
 use Log::Log4perl qw( :easy );
 use Getopt::Long;
+    use XML::Simple;
+    use Data::Dumper;
 
 my %l4p_config = (
     'log4perl.category'                                  => 'TRACE, Screen',
@@ -226,9 +264,11 @@ my $opt_resultFile    = "";
 my $opt_testSuiteName = "";
 my $opt_targetName    = "";
 my $opt_targetType    = "";
+my $opt_changelog     = "";
 
 GetOptions( 'buildName=s',     \$opt_name,
             'branchName=s',    \$opt_branch,
+            'changelog=s',     \$opt_changelog,
             'revision=s',      \$opt_revision,
             'action=s',        \$opt_action,
             'comment=s',       \$opt_comment,
@@ -244,6 +284,7 @@ if( not $opt_name or not $opt_action ) {
 }
 
 if( $opt_action eq "new_test_result" ) {
+
     my $handler = Handler::Database->new();
 
     my $id = $handler->newTestExecution( buildName     => $opt_name,
@@ -262,11 +303,21 @@ if( $opt_action eq "new_test_result" ) {
     }
     close FILE;
 
+} elsif( $opt_action eq "new_svn_commits" )  {
+
+    my $handler = Handler::Database->new();
+    my $xml = XMLin( $opt_changelog, ForceArray => 1 );
+
+    foreach my $logentry ( @{ $xml->{logentry} } ) {
+        $handler->newSubversionCommit( baselineName => $opt_name,
+                                       logentry     => $logentry );
+    }
+
 } else {
 
     Handler::Database->new()->newBuildEvent( action  => $opt_action,
-                                             release => Model::Build->new( baselineName => $opt_name, 
-                                                                           branchName   => $opt_branch, 
+                                             release => Model::Build->new( baselineName => $opt_name,
+                                                                           branchName   => $opt_branch,
                                                                            revision     => $opt_revision,
                                                                            comment      => $opt_comment ) );
 }

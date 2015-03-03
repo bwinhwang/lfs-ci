@@ -271,7 +271,7 @@ uploadKnifeToStorage() {
     knifeFile=${1}
     mustExistFile ${knifeFile}
 
-    execute rsync -avrPe ssh ${knifeFile} lfs_share_sync_host_espoo2:/build/home/lfs_knives/
+    execute -r 10 rsync -avrPe ssh ${knifeFile} lfs_share_sync_host_espoo2:/build/home/lfs_knives/
 
     return
 }
