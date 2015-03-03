@@ -6,10 +6,11 @@
 #            
 #           * creation of workspace is done by jenkins git plugin
 # 
-# jenkins job names: PKGPOOL_CI_-_trunk_-_Build
-#                    PKGPOOL_CI_-_trunk_-_Test
-#                    PKGPOOL_PROD_-_trunk_-_Release
-#                    PKGPOOL_PROD_-_trunk_-_Update_Dependencies
+# jenkins job names: 
+#    - PKGPOOL_CI_-_trunk_-_Build
+#    - PKGPOOL_CI_-_trunk_-_Test
+#    - PKGPOOL_PROD_-_trunk_-_Release
+#    - PKGPOOL_PROD_-_trunk_-_Update_Dependencies
 #
 # Fingerprint file: workspace/bld/bld-pkgpool-release/label
 #

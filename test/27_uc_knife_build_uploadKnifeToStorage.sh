@@ -1,8 +1,6 @@
 #!/bin/bash
 
-source lib/common.sh
-
-initTempDirectory
+source test/common.sh
 
 source lib/uc_knife_build.sh
 
@@ -17,6 +15,10 @@ oneTimeSetUp() {
     }
     mustExistFile() {
         mockedCommand "mustExistFile $@"
+    }
+    getConfig() {
+        mockedCommand "getConfig $@"
+        echo "server:upload/"
     }
 }
 oneTimeTearDown() {
@@ -42,9 +44,10 @@ test1() {
     local expect=$(createTempFile)
 cat <<EOF > ${expect}
 mustExistFile /path/to/file
-execute -r 10 rsync -avrPe ssh /path/to/file lfs_share_sync_host_espoo2:/build/home/lfs_knives/
+getConfig LFS_CI_upload_server
+execute rsync -avrPe ssh /path/to/file server:upload/
 EOF
-    assertEquals "$(cat ${expect})" "$(cat ${UT_MOCKED_COMMANDS})"
+    assertExecutedCommands ${expect}
 
     return
 }

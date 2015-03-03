@@ -77,8 +77,7 @@ test1() {
     export UPSTREAM_PROJECT=PKGPOOL_CI_-_trunk_-_Test
     export UPSTREAM_BUILD=1234
 
-
-    usecase_PKGPOOL_RELEASE
+    assertTrue "usecase_PKGPOOL_RELEASE"
 
     local expect=$(createTempFile)
 # createReleaseInWorkflowTool LABEL ${WORKSPACE}/workspace/releasenote.xml

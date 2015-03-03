@@ -192,7 +192,7 @@ mustHaveSdkOnShare() {
 
     local sdkSvnLocation=$(getConfig LFS_CI_UC_package_sdk_svn_location)
 
-    svnExport {sdkSvnLocation}/tags/${sdkBaseline} ${ciLfsLocation}/SDKs/${sdkBaseline}
+    svnExport ${sdkSvnLocation}/tags/${sdkBaseline} ${ciLfsLocation}/SDKs/${sdkBaseline}
     
     return
 }

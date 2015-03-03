@@ -193,6 +193,11 @@ svnLog() {
     execute -n -r 3 svn log --non-interactive --trust-server-cert $@
     return
 }
+
+## @fn      svnCat()
+#  @brief   executes an svn cat command
+#  @param   {args}    args for the svn cat command
+#  @return  output of the svn cat command
 svnCat() {
     execute -n -r 3 svn cat --non-interactive --trust-server-cert $@
     return

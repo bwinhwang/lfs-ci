@@ -56,65 +56,40 @@
 # * knife workspaces can be deleted after building (no matter if it is successful or not)
 
 [[ -z ${LFS_CI_SOURCE_artifacts}       ]] && source ${LFS_CI_ROOT}/lib/artifacts.sh
-[[ -z ${LFS_CI_SOURCE_createWorkspace} ]] && source ${LFS_CI_ROOT}/lib/createWorkspace.sh
-[[ -z ${LFS_CI_SOURCE_database}        ]] && source ${LFS_CI_ROOT}/lib/database.sh
-[[ -z ${LFS_CI_SOURCE_build}           ]] && source ${LFS_CI_ROOT}/lib/build.sh
+[[ -z ${LFS_CI_SOURCE_subversion}      ]] && source ${LFS_CI_ROOT}/lib/subversion.sh
+[[ -z ${LFS_CI_SOURCE_special_build}   ]] && source ${LFS_CI_ROOT}/lib/special_build.sh
 [[ -z ${LFS_CI_SOURCE_uc_lfs_package}  ]] && source ${LFS_CI_ROOT}/lib/uc_lfs_package.sh
+
+## @fn      usecase_LFS_KNIFE_BUILD()
+#  @brief   run the usecase LFS Knife Build
+#  @param   <none>
+#  @return  <none>
+usecase_LFS_KNIFE_BUILD() {
+    requiredParameters KNIFE_LFS_BASELINE REQUESTOR_USERID
+
+    # get the information from WFT (opt)
+    # get the information from jenkins
+
+    local currentDateTime=$(date +%Y%m%d-%H%M%S)
+    local label=$(printf "KNIFE_%s.%s" ${KNIFE_LFS_BASELINE} ${currentDateTime})
+
+    specialBuildPreparation KNIFE ${label} ${KNIFE_LFS_BASELINE} "none" 
+
+    return
+}
 
 ## @fn      usecase_LFS_KNIFE_BUILD_PLATFORM()
 #  @brief   build a lfs knife
 #  @param   <none>
 #  @return  <none>
 usecase_LFS_KNIFE_BUILD_PLATFORM() {
-
-    # get the information from WFT (opt)
-    # get the information from jenkins
-
     requiredParameters KNIFE_LFS_BASELINE WORKSPACE UPSTREAM_PROJECT UPSTREAM_BUILD
 
     local baseLabel=${KNIFE_LFS_BASELINE}
-
-    # we have to figure out, if we need to build something.
-    # e.g.: if the knife baseline is a LRC baseline, we 
-    # do not need to build FSM-r2,3,4.
-    # also for FSM-r4, we need a different location.
-    local subTaskName=$(getSubTaskNameFromJobName)
-    mustHaveValue "${subTaskName}" "subTaskName"
-
-    info "baseLabel ${baseLabel}"
-    info "subTaskName ${subTaskName}"
-   
-    # short names: stn := subTaskName
-    #              bl  := baseLabel
-    #
-    #  results: build should be done := 1
-    #           build not required   := 0
-    #
-    #            | stn == LRC | stn != LRC 
-    # -------------------------------------
-    #  bl  = LRC |      1     |      0
-    # -------------------------------------
-    #  bl != LRC |      0     |      1
-    # -------------------------------------
-
-
-    if [[ ${baseLabel} =~ LRC_LCP ]] ; then
-        if [[ ${subTaskName} = LRC ]] ; then
-            debug "it's a LRC build, everything is fine."
-        else
-            warning "Knife baseline is an LRC-baseline, but build is not required for LRC"
-            exit 0
-        fi
-    else
-        if [[ ${subTaskName} = LRC ]] ; then
-            warning "Knife baseline is an LRC-baseline, but build is not required for LRC"
-            exit 0
-        else
-            debug "it's a normal FSMr-x build, everything is fine."
-        fi
-    fi
+    mustHaveValue "${baseLabel}" "base label"
 
     # create a workspace
+    # TODO: demx2fk3 2015-02-26 do this in a different way or move it to a different place
     debug "create own revision control file"
     export tagName=${baseLabel}
     local svnReposUrl=$(getConfig LFS_PROD_svn_delivery_os_repos_url)
@@ -122,90 +97,20 @@ usecase_LFS_KNIFE_BUILD_PLATFORM() {
     local revision=$(svnCat ${svnReposUrl}/tags/${baseLabel}/doc/scripts/revisions.txt | cut -d" " -f3 | sort -nu | tail -n 1)
     echo "src-knife ${svnReposUrl}/tags/${baseLabel} ${revision}" > ${WORKSPACE}/revisions.txt
 
-    # faking the branch name for workspace creation...
-    LFS_CI_GLOBAL_BRANCH_NAME=$(getConfig LFS_PROD_tag_to_branch)
+    mustHaveLocationFromBaseline ${baseLabel}
+    local location=${LFS_CI_GLOBAL_BRANCH_NAME}
 
-    if [[ -z ${LFS_CI_GLOBAL_BRANCH_NAME} ]] ; then
-        fatal "this branch is not prepared to build knives"
+    if ! specialBuildisRequiredForLrc ${location} ; then
+        warning "build is not required."
+        exit 0
     fi
 
-    # for FSM-r4, it's have to do this in a different way..
-    if [[ ${subTaskName} = "FSM-r4" ]] ; then
-        case ${LFS_CI_GLOBAL_BRANCH_NAME} in
-            trunk) LFS_CI_GLOBAL_BRANCH_NAME=FSM_R4_DEV ;;
-            *)     # TODO: demx2fk3 2015-02-03 add check, if new location exists, otherwise no build
-                   LFS_CI_GLOBAL_BRANCH_NAME=${LFS_CI_GLOBAL_BRANCH_NAME}_FSMR4 ;;
-        esac
-    fi
-    export LFS_CI_GLOBAL_BRANCH_NAME
-
-    createWorkspace
-
-    copyArtifactsToWorkspace "${UPSTREAM_PROJECT}" "${UPSTREAM_BUILD}" "fsmci"
-    mustHaveNextCiLabelName
-    local label=$(getNextCiLabelName)
-    mustHaveValue ${label} "label name"
-    setBuildDescription "${JOB_NAME}" "${BUILD_NUMBER}" "${label}"
-
-    # apply patches to the workspace
-    applyKnifePatches
-
-    buildLfs
-
-    info "upload results to artifakts share."
-    createArtifactArchive
+    specialBuildCreateWorkspaceAndBuild
 
     info "build job finished."
     return
 }
 
-## @fn      usecase_LFS_KNIFE_BUILD()
-#  @brief   run the usecase LFS Knife Build
-#  @param   <none>
-#  @return  <none>
-usecase_LFS_KNIFE_BUILD() {
-
-    requiredParameters KNIFE_LFS_BASELINE  KNIFE_REQUESTOR
-
-    local currentDateTime=$(date +%Y%m%d-%H%M%S)
-    local label=$(printf "KNIFE_%s.%s" ${KNIFE_LFS_BASELINE} ${currentDateTime})
-
-    info "knife label is ${label}"
-    info "knife is based on ${KNIFE_LFS_BASELINE}"
-
-    local workspace=$(getWorkspaceName)
-    mustHaveCleanWorkspace
-
-    debug "writing new label file in workspace ${workspace}"
-    execute mkdir -p ${workspace}/bld/bld-fsmci-summary/
-    echo ${label}              > ${workspace}/bld/bld-fsmci-summary/label
-    echo ${KNIFE_LFS_BASELINE} > ${workspace}/bld/bld-fsmci-summary/oldLabel
-
-    debug "create own revision control file"
-    echo "src-foo http://fakeurl/ ${baseLabel}" > ${WORKSPACE}/revisionstate.xml
-    copyFileFromWorkspaceToBuildDirectory ${JOB_NAME} ${BUILD_NUMBER} revisionstate.xml
-    
-
-    info "storing knife input as artifacts"
-    execute mkdir -p ${workspace}/bld/bld-knife-input/
-    execute -i cp -a ${WORKSPACE}/lfs.patch ${workspace}/bld/bld-knife-input/
-    cat > ${workspace}/bld/bld-knife-input/knife-requestor.txt <<EOF
-KNIFE_REQUESTOR="${KNIFE_REQUESTOR}"
-KNIFE_REQUESTOR_FIRST_NAME="${KNIFE_REQUESTOR_FIRST_NAME}"
-KNIFE_REQUESTOR_LAST_NAME="${KNIFE_REQUESTOR_LAST_NAME}"
-KNIFE_REQUESTOR_USERID="${KNIFE_REQUESTOR_USERID}"
-KNIFE_REQUESTOR_EMAIL="${KNIFE_REQUESTOR_EMAIL}"
-EOF
-
-    info "upload results to artifakts share."
-    createArtifactArchive
-
-    setBuildDescription "${JOB_NAME}" "${BUILD_NUMBER}" "${label}<br>${KNIFE_REQUESTOR}"
-
-    info "build preparation done."
-
-    return
-}
 
 ## @fn      usecase_LFS_KNIFE_PACKAGE()
 #  @brief   run the usecase lfs knife package
@@ -217,86 +122,48 @@ usecase_LFS_KNIFE_PACKAGE() {
     local workspace=$(getWorkspaceName)
     mustHaveWorkspaceName
 
-    export LFS_CI_GLOBAL_BRANCH_NAME=$(getConfig LFS_PROD_tag_to_branch)
-    if [[ -z ${LFS_CI_GLOBAL_BRANCH_NAME} ]] ; then
-        fatal "this branch is not prepared to build knives"
-    fi
-
     info "running usecase LFS package"
     ci_job_package
 
-    mustHaveNextCiLabelName
-    local label=$(getNextCiLabelName)
-    mustHaveValue ${label} "label name"
+    specialBuildUploadAndNotifyUser KNIFE
 
-    mustExistFile ${workspace}/bld/bld-knife-input/knife-requestor.txt
-
-    source ${workspace}/bld/bld-knife-input/knife-requestor.txt
-
-    info "creating tarball with lfs load..."
-    execute tar -cv \
-                --transform='s:^\./:os/:' \
-                -C ${workspace}/upload/ \
-                -f ${workspace}/lfs-knife_${label}.tar \
-                .
-
-    info "compressing lfs-knife.tar..."
-    execute ${LFS_CI_ROOT}/bin/pigz ${workspace}/lfs-knife_${label}.tar
-
-    info "upload knife to storage"
-    uploadKnifeToStorage ${workspace}/lfs-knife_${label}.tar.gz 
-
-    local readmeFile=${WORKSPACE}/.00_README_knife_result.txt
-    cat > ${readmeFile} <<EOF
-eslinn10.emea.nsn-net.net:/vol/eslinn10_bin/build/build/home/lfs_knives/lfs-knife_${label}.tar.gz
-EOF
-
-    copyFileToArtifactDirectory $(basename ${readmeFile})
-
-    execute ${LFS_CI_ROOT}/bin/sendReleaseNote -r ${WORKSPACE}/.00_README_knife_result.txt \
-                                               -t ${label}                                 \
-                                               -n                                          \
-                                               -f ${LFS_CI_ROOT}/etc/file.cfg
-
-    info "knife done."
-
+    info "knife is done."
     return
 }
 
-## @fn      uploadKnifeToStorage()
-#  @brief   upload the knife results to the storage
-#  @param   <none>
+## @fn      mustHaveLocationFromBaseline()
+#  @brief   ensure, that there is a location based on a baseline
+#  @param   {location}    name of location
 #  @return  <none>
-uploadKnifeToStorage() {
-    knifeFile=${1}
-    mustExistFile ${knifeFile}
+mustHaveLocationFromBaseline() {
 
-    execute -r 10 rsync -avrPe ssh ${knifeFile} lfs_share_sync_host_espoo2:/build/home/lfs_knives/
+    local tagName=$1
+    mustHaveValue "${tagName}" "baseline"
 
-    return
-}
+    export tagName
 
-## @fn      applyKnifePatches()
-#  @brief   apply the patches from the knife input to the workspace
-#  @param   <none>
-#  @return  <none>
-applyKnifePatches() {
-    local workspace=$(getWorkspaceName)
-    mustHaveWorkspaceName
+    # faking the branch name for workspace creation...
+    location=$(getConfig LFS_PROD_tag_to_branch)
 
-    info "applying patches to workspace..."
-
-    if [[ -e ${workspace}/bld/bld-knife-input/knife.tar.gz ]] ; then
-        info "extracting knife.tar.gz..."
-        execute tar -xvz -C ${workspace} -f ${workspace}/bld/bld-knife-input/knife.tar.gz
+    if [[ -z ${location} ]] ; then
+        fatal "this branch is not prepared to build knives"
     fi
 
-    if [[ -e ${workspace}/bld/bld-knife-input/knife.patch ]] ; then
-        info "applying knife.patch file..."
-        execute patch -d ${workspace} < ${workspace}/bld/bld-knife-input/knife.patch
+    debug "subtask is ${subTaskName}"
+    # for FSM-r4, it's have to do this in a different way..
+    if [[ ${subTaskName} = "FSM-r4" ]] ; then
+        case ${location} in
+            trunk)          location=FSM_R4_DEV ;;
+            pronb-deveoper) location=FSM_R4_DEV ;;
+            *)     # TODO: demx2fk3 2015-02-03 add check, if new location exists, otherwise no build
+                   location=${location}_FSMR4 ;;
+        esac
     fi
-
-    # add more stuff here
+    mustHaveValue "${location}" "location"
+    debug "using location ${location}"
+    export LFS_CI_GLOBAL_BRANCH_NAME=${location}
 
     return
 }
+
+

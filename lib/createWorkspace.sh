@@ -150,6 +150,9 @@ createWorkspace() {
     mustHaveValue "${revision}" "revision from revision state file"
     info "using revision ${revision} from revision state file"
 
+    debug "parameter: revision ${revision}"
+    debug "parameter: location ${location}"
+
     setupNewWorkspace
     mustHaveWritableWorkspace
 

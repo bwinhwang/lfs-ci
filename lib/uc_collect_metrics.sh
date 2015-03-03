@@ -1,15 +1,43 @@
 #!/bin/bash
-## @file  uc_test
-#  @brief the test usecase
+## @file    uc_collect_metrics.sh
+#  @brief   usecase collect metrics - collect the metrics from the build and test jobs and store them into the database
+#  @details naming: 
+#           - LFS_CI_-_trunk_-_Test_-_collect_metrics
+#  
+#  The usecase is executed after the test jobs, no matter if they were successfull or not.
+#  The usecase collects all the metrics from the build and test jobs and stores them into the database.
+#  Collected metrics:
+#  - Build jobs
+#    - duration
+#    - compiler warnings
+#  - Package jobs
+#    - duration
+#  - Test jobs
+#    - duration
+#    - failed TCs
+#    - skipped TCs
+#    - total TCs
+#  - From artifacts of test jobs
+#    - all metrics, which are stored in files call <testsuite>-metrics-database-values.txt
 
+[[ -z ${LFS_CI_SOURCE_common}    ]] && source ${LFS_CI_ROOT}/lib/common.sh
 [[ -z ${LFS_CI_SOURCE_jenkins}   ]] && source ${LFS_CI_ROOT}/lib/jenkins.sh
 [[ -z ${LFS_CI_SOURCE_artifacts} ]] && source ${LFS_CI_ROOT}/lib/artifacts.sh
 [[ -z ${LFS_CI_SOURCE_database}  ]] && source ${LFS_CI_ROOT}/lib/database.sh
 
+## @fn      ci_job_test_collect_metrics()
+#  @brief   run the usecase collect metrics (legacy function)
+#  @todo    migrate to new usecase call concept and remove this function
+#  @param   <none>
+#  @return  <none>
 ci_job_test_collect_metrics() {
     usecase_LFS_COLLECT_METRICS
 }
 
+## @fn      usecase_LFS_COLLECT_METRICS()
+#  @brief   run the usecase collect metrics 
+#  @param   <none>
+#  @return  <none>
 usecase_LFS_COLLECT_METRICS() {
     requiredParameters UPSTREAM_PROJECT UPSTREAM_BUILD 
 
@@ -102,11 +130,19 @@ usecase_LFS_COLLECT_METRICS() {
     return
 }
 
+## @fn      storeMetricsForTestJob()
+#  @brief   store the metrics from the test job into the database
+#  @param   {jobName}        name of the job
+#  @param   {buildNumber}    number of the build
+#  @return  <none>
 storeMetricsForTestJob() {
     requiredParameters WORKSPACE LFS_CI_ROOT
 
     local jobName=${1}
+    mustHaveValue "${jobName}" "job name"
+
     local buildNumber=${2}
+    mustHaveValue "${buildNumber}" "build number"
 
     local workspace=$(getWorkspaceName)
     mustHaveWorkspaceName
@@ -149,6 +185,11 @@ storeMetricsForTestJob() {
     return
 }
 
+## @fn      storeMetricsFromArtifacts()
+#  @brief   store the metrics, which are included in the artifacts into the database
+#  @param   {jobName}        name of the job
+#  @param   {buildNumber}    number of the build
+#  @return  <none>
 storeMetricsFromArtifacts() {
     local jobName=$1
     mustHaveValue "${jobName}" "job name"
