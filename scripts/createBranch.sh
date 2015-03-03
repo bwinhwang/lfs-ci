@@ -358,15 +358,23 @@ svnCopyDeliveryLRC() {
 
 dbInsert() {
     info "--------------------------------------------------------"
-    info "DB: insert $NEW_BRANCH into table branches"
+    info "DB: insert branch into table branches"
     info "--------------------------------------------------------"
 
+    local branch=${NEW_BRANCH}
     local branchType=$(getBranchPart ${NEW_BRANCH} TYPE)
     local yyyy=$(getBranchPart ${NEW_BRANCH} YYYY)
     local mm=$(getBranchPart ${NEW_BRANCH} MM)
+    local regex="${branchType}_PS_LFS_OS_${yyyy}_${mm}_([0-9][0-9][0-9][0-9])"
+
+    if [[ ${LRC} == "true" ]]; then
+        branch="LRC_${NEW_BRANCH}"
+        regex="${branchType}_LRC_LCP_PS_LFS_OS_${yyyy}_${mm}_([0-9][0-9][0-9][0-9])"
+    fi
+
     local sqlString="insert into branches \
     (branch_name, location_name, ps_branch_name, based_on_revision, based_on_release, release_name_regex, date_created, comment) \
-    VALUES ('$NEW_BRANCH', '$NEW_BRANCH', '$NEW_BRANCH', $REVISION, '$RELEASE', '${branchType}_PS_LFS_OS_${yyyy}_${mm}_([0-9][0-9][0-9][0-9])', now(), '$COMMENT')"
+    VALUES ('$branch', '$branch', '$NEW_BRANCH', $REVISION, '$RELEASE', '${regex}', now(), '$COMMENT')"
 
     echo $sqlString | mysql -u lfspt --password=pt -h ulwiki02.emea.nsn-net.net -D lfspt
 }
@@ -397,12 +405,11 @@ main() {
             svnCopyDeliveryLRC ${SRC_BRANCH} ${NEW_BRANCH}
         fi
         svnEditLocationsTxtFile ${NEW_BRANCH}
+        if [[ "${DO_DB_INSERT}" == "true" ]]; then
+            dbInsert
+        fi
     else
         info "$(basename $0): Nothing to do."
-    fi
-
-    if [[ "${DO_DB_INSERT}" == "true" ]]; then
-        dbInsert
     fi
 }
 
