@@ -117,7 +117,7 @@ executeOnMaster() {
     local command=$@
     local server=$(getConfig jenkinsMasterServerHostName)
 
-    execute ssh ${server} ${command}
+    execute -r 10 ssh ${server} ${command}
     return
 }
 

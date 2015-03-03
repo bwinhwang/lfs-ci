@@ -613,7 +613,7 @@ copyFileFromBuildDirectoryToWorkspace() {
 
     mustHaveValue "${dir}" "build directory on master"
     debug "copy file ${fileName} from master:${dir} to ${WORKSPACE}"
-    execute rsync -avPe ssh ${master}:${dir}/${fileName} ${WORKSPACE}/$(basename ${fileName})
+    execute -r 10 rsync -avPe ssh ${master}:${dir}/${fileName} ${WORKSPACE}/$(basename ${fileName})
 
     return        
 }
@@ -637,7 +637,7 @@ copyFileFromWorkspaceToBuildDirectory() {
 
     mustHaveValue "${dir}" "build directory on master"
     debug "copy file ${fileName} to master:${dir}"
-    execute rsync -avPe ssh ${fileName} ${master}:${dir}/$(basename ${fileName})
+    execute -r 10 rsync -avPe ssh ${fileName} ${master}:${dir}/$(basename ${fileName})
 
     return        
 }

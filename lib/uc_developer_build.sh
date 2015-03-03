@@ -100,12 +100,11 @@ usecase_LFS_DEVELOPER_PACKAGE() {
     local label=$(getNextCiLabelName)
     mustHaveValue ${label} "label name"
 
-    linkFileToArtifactsDirectory /build/home/${USER}/private_builds/${label}.tar.gz
+    linkFileToArtifactsDirectory /build/home/${USER}/privateBuilds/${label}.tar.gz
 
     info "developer build is done."
     return
 }
-
 
 ## @fn      mustHaveLocationForDeveloperBuild()
 #  @brief   ensures, that there is a location for a developer build
