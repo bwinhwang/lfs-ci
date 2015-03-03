@@ -356,6 +356,21 @@ svnCopyDeliveryLRC() {
     fi
 }
 
+dbInsert() {
+    info "--------------------------------------------------------"
+    info "DB: insert $NEW_BRANCH into table branches"
+    info "--------------------------------------------------------"
+
+    local branchType=$(getBranchPart ${NEW_BRANCH} TYPE)
+    local yyyy=$(getBranchPart ${NEW_BRANCH} YYYY)
+    local mm=$(getBranchPart ${NEW_BRANCH} MM)
+    local sqlString="insert into branches \
+    (branch_name, location_name, ps_branch_name, based_on_revision, based_on_release, release_name_regex, date_created, comment) \
+    VALUES ('$NEW_BRANCH', '$NEW_BRANCH', '$NEW_BRANCH', $REVISION, '$RELEASE', '${branchType}_PS_LFS_OS_${yyyy}_${mm}_([0-9][0-9][0-9][0-9])', now(), '$COMMENT')"
+
+    echo $sqlString | mysql -u lfspt --password=pt -h ulwiki02.emea.nsn-net.net -D lfspt
+}
+
 
 #######################################################################
 # main
@@ -384,6 +399,10 @@ main() {
         svnEditLocationsTxtFile ${NEW_BRANCH}
     else
         info "$(basename $0): Nothing to do."
+    fi
+
+    if [[ "${DO_DB_INSERT}" == "true" ]]; then
+        dbInsert
     fi
 }
 
