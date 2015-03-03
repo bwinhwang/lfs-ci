@@ -51,7 +51,7 @@ test1() {
 mustHaveLocationForDeveloperBuild 
 ci_job_package 
 specialBuildUploadAndNotifyUser DEV
-linkFileToArtifactsDirectory /build/home/${USER}/private_builds/LABEL.tar.gz
+linkFileToArtifactsDirectory /build/home/${USER}/privateBuilds/LABEL.tar.gz
 EOF
     assertExecutedCommands ${expect}
 

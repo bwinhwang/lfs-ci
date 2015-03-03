@@ -45,9 +45,9 @@ test1() {
 cat <<EOF > ${expect}
 mustExistFile /path/to/file
 getConfig LFS_CI_upload_server
-execute -r 10 rsync -avrPe ssh /path/to/file server:upload/
+execute rsync -avrPe ssh /path/to/file server:upload/
 EOF
-    assertEquals "$(cat ${expect})" "$(cat ${UT_MOCKED_COMMANDS})"
+    assertExecutedCommands ${expect}
 
     return
 }
