@@ -207,6 +207,7 @@ extractArtifactsOnReleaseShare() {
         info "copy ${basename} to buildresults share ${destination}"
 
         if [[ ${canStoreArtifactsOnShare} ]] ; then
+            # TODO: demx2fk3 2015-03-03 FIXME use execute -r 10 ssh master
             executeOnMaster chmod u+w ${resultBuildShare}/
             executeOnMaster mkdir -p ${resultBuildShare}/${basename}/
             executeOnMaster chmod u+w ${resultBuildShare}/${basename}/
@@ -289,6 +290,7 @@ extractArtifactsOnReleaseShareKernelSources() {
         info "copy kernelsources from ${jobName} to buildresults share ${destination}"
 
         if [[ ${canStoreArtifactsOnShare} ]] ; then
+            # TODO: demx2fk3 2015-03-03 FIXME use execute -r 10 ssh master
             executeOnMaster chmod u+w $(dirname ${destination})
             executeOnMaster mkdir -p  ${destination}
             execute rsync -av --exclude=.svn ${workspace}/bld/bld-kernelsources-linux/. ${server}:${destination}/
@@ -413,7 +415,7 @@ _createLfsOsReleaseNote() {
     
     execute mkdir -p ${workspace}/os
     mustExistDirectory ${workspace}/os
-    execute rsync -ae ssh ${serverName}:${buildDirectory}/changelog.xml ${workspace}/os/
+    execute -r 10 rsync -ae ssh ${serverName}:${buildDirectory}/changelog.xml ${workspace}/os/
     mustExistFile ${workspace}/os/changelog.xml
 
     # TODO FIME

@@ -103,10 +103,10 @@ uc_job_test_on_target_archive_logs() {
     local testReposPathOnMoritz=$(getConfig LFS_CI_uc_test_on_target_test_repos_on_moritz)
     mustHaveValue "${testReposPathOnMoritz}" "test-repos path on moritz"
     
-    execute rsync -LavrPe ssh \
+    execute -r 10 rsync -LavrPe ssh \
         moritz:/lvol2/production_jenkins/jenkins-home/jobs/${jobName}/workspace/. \
         ${workspace}/.
-    execute rsync -LavrPe ssh \
+    execute -r 10 rsync -LavrPe ssh \
         moritz:${testReposPathOnMoritz}/src-fsmtest/${LABEL}-${jobName}/.  \
         ${workspace}/.
 

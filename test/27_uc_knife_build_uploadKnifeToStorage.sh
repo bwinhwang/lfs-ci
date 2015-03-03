@@ -42,7 +42,7 @@ test1() {
     local expect=$(createTempFile)
 cat <<EOF > ${expect}
 mustExistFile /path/to/file
-execute rsync -avrPe ssh /path/to/file lfs_share_sync_host_espoo2:/build/home/lfs_knives/
+execute -r 10 rsync -avrPe ssh /path/to/file lfs_share_sync_host_espoo2:/build/home/lfs_knives/
 EOF
     assertEquals "$(cat ${expect})" "$(cat ${UT_MOCKED_COMMANDS})"
 
