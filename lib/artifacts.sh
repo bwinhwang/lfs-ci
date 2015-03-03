@@ -213,7 +213,7 @@ copyFileToArtifactDirectory() {
     local serverName=$(getConfig LFS_CI_artifacts_storage_host)
     local artifactsPathOnShare=$(getConfig artifactesShare)/${JOB_NAME}/${BUILD_NUMBER}
     # executeOnMaster mkdir -p ${artifactsPathOnShare}/save
-    execute ssh ${serverName} mkdir -p ${artifactsPathOnShare}/save
+    execute -r 10 ssh ${serverName} mkdir -p ${artifactsPathOnShare}/save
 
     # sometimes, the remote host closes connection, so we try to retry...
     execute -r 10 rsync --archive --verbose --rsh=ssh -P  \
