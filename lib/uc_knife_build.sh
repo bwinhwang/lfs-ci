@@ -149,6 +149,7 @@ mustHaveLocationFromBaseline() {
         fatal "this branch is not prepared to build knives"
     fi
 
+    debug "subtask is ${subTaskName}"
     # for FSM-r4, it's have to do this in a different way..
     if [[ ${subTaskName} = "FSM-r4" ]] ; then
         case ${location} in
@@ -159,6 +160,7 @@ mustHaveLocationFromBaseline() {
         esac
     fi
     mustHaveValue "${location}" "location"
+    debug "using location ${location}"
     export LFS_CI_GLOBAL_BRANCH_NAME=${location}
 
     return
