@@ -120,7 +120,7 @@ svnCopyLocationsFSMR4() {
     mustHaveValue "${srcBranch}" "source branch"
     mustHaveValue "${newBranch}" "new branch"
 
-    svn ls ${SVN_REPO}/${SVN_DIR}/trunk/bldtools/${LOCATIONS_FSMR4} || {
+    svn ls ${SVN_REPO}/${SVN_DIR}/trunk/bldtools/${LOCATIONS_FSMR4} && {
         svn copy -m "copy locations branch ${newBranch}" ${SVN_REPO}/${SVN_DIR}/trunk/bldtools/${LOCATIONS_FSMR4} \
             ${SVN_REPO}/${SVN_DIR}/trunk/bldtools/locations-${newBranch}_FSMR4
         svn checkout ${SVN_REPO}/${SVN_DIR}/trunk/bldtools/locations-${newBranch}_FSMR4
@@ -210,6 +210,10 @@ createBranchInGit() {
     fi
 }
 
+## @fn      svnDummyCommit
+#  @brief   perform a dummy commit in SVN
+#  @param   <newBranch> new branch name
+#  @return  <none>
 svnDummyCommit() {
     info "--------------------------------------------------------"
     info "SVN: dummy commit on $SRC_PROJECT"
