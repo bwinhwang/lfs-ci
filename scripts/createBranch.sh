@@ -5,23 +5,24 @@ source ${LFS_CI_ROOT}/lib/logging.sh
 source ${LFS_CI_ROOT}/lib/jenkins.sh
 
 initTempDirectory
-setBuildDescription "${JOB_NAME}" "${BUILD_NUMBER}" "${BRANCH}"
+setBuildDescription "${JOB_NAME}" "${BUILD_NUMBER}" "${NEW_BRANCH}"
 
 info "###############################################################"
 info "# Variables from Jenkins"
 info "# ----------------------"
-info "# SRC_BRANCH:          $SRC_BRANCH"
-info "# NEW_BRANCH:          $NEW_BRANCH"
-info "# REVISION:            $REVISION"
-info "# FSMR4:               $FSMR4"
-info "# SOURCE_RELEASE:      $SOURCE_RELEASE"
-info "# ECL_URLS:            $ECL_URLS"
-info "# COMMENT:             $COMMENT"
-info "# DO_SVN:              $DO_SVN"
-info "# DO_JENKINS:          $DO_JENKINS"
-info "# DUMMY_COMMIT:        $DUMMY_COMMIT"
-info "# COPY_DELIVERY:       $COPY_DELIVERY"
-info "# UPDATE_LOCATIONS_TXT $UPDATE_LOCATIONS_TXT"
+info "# SRC_BRANCH:           $SRC_BRANCH"
+info "# NEW_BRANCH:           $NEW_BRANCH"
+info "# REVISION:             $REVISION"
+info "# FSMR4:                $FSMR4"
+info "# SOURCE_RELEASE:       $SOURCE_RELEASE"
+info "# ECL_URLS:             $ECL_URLS"
+info "# COMMENT:              $COMMENT"
+info "# DO_SVN:               $DO_SVN"
+info "# DO_JENKINS:           $DO_JENKINS"
+info "# DUMMY_COMMIT:         $DUMMY_COMMIT"
+info "# COPY_DELIVERY:        $COPY_DELIVERY"
+info "# UPDATE_LOCATIONS_TXT: $UPDATE_LOCATIONS_TXT"
+info "# DO_DB_INSERT:         $DO_DB_INSERT"
 info "###############################################################"
 
 SVN_REPO="https://svne1.access.nsn.com/isource/svnroot/BTS_SC_LFS"
@@ -119,7 +120,7 @@ svnCopyLocationsFSMR4() {
     mustHaveValue "${srcBranch}" "source branch"
     mustHaveValue "${newBranch}" "new branch"
 
-    svn ls ${SVN_REPO}/${SVN_DIR}/trunk/bldtools/${LOCATIONS_FSMR4} || {
+    svn ls ${SVN_REPO}/${SVN_DIR}/trunk/bldtools/${LOCATIONS_FSMR4} && {
         svn copy -m "copy locations branch ${newBranch}" ${SVN_REPO}/${SVN_DIR}/trunk/bldtools/${LOCATIONS_FSMR4} \
             ${SVN_REPO}/${SVN_DIR}/trunk/bldtools/locations-${newBranch}_FSMR4
         svn checkout ${SVN_REPO}/${SVN_DIR}/trunk/bldtools/locations-${newBranch}_FSMR4
@@ -209,6 +210,10 @@ createBranchInGit() {
     fi
 }
 
+## @fn      svnDummyCommit
+#  @brief   perform a dummy commit in SVN
+#  @param   <newBranch> new branch name
+#  @return  <none>
 svnDummyCommit() {
     info "--------------------------------------------------------"
     info "SVN: dummy commit on $SRC_PROJECT"
@@ -356,6 +361,29 @@ svnCopyDeliveryLRC() {
     fi
 }
 
+dbInsert() {
+    info "--------------------------------------------------------"
+    info "DB: insert branch into table branches"
+    info "--------------------------------------------------------"
+
+    local branch=${NEW_BRANCH}
+    local branchType=$(getBranchPart ${NEW_BRANCH} TYPE)
+    local yyyy=$(getBranchPart ${NEW_BRANCH} YYYY)
+    local mm=$(getBranchPart ${NEW_BRANCH} MM)
+    local regex="${branchType}_PS_LFS_OS_${yyyy}_${mm}_([0-9][0-9][0-9][0-9])"
+
+    if [[ ${LRC} == "true" ]]; then
+        branch="LRC_${NEW_BRANCH}"
+        regex="${branchType}_LRC_LCP_PS_LFS_OS_${yyyy}_${mm}_([0-9][0-9][0-9][0-9])"
+    fi
+
+    local sqlString="insert into branches \
+    (branch_name, location_name, ps_branch_name, based_on_revision, based_on_release, release_name_regex, date_created, comment) \
+    VALUES ('$branch', '$branch', '$NEW_BRANCH', $REVISION, '$RELEASE', '${regex}', now(), '$COMMENT')"
+
+    echo $sqlString | mysql -u lfspt --password=pt -h ulwiki02.emea.nsn-net.net -D lfspt
+}
+
 
 #######################################################################
 # main
@@ -382,6 +410,9 @@ main() {
             svnCopyDeliveryLRC ${SRC_BRANCH} ${NEW_BRANCH}
         fi
         svnEditLocationsTxtFile ${NEW_BRANCH}
+        if [[ "${DO_DB_INSERT}" == "true" ]]; then
+            dbInsert
+        fi
     else
         info "$(basename $0): Nothing to do."
     fi
