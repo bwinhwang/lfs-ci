@@ -39,6 +39,11 @@ ci_job_test_unittest() {
     execute make clean
     execute -i make -i test-xmloutput JOB_NAME="$JOB_NAME"
 
+    case "$JOBNAME"
+    in *FSM-r4*) TARGET_TYPE=FSM-r4
+    ;; *)        TARGET_TYPE=FSM-r3
+    esac
+
     local src=src-unittests/src/tests/ddal/ddal-unittests
 
     info "collecting results"
@@ -74,7 +79,7 @@ ci_job_test_unittest() {
     execute python ${lcov_cobertura} lcov.out
     execute sed -i -e 's/#FFFFFF/#FFFFEE/' gcov.css
 
-    execute -n find . -name '*.html' | execute xargs -n1 sed -i -e "s/LCOV -/${label} DDAL Unittests -/"
+    execute -n find . -name '*.html' | execute xargs -n1 sed -i -e "s/LCOV -/${label} $TARGET_TYPE DDAL Unittests -/"
     execute -n ${lcov} --summary lcov.out > lcov.summary
 
     rawDebug lcov.summary
@@ -103,7 +108,7 @@ ci_job_test_unittest() {
     databaseTestResults ${label}      \
                         unittest_ddal \
                         localhost-x86 \
-                        FSM-r3        \
+                        $TARGET_TYPE  \
                         ${resultFile}
 
     info "testing done."
