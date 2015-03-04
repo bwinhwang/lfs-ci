@@ -37,7 +37,7 @@ ci_job_test_unittest() {
 
     info "running test suite.."
     execute make clean
-    execute -i make -i test-xmloutput
+    execute -i make -i test-xmloutput JOB_NAME="$JOB_NAME"
 
     local src=src-unittests/src/tests/ddal/ddal-unittests
 
