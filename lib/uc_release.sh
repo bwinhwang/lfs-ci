@@ -674,9 +674,9 @@ createReleaseTag() {
     componentsFile=${workspace}/bld/bld-externalComponents-summary/externalComponents   
     mustExistFile ${componentsFile}
 
-    local sdk2=$(getConfig sdk2 ${componentsFile})
-    local sdk3=$(getConfig sdk3 ${componentsFile})
-    local sdk=$(getConfig sdk ${componentsFile})
+    local sdk2=$(getConfig sdk2 -f ${componentsFile})
+    local sdk3=$(getConfig sdk3 -f ${componentsFile})
+    local sdk=$(getConfig sdk -f ${componentsFile})
 
     info "using sdk2 ${sdk2}"
     info "using sdk3 ${sdk3}"
