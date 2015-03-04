@@ -4,58 +4,6 @@
 
 LFS_CI_SOURCE_makingtest='$Id$'
 
-## @fn      makingTest_checkUname()
-#  @brief   running a very basic startup test via making test on the target
-#  @details this test is starting the target with the new uImage and check, 
-#           if the uname -a output contains linux
-#  @param   <none>
-#  @return  <none>
-makingTest_checkUname() {
-    requiredParameters JOB_NAME BUILD_NUMBER LABEL DELIVERY_DIRECTORY
-
-    local targetName=$(sed "s/^Test-//" <<< ${JOB_NAME})
-    mustHaveValue ${targetName} "target name"
-    info "testing on target ${targetName}"
-
-    local workspace=$(getWorkspaceName)
-
-    # Note: TESTTARGET lowercase with ,,
-    local make="make"
-
-    cd ${workspace}/src-test/src/unittest/tests/common/checkuname
-
-    info "writing test config"
-    execute ${make} testconfig-overwrite TESTBUILD=${DELIVERY_DIRECTORY} TESTTARGET=${testTargetName,,}
-
-    info "installing software on the target"
-    execute ${make} install 
-
-    info "powercycle target"
-    local powercycleOptions=$(getConfig LFS_CI_uc_test_making_test_powercycle_options)
-    execute ${make} powercycle ${powercycleOptions} 
-
-    info "wait for prompt"
-    execute ${make} waitprompt
-    execute ${make} waitprompt
-
-    debug "sleep for 60 seconds..."
-    sleep 60
-    execute ${make} waitprompt
-
-    info "executing checks"
-    execute ${make} test
-
-    info "show uptime"
-    execute ${make} invoke_console_cmd CMD="uptime"
-
-    info "show kernel version"
-    ${make} invoke_console_cmd CMD="uname -a"
-
-    info "testing done."
-
-    return 0
-}
-
 ## @fn      makingTest_testFSM()
 #  @brief   running a whole test suite on the target with making test
 #  @details the following making tests commands are executed (simplified)
@@ -95,76 +43,42 @@ makingTest_testFSM() {
     mustExistDirectory ${testSuiteDirectory}
 	mustExistFile ${testSuiteDirectory}/testsuite.mk
 
-    local make="make -C ${testSuiteDirectory}"
+    makingTest_testconfig 
+    makingTest_install ${testBuildDirectory}
+
+    info "running test suite"
+    execute -i make -C ${testSuiteDirectory}  --ignore-errors test-xmloutput
+
+    makingTest_copyResults ${testSuiteDirectory}
+    makingTest_poweroff
+
+    return
+}
+
+makingTest_testconfig() {
+    requiredParameters DELIVERY_DIRECTORY
+
+    local workspace=$(getWorkspaceName)
+    mustHaveWorkspaceName
+
+    export targetNname=$(reservedTarget)
+    mustHaveValue "${targetNname}" "target name"
+
+	local testSuiteDirectory=${workspace}/$(getConfig LFS_CI_uc_test_making_test_suite_dir)
+    mustExistDirectory ${testSuiteDirectory}
+	mustExistFile ${testSuiteDirectory}/testsuite.mk
 
     info "create testconfig for ${testSuiteDirectory}"
     execute ${make} testconfig-overwrite \
-                TESTBUILD=${testBuildDirectory} \
-                TESTTARGET=${testTargetName,,}
-
-    local powercycleOptions=$(getConfig LFS_CI_uc_test_making_test_powercycle_options)
-    info "powercycle the target to get it in a defined state"
-    execute ${make} powercycle ${powercycleOptions}
-
-    debug "sleep for 10 seconds..."
-    sleep 10
-
-    info "waiting for prompt"
-    execute ${make} waitprompt
-    # workaround for broken waitprompt / moxa: It seems, that moxa is buffering some data.
-    execute ${make} waitprompt 
-    execute ${make} waitssh
-
-    debug "sleep for 60 seconds..."
-    sleep 60
-    info "setup target"
-    execute ${make} setup
-
-    local installOptions="$(getConfig LFS_CI_uc_test_making_test_install_options)"
-    info "installing software using ${installOptions}"
-    execute ${make} install ${installOptions}
-
-    local doFirmwareupgrade="$(getConfig LFS_CI_uc_test_making_test_do_firmwareupgrade)"
-    if [[ ${doFirmwareupgrade} ]] ; then
-        info "perform firmware upgrade an all boards of $testTargetName."
-        execute -i ${make} firmwareupgrade FORCED_UPGRADE=true
-    fi
-
-    info "restarting the target"
-    local powercycleOptions=$(getConfig LFS_CI_uc_test_making_test_powercycle_options)
-    execute ${make} powercycle ${powercycleOptions}
-
-    debug "sleep for 10 seconds..."
-    sleep 10
-    execute ${make} waitprompt
-    # workaround for broken waitprompt / moxa: It seems, that moxa is buffering some data.
-    execute ${make} waitprompt
-    execute ${make} waitssh
-
-    debug "sleep for 60 seconds..."
-    sleep 60
-
-    info "setup target"
-    execute ${make} setup
-
-    info "checking the board for correct software"
-    execute ${make} check
-
-    export LFS_CI_ERROR_CODE= 
-    info "running test suite"
-    execute -i ${make} --ignore-errors test-xmloutput || LFS_CI_ERROR_CODE=0 # also true
-
-    makingTest_copyResults ${testSuiteDirectory}
-
-    if [[ ${LFS_CI_ERROR_CODE} ]] ; then
-        error "some errors in test cases. please see logfile"
-        exit 1
-    fi
-
-    # not all branches have the poweroff implemented
-    execute -i ${make} poweroff
-
+                TESTBUILD=${DELIVERY_DIRECTORY} \
+                TESTTARGET=${targetNname,,}
     return
+}
+
+
+makingTest_poweroff() {
+    # not all branches have the poweroff implemented
+    execute -i make poweroff
 }
 
 ## @fn      makingTest_copyResults()
@@ -384,6 +298,12 @@ makingTest_install() {
         execute -i ${make} install FORCE=yes || { sleep 20 ; continue ; }
         execute ${make} waitprompt
 
+        local doFirmwareupgrade="$(getConfig LFS_CI_uc_test_making_test_do_firmwareupgrade)"
+        if [[ ${doFirmwareupgrade} ]] ; then
+            info "perform firmware upgrade an all boards of $testTargetName."
+            execute -i ${make} firmwareupgrade FORCED_UPGRADE=true
+        fi
+
         info "rebooting target..."
         local powercycleOptions=$(getConfig LFS_CI_uc_test_making_test_powercycle_options)
         execute ${make} powercycle ${powercycleOptions} FORCE=yes
@@ -474,3 +394,7 @@ _reserveTarget() {
     return
 }
 
+mustHaveMakingTestTestConfig() {
+    [[ -e testconfig.mk ]] && return
+
+}
