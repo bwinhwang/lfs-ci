@@ -123,10 +123,10 @@ copyReleaseCandidateToShare() {
     local commonentsFile=${workspace}/bld/bld-externalComponents-summary/externalComponents 
     mustExistFile ${commonentsFile}
     for sdk in $(getConfig LFS_CI_UC_package_linking_component) ; do
-        local sdkValue=$(getConfig ${sdk} ${commonentsFile})
+        local sdkValue=$(getConfig ${sdk} -f ${commonentsFile})
         # TODO: demx2fk3 2014-08-26 hack place make this different
         if [[ ${sdk} = sdk3 && -z ${sdkValue} ]] ; then
-            sdkValue=$(getConfig sdk ${commonentsFile})
+            sdkValue=$(getConfig sdk -f ${commonentsFile})
         fi
         mustHaveSdkOnShare ${sdkValue}
         execute ln -sf ../../../SDKs/${sdkValue} ${sdk}
@@ -165,10 +165,10 @@ getUsedSdkVersions() {
 
     local usedSdks=
     for sdk in $(getConfig LFS_CI_UC_package_linking_component) ; do
-        local sdkValue=$(getConfig ${sdk} ${commonentsFile})
+        local sdkValue=$(getConfig ${sdk} -f ${commonentsFile})
         # TODO: demx2fk3 2014-08-26 hack place make this different
         if [[ ${sdk} = sdk3 && -z ${sdkValue} ]] ; then
-            sdkValue=$(getConfig sdk ${commonentsFile})
+            sdkValue=$(getConfig sdk -f ${commonentsFile})
         fi
         usedSdks="${usedSdks} ${sdkValue}"
     done
