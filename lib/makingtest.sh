@@ -10,47 +10,38 @@ LFS_CI_SOURCE_makingtest='$Id$'
 #            $ make testconfig
 #            $ make powercycle
 #            $ make install
-#            $ make powercycle
 #            $ make test
 #            $ make poweroff
 #  @param   <none>
 #  @return  <none>
 makingTest_testFSM() {
-    requiredParameters JOB_NAME DELIVERY_DIRECTORY
+
+    makingTest_testconfig 
+    makingTest_poweron
+    makingTest_install    
+    makingTest_testXmloutput
+    makingTest_copyResults 
+    makingTest_poweroff
+
+    return
+}
+
+makingTest_testXmloutput() {
 
     local workspace=$(getWorkspaceName)
     mustHaveWorkspaceName
-
-    local testBuildDirectory=${DELIVERY_DIRECTORY}
-    mustExistDirectory ${testBuildDirectory}
 
     local xmlOutputDirectory=${workspace}/xml-output
     execute mkdir -p ${xmlOutputDirectory}
     mustExistDirectory ${xmlOutputDirectory}
 
-	export targetName=$(_reserveTarget)
-    mustHaveValue "${testTargetName}" "test target name"
-
-    info "test target name is ${targetName}"
-
-    # we can not use location here, because the job name is "Test-ABC".
-    # there is no location in the job name. So we have to use the
-    # location of the upstream job.
-    export branchName=$(getLocationName ${UPSTREAM_PROJECT})
-    mustHaveValue "${branchName}" "branch name"
-
-	local testSuiteDirectory=${workspace}/$(getConfig LFS_CI_uc_test_making_test_suite_dir)
+    local testSuiteDirectory=$(makingTest_testSuiteDirectory)
     mustExistDirectory ${testSuiteDirectory}
-	mustExistFile ${testSuiteDirectory}/testsuite.mk
 
-    makingTest_testconfig 
-    makingTest_install ${testBuildDirectory}
+    mustHaveMakingTestTestConfig
 
     info "running test suite"
-    execute -i make -C ${testSuiteDirectory}  --ignore-errors test-xmloutput
-
-    makingTest_copyResults ${testSuiteDirectory}
-    makingTest_poweroff
+    execute -i make -C ${testSuiteDirectory} --ignore-errors test-xmloutput
 
     return
 }
@@ -58,27 +49,72 @@ makingTest_testFSM() {
 makingTest_testconfig() {
     requiredParameters DELIVERY_DIRECTORY
 
-    local workspace=$(getWorkspaceName)
-    mustHaveWorkspaceName
-
-    export targetNname=$(reservedTarget)
-    mustHaveValue "${targetNname}" "target name"
-
-	local testSuiteDirectory=${workspace}/$(getConfig LFS_CI_uc_test_making_test_suite_dir)
+    local targetName=$(_reserveTarget)
+    mustHaveValue "${targetName}" "target name"
+    
+    local testSuiteDirectory=$(makingTest_testSuiteDirectory)
     mustExistDirectory ${testSuiteDirectory}
-	mustExistFile ${testSuiteDirectory}/testsuite.mk
 
     info "create testconfig for ${testSuiteDirectory}"
-    execute ${make} testconfig-overwrite \
+    execute ${make} testconfig-overwrite        \
                 TESTBUILD=${DELIVERY_DIRECTORY} \
-                TESTTARGET=${targetNname,,}
+                TESTTARGET=${targetName,,}
     return
 }
 
+makingTest_testSuiteDirectory() {
+    local workspace=$(getWorkspaceName)
+    mustHaveWorkspaceName
 
-makingTest_poweroff() {
+    local targetName=$(_reserveTarget)
+    mustHaveValue "${targetName}" "target name"
+
+    # we can not use location here, because the job name is "Test-ABC".
+    # there is no location in the job name. So we have to use the
+    # location of the upstream job.
+    local  branchName=$(getLocationName ${UPSTREAM_PROJECT})
+    mustHaveValue "${branchName}" "branch name"
+
+	local testSuiteDirectory=${workspace}/$(getConfig LFS_CI_uc_test_making_test_suite_dir -t targetName:${targetName} -t branchName:${branchName})
+    mustExistDirectory ${testSuiteDirectory}
+	mustExistFile ${testSuiteDirectory}/testsuite.mk
+
+    return
+}
+
+makingTest_poweron() {
+    mustHaveMakingTestTestConfig
+
+    local testSuiteDirectory=$(makingTest_testSuiteDirectory)
+    mustExistDirectory ${testSuiteDirectory}
+
     # not all branches have the poweroff implemented
-    execute -i make poweroff
+    execute -i make -C ${testSuiteDirectory} poweron
+
+    return
+}
+makingTest_poweroff() {
+    mustHaveMakingTestTestConfig
+
+    local testSuiteDirectory=$(makingTest_testSuiteDirectory)
+    mustExistDirectory ${testSuiteDirectory}
+
+    # not all branches have the poweroff implemented
+    execute -i make -C ${testSuiteDirectory} poweroff
+    return
+}
+
+makingTest_powercycle() {
+    mustHaveMakingTestTestConfig
+    # not all branches have the poweroff implemented
+
+    local testSuiteDirectory=$(makingTest_testSuiteDirectory)
+    mustExistDirectory ${testSuiteDirectory}
+
+    info "powercycle the target ..."
+    local powercycleOptions=$(getConfig LFS_CI_uc_test_making_test_powercycle_options)
+    execute make -C ${testSuiteDirectory} powercycle ${powercycleOptions}
+    return
 }
 
 ## @fn      makingTest_copyResults()
@@ -89,7 +125,9 @@ makingTest_copyResults() {
     local workspace=$(getWorkspaceName)
     mustHaveWorkspaceName
 
-    local testSuiteDirectory=$1
+    mustHaveMakingTestTestConfig
+
+    local testSuiteDirectory=$(makingTest_testSuiteDirectory)
     mustExistDirectory ${testSuiteDirectory}
 
     execute mkdir -p ${workspace}/xml-reports/ \
@@ -126,10 +164,10 @@ makingTest_testLRC() {
     execute mkdir -p ${xmlOutputDirectory}
     mustExistDirectory ${xmlOutputDirectory}
 
-    # TODO: demx2fk3 2015-02-19 reserve target
+    local testTargetName=$(_reserveTarget)
     mustHaveValue "${testTargetName}" "test target name"
 
-    local testSuiteDirectory=${workspace}/src-test/src/unittest/testsuites/continousintegration/production_ci_LRC
+    local testSuiteDirectory=$(makingTest_testSuiteDirectory)
     local testSuiteDirectory_SHP=${testSuiteDirectory}_shp
     local testSuiteDirectory_AHP=${testSuiteDirectory}_ahp
     mustExistDirectory ${testSuiteDirectory}
@@ -151,9 +189,7 @@ makingTest_testLRC() {
                 TESTBUILD=${testBuildDirectory}                    \
                 TESTTARGET=${testTargetName}_shp
 
-    info "powercycle the target to get it in a defined state"
-    local powercycleOptions=$(getConfig LFS_CI_uc_test_making_test_powercycle_options)
-    execute make -C ${testSuiteDirectory} powercycle ${powercycleOptions}
+    makingTest_powercycle
     info "waiting for prompt"
     execute make -C ${testSuiteDirectory} waitssh
 
@@ -161,7 +197,7 @@ makingTest_testLRC() {
     sleep 120 
 
     info "installing software"
-    makingTest_install ${testSuiteDirectory}
+    makingTest_install 
 
     info "checking the board for correct software"
     makingTest_check   ${testSuiteDirectory}     ${testTargetName}
@@ -280,15 +316,17 @@ makingTest_check() {
 #  @param   {testSuiteDirectory}    directory of a test suite
 #  @return  <none>
 makingTest_install() {
-    local testSuiteDirectory=$1
+    local testSuiteDirectory=$(makingTest_testSuiteDirectory)
     mustExistDirectory ${testSuiteDirectory}
 
     local make="make -C ${testSuiteDirectory}"
 
+    mustHaveMakingTestRunningTarget
+
     info "installing software on target"
     execute ${make} setup
 
-    # currently install does show wrong (old) version after reboot and
+    # on LRC: currently install does show wrong (old) version after reboot and
     # SHP sometimes fails to be up when install is retried.
     # We try installation up to 4 times
     for i in $(seq 1 4) ; do
@@ -305,17 +343,9 @@ makingTest_install() {
         fi
 
         info "rebooting target..."
-        local powercycleOptions=$(getConfig LFS_CI_uc_test_making_test_powercycle_options)
-        execute ${make} powercycle ${powercycleOptions} FORCE=yes
+        makingTest_powercycle
 
-        info "wait for prompt"
-        execute ${make} waitprompt
-
-        info "wait for ssh"
-        execute ${make} waitssh
-
-        debug "sleep for 60 seconds..."
-        sleep 60
+        mustHaveMakingTestRunningTarget
 
         info "running setup"
         execute -i ${make} setup || continue
@@ -395,6 +425,32 @@ _reserveTarget() {
 }
 
 mustHaveMakingTestTestConfig() {
-    [[ -e testconfig.mk ]] && return
+    local workspace=$(getWorkspaceName)
+    mustHaveWorkspaceName
 
+	local testSuiteDirectory=${workspace}/$(getConfig LFS_CI_uc_test_making_test_suite_dir)
+    mustExistDirectory ${testSuiteDirectory}
+	mustExistFile ${testSuiteDirectory}/testsuite.mk
+
+    [[ -e ${testSuiteDirectory}/testconfig.mk ]] && return
+    makingTest_testconfig
+    return
+}
+
+mustHaveMakingTestRunningTarget() {
+
+    mustHaveMakingTestTestConfig
+
+    local workspace=$(getWorkspaceName)
+    mustHaveWorkspaceName
+
+	local testSuiteDirectory=${workspace}/$(getConfig LFS_CI_uc_test_making_test_suite_dir)
+    mustExistDirectory ${testSuiteDirectory}
+	mustExistFile ${testSuiteDirectory}/testsuite.mk
+
+    execute make -C ${testSuiteDirectory} waitprompt
+    execute make -C ${testSuiteDirectory} waitssh
+    sleep 60
+
+    return
 }
