@@ -178,6 +178,7 @@ testConfigInclude5() {
     assertEquals "value from getConfig" "3" "${value}"
     cd - >/dev/null
 }
+
 source lib/shunit2
 
 exit 0
