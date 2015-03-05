@@ -356,8 +356,9 @@ makingTest_install() {
     for i in $(seq 1 4) ; do
         info "install loop ${i}"
 
-        info "running install"
-        execute -i ${make} install FORCE=yes || { sleep 20 ; continue ; }
+        local installOptions=$(getConfig LFS_CI_uc_test_making_test_install_options)
+        info "running install with options ${installOptions:-none}"
+        execute -i ${make} install ${installOptions} FORCE=yes || { sleep 20 ; continue ; }
 
         local doFirmwareupgrade="$(getConfig LFS_CI_uc_test_making_test_do_firmwareupgrade)"
         if [[ ${doFirmwareupgrade} ]] ; then
@@ -480,10 +481,13 @@ mustHaveMakingTestRunningTarget() {
 	local testSuiteDirectory=$(makingTest_testSuiteDirectory)
 	mustExistFile ${testSuiteDirectory}/testsuite.mk
 
+    info "checking, if target is up and running (with ssh)..."
     execute make -C ${testSuiteDirectory} waitprompt
     execute make -C ${testSuiteDirectory} waitssh
     debug "sleeping for 60 seconds..."
     execute sleep 60
+
+    info "target is up."
 
     return
 }
