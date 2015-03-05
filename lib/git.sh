@@ -43,6 +43,6 @@ gitDescribe() {
 }
 
 gitRevParse() {
-    execute git rev-parse $@
+    execute -n git rev-parse $@
     return
 }

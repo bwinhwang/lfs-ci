@@ -89,6 +89,18 @@ databaseEventTestStarted() {
 }
 
 
+databaseAddNewCommits() {
+    mustHaveNextCiLabelName
+    local label=$(getNextCiLabelName)
+    mustHaveValue ${label} "label name"
+
+    copyFileFromBuildDirectoryToWorkspace ${JOB_NAME} ${BUILD_NUMBER} changelog.xml
+
+    execute -i ${LFS_CI_ROOT}/bin/newBuildEvent.pl --buildName=${label} --action=new_svn_commits --changelog=${WORKSPACE}/changelog.xml
+
+    return
+}
+
 databaseEventTestFinished() {
     local label=$1
     local targetName=$2

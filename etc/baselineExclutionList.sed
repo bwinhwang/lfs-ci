@@ -32,6 +32,9 @@
 # needed by FB1311_LNT4OPTUS
 /LBT140210-ci1/d
 
+# needed by FB1311_RLD8
+/RLD8LFS131108-ci1/d
+
 # needed by FB1304_LND70
 /LBT130609-ci1/d
 
