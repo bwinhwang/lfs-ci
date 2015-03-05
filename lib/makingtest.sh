@@ -15,7 +15,6 @@ LFS_CI_SOURCE_makingtest='$Id$'
 #  @param   <none>
 #  @return  <none>
 makingTest_testFSM() {
-
     makingTest_testconfig 
     makingTest_poweron
     makingTest_install    
@@ -26,6 +25,11 @@ makingTest_testFSM() {
     return
 }
 
+## @fn      makingTest_testXmloutput()
+#  @brief   running TMF tests on the target and create XML output
+#  @details this is just a make test-xmloutput with some options
+#  @param   <none>
+#  @return  <none>
 makingTest_testXmloutput() {
 
     local workspace=$(getWorkspaceName)
@@ -38,14 +42,23 @@ makingTest_testXmloutput() {
     local testSuiteDirectory=$(makingTest_testSuiteDirectory)
     mustExistDirectory ${testSuiteDirectory}
 
+    local testOptions=$(getConfig LFS_CI_uc_test_making_test_test_options)
+
     mustHaveMakingTestTestConfig
 
     info "running test suite"
-    execute -i make -C ${testSuiteDirectory} --ignore-errors test-xmloutput
+    execute -i make -C ${testSuiteDirectory}      \
+                    --ignore-errors ${testOptions}\
+                    test-xmloutput
 
     return
 }
 
+## @fn      makingTest_testconfig()
+#  @brief   create a test configuration (testconfig.mk) for making test 
+#           in the test suite directory
+#  @param   <none>
+#  @return  <none>
 makingTest_testconfig() {
     requiredParameters DELIVERY_DIRECTORY
 
@@ -56,13 +69,20 @@ makingTest_testconfig() {
     mustExistDirectory ${testSuiteDirectory}
 
     info "create testconfig for ${testSuiteDirectory}"
-    execute ${make} testconfig-overwrite        \
+    execute make -C ${testSuiteDirectory}       \
+                testconfig-overwrite            \
                 TESTBUILD=${DELIVERY_DIRECTORY} \
                 TESTTARGET=${targetName,,}
     return
 }
 
+## @fn      makingTest_testSuiteDirectory()
+#  @brief   get the test suite directory from the configuration
+#  @param   <none>
+#  @return  path to the test suite directory
 makingTest_testSuiteDirectory() {
+    requiredParameters UPSTREAM_PROJECT
+
     local workspace=$(getWorkspaceName)
     mustHaveWorkspaceName
 
@@ -79,9 +99,15 @@ makingTest_testSuiteDirectory() {
     mustExistDirectory ${testSuiteDirectory}
 	mustExistFile ${testSuiteDirectory}/testsuite.mk
 
+    echo ${testSuiteDirectory}
+
     return
 }
 
+## @fn      makingTest_poweron()
+#  @brief   turn the power on on a target
+#  @param   <none>
+#  @return  <none>
 makingTest_poweron() {
     mustHaveMakingTestTestConfig
 
@@ -93,6 +119,11 @@ makingTest_poweron() {
 
     return
 }
+
+## @fn      makingTest_poweroff()
+#  @brief   turn the power off on a target
+#  @param   <none>
+#  @return  <none>
 makingTest_poweroff() {
     mustHaveMakingTestTestConfig
 
@@ -104,6 +135,10 @@ makingTest_poweroff() {
     return
 }
 
+## @fn      makingTest_powercycle()
+#  @brief   powercycle a target
+#  @param   <none>
+#  @return  <none>
 makingTest_powercycle() {
     mustHaveMakingTestTestConfig
     # not all branches have the poweroff implemented
@@ -119,7 +154,7 @@ makingTest_powercycle() {
 
 ## @fn      makingTest_copyResults()
 #  @brief   copy the results of a test into the artifacts folder
-#  @param   {testSuiteDirectory}    directory of the test suite
+#  @param   <none>
 #  @return  <none>
 makingTest_copyResults() {
     local workspace=$(getWorkspaceName)
@@ -190,28 +225,22 @@ makingTest_testLRC() {
                 TESTTARGET=${testTargetName}_shp
 
     makingTest_powercycle
-    info "waiting for prompt"
-    execute make -C ${testSuiteDirectory} waitssh
-
-    debug "sleep for 120 seconds..."
-    sleep 120 
+    mustHaveMakingTestRunningTarget
 
     info "installing software"
     makingTest_install 
 
     info "checking the board for correct software"
-    makingTest_check   ${testSuiteDirectory}     ${testTargetName}
+    makingTest_testLRC_check   ${testSuiteDirectory}     ${testTargetName}
     info "checking the board for correct software SHP"
-    makingTest_check   ${testSuiteDirectory_SHP} ${testTargetName}_shp
+    makingTest_testLRC_check   ${testSuiteDirectory_SHP} ${testTargetName}_shp
     info "checking the board for correct software AHP"
-    makingTest_check   ${testSuiteDirectory_AHP} ${testTargetName}_ahp
+    makingTest_testLRC_check   ${testSuiteDirectory_AHP} ${testTargetName}_ahp
 
     makingTest_testLRC_subBoard ${testSuiteDirectory_SHP} ${testBuildDirectory} ${testTargetName}_shp shp        ${xmlOutputDirectory}/shp
     makingTest_testLRC_subBoard ${testSuiteDirectory}     ${testBuildDirectory} ${testTargetName}_shp shp-common ${xmlOutputDirectory}/shp-common
 
-    execute make -C ${testSuiteDirectory_AHP} waitssh
-    debug "sleep for 60 seconds..."
-    sleep 60
+    mustHaveMakingTestRunningTarget
     execute make -C ${testSuiteDirectory_AHP} setup
     execute make -C ${testSuiteDirectory_AHP} check
 
@@ -222,7 +251,7 @@ makingTest_testLRC() {
         cat -v ${file} > ${file}.tmp && mv ${file}.tmp ${file}
     done
 
-    execute -i make -C ${testSuiteDirectory} poweroff
+    makingTest_poweroff
 
     return
 }
@@ -271,13 +300,13 @@ makingTest_testLRC_subBoard() {
     return
 }
 
-## @fn      makingTest_check()
+## @fn      makingTest_testLRC_check()
 #  @brief   checks, if a target is up and running and is running with the
 #           correct software version
 #  @param   {testSuiteDirectory}  directory of the test suite
 #  @param   {targetName}          name of the target
 #  @return  <none>
-makingTest_check() {
+makingTest_testLRC_check() {
     local testSuiteDirectory=${1}
     mustExistDirectory ${testSuiteDirectory}
 
@@ -292,14 +321,7 @@ makingTest_check() {
     info "recreating testconfig for ${testSuiteDirectory//${workspace}} / $(basename ${testBuildDirectory}) / ${testTargetName}"
     execute ${make} testconfig-overwrite TESTBUILD=${testBuildDirectory} TESTTARGET=${testTargetName}
 
-    info "waiting for prompt"
-    execute ${make} waitprompt
-
-    info "waiting for ssh"
-    execute ${make} waitssh
-
-    debug "sleep for 60 seconds..."
-    sleep 60
+    mustHaveMakingTestRunningTarget
 
     info "running setup"
     execute ${make} setup
@@ -334,7 +356,6 @@ makingTest_install() {
 
         info "running install"
         execute -i ${make} install FORCE=yes || { sleep 20 ; continue ; }
-        execute ${make} waitprompt
 
         local doFirmwareupgrade="$(getConfig LFS_CI_uc_test_making_test_do_firmwareupgrade)"
         if [[ ${doFirmwareupgrade} ]] ; then
@@ -354,8 +375,11 @@ makingTest_install() {
         execute -i ${make} check || continue
 
         info "install was successful"
-        break
+
+        return
     done
+
+    fatal "installation failed after four attempts"
 
     return
 }
@@ -424,19 +448,26 @@ _reserveTarget() {
     return
 }
 
+## @fn      mustHaveMakingTestTestConfig()
+#  @brief   ensures, that there is a testconfig.mk in the testsuite directory
+#  @param   <none>
+#  @return  <none>
 mustHaveMakingTestTestConfig() {
     local workspace=$(getWorkspaceName)
     mustHaveWorkspaceName
 
-	local testSuiteDirectory=${workspace}/$(getConfig LFS_CI_uc_test_making_test_suite_dir)
-    mustExistDirectory ${testSuiteDirectory}
-	mustExistFile ${testSuiteDirectory}/testsuite.mk
+	local testSuiteDirectory=$(makingTest_testSuiteDirectory)
+	mustExistDirectory ${testSuiteDirectory}
 
     [[ -e ${testSuiteDirectory}/testconfig.mk ]] && return
     makingTest_testconfig
     return
 }
 
+## @fn      mustHaveMakingTestRunningTarget()
+#  @brief   ensures, that the test target is up and running with ssh
+#  @param   <none>
+#  @return  <none>
 mustHaveMakingTestRunningTarget() {
 
     mustHaveMakingTestTestConfig
@@ -444,13 +475,13 @@ mustHaveMakingTestRunningTarget() {
     local workspace=$(getWorkspaceName)
     mustHaveWorkspaceName
 
-	local testSuiteDirectory=${workspace}/$(getConfig LFS_CI_uc_test_making_test_suite_dir)
-    mustExistDirectory ${testSuiteDirectory}
+	local testSuiteDirectory=$(makingTest_testSuiteDirectory)
 	mustExistFile ${testSuiteDirectory}/testsuite.mk
 
     execute make -C ${testSuiteDirectory} waitprompt
     execute make -C ${testSuiteDirectory} waitssh
-    sleep 60
+    debug "sleeping for 60 seconds..."
+    execute sleep 60
 
     return
 }
