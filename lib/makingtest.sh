@@ -95,7 +95,6 @@ makingTest_testSuiteDirectory() {
     local  branchName=$(getLocationName ${UPSTREAM_PROJECT})
     mustHaveValue "${branchName}" "branch name"
 
-
 	local testSuiteDirectory=${workspace}/$(getConfig LFS_CI_uc_test_making_test_suite_dir -t targetName:${targetName} -t branchName:${branchName})
     mustExistDirectory ${testSuiteDirectory}
 	mustExistFile ${testSuiteDirectory}/testsuite.mk
@@ -207,8 +206,8 @@ makingTest_testLRC() {
     local testSuiteDirectory=$(makingTest_testSuiteDirectory)
     local testSuiteDirectory_SHP=${testSuiteDirectory}_shp
     local testSuiteDirectory_AHP=${testSuiteDirectory}_ahp
-    mustExistDirectory ${testSuiteDirectory}
-    mustExistDirectory ${testSuiteDirectory_SHP}
+    mustExistDirectory ${testSuiteDirectory}/
+    mustExistDirectory ${testSuiteDirectory_SHP}/
     mustExistDirectory ${testSuiteDirectory_AHP}
 
     execute make -C ${testSuiteDirectory} clean
