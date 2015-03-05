@@ -74,9 +74,11 @@ usecase_PKGPOOL_BUILD() {
     execute touch /build/home/psulm/SC_LFS/pkgpool/.hashpool
 
     mkdir -p ${workspace}/bld/bld-pkgpool-release/
-    echo ${oldReleaseTag} > ${workspace}/bld/bld-pkgpool-release/oldLabel
-    echo ${releaseTag}    > ${workspace}/bld/bld-pkgpool-release/label
-    echo ${gitRevision}   > ${workspace}/bld/bld-pkgpool-release/gitrevision
+    echo ${oldReleaseTag}                   > ${workspace}/bld/bld-pkgpool-release/oldLabel
+    echo ${releaseTag}                      > ${workspace}/bld/bld-pkgpool-release/label
+    echo ${gitRevision}                     > ${workspace}/bld/bld-pkgpool-release/gitrevision
+    gitLog ${oldReleaseTag}..${gitRevision} > ${workspace}/bld/bld-pkgpool-release/gitlog
+
     execute -n sed -ne 's|^src [^ ]* \(.*\)$|PS_LFS_PKG = \1|p' ${workspace}/pool/*.meta |\
         sort -u > ${workspace}/bld/bld-pkgpool-release/forReleaseNote.txt
 
@@ -218,8 +220,14 @@ usecase_PKGPOOL_UDPATE_DEPS() {
     local oldLabel=$(cat ${workspace}/bld/bld-pkgpool-release/oldLabel)
     mustHaveValue "${oldLabel}" "old label"
 
+    local newGitRevision=$(cat ${workspace}/bld/bld-pkgpool-release/gitrevision)
+    mustHaveValue "${newGitRevision}" "new git revision"
+
+    gitClone ssh://git@psulm.nsn-net.net/build/build ${WORKSPACE}/src
+
     local svnUrlsToUpdate=$(getConfig PKGPOOL_PROD_update_dependencies_svn_url)
     mustHaveValue "${svnUrlsToUpdate}" "svn urls for pkgpool"
+
 
     local urlToUpdate=""
 
@@ -234,14 +242,11 @@ usecase_PKGPOOL_UDPATE_DEPS() {
 
         svnCheckout ${svnUrl} ${workspace}
 
-        # TODO: demx2fk3 2015-02-25 fixme
-        local oldGitRevision=$(cat ${workspace}/src/gitrevision)
-        local newGitRevision=$(gitRevParse HEAD)
         local gitLog=$(createTempFile)
-
-        # TODO: demx2fk3 2015-02-25 fixme
         cd ${WORKSPACE}/src
-        # TODO: demx2fk3 2015-02-25 fixme
+        local oldGitRevision=$(cat ${workspace}/src/gitrevision)
+        mustHaveValue "${oldGitRevision}" "old git revision"
+
         gitLog ${oldGitRevision}..${newGitRevision} | \
             sed -e 's,^    %,%,' > ${gitLog}
         rawDebug ${gitLog}
