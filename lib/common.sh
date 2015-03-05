@@ -241,8 +241,7 @@ switchSvnServerInLocations() {
     local location=$(getLocationName)
 
     info "changing svne1 to ulmscmi"
-    execute find ${workspace}/
-    execute perl -pi -e "s/${masterServer}/${slaveServer}/g" \
+    perl -pi -e "s/${masterServer}/${slaveServer}/g" \
         ${workspace}/locations/locations-*/Dependencies
 
     execute svn status ${workspace}/locations/locations-*/Dependencies
