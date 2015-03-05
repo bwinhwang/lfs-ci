@@ -23,8 +23,10 @@ info "# DUMMY_COMMIT:         $DUMMY_COMMIT"
 info "# COPY_DELIVERY:        $COPY_DELIVERY"
 info "# UPDATE_LOCATIONS_TXT: $UPDATE_LOCATIONS_TXT"
 info "# DO_DB_INSERT:         $DO_DB_INSERT"
+info "# DO_GIT:               $DO_GIT"
 info "###############################################################"
 
+# TODO: Get it via getConfig()
 SVN_REPO="https://svne1.access.nsn.com/isource/svnroot/BTS_SC_LFS"
 SVN_DIR="os"
 SRC_PROJECT="src-project"
@@ -190,13 +192,18 @@ createBranchInGit() {
     info "GIT: create branch"
     info "--------------------------------------------------------"
 
+    if [[ "${DO_GIT}" == "false" ]]; then
+        info "Not creating branch in GIT"
+        return 0
+    fi
+
     # TODO: check if branch already exists in GIT
-    local branchExists="yes"
+    local branchExists="no"
 
     if [[ "${branchExists}" == "no" ]]; then
         local newBranch=$1
         mustHaveValue "${newBranch}" "new branch"
-        # TODO: get GIT server from config
+        # TODO: get GIT via getConfig()
         local gitServer="psulm.nsn-net.net"
 
         gitRevision=$(svn cat ${SVN_REPO}/${SVN_PATH}/main/${SRC_PROJECT}/src/gitrevision)
@@ -284,18 +291,26 @@ svnEditLocationsTxtFile() {
     cd ${bldTools}
     svn update ${locationsTxt}
 
-    if [[ ! "${LRC}" ]]; then
+    if [[ ! "${LRC}" ]] && [[ "$(echo ${newBranch} | cut -c1,2)" == "FB" ]]; then
         echo "${newBranch}                           Feature Build ${newBranch} (all FB_PS_LFS_REL_${yyyy}_${mm}_xx...)" >> ${locationsTxt}
     fi
+
+    if [[ ! "${LRC}" ]] && [[ "$(echo ${newBranch} | cut -c1,2)" == "MD" ]]; then
+        echo "${newBranch}                           Feature Build ${newBranch} (bi-weekly branch)" >> ${locationsTxt}
+    fi
+
     if [[ "${FSMR4}" == "true" ]] && [[ "$(echo ${newBranch} | cut -c1,2)" == "MD" ]]; then
         echo "${newBranch}_FSMR4                     Feature Build ${newBranch} FSM-r4 stuff only (bi-weekly branch)" >> ${locationsTxt}
     fi
+
     if [[ "${FSMR4}" == "true" ]] && [[ "$(echo ${newBranch} | cut -c1,2)" == "FB" ]]; then
         echo "${newBranch}_FSMR4                     Feature Build ${newBranch} FSM-r4 stuff only" >> ${locationsTxt}
     fi
+
     if [[ "${LRC}" == "true" ]]; then
         echo "LRC_${newBranch}                       LRC locations (special LRC for ${newBranch} only)" >> ${locationsTxt}
     fi
+
     svn commit -m "Added ${newBranch} to file ${locationsTxt}" ${locationsTxt}
 }
 
@@ -363,8 +378,13 @@ svnCopyDeliveryLRC() {
 
 dbInsert() {
     info "--------------------------------------------------------"
-    info "DB: insert branch into table branches"
+    info "DB: insert branch into lfspt database"
     info "--------------------------------------------------------"
+
+    if [[ "${DO_DB_INSERT}" == "false" ]]; then
+        info "Not inserting branch ${NEW_BRANCH} into table branches of lfspt database."
+        return 0
+    fi
 
     local branch=${NEW_BRANCH}
     local branchType=$(getBranchPart ${NEW_BRANCH} TYPE)
@@ -402,7 +422,6 @@ main() {
             if [[ "${FSMR4}" == "true" ]]; then
                 svnCopyLocationsFSMR4 ${SRC_BRANCH} ${NEW_BRANCH}
             fi
-            createBranchInGit ${NEW_BRANCH}
         elif [[ ${LRC} == "true" ]]; then
             svnCopyBranchLRC ${SRC_BRANCH} ${NEW_BRANCH}
             svnCopyLocationsLRC ${SRC_BRANCH} ${NEW_BRANCH}
@@ -410,9 +429,8 @@ main() {
             svnCopyDeliveryLRC ${SRC_BRANCH} ${NEW_BRANCH}
         fi
         svnEditLocationsTxtFile ${NEW_BRANCH}
-        if [[ "${DO_DB_INSERT}" == "true" ]]; then
-            dbInsert
-        fi
+        dbInsert
+        createBranchInGit ${NEW_BRANCH}
     else
         info "$(basename $0): Nothing to do."
     fi

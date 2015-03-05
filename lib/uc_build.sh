@@ -167,6 +167,7 @@ ci_job_build_version() {
     setBuildDescription "${JOB_NAME}" "${BUILD_NUMBER}" "${label}"
 
     databaseEventBuildStarted
+    databaseAddNewCommits
 
     return
 }

@@ -131,13 +131,13 @@ case "${JOB_NAME}" in
         source ${LFS_CI_ROOT}/lib/uc_collect_metrics.sh
         ci_job_test_collect_metrics || exit 1 
     ;;
-    *_CI_*_Test*)
-        source ${LFS_CI_ROOT}/lib/uc_test.sh
-        ci_job_test    || exit 1 
-    ;;
     *_CI_*_Unittest*)
         source ${LFS_CI_ROOT}/lib/uc_test_unittest_ddal.sh
         ci_job_test_unittest || exit 1 
+    ;;
+    *_CI_*_Test*)
+        source ${LFS_CI_ROOT}/lib/uc_test.sh
+        ci_job_test    || exit 1 
     ;;
     LFS_Post_*_TestBuildsystem_*)
         source ${LFS_CI_ROOT}/lib/uc_test_buildsystem.sh
