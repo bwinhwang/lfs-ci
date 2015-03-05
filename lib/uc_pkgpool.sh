@@ -77,7 +77,6 @@ usecase_PKGPOOL_BUILD() {
     echo ${oldReleaseTag}                   > ${workspace}/bld/bld-pkgpool-release/oldLabel
     echo ${releaseTag}                      > ${workspace}/bld/bld-pkgpool-release/label
     echo ${gitRevision}                     > ${workspace}/bld/bld-pkgpool-release/gitrevision
-    gitLog ${oldReleaseTag}..${gitRevision} > ${workspace}/bld/bld-pkgpool-release/gitlog
 
     execute -n sed -ne 's|^src [^ ]* \(.*\)$|PS_LFS_PKG = \1|p' ${workspace}/pool/*.meta |\
         sort -u > ${workspace}/bld/bld-pkgpool-release/forReleaseNote.txt
