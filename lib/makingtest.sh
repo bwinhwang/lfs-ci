@@ -95,6 +95,8 @@ makingTest_testSuiteDirectory() {
     local  branchName=$(getLocationName ${UPSTREAM_PROJECT})
     mustHaveValue "${branchName}" "branch name"
 
+    info "using test suite ${testSuiteDirectory} for target ${targetName} and branch ${branchName}"
+
 	local testSuiteDirectory=${workspace}/$(getConfig LFS_CI_uc_test_making_test_suite_dir -t targetName:${targetName} -t branchName:${branchName})
     mustExistDirectory ${testSuiteDirectory}
 	mustExistFile ${testSuiteDirectory}/testsuite.mk
