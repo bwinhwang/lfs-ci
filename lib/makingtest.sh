@@ -478,10 +478,13 @@ mustHaveMakingTestRunningTarget() {
 	local testSuiteDirectory=$(makingTest_testSuiteDirectory)
 	mustExistFile ${testSuiteDirectory}/testsuite.mk
 
+    info "checking, if target is up and running (with ssh)..."
     execute make -C ${testSuiteDirectory} waitprompt
     execute make -C ${testSuiteDirectory} waitssh
     debug "sleeping for 60 seconds..."
     execute sleep 60
+
+    info "target is up."
 
     return
 }
