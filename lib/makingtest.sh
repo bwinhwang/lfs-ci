@@ -95,12 +95,12 @@ makingTest_testSuiteDirectory() {
     local  branchName=$(getLocationName ${UPSTREAM_PROJECT})
     mustHaveValue "${branchName}" "branch name"
 
-    info "using test suite ${testSuiteDirectory} for target ${targetName} and branch ${branchName}"
 
 	local testSuiteDirectory=${workspace}/$(getConfig LFS_CI_uc_test_making_test_suite_dir -t targetName:${targetName} -t branchName:${branchName})
     mustExistDirectory ${testSuiteDirectory}
 	mustExistFile ${testSuiteDirectory}/testsuite.mk
 
+    trace "using test suite ${testSuiteDirectory} for target ${targetName} and branch ${branchName}"
     echo ${testSuiteDirectory}
 
     return
@@ -354,7 +354,7 @@ makingTest_install() {
     # SHP sometimes fails to be up when install is retried.
     # We try installation up to 4 times
     for i in $(seq 1 4) ; do
-        info "install loop ${i}"
+        trace "install loop ${i}"
 
         local installOptions=$(getConfig LFS_CI_uc_test_making_test_install_options)
         info "running install with options ${installOptions:-none}"
@@ -371,18 +371,18 @@ makingTest_install() {
 
         mustHaveMakingTestRunningTarget
 
-        info "running setup"
+        info "running setup..."
         execute -i ${make} setup || continue
 
-        info "running check"
+        info "running check..."
         execute -i ${make} check || continue
 
-        info "install was successful"
+        info "install was successful."
 
         return
     done
 
-    fatal "installation failed after four attempts"
+    fatal "installation failed after four attempts."
 
     return
 }
