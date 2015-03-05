@@ -26,6 +26,8 @@ dumpCustomScmEnvironmentVariables() {
         trace "$(printf "%25s %-30s\n" "${var}" "${!var}")"
     done
 
+    execute printenv
+
     return
 }
 
