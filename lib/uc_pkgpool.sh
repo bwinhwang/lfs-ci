@@ -160,6 +160,9 @@ usecase_PKGPOOL_RELEASE() {
 
     local releaseNoteTxt=${workspace}/releasenote.txt
     execute touch ${releaseNoteTxt}
+
+    execute sed -i -e "s/PS_LFS_PKG = //g" ${workspace}/forReleaseNote.txt.old
+    execute sed -i -e "s/PS_LFS_PKG = //g" ${workspace}/bld/bld-pkgpool-release/forReleaseNote.txt
     execute -i -l ${releaseNoteTxt} diff -y -W72 -t --suppress-common-lines \
         ${workspace}/forReleaseNote.txt.old \
         ${workspace}/bld/bld-pkgpool-release/forReleaseNote.txt
