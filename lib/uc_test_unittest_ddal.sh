@@ -7,12 +7,12 @@
 [[ -z ${LFS_CI_SOURCE_createWorkspace} ]] && source ${LFS_CI_ROOT}/lib/createWorkspace.sh
 [[ -z ${LFS_CI_SOURCE_database}        ]] && source ${LFS_CI_ROOT}/lib/database.sh
 
-## @fn      ci_job_test_unittest()
+## @fn      ci_job_test_unittest_ddal()
 #  @brief   create a workspace and run the unit tests for ddal
 #  @todo    lot of pathes are hardcoded at the moment. make this more configureable
 #  @param   <none>
 #  @return  <none>
-ci_job_test_unittest() {
+ci_job_test_unittest_ddal() {
 
     requiredParameters UPSTREAM_PROJECT UPSTREAM_BUILD JOB_NAME BUILD_NUMBER WORKSPACE
 
@@ -39,7 +39,7 @@ ci_job_test_unittest() {
     execute make clean
     execute -i make -i test-xmloutput JOB_NAME="$JOB_NAME"
 
-    case "$JOBNAME"
+    case "$JOB_NAME"
     in *FSM-r4*) TARGET_TYPE=FSM-r4
     ;; *)        TARGET_TYPE=FSM-r3
     esac
