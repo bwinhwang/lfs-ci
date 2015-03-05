@@ -27,6 +27,7 @@ oneTimeSetUp() {
         mkdir -p         ${WORKSPACE}/workspace/bld/bld-pkgpool-release/
         echo LABEL >     ${WORKSPACE}/workspace/bld/bld-pkgpool-release/label
         echo OLD_LABEL > ${WORKSPACE}/workspace/bld/bld-pkgpool-release/oldLabel
+        echo newRevision > ${WORKSPACE}/workspace/bld/bld-pkgpool-release/gitrevision
         return
     }
     setBuildDescription() {
@@ -35,6 +36,9 @@ oneTimeSetUp() {
     gitRevParse() {
         mockedCommand "gitRevParse $@"
         echo "$1"
+    }
+    gitClone() {
+        mockedCommand "gitClone $@"
     }
     gitLog() {
         mockedCommand "gitLog $@"
@@ -112,10 +116,10 @@ test1() {
 mustHaveCleanWorkspace
 copyArtifactsToWorkspace PKGPOOL_CI_-_trunk_-_Test 1234 pkgpool
 setBuildDescription LFS_CI_-_trunk_-_Build 123 LABEL
+gitClone ssh://git@psulm.nsn-net.net/build/build ${WORKSPACE}/src
 getConfig PKGPOOL_PROD_update_dependencies_svn_url
 svnCheckout http://host/path ${WORKSPACE}/workspace
-gitRevParse HEAD
-gitLog oldRevision..HEAD
+gitLog oldRevision..newRevision
 execute sed -i -e 
             s|^PKGLABEL *?=.*|PKGLABEL ?= |
             s|^LRCPKGLABEL *?=.*|LRCPKGLABEL ?= |
@@ -152,10 +156,10 @@ test2() {
 mustHaveCleanWorkspace
 copyArtifactsToWorkspace PKGPOOL_CI_-_trunk_-_Test 1234 pkgpool
 setBuildDescription LFS_CI_-_trunk_-_Build 123 LABEL
+gitClone ssh://git@psulm.nsn-net.net/build/build ${WORKSPACE}/src
 getConfig PKGPOOL_PROD_update_dependencies_svn_url
 svnCheckout http://host/path ${WORKSPACE}/workspace
-gitRevParse HEAD
-gitLog oldRevision..HEAD
+gitLog oldRevision..newRevision
 execute sed -i -e 
             s|^PKGLABEL *?=.*|PKGLABEL ?= |
             s|^LRCPKGLABEL *?=.*|LRCPKGLABEL ?= |
@@ -192,10 +196,10 @@ test3() {
 mustHaveCleanWorkspace
 copyArtifactsToWorkspace PKGPOOL_CI_-_trunk_-_Test 1234 pkgpool
 setBuildDescription LFS_CI_-_trunk_-_Build 123 LABEL
+gitClone ssh://git@psulm.nsn-net.net/build/build ${WORKSPACE}/src
 getConfig PKGPOOL_PROD_update_dependencies_svn_url
 svnCheckout http://host/path ${WORKSPACE}/workspace
-gitRevParse HEAD
-gitLog oldRevision..HEAD
+gitLog oldRevision..newRevision
 execute sed -i -e 
             s|^PKGLABEL *?=.*|PKGLABEL ?= |
             s|^LRCPKGLABEL *?=.*|LRCPKGLABEL ?= |
@@ -230,10 +234,10 @@ test4() {
 mustHaveCleanWorkspace
 copyArtifactsToWorkspace PKGPOOL_CI_-_trunk_-_Test 1234 pkgpool
 setBuildDescription LFS_CI_-_trunk_-_Build 123 LABEL
+gitClone ssh://git@psulm.nsn-net.net/build/build ${WORKSPACE}/src
 getConfig PKGPOOL_PROD_update_dependencies_svn_url
 svnCheckout http://host/path ${WORKSPACE}/workspace
-gitRevParse HEAD
-gitLog oldRevision..HEAD
+gitLog oldRevision..newRevision
 execute sed -i -e 
             s|^PKGLABEL *?=.*|PKGLABEL ?= |
             s|^LRCPKGLABEL *?=.*|LRCPKGLABEL ?= |
@@ -241,8 +245,7 @@ execute sed -i -e
          file
 svnCommit -F gitlog file ${WORKSPACE}/workspace/src/gitrevision
 svnCheckout http://host/path2 ${WORKSPACE}/workspace
-gitRevParse HEAD
-gitLog oldRevision..HEAD
+gitLog oldRevision..newRevision
 execute sed -i -e 
             s|^PKGLABEL *?=.*|PKGLABEL ?= |
             s|^LRCPKGLABEL *?=.*|LRCPKGLABEL ?= |
@@ -274,10 +277,10 @@ test5() {
 mustHaveCleanWorkspace
 copyArtifactsToWorkspace PKGPOOL_CI_-_trunk_-_Test 1234 pkgpool
 setBuildDescription LFS_CI_-_trunk_-_Build 123 LABEL
+gitClone ssh://git@psulm.nsn-net.net/build/build ${WORKSPACE}/src
 getConfig PKGPOOL_PROD_update_dependencies_svn_url
 svnCheckout http://host/path ${WORKSPACE}/workspace
-gitRevParse HEAD
-gitLog oldRevision..HEAD
+gitLog oldRevision..newRevision
 execute sed -i -e 
             s|^PKGLABEL *?=.*|PKGLABEL ?= |
             s|^LRCPKGLABEL *?=.*|LRCPKGLABEL ?= |

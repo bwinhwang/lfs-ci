@@ -67,6 +67,11 @@ actionCheckout() {
       read oldUpstreamBuildNumber ;  } < "${OLD_REVISION_STATE_FILE}"
     debug "old upstream project data are: ${oldUpstreamProjectName} / ${oldUpstreamBuildNumber}"
 
+    if [[ -z ${oldUpstreamProjectName} || -z ${oldUpstreamBuildNumber} ]] ; then
+        warning "no information found in old revision state file."
+        return
+    fi
+
     # in case of a parameterized build (aka test job), we get the parameter
     # TESTED_BUILD_JOBNAME from the upstream
     local upstreamProjectName=${UPSTREAM_PROJECT:-${TESTED_BUILD_JOBNAME}}

@@ -47,6 +47,9 @@
 ci_job_klocwork_build() {
     requiredParameters WORKSPACE BUILD_ID
 
+    unset NODE_LABELS
+    export NODE_LABELS
+
     local workspace=$(getWorkspaceName)
     mustHaveWorkspaceName
 

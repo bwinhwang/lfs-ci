@@ -9,7 +9,7 @@
 #  @param   {arguments}    arguments for git log
 #  @return  log from git
 gitLog() {
-    execute -n git log
+    execute -n git log $@
 }
 
 ## @fn      gitTagAndPushToOrigin()
