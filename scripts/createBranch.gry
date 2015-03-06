@@ -57,6 +57,8 @@ jenkinsUrl = build.getEnvironment(listener).get("JENKINS_URL")
 
 apiToken = build.getEnvironment(listener).get("JENKINS_API_TOKEN")
 
+apiUser = build.getEnvironment(listener).get("JENKINS_API_USER")
+
 lrc_jobs = false
 if(build.getEnvironment(listener).get("LRC") == "true") {
     lrc_jobs = true
@@ -299,7 +301,7 @@ def bindings = getBinding()
 config.putAll(bindings.getVariables())
 def out = config['out']
 
-sectionedView = new MySectionedView(new_branch, lrc_jobs, jenkinsUrl, apiToken, out)
+sectionedView = new MySectionedView(new_branch, lrc_jobs, jenkinsUrl, apiToken, apiUser, out)
 sectionedView.createSectionedView()
 sectionedView.addListViewSections()
 
@@ -330,6 +332,7 @@ class MySectionedView {
     def listAlignment
     def jenkinsUrl
     def apiToken
+    def apiUser
     def out
 
     /**
@@ -339,13 +342,15 @@ class MySectionedView {
      * @param lrc true in case of LRC false otherwise.
      * @param jenkinsUrl the Jenkins URL (eg. http://jenkins-server:8090/).
      * @param apiToken the Jenkins API token.
+     * @param apiUser the Jenkins API user.
      * @param out the output stream so that this.out.println("...") works.
      */
-    MySectionedView(branch, lrc, jenkinsUrl, apiToken, out) {
+    MySectionedView(branch, lrc, jenkinsUrl, apiToken, apiUser, out) {
         this.branch = branch
         this.lrc = lrc
         this.jenkinsUrl = jenkinsUrl
         this.apiToken = apiToken
+        this.apiUser = apiUser
         this.out = out
 
         this.regExLfsCi = "LFS_CI_-_${this.branch}.*"
@@ -479,7 +484,7 @@ class MySectionedView {
 
         configurationFile = new File("config.xml")
         configurationFile.write(newConfigXml)
-        proc = ['curl', "-ueambrosc:${this.apiToken}", "${requestUrl}", "--data-binary", "@config.xml"].execute()
+        proc = ['curl', "-u${this.apiUser}:${this.apiToken}", "${requestUrl}", "--data-binary", "@config.xml"].execute()
         proc.waitFor()
         this.out.println("addListViewSections() proc.text: $proc.text")
     }
