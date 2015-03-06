@@ -53,11 +53,15 @@ copy_jobs = false
 fsmr4_jobs = false
 
 // Environment vars
+jenkinsUrl = build.getEnvironment(listener).get("JENKINS_URL")
+
+apiToken = build.getEnvironment(listener).get("JENKINS_API_TOKEN")
+
 lrc_jobs = false
 if(build.getEnvironment(listener).get("LRC") == "true") {
     lrc_jobs = true
 }
-jenkinsUrl = build.getEnvironment(listener).get("JENKINS_URL")
+
 
 // Parameters from Jenkins job
 def parameters = build?.actions.find{ it instanceof ParametersAction }?.parameters
@@ -267,6 +271,7 @@ for(job in src_branch_view_obj.getItems()) {
 for(job in jobs_list) {
     //if(job.name == "LFS_CI_-_${src_branch}_-_Build") {
     //if(job.name == "LFS_CI_-_${src_branch}_-_Test" || job.name == "LFS_Prod_-_trunk_-_Releasing_-_summary" || job.name == "LFS_CI_-_LRC_-_Build" || job.name == "LFS_Prod_-_LRC_-_Releasing_-_summary") {
+    //if(job.name == "LFS_CI_-_${src_branch}_-_Build" || job.name == "LFS_CI_-_${src_branch}_-_Test" || job.name == "LFS_Prod_-_trunk_-_Releasing_-_summary") {
     //if(job.name.find("LRC")) {
     //if(job.name.find("fsmr4")) {
     def new_job = copyJob(job)
@@ -288,7 +293,13 @@ for(disabled_job in jobs_to_enable) {
     println("[INFO] enabled job \"$disabled_job.name\"")
 }
 
-sectionedView = new MySectionedView(new_branch, lrc_jobs, jenkinsUrl)
+
+def config = new HashMap()
+def bindings = getBinding()
+config.putAll(bindings.getVariables())
+def out = config['out']
+
+sectionedView = new MySectionedView(new_branch, lrc_jobs, jenkinsUrl, apiToken, out)
 sectionedView.createSectionedView()
 sectionedView.addListViewSections()
 
@@ -297,6 +308,8 @@ sectionedView.addListViewSections()
 //
 // CLASSES
 //
+// In groovy the output stream must provided to a class
+// explicitly. Here we call it out.
 ///////////////////////////////////////////////////////////////////////
 
 
@@ -316,6 +329,8 @@ class MySectionedView {
     def listWidth
     def listAlignment
     def jenkinsUrl
+    def apiToken
+    def out
 
     /**
      * Constructor
@@ -323,18 +338,24 @@ class MySectionedView {
      * @param branch Name of the branch (eg. FB1408).
      * @param lrc true in case of LRC false otherwise.
      * @param jenkinsUrl the Jenkins URL (eg. http://jenkins-server:8090/).
+     * @param apiToken the Jenkins API token.
+     * @param out the output stream so that this.out.println("...") works.
      */
-    MySectionedView(branch, lrc, jenkinsUrl) {
+    MySectionedView(branch, lrc, jenkinsUrl, apiToken, out) {
         this.branch = branch
         this.lrc = lrc
         this.jenkinsUrl = jenkinsUrl
+        this.apiToken = apiToken
+        this.out = out
 
         this.regExLfsCi = "LFS_CI_-_${this.branch}.*"
         this.regExLfsProd = "LFS_Prod_-_${this.branch}_-_.*"
         this.nameSectionTesting = "CI Builds and Testing (${this.branch})"
         this.nameSectionReleasing = "Releasing (${this.branch})"
-
-        this.branchSectionedView = this.branch[2..-1]
+        if(this.branch[0..1] == "FB")
+            this.branchSectionedView = this.branch[2..-1]
+        else
+            this.branchSectionedView = this.branch[3..-1]
         this.listWidth = "HALF"
         this.listAlignment = "LEFT"
         if(this.lrc) {
@@ -349,8 +370,9 @@ class MySectionedView {
     /**
      * @return String the config.xml for the sectioned view.
      */
-    def String getCurrentXml() {
+    String getCurrentXml() {
         def requestUrl = "${this.jenkinsUrl}view/${this.branchSectionedView}/config.xml"
+        this.out.println("==> $requestUrl")
         def proc = ['curl', "${requestUrl}"].execute()
         def xmlString = proc.text
         return xmlString
@@ -361,7 +383,7 @@ class MySectionedView {
      *
      * @return String XML String defining list view sections.
      */
-    def String createListViewSectionsXml() {
+    String createListViewSectionsXml() {
         return """
             <hudson.plugins.sectioned__view.ListViewSection>
               <jobNames><comparator class="hudson.util.CaseInsensitiveComparator"/></jobNames>
@@ -400,37 +422,36 @@ class MySectionedView {
      *
      * @return boolean true if the sectioned view has a list view section false otherwise.
      */
-    def boolean hasListViewSection() {
-        if(this.getCurrentXml().find("<sections/>")) {
-            return false
-        } else {
+    boolean hasListViewSection() {
+        if(this.getCurrentXml().find("<sections>")) {
             return true
+        } else {
+            return false
         }
     }
 
     /**
      * Create the sectioned view for this.branch.
      */
-    def void createSectionedView() {
-        def newBranchSectionView = this.branch[2..-1]
+    void createSectionedView() {
         def trunk_view = "trunk"
         def trunk_view_owner_obj = null
-        def newBranchSectionViewObj = Jenkins.instance.getView(newBranchSectionView)
+        def branchSectionedViewObj = Jenkins.instance.getView(this.branchSectionedView)
 
-        if(newBranchSectionViewObj) {
-            println("[INFO] view ${newBranchSectionView} already exists.")
+        if(branchSectionedViewObj) {
+            this.out.println("[INFO] view ${this.branchSectionedView} already exists.")
         } else {
             trunk_view_owner_obj = Jenkins.instance.getView(trunk_view).getOwner();
-            newBranchSectionViewObj = new SectionedView(newBranchSectionView)
-            trunk_view_owner_obj.addView(newBranchSectionViewObj)
-            println("[INFO] Created view ${newBranchSectionView}")
+            branchSectionedViewObj = new SectionedView(this.branchSectionedView)
+            trunk_view_owner_obj.addView(branchSectionedViewObj)
+            this.out.println("[INFO] Created view ${this.branchSectionedView}")
         }
     }
 
     /**
      * Add list view sections to the sectioned view.
      */
-    def void addListViewSections() {
+    void addListViewSections() {
         def requestUrl = "${this.jenkinsUrl}view/${this.branchSectionedView}/config.xml"
         def currentXml = this.getCurrentXml()
         def configurationFile = null
@@ -439,26 +460,27 @@ class MySectionedView {
 
         if(this.lrc) {
             if(!this.hasListViewSection()) {
-                println("view has not list view sections")
+                this.out.println("[INFO] view has not list view sections")
                 newConfigXml = currentXml.replaceFirst("<sections/>", "<sections>\n"+this.createListViewSectionsXml()+"\n</sections>")
             } else {
-                println("view already has list view sections")
+                this.out.println("[INFO] view already has list view sections")
                 newConfigXml = currentXml.replaceFirst("</sections>", this.createListViewSectionsXml()+"\n</sections>")
             }
         } else {
             if(!this.hasListViewSection()) {
-                println("view has not list view sections")
+                this.out.println("[INFO] view does not have list view sections")
                 newConfigXml = currentXml.replaceFirst("<sections/>", "<sections>\n"+this.createListViewSectionsXml()+"\n</sections>")
+                this.out.println("\n\n$newConfigXml")
             } else {
-                println("view already has list view sections")
+                this.out.println("[INFO] view already has list view sections")
                 newConfigXml = currentXml.replaceFirst("<sections>", "<sections>\n"+this.createListViewSectionsXml())
             }
         }
 
         configurationFile = new File("config.xml")
         configurationFile.write(newConfigXml)
-        proc = ['curl', "-ueambrosc:c83b379dc70aa8aca6980666e11f941e", "${requestUrl}", "--data-binary", "@config.xml"].execute()
+        proc = ['curl', "-ueambrosc:${this.apiToken}", "${requestUrl}", "--data-binary", "@config.xml"].execute()
         proc.waitFor()
+        this.out.println("addListViewSections() proc.text: $proc.text")
     }
 }
-

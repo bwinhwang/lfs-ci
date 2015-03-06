@@ -30,6 +30,7 @@ info "###############################################################"
 SVN_REPO="https://svne1.access.nsn.com/isource/svnroot/BTS_SC_LFS"
 SVN_DIR="os"
 SRC_PROJECT="src-project"
+VARS_FILE="VARIABLES.TXT"
 
 if [[ "${SRC_BRANCH}" == "trunk" ]]; then
     LOCATIONS="pronb-developer"
@@ -53,6 +54,12 @@ __checkParams() {
     [[ ! ${COMMENT} ]] && { echo "COMMENT is missing"; exit 1; }
 
     return 0
+}
+
+__preparation(){
+    JENKINS_API_TOKEN=$(getConfig jenkinsApiToken)
+    mustHaveValue ${JENKINS_API_TOKEN} "Jenkins API token is missing."
+    echo JENKINS_API_TOKEN=${JENKINS_API_TOKEN} > ${VARS_FILE}
 }
 
 ## @fn      svnCopyBranch()
@@ -412,6 +419,7 @@ dbInsert() {
 main() {
 
     __checkParams
+    __preparation
 
     if [[ "${DO_SVN}" == "true" ]]; then
         if [[ ! ${LRC} ]]; then
