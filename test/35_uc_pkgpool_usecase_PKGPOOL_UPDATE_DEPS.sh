@@ -119,7 +119,7 @@ setBuildDescription LFS_CI_-_trunk_-_Build 123 LABEL
 gitClone ssh://git@psulm.nsn-net.net/build/build ${WORKSPACE}/src
 getConfig PKGPOOL_PROD_update_dependencies_svn_url
 svnCheckout http://host/path ${WORKSPACE}/workspace
-gitLog oldRevision..newRevision
+gitLog --format=medium oldRevision..newRevision
 execute sed -i -e 
             s|^PKGLABEL *?=.*|PKGLABEL ?= |
             s|^LRCPKGLABEL *?=.*|LRCPKGLABEL ?= |
@@ -159,7 +159,7 @@ setBuildDescription LFS_CI_-_trunk_-_Build 123 LABEL
 gitClone ssh://git@psulm.nsn-net.net/build/build ${WORKSPACE}/src
 getConfig PKGPOOL_PROD_update_dependencies_svn_url
 svnCheckout http://host/path ${WORKSPACE}/workspace
-gitLog oldRevision..newRevision
+gitLog --format=medium oldRevision..newRevision
 execute sed -i -e 
             s|^PKGLABEL *?=.*|PKGLABEL ?= |
             s|^LRCPKGLABEL *?=.*|LRCPKGLABEL ?= |
@@ -199,7 +199,7 @@ setBuildDescription LFS_CI_-_trunk_-_Build 123 LABEL
 gitClone ssh://git@psulm.nsn-net.net/build/build ${WORKSPACE}/src
 getConfig PKGPOOL_PROD_update_dependencies_svn_url
 svnCheckout http://host/path ${WORKSPACE}/workspace
-gitLog oldRevision..newRevision
+gitLog --format=medium oldRevision..newRevision
 execute sed -i -e 
             s|^PKGLABEL *?=.*|PKGLABEL ?= |
             s|^LRCPKGLABEL *?=.*|LRCPKGLABEL ?= |
@@ -237,7 +237,7 @@ setBuildDescription LFS_CI_-_trunk_-_Build 123 LABEL
 gitClone ssh://git@psulm.nsn-net.net/build/build ${WORKSPACE}/src
 getConfig PKGPOOL_PROD_update_dependencies_svn_url
 svnCheckout http://host/path ${WORKSPACE}/workspace
-gitLog oldRevision..newRevision
+gitLog --format=medium oldRevision..newRevision
 execute sed -i -e 
             s|^PKGLABEL *?=.*|PKGLABEL ?= |
             s|^LRCPKGLABEL *?=.*|LRCPKGLABEL ?= |
@@ -245,7 +245,7 @@ execute sed -i -e
          file
 svnCommit -F gitlog file ${WORKSPACE}/workspace/src/gitrevision
 svnCheckout http://host/path2 ${WORKSPACE}/workspace
-gitLog oldRevision..newRevision
+gitLog --format=medium oldRevision..newRevision
 execute sed -i -e 
             s|^PKGLABEL *?=.*|PKGLABEL ?= |
             s|^LRCPKGLABEL *?=.*|LRCPKGLABEL ?= |
@@ -280,7 +280,7 @@ setBuildDescription LFS_CI_-_trunk_-_Build 123 LABEL
 gitClone ssh://git@psulm.nsn-net.net/build/build ${WORKSPACE}/src
 getConfig PKGPOOL_PROD_update_dependencies_svn_url
 svnCheckout http://host/path ${WORKSPACE}/workspace
-gitLog oldRevision..newRevision
+gitLog --format=medium oldRevision..newRevision
 execute sed -i -e 
             s|^PKGLABEL *?=.*|PKGLABEL ?= |
             s|^LRCPKGLABEL *?=.*|LRCPKGLABEL ?= |

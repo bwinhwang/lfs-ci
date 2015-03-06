@@ -152,5 +152,7 @@ if(!lrc_jobs && !remaining_jobs) {
     deleteView()
 }
 else {
+    println("lrc_jobs: ${lrc_jobs}")
+    println("remaining_jobs: ${remaining_jobs}")
     println("[INFO] Not deleting list view sections. There are still jobs from another branch.")
 }

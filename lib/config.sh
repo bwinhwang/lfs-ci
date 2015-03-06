@@ -89,10 +89,22 @@ getProductNameFromJobName() {
 #  @brief   get the configuration to the requested key
 #  @todo    move this into a generic module. make it also more configureable
 #  @param   {key}    key name of the requested value
+#  @param   {opt}    -f configFile   name and location of the config file
+#  @param   {opt}    -t tags         tags which should also match, 
+#                                    multible tags are allowed
 #  @return  value for the key
 getConfig() {
-    local key=$1
-    local file=${2:-${LFS_CI_CONFIG_FILE}}
+    local configFile=${LFS_CI_CONFIG_FILE:-${LFS_CI_ROOT}/etc/file.cfg}
+    local tags=
+
+    while [[ $# -gt 0 ]] ; do
+        case ${1} in
+            -f) configFile=${2} ; shift ;;
+            -t) tags="-t ${2} ${tags} " ; shift;;
+            *) key=${1} ;;
+        esac
+        shift
+    done
 
     local productName=$(getProductNameFromJobName)
     local location=$(getLocationName)
@@ -101,27 +113,26 @@ getConfig() {
     local config=$(getTargetBoardName)
 
     # TODO: demx2fk3 2014-08-05 this should be always commented out, only required for debugging
-    # echo 1>&2 "get config value for ${key} using ${file}"
+    # echo 1>&2 "get config value for ${key} using ${configFile}"
+    # echo 1>&2 "tags/${tags}"
     # echo 1>&2 "config/${config}"
     # echo 1>&2 "location/${location}"
     # echo 1>&2 "subTaskName/${subTaskName}"
     # echo 1>&2 "taskName/${taskName}"
     # echo 1>&2 "productName/${productName}"
 
-    if [[ ! -e ${file} ]] ; then
-        file=${LFS_CI_ROOT}/etc/file.cfg
-    fi
 
-    ${LFS_CI_ROOT}/bin/getConfig -k "${key}" -f ${file} \
+    ${LFS_CI_ROOT}/bin/getConfig -k "${key}" \
+        -f ${configFile}              \
         -t productName:${productName} \
         -t taskName:${taskName}       \
         -t subTaskName:${subTaskName} \
         -t location:${location}       \
-        -t config:${config}          
+        -t config:${config}           \
+        ${tags}
 
     return
 }
-
 
 # this is the static configuration, which is valid for all scripting
 # stuff in here.

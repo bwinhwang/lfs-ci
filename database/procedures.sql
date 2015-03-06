@@ -373,3 +373,34 @@ BEGIN
 END //
 DELIMITER ;
 
+
+DROP PROCEDURE add_new_subversion_commit;
+DELIMITER //
+CREATE  PROCEDURE add_new_subversion_commit( IN in_build_name VARCHAR(128),
+                                             IN in_revision   INT,
+                                             IN in_author     VARCHAR(16),
+                                             IN in_date       TEXT,
+                                             IN in_msg        TEXT)
+BEGIN
+   DECLARE cnt_build_id INT;
+   DECLARE var_build_id INT;
+   DECLARE cnt_is_already_done INT;
+
+   SELECT count(id) INTO cnt_build_id FROM builds WHERE build_name = in_build_name;
+   
+   IF cnt_build_id = 0 THEN
+      SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'build_name does not exist';
+   END IF;
+   
+   
+   SELECT max(id) INTO var_build_id FROM builds WHERE build_name = in_build_name;
+
+   SELECT count(id) INTO cnt_is_already_done FROM subversion_commits WHERE build_id = var_build_id AND svn_revision = in_revision;
+
+   IF cnt_is_already_done = 0 THEN
+       INSERT INTO subversion_commits (build_id, svn_revision, svn_author, commit_date, commit_message ) VALUES ( var_build_id, in_revision, in_author, in_date, in_msg );
+   END IF;
+
+END
+DELIMITER ;
+
