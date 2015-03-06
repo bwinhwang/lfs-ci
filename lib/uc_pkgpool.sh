@@ -246,8 +246,12 @@ usecase_PKGPOOL_UDPATE_DEPS() {
         local oldGitRevision=$(cat ${workspace}/src/gitrevision)
         mustHaveValue "${oldGitRevision}" "old git revision"
 
-        gitLog ${oldGitRevision}..${newGitRevision} | \
-            sed -e 's,^    %,%,' > ${gitLog}
+        if [[ ${oldGitRevision} = ${newGitRevision} ]] ; then
+            echo "no change" > ${gitLog}
+        else
+            gitLog  --format=medium ${oldGitRevision}..${newGitRevision} | \
+                sed -e 's,^    %,%,' > ${gitLog}
+        fi
         rawDebug ${gitLog}
 
         cd ${workspace}
