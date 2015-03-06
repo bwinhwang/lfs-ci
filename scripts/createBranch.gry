@@ -475,7 +475,6 @@ class MySectionedView {
             if(!this.hasListViewSection()) {
                 this.out.println("[INFO] view does not have list view sections")
                 newConfigXml = currentXml.replaceFirst("<sections/>", "<sections>\n"+this.createListViewSectionsXml()+"\n</sections>")
-                this.out.println("\n\n$newConfigXml")
             } else {
                 this.out.println("[INFO] view already has list view sections")
                 newConfigXml = currentXml.replaceFirst("<sections>", "<sections>\n"+this.createListViewSectionsXml())
