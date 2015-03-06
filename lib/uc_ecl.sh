@@ -154,7 +154,7 @@ getEclValue() {
         ECL_PS_LFS_SDK3) 
             local commonentsFile=${workspace}/bld//bld-externalComponents-summary/externalComponents 
             mustExistFile ${commonentsFile}
-            newValue=$(getConfig sdk3 ${commonentsFile})
+            newValue=$(getConfig sdk3 -f ${commonentsFile})
         ;;
         ECL_LFS)
             local branchNameInSubversion=$(getConfig SVN_lfs_branch_name)

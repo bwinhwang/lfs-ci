@@ -101,6 +101,84 @@ testConfigOrderCheck() {
     assertEquals "value from getConfig" "2" "${value}"
 }
 
+testConfigInclude() {
+    local cfg1=$(createTempFile)
+    local cfg2=$(createTempFile)
+
+    echo "bar = 1"  > ${cfg1}
+    echo "bar = 2" >> ${cfg1}
+    echo "include ${cfg2}" >> ${cfg1}
+    echo "foo = 3"  > ${cfg2}
+    echo "foo = 4" >> ${cfg2}
+
+    assertTrue "${LFS_CI_ROOT}/bin/getConfig -k bar -f ${cfg1}"
+    local value=$(${LFS_CI_ROOT}/bin/getConfig -k bar -f ${cfg1})
+    assertEquals "value from getConfig" "1" "${value}"
+
+    local value=$(${LFS_CI_ROOT}/bin/getConfig -k foo -f ${cfg1})
+    assertEquals "value from getConfig" "3" "${value}"
+}
+
+testConfigInclude2() {
+    local cfg1=$(createTempFile)
+    local cfg2=$(createTempFile)
+
+    echo "foo = 1"          > ${cfg1}
+    echo "foo = 2"         >> ${cfg1}
+    echo "include ${cfg2}" >> ${cfg1}
+    echo "foo = 3"          > ${cfg2}
+    echo "foo = 4"         >> ${cfg2}
+
+    local value=$(${LFS_CI_ROOT}/bin/getConfig -k foo -f ${cfg1})
+    assertEquals "value from getConfig" "1" "${value}"
+}
+
+testConfigInclude3() {
+    local cfg1=$(createTempFile)
+    local cfg2=$(createTempFile)
+
+    echo "include ${cfg2}" >> ${cfg1}
+    echo "foo = 1"         >> ${cfg1}
+    echo "foo = 2"         >> ${cfg1}
+    echo "foo = 3"         >> ${cfg2}
+    echo "foo = 4"         >> ${cfg2}
+
+    local value=$(${LFS_CI_ROOT}/bin/getConfig -k foo -f ${cfg1})
+    assertEquals "value from getConfig" "3" "${value}"
+}
+
+testConfigInclude4() {
+    local dir=$(createTempDirectory)
+    local cfg1=${dir}/cfg1
+    local cfg2=${dir}/cfg2
+
+    echo "include cfg2" >> ${cfg1}
+    echo "foo = 1"      >> ${cfg1}
+    echo "foo = 2"      >> ${cfg1}
+    echo "foo = 3"      >> ${cfg2}
+    echo "foo = 4"      >> ${cfg2}
+
+    local value=$(${LFS_CI_ROOT}/bin/getConfig -k foo -f ${cfg1})
+    assertEquals "value from getConfig" "3" "${value}"
+}
+
+testConfigInclude5() {
+    local dir=$(createTempDirectory)
+    local cfg1=${dir}/cfg1
+    local cfg2=${dir}/cfg2
+
+    echo "include cfg2" >> ${cfg1}
+    echo "foo = 1"      >> ${cfg1}
+    echo "foo = 2"      >> ${cfg1}
+    echo "foo = 3"      >> ${cfg2}
+    echo "foo = 4"      >> ${cfg2}
+
+    cd ${dir}
+    local value=$(${LFS_CI_ROOT}/bin/getConfig -k foo -f cfg1)
+    assertEquals "value from getConfig" "3" "${value}"
+    cd - >/dev/null
+}
+
 source lib/shunit2
 
 exit 0
