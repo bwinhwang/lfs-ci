@@ -149,6 +149,23 @@ sub newBuildEvent {
     return;
 }
 
+sub branchInformation {
+    my $self  = shift;
+    my $param = { @_ };
+
+    my $sth = $self->prepare( 
+        "select * from branches"
+    );
+    $sth->execute()
+        or LOGDIE sprintf( "can not get branch information" );
+    my @results;
+    while ( my $row = $sth->fetchrow_hashref() ) {
+         push @results, $row;
+    }
+    return @results;
+
+}
+
 package Handler::Database;
 
 use strict;
@@ -222,6 +239,43 @@ sub newSubversionCommit {
                                          author       => $param->{logentry}->{author}->[0],
                                          date         => $param->{logentry}->{date}->[0],
                                          revision     => $param->{logentry}->{revision}, );
+    return;
+}
+
+sub branchInformation {
+    my $self = shift;
+
+    if( not $self->{store} ) {
+        $self->{store} = Store::Database->new();
+    }
+
+    my @data = $self->{store}->branchInformation();
+
+    printf "# This file was automatically created by %s.\n", $0;
+    printf "# Do not edit it by hand.\n";
+    print "\n";
+    printf "LFS_CI_internal_config_file_branch_cfg = %d\n", time();
+    print "\n";
+    foreach my $row ( @data ) {
+        printf "\n# %s\n", "-"x80;
+        printf "# branch id %d\n", $row->{id};
+        printf "# branch creation date: %s\n", $row->{date_created};
+        printf "# branch close date   : %s\n", $row->{date_closed};
+        printf "# branch comment      : %s\n", $row->{comment} || "<none>";
+        printf "#\n";
+        printf "LFS_PROD_branch_to_tag_regex          < productName:LFS, location:%s > = %s\n",          
+               $row->{location_name}, $row->{release_name_regex}; 
+        printf "LFS_CI_branch_status                  < productName:LFS, location:%s > = %s\n",                  
+               $row->{location_name}, $row->{status}; 
+        printf "LFS_PROD_tag_to_branch                < productName:LFS, tagName~%s > = %s\n",                 
+               $row->{release_name_regex}, $row->{location_name} || "";
+        printf "LFS_CI_uc_update_ecl_url              < productName:LFS, location:%s > = %s\n",              
+               $row->{location_name}, $row->{ps_branch_name} || "";
+        printf "LFS_PROD_uc_release_based_on          < productName:LFS, location:%s > = %s\n",          
+               $row->{location_name}, $row->{based_on_release} || "";
+        printf "LFS_PROD_uc_release_based_on_revision < productName:LFS, location:%s > = %s\n", 
+               $row->{location_name}, $row->{based_on_revision} || "";
+    }
     return;
 }
 
@@ -303,6 +357,8 @@ if( $opt_action eq "new_test_result" ) {
     }
     close FILE;
 
+} elsif( $opt_action eq "branch_information" )  {
+    my $handler = Handler::Database->new()->branchInformation();
 } elsif( $opt_action eq "new_svn_commits" )  {
 
     my $handler = Handler::Database->new();
