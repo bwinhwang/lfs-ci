@@ -661,8 +661,10 @@ _getUpstreamProjects() {
 
     # find the related jobs of the build
     # TODO: demx2fk3 2015-01-23 KNIFE FIXME
-    # runOnMaster ${LFS_CI_ROOT}/bin/getUpStreamProject \
-    runOnMaster /ps/lfs/ci/bin/getUpStreamProject \
+    local server=$(getConfig jenkinsMasterServerHostName)
+    mustHaveValue "${server}" "server name"
+    execute -n -r 10 ssh ${server}                    \
+            /ps/lfs/ci/bin/getUpStreamProject         \
                     -j ${jobName}                     \
                     -b ${buildNumber}                 \
                     -h ${serverPath} > ${upstreamsFile}
@@ -691,10 +693,13 @@ _getDownstreamProjects() {
     mustHaveValue "${serverPath}" "server path"
 
     # TODO: demx2fk3 2015-01-23 KNIFE FIXME
-    # runOnMaster ${LFS_CI_ROOT}/bin/getDownStreamProjects -j ${jobName}    \
-    runOnMaster /ps/lfs/ci/bin/getDownStreamProjects -j ${jobName}     \
-                                                        -b ${buildNumber} \
-                                                        -h ${serverPath}  > ${downstreamFile}
+    local server=$(getConfig jenkinsMasterServerHostName)
+    mustHaveValue "${server}" "server name"
+    execute -n -r 10 ssh ${server}                      \
+            /ps/lfs/ci/bin/getDownStreamProjects        \
+                    -j ${jobName}                       \
+                    -b ${buildNumber}                   \
+                    -h ${serverPath}  > ${downstreamFile}
     rawDebug ${downstreamFile}
 
     return
