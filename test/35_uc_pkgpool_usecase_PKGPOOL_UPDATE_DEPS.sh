@@ -116,16 +116,17 @@ test1() {
 mustHaveCleanWorkspace
 copyArtifactsToWorkspace PKGPOOL_CI_-_trunk_-_Test 1234 pkgpool
 setBuildDescription LFS_CI_-_trunk_-_Build 123 LABEL
+execute rm -rfv ${WORKSPACE}/src
 gitClone ssh://git@psulm.nsn-net.net/build/build ${WORKSPACE}/src
 getConfig PKGPOOL_PROD_update_dependencies_svn_url
 svnCheckout http://host/path ${WORKSPACE}/workspace
-gitLog oldRevision..newRevision
+gitLog --format=medium oldRevision..newRevision
 execute sed -i -e 
-            s|^PKGLABEL *?=.*|PKGLABEL ?= |
-            s|^LRCPKGLABEL *?=.*|LRCPKGLABEL ?= |
-            s|^hint *bld/pkgpool .*|hint bld/pkgpool |
+            s|^PKGLABEL *?=.*|PKGLABEL ?= LABEL|
+            s|^LRCPKGLABEL *?=.*|LRCPKGLABEL ?= LABEL|
+            s|^hint *bld/pkgpool .*|hint bld/pkgpool LABEL|
          file
-svnCommit -F gitlog file ${WORKSPACE}/workspace/src/gitrevision
+svnCommit -F ${WORKSPACE}/workspace/gitLog.txt file ${WORKSPACE}/workspace/src/gitrevision
 EOF
 
     assertExecutedCommands ${expect}
@@ -156,19 +157,20 @@ test2() {
 mustHaveCleanWorkspace
 copyArtifactsToWorkspace PKGPOOL_CI_-_trunk_-_Test 1234 pkgpool
 setBuildDescription LFS_CI_-_trunk_-_Build 123 LABEL
+execute rm -rfv ${WORKSPACE}/src
 gitClone ssh://git@psulm.nsn-net.net/build/build ${WORKSPACE}/src
 getConfig PKGPOOL_PROD_update_dependencies_svn_url
 svnCheckout http://host/path ${WORKSPACE}/workspace
-gitLog oldRevision..newRevision
+gitLog --format=medium oldRevision..newRevision
 execute sed -i -e 
-            s|^PKGLABEL *?=.*|PKGLABEL ?= |
-            s|^LRCPKGLABEL *?=.*|LRCPKGLABEL ?= |
-            s|^hint *bld/pkgpool .*|hint bld/pkgpool |
+            s|^PKGLABEL *?=.*|PKGLABEL ?= LABEL|
+            s|^LRCPKGLABEL *?=.*|LRCPKGLABEL ?= LABEL|
+            s|^hint *bld/pkgpool .*|hint bld/pkgpool LABEL|
          file
-svnCommit -F gitlog file ${WORKSPACE}/workspace/src/gitrevision
+svnCommit -F ${WORKSPACE}/workspace/gitLog.txt file ${WORKSPACE}/workspace/src/gitrevision
 setBuildResultUnstable
-execute sed -i -e 1{s,%,o/o,g;s,^,SVN REJECTED: ,} gitlog
-svnCommit -F gitlog file ${WORKSPACE}/workspace/src/gitrevision
+execute sed -i -e 1{s,%,o/o,g;s,^,SVN REJECTED: ,} ${WORKSPACE}/workspace/gitLog.txt
+svnCommit -F ${WORKSPACE}/workspace/gitLog.txt file ${WORKSPACE}/workspace/src/gitrevision
 EOF
     assertExecutedCommands ${expect}
 
@@ -196,19 +198,20 @@ test3() {
 mustHaveCleanWorkspace
 copyArtifactsToWorkspace PKGPOOL_CI_-_trunk_-_Test 1234 pkgpool
 setBuildDescription LFS_CI_-_trunk_-_Build 123 LABEL
+execute rm -rfv ${WORKSPACE}/src
 gitClone ssh://git@psulm.nsn-net.net/build/build ${WORKSPACE}/src
 getConfig PKGPOOL_PROD_update_dependencies_svn_url
 svnCheckout http://host/path ${WORKSPACE}/workspace
-gitLog oldRevision..newRevision
+gitLog --format=medium oldRevision..newRevision
 execute sed -i -e 
-            s|^PKGLABEL *?=.*|PKGLABEL ?= |
-            s|^LRCPKGLABEL *?=.*|LRCPKGLABEL ?= |
-            s|^hint *bld/pkgpool .*|hint bld/pkgpool |
+            s|^PKGLABEL *?=.*|PKGLABEL ?= LABEL|
+            s|^LRCPKGLABEL *?=.*|LRCPKGLABEL ?= LABEL|
+            s|^hint *bld/pkgpool .*|hint bld/pkgpool LABEL|
          file
-svnCommit -F gitlog file ${WORKSPACE}/workspace/src/gitrevision
+svnCommit -F ${WORKSPACE}/workspace/gitLog.txt file ${WORKSPACE}/workspace/src/gitrevision
 setBuildResultUnstable
-execute sed -i -e 1{s,%,o/o,g;s,^,SVN REJECTED: ,} gitlog
-svnCommit -F gitlog file ${WORKSPACE}/workspace/src/gitrevision
+execute sed -i -e 1{s,%,o/o,g;s,^,SVN REJECTED: ,} ${WORKSPACE}/workspace/gitLog.txt
+svnCommit -F ${WORKSPACE}/workspace/gitLog.txt file ${WORKSPACE}/workspace/src/gitrevision
 EOF
     assertExecutedCommands ${expect}
 
@@ -234,24 +237,25 @@ test4() {
 mustHaveCleanWorkspace
 copyArtifactsToWorkspace PKGPOOL_CI_-_trunk_-_Test 1234 pkgpool
 setBuildDescription LFS_CI_-_trunk_-_Build 123 LABEL
+execute rm -rfv ${WORKSPACE}/src
 gitClone ssh://git@psulm.nsn-net.net/build/build ${WORKSPACE}/src
 getConfig PKGPOOL_PROD_update_dependencies_svn_url
 svnCheckout http://host/path ${WORKSPACE}/workspace
-gitLog oldRevision..newRevision
+gitLog --format=medium oldRevision..newRevision
 execute sed -i -e 
-            s|^PKGLABEL *?=.*|PKGLABEL ?= |
-            s|^LRCPKGLABEL *?=.*|LRCPKGLABEL ?= |
-            s|^hint *bld/pkgpool .*|hint bld/pkgpool |
+            s|^PKGLABEL *?=.*|PKGLABEL ?= LABEL|
+            s|^LRCPKGLABEL *?=.*|LRCPKGLABEL ?= LABEL|
+            s|^hint *bld/pkgpool .*|hint bld/pkgpool LABEL|
          file
-svnCommit -F gitlog file ${WORKSPACE}/workspace/src/gitrevision
+svnCommit -F ${WORKSPACE}/workspace/gitLog.txt file ${WORKSPACE}/workspace/src/gitrevision
 svnCheckout http://host/path2 ${WORKSPACE}/workspace
-gitLog oldRevision..newRevision
+gitLog --format=medium oldRevision..newRevision
 execute sed -i -e 
-            s|^PKGLABEL *?=.*|PKGLABEL ?= |
-            s|^LRCPKGLABEL *?=.*|LRCPKGLABEL ?= |
-            s|^hint *bld/pkgpool .*|hint bld/pkgpool |
+            s|^PKGLABEL *?=.*|PKGLABEL ?= LABEL|
+            s|^LRCPKGLABEL *?=.*|LRCPKGLABEL ?= LABEL|
+            s|^hint *bld/pkgpool .*|hint bld/pkgpool LABEL|
          file2
-svnCommit -F gitlog file2 ${WORKSPACE}/workspace/src/gitrevision
+svnCommit -F ${WORKSPACE}/workspace/gitLog.txt file2 ${WORKSPACE}/workspace/src/gitrevision
 EOF
     assertExecutedCommands ${expect}
 
@@ -277,16 +281,17 @@ test5() {
 mustHaveCleanWorkspace
 copyArtifactsToWorkspace PKGPOOL_CI_-_trunk_-_Test 1234 pkgpool
 setBuildDescription LFS_CI_-_trunk_-_Build 123 LABEL
+execute rm -rfv ${WORKSPACE}/src
 gitClone ssh://git@psulm.nsn-net.net/build/build ${WORKSPACE}/src
 getConfig PKGPOOL_PROD_update_dependencies_svn_url
 svnCheckout http://host/path ${WORKSPACE}/workspace
-gitLog oldRevision..newRevision
+gitLog --format=medium oldRevision..newRevision
 execute sed -i -e 
-            s|^PKGLABEL *?=.*|PKGLABEL ?= |
-            s|^LRCPKGLABEL *?=.*|LRCPKGLABEL ?= |
-            s|^hint *bld/pkgpool .*|hint bld/pkgpool |
+            s|^PKGLABEL *?=.*|PKGLABEL ?= LABEL|
+            s|^LRCPKGLABEL *?=.*|LRCPKGLABEL ?= LABEL|
+            s|^hint *bld/pkgpool .*|hint bld/pkgpool LABEL|
          file
-svnCommit -F gitlog file ${WORKSPACE}/workspace/src/gitrevision
+svnCommit -F ${WORKSPACE}/workspace/gitLog.txt file ${WORKSPACE}/workspace/src/gitrevision
 setBuildResultUnstable
 EOF
     assertExecutedCommands ${expect}

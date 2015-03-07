@@ -46,3 +46,8 @@ gitRevParse() {
     execute -n git rev-parse $@
     return
 }
+
+gitClone() {
+    execute git clone $@
+    return
+}

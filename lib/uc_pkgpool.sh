@@ -160,6 +160,9 @@ usecase_PKGPOOL_RELEASE() {
 
     local releaseNoteTxt=${workspace}/releasenote.txt
     execute touch ${releaseNoteTxt}
+
+    execute sed -i -e "s/PS_LFS_PKG = //g" ${workspace}/forReleaseNote.txt.old
+    execute sed -i -e "s/PS_LFS_PKG = //g" ${workspace}/bld/bld-pkgpool-release/forReleaseNote.txt
     execute -i -l ${releaseNoteTxt} diff -y -W72 -t --suppress-common-lines \
         ${workspace}/forReleaseNote.txt.old \
         ${workspace}/bld/bld-pkgpool-release/forReleaseNote.txt
@@ -222,6 +225,9 @@ usecase_PKGPOOL_UDPATE_DEPS() {
     local newGitRevision=$(cat ${workspace}/bld/bld-pkgpool-release/gitrevision)
     mustHaveValue "${newGitRevision}" "new git revision"
 
+    info "new label is ${label}/${newGitRevision} based on ${oldLabel}"
+
+    execute rm -rfv ${WORKSPACE}/src
     gitClone ssh://git@psulm.nsn-net.net/build/build ${WORKSPACE}/src
 
     local svnUrlsToUpdate=$(getConfig PKGPOOL_PROD_update_dependencies_svn_url)
@@ -241,26 +247,33 @@ usecase_PKGPOOL_UDPATE_DEPS() {
 
         svnCheckout ${svnUrl} ${workspace}
 
-        local gitLog=$(createTempFile)
+        local gitLog=${WORKSPACE}/workspace/gitLog.txt
         cd ${WORKSPACE}/src
         local oldGitRevision=$(cat ${workspace}/src/gitrevision)
         mustHaveValue "${oldGitRevision}" "old git revision"
+        info "old git revision in $(basename ${svnUrl}) is ${oldGitRevision}"
 
-        gitLog ${oldGitRevision}..${newGitRevision} | \
-            sed -e 's,^    %,%,' > ${gitLog}
+        if [[ ${oldGitRevision} = ${newGitRevision} ]] ; then
+            echo "no change" > ${gitLog}
+        else
+            gitLog  --format=medium ${oldGitRevision}..${newGitRevision} | \
+                sed -e 's,^    %,%,' > ${gitLog}
+        fi
         rawDebug ${gitLog}
 
         cd ${workspace}
         execute sed -i -e "
-            s|^PKGLABEL *?=.*|PKGLABEL ?= ${releaseString}|
-            s|^LRCPKGLABEL *?=.*|LRCPKGLABEL ?= ${releaseString}|
-            s|^hint *bld/pkgpool .*|hint bld/pkgpool ${releaseString}|
+            s|^PKGLABEL *?=.*|PKGLABEL ?= ${label}|
+            s|^LRCPKGLABEL *?=.*|LRCPKGLABEL ?= ${label}|
+            s|^hint *bld/pkgpool .*|hint bld/pkgpool ${label}|
         " ${releaseFile}
+
+        echo ${newGitRevision} > ${workspace}/src/gitrevision
 
         export LFS_CI_LAST_EXECUTE_LOGFILE=$(createTempFile)
         try
         (
-            svnCommit -F gitlog ${releaseFile} ${workspace}/src/gitrevision
+            svnCommit -F ${gitLog} ${releaseFile} ${workspace}/src/gitrevision
         )
         catch ||
         (
@@ -278,16 +291,16 @@ usecase_PKGPOOL_UDPATE_DEPS() {
             fi
 
             for lineNumber in ${errorLineNumber} ; do
-                execute sed -i -e "${lineNumber}{s,%,o/o,g;s,^,SVN REJECTED: ,}" gitlog
+                execute sed -i -e "${lineNumber}{s,%,o/o,g;s,^,SVN REJECTED: ,}" ${gitLog}
             done
 
             warning "SVN rejected some of your commit notes for the release note."
             warning "If you need them in the release note please do another commit"
             warning "with corrected syntax."
             warning "We try to commit with corrected notes."
-            rawDebug gitlog
+            rawDebug ${gitLog}
 
-            svnCommit -F gitlog ${releaseFile} ${workspace}/src/gitrevision
+            svnCommit -F ${gitLog} ${releaseFile} ${workspace}/src/gitrevision
         ) || exit 1 # when catch part also fails, we exit the usecase
 
         info "update done for ${urlToUpdate}"

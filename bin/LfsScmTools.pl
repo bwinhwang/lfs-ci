@@ -89,10 +89,14 @@ sub readConfig {
                       (?<value>.*)
                       \s* 
                     /x;
+    my $includeRE = qr/ \s*
+                        include\s*(?<fileName>.*)
+                        \s*
+                      /x;
 
     my $data = [];
-    open FILE, $file or die "can not open file";
-    while ( my $line = <FILE> ) {
+    open my $fh, $file or die "can not open file \'$file\'";
+    while ( my $line = <$fh> ) {
         chomp( $line );
         next if $line =~ m/^#/;
         next if $line =~ m/^\s*$/;
@@ -103,9 +107,17 @@ sub readConfig {
                                 value => $+{value} || "",
                                 tags  => $+{tags}  || "",
                              }
+        } elsif ( $line =~ /^ $includeRE $/x ) {
+            my $fileName = $+{fileName};
+
+            if ( ! -e $fileName ) {
+                use File::Basename;
+                $fileName = sprintf( "%s/%s", dirname( $self->{file} ), $fileName );
+            }
+            push @{ $data }, @{ Store::Config::File->new( file => $fileName )->readConfig() || [] };
         }
     }
-    close FILE;
+    close $fh;
 
     return $data;
 }
@@ -2321,7 +2333,7 @@ sub prepare {
 
     foreach my $value ( @{ $opt_t } ) {
         if( $value =~ m/([\w_]+):(.*)/ ) {
-            Singleton::configStore( "cache" )->{data}->{ $1 } = $2;
+            Singleton::configStore( "cache", storeClass => "cache" )->{data}->{ $1 } = $2;
         }
     }
     return;
@@ -2820,8 +2832,8 @@ sub loadData {
     foreach my $store ( 
                         Store::Config::Environment->new(), 
                         Store::Config::Date->new(), 
-                        Singleton::configStore( "cache" ),
-                        Singleton::configStore( "file", configFileName => $fileName ),
+                        Singleton::configStore( "cache", storeClass => "cache" ),
+                        Singleton::configStore( "file",  storeClass => "file", configFileName => $fileName ),
                       ) {
         push @dataList, @{ $store->readConfig() };
     }
@@ -2894,13 +2906,13 @@ sub hint {
 }
 
 sub configStore {
-    my $storeName = shift;
-    my $param     = { @_ };
+    my $storeName  = shift;
+    my $param      = { @_ };
+    my $storeClass =  $param->{storeClass};
     if( not $obj->{config}{ $storeName } ) {
-        if( $storeName eq "cache" ) {
+        if( $storeClass eq "cache" ) {
             $obj->{config}{ $storeName } = Store::Config::Cache->new();
-        }
-        if( $storeName eq "file" ) {
+        } elsif( $storeClass eq "file" ) {
             my $fileName = $param->{configFileName};
             $obj->{config}{ $storeName } = Store::Config::File->new( file => $fileName ),
         }
