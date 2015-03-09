@@ -73,6 +73,13 @@ usecase_LFS_KNIFE_BUILD() {
     local currentDateTime=$(date +%Y%m%d-%H%M%S)
     local label=$(printf "KNIFE_%s.%s" ${KNIFE_LFS_BASELINE} ${currentDateTime})
 
+    export tagName=${baseLabel}
+    local svnReposUrl=$(getConfig LFS_PROD_svn_delivery_os_repos_url)
+    mustExistInSubversion ${svnReposUrl}/tags/${baseLabel}/doc/scripts/ revisions.txt
+    local revision=$(svnCat ${svnReposUrl}/tags/${baseLabel}/doc/scripts/revisions.txt | cut -d" " -f3 | sort -nu | tail -n 1)
+
+    info "using revision ${revision} instead of ${KNIFE_LFS_BASELINE}"
+
     specialBuildPreparation KNIFE ${label} ${KNIFE_LFS_BASELINE} "none" 
 
     return
@@ -90,12 +97,6 @@ usecase_LFS_KNIFE_BUILD_PLATFORM() {
 
     # create a workspace
     # TODO: demx2fk3 2015-02-26 do this in a different way or move it to a different place
-    debug "create own revision control file"
-    export tagName=${baseLabel}
-    local svnReposUrl=$(getConfig LFS_PROD_svn_delivery_os_repos_url)
-    mustExistInSubversion ${svnReposUrl}/tags/${baseLabel}/doc/scripts/ revisions.txt
-    local revision=$(svnCat ${svnReposUrl}/tags/${baseLabel}/doc/scripts/revisions.txt | cut -d" " -f3 | sort -nu | tail -n 1)
-    echo "src-knife ${svnReposUrl}/tags/${baseLabel} ${revision}" > ${WORKSPACE}/revisions.txt
 
     mustHaveLocationFromBaseline ${baseLabel}
     local location=${LFS_CI_GLOBAL_BRANCH_NAME}

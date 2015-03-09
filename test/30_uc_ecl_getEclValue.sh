@@ -111,7 +111,7 @@ test5() {
 
     local expect=$(createTempFile)
 cat <<EOF > ${expect}
-getConfig sdk3 ${WORKSPACE}/workspace/bld//bld-externalComponents-summary/externalComponents
+getConfig sdk3 -f ${WORKSPACE}/workspace/bld//bld-externalComponents-summary/externalComponents
 EOF
     assertEquals "$(cat ${expect})" "$(cat ${UT_MOCKED_COMMANDS})"
 

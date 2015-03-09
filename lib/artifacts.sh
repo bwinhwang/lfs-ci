@@ -157,17 +157,17 @@ copyArtifactsToWorkspace() {
     local file=""
     local downStreamprojectsFile=$(createTempFile)
     local serverPath=$(getConfig jenkinsMasterServerPath)
-    mustHaveValue "${serverPath}"
+    mustHaveValue "${serverPath}" "server path"
+    local server=$(getConfig jenkinsMasterServerHostName)
+    mustHaveValue "${server}" "server name"
 
     local workspace=$(getWorkspaceName)
     mustHaveWorkspaceName
 
-    # TODO: demx2fk3 2014-10-14 use getDownStreamProjectsData
-    # runOnMaster ${LFS_CI_ROOT}/bin/getDownStreamProjects -j ${jobName}     \
-    # TODO: demx2fk3 2015-01-23 KNIFE FIXME
-    runOnMaster /ps/lfs/ci/bin/getDownStreamProjects -j ${jobName}     \
-                                                     -b ${buildNumber} \
-                                                     -h ${serverPath} > ${downStreamprojectsFile}
+    execute -n -r 10 ssh ${server} \
+            /ps/lfs/ci/bin/getDownStreamProjects -j ${jobName}     \
+                                                 -b ${buildNumber} \
+                                                 -h ${serverPath} > ${downStreamprojectsFile}
 
     if [[ $? -ne 0 ]] ; then
         error "error in getDownStreamProjects for ${jobName} #${buildNumber}"

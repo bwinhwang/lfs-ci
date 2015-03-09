@@ -129,7 +129,7 @@ runOnMaster() {
     local command=$@
     local server=$(getConfig jenkinsMasterServerHostName)
     trace "running command on server: ssh ${server} ${command}"
-    ssh ${server} ${command}
+    execute -n -i -r 10 ssh ${server} ${command}
     return $?
 }
 
