@@ -82,7 +82,7 @@ sub readConfig {
                        \s*
                     /x;
     my $nameRE  = qr/ \s* 
-                      (?<name>[\w_]+) 
+                      (?<name>[\w_-]+) 
                       \s* 
                     /x;
     my $valueRE = qr/ \s* 

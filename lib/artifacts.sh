@@ -158,13 +158,13 @@ copyArtifactsToWorkspace() {
     local downStreamprojectsFile=$(createTempFile)
     local serverPath=$(getConfig jenkinsMasterServerPath)
     mustHaveValue "${serverPath}" "server path"
-    local server=$(getConfig enkinsMasterServerHostName)
+    local server=$(getConfig jenkinsMasterServerHostName)
     mustHaveValue "${server}" "server name"
 
     local workspace=$(getWorkspaceName)
     mustHaveWorkspaceName
 
-    execute -i -r 10 ssh ${server} \
+    execute -n -r 10 ssh ${server} \
             /ps/lfs/ci/bin/getDownStreamProjects -j ${jobName}     \
                                                  -b ${buildNumber} \
                                                  -h ${serverPath} > ${downStreamprojectsFile}
