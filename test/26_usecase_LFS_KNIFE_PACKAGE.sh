@@ -72,12 +72,7 @@ test1() {
 
 cat <<EOF > ${expect}
 ci_job_package 
-<<<<<<< HEAD
 copyAndExtractBuildArtifactsFromProject upstream_project 123 knife fsmci
-=======
-runOnMaster ls /build/home/psulm/LFS_internal/artifacts/upstream_project/123/save/
-execute mkdir -p ${WORKSPACE}/workspace/bld/
->>>>>>> git-master/master
 mustHaveNextCiLabelName 
 execute tar -cv --transform=s:^\./:os/: -C ${WORKSPACE}/workspace/upload/ -f ${WORKSPACE}/workspace/KNIFE_LABEL.tar .
 execute ${LFS_CI_ROOT}/bin/pigz ${WORKSPACE}/workspace/KNIFE_LABEL.tar
