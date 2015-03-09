@@ -223,8 +223,51 @@ copySysroot() {
             # TODO: demx2fk3 2014-04-07 expand the short parameter names
             execute tar -xzf ${sysroot_tgz} -C ${dst}
         else
-            error "missing ${sysroot_tgz}, else path not implemented"
-            exit 1
+            # This else part is only valid for releases less than FB1405 which uses TOOLSETS and only for i686-pc-linux-gnu and powerpc-e500-linux-gnu
+            # These old releases with TOOLSETS don't have sysroot.tgz
+            # porting from old CI bin/createBTS_D_SC_LFS_Pre line 405 ff to here"
+ 
+            local commonentsFile=${workspace}/bld/bld-externalComponents-summary/externalComponents
+            mustExistFile ${commonentsFile}
+                
+            info "evaluate used toolset"
+            local bldToolset=bld-toolset-${destinationsArchitecture}
+            local toolsetValue=$(getConfig $bldToolset -f ${commonentsFile})    
+            
+            info "fetching includes and libs for sysroot out of the toolset (${toolsetValue}) of platform (${platform}) for architecture (${destinationsArchitecture})"
+            local GLIBC=glibc-2.9
+            local TOOLSET_ROOT_DIR=/build/home/SC_LFS/toolsets/bld-toolset-${destinationsArchitecture}/${toolsetValue}/results/opt/${destinationsArchitecture}/${GLIBC}
+            execute mkdir -p "${dst}/usr/include"
+            execute mkdir -p "${dst}/usr/lib"
+            execute chmod -R 777 "${dst}/usr"
+            execute find ${TOOLSET_ROOT_DIR} -name include -exec cp -rf {} ${dst}/usr \; -exec chmod -R u+w ${dst}/usr \;
+            execute find ${TOOLSET_ROOT_DIR} -name lib     -exec cp -rf {} ${dst}/usr \; -exec chmod -R u+w ${dst}/usr \;
+
+            case ${platform} in
+                fcmd)
+                    # fetch DDAL include and libs out of DDAL.TGZ
+                    # bld-psl-fxxx/results/ifddal.tgz (ifddal header) to sys-root (only needed for i686 and e500, because here we have no rfs.init_sys-root)    
+                    execute tar xzvf ${workspace}/bld/bld-psl-fcmd/results/ifddal.tgz -C ${dst}/usr --strip-components=1
+                    
+                    # copy bld-psl-fcmd/results/sys-root into sys-root
+                    execute cp -rf ${workspace}/bld/bld-psl-fcmd/results/sys-root/* ${dst}/
+                    ;;
+                fspc)  
+                    execute tar xzvf ${workspace}/bld/bld-psl-fspc/results/ifddal.tgz -C ${dst}/usr/lib ddal/lib/libDDAL.so.fspc --strip-components=2
+
+                    execute tar xvzf ${workspace}/bld/bld-psl-fspc/results/rootfs_debug.tgz -C ${dst}/
+                    rm -f ${dst}/build.log
+
+                    # TODO: dems18x0 2015-03-09: fix old GCC path? But this fix path was also used in old CI Build-System
+                    local SYSROOT_DIR=/build/home/SC_LFS/packages/gcc/releases/i686-pc-linux-gnu/glibc-2.3/GCC-4.3.3_10500/usr/${destinationsArchitecture}/sys-root
+                    mustExistDirectory ${SYSROOT_DIR}
+                    execute cp -r $SYSROOT_DIR/usr/include/* ${dst}/usr/include/
+                    execute cp -r $SYSROOT_DIR/usr/lib/* ${dst}/usr/lib/
+                    execute cp -r $SYSROOT_DIR/lib ${dst}/lib/
+                    ;;
+                *)  ;;
+            esac
+
         fi
 
         # handling libddal stuff            
