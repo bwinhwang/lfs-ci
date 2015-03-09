@@ -115,6 +115,7 @@ lastExecuteLogFile() {
 #  @throws  raise an error, if command fails
 executeOnMaster() {
     local command=$@
+    # TODO: demx2fk3 2015-03-09 FIXME SSH_LOAD replace this with other server
     local server=$(getConfig jenkinsMasterServerHostName)
 
     execute -r 10 ssh ${server} ${command}
@@ -128,8 +129,8 @@ executeOnMaster() {
 runOnMaster() {
     local command=$@
     local server=$(getConfig jenkinsMasterServerHostName)
-    trace "running command on server: ssh ${server} ${command}"
-    ssh ${server} ${command}
+    mustHaveValue "${server}" "server name"
+    execute -n -i -r 10 ssh ${server} ${command}
     return $?
 }
 

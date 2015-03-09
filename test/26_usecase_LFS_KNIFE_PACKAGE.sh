@@ -33,6 +33,9 @@ oneTimeSetUp() {
     copyFileToArtifactDirectory() {
         mockedCommand "copyFileToArtifactDirectory $@"
     }
+    copyAndExtractBuildArtifactsFromProject() {
+        mockedCommand "copyAndExtractBuildArtifactsFromProject $@"
+    }
 
 }
 oneTimeTearDown() {
@@ -66,7 +69,7 @@ test1() {
 
 cat <<EOF > ${expect}
 ci_job_package 
-execute mkdir -p ${WORKSPACE}/workspace/bld/
+copyAndExtractBuildArtifactsFromProject upstream_project 123 knife fsmci
 mustHaveNextCiLabelName 
 execute tar -cv --transform=s:^\./:os/: -C ${WORKSPACE}/workspace/upload/ -f ${WORKSPACE}/workspace/KNIFE_LABEL.tar .
 execute ${LFS_CI_ROOT}/bin/pigz ${WORKSPACE}/workspace/KNIFE_LABEL.tar

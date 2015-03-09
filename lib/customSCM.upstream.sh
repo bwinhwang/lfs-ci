@@ -60,6 +60,7 @@ actionCheckout() {
     # create a new changelog file
     cat < /dev/null > "${CHANGELOG}"
 
+    # TODO: demx2fk3 2015-03-09 FIXME SSH_LOAD replace this with other server
     local server=$(getConfig jenkinsMasterServerHostName)
 
     debug "get the old upstream project data... from ${OLD_REVISION_STATE_FILE}"

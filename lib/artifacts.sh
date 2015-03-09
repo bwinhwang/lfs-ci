@@ -158,6 +158,7 @@ copyArtifactsToWorkspace() {
     local downStreamprojectsFile=$(createTempFile)
     local serverPath=$(getConfig jenkinsMasterServerPath)
     mustHaveValue "${serverPath}" "server path"
+    # TODO: demx2fk3 2015-03-09 FIXME SSH_LOAD replace this with other server
     local server=$(getConfig jenkinsMasterServerHostName)
     mustHaveValue "${server}" "server name"
 

@@ -37,6 +37,7 @@ actionCheckout() {
 
     local upstreamProjectName=${UPSTREAM_PROJECT:-${TESTED_BUILD_JOBNAME}}
     local upstreamBuildNumber=${UPSTREAM_BUILD:-${TESTED_BUILD_NUMBER}}
+    # TODO: demx2fk3 2015-03-09 FIXME SSH_LOAD replace this with other server
     local server=$(getConfig jenkinsMasterServerHostName)
     local buildDirectory=$(getBuildDirectoryOnMaster ${upstreamProjectName} ${upstreamBuildNumber})
 

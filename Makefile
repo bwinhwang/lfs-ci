@@ -1,9 +1,15 @@
-.PHONY: all test tags doc
+tests := $(shell ls test/*.sh)
+
+.PHONY: all test tags doc $(tests)
+
 all:
 	echo nothing todo...
 
-test:
-	LFS_CI_ROOT=${PWD} bin/unitTest.sh
+$(tests):
+	export LFS_CI_ROOT=${PWD} ; \
+	bash $@
+
+test: $(tests)
 
 tags:
 	ctags lib/*.sh bin/*.sh test/common.sh
@@ -11,3 +17,5 @@ tags:
 doc:
 	doxygen doc/Doxyfile
 	${MAKE} -C doc/latex
+
+

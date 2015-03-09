@@ -174,6 +174,7 @@ extractArtifactsOnReleaseShare() {
     requiredParameters LFS_PROD_RELEASE_PREVIOUS_TAG_NAME LFS_PROD_RELEASE_CURRENT_TAG_NAME
 
     local workspace=$(getWorkspaceName)
+    # TODO: demx2fk3 2015-03-09 FIXME SSH_LOAD replace this with other server
     local server=$(getConfig jenkinsMasterServerHostName)
     local resultBuildShare=$(getConfig LFS_PROD_UC_release_copy_build_to_share)
     local resultBuildShareLinuxKernel=$(getConfig LFS_PROD_UC_release_copy_build_to_share_linux_kernel)
@@ -244,6 +245,7 @@ extractArtifactsOnReleaseShareKernelSources() {
     mustHaveWorkspaceName
     mustHaveWritableWorkspace
 
+    # TODO: demx2fk3 2015-03-09 FIXME SSH_LOAD replace this with other server
     local server=$(getConfig jenkinsMasterServerHostName)
     mustHaveValue "${server}" "server name"
 
@@ -409,12 +411,14 @@ _createLfsOsReleaseNote() {
 
     # get the change log file from master
     local buildDirectory=$(getBuildDirectoryOnMaster ${JOB_NAME} ${BUILD_NUMBER})
+    # TODO: demx2fk3 2015-03-09 FIXME SSH_LOAD replace this with other server
     local serverName=$(getConfig jenkinsMasterServerHostName)
 
     info "creating release note for ${LFS_PROD_RELEASE_CURRENT_TAG_NAME}"
     
     execute mkdir -p ${workspace}/os
     mustExistDirectory ${workspace}/os
+    # TODO: demx2fk3 2015-03-09 FIXME SSH_LOAD replace this with other server
     execute -r 10 rsync -ae ssh ${serverName}:${buildDirectory}/changelog.xml ${workspace}/os/
     mustExistFile ${workspace}/os/changelog.xml
 

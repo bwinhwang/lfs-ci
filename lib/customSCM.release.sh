@@ -111,6 +111,7 @@ _createChangelog() {
     local upstreamBuildNumber=$2
     local changeLog=$3
 
+    # TODO: demx2fk3 2015-03-09 FIXME SSH_LOAD replace this with other server
     local server=$(getConfig jenkinsMasterServerHostName)
 
     local build=${upstreamBuildNumber}
