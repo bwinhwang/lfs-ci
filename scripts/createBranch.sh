@@ -56,10 +56,15 @@ __checkParams() {
     return 0
 }
 
+## @fn     __preparation()
+#  @brief  Create key=value pairs file which is used by Jenkins.
 __preparation(){
     JENKINS_API_TOKEN=$(getConfig jenkinsApiToken)
+    JENKINS_API_USER=$(getConfig jenkinsApiUser)
     mustHaveValue ${JENKINS_API_TOKEN} "Jenkins API token is missing."
+    mustHaveValue ${JENKINS_API_USER} "Jenkins API user is missing."
     echo JENKINS_API_TOKEN=${JENKINS_API_TOKEN} > ${VARS_FILE}
+    echo JENKINS_API_USER=${JENKINS_API_USER} >> ${VARS_FILE}
 }
 
 ## @fn      svnCopyBranch()
@@ -251,6 +256,10 @@ svnDummyCommit() {
     fi
 }
 
+## @fn      svnDummyCommitLRC
+#  @brief   perform a dummy commit in SVN for LRC
+#  @param   <newBranch> new branch name (without LRC_ prefix)
+#  @return  <none>
 svnDummyCommitLRC() {
     info "--------------------------------------------------------"
     info "SVN: dummy commit on $SRC_PROJECT for LRC"
@@ -274,6 +283,10 @@ svnDummyCommitLRC() {
     fi
 }
 
+## @fn      svnEditLocationsTxtFile()
+#  @brief   adapt locations.txt file
+#  @param   <newBranch> new branch name
+#  @return  <none>
 svnEditLocationsTxtFile() {
     # TODO: Create locations.txt from DB
     info "--------------------------------------------------------"
@@ -321,6 +334,11 @@ svnEditLocationsTxtFile() {
     svn commit -m "Added ${newBranch} to file ${locationsTxt}" ${locationsTxt}
 }
 
+## @fn      svnCopyDelivery()
+#  @brief   copy delivery repository.
+#  @param   <newBranch> new branch name
+#  @param   <srcBranch> source branch name
+#  @return  <none>
 svnCopyDelivery() {
     info "--------------------------------------------------------"
     info "SVN: copy delivery repository"
@@ -352,6 +370,11 @@ svnCopyDelivery() {
     fi
 }
 
+## @fn      svnCopyDeliveryLRC()
+#  @brief   copy delivery repository for LRC.
+#  @param   <newBranch> new branch name
+#  @param   <srcBranch> source branch name
+#  @return  <none>
 svnCopyDeliveryLRC() {
     info "--------------------------------------------------------"
     info "SVN: copy delivery repository for LRC"
@@ -383,6 +406,9 @@ svnCopyDeliveryLRC() {
     fi
 }
 
+## @fn      dbInsert
+#  @brief   insert new branch into lfs database
+#  @return  <none>
 dbInsert() {
     info "--------------------------------------------------------"
     info "DB: insert branch into lfspt database"
