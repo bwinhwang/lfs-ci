@@ -90,6 +90,8 @@ databaseEventTestStarted() {
 
 
 databaseAddNewCommits() {
+    requiredParameters JOB_NAME BUILD_NUMBER
+
     mustHaveNextCiLabelName
     local label=$(getNextCiLabelName)
     mustHaveValue ${label} "label name"
