@@ -33,6 +33,9 @@ oneTimeSetUp() {
     copyFileToArtifactDirectory() {
         mockedCommand "copyFileToArtifactDirectory $@"
     }
+    runOnMaster() {
+        mockedCommand "runOnMaster $@"
+    }
 
 }
 oneTimeTearDown() {
@@ -66,6 +69,7 @@ test1() {
 
 cat <<EOF > ${expect}
 ci_job_package 
+runOnMaster ls /build/home/psulm/LFS_internal/artifacts/upstream_project/123/save/
 execute mkdir -p ${WORKSPACE}/workspace/bld/
 mustHaveNextCiLabelName 
 execute tar -cv --transform=s:^\./:os/: -C ${WORKSPACE}/workspace/upload/ -f ${WORKSPACE}/workspace/KNIFE_LABEL.tar .
