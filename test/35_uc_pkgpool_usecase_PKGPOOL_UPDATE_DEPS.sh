@@ -109,7 +109,7 @@ test1() {
 
     mkdir -p ${WORKSPACE}/src
 
-    assertTrue "usecase_PKGPOOL_UDPATE_DEPS"
+    assertTrue "usecase_PKGPOOL_UPDATE_DEPS"
 
     local expect=$(createTempFile)
     cat <<EOF > ${expect}
@@ -149,8 +149,8 @@ test2() {
 
     mkdir -p ${WORKSPACE}/src
 
-    # usecase_PKGPOOL_UDPATE_DEPS
-    assertFalse "usecase_PKGPOOL_UDPATE_DEPS"
+    # usecase_PKGPOOL_UPDATE_DEPS
+    assertFalse "usecase_PKGPOOL_UPDATE_DEPS"
 
     local expect=$(createTempFile)
     cat <<EOF > ${expect}
@@ -191,7 +191,7 @@ test3() {
 
     mkdir -p ${WORKSPACE}/src
 
-    assertTrue "usecase_PKGPOOL_UDPATE_DEPS"
+    assertTrue "usecase_PKGPOOL_UPDATE_DEPS"
 
     local expect=$(createTempFile)
     cat <<EOF > ${expect}
@@ -230,7 +230,7 @@ test4() {
 
     mkdir -p ${WORKSPACE}/src
 
-    assertTrue "usecase_PKGPOOL_UDPATE_DEPS"
+    assertTrue "usecase_PKGPOOL_UPDATE_DEPS"
 
     local expect=$(createTempFile)
     cat <<EOF > ${expect}
@@ -274,7 +274,7 @@ test5() {
     mkdir -p ${WORKSPACE}/src
     echo "fail" > ${WORKSPACE}/svn_error_1
 
-    assertFalse "usecase_PKGPOOL_UDPATE_DEPS"
+    assertFalse "usecase_PKGPOOL_UPDATE_DEPS"
 
     local expect=$(createTempFile)
     cat <<EOF > ${expect}

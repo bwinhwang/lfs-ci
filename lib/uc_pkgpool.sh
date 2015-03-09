@@ -199,11 +199,11 @@ usecase_PKGPOOL_RELEASE() {
     return
 }
 
-## @fn      usecase_PKGPOOL_UDPATE_DEPS()
+## @fn      usecase_PKGPOOL_UPDATE_DEPS()
 #  @brief   run the usecase PKGPOOL_UPDATE_DEPS
 #  @param   <none>
 #  @return  <none>
-usecase_PKGPOOL_UDPATE_DEPS() {
+usecase_PKGPOOL_UPDATE_DEPS() {
     requiredParameters LFS_CI_ROOT UPSTREAM_PROJECT UPSTREAM_BUILD
 
     local workspace=$(getWorkspaceName)
