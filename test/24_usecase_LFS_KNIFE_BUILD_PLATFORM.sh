@@ -71,8 +71,6 @@ test1() {
 
     local expect=$(createTempFile)
 cat <<EOF > ${expect}
-mustExistInSubversion https://ulscmi.inside.nsn.com/isource/svnroot/BTS_D_SC_LFS_2015_01/os/tags/PS_LFS_OS_2015_01_0001/doc/scripts/ revisions.txt
-svnCat https://ulscmi.inside.nsn.com/isource/svnroot/BTS_D_SC_LFS_2015_01/os/tags/PS_LFS_OS_2015_01_0001/doc/scripts/revisions.txt
 execute rm -rf ${WORKSPACE}/revisions.txt
 createWorkspace 
 copyArtifactsToWorkspace upstream_project 123 fsmci
