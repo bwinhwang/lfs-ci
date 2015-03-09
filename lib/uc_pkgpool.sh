@@ -53,8 +53,7 @@ usecase_PKGPOOL_BUILD() {
     cd ${workspace}
 
     info "building pkgpool..."
-    # TODO: demx2fk3 2015-02-09 use different path for testing ci jobs
-    execute -l ${buildLogFile} ${gitWorkspace}/build -j100 --pkgpool=/build/home/psulm/SC_LFS/pkgpool --prepopulate --release="${releasePrefix}" 
+    execute -l ${buildLogFile} ${gitWorkspace}/build -j100 --prepopulate --release="${releasePrefix}" 
 
     local releaseTag="$(execute -n sed -ne 's,^release \([^ ]*\) complete,\1,p' ${buildLogFile})"
     mustHaveValue "${releaseTag}" "release tag"
@@ -145,7 +144,6 @@ usecase_PKGPOOL_RELEASE() {
     local oldLabel=$(cat ${workspace}/bld/bld-pkgpool-release/oldLabel)
     mustHaveValue "${oldLabel}" "old label"
 
-    # TODO: demx2fk3 2015-02-05 baselines list missing
     echo "<log/>" > ${workspace}/changelog.xml
     cd ${workspace}
     export productName=PKGPOOL
@@ -171,9 +169,8 @@ usecase_PKGPOOL_RELEASE() {
 
     local canCreateReleaseinWft=$(getConfig LFS_CI_uc_release_can_create_release_in_wft)
     if [[ ${canCreateReleaseinWft} ]] ; then
-        # createReleaseInWorkflowTool ${label} ${workspace}/releasenote.xml
-        # uploadToWorkflowTool        ${label} ${workspace}/releasenote.xml
-        true
+        createReleaseInWorkflowTool ${label} ${workspace}/releasenote.xml
+        uploadToWorkflowTool        ${label} ${workspace}/releasenote.xml
     else
         warning "creating release not in WFT is disabled via config"
     fi
@@ -202,11 +199,11 @@ usecase_PKGPOOL_RELEASE() {
     return
 }
 
-## @fn      usecase_PKGPOOL_UDPATE_DEPS()
+## @fn      usecase_PKGPOOL_UPDATE_DEPS()
 #  @brief   run the usecase PKGPOOL_UPDATE_DEPS
 #  @param   <none>
 #  @return  <none>
-usecase_PKGPOOL_UDPATE_DEPS() {
+usecase_PKGPOOL_UPDATE_DEPS() {
     requiredParameters LFS_CI_ROOT UPSTREAM_PROJECT UPSTREAM_BUILD
 
     local workspace=$(getWorkspaceName)
