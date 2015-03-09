@@ -189,24 +189,31 @@ _build_fsmddal_pdf() {
 
     setBuildDescription "${JOB_NAME}" "${BUILD_NUMBER}" "${newCiLabel}"
 
+    # lrc | fsm
+    local component=$(getConfig LFS_CI_uc_build_create_ddal_pdf_component)
+    mustHaveValue "${component}" "component"
+
     cd ${workspace}
-    execute build -C src-fsmifdd -L src-fsmifdd.log defcfg
+    execute build -C src-${component}ifdd -L src-${component}ifdd.log defcfg
 
     local tmpDir=$(createTempDirectory)
     execute mkdir -p ${tmpDir}/ddal/
+    # remark: this hiere is still fsmifddg!!!
     execute cp -r ${workspace}/bld/bld-fsmifdd-defcfg/results/include ${tmpDir}/ddal/
 
+    # remark: the target is also expected as fsmifdd.tgz
     execute tar -C   ${tmpDir} \
-                -czf ${workspace}/src-fsmpsl/src/fsmddal.d/fsmifdd.tgz \
+                -czf ${workspace}/src-${component}psl/src/${component}ddal.d/fsmifdd.tgz \
                 ddal
 
-    echo ${label} > ${workspace}/src-fsmpsl/src/fsmddal.d/label
-    execute make -C ${workspace}/src-fsmpsl/src/fsmddal.d/ LABEL=${label}
+    echo ${label} > ${workspace}/src-${component}psl/src/${component}ddal.d/label
+    execute make -C ${workspace}/src-${component}psl/src/${component}ddal.d/ LABEL=${label}
 
-    # fixme
-    local destinationDir=${workspace}/bld/bld-fsmddal-doc/results/doc/
+
+    # remark: the result file is FSMDDAL.pdf
+    local destinationDir=${workspace}/bld/bld-${component}ddal-doc/results/doc/
     execute mkdir -p ${destinationDir}
-    execute cp ${workspace}/src-fsmpsl/src/fsmddal.d/FSMDDAL.pdf ${destinationDir}
+    execute cp ${workspace}/src-${component}psl/src/${component}ddal.d/FSMDDAL.pdf ${destinationDir}
     execute rm -rf ${workspace}/bld/bld-fsmifdd-defcfg
 
     return
