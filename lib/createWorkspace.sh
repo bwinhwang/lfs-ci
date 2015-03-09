@@ -134,7 +134,7 @@ createWorkspace() {
 
     local location=$(getLocationName)
     mustHaveLocationName
-    info "location is ${location} / ${LFS_CI_GLOBAL_BRANCH_NAME}"
+    info "location is ${location} / ${LFS_CI_GLOBAL_BRANCH_NAME:-none global location}"
 
     local productName=$(getProductNameFromJobName)
     mustHaveValue "${productName}" "product name"

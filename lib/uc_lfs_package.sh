@@ -188,7 +188,7 @@ copySysroot() {
         local dst=${workspace}/upload/sys-root/${destinationsArchitecture}
         execute mkdir -p ${dst}/doc
 
-        for file in ${workspace}/bld/bld-fsmddal-doc/results/doc/{FSM,}DDAL.pdf ; do
+        for file in ${workspace}/bld/bld-*ddal-doc/results/doc/{FSM,}DDAL.pdf ; do
             if [[ -f ${file} ]] ; then
                 info "copy ${file} to documentation directory in sysroot"
                 execute cp ${file} ${dst}/doc/
