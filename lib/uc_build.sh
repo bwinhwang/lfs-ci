@@ -194,7 +194,12 @@ _build_fsmddal_pdf() {
     mustHaveValue "${component}" "component"
 
     cd ${workspace}
-    execute build -C src-${component}ifdd -L src-${component}ifdd.log defcfg
+    # TODO: demx2fk3 2015-03-09 FIXME
+    if [[ ${component} = lrc ]] ; then
+        execute build -C src-ifdd    -L src-ifdd.log defcfg
+    else
+        execute build -C src-fsmifdd -L src-fsmifdd.log defcfg
+    fi
 
     local tmpDir=$(createTempDirectory)
     execute mkdir -p ${tmpDir}/ddal/
