@@ -169,9 +169,8 @@ usecase_PKGPOOL_RELEASE() {
 
     local canCreateReleaseinWft=$(getConfig LFS_CI_uc_release_can_create_release_in_wft)
     if [[ ${canCreateReleaseinWft} ]] ; then
-        # createReleaseInWorkflowTool ${label} ${workspace}/releasenote.xml
-        # uploadToWorkflowTool        ${label} ${workspace}/releasenote.xml
-        true
+        createReleaseInWorkflowTool ${label} ${workspace}/releasenote.xml
+        uploadToWorkflowTool        ${label} ${workspace}/releasenote.xml
     else
         warning "creating release not in WFT is disabled via config"
     fi
