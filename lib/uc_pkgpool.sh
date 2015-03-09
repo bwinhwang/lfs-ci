@@ -55,6 +55,8 @@ usecase_PKGPOOL_BUILD() {
     info "building pkgpool..."
     execute -l ${buildLogFile} ${gitWorkspace}/build -j100 --prepopulate --release="${releasePrefix}" 
 
+    # TODO: demx2fk3 2015-03-09 add logfiles to artifacts
+
     local releaseTag="$(execute -n sed -ne 's,^release \([^ ]*\) complete,\1,p' ${buildLogFile})"
     mustHaveValue "${releaseTag}" "release tag"
 
