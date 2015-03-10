@@ -266,9 +266,9 @@ copySysroot() {
                     execute cp -r $SYSROOT_DIR/lib ${dst}/lib/
                     ;;
                 qemu)
-                    execute tar xzvf ${workspace}/bld/bld-psl-qemu/results/ifddal.tgz -C ${dst}/usr --strip-components=1
+                    execute tar xzvf ${workspace}/bld/bld-ddal-qemu_i386/results/include/ifddal.tgz -C ${dst}/usr --strip-components=1
 
-                    execute tar xvzf ${workspace}/bld/bld-psl-qemu/results/rootfs_debug.tgz -C ${dst}/
+                    execute tar xvzf ${workspace}/bld/bld-psl-qemu_i386/results/rootfs_debug.tgz -C ${dst}/
                     rm -f ${dst}/build.log
 
                     # TODO: dems18x0 2015-03-09: fix old GCC path? But this fix path was also used in old CI Build-System
