@@ -1,12 +1,13 @@
-package Nokia::main; 
-## @fn    main
-#  @brief the main programm and dispatcher to the command objects.
+#!/usr/bin/env perl
 
 use strict;
 use warnings;
+
 use Data::Dumper;
 use File::Basename;
 use Log::Log4perl qw( :easy );
+
+use lib sprintf( "%s/lib/perl/", $ENV{LFS_CI_ROOT} || "." );
 
 my %l4p_config = (
     'log4perl.category'                                  => 'TRACE, Logfile',
@@ -48,7 +49,10 @@ if( not exists $commands{$program} ) {
     die "command $program not defined";
 }
 
-require $commands{$program};
+eval "use $commands{$program};";
+if( @_ ) {
+    die "@_";
+}
 my $command = $commands{$program}->new();
 $command->prepare( @ARGV );
 $command->execute() and die "can not execute $program";

@@ -5,8 +5,6 @@ package Nokia::Command;
 use strict;
 use warnings;
 
-use Nokia::Object;
-
 use parent qw( Nokia::Object );
 
 sub prepare {

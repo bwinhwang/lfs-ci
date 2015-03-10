@@ -6,6 +6,11 @@ use warnings;
 
 use Log::Log4perl qw( :easy );
 
+use Nokia::Config;
+use Nokia::Store::Config::Cache;
+use Nokia::Store::Config::File;
+use Nokia::Hints;
+
 my $obj = bless {}, __PACKAGE__;
 
 ## @fn      svn()

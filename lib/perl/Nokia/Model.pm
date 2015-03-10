@@ -5,9 +5,6 @@ package Nokia::Model;
 use strict;
 use warnings;
 
-use Nokia::Object;
-
 use parent qw( Nokia::Object );
-
 
 1;

@@ -1,13 +1,12 @@
-package Nokia::Command::GetDependencies; # {{{
+package Nokia::Command::GetDependencies; 
 use strict;
 use warnings;
 
-use Nokia::Command;
+use Data::Dumper;
+
 use Nokia::Usecase::GetLocation;
 
 use parent qw( Nokia::Command );
-
-use Data::Dumper;
 
 sub prepare {
     my $self = shift;

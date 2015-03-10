@@ -3,12 +3,16 @@ package Nokia::Config;
 use warnings;
 use strict;
 
-use Nokia::Object;
-
-use parent qw( Nokia::Object );
-
 use Data::Dumper;
 use Log::Log4perl qw( :easy );
+
+use Nokia::Model::Config;
+use Nokia::Store::Config::Environment;
+use Nokia::Store::Config::File;
+use Nokia::Store::Config::Cache;
+use Nokia::Store::Config::Date;
+
+use parent qw( Nokia::Object );
 
 ## @fn      init()
 #  @brief   initialize the config handler object
@@ -92,7 +96,7 @@ sub loadData {
                                                 operator => "eq"
                                               );
             } elsif( $tag =~ m/(\w+)~([^:\s]+)/ ) {
-                push @tags, ModelNokia::::Config->new( 
+                push @tags, Nokia::Model::Config->new( 
                                                 handler  => $self,
                                                 name     => $1, 
                                                 value    => $2, 

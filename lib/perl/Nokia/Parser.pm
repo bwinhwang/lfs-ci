@@ -5,8 +5,6 @@ package Nokia::Parser;
 use strict;
 use warnings;
 
-use Nokia::Object;
-
 use parent qw( Nokia::Object );
 
 ## @fn     fileName()

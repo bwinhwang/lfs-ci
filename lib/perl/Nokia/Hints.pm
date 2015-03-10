@@ -9,8 +9,6 @@ use warnings;
 
 use Data::Dumper;
 
-use Nokia::Object;
-
 use parent qw( Nokia::Object );
 
 ## @fn      addHint( %param )

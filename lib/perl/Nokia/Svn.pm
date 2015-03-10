@@ -4,13 +4,11 @@ package Nokia::Svn;
 use strict;
 use warnings;
 
-use Nokia::Object;
-
-use parent qw( Nokia::Object );
-
 use XML::Simple;
 use Data::Dumper;
 use Log::Log4perl qw( :easy );
+
+use parent qw( Nokia::Object );
 
 ## @fn     init()
 #  @brief  initialize the Svn Object with data
