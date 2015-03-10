@@ -274,7 +274,7 @@ test5() {
     mkdir -p ${WORKSPACE}/src
     echo "fail" > ${WORKSPACE}/svn_error_1
 
-    assertFalse "usecase_PKGPOOL_UPDATE_DEPS"
+    assertTrue "usecase_PKGPOOL_UPDATE_DEPS"
 
     local expect=$(createTempFile)
     cat <<EOF > ${expect}
