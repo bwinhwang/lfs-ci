@@ -265,6 +265,19 @@ copySysroot() {
                     execute cp -r $SYSROOT_DIR/usr/lib/* ${dst}/usr/lib/
                     execute cp -r $SYSROOT_DIR/lib ${dst}/lib/
                     ;;
+                qemu)
+                    execute tar xzvf ${workspace}/bld/bld-ddal-qemu_i386/results/include/ifddal.tgz -C ${dst}/usr --strip-components=1
+
+                    execute tar xvzf ${workspace}/bld/bld-psl-qemu_i386/results/rootfs_debug.tgz -C ${dst}/
+                    rm -f ${dst}/build.log
+
+                    # TODO: dems18x0 2015-03-09: fix old GCC path? But this fix path was also used in old CI Build-System
+                    local SYSROOT_DIR=/build/home/SC_LFS/packages/gcc/releases/i686-pc-linux-gnu/glibc-2.3/GCC-4.3.3_10500/usr/${destinationsArchitecture}/sys-root
+                    mustExistDirectory ${SYSROOT_DIR}
+                    execute cp -r $SYSROOT_DIR/usr/include/* ${dst}/usr/include/
+                    execute cp -r $SYSROOT_DIR/usr/lib/* ${dst}/usr/lib/
+                    execute cp -r $SYSROOT_DIR/lib ${dst}/lib/
+                    ;;
                 *)  ;;
             esac
 
