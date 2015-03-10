@@ -40,7 +40,10 @@ exit_handler() {
 	[ ${rc} -ne 0 ] && trace "$(_stackTrace)"
 
 	for m in ${CI_EXIT_HANDLER_METHODS}; do
-		${m} ${rc}
+        # remark: it is possible to give parameters to the exit funktion
+        # this parameters are separated via :
+        # e.g.: exitFuntion:parameter1:parameter2
+		${m//:/} ${rc}
 	done
 
 	exit ${rc:-3}

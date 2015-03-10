@@ -123,4 +123,26 @@ unreserveTarget() {
     return
 }
 
+mustHaveReservedTarget() {
+    requiredParameters JOB_NAME
+
+    local isBookingEnabled=$(getConfig LFS_uc_test_is_booking_enabled)
+    local targetName=""
+    if [[ ${isBookingEnabled} ]] ; then
+        # new method via booking from database
+        local targetFeatures="$(getConfig LFS_uc_test_booking_target_features)"
+        debug "requesting target with features ${targetFeatures}"
+
+        reserveTargetByFeature ${targetFeatures}
+        targetName=$(reservedTarget)
+
+        exit_add unreserveTarget
+    else
+        # old legacy method - from job name            
+        targetName=$(sed "s/^Test-//" <<< ${JOB_NAME})
+    fi
+    mustHaveValue "${targetName}" "target name"
+
+    return
+}
 

@@ -18,41 +18,29 @@ ci_job_test_on_target() {
 
     setBuildDescription ${JOB_NAME} ${BUILD_NUMBER} ${LABEL}
 
-    local isBookingEnabled=$(getConfig LFS_uc_test_is_booking_enabled)
-    local targetName=""
-    if [[ ${isBookingEnabled} ]] ; then
-        # new method via booking from database
-        local targetFeatures="$(getConfig LFS_uc_test_booking_target_features)"
-        debug "requesting target with features ${targetFeatures}"
-
-        reserveTargetByFeature ${targetFeatures}
-        targetName=$(reservedTarget)
-
-        exit_add unreserveTarget
-    else
-        # old legacy method - from job name            
-        targetName=$(_reserveTarget)
-    fi
-    mustHaveValue "${targetName}" "target name"
-
     local workspace=$(getWorkspaceName)
     mustHaveCleanWorkspace
 
     local branchName=$(getLocationName ${UPSTREAM_PROJECT})
     mustHaveValue "${branchName}" "branch name"
 
-    info "create workspace for testing on ${branchName}"
     # TODO: demx2fk3 2015-02-13 we are using the wrong revision to checkout src-test
+    info "create workspace for testing on ${branchName}"
     createBasicWorkspace -l ${branchName} src-test
 
-    export testTargetName=${targetName}
-    info "target is testTargetName : ${testTargetName}"
-    local testType=$(getConfig LFS_CI_uc_test_making_test_type)
+    copyAndExtractBuildArtifactsFromProject ${UPSTREAM_PROJECT} ${UPSTREAM_BUILD} "fsmci"
 
-    databaseEventSubTestStarted ${LABEL} ${testTargetName}
+    mustHaveReservedTarget
+    local targetName=$(_reserveTarget)
+
+    local testType=$(getConfig LFS_CI_uc_test_making_test_type -t testTargetName:${targetName})
+    mustHaveValue "${testType}" "test type"
+
+    databaseEventSubTestStarted 
+    exit_add _exitHandlerDatabaseEventsSubTestFailed
 
     for type in $(getConfig LFS_CI_uc_test_making_test_type) ; do
-        info "running test type ${type} on target ${testTargetName}"
+        info "running test type ${type} on target ${targetName}"
         case ${testType} in
             checkUname)        makingTest_checkUname ;;
             testProductionLRC) makingTest_testLRC ;;
@@ -62,28 +50,12 @@ ci_job_test_on_target() {
         esac
     done
 
-    databaseEventSubTestFinished ${LABEL} ${testTargetName}
-
     info "testing done."
     return
 }
 
-
-## @fn      reserveTarget
-#  @brief   make a reserveration from TAToo to get a target
-#  @param   <none>
-#  @return  name of the target
-reserveTarget() {
-
-    requiredParameters JOB_NAME
-
-    local targetName=$(sed "s/^Test-//" <<< ${JOB_NAME})
-    mustHaveValue ${targetName} "target name"
-    info "testing on target ${targetName}"
-
-    echo ${targetName}
-   
-    return
+_exitHandlerDatabaseEventsSubTestFailed() {
+    [[ ${1} -gt 0 ]] && databaseEventSubTestFailed 
 }
 
 ## @fn      uc_job_test_on_target_archive_logs()

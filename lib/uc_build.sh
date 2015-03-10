@@ -130,9 +130,6 @@ ci_job_build_version() {
         fi
     fi
 
-    # for the metrics database, we are installing a own exit handler to record the end of this job
-    databaseEventSubBuildStarted
-    exit_add _recordBuildEndEvent
 
     info "workspace is ${workspace}"
 
@@ -156,6 +153,7 @@ ci_job_build_version() {
     local label=$(${LFS_CI_ROOT}/bin/getNewTagName -o "${oldLabel}" -r "${regex}" )
     mustHaveValue "${label}" "next release label name"
 
+
     info "new version is ${label}"
     setBuildDescription "${JOB_NAME}" "${BUILD_NUMBER}" "${label}"
 
@@ -163,6 +161,10 @@ ci_job_build_version() {
     execute mkdir -p ${workspace}/bld/bld-fsmci-summary
     echo ${label}    > ${workspace}/bld/bld-fsmci-summary/label
     echo ${oldLabel} > ${workspace}/bld/bld-fsmci-summary/oldLabel
+
+    # for the metrics database, we are installing a own exit handler to record the end of this job
+    databaseEventBuildStarted
+    exit_add _recordBuildEndEvent
 
     debug "writing new label file in ${jobDirectory}/label"
     executeOnMaster "echo ${label} > ${jobDirectory}/label"
@@ -172,7 +174,6 @@ ci_job_build_version() {
 
     setBuildDescription "${JOB_NAME}" "${BUILD_NUMBER}" "${label}"
 
-    databaseEventBuildStarted
     databaseAddNewCommits
 
     return

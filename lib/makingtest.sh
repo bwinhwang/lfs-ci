@@ -456,8 +456,8 @@ makingTest_testsWithoutTarget() {
 #  @param   <none>
 #  @return  name of the target
 _reserveTarget() {
-
     requiredParameters JOB_NAME
+
     local isBookingEnabled=$(getConfig LFS_uc_test_is_booking_enabled)
     local targetName=""
 

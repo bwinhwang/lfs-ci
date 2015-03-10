@@ -125,6 +125,9 @@ sub newBuildEvent {
     } elsif ( $action eq "build_failed"  ) {
         $method = "build_failed( ?, ?, ?, ? )";
         $data   = [ $baselineName, $comment, $jobName, $buildNumber ];
+    } elsif ( $action eq "build_finished"  ) {
+        $method = "build_finished( ?, ?, ?, ? )";
+        $data   = [ $baselineName, $comment, $jobName, $buildNumber ];
     } elsif ( $action eq "subbuild_started"  ) {
         $method = "subbuild_started( ?, ?, ?, ?, ?, ? )";
         $data   = [ $baselineName, $comment, $target, $subTarget, $jobName, $buildNumber ];
@@ -136,6 +139,12 @@ sub newBuildEvent {
         $data   = [ $baselineName, $comment, $target, $subTarget, $jobName, $buildNumber ];
     } elsif ( $action eq "test_started"      ) {
         $method = "test_started( ?, ?, ?, ? )";
+        $data   = [ $baselineName, $comment, $target, $subTarget, $jobName, $buildNumber ];
+    } elsif ( $action eq "test_failed"      ) {
+        $method = "test_failed( ?, ?, ?, ? )";
+        $data   = [ $baselineName, $comment, $target, $subTarget, $jobName, $buildNumber ];
+    } elsif ( $action eq "test_finished"      ) {
+        $method = "test_finished( ?, ?, ?, ? )";
         $data   = [ $baselineName, $comment, $target, $subTarget, $jobName, $buildNumber ];
     } elsif ( $action eq "subtest_started"   ) {
         $method = "subtest_started( ?, ?, ?, ?, ?, ? )";
@@ -154,6 +163,9 @@ sub newBuildEvent {
         $data   = [ $baselineName, $comment, $jobName, $buildNumber ];
     } elsif ( $action eq "package_finished"  ) {
         $method = "package_finished( ?, ?, ?, ? )";
+        $data   = [ $baselineName, $comment, $jobName, $buildNumber ];
+    } elsif ( $action eq "package_failed"   ) {
+        $method = "package_failed( ?, ?, ?, ? )";
         $data   = [ $baselineName, $comment, $jobName, $buildNumber ];
     } elsif ( $action eq "release_started"   ) {
         $method = "release_started( ?, ?, ?, ? )";

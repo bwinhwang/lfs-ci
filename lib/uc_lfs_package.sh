@@ -32,6 +32,9 @@ ci_job_package() {
     local requiredArtifacts=$(getConfig LFS_CI_UC_package_required_artifacts)
     copyArtifactsToWorkspace "${UPSTREAM_PROJECT}" "${UPSTREAM_BUILD}" "${requiredArtifacts}"
 
+    databaseEventPackageStarted
+    exit_add _exitHandlerDatabaseEventPackageFinishedOrFailed
+
     mustHaveNextCiLabelName
     local label=$(getNextReleaseLabel)
     local location=$(getLocationName)
@@ -61,6 +64,14 @@ ci_job_package() {
     copyReleaseCandidateToShare
 
     return
+}
+
+_exitHandlerDatabaseEventPackageFinishedOrFailed() {
+    if [[ ${1} -gt 0 ]] ; then
+        databaseEventPackageFailed
+    else
+        databaseEventPackageFinished
+    fi
 }
 
 ## @fn      copyGenericBuildResults()

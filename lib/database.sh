@@ -68,24 +68,55 @@ databaseEventReleaseFinished() {
     return
 }
 
+databaseEventTestStarted() {
+    _storeEvent test_started
+}
+databaseEventTestFailed() {
+    _storeEvent test_failed
+}
+databaseEventPackageStarted() {
+    _storeEvent package_started
+}
+databaseEventPackageFinished() {
+    _storeEvent package_finished
+}
+databaseEventPackageFailed() {
+    _storeEvent package_failed
+}
+
 databaseEventSubTestStarted() {
-    local targetName=$1
-    local targetType=$2
+    # target type: FSM-r2, FSM-r3, FSM-r4, LRC, host
+    local targetType=$(getConfig LFS_CI_uc_test_target_type_mapping)
+    mustHaveValue "${targetType}" "target type"
+
+    local targetName=$(_reserveTarget)
+    mustHaveValue "${targetName}" "target name"
+
     _storeEvent "subtest_started" ${targetName} ${targetType}
     return
 }
 
 
 databaseEventSubTestFinished() {
-    local targetName=$1
-    local targetTYpe=$2
+    # target type: FSM-r2, FSM-r3, FSM-r4, LRC, host
+    local targetType=$(getConfig LFS_CI_uc_test_target_type_mapping)
+    mustHaveValue "${targetType}" "target type"
+
+    local targetName=$(_reserveTarget)
+    mustHaveValue "${targetName}" "target name"
+
     _storeEvent "subtest_finished" ${targetName} ${targetType}
     return
 }
 
 databaseEventSubTestFailed() {
-    local targetName=$1
-    local targetTYpe=$2
+    # target type: FSM-r2, FSM-r3, FSM-r4, LRC, host
+    local targetType=$(getConfig LFS_CI_uc_test_target_type_mapping)
+    mustHaveValue "${targetType}" "target type"
+
+    local targetName=$(_reserveTarget)
+    mustHaveValue "${targetName}" "target name"
+
     _storeEvent "subtest_failed" ${targetName} ${targetType}
     return
 }

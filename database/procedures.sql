@@ -75,6 +75,20 @@ END //
 DELIMITER ;
 
 -- }}}
+-- {{{ build_finished
+
+DROP PROCEDURE IF EXISTS build_finished
+DELIMITER //
+CREATE PROCEDURE build_finished( IN in_build_name VARCHAR(128), 
+                               IN in_comment TEXT, 
+                               IN in_job_name VARCHAR(128), 
+                               IN in_build_number INT )
+BEGIN
+    CALL new_build_event( in_build_name, 'build_finished', in_comment,  in_job_name, in_build_number );
+END //
+DELIMITER ;
+
+-- }}}
 -- {{{ subbuild_started
 
 DROP PROCEDURE IF EXISTS subbuild_started;
@@ -136,6 +150,34 @@ CREATE PROCEDURE test_started( IN in_build_name VARCHAR(128),
                                IN in_build_number INT )
 BEGIN
     CALL new_build_event( in_build_name, 'test_started', in_comment, in_job_name, in_build_number );
+END //
+DELIMITER ;
+
+-- }}}
+-- {{{ test_failed
+
+DROP PROCEDURE IF EXISTS test_failed;
+DELIMITER //
+CREATE PROCEDURE test_failed( IN in_build_name VARCHAR(128), 
+                               IN in_comment TEXT,
+                               IN in_job_name VARCHAR(128), 
+                               IN in_build_number INT )
+BEGIN
+    CALL new_build_event( in_build_name, 'test_failed', in_comment, in_job_name, in_build_number );
+END //
+DELIMITER ;
+
+-- }}}
+-- {{{ test_finished
+
+DROP PROCEDURE IF EXISTS test_finished;
+DELIMITER //
+CREATE PROCEDURE test_finished( IN in_build_name VARCHAR(128), 
+                               IN in_comment TEXT,
+                               IN in_job_name VARCHAR(128), 
+                               IN in_build_number INT )
+BEGIN
+    CALL new_build_event( in_build_name, 'test_finished', in_comment, in_job_name, in_build_number );
 END //
 DELIMITER ;
 
