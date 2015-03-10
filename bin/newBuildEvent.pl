@@ -111,40 +111,64 @@ sub newBuildEvent {
     my $branchName   = $param->{branchName};
     my $revision     = $param->{revision};
     my $comment      = $param->{comment};
+    my $jobName      = $param->{jobName};
+    my $buildNumber  = $param->{buildNumber};
+    my $target       = $param->{target};
+    my $subTarget    = $param->{subTarget};
     my $action       = $param->{action};
     my $method       = "";
+    my $data         = [];
 
     if( $action eq "build_started" ) {
-        $method = "build_started( ?, ?, ?, ? )";
-    } elsif ( $action eq "build_finished" ) {
-        $method = "build_finished( ?, ? )",
-    } elsif ( $action eq "build_failed" ) {
-        $method = "build_failed( ?, ? )",
-    } elsif ( $action eq "release_started" ) {
-        $method = "release_started( ?, ? )",
-    } elsif ( $action eq "release_finished" ) {
-        $method = "release_finished( ?, ? )",
-    } elsif ( $action eq "test_started" ) {
-        $method = "test_started( ?, ? )",
-    } elsif ( $action eq "test_finished" ) {
-        $method = "test_finished( ?, ? )",
-    } elsif ( $action eq "test_unstable" ) {
-        $method = "test_unstable( ?, ? )",
-    } elsif ( $action eq "test_failed" ) {
-        $method = "test_failed( ?, ? )",
+        $method = "build_started( ?, ?, ?, ?, ?, ? )";
+        $data   = [ $baselineName, $comment, $branchName, $revision, $jobName, $buildNumber ];
+    } elsif ( $action eq "build_failed"  ) {
+        $method = "build_failed( ?, ?, ?, ? )";
+        $data   = [ $baselineName, $comment, $jobName, $buildNumber ];
+    } elsif ( $action eq "subbuild_started"  ) {
+        $method = "subbuild_started( ?, ?, ?, ?, ?, ? )";
+        $data   = [ $baselineName, $comment, $target, $subTarget, $jobName, $buildNumber ];
+    } elsif ( $action eq "subbuild_finished" ) {
+        $method = "subbuild_finished( ?, ?, ?, ?, ?, ? )";
+        $data   = [ $baselineName, $comment, $target, $subTarget, $jobName, $buildNumber ];
+    } elsif ( $action eq "subbuild_failed"   ) {
+        $method = "subbuild_failed( ?, ?, ?, ?, ?, ? )";
+        $data   = [ $baselineName, $comment, $target, $subTarget, $jobName, $buildNumber ];
+    } elsif ( $action eq "test_started"      ) {
+        $method = "test_started( ?, ?, ?, ? )";
+        $data   = [ $baselineName, $comment, $target, $subTarget, $jobName, $buildNumber ];
+    } elsif ( $action eq "subtest_started"   ) {
+        $method = "subtest_started( ?, ?, ?, ?, ?, ? )";
+        $data   = [ $baselineName, $comment, $target, $subTarget, $jobName, $buildNumber ];
+    } elsif ( $action eq "subtest_finished"  ) {
+        $method = "subtest_finished( ?, ?, ?, ?, ?, ? )";
+        $data   = [ $baselineName, $comment, $target, $subTarget, $jobName, $buildNumber ];
+    } elsif ( $action eq "subtest_unstable"  ) {
+        $method = "subtest_unstable( ?, ?, ?, ?, ?, ? )";
+        $data   = [ $baselineName, $comment, $target, $subTarget, $jobName, $buildNumber ];
+    } elsif ( $action eq "subtest_failed"    ) {
+        $method = "subtest_failed( ?, ?, ?, ?, ?, ? )";
+        $data   = [ $baselineName, $comment, $target, $subTarget, $jobName, $buildNumber ];
+    } elsif ( $action eq "package_started"   ) {
+        $method = "package_started( ?, ?, ?, ? )";
+        $data   = [ $baselineName, $comment, $jobName, $buildNumber ];
+    } elsif ( $action eq "package_finished"  ) {
+        $method = "package_finished( ?, ?, ?, ? )";
+        $data   = [ $baselineName, $comment, $jobName, $buildNumber ];
+    } elsif ( $action eq "release_started"   ) {
+        $method = "release_started( ?, ?, ?, ? )";
+        $data   = [ $baselineName, $comment, $jobName, $buildNumber ];
+    } elsif ( $action eq "release_finished"  ) {
+        $method = "release_finished( ?, ?, ?, ? )";
+        $data   = [ $baselineName, $comment, $jobName, $buildNumber ];
     }
 
     my $sth = $self->prepare(
         "call $method"
     );
 
-    if( $action eq "build_started" ) {
-        $sth->execute( $baselineName, $comment, $branchName, $revision )
-            or LOGDIE sprintf( "can not insert data\n%s\n", $sth->errstr() );
-    } else {
-        $sth->execute( $baselineName, $comment )
-            or LOGDIE sprintf( "can not insert data\n%s\n", $sth->errstr() );
-    }
+    $sth->execute( @{ $data } )
+        or LOGDIE sprintf( "can not insert data\n%s\n", $sth->errstr() );
 
     return;
 }
@@ -319,6 +343,8 @@ my $opt_testSuiteName = "";
 my $opt_targetName    = "";
 my $opt_targetType    = "";
 my $opt_changelog     = "";
+my $opt_jobName       = "";
+my $opt_buildNumber   = "";
 
 GetOptions( 'buildName=s',     \$opt_name,
             'branchName=s',    \$opt_branch,
@@ -330,6 +356,8 @@ GetOptions( 'buildName=s',     \$opt_name,
             'testSuiteName=s', \$opt_testSuiteName,
             'targetName=s',    \$opt_targetName,
             'targetType=s',    \$opt_targetType,
+            'jobName=s',       \$opt_jobName,
+            'buildNumber=s',   \$opt_buildNumber,
         ) or LOGDIE "invalid option";
 
 if( not $opt_name or not $opt_action ) {
@@ -375,7 +403,11 @@ if( $opt_action eq "new_test_result" ) {
                                              release => Model::Build->new( baselineName => $opt_name,
                                                                            branchName   => $opt_branch,
                                                                            revision     => $opt_revision,
-                                                                           comment      => $opt_comment ) );
+                                                                           comment      => $opt_comment,
+                                                                           target       => $opt_targetName,
+                                                                           subTarget    => $opt_targetType,
+                                                                           jobName      => $opt_jobName,
+                                                                           buildNumber  => $opt_buildNumber, ) );
 }
 
 exit 0;

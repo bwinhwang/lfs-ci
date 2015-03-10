@@ -55,8 +55,22 @@ CREATE PROCEDURE build_started( IN in_build_name VARCHAR(128),
                                 IN in_job_name VARCHAR(128), 
                                 IN in_build_number INT )
 BEGIN
-   CALL new_build( in_build_name, in_branch_name, in_comment, in_revision);
-   CALL new_build_event( in_build_name, 'build_started', in_comment,  in_job_name, in_build_number );
+    CALL new_build( in_build_name, in_branch_name, in_comment, in_revision);
+    CALL new_build_event( in_build_name, 'build_started', in_comment,  in_job_name, in_build_number );
+END //
+DELIMITER ;
+
+-- }}}
+-- {{{ build_failed
+
+DROP PROCEDURE IF EXISTS build_failed;
+DELIMITER //
+CREATE PROCEDURE build_failed( IN in_build_name VARCHAR(128), 
+                               IN in_comment TEXT, 
+                               IN in_job_name VARCHAR(128), 
+                               IN in_build_number INT )
+BEGIN
+    CALL new_build_event( in_build_name, 'build_failed', in_comment,  in_job_name, in_build_number );
 END //
 DELIMITER ;
 
@@ -100,11 +114,11 @@ DELIMITER ;
 DROP PROCEDURE IF EXISTS subbuild_failed;
 DELIMITER //
 CREATE PROCEDURE subbuild_failed( IN in_build_name VARCHAR(128), 
-                               IN in_comment TEXT,
-                               IN in_target VARCHAR(16),
-                               IN in_subtarget VARCHAR(16),
-                               IN in_job_name VARCHAR(128), 
-                               IN in_build_number INT )
+                                  IN in_comment TEXT,
+                                  IN in_target VARCHAR(16),
+                                  IN in_subtarget VARCHAR(16),
+                                  IN in_job_name VARCHAR(128), 
+                                  IN in_build_number INT )
 BEGIN
     CALL new_build_event( in_build_name, CONCAT( 'subbuild_failed', '_', in_target, '_', in_subtarget), in_comment, in_job_name, in_build_number );
     CALL _check_if_event_builds( in_build_name, 'build', in_comment, in_job_name, in_build_number );
@@ -148,11 +162,11 @@ DELIMITER ;
 DROP PROCEDURE IF EXISTS subtest_unstable;
 DELIMITER //
 CREATE PROCEDURE subtest_unstable( IN in_build_name VARCHAR(128), 
-                                IN in_comment TEXT,
-                                IN in_target VARCHAR(16),
-                                IN in_subtarget VARCHAR(16),
-                                IN in_job_name VARCHAR(128), 
-                                IN in_build_number INT )
+                                   IN in_comment TEXT,
+                                   IN in_target VARCHAR(16),
+                                   IN in_subtarget VARCHAR(16),
+                                   IN in_job_name VARCHAR(128), 
+                                   IN in_build_number INT )
 BEGIN
     CALL new_build_event( in_build_name, CONCAT( 'subtest_unstable', '_', in_target, '_', in_subtarget), in_comment, in_job_name, in_build_number );
     CALL _check_if_event_builds( in_build_name, 'test', in_comment, in_job_name, in_build_number );

@@ -1,7 +1,6 @@
 #!/bin/bash
 
-source lib/common.sh
-initTempDirectory
+source test/common.sh
 
 source ${LFS_CI_ROOT}/lib/database.sh
 
@@ -45,6 +44,9 @@ setUp() {
     export WORKSPACE=$(createTempDirectory)
     echo "src-bos foo 123456" > ${WORKSPACE}/revision_state.txt
 
+    export JOB_NAME=LFS_CI_-_trunk_-_Build_-_FSM-r2_-_fcmd
+    export BUILD_NUMBER=123
+
     return
 }
 
@@ -53,9 +55,6 @@ tearDown() {
 }
 
 testDatabaseEventBuildStarted_ok() {
-    export JOB_NAME=Build_Job
-    export BUILD_NUMBER=123
-
     assertTrue "databaseEventBuildStarted"
 
     local expect=$(createTempFile)
@@ -63,46 +62,39 @@ testDatabaseEventBuildStarted_ok() {
 getLocationName
 mustHaveLocationName
 getLocationName
-runOnMaster cat /var/fpwork/psulm/lfs-jenkins/home/jobs/Build_Job/builds/123/revisionstate.xml
+runOnMaster cat /var/fpwork/psulm/lfs-jenkins/home/jobs/LFS_CI_-_trunk_-_Build_-_FSM-r2_-_fcmd/builds/123/revisionstate.xml
 mustHaveNextCiLabelName
 getNextCiLabelName
-execute -i ${LFS_CI_ROOT}/bin/newBuildEvent.pl --buildName=PS_LFS_OS_9999_88_7777 --branchName=trunk --revision=123456 --action=build_started --comment=Build_Job_123
+execute -i ${LFS_CI_ROOT}/bin/newBuildEvent.pl --buildName=PS_LFS_OS_9999_88_7777 --action=build_started --jobName=LFS_CI_-_trunk_-_Build_-_FSM-r2_-_fcmd --buildNumber=123 --targetName=--revision=123456 --targetType=--branchName=trunk
 EOF
-
-    assertEquals "$(cat ${expect})" "$(cat ${UT_MOCKED_COMMANDS})"
+    assertExecutedCommands ${expect}
 }
 
 
-testDatabaseEventBuildFinished_ok() {
-    export JOB_NAME=Build_Job
-    export BUILD_NUMBER=123
-
-    assertTrue "databaseEventBuildFinished"
+testDatabaseEventSubBuildFinished_ok() {
+    assertTrue "databaseEventSubBuildFinished"
 
     local expect=$(createTempFile)
     cat <<EOF > ${expect}
 mustHaveNextCiLabelName
 getNextCiLabelName
-execute -i ${LFS_CI_ROOT}/bin/newBuildEvent.pl --buildName=PS_LFS_OS_9999_88_7777 --action=build_finished --comment=Build_Job_123
+execute -i ${LFS_CI_ROOT}/bin/newBuildEvent.pl --buildName=PS_LFS_OS_9999_88_7777 --action=subbuild_finished --jobName=LFS_CI_-_trunk_-_Build_-_FSM-r2_-_fcmd --buildNumber=123 --targetName=FSM-r2 --targetType=fcmd
 EOF
 
-    assertEquals "$(cat ${expect})" "$(cat ${UT_MOCKED_COMMANDS})"
+    assertExecutedCommands ${expect}
 }
 
-testDatabaseEventBuildFailed_ok() {
-    export JOB_NAME=Build_Job
-    export BUILD_NUMBER=123
-
-    assertTrue "databaseEventBuildFinished 0"
+testDatabaseEventSubBuildFailed_ok() {
+    assertTrue "databaseEventSubBuildFinished 0"
 
     local expect=$(createTempFile)
     cat <<EOF > ${expect}
 mustHaveNextCiLabelName
 getNextCiLabelName
-execute -i ${LFS_CI_ROOT}/bin/newBuildEvent.pl --buildName=PS_LFS_OS_9999_88_7777 --action=build_finished --comment=Build_Job_123
+execute -i ${LFS_CI_ROOT}/bin/newBuildEvent.pl --buildName=PS_LFS_OS_9999_88_7777 --action=subbuild_finished --jobName=LFS_CI_-_trunk_-_Build_-_FSM-r2_-_fcmd --buildNumber=123 --targetName=FSM-r2 --targetType=fcmd
 EOF
 
-    assertEquals "$(cat ${expect})" "$(cat ${UT_MOCKED_COMMANDS})"
+    assertExecutedCommands ${expect}
 }
 
 testdatabaseEventReleaseStarted() {
@@ -111,10 +103,12 @@ testdatabaseEventReleaseStarted() {
 
     local expect=$(createTempFile)
     cat <<EOF > ${expect}
-execute -i ${LFS_CI_ROOT}/bin/newBuildEvent.pl --buildName=PS_LFS_OS_9999_88_7777 --action=release_started
+mustHaveNextCiLabelName
+getNextCiLabelName
+execute -i ${LFS_CI_ROOT}/bin/newBuildEvent.pl --buildName=PS_LFS_OS_9999_88_7777 --action=release_started --jobName=LFS_CI_-_trunk_-_Build_-_FSM-r2_-_fcmd --buildNumber=123 --targetName=FSM-r2 --targetType=fcmd
 EOF
 
-    assertEquals "$(cat ${expect})" "$(cat ${UT_MOCKED_COMMANDS})"
+    assertExecutedCommands ${expect}
 }
 
 testdatabaseEventReleaseFinished() {
@@ -123,10 +117,12 @@ testdatabaseEventReleaseFinished() {
 
     local expect=$(createTempFile)
     cat <<EOF > ${expect}
-execute -i ${LFS_CI_ROOT}/bin/newBuildEvent.pl --buildName=PS_LFS_OS_9999_88_7777 --action=release_finished
+mustHaveNextCiLabelName
+getNextCiLabelName
+execute -i ${LFS_CI_ROOT}/bin/newBuildEvent.pl --buildName=PS_LFS_OS_9999_88_7777 --action=release_finished --jobName=LFS_CI_-_trunk_-_Build_-_FSM-r2_-_fcmd --buildNumber=123 --targetName=FSM-r2 --targetType=fcmd
 EOF
 
-    assertEquals "$(cat ${expect})" "$(cat ${UT_MOCKED_COMMANDS})"
+    assertExecutedCommands ${expect}
 }
 
 testDatabaseTestResults() {
@@ -137,7 +133,7 @@ testDatabaseTestResults() {
 execute -i ${LFS_CI_ROOT}/bin/newBuildEvent.pl --action=new_test_result --buildName=PS_LFS_OS_9999_88_7777 --resultFile=resultFile --testSuiteName=testSuite --targetName=targetName --targetType=targetType
 EOF
 
-    assertEquals "$(cat ${expect})" "$(cat ${UT_MOCKED_COMMANDS})"
+    assertExecutedCommands ${expect}
 }
 
 source lib/shunit2

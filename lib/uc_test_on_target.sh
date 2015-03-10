@@ -49,7 +49,7 @@ ci_job_test_on_target() {
     info "target is testTargetName : ${testTargetName}"
     local testType=$(getConfig LFS_CI_uc_test_making_test_type)
 
-    databaseEventTestStarted ${LABEL} ${testTargetName}
+    databaseEventSubTestStarted ${LABEL} ${testTargetName}
 
     for type in $(getConfig LFS_CI_uc_test_making_test_type) ; do
         info "running test type ${type} on target ${testTargetName}"
@@ -62,7 +62,7 @@ ci_job_test_on_target() {
         esac
     done
 
-    databaseEventTestFinished ${LABEL} ${testTargetName}
+    databaseEventSubTestFinished ${LABEL} ${testTargetName}
 
     info "testing done."
     return
