@@ -300,6 +300,7 @@ usecase_PKGPOOL_UPDATE_DEPS() {
             warning "We try to commit with corrected notes."
             rawDebug ${gitLog}
 
+            info "retry commit with corrected commit message..."
             svnCommit -F ${gitLog} ${releaseFile} ${workspace}/src/gitrevision
         ) || exit 1 # when catch part also fails, we exit the usecase
 
