@@ -280,11 +280,14 @@ usecase_PKGPOOL_UPDATE_DEPS() {
             errorLogFile=$(lastExecuteLogFile)
             mustExistFile ${errorLogFile}
 
+            rawDebug ${errorLogFile}
+
             setBuildResultUnstable
 
             local errorLineNumber=$(sed -ne 's,^Error in line \([0-9]\+\) : .*,\1,p' ${errorLogFile})
             if [[ -z "${errorLineNumber}" ]] ; then
-                fatal "SVN rejected our commit message for a reason we didn't understand. (see logfile)"
+                error "SVN rejected our commit message for a reason we didn't understand. (see logfile)"
+                exit 0
             fi
 
             for lineNumber in ${errorLineNumber} ; do
