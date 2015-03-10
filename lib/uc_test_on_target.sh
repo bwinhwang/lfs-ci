@@ -18,11 +18,14 @@ ci_job_test_on_target() {
 
     setBuildDescription ${JOB_NAME} ${BUILD_NUMBER} ${LABEL}
 
+    local branchName=$(getLocationName ${UPSTREAM_PROJECT})
+    mustHaveValue "${branchName}" "branch name"
+
     local isBookingEnabled=$(getConfig LFS_uc_test_is_booking_enabled)
     local targetName=""
     if [[ ${isBookingEnabled} ]] ; then
         # new method via booking from database
-        local targetFeatures="$(getConfig LFS_uc_test_booking_target_features)"
+        local targetFeatures="$(getConfig LFS_uc_test_booking_target_features -t branchName:${branchName} )"
         debug "requesting target with features ${targetFeatures}"
 
         reserveTargetByFeature ${targetFeatures}
@@ -38,8 +41,6 @@ ci_job_test_on_target() {
     local workspace=$(getWorkspaceName)
     mustHaveCleanWorkspace
 
-    local branchName=$(getLocationName ${UPSTREAM_PROJECT})
-    mustHaveValue "${branchName}" "branch name"
 
     info "create workspace for testing on ${branchName}"
     # TODO: demx2fk3 2015-02-13 we are using the wrong revision to checkout src-test
