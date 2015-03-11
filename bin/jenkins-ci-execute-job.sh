@@ -30,12 +30,8 @@ fi
 # start the logfile
 initTempDirectory
 startLogfile
-# archiveLogfile
 # and end it, if the script exited in some way
 exit_add stopLogfile
-
-# TODO: demx2fk3 2014-03-31 FIXME
-# cleanupEnvironmentVariables
 
 # for better debugging
 PS4='+(${BASH_SOURCE}:${LINENO}): ${FUNCNAME[0]:+${FUNCNAME[0]}(): }'

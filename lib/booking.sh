@@ -18,7 +18,6 @@
 #
 #           unreserveTarget targetName
 #
-#           
 
 LFS_CI_SOURCE_booking='$Id$'
 
@@ -123,6 +122,10 @@ unreserveTarget() {
     return
 }
 
+## @fn      mustHaveReservedTarget()
+#  @brief   ensures, that a target is reserved
+#  @param   <none>
+#  @return  <none>
 mustHaveReservedTarget() {
     requiredParameters JOB_NAME
 
