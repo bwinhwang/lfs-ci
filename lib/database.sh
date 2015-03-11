@@ -155,26 +155,22 @@ _storeEvent() {
     shift
 
     # fixme
-    local targetName=$(_reserveTarget)
+    local targetName=""
+    local targetType=""
+    if [[ JOB_NAME =~ Test- ]] ; then
+        targetName=$(_reserveTarget)
+        targetType=$(getConfig LFS_CI_uc_test_target_type_mapping -t jobName:${targetType})
+    else
+        # target type: FSM-r2, FSM-r3, FSM-r4, LRC, host
+        targetName=$(getSubTaskNameFromJobName)
+        targetType=$(getTargetBoardName)
+    fi
     mustHaveValue "${targetName}" "target name"
-
-    # target type: FSM-r2, FSM-r3, FSM-r4, LRC, host
-    local targetType=$(getConfig LFS_CI_uc_test_target_type_mapping -t jobName:${targetType})
     mustHaveValue "${targetType}" "target type"
 
     mustHaveNextCiLabelName
     local label=$(getNextCiLabelName)
     mustHaveValue ${label} "label name"
-
-    if [[ -z ${targetName} ]] ; then
-        targetName=$(getSubTaskNameFromJobName)
-    fi
-    mustHaveValue "${targetName}" "target name"
-
-    if [[ -z ${targetType} ]] ; then
-        targetType=$(getTargetBoardName)
-    fi
-    mustHaveValue "${targetType}" "target type"
 
     execute -i ${LFS_CI_ROOT}/bin/newEvent         \
                 --buildName=${label}               \
