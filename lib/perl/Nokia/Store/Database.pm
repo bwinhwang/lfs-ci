@@ -26,6 +26,7 @@ sub prepare {
                 $dbHostname,                  # database host
                 $dbPort,                      # database port
                 );
+
         my $userName = Nokia::Singleton::config->getConfig( "MYSQL_db_username" );
         my $password = Nokia::Singleton::config->getConfig( "MYSQL_db_password" );
         my $dbiArgs  = { AutoCommit => 1,
