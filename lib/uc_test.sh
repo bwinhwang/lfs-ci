@@ -64,6 +64,9 @@ ci_job_test() {
 
         mustHaveValue "${labelName}" "label name"
 
+        databaseEventTestStarted
+        exit_add _exitHandlerDatabaseTestFailed
+
         local deliveryDirectory=$(getConfig LFS_CI_UC_package_copy_to_share_name)/$(getConfig LFS_CI_UC_package_copy_to_share_path_name)/${labelName}
 
         mustExistDirectory ${deliveryDirectory}
@@ -111,4 +114,7 @@ ci_job_test() {
     return
 }
 
+_exitHandlerDatabaseTestFailed() {
+    [[ ${1} -gt 0 ]] && databaseEventTestFailed
+}
 

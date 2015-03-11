@@ -1,6 +1,14 @@
 #!/bin/bash
 ## @file  exit_handling.sh
 #  @brief handling of the exit trap
+#
+#  You can add a function, which should be executed when the script exits.
+#
+#  e.g.: exit_add cleanupTempFiles
+# 
+#  This means, that cleanupTempFiles will be executed, when the scripts end.
+#  You can use this to do actions, which should be executed, no mether if
+#  the script is failing or not.
 
 LFS_CI_SOURCE_exit_handling='$Id$'
 
@@ -20,13 +28,22 @@ exit_add() {
     return
 }
 
+## @fn      exit_remove()
+#  @brief   remove a registered function, which should be executed in the exit handler
+#  @param   {functionName}     name of the function
+#  @return  <none>
+exit_remove() {
+    local functionName=$1
+    CI_EXIT_HANDLER_METHODS="${CI_EXIT_HANDLER_METHODS/ ${functionName}}"
+    trace "exit: methods now '${CI_EXIT_HANDLER_METHODS}'"
+    return
+}
+
 ## @fn      exit_handler()
 #  @brief   exit handler, run the registered traps
-#  @details TODO: demx2fk3 2014-12-16 
 #  @param   {msg}               log message to print
 #  @param   {showStacktrace}    should the stacktrace be printed
 #  @param   {exitCode}          exit code
-#  @param   <none>
 #  @return  exit code
 exit_handler() {
     local rc=$?
@@ -36,11 +53,14 @@ exit_handler() {
 
 	trap - ERR EXIT SIGTERM SIGINT
 
-	[ $2    -ne 0 ] && trace "$(_stackTrace)"
-	[ ${rc} -ne 0 ] && trace "$(_stackTrace)"
+	[[ $2    -ne 0 ]] && trace "$(_stackTrace)"
+	[[ ${rc} -ne 0 ]] && trace "$(_stackTrace)"
 
 	for m in ${CI_EXIT_HANDLER_METHODS}; do
-		${m} ${rc}
+        # remark: it is possible to give parameters to the exit funktion
+        # this parameters are separated via :
+        # e.g.: exitFuntion:parameter1:parameter2
+		${m//:/} ${rc}
 	done
 
 	exit ${rc:-3}

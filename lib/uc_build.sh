@@ -76,9 +76,6 @@ ci_job_build() {
     local subTaskName=$(getSubTaskNameFromJobName)
     mustHaveValue "${subTaskName}"
 
-    # for the metrics database, we are installing a own exit handler to record the end of this job
-    exit_add _recordBuildEndEvent
-
     execute rm -rf ${WORKSPACE}/revisions.txt
     createWorkspace
 
@@ -86,9 +83,14 @@ ci_job_build() {
     # TODO: demx2fk3 2014-07-15 fix me - wrong function
     copyArtifactsToWorkspace "${UPSTREAM_PROJECT}" "${UPSTREAM_BUILD}" "fsmci"
     mustHaveNextCiLabelName
+
     local label=$(getNextCiLabelName)
     mustHaveValue ${label} "label name"
     setBuildDescription "${JOB_NAME}" "${BUILD_NUMBER}" "${label}"
+
+    # for the metrics database, we are installing a own exit handler to record the end of this job
+    databaseEventSubBuildStarted
+    exit_add _recordSubBuildEndEvent
 
     info "subTaskName is ${subTaskName}"
     case ${subTaskName} in
@@ -128,6 +130,7 @@ ci_job_build_version() {
         fi
     fi
 
+
     info "workspace is ${workspace}"
 
     local jobDirectory=$(getBuildDirectoryOnMaster)
@@ -150,6 +153,7 @@ ci_job_build_version() {
     local label=$(${LFS_CI_ROOT}/bin/getNewTagName -o "${oldLabel}" -r "${regex}" )
     mustHaveValue "${label}" "next release label name"
 
+
     info "new version is ${label}"
     setBuildDescription "${JOB_NAME}" "${BUILD_NUMBER}" "${label}"
 
@@ -157,6 +161,10 @@ ci_job_build_version() {
     execute mkdir -p ${workspace}/bld/bld-fsmci-summary
     echo ${label}    > ${workspace}/bld/bld-fsmci-summary/label
     echo ${oldLabel} > ${workspace}/bld/bld-fsmci-summary/oldLabel
+
+    # for the metrics database, we are installing a own exit handler to record the end of this job
+    databaseEventBuildStarted
+    exit_add _recordBuildEndEvent
 
     debug "writing new label file in ${jobDirectory}/label"
     executeOnMaster "echo ${label} > ${jobDirectory}/label"
@@ -166,7 +174,6 @@ ci_job_build_version() {
 
     setBuildDescription "${JOB_NAME}" "${BUILD_NUMBER}" "${label}"
 
-    databaseEventBuildStarted
     databaseAddNewCommits
 
     return
@@ -224,6 +231,16 @@ _build_fsmddal_pdf() {
     return
 }
 
+_recordSubBuildEndEvent() {
+    local rc=${1}
+    if [[ ${rc} -gt 0 ]] ; then
+        databaseEventSubBuildFailed
+    else
+        databaseEventSubBuildFinished
+    fi
+    return
+}
+
 _recordBuildEndEvent() {
     local rc=${1}
     if [[ ${rc} -gt 0 ]] ; then
@@ -234,56 +251,3 @@ _recordBuildEndEvent() {
     return
 }
 
-
-## @fn      preCheckoutPatchWorkspace()
-#  @brief   apply patches before the checkout of the workspace to the workspace
-#  @param   <none>
-#  @return  <none>
-preCheckoutPatchWorkspace() {
-    _applyPatchesInWorkspace "${JOB_NAME}/preCheckout/"
-    _applyPatchesInWorkspace "common/preCheckout/"
-    return
-}
-
-## @fn      postCheckoutPatchWorkspace()
-#  @brief   apply patches after the checkout of the workspace to the workspace
-#  @param   <none>
-#  @return  <none>
-postCheckoutPatchWorkspace() {
-    _applyPatchesInWorkspace "${JOB_NAME}/postCheckout/"
-    _applyPatchesInWorkspace "common/postCheckout/"
-    return
-}
-
-## @fn      _applyPatchesInWorkspace()
-#  @brief   apply patches to the workspace, if exist one for the directory
-#  @details in some cases, it's required to apply a patch to the workspace to
-#           change some "small" issue in the workspace, e.g. change the svn server
-#           from the master svne1 server to the slave ulisop01 server.
-#  @param   <none>
-#  @return  <none>
-_applyPatchesInWorkspace() {
-
-    local patchPath=$@
-
-    if [[ -d "${LFS_CI_ROOT}/patches/${patchPath}" ]] ; then
-        for patch in "${LFS_CI_ROOT}/patches/${patchPath}/"* ; do
-            [[ ! -f "${patch}" ]] && continue
-            info "applying post checkout patch $(basename \"${patch}\")"
-            patch -p0 < "${patch}" || exit 1
-        done
-    fi
-
-    return
-}
-
-usecase_LFS_BUILD_POSTACTION() {
-    local workspace=$(getWorkspaceName)
-
-    local label=$(getNextCiLabelName)
-    mustHaveValue "${label}" "label"
-
-    databaseEventBuildFinished
-
-    return
-}

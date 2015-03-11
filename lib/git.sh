@@ -42,11 +42,19 @@ gitDescribe() {
     return
 }
 
+## @fn      gitRevParse()
+#  @brief   perform the git rev-parse command
+#  @param   {arguments}    arguments for git rev-parse
+#  @return  <none>
 gitRevParse() {
     execute -n git rev-parse $@
     return
 }
 
+## @fn      gitClone()
+#  @brief   perform the git clone command
+#  @param   {arguments}    arguments for git clone
+#  @return  <none>
 gitClone() {
     execute git clone $@
     return

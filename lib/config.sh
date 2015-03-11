@@ -177,22 +177,3 @@ declare -A archMap=(         ["fct"]="mips64-octeon2-linux-gnu"      \
                          ["fsm4_k2"]="arm-cortexa15-linux-gnueabihf" \
 )
 
-
-## @fn      getDeliveryRepositoryName()
-#  @brief   get the subversion binary delivery repos name based on the defined regex
-#  @param   {tagName}    name of the tag
-#  @return  repos name
-getDeliveryRepositoryName() {
-    local tagName=$1
-    mustHaveValue "${tagName}" "name of the tag"
-
-    local reposName=$(sed 's/^.*PS_LFS_OS_\([^_]\+_[^_]\+\)_.*$/BTS_D_SC_LFS_\1/' <<< ${tagName} )
-    if [[ ${tagName} = ${reposName} ]] ; then
-        error "regex to get SVN delivery repos name didn't match to ${tagName}"
-        exit 1
-    fi
-    debug "svn delivery repos name for ${tagName} is ${reposName}"
-
-    echo ${reposName}
-    return
-}

@@ -244,12 +244,3 @@ linkFileToArtifactsDirectory() {
     return
 }
 
-## @fn      archiveLogfile()
-#  @brief   add a link to the artifacts archive for the current logfile
-#  @param   <none>
-#  @return  <none>
-archiveLogfile() {
-    [[ -f ${CI_LOGGING_LOGFILENAME} ]] || return
-    linkFileToArtifactsDirectory ${CI_LOGGING_LOGFILENAME}.gz logfile.txt.gz
-    return
-}
