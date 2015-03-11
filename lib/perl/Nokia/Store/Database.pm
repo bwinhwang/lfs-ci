@@ -31,6 +31,8 @@ sub prepare {
         my $dbiArgs  = { AutoCommit => 1,
                          PrintError => 1 };
 
+        DEBUG "using dbi string $dbiString";
+
         $self->{dbi} = DBI->connect( $dbiString, $userName, $password, $dbiArgs ) 
             or LOGDIE $DBI::errstr;
     }
