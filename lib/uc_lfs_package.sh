@@ -250,7 +250,13 @@ copySysroot() {
                     execute tar xzvf ${workspace}/bld/bld-psl-fcmd/results/ifddal.tgz -C ${dst}/usr --strip-components=1
                     
                     # copy bld-psl-fcmd/results/sys-root into sys-root
-                    execute cp -rf ${workspace}/bld/bld-psl-fcmd/results/sys-root/* ${dst}/
+                    if [ -d ${workspace}/bld/bld-psl-fcmd/results/sys-root ];
+                    then
+		                    execute cp -rf ${workspace}/bld/bld-psl-fcmd/results/sys-root/* ${dst}/
+                    else
+                            # some older releases do not have a psl/results/sys-root directory
+                            info "No ${workspace}/bld/bld-psl-fcmd/results/sys-root found"
+                    fi
                     ;;
                 fspc)  
                     execute tar xzvf ${workspace}/bld/bld-psl-fspc/results/ifddal.tgz -C ${dst}/usr/lib ddal/lib/libDDAL.so.fspc --strip-components=2
