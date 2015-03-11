@@ -165,6 +165,8 @@ _storeEvent() {
         targetName=$(getSubTaskNameFromJobName)
         targetType=$(getTargetBoardName)
     fi
+    targetType=${targetType:-other}
+    targetName=${targetName:-host}
     mustHaveValue "${targetName}" "target name"
     mustHaveValue "${targetType}" "target type"
 
@@ -172,13 +174,13 @@ _storeEvent() {
     local label=$(getNextCiLabelName)
     mustHaveValue ${label} "label name"
 
-    execute -i ${LFS_CI_ROOT}/bin/newEvent         \
-                --buildName=${label}               \
-                --action=${eventName}              \
-                --jobName=${JOB_NAME}              \
-                --buildNumber=${BUILD_NUMBER}      \
-                --targetName=${targetName:-host}   \
-                --targetType=${targetType:-other}  \
+    execute -i ${LFS_CI_ROOT}/bin/newEvent    \
+                --buildName=${label}          \
+                --action=${eventName}         \
+                --jobName=${JOB_NAME}         \
+                --buildNumber=${BUILD_NUMBER} \
+                --targetName=${targetName}    \
+                --targetType=${targetType}    \
                 $@
 
     return
