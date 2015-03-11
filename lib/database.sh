@@ -157,7 +157,7 @@ _storeEvent() {
     # fixme
     local targetName=""
     local targetType=""
-    if [[ JOB_NAME =~ Test- ]] ; then
+    if [[ ${JOB_NAME} =~ Test- ]] ; then
         targetName=$(_reserveTarget)
         targetType=$(getConfig LFS_CI_uc_test_target_type_mapping -t jobName:${targetType})
     else
