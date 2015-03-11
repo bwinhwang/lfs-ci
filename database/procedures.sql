@@ -598,6 +598,7 @@ BEGIN
        INSERT INTO subversion_commits (build_id, svn_revision, svn_author, commit_date, commit_message ) VALUES ( var_build_id, in_revision, in_author, in_date, in_msg );
    END IF;
 
-END
+END //
 DELIMITER ;
+
 -- }}}
