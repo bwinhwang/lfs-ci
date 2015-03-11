@@ -148,7 +148,7 @@ _storeEvent() {
     fi
     mustHaveValue "${targetType}" "target type"
 
-    execute -i ${LFS_CI_ROOT}/bin/newBuildEvent.pl \
+    execute -i ${LFS_CI_ROOT}/bin/newEvent         \
                 --buildName=${label}               \
                 --action=${eventName}              \
                 --jobName=${JOB_NAME}              \
@@ -169,7 +169,7 @@ databaseAddNewCommits() {
 
     copyFileFromBuildDirectoryToWorkspace ${JOB_NAME} ${BUILD_NUMBER} changelog.xml
 
-    execute -i ${LFS_CI_ROOT}/bin/newBuildEvent.pl --buildName=${label} --action=new_svn_commits --changelog=${WORKSPACE}/changelog.xml
+    execute -i ${LFS_CI_ROOT}/bin/newSubversionCommits --buildName=${label} --changelog=${WORKSPACE}/changelog.xml
 
     return
 }
@@ -182,8 +182,7 @@ databaseTestResults() {
     local resultFile=$5
 
     info "adding metrics for ${label}, ${testSuiteName}, ${targetName}/${targetType}"
-    execute -i ${LFS_CI_ROOT}/bin/newBuildEvent.pl \
-            --action=new_test_result               \
+    execute -i ${LFS_CI_ROOT}/bin/newTestResults   \
             --buildName=${label}                   \
             --resultFile=${resultFile}             \
             --testSuiteName=${testSuiteName}       \

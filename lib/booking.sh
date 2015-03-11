@@ -40,7 +40,7 @@ reserveTargetByName() {
     mustHaveValue "${maxTryToGetTarget}" "max tries to get target"
 
     while [[ ${counter} -lt ${maxTryToGetTarget} ]] ; do
-        if execute -i ${LFS_CI_ROOT}/bin/ysmv2.pl --action=reserveTarget --targetName=${targetName} ; then
+        if execute -i ${LFS_CI_ROOT}/bin/reserveTarget --targetName=${targetName} ; then
             info "reservation for target ${targetName} was successful"
             export LFS_CI_BOOKING_RESERVED_TARGET=${targetName}
             return
@@ -83,10 +83,10 @@ reserveTargetByFeature() {
     local counter=0
 
     while [[ ${counter} -lt ${maxTryToGetTarget} ]] ; do
-        for targetName in $(execute -n ${LFS_CI_ROOT}/bin/ysmv2.pl --action=searchTarget ${searchParameter} ) ; do
+        for targetName in $(execute -n ${LFS_CI_ROOT}/bin/searchTarget ${searchParameter} ) ; do
             info "try to reserve target ${targetName}"
 
-            if execute -i ${LFS_CI_ROOT}/bin/ysmv2.pl --action=reserveTarget --targetName=${targetName} ; then
+            if execute -i ${LFS_CI_ROOT}/bin/reserveTarget --targetName=${targetName} ; then
                 info "reservation for target ${targetName} was successful"
                 export LFS_CI_BOOKING_RESERVED_TARGET=${targetName}
                 return
@@ -119,7 +119,7 @@ unreserveTarget() {
     local targetName=${LFS_CI_BOOKING_RESERVED_TARGET}
     mustHaveValue "${targetName}" "targetName"
 
-    execute ${LFS_CI_ROOT}/bin/ysmv2.pl --action=unreserveTarget --targetName=${targetName}
+    execute ${LFS_CI_ROOT}/bin/unreserveTarget --targetName=${targetName}
     return
 }
 

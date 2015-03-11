@@ -39,10 +39,15 @@ my %commands = (
                  getRevisionTxtFromDependencies => "Nokia::Command::GetRevisionTxtFromDependencies",
                  getUpStreamProject             => "Nokia::Command::GetUpStreamProject",
                  removalCandidates              => "Nokia::Command::RemovalCandidates",
-                 #TODO 2014-10-31 demx2fk3: typo FIXME
-                 removalCanidates               => "Nokia::Command::RemovalCandidates",
                  sendReleaseNote                => "Nokia::Command::SendReleaseNote",
                  sortBuildsFromDependencies     => "Nokia::Command::SortBuildsFromDependencies",
+                 getBranchInformation           => "Nokia::Command::GetBranchInformation",
+                 newEvent                       => "Nokia::Command::NewEvent",
+                 newSubversionCommits           => "Nokia::Command::NewSubversionCommits",
+                 newTestResults                 => "Nokia::Command::NewTestResults",
+                 reserveTarget                  => "Nokia::Command::ReserveTarget",
+                 unreserveTarget                => "Nokia::Command::UnreserveTarget",
+                 searchTarget                   => "Nokia::Command::SearchTarget",
                );
 
 if( not exists $commands{$program} ) {
