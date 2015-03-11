@@ -6,7 +6,7 @@ use Getopt::Long;
 use Data::Dumper;
 use Log::Log4perl qw( :easy );
 
-use Nokia::Handler::Database;
+use Nokia::Handler::Database::Events;
 
 use parent qw( Nokia::Command; );
 
@@ -25,7 +25,7 @@ sub prepare {
 
 sub execute {
     my $self = shift;
-    my $handler = Nokia::Handler::Database->new();
+    my $handler = Nokia::Handler::Database::Events->new();
 
     my $id = $handler->newTestExecution( 
         buildName     => $self->{opt_name},
