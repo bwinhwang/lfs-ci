@@ -5,7 +5,8 @@ use warnings;
 
 use parent qw( Nokia::Object );
 
-use Nokia::Store::Database;
+use Nokia::Store::Database::Events;
+use Nokia::Store::Database::Branches;
 
 sub newTestResult {
     my $self  = shift;
@@ -16,7 +17,7 @@ sub newTestResult {
     my $testResultValue = $param->{testResultValue};
 
     if( not $self->{store} ) {
-        $self->{store} = Nokia::Store::Database->new();
+        $self->{store} = Nokia::Store::Database::Events->new();
     }
 
     $self->{store}->newTestResult( testExecutionId => $testExecutionId,
@@ -34,7 +35,7 @@ sub newTestExecution {
     my $targetType    = $param->{targetType};
 
     if( not $self->{store} ) {
-        $self->{store} = Nokia::Store::Database->new();
+        $self->{store} = Nokia::Store::Database::Events->new();
     }
 
     my $id = $self->{store}->newTestExecution( buildName     => $param->{buildName},
@@ -50,7 +51,7 @@ sub newBuildEvent {
     my $release = $param->{release};
 
     if( not $self->{store} ) {
-        $self->{store} = Nokia::Store::Database->new();
+        $self->{store} = Nokia::Store::Database::Events->new();
     }
 
     $self->{store}->newBuildEvent( baselineName => $release->baselineName(),
@@ -66,7 +67,7 @@ sub newSubversionCommit {
     my $param = { @_ };
 
     if( not $self->{store} ) {
-        $self->{store} = Nokia::Store::Database->new();
+        $self->{store} = Nokia::Store::Database::Events->new();
     }
 
     $self->{store}->newSubversionCommit( baselineName => $param->{baselineName},
@@ -81,7 +82,7 @@ sub branchInformation {
     my $self = shift;
 
     if( not $self->{store} ) {
-        $self->{store} = Nokia::Store::Database->new();
+        $self->{store} = Nokia::Store::Database::Branches->new();
     }
 
     my @data = $self->{store}->branchInformation();

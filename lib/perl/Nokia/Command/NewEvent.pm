@@ -6,10 +6,10 @@ use Getopt::Long;
 use Data::Dumper;
 use Log::Log4perl qw( :easy );
 
-use Nokia::Handler::Database::Events;
+use Nokia::Handler::Database;
 use Nokia::Model::Build;
 
-use parent qw( Nokia::Command; );
+use parent qw( Nokia::Command );
 
 sub prepare {
     my $self = shift;
@@ -28,8 +28,8 @@ sub prepare {
 
 sub execute {
     my $self = shift;
-    Nokia::Handler::Database::Events->new()->newBuildEvent( 
-        action  => $opt_action,
+    Nokia::Handler::Database->new()->newBuildEvent( 
+        action  => $self->{opt_action},
         release => Nokia::Model::Build->new( 
             baselineName => $self->{opt_name},
             branchName   => $self->{opt_branch},

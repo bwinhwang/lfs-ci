@@ -15,10 +15,10 @@ sub prepare {
 
     if( not $self->{dbi} ) {
 
-        my $dbDriver   = Singleton::config->getConfig( "MYSQL_db_driver" );
-        my $dbName     = Singleton::config->getConfig( "MYSQL_db_name" );
-        my $dbHostname = Singleton::config->getConfig( "MYSQL_db_hostname" );
-        my $dbPort     = Singleton::config->getConfig( "MYSQL_db_port" );
+        my $dbDriver   = Nokia::Singleton::config->getConfig( "MYSQL_db_driver" );
+        my $dbName     = Nokia::Singleton::config->getConfig( "MYSQL_db_name" );
+        my $dbHostname = Nokia::Singleton::config->getConfig( "MYSQL_db_hostname" );
+        my $dbPort     = Nokia::Singleton::config->getConfig( "MYSQL_db_port" );
 
         my $dbiString = sprintf( "DBI:%s:%s:%s:%s",
                 $dbDriver,                    # database driver
@@ -26,8 +26,8 @@ sub prepare {
                 $dbHostname,                  # database host
                 $dbPort,                      # database port
                 );
-        my $userName = Singleton::config->getConfig( "MYSQL_db_username" );
-        my $password = Singleton::config->getConfig( "MYSQL_db_password" );
+        my $userName = Nokia::Singleton::config->getConfig( "MYSQL_db_username" );
+        my $password = Nokia::Singleton::config->getConfig( "MYSQL_db_password" );
         my $dbiArgs  = { AutoCommit => 1,
                          PrintError => 1 };
 

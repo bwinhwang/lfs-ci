@@ -1,4 +1,4 @@
-package Nokia::Store::Database::Events;
+package Nokia::Store::Database::Branches;
 use strict;
 use warnings;
 
