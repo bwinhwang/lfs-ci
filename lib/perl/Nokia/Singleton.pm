@@ -10,6 +10,7 @@ use Nokia::Config;
 use Nokia::Store::Config::Cache;
 use Nokia::Store::Config::File;
 use Nokia::Hints;
+use Nokia::Svn;
 
 my $obj = bless {}, __PACKAGE__;
 

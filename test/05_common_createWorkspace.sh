@@ -1,15 +1,12 @@
 #!/bin/bash
 
-source lib/common.sh
-initTempDirectory
+source test/common.sh
 
 source lib/createWorkspace.sh
 
-export UNITTEST_COMMAND=$(createTempFile)
-
 oneTimeSetUp() {
     mockedCommand() {
-        echo "$@" >> ${UNITTEST_COMMAND}
+        echo "$@" >> ${UT_MOCKED_COMMANDS}
     }
     exit_handler() {
         echo exit
@@ -62,7 +59,7 @@ oneTimeSetUp() {
 }
 
 setUp() {
-    cp -f /dev/null ${UNITTEST_COMMAND}
+    cp -f /dev/null ${UT_MOCKED_COMMANDS}
 }
 
 tearDown() {
@@ -105,7 +102,7 @@ mustHaveLocalSdks
 copyAndExtractBuildArtifactsFromProject 
 EOF
 
-    assertEquals "$(cat ${expect})" "$(cat ${UNITTEST_COMMAND})"
+    assertExecutedCommands ${expect}
 }
 
 source lib/shunit2
