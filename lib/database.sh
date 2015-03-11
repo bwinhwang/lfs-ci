@@ -119,14 +119,7 @@ databaseEventPackageFailed() {
 #  @param   <none>
 #  @return  <none>
 databaseEventSubTestStarted() {
-    # target type: FSM-r2, FSM-r3, FSM-r4, LRC, host
-    local targetType=$(getConfig LFS_CI_uc_test_target_type_mapping)
-    mustHaveValue "${targetType}" "target type"
-
-    local targetName=$(_reserveTarget)
-    mustHaveValue "${targetName}" "target name"
-
-    _storeEvent "subtest_started" ${targetName} ${targetType}
+    _storeEvent subtest_started 
     return
 }
 
@@ -135,14 +128,7 @@ databaseEventSubTestStarted() {
 #  @param   <none>
 #  @return  <none>
 databaseEventSubTestFinished() {
-    # target type: FSM-r2, FSM-r3, FSM-r4, LRC, host
-    local targetType=$(getConfig LFS_CI_uc_test_target_type_mapping)
-    mustHaveValue "${targetType}" "target type"
-
-    local targetName=$(_reserveTarget)
-    mustHaveValue "${targetName}" "target name"
-
-    _storeEvent "subtest_finished" ${targetName} ${targetType}
+    _storeEvent subtest_finished
     return
 }
 
@@ -151,14 +137,7 @@ databaseEventSubTestFinished() {
 #  @param   <none>
 #  @return  <none>
 databaseEventSubTestFailed() {
-    # target type: FSM-r2, FSM-r3, FSM-r4, LRC, host
-    local targetType=$(getConfig LFS_CI_uc_test_target_type_mapping)
-    mustHaveValue "${targetType}" "target type"
-
-    local targetName=$(_reserveTarget)
-    mustHaveValue "${targetName}" "target name"
-
-    _storeEvent "subtest_failed" ${targetName} ${targetType}
+    _storeEvent subtest_failed 
     return
 }
 
@@ -175,11 +154,13 @@ _storeEvent() {
     mustHaveValue "${eventName}" "event name"
     shift
 
-    local targetName=$1
-    shift
+    # fixme
+    local targetName=$(_reserveTarget)
+    mustHaveValue "${targetName}" "target name"
 
-    local targetType=$1
-    shift
+    # target type: FSM-r2, FSM-r3, FSM-r4, LRC, host
+    local targetType=$(getConfig LFS_CI_uc_test_target_type_mapping -t jobName:${targetType})
+    mustHaveValue "${targetType}" "target type"
 
     mustHaveNextCiLabelName
     local label=$(getNextCiLabelName)
