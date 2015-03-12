@@ -19,7 +19,7 @@ ci_job_test_buildsystem() {
 
     local label=$(cat ${WORKSPACE}/label.txt)
 
-    setBuildDescription ${JOB_NAME} ${BUILD_NAME} ${label}
+    setBuildDescription ${JOB_NAME} ${BUILD_NUMBER} ${label}
 
     local svnReposUrl=$(getConfig LFS_PROD_svn_delivery_os_repos_url -t tagName:${label})
     mustExistInSubversion ${svnReposUrl}/tags/${label}/doc/scripts/ revisions.txt
