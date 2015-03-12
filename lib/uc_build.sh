@@ -151,7 +151,7 @@ ci_job_build_version() {
 
     info "using regex ${regex} for branch ${branch}"
 
-    local label=${labelPrefix}$(${LFS_CI_ROOT}/bin/getNewTagName -o "${oldLabel}" -r "${regex}" )
+    local label=${labelPrefix^^}$(${LFS_CI_ROOT}/bin/getNewTagName -o "${oldLabel}" -r "${regex}" )
     mustHaveValue "${label}" "next release label name"
 
 
