@@ -32,10 +32,13 @@ ci_job_test_buildsystem() {
     local testSuiteDirectory=${workspace}/src-test/src/unittest/testsuites/buildsystem/dependencies
 
 
+    info "starting tests..."
     execute make -C ${testSuiteDirectory} clean
     execute make -C ${testSuiteDirectory} test-xmloutput
     execute mkdir ${workspace}/xml-reports/
     execute cp -f ${testSuiteDirectory}/xml-reports/*.xml* ${workspace}/xml-reports/
+
+    info "test done."
 
     return
 }
