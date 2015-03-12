@@ -5,7 +5,7 @@
 
 oneTimeSetUp() {
     export BRANCH="FB1408"
-    export LfS_CI_ROOT="."
+    export LFS_CI_ROOT="."
     svn() {
         if [[ $(echo "$@" | grep FB1408) ]]; then
             cat test/data/21_deleteBranchFB1408.txt

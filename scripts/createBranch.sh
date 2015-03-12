@@ -406,8 +406,9 @@ svnCopyDeliveryLRC() {
     fi
 }
 
-## @fn      dbInsert
-#  @brief   insert new branch into lfs database
+## @fn      dbInsert()
+#  @brief   insert the new branch into the lfs database
+#  @param   <branch> the name of the branch
 #  @return  <none>
 dbInsert() {
     info "--------------------------------------------------------"
@@ -415,26 +416,32 @@ dbInsert() {
     info "--------------------------------------------------------"
 
     if [[ "${DO_DB_INSERT}" == "false" ]]; then
-        info "Not inserting branch ${NEW_BRANCH} into table branches of lfspt database."
+        info "Not inserting branch ${branch} into table branches of lfspt database."
         return 0
     fi
 
-    local branch=${NEW_BRANCH}
-    local branchType=$(getBranchPart ${NEW_BRANCH} TYPE)
-    local yyyy=$(getBranchPart ${NEW_BRANCH} YYYY)
-    local mm=$(getBranchPart ${NEW_BRANCH} MM)
+    local branch=$1
+    local branchType=$(getBranchPart ${branch} TYPE)
+    local yyyy=$(getBranchPart ${branch} YYYY)
+    local mm=$(getBranchPart ${branch} MM)
     local regex="${branchType}_PS_LFS_OS_${yyyy}_${mm}_([0-9][0-9][0-9][0-9])"
 
     if [[ ${LRC} == "true" ]]; then
-        branch="LRC_${NEW_BRANCH}"
+        branch="LRC_${branch}"
         regex="${branchType}_LRC_LCP_PS_LFS_OS_${yyyy}_${mm}_([0-9][0-9][0-9][0-9])"
     fi
 
     local sqlString="insert into branches \
     (branch_name, location_name, ps_branch_name, based_on_revision, based_on_release, release_name_regex, date_created, comment) \
-    VALUES ('$branch', '$branch', '$NEW_BRANCH', $REVISION, '$RELEASE', '${regex}', now(), '$COMMENT')"
+    VALUES ('$branch', '$branch', '${branch}', ${REVISION}, '${RELEASE}', '${regex}', now(), '$COMMENT')"
 
-    echo $sqlString | mysql -u lfspt --password=pt -h ulwiki02.emea.nsn-net.net -D lfspt
+    local dbName=$(getConfig MYSQL_db_name)
+    local dbUser=$(getConfig MYSQL_db_username)
+    local dbPass=$(getConfig MYSQL_db_password)
+    local dbHost=$(getConfig MYSQL_db_hostname)
+    local dbPort=$(getConfig MYSQL_db_port)
+
+    echo $sqlString | mysql -u ${dbUser} --password=${dbPass} -h ${dbHost} -P ${dbPort} -D ${dbName}
 }
 
 
@@ -463,7 +470,7 @@ main() {
             svnCopyDeliveryLRC ${SRC_BRANCH} ${NEW_BRANCH}
         fi
         svnEditLocationsTxtFile ${NEW_BRANCH}
-        dbInsert
+        dbInsert ${NEW_BRANCH}
         createBranchInGit ${NEW_BRANCH}
     else
         info "$(basename $0): Nothing to do."
