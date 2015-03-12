@@ -57,7 +57,7 @@ __checkParams() {
 }
 
 ## @fn     __preparation()
-#  @brief  Create key=value pairs file which is used by Jenkins.
+#  @brief  Create key=value pairs file which is sourced by Jenkins.
 __preparation(){
     JENKINS_API_TOKEN=$(getConfig jenkinsApiToken)
     JENKINS_API_USER=$(getConfig jenkinsApiUser)
@@ -68,9 +68,9 @@ __preparation(){
 }
 
 ## @fn      svnCopyBranch()
-#  @brief   copy branch in SVN.
-#  @param   <srcBranch> source branch
-#  @param   <newBranch> new name
+#  @brief   create the new branch in SVN by coping the source branch.
+#  @param   <srcBranch> name of source branch
+#  @param   <newBranch> name of new branch
 #  @return  <none>
 svnCopyBranch() {
     info "--------------------------------------------------------"
@@ -93,9 +93,9 @@ svnCopyBranch() {
 }
 
 ## @fn      svnCopyLocations()
-#  @brief   copy locations for branch in SVN.
-#  @param   <srcBranch> source branch
-#  @param   <newBranch> new name
+#  @brief   copy locations for the branch in SVN.
+#  @param   <srcBranch> name of source branch
+#  @param   <newBranch> name of new branch
 #  @return  <none>
 svnCopyLocations() {
     info "--------------------------------------------------------"
@@ -120,9 +120,9 @@ svnCopyLocations() {
 }
 
 ## @fn      svnCopyLocationsFSMR4()
-#  @brief   copy locations for branch for FSMR4 in SVN.
-#  @param   <srcBranch> source branch
-#  @param   <newBranch> new name
+#  @brief   copy locations for the branch for FSMR4 in SVN.
+#  @param   <srcBranch> name of the source branch
+#  @param   <newBranch> name of the new branch
 #  @return  <none>
 svnCopyLocationsFSMR4() {
     info "--------------------------------------------------------"
@@ -145,9 +145,9 @@ svnCopyLocationsFSMR4() {
 }
 
 ## @fn      svnCopyBranchLRC()
-#  @brief   copy branch in SVN for LRC.
-#  @param   <srcBranch> source branch
-#  @param   <newBranch> new name
+#  @brief   copy the branch in SVN for LRC by coping source branch to new branch.
+#  @param   <srcBranch> name of the source branch
+#  @param   <newBranch> name of the new branch
 #  @return  <none>
 svnCopyBranchLRC() {
     info "--------------------------------------------------------"
@@ -171,8 +171,8 @@ svnCopyBranchLRC() {
 
 ## @fn      svnCopyLocationsLRC()
 #  @brief   copy locations for branch for LRC in SVN.
-#  @param   <srcBranch> source branch
-#  @param   <newBranch> new name
+#  @param   <srcBranch> name of the source branch
+#  @param   <newBranch> name of the new branch
 #  @return  <none>
 svnCopyLocationsLRC() {
     info "--------------------------------------------------------"
