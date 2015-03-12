@@ -28,7 +28,7 @@ sub execute {
     my $xml = XMLin( $self->{opt_changelog}, ForceArray => 1 );
 
     foreach my $logentry ( @{ $xml->{logentry} } ) {
-        $handler->newSubversionCommit( baselineName => $self->{pt_name},
+        $handler->newSubversionCommit( baselineName => $self->{opt_name},
                                        logentry     => $logentry );
     }
     return;
