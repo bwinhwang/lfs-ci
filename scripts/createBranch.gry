@@ -32,10 +32,6 @@ import java.io.FileInputStream;
 
 println("\nRunning script createBranch.gry\n")
 
-def env = System.getenv()
-
-jenkinsHome = env['JENKINS_HOME']
-
 def j = Jenkins.instance
 
 def thr = Thread.currentThread()
@@ -53,6 +49,8 @@ copy_jobs = false
 fsmr4_jobs = false
 
 // Environment vars
+jenkinsHome = build.getEnvironment(listener).get("JENKINS_HOME")
+
 jenkinsUrl = build.getEnvironment(listener).get("JENKINS_URL")
 
 apiToken = build.getEnvironment(listener).get("JENKINS_API_TOKEN")
@@ -355,8 +353,8 @@ class MySectionedView {
         this.apiUser = apiUser
         this.out = out
 
-        this.regExLfsCiBuild = "LFS_CI_-_(trunk|fsmr4)_-_(Build|Package).*"
-        this.regExLfsCiTesting = "LFS_CI_-_(trunk|fsmr4)_-_.*Test.*"
+        this.regExLfsCiBuild = "LFS_CI_-_(${this.branch}|${this.branch}_FSMR4)_-_(Build|KlocworkBuild).*"
+        this.regExLfsCiTesting = "LFS_CI_-_(${this.branch}|${this.branch}_FSMR4)_-_.*(Test|Unittest).*"
         this.regExLfsProd = "LFS_Prod_-_${this.branch}_-_.*"
         this.nameSectionBuild = "CI Builds (${this.branch})"
         this.nameSectionTesting = "CI Testing (${this.branch})"
@@ -382,13 +380,13 @@ class MySectionedView {
     String getCurrentXml() {
         def requestUrl = "${this.jenkinsUrl}view/${this.branchSectionedView}/config.xml"
         this.out.println("==> $requestUrl")
-        def proc = ['curl', "${requestUrl}"].execute()
+        def proc = ["curl", "--noproxy", "localhost", "${requestUrl}"].execute()
         def xmlString = proc.text
         return xmlString
     }
 
     String createListViewSectionsXml() {
-        xs = """
+        def xs = """
             <hudson.plugins.sectioned__view.ListViewSection>
               <jobNames><comparator class="hudson.util.CaseInsensitiveComparator"/></jobNames>
               <jobFilters/>
@@ -443,6 +441,7 @@ class MySectionedView {
                 <hudson.views.JobColumn/>
                 <hudson.views.LastSuccessColumn/><hudson.views.LastFailureColumn/><hudson.views.LastDurationColumn/><hudson.views.BuildButtonColumn/></columns>
             </hudson.plugins.sectioned__view.ListViewSection>"""
+
         return xs
     }
 
@@ -563,7 +562,7 @@ class MySectionedView {
 
         configurationFile = new File("config.xml")
         configurationFile.write(newConfigXml)
-        proc = ['curl', "-u${this.apiUser}:${this.apiToken}", "${requestUrl}", "--data-binary", "@config.xml"].execute()
+        proc = ["curl", "-u${this.apiUser}:${this.apiToken}", "${requestUrl}", "--noproxy", "localhost", "--data-binary", "@config.xml"].execute()
         proc.waitFor()
         this.out.println("addListViewSections() proc.text: $proc.text")
     }
