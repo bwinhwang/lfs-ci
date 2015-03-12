@@ -23,7 +23,7 @@ ci_job_test_unittest() {
 
     mustHaveNextCiLabelName
     local label=$(getNextCiLabelName)
-    ####setBuildDescription ${JOB_NAME} ${BUILD_NUMBER} ${label}
+    setBuildDescription ${JOB_NAME} ${BUILD_NUMBER} ${label}
 
     local revision=$(latestRevisionFromRevisionStateFile)
     mustHaveValue "${revision}" "revision"
