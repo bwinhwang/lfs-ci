@@ -54,11 +54,17 @@ sub newBuildEvent {
         $self->{store} = Nokia::Store::Database::Events->new();
     }
 
-    $self->{store}->newBuildEvent( baselineName => $release->baselineName(),
-                                   branchName   => $release->branchName(),
-                                   revision     => $release->revision(),
+    $self->{store}->newBuildEvent( 
                                    action       => $param->{action},
-                                   comment      => $release->comment() );
+                                   baselineName => $release->baselineName(),
+                                   branchName   => $release->branchName(),
+                                   comment      => $release->comment(),
+                                   revision     => $release->revision(),
+                                   target       => $release->target(),
+                                   subTarget    => $release->subTarget(),
+                                   jobName      => $release->jobName(),
+                                   buildNumber  => $release->buildNumber(),
+                                 );
     return;
 }
 

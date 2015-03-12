@@ -31,6 +31,11 @@ databaseEventBuildFailed() {
     return
 }
 
+databaseEventBuildFinished() {
+    _storeEvent build_finished
+    return
+}
+
 ## @fn      databaseEventSubBuildFinished()
 #  @brief   create an entry in the database table build_events for a started build
 #  @param   <none>

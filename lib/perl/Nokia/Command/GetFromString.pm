@@ -24,14 +24,16 @@ use parent qw( Nokia::Object );
 
 sub prepare {
     my $self = shift;
+    $self->{string} = shift; # string, which should be parsed
+    $self->{wanted} = shift; # wanted substring from regex
     return;
 }
 
 sub execute {
     my $self = shift;
 
-    my $string = $ARGV[0]; # string, which should be parsed
-    my $wanted = $ARGV[1]; # wanted substring from regex
+    my $string = $self->{string};
+    my $wanted = $self->{wanted};
 
     my $wantMap = {
                     productName => 0,

@@ -8,6 +8,8 @@ use Log::Log4perl qw( :easy );
 
 use lib sprintf( "%s/lib/perl/", $ENV{LFS_CI_ROOT} || "." );
 
+use Nokia::Singleton;
+
 my %l4p_config = (
     'log4perl.category'                                  => 'TRACE, Logfile',
     'log4perl.category.Sysadm.Install'                   => 'OFF',
@@ -57,6 +59,9 @@ eval "use $commands{$program};";
 if( @_ ) {
     die "@_";
 }
+
+Nokia::Singleton::config()->loadData( configFile => $ENV{"LFS_CI_CONFIG_FILE"} );
+
 my $command = $commands{$program}->new();
 $command->prepare( @ARGV );
 $command->execute() and die "can not execute $program";

@@ -59,7 +59,6 @@ sub config {
     if( not $obj->{config}{handler} ) {
         DEBUG "creating config handler";
         $obj->{config}{handler} = Nokia::Config->new();
-        $obj->{config}{handler}->loadData( configFileName => $ENV{"LFS_CI_CONFIG_FILE"} );
     }
     return $obj->{config}{handler};
 }

@@ -13,7 +13,7 @@ use parent qw( Nokia::Object );
 
 sub prepare {
     my $self = shift;
-    my $self->{opt_userName} = $ENV{"USER"};
+    $self->{opt_userName} = $ENV{"USER"};
 
     GetOptions( 'targetName=s', \$self->{opt_targetName},
                 'comment=s',    \$self->{opt_comment},

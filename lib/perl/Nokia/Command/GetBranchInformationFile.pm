@@ -6,9 +6,9 @@ use Getopt::Long;
 use Data::Dumper;
 use Log::Log4perl qw( :easy );
 
-use Nokia::Handler::Database::Branches;
+use Nokia::Handler::Database;
 
-use parent qw( Nokia::Command; );
+use parent qw( Nokia::Command );
 
 sub prepare {
     my $self = shift;
@@ -17,7 +17,7 @@ sub prepare {
 
 sub execute {
     my $self = shift;
-    Nokia::Handler::Database::Branches->new()->branchInformation();
+    Nokia::Handler::Database->new()->branchInformation();
     return;
 }
 

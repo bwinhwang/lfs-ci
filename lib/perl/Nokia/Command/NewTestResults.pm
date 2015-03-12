@@ -6,9 +6,9 @@ use Getopt::Long;
 use Data::Dumper;
 use Log::Log4perl qw( :easy );
 
-use Nokia::Handler::Database::Events;
+use Nokia::Handler::Database;
 
-use parent qw( Nokia::Command; );
+use parent qw( Nokia::Command );
 
 sub prepare {
     my $self = shift;
@@ -25,7 +25,7 @@ sub prepare {
 
 sub execute {
     my $self = shift;
-    my $handler = Nokia::Handler::Database::Events->new();
+    my $handler = Nokia::Handler::Database->new();
 
     my $id = $handler->newTestExecution( 
         buildName     => $self->{opt_name},
@@ -33,7 +33,7 @@ sub execute {
         targetName    => $self->{opt_targetName},
         targetType    => $self->{opt_targetType}, );
 
-    open FILE, $opt_resultFile 
+    open FILE, $self->{opt_resultFile} 
         or LOGDIE sprintf( "can not open %s", $self->{opt_resultFile});
 
     while( <FILE> ) {
