@@ -41,7 +41,6 @@ ci_job_test_on_target() {
     local workspace=$(getWorkspaceName)
     mustHaveCleanWorkspace
 
-
     info "create workspace for testing on ${branchName}"
     # TODO: demx2fk3 2015-02-13 we are using the wrong revision to checkout src-test
     createBasicWorkspace -l ${branchName} src-test
@@ -49,6 +48,8 @@ ci_job_test_on_target() {
     export testTargetName=${targetName}
     info "target is testTargetName : ${testTargetName}"
     local testType=$(getConfig LFS_CI_uc_test_making_test_type)
+
+    info "testing production ${LABEL}"
 
     databaseEventTestStarted ${LABEL} ${testTargetName}
 
