@@ -147,10 +147,11 @@ ci_job_build_version() {
 
     local regex=$(getConfig LFS_PROD_branch_to_tag_regex)
     mustHaveValue "${regex}" "branch to tag regex map"
+    local labelPrefix=$(getConfig LFS_PROD_label_prefix)
 
     info "using regex ${regex} for branch ${branch}"
 
-    local label=$(${LFS_CI_ROOT}/bin/getNewTagName -o "${oldLabel}" -r "${regex}" )
+    local label=${labelPrefix}$(${LFS_CI_ROOT}/bin/getNewTagName -o "${oldLabel}" -r "${regex}" )
     mustHaveValue "${label}" "next release label name"
 
 
