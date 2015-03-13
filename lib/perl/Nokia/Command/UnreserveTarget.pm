@@ -1,4 +1,4 @@
-package Nokia::Command::GetConfig; 
+package Nokia::Command::UnreserveTarget; 
 use strict;
 use warnings;
 
