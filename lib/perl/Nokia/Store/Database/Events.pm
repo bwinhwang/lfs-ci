@@ -4,6 +4,7 @@ use warnings;
 
 use DBI;
 use Log::Log4perl qw( :easy);
+use Data::Dumper;
 
 use parent qw( Nokia::Store::Database );
 
@@ -39,7 +40,8 @@ sub newSubversionCommit {
     my $sth = $self->prepare(
         'CALL add_new_subversion_commit( ?, ?, ?, ?, ? )'
     );
-    print "$baselineName $revision $author $date\n";
+    DEBUG "executing add_new_subversion_commit with data ($baselineName, $revision, $author, $date, $msg )";
+
     $sth->execute( $baselineName, $revision, $author, $date, $msg )
         or LOGDIE sprintf( "can not insert test execution: %s, %s, %s, %s", $baselineName, $revision, $author, $author);
 
@@ -66,17 +68,19 @@ sub newTestResult {
 sub newBuildEvent {
     my $self         = shift;
     my $param        = { @_ };
-    my $baselineName = $param->{baselineName};
-    my $branchName   = $param->{branchName};
-    my $revision     = $param->{revision};
-    my $comment      = $param->{comment};
-    my $jobName      = $param->{jobName};
-    my $buildNumber  = $param->{buildNumber};
-    my $target       = $param->{target};
-    my $subTarget    = $param->{subTarget};
+    my $baselineName = $param->{baselineName} || "";
+    my $branchName   = $param->{branchName}   || "";
+    my $revision     = $param->{revision}     || "";
+    my $comment      = $param->{comment}      || "";
+    my $jobName      = $param->{jobName}      || "";
+    my $buildNumber  = $param->{buildNumber}  || "";
+    my $target       = $param->{target}       || "";
+    my $subTarget    = $param->{subTarget}    || "";
     my $action       = $param->{action};
     my $method       = "";
     my $data         = [];
+
+    DEBUG "parameter" . Dumper( $param );
 
     if( $action eq "build_started" ) {
         $method = "build_started( ?, ?, ?, ?, ?, ? )";
@@ -133,6 +137,8 @@ sub newBuildEvent {
         $method = "release_finished( ?, ?, ?, ? )";
         $data   = [ $baselineName, $comment, $jobName, $buildNumber ];
     }
+
+    DEBUG "executing $action with $method and data (" . join( ", ", @{ $data } ) . ")";
 
     my $sth = $self->prepare(
         "call $method"

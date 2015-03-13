@@ -1,14 +1,15 @@
-package Nokia::Command::GetBranchInformationFile;
+package Nokia::Command::NewSubversionCommits;
 use strict;
 use warnings;
 
 use Getopt::Long;
 use Data::Dumper;
 use Log::Log4perl qw( :easy );
+use XML::Simple;
 
-use Nokia::Handler::Database::SubversionCommits;
+use Nokia::Handler::Database;
 
-use parent qw( Nokia::Command; );
+use parent qw( Nokia::Command );
 
 sub prepare {
     my $self = shift;
@@ -22,13 +23,14 @@ sub prepare {
 
 sub execute {
     my $self = shift;
-    my $handler = Nokia::Handler::Database::SubversionCommits->new();
+    my $handler = Nokia::Handler::Database->new();
 
     my $xml = XMLin( $self->{opt_changelog}, ForceArray => 1 );
 
     foreach my $logentry ( @{ $xml->{logentry} } ) {
-        $handler->newSubversionCommit( baselineName => $self->{pt_name},
+        $handler->newSubversionCommit( baselineName => $self->{opt_name},
                                        logentry     => $logentry );
+    }
     return;
 }
 

@@ -3,7 +3,7 @@ use strict;
 use warnings;
 
 use Nokia::Singleton;
-use Nokia::Sotre::Database::Booking;
+use Nokia::Store::Database::Booking;
 
 use parent qw( Nokia::Object );
 
@@ -13,7 +13,7 @@ use Log::Log4perl qw( :easy );
 
 sub prepare {
     my $self = shift;
-    my $opt_userName = $ENV{"USER"};
+    $self->{opt_userName} = $ENV{"USER"};
 
     GetOptions( 'targetName=s', \$self->{opt_targetName},
                 'userName=s',   \$self->{opt_userName},

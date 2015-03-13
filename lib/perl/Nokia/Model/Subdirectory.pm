@@ -10,7 +10,6 @@ use Data::Dumper;
 
 use Nokia::Singleton;
 use Nokia::Parser::Dependencies;
-use Nokia::Usecase::GetLocation;
 
 use parent qw( Nokia::Object );
 
