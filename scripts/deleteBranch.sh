@@ -28,7 +28,7 @@ SHARE="/build/home/CI_LFS/Release_Candidates"
 BLD_SHARE="/build/home/SC_LFS/releases/bld"
 PKG_SHARE="/build/home/SC_LFS/pkgpool"
 SVN_OPTS="--non-interactive --trust-server-cert"
-ARCHIVE_BASE="/build/home/psulm/genericCleanup"
+ARCHIVE_BASE=$(getConfig ADMIN_archive_share)
 
 
 #######################################################################

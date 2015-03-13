@@ -32,10 +32,6 @@ import java.io.FileInputStream;
 
 println("\nRunning script createBranch.gry\n")
 
-def env = System.getenv()
-
-jenkinsHome = env['JENKINS_HOME']
-
 def j = Jenkins.instance
 
 def thr = Thread.currentThread()
@@ -52,7 +48,11 @@ copy_jobs = false
 
 fsmr4_jobs = false
 
+activateRootJobs = false
+
 // Environment vars
+jenkinsHome = build.getEnvironment(listener).get("JENKINS_HOME")
+
 jenkinsUrl = build.getEnvironment(listener).get("JENKINS_URL")
 
 apiToken = build.getEnvironment(listener).get("JENKINS_API_TOKEN")
@@ -76,6 +76,8 @@ parameters.each {
         fsmr4_jobs = it.value
     else if(it.name == "COMMENT")
         comment = it.value
+    else if(it.name == "ACTIVE_ROOT_JOBS")
+        activateRootJobs = it.value
     else if(it.name == "DO_JENKINS" && it.value == false) {
         println("DO_JENKINS: false - nothing to do.")
         return 0
@@ -273,7 +275,7 @@ for(job in src_branch_view_obj.getItems()) {
 for(job in jobs_list) {
     //if(job.name == "LFS_CI_-_${src_branch}_-_Build") {
     //if(job.name == "LFS_CI_-_${src_branch}_-_Test" || job.name == "LFS_Prod_-_trunk_-_Releasing_-_summary" || job.name == "LFS_CI_-_LRC_-_Build" || job.name == "LFS_Prod_-_LRC_-_Releasing_-_summary") {
-    //if(job.name == "LFS_CI_-_${src_branch}_-_Build" || job.name == "LFS_CI_-_${src_branch}_-_Test" || job.name == "LFS_Prod_-_trunk_-_Releasing_-_summary") {
+    if(job.name == "LFS_CI_-_${src_branch}_-_Build" || job.name == "LFS_CI_-_${src_branch}_-_Test" || job.name == "LFS_Prod_-_trunk_-_Releasing_-_summary") {
     //if(job.name.find("LRC")) {
     //if(job.name.find("fsmr4")) {
     def new_job = copyJob(job)
@@ -286,13 +288,17 @@ for(job in jobs_list) {
     reloadJobConfig(new_job, config_file)
     new_branch_view_obj.doAddJobToView(new_job.getName())
     println("[INFO] added job $new_job.name to view \"$new_branch_view_obj.name\"")
-    //}
+    }
 }
 
 // enable previosly disabled jobs
-for(disabled_job in jobs_to_enable) {
-    disabled_job.enable()
-    println("[INFO] enabled job \"$disabled_job.name\"")
+if(activateRootJobs) {
+    for(disabled_job in jobs_to_enable) {
+        disabled_job.enable()
+        println("[INFO] enabled job \"$disabled_job.name\"")
+    }
+} else {
+    println("[INFO] not enabling before disabled jobs")
 }
 
 
@@ -323,8 +329,10 @@ class MySectionedView {
 
     def branch
     def lrc
-    def regExLfsCi
+    def regExLfsCiBuild
+    def regExLfsCiTesting
     def regExLfsProd
+    def nameSectionBuild
     def nameSectionTesting
     def nameSectionReleasing
     def branchSectionedView
@@ -353,9 +361,11 @@ class MySectionedView {
         this.apiUser = apiUser
         this.out = out
 
-        this.regExLfsCi = "LFS_CI_-_${this.branch}.*"
+        this.regExLfsCiBuild = "LFS_CI_-_(${this.branch}|${this.branch}_FSMR4)_-_(Build|KlocworkBuild).*"
+        this.regExLfsCiTesting = "LFS_CI_-_(${this.branch}|${this.branch}_FSMR4)_-_.*(Test|Unittest).*"
         this.regExLfsProd = "LFS_Prod_-_${this.branch}_-_.*"
-        this.nameSectionTesting = "CI Builds and Testing (${this.branch})"
+        this.nameSectionBuild = "CI Builds (${this.branch})"
+        this.nameSectionTesting = "CI Testing (${this.branch})"
         this.nameSectionReleasing = "Releasing (${this.branch})"
         if(this.branch[0..1] == "FB")
             this.branchSectionedView = this.branch[2..-1]
@@ -365,9 +375,9 @@ class MySectionedView {
         this.listAlignment = "LEFT"
         if(this.lrc) {
             this.listAlignment = "RIGHT"
-            this.regExLfsCi = "LFS_CI_-_LRC_${this.branch}.*"
+            this.regExLfsCiBuild = "LFS_CI_-_LRC_${this.branch}.*"
             this.regExLfsProd = "LFS_Prod_-_LRC_${this.branch}_-_.*"
-            this.nameSectionTesting = "CI Builds and Testing (LRC_${this.branch})"
+            this.nameSectionBuild = "CI Builds and Testing (LRC_${this.branch})"
             this.nameSectionReleasing = "Releasing (LRC_${this.branch})"
         }
     }   
@@ -378,9 +388,69 @@ class MySectionedView {
     String getCurrentXml() {
         def requestUrl = "${this.jenkinsUrl}view/${this.branchSectionedView}/config.xml"
         this.out.println("==> $requestUrl")
-        def proc = ['curl', "${requestUrl}"].execute()
+        def proc = ["curl", "--noproxy", "localhost", "${requestUrl}"].execute()
         def xmlString = proc.text
         return xmlString
+    }
+
+    String createListViewSectionsXml() {
+        def xs = """
+            <hudson.plugins.sectioned__view.ListViewSection>
+              <jobNames><comparator class="hudson.util.CaseInsensitiveComparator"/></jobNames>
+              <jobFilters/>
+              <name>${this.nameSectionBuild}</name>
+              <includeRegex>${this.regExLfsCiBuild}</includeRegex>
+              <width>${listWidth}</width>
+              <alignment>${this.listAlignment}</alignment>
+              <columns>
+                <hudson.views.StatusColumn/>
+                <hudson.views.WeatherColumn/>
+                <hudson.views.JobColumn/>
+                <hudson.views.LastSuccessColumn/>
+                <hudson.views.LastFailureColumn/>
+                <hudson.views.LastDurationColumn/>
+                <hudson.views.BuildButtonColumn/>
+              </columns>
+            </hudson.plugins.sectioned__view.ListViewSection>"""
+
+        // LRC list view section does not separate build and test jobs
+        if(!this.lrc) {
+            xs+= """
+            <hudson.plugins.sectioned__view.ListViewSection>
+              <jobNames><comparator class="hudson.util.CaseInsensitiveComparator"/></jobNames>
+              <jobFilters/>
+              <name>${this.nameSectionTesting}</name>
+              <includeRegex>${this.regExLfsCiTesting}</includeRegex>
+              <width>${listWidth}</width>
+              <alignment>${this.listAlignment}</alignment>
+              <columns>
+                <hudson.views.StatusColumn/>
+                <hudson.views.WeatherColumn/>
+                <hudson.views.JobColumn/>
+                <hudson.views.LastSuccessColumn/>
+                <hudson.views.LastFailureColumn/>
+                <hudson.views.LastDurationColumn/>
+                <hudson.views.BuildButtonColumn/>
+              </columns>
+            </hudson.plugins.sectioned__view.ListViewSection>"""
+        }
+
+        xs+= """
+            <hudson.plugins.sectioned__view.ListViewSection>
+              <jobNames><comparator class="hudson.util.CaseInsensitiveComparator"/></jobNames>
+              <jobFilters/>
+              <name>${this.nameSectionReleasing}</name>
+              <includeRegex>${this.regExLfsProd}</includeRegex>
+              <width>${listWidth}</width>
+              <alignment>${this.listAlignment}</alignment>
+              <columns>
+                <hudson.views.StatusColumn/>
+                <hudson.views.WeatherColumn/>
+                <hudson.views.JobColumn/>
+                <hudson.views.LastSuccessColumn/><hudson.views.LastFailureColumn/><hudson.views.LastDurationColumn/><hudson.views.BuildButtonColumn/></columns>
+            </hudson.plugins.sectioned__view.ListViewSection>"""
+
+        return xs
     }
 
     /**
@@ -388,13 +458,30 @@ class MySectionedView {
      *
      * @return String XML String defining list view sections.
      */
-    String createListViewSectionsXml() {
+    String createListViewSectionsXml_OLD() {
         return """
             <hudson.plugins.sectioned__view.ListViewSection>
               <jobNames><comparator class="hudson.util.CaseInsensitiveComparator"/></jobNames>
               <jobFilters/>
+              <name>${this.nameSectionBuild}</name>
+              <includeRegex>${this.regExLfsCiBuild}</includeRegex>
+              <width>${listWidth}</width>
+              <alignment>${this.listAlignment}</alignment>
+              <columns>
+                <hudson.views.StatusColumn/>
+                <hudson.views.WeatherColumn/>
+                <hudson.views.JobColumn/>
+                <hudson.views.LastSuccessColumn/>
+                <hudson.views.LastFailureColumn/>
+                <hudson.views.LastDurationColumn/>
+                <hudson.views.BuildButtonColumn/>
+              </columns>
+            </hudson.plugins.sectioned__view.ListViewSection>
+            <hudson.plugins.sectioned__view.ListViewSection>
+              <jobNames><comparator class="hudson.util.CaseInsensitiveComparator"/></jobNames>
+              <jobFilters/>
               <name>${this.nameSectionTesting}</name>
-              <includeRegex>${this.regExLfsCi}</includeRegex>
+              <includeRegex>${this.regExLfsCiTesting}</includeRegex>
               <width>${listWidth}</width>
               <alignment>${this.listAlignment}</alignment>
               <columns>
@@ -483,7 +570,7 @@ class MySectionedView {
 
         configurationFile = new File("config.xml")
         configurationFile.write(newConfigXml)
-        proc = ['curl', "-u${this.apiUser}:${this.apiToken}", "${requestUrl}", "--data-binary", "@config.xml"].execute()
+        proc = ["curl", "-u${this.apiUser}:${this.apiToken}", "${requestUrl}", "--noproxy", "localhost", "--data-binary", "@config.xml"].execute()
         proc.waitFor()
         this.out.println("addListViewSections() proc.text: $proc.text")
     }
