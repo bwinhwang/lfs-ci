@@ -14,6 +14,7 @@ info "# SRC_BRANCH:           $SRC_BRANCH"
 info "# NEW_BRANCH:           $NEW_BRANCH"
 info "# REVISION:             $REVISION"
 info "# FSMR4:                $FSMR4"
+info "# FSMR4_ONLY:           $FSMR4_ONLY"
 info "# SOURCE_RELEASE:       $SOURCE_RELEASE"
 info "# ECL_URLS:             $ECL_URLS"
 info "# COMMENT:              $COMMENT"
@@ -53,6 +54,7 @@ __checkParams() {
     [[ ! ${SOURCE_RELEASE} ]] && { echo "SOURCE_RELEASE is missing"; exit 1; }
     [[ ! ${ECL_URLS} ]] && { echo "ECL_URLS is missing"; exit 1; }
     [[ ! ${COMMENT} ]] && { echo "COMMENT is missing"; exit 1; }
+    [[ ${FSMR4} == false ]] && [[ ${FSMR4_ONLY} == true ]] && { echo "FSMR4 can not be false in case FSMR4_ONLY is true"; exit 1; }
 
     return 0
 }
