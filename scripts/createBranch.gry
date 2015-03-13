@@ -48,6 +48,8 @@ copy_jobs = false
 
 fsmr4_jobs = false
 
+activateRootJobs = false
+
 // Environment vars
 jenkinsHome = build.getEnvironment(listener).get("JENKINS_HOME")
 
@@ -74,6 +76,8 @@ parameters.each {
         fsmr4_jobs = it.value
     else if(it.name == "COMMENT")
         comment = it.value
+    else if(it.name == "ACTIVE_ROOT_JOBS")
+        activateRootJobs = it.value
     else if(it.name == "DO_JENKINS" && it.value == false) {
         println("DO_JENKINS: false - nothing to do.")
         return 0
@@ -288,9 +292,13 @@ for(job in jobs_list) {
 }
 
 // enable previosly disabled jobs
-for(disabled_job in jobs_to_enable) {
-    disabled_job.enable()
-    println("[INFO] enabled job \"$disabled_job.name\"")
+if(activateRootJobs) {
+    for(disabled_job in jobs_to_enable) {
+        disabled_job.enable()
+        println("[INFO] enabled job \"$disabled_job.name\"")
+    }
+} else {
+    println("[INFO] not enabling before disabled jobs")
 }
 
 
