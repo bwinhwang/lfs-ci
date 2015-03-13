@@ -1,4 +1,4 @@
-package Nokia::Store::Database;
+package Nokia::Store::Database::Booking;
 use strict;
 use warnings;
 
