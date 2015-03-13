@@ -147,6 +147,8 @@ archiveBranchShare() {
     local dirPattern="${branchType}_PS_LFS_OS_${yyyy}_${mm}*"
     local dirsToDelete=$(find ${SHARE} -maxdepth 2 -type d -name "${dirPattern}")
 
+    #TODO: get dirPattern from DB
+
     info "archive $SHARE"
     for DIR in $dirsToDelete
     do
@@ -165,6 +167,8 @@ archiveBranchBldShare() {
     local yyyy=$(getBranchPart ${BRANCH} YYYY)
     local dirPattern="${branchType}_PS_LFS_OS_${yyyy}_${mm}*"
     local dirsToDelete=$(find ${BLD_SHARE} -maxdepth 2 -type d -name "${dirPattern}")
+
+    #TODO: get dirPattern from DB
 
     info "archive $BLD_SHARE"
     for DIR in $dirsToDelete
