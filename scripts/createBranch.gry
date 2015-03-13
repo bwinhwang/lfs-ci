@@ -274,12 +274,16 @@ new_branch_view_obj = createScmView()
 def jobs_list = []
 for(job in src_branch_view_obj.getItems()) {
     if(job.getName().find(src_branch) && !lrc_jobs) {
+        // fsm is requested
         jobs_list.add(job)
-    } else if(fsmr4_jobs && job.getName().find("fsmr4")) {
+    } else if(fsmr4_jobs && !fsmr4_only && job.getName().find("fsmr4")) {
+        // fsmr4 is also requested
         jobs_list.add(job)
     } else if(fsmr4_only && !job.getName().find("FSM-r2") && !job.getName().find("FSM-r3")) {
+        // only fsmr4 is requested (fsm jobs are not needed)
         jobs_list.add(job)
     } else if(lrc_jobs && job.getName().find("LRC")) {
+        // LRC is requested
         jobs_list.add(job)
     }
 }
