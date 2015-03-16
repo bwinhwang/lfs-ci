@@ -51,6 +51,12 @@ sub configStore {
     return $obj->{config}{ $storeName };
 }
 
+sub invalidateConfigStore {
+    my $storeName = shift;
+    $obj->{config}{$storeName} = undef;
+    return
+}
+
 ## @fn      config()
 #  @brief   return the config handler
 #  @param   <none>

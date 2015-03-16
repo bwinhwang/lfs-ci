@@ -34,6 +34,7 @@ sub prepare {
 
     foreach my $value ( @{ $opt_t } ) {
         if( $value =~ m/([\w_]+):(.*)/ ) {
+            DEBUG "adding setting $1 (value: $2)";
             Nokia::Singleton::configStore( "cache", storeClass => "cache" )->{data}->{ $1 } = $2;
         }
     }

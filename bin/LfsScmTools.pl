@@ -60,7 +60,9 @@ if( @_ ) {
     die "@_";
 }
 
-Nokia::Singleton::config()->loadData( configFile => $ENV{"LFS_CI_CONFIG_FILE"} );
+if( $program ne "getConfig" ) {
+    Nokia::Singleton::config()->loadData( configFile => $ENV{"LFS_CI_CONFIG_FILE"} );
+}
 
 my $command = $commands{$program}->new();
 $command->prepare( @ARGV );

@@ -179,6 +179,20 @@ testConfigInclude5() {
     cd - >/dev/null
 }
 
+testConfigDifferentConfigFile() {
+    local cfg1=$(createTempFile)
+    local cfg2=$(createTempFile)
+
+    echo "foo = 1"          > ${cfg1}
+    echo "bar = 2"         >> ${cfg1}
+    export LFS_CI_CONFIG_FILE=${cfg1}
+
+    echo "foo = 3"          > ${cfg2}
+    echo "bar = 4"         >> ${cfg2}
+
+    local value=$(${LFS_CI_ROOT}/bin/getConfig -k foo -f ${cfg2})
+    assertEquals "value from getConfig" "3" "${value}"
+}
 source lib/shunit2
 
 exit 0
