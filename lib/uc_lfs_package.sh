@@ -285,7 +285,7 @@ copySysroot() {
             mustExistDirectory ${SYSROOT_DIR}
             execute cp -r $SYSROOT_DIR/usr/include/* ${dst}/usr/include/
             execute cp -r $SYSROOT_DIR/usr/lib/* ${dst}/usr/lib/
-            execute cp -r $SYSROOT_DIR/lib ${dst}/lib/
+            execute cp -r $SYSROOT_DIR/lib/* ${dst}/lib/
 
         fi
 
