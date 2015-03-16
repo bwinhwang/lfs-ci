@@ -51,6 +51,9 @@ uploadToSubversion() {
     export TMPDIR=/dev/shm/${JOB_NAME}.${USER}/tmp
     debug "cleanup tmp directory"
 
+    # ensure, that there are 15 GB disk space
+    mustHaveFreeDiskSpace ${TMPDIR} 15000000 
+
     # TMPDIR is not handled/created via createTempDirectory. So we have to
     # take care to clean up the temp directory after exit and failure
     # exit_add subversionUploadCleanupTempDirectory
