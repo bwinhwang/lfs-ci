@@ -65,7 +65,7 @@ getLocationName
 runOnMaster cat /var/fpwork/psulm/lfs-jenkins/home/jobs/LFS_CI_-_trunk_-_Build_-_FSM-r2_-_fcmd/builds/123/revisionstate.xml
 mustHaveNextCiLabelName
 getNextCiLabelName
-execute -i ${LFS_CI_ROOT}/bin/newEvent --buildName=PS_LFS_OS_9999_88_7777 --action=build_started --jobName=LFS_CI_-_trunk_-_Build_-_FSM-r2_-_fcmd --buildNumber=123 --targetName=--revision=123456 --targetType=--branchName=trunk
+execute -i ${LFS_CI_ROOT}/bin/newEvent --buildName=PS_LFS_OS_9999_88_7777 --action=build_started --jobName=LFS_CI_-_trunk_-_Build_-_FSM-r2_-_fcmd --buildNumber=123 --targetName=FSM-r2 --targetType=fcmd --revision=123456 --branchName=trunk
 EOF
     assertExecutedCommands ${expect}
 }
