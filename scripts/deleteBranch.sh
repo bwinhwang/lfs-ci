@@ -136,18 +136,40 @@ LRC_moveBranchSvn() {
     return 0
 }
 
+getDbData() {
+    case $1 in
+        db_name) echo "lfspt" ;;
+        db_username) echo "lfspt_read" ;;
+        db_password) echo "ptread" ;;
+        db_hostname) echo "ulwiki02.emea.nsn-net.net" ;;
+        db_port) echo "3306" ;;
+    esac
+}
+
+getDirPattern() {
+    local branch=$1
+    local dbName=$(getDbData db_name)
+    local dbUser=$(getDbData db_username)
+    local dbPass=$(getDbData db_password)
+    local dbHost=$(getDbData db_hostname)
+    local dbPort=$(getDbData db_port)
+    local sqlString="SELECT release_name_regex FROM branches WHERE branch_name='${branch}'"
+    local dirPattern=$(echo "${sqlString}" | mysql -N -u ${dbUser} --password=${dbPass} -h ${dbHost} -P ${dbPort} -D ${dbName})
+
+    mustHaveValue ${branch} "No value for branch."
+    mustHaveValue ${dirPattern} "dirPattern must have a value."
+
+    dirPattern=$(echo ${dirPattern} | cut -d'(' -f1)
+    echo "${dirPattern}*"
+}
+
 ## @fn      archiveBranchShare()
 #  @brief   archive data for BRANCH on share
 #  @param   <none>
 #  @return  <none>
 archiveBranchShare() {
-    local branchType=$(getBranchPart ${BRANCH} TYPE)
-    local mm=$(getBranchPart ${BRANCH} MM)
-    local yyyy=$(getBranchPart ${BRANCH} YYYY)
-    local dirPattern="${branchType}_PS_LFS_OS_${yyyy}_${mm}*"
+    local dirPattern=$(getDirPattern $BRANCH)
     local dirsToDelete=$(find ${SHARE} -maxdepth 2 -type d -name "${dirPattern}")
-
-    #TODO: get dirPattern from DB
 
     info "archive $SHARE"
     for DIR in $dirsToDelete
@@ -162,13 +184,8 @@ archiveBranchShare() {
 #  @param   <none>
 #  @return  <none>
 archiveBranchBldShare() {
-    local branchType=$(getBranchPart ${BRANCH} TYPE)
-    local mm=$(getBranchPart ${BRANCH} MM)
-    local yyyy=$(getBranchPart ${BRANCH} YYYY)
-    local dirPattern="${branchType}_PS_LFS_OS_${yyyy}_${mm}*"
+    local dirPattern=$(getDirPattern $BRANCH)
     local dirsToDelete=$(find ${BLD_SHARE} -maxdepth 2 -type d -name "${dirPattern}")
-
-    #TODO: get dirPattern from DB
 
     info "archive $BLD_SHARE"
     for DIR in $dirsToDelete
@@ -183,10 +200,7 @@ archiveBranchBldShare() {
 #  @param   <none>
 #  @return  <none>
 archiveBranchPkgShare() {
-    local branchType=$(getBranchPart ${BRANCH} TYPE)
-    local mm=$(getBranchPart ${BRANCH} MM)
-    local yyyy=$(getBranchPart ${BRANCH} YYYY)
-    local dirPattern="${branchType}_PS_LFS_PKG_${yyyy}_${mm}*"
+    local dirPattern=$(getDirPattern $BRANCH)
     local dirsToDelete=$(find ${PKG_SHARE} -maxdepth 1 -type d -name "${dirPattern}")
 
     info "archive $PKG_SHARE"
@@ -202,10 +216,7 @@ archiveBranchPkgShare() {
 #  @param   <none>
 #  @return  <none>
 LRC_archiveBranchShare() {
-    local branchType=$(getBranchPart ${BRANCH} TYPE)
-    local mm=$(getBranchPart ${BRANCH} MM)
-    local yyyy=$(getBranchPart ${BRANCH} YYYY)
-    local dirPattern="${branchType}_LRC_LCP_PS_LFS_OS_${yyyy}_${mm}*"
+    local dirPattern=$(getDirPattern LRC_$BRANCH)
     local dirsToDelete=$(find ${SHARE} -maxdepth 2 -type d -name "${dirPattern}")
 
     info "archive $SHARE LRC"
@@ -221,10 +232,7 @@ LRC_archiveBranchShare() {
 #  @param   <none>
 #  @return  <none>
 LRC_archiveBranchBldShare() {
-    local branchType=$(getBranchPart ${BRANCH} TYPE)
-    local mm=$(getBranchPart ${BRANCH} MM)
-    local yyyy=$(getBranchPart ${BRANCH} YYYY)
-    local dirPattern="${branchType}_LRC_LCP_PS_LFS_OS_${yyyy}_${mm}*"
+    local dirPattern=$(getDirPattern LRC_$BRANCH)
     local dirsToDelete=$(find ${BLD_SHARE} -maxdepth 2 -type d -name "${dirPattern}")
 
     info "archive $BLD_SHARE LRC"
