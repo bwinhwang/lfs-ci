@@ -12,6 +12,8 @@ BEGIN
     SELECT count(id) INTO cnt_branch_id FROM branches WHERE location_name = in_branch_name;
     IF cnt_branch_id = 0 THEN
         INSERT INTO branches ( ps_branch_name, location_name, branch_name, date_created, comment ) VALUES ( in_branch_name, in_branch_name, in_branch_name, NOW(), in_comment );
+    ELSE
+        SELECT * FROM branches WHERE location_name = in_branch_name;
     END IF;
     SELECT id INTO var_branch_id FROM branches WHERE location_name = in_branch_name;
 
@@ -80,9 +82,9 @@ DELIMITER ;
 DROP PROCEDURE IF EXISTS build_finished
 DELIMITER //
 CREATE PROCEDURE build_finished( IN in_build_name VARCHAR(128), 
-                               IN in_comment TEXT, 
-                               IN in_job_name VARCHAR(128), 
-                               IN in_build_number INT )
+                                 IN in_comment TEXT, 
+                                 IN in_job_name VARCHAR(128), 
+                                 IN in_build_number INT )
 BEGIN
     CALL new_build_event( in_build_name, 'build_finished', in_comment,  in_job_name, in_build_number );
 END //
