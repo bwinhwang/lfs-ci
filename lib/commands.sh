@@ -29,7 +29,7 @@ execute() {
     local noRedirect=
     local retryCount=1
     local ignoreError=
-    local logfile=
+    local logfile=${LFS_CI_LAST_EXECUTE_LOGFILE}
 
     # Note: we are not using getopt, because we have problems with parsing
     # the parameters from the command. We don't want that.

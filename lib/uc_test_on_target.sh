@@ -18,11 +18,14 @@ ci_job_test_on_target() {
 
     setBuildDescription ${JOB_NAME} ${BUILD_NUMBER} ${LABEL}
 
+    local branchName=$(getLocationName ${UPSTREAM_PROJECT})
+    mustHaveValue "${branchName}" "branch name"
+
     local isBookingEnabled=$(getConfig LFS_uc_test_is_booking_enabled)
     local targetName=""
     if [[ ${isBookingEnabled} ]] ; then
         # new method via booking from database
-        local targetFeatures="$(getConfig LFS_uc_test_booking_target_features)"
+        local targetFeatures="$(getConfig LFS_uc_test_booking_target_features -t branchName:${branchName} )"
         debug "requesting target with features ${targetFeatures}"
 
         reserveTargetByFeature ${targetFeatures}
@@ -38,9 +41,6 @@ ci_job_test_on_target() {
     local workspace=$(getWorkspaceName)
     mustHaveCleanWorkspace
 
-    local branchName=$(getLocationName ${UPSTREAM_PROJECT})
-    mustHaveValue "${branchName}" "branch name"
-
     info "create workspace for testing on ${branchName}"
     # TODO: demx2fk3 2015-02-13 we are using the wrong revision to checkout src-test
     createBasicWorkspace -l ${branchName} src-test
@@ -48,6 +48,8 @@ ci_job_test_on_target() {
     export testTargetName=${targetName}
     info "target is testTargetName : ${testTargetName}"
     local testType=$(getConfig LFS_CI_uc_test_making_test_type)
+
+    info "testing production ${LABEL}"
 
     databaseEventTestStarted ${LABEL} ${testTargetName}
 
@@ -100,7 +102,10 @@ uc_job_test_on_target_archive_logs() {
     # set the correct jobName
     export JOB_NAME=${jobName}
 
-    local testReposPathOnMoritz=$(getConfig LFS_CI_uc_test_on_target_test_repos_on_moritz)
+    local branchName=$(getLocationName ${UPSTREAM_PROJECT})
+    mustHaveValue "${branchName}" "branch name"
+
+    local testReposPathOnMoritz=$(getConfig LFS_CI_uc_test_on_target_test_repos_on_moritz -t location:${branchName})
     mustHaveValue "${testReposPathOnMoritz}" "test-repos path on moritz"
     
     execute -r 10 rsync -LavrPe ssh \

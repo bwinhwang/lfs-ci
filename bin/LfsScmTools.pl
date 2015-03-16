@@ -2290,7 +2290,7 @@ sub execute {
                               msg  => $self->{releaseNote},
                             }
                           ); 
-    DEBUG "return code from mua was $rv";
+    DEBUG "return code from mua was " . Dumper( $rv );
 
     if( ! $rv ) {
         die "error in sending release note: rc $rv";

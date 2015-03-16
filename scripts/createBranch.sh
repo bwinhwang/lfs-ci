@@ -14,6 +14,7 @@ info "# SRC_BRANCH:           $SRC_BRANCH"
 info "# NEW_BRANCH:           $NEW_BRANCH"
 info "# REVISION:             $REVISION"
 info "# FSMR4:                $FSMR4"
+info "# FSMR4_ONLY:           $FSMR4_ONLY"
 info "# SOURCE_RELEASE:       $SOURCE_RELEASE"
 info "# ECL_URLS:             $ECL_URLS"
 info "# COMMENT:              $COMMENT"
@@ -24,6 +25,7 @@ info "# COPY_DELIVERY:        $COPY_DELIVERY"
 info "# UPDATE_LOCATIONS_TXT: $UPDATE_LOCATIONS_TXT"
 info "# DO_DB_INSERT:         $DO_DB_INSERT"
 info "# DO_GIT:               $DO_GIT"
+info "# ACTIVATE_ROOT_JOBS:   $ACTIVATE_ROOT_JOBS"
 info "###############################################################"
 
 # TODO: Get it via getConfig()
@@ -52,12 +54,13 @@ __checkParams() {
     [[ ! ${SOURCE_RELEASE} ]] && { echo "SOURCE_RELEASE is missing"; exit 1; }
     [[ ! ${ECL_URLS} ]] && { echo "ECL_URLS is missing"; exit 1; }
     [[ ! ${COMMENT} ]] && { echo "COMMENT is missing"; exit 1; }
+    [[ ${FSMR4} == false ]] && [[ ${FSMR4_ONLY} == true ]] && { echo "FSMR4 can not be false in case FSMR4_ONLY is true"; exit 1; }
 
     return 0
 }
 
 ## @fn     __preparation()
-#  @brief  Create key=value pairs file which is used by Jenkins.
+#  @brief  Create key=value pairs file which is sourced by Jenkins.
 __preparation(){
     JENKINS_API_TOKEN=$(getConfig jenkinsApiToken)
     JENKINS_API_USER=$(getConfig jenkinsApiUser)
@@ -68,9 +71,9 @@ __preparation(){
 }
 
 ## @fn      svnCopyBranch()
-#  @brief   copy branch in SVN.
-#  @param   <srcBranch> source branch
-#  @param   <newBranch> new name
+#  @brief   create the new branch in SVN by coping the source branch.
+#  @param   <srcBranch> name of source branch
+#  @param   <newBranch> name of new branch
 #  @return  <none>
 svnCopyBranch() {
     info "--------------------------------------------------------"
@@ -93,9 +96,9 @@ svnCopyBranch() {
 }
 
 ## @fn      svnCopyLocations()
-#  @brief   copy locations for branch in SVN.
-#  @param   <srcBranch> source branch
-#  @param   <newBranch> new name
+#  @brief   copy locations for the branch in SVN.
+#  @param   <srcBranch> name of source branch
+#  @param   <newBranch> name of new branch
 #  @return  <none>
 svnCopyLocations() {
     info "--------------------------------------------------------"
@@ -120,9 +123,9 @@ svnCopyLocations() {
 }
 
 ## @fn      svnCopyLocationsFSMR4()
-#  @brief   copy locations for branch for FSMR4 in SVN.
-#  @param   <srcBranch> source branch
-#  @param   <newBranch> new name
+#  @brief   copy locations for the branch for FSMR4 in SVN.
+#  @param   <srcBranch> name of the source branch
+#  @param   <newBranch> name of the new branch
 #  @return  <none>
 svnCopyLocationsFSMR4() {
     info "--------------------------------------------------------"
@@ -145,9 +148,9 @@ svnCopyLocationsFSMR4() {
 }
 
 ## @fn      svnCopyBranchLRC()
-#  @brief   copy branch in SVN for LRC.
-#  @param   <srcBranch> source branch
-#  @param   <newBranch> new name
+#  @brief   copy the branch in SVN for LRC by coping source branch to new branch.
+#  @param   <srcBranch> name of the source branch
+#  @param   <newBranch> name of the new branch
 #  @return  <none>
 svnCopyBranchLRC() {
     info "--------------------------------------------------------"
@@ -171,8 +174,8 @@ svnCopyBranchLRC() {
 
 ## @fn      svnCopyLocationsLRC()
 #  @brief   copy locations for branch for LRC in SVN.
-#  @param   <srcBranch> source branch
-#  @param   <newBranch> new name
+#  @param   <srcBranch> name of the source branch
+#  @param   <newBranch> name of the new branch
 #  @return  <none>
 svnCopyLocationsLRC() {
     info "--------------------------------------------------------"
@@ -406,8 +409,9 @@ svnCopyDeliveryLRC() {
     fi
 }
 
-## @fn      dbInsert
-#  @brief   insert new branch into lfs database
+## @fn      dbInsert()
+#  @brief   insert the new branch into the lfs database
+#  @param   <branch> the name of the branch
 #  @return  <none>
 dbInsert() {
     info "--------------------------------------------------------"
@@ -415,26 +419,32 @@ dbInsert() {
     info "--------------------------------------------------------"
 
     if [[ "${DO_DB_INSERT}" == "false" ]]; then
-        info "Not inserting branch ${NEW_BRANCH} into table branches of lfspt database."
+        info "Not inserting branch ${branch} into table branches of lfspt database."
         return 0
     fi
 
-    local branch=${NEW_BRANCH}
-    local branchType=$(getBranchPart ${NEW_BRANCH} TYPE)
-    local yyyy=$(getBranchPart ${NEW_BRANCH} YYYY)
-    local mm=$(getBranchPart ${NEW_BRANCH} MM)
+    local branch=$1
+    local branchType=$(getBranchPart ${branch} TYPE)
+    local yyyy=$(getBranchPart ${branch} YYYY)
+    local mm=$(getBranchPart ${branch} MM)
     local regex="${branchType}_PS_LFS_OS_${yyyy}_${mm}_([0-9][0-9][0-9][0-9])"
 
     if [[ ${LRC} == "true" ]]; then
-        branch="LRC_${NEW_BRANCH}"
+        branch="LRC_${branch}"
         regex="${branchType}_LRC_LCP_PS_LFS_OS_${yyyy}_${mm}_([0-9][0-9][0-9][0-9])"
     fi
 
     local sqlString="insert into branches \
     (branch_name, location_name, ps_branch_name, based_on_revision, based_on_release, release_name_regex, date_created, comment) \
-    VALUES ('$branch', '$branch', '$NEW_BRANCH', $REVISION, '$RELEASE', '${regex}', now(), '$COMMENT')"
+    VALUES ('$branch', '$branch', '${branch}', ${REVISION}, '${RELEASE}', '${regex}', now(), '$COMMENT')"
 
-    echo $sqlString | mysql -u lfspt --password=pt -h ulwiki02.emea.nsn-net.net -D lfspt
+    local dbName=$(getConfig MYSQL_db_name)
+    local dbUser=$(getConfig MYSQL_db_username)
+    local dbPass=$(getConfig MYSQL_db_password)
+    local dbHost=$(getConfig MYSQL_db_hostname)
+    local dbPort=$(getConfig MYSQL_db_port)
+
+    echo $sqlString | mysql -u ${dbUser} --password=${dbPass} -h ${dbHost} -P ${dbPort} -D ${dbName}
 }
 
 
@@ -463,7 +473,7 @@ main() {
             svnCopyDeliveryLRC ${SRC_BRANCH} ${NEW_BRANCH}
         fi
         svnEditLocationsTxtFile ${NEW_BRANCH}
-        dbInsert
+        dbInsert ${NEW_BRANCH}
         createBranchInGit ${NEW_BRANCH}
     else
         info "$(basename $0): Nothing to do."

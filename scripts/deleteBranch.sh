@@ -28,7 +28,7 @@ SHARE="/build/home/CI_LFS/Release_Candidates"
 BLD_SHARE="/build/home/SC_LFS/releases/bld"
 PKG_SHARE="/build/home/SC_LFS/pkgpool"
 SVN_OPTS="--non-interactive --trust-server-cert"
-ARCHIVE_BASE="/build/home/psulm/genericCleanup"
+ARCHIVE_BASE=$(getConfig ADMIN_archive_share)
 
 
 #######################################################################
@@ -69,7 +69,7 @@ getValueFromEclFile() {
 
 __checkParams() {
     [[ ! "$BRANCH" ]] && { error "BRANCH must be specified"; return 1; }
-    echo $BRANCH | grep -q -e "^FB[0-9]\{4\}\|^MD[0-9]\{5\}\|^LRC_FB[0-9]\{4\}\|TEST_ERWIN\|TESTERWIN" || { error "$BRANCH is not valid."; return 1; }
+    echo $BRANCH | grep -q -e "^FB[0-9]\{4\}\|^MD[0-9]\{5\}\|^LRC_FB[0-9]\{4\}\|^TST_\|TEST_ERWIN\|TESTERWIN" || { error "$BRANCH is not valid."; return 1; }
 }
 
 __checkOthers() {
@@ -147,6 +147,8 @@ archiveBranchShare() {
     local dirPattern="${branchType}_PS_LFS_OS_${yyyy}_${mm}*"
     local dirsToDelete=$(find ${SHARE} -maxdepth 2 -type d -name "${dirPattern}")
 
+    #TODO: get dirPattern from DB
+
     info "archive $SHARE"
     for DIR in $dirsToDelete
     do
@@ -165,6 +167,8 @@ archiveBranchBldShare() {
     local yyyy=$(getBranchPart ${BRANCH} YYYY)
     local dirPattern="${branchType}_PS_LFS_OS_${yyyy}_${mm}*"
     local dirsToDelete=$(find ${BLD_SHARE} -maxdepth 2 -type d -name "${dirPattern}")
+
+    #TODO: get dirPattern from DB
 
     info "archive $BLD_SHARE"
     for DIR in $dirsToDelete

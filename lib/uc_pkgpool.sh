@@ -282,11 +282,14 @@ usecase_PKGPOOL_UPDATE_DEPS() {
             errorLogFile=$(lastExecuteLogFile)
             mustExistFile ${errorLogFile}
 
+            rawDebug ${errorLogFile}
+
             setBuildResultUnstable
 
             local errorLineNumber=$(sed -ne 's,^Error in line \([0-9]\+\) : .*,\1,p' ${errorLogFile})
             if [[ -z "${errorLineNumber}" ]] ; then
-                fatal "SVN rejected our commit message for a reason we didn't understand. (see logfile)"
+                error "SVN rejected our commit message for a reason we didn't understand. (see logfile)"
+                exit 0
             fi
 
             for lineNumber in ${errorLineNumber} ; do
@@ -299,6 +302,7 @@ usecase_PKGPOOL_UPDATE_DEPS() {
             warning "We try to commit with corrected notes."
             rawDebug ${gitLog}
 
+            info "retry commit with corrected commit message..."
             svnCommit -F ${gitLog} ${releaseFile} ${workspace}/src/gitrevision
         ) || exit 1 # when catch part also fails, we exit the usecase
 
