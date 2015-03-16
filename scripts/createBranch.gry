@@ -203,6 +203,9 @@ def updateJobConfig(job, new_job) {
         processFileInplace(config_file) { text ->
             text.replaceAll("LFS_Prod_-_LRC_-", "LFS_Prod_-_LRC_"+new_branch+"_-")
         }
+        processFileInplace(config_file) { text ->
+            text.replaceAll("PKGPOOL_-_LRC_-", "PKGPOOL_-_LRC_"+new_branch+"_-")
+        }
     } else if(!lrc_jobs) {
         processFileInplace(config_file) { text ->
             text.replaceAll("-_"+src_branch+"_-", "-_"+new_branch+"_-")

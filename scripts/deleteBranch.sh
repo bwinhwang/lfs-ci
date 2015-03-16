@@ -137,6 +137,7 @@ LRC_moveBranchSvn() {
 }
 
 getDbData() {
+    # TODO: read from config as soon as MYSQL_ params are available in file.cfg
     case $1 in
         db_name) echo "lfspt" ;;
         db_username) echo "lfspt_read" ;;
@@ -241,6 +242,37 @@ LRC_archiveBranchBldShare() {
         local archiveDir=$(echo $DIR | sed 's/\//_/g')
         __cmd mv ${DIR} ${ARCHIVE_BASE}/${archiveDir}
     done
+}
+
+deleteTestResults() {
+    #TODO
+    # Hallo Erwin,
+    # 
+    # 
+    # hier noch etwas für dein Branch-Lösch-Script.
+    # 
+    # 
+    # Es sollten auch die Test-Ergebnisse für einen gelöschten Branch gelöscht werden.
+    #  
+    # 
+    # Diese liegen auf der moritz unter
+    # 
+    # psulm@ulegcpmoritz$ pwd
+    # 
+    # /lvol2/production_jenkins/test-repos/src-fsmtest
+    # 
+    # 
+    # Diese machen die moritz auch ganz schön voll.
+    # 
+    # Ich habe hier gerade etwas aufgeräumt, aber dennoch über 7000 Tests drin L
+    # 
+    # Generell in die Runde. Wie viele Tests sollten denn für einen aktiven Branch gehalten werden ?
+    # 
+    #  
+    # Gruß
+    # 
+    # Reiner
+    return 0
 }
 
 __checkParams || { error "Params check failed."; exit 1; }
