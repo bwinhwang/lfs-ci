@@ -7,6 +7,7 @@
 [[ -z ${LFS_CI_SOURCE_jenkins}      ]] && source ${LFS_CI_ROOT}/lib/jenkins.sh
 [[ -z ${LFS_CI_SOURCE_workflowtool} ]] && source ${LFS_CI_ROOT}/lib/workflowtool.sh
 [[ -z ${LFS_CI_SOURCE_database}     ]] && source ${LFS_CI_ROOT}/lib/database.sh
+[[ -z ${LFS_CI_SOURCE_try}          ]] && source ${LFS_CI_ROOT}/lib/try.sh
 
 ## @fn      ci_job_release()
 #  @brief   dispatcher for the release jobs
@@ -99,7 +100,12 @@ ci_job_release() {
         ;;
         upload_to_subversion)
             # from subversion.sh
-            uploadToSubversion "${releaseDirectory}/os" "${branch}" "upload of build ${JOB_NAME} / ${BUILD_NUMBER}"
+            try (
+                uploadToSubversion "${releaseDirectory}/os" "${branch}" "upload of build ${JOB_NAME} / ${BUILD_NUMBER}"
+            ) || catch (
+                warning "retry to upload the release a second time"
+                uploadToSubversion "${releaseDirectory}/os" "${branch}" "upload of build ${JOB_NAME} / ${BUILD_NUMBER}"
+            ) || fatal "upload to subversion failed"
         ;;
         build_results_to_share)
             extractArtifactsOnReleaseShare "${buildJobName}" "${buildBuildNumber}"
