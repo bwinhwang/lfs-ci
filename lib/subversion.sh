@@ -50,6 +50,7 @@ uploadToSubversion() {
     local oldTemp=${TMPDIR:-/tmp}
     export TMPDIR=/dev/shm/${JOB_NAME}.${USER}/tmp
     debug "cleanup tmp directory"
+    execute mkdir -p ${TMPDIR}
 
     # ensure, that there are 15 GB disk space
     mustHaveFreeDiskSpace ${TMPDIR} 15000000 
