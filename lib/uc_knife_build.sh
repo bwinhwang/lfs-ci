@@ -73,14 +73,16 @@ usecase_LFS_KNIFE_BUILD() {
     local currentDateTime=$(date +%Y%m%d-%H%M%S)
     local label=$(printf "KNIFE_%s.%s" ${KNIFE_LFS_BASELINE} ${currentDateTime})
 
-    export tagName=${baseLabel}
-    local svnReposUrl=$(getConfig LFS_PROD_svn_delivery_os_repos_url)
+    local svnReposUrl=$(getConfig LFS_PROD_svn_delivery_os_repos_url -t tagName:${KNIFE_LFS_BASELINE} )
     mustExistInSubversion ${svnReposUrl}/tags/${baseLabel}/doc/scripts/ revisions.txt
     local revision=$(svnCat ${svnReposUrl}/tags/${baseLabel}/doc/scripts/revisions.txt | cut -d" " -f3 | sort -nu | tail -n 1)
 
-    info "using revision ${revision} instead of ${KNIFE_LFS_BASELINE}"
+    mustHaveLocationFromBaseline ${KNIFE_LFS_BASELINE}
+    local location=${LFS_CI_GLOBAL_BRANCH_NAME}
 
-    specialBuildPreparation KNIFE ${label} ${KNIFE_LFS_BASELINE} "none" 
+    info "using revision ${location}@${revision} instead of ${KNIFE_LFS_BASELINE}"
+
+    specialBuildPreparation KNIFE ${label} ${revision} ${location}
 
     return
 }
@@ -90,16 +92,17 @@ usecase_LFS_KNIFE_BUILD() {
 #  @param   <none>
 #  @return  <none>
 usecase_LFS_KNIFE_BUILD_PLATFORM() {
-    requiredParameters KNIFE_LFS_BASELINE WORKSPACE UPSTREAM_PROJECT UPSTREAM_BUILD
+    requiredParameters WORKSPACE UPSTREAM_PROJECT UPSTREAM_BUILD
 
-    local baseLabel=${KNIFE_LFS_BASELINE}
-    mustHaveValue "${baseLabel}" "base label"
+    local workspaces=$(getWorkspaceName)
+    mustHaveWorkspaceName
 
-    # create a workspace
-    # TODO: demx2fk3 2015-02-26 do this in a different way or move it to a different place
+    copyAndExtractBuildArtifactsFromProject ${UPSTREAM_PROJECT} ${UPSTREAM_BUILD} "fsmci"
 
-    mustHaveLocationFromBaseline ${baseLabel}
-    local location=${LFS_CI_GLOBAL_BRANCH_NAME}
+    local location=$(cat ${workspaces}/bld/bld-fsmci-summary/location)
+    mustHaveValue "${location}" "location name"
+
+    export LFS_CI_GLOBAL_BRANCH_NAME=${location}
 
     if ! specialBuildisRequiredForLrc ${location} ; then
         warning "build is not required."
@@ -141,10 +144,8 @@ mustHaveLocationFromBaseline() {
     local tagName=$1
     mustHaveValue "${tagName}" "baseline"
 
-    export tagName
-
     # faking the branch name for workspace creation...
-    location=$(getConfig LFS_PROD_tag_to_branch)
+    local location=$(getConfig LFS_PROD_tag_to_branch -t tagName:${tagName})
 
     if [[ -z ${location} ]] ; then
         fatal "this branch is not prepared to build knives"
