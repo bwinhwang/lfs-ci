@@ -100,12 +100,7 @@ ci_job_release() {
         ;;
         upload_to_subversion)
             # from subversion.sh
-            try (
-                uploadToSubversion "${releaseDirectory}/os" "${branch}" "upload of build ${JOB_NAME} / ${BUILD_NUMBER}"
-            ) || catch (
-                warning "retry to upload the release a second time"
-                uploadToSubversion "${releaseDirectory}/os" "${branch}" "upload of build ${JOB_NAME} / ${BUILD_NUMBER}"
-            ) || fatal "upload to subversion failed"
+            uploadToSubversion "${releaseDirectory}/os" "${branch}" "upload of build ${JOB_NAME} / ${BUILD_NUMBER}"
         ;;
         build_results_to_share)
             extractArtifactsOnReleaseShare "${buildJobName}" "${buildBuildNumber}"
