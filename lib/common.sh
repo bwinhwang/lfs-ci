@@ -863,3 +863,20 @@ getBranchPart() {
     [[ ${what} == NR ]] && echo ${nr}
 }
 
+mustHaveFreeDiskSpace() {
+    local filesystem=$1
+    mustExistDirectory ${filesystem}
+
+    local requiredSpace=$2
+    mustHaveValue "${requiredSpace}" "required disk space in kb"
+
+    local free=$(execute -n df -k ${filesystem} | tail -1 | awk '{print $4}')
+    mustHaveValue "${free}" "free diskspace of ${filesystem}"
+
+    if [[ ${free} -gt ${requiredSpace} ]] ; then
+        return
+    fi
+
+    fatal "not enough disk space on ${filesystem}. Free ${free}, required ${requiredSpace}"
+    
+}
