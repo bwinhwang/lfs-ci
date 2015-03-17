@@ -74,8 +74,8 @@ test1() {
 
     local expect=$(createTempFile)
 cat <<EOF > ${expect}
-mustExistInSubversion https://ulscmi.inside.nsn.com/isource/svnroot/BTS_D_SC_LFS_2015_03/os/tags//doc/scripts/ revisions.txt
-svnCat https://ulscmi.inside.nsn.com/isource/svnroot/BTS_D_SC_LFS_2015_03/os/tags//doc/scripts/revisions.txt
+mustExistInSubversion https://ulscmi.inside.nsn.com/isource/svnroot/BTS_D_SC_LFS_2015_03/os/tags/PS_LFS_OS_2015_03_0001/doc/scripts/ revisions.txt
+svnCat https://ulscmi.inside.nsn.com/isource/svnroot/BTS_D_SC_LFS_2015_03/os/tags/PS_LFS_OS_2015_03_0001/doc/scripts/revisions.txt
 execute mkdir -p ${WORKSPACE}/workspace
 execute mkdir -p ${WORKSPACE}/workspace/bld/bld-fsmci-summary/
 copyFileFromWorkspaceToBuildDirectory LFS_KNIFE_-_knife_-_Build 123 ${WORKSPACE}/revisionstate.xml

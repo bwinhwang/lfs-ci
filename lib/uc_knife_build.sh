@@ -72,8 +72,9 @@ usecase_LFS_KNIFE_BUILD() {
 
     local currentDateTime=$(date +%Y%m%d-%H%M%S)
     local label=$(printf "KNIFE_%s.%s" ${KNIFE_LFS_BASELINE} ${currentDateTime})
+    local baseLabel=${KNIFE_LFS_BASELINE}
 
-    local svnReposUrl=$(getConfig LFS_PROD_svn_delivery_os_repos_url -t tagName:${KNIFE_LFS_BASELINE} )
+    local svnReposUrl=$(getConfig LFS_PROD_svn_delivery_os_repos_url -t tagName:${baseLabel} )
     mustExistInSubversion ${svnReposUrl}/tags/${baseLabel}/doc/scripts/ revisions.txt
     local revision=$(svnCat ${svnReposUrl}/tags/${baseLabel}/doc/scripts/revisions.txt | cut -d" " -f3 | sort -nu | tail -n 1)
 
