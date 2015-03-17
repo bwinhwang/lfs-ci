@@ -297,6 +297,9 @@ mustHaveLocalSdks() {
         mustHaveValue "${subsystem}" "name of subsystem"
 
         local localCacheDir=${LFS_CI_SHARE_MIRROR}/${USER}/lfs-ci-local/${subsystem}
+        
+        local canCopySdksToLocalDisk=$(getConfig LFS_CI_uc_build_can_copy_sdks_to_local_harddisk -t subsystem:${subsystem})
+        [[ ${canCopySdksToLocalDisk} ]] || return
 
         info "checking for ${subsystem} / ${tag} on local disk"
 
