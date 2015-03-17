@@ -160,7 +160,7 @@ def copyJob(job) {
         new_job = Jenkins.instance.copy(job, new_name)
         new_job.setDisplayName(job.getDisplayName().replaceFirst(src_branch, new_branch))
     }
-    if(new_name == "LFS_CI_-_${new_branch}_-_Build" || new_name == "LFS_CI_-_LRC_${new_branch}_-_Build") {
+    if(new_name == "LFS_CI_-_${new_branch}_-_Build" || new_name == "LFS_CI_-_LRC_${new_branch}_-_Build" || new_name == "PKGPOOL_-_${new_branch}_-_Build" || new_name == "PKGPOOL_-_LRC_${new_branch}_-_Build") {
         new_job.setDescription("Comment: ${comment}")
         println("[INFO] set description for job \"$new_name\"")
         // disable build jobs because not all jobs are created jet.
@@ -202,6 +202,9 @@ def updateJobConfig(job, new_job) {
         }
         processFileInplace(config_file) { text ->
             text.replaceAll("LFS_Prod_-_LRC_-", "LFS_Prod_-_LRC_"+new_branch+"_-")
+        }
+        processFileInplace(config_file) { text ->
+            text.replaceAll("PKGPOOL_-_LRC_-", "PKGPOOL_-_LRC_"+new_branch+"_-")
         }
     } else if(!lrc_jobs) {
         processFileInplace(config_file) { text ->

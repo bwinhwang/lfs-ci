@@ -238,7 +238,7 @@ usecase_PKGPOOL_UPDATE_DEPS() {
     for urlToUpdate in ${svnUrlsToUpdate} ; do
         info "url to update ${urlToUpdate}"
 
-        local releaseFile=$(basename ${urlToUpdate})
+        local releaseFile=${workspace}/$(basename ${urlToUpdate})
         local svnUrl=$(dirname ${urlToUpdate})
 
         local workspace=$(getWorkspaceName)
