@@ -154,6 +154,7 @@ specialBuildCreateWorkspaceAndBuild() {
     mustHaveNextCiLabelName
     local label=$(getNextCiLabelName)
     mustHaveValue ${label} "label name"
+
     setBuildDescription "${JOB_NAME}" "${BUILD_NUMBER}" "${label}"
 
     # apply patches to the workspace
