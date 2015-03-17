@@ -103,12 +103,20 @@ usecase_LFS_KNIFE_BUILD_PLATFORM() {
     local location=$(cat ${workspaces}/bld/bld-fsmci-summary/location)
     mustHaveValue "${location}" "location name"
 
-    export LFS_CI_GLOBAL_BRANCH_NAME=${location}
+    local subTaskName=$(getSubTaskNameFromJobName)
+    mustHaveValue "${subTaskName}" "sub task name"
+
 
     if ! specialBuildisRequiredForLrc ${location} ; then
         warning "build is not required."
         exit 0
     fi
+
+    if [[ ${subTaskName} = "FSM-r4" ]] ; then
+        location=${location}_FSMR4
+    fi
+
+    export LFS_CI_GLOBAL_BRANCH_NAME=${location}
 
     specialBuildCreateWorkspaceAndBuild
 
