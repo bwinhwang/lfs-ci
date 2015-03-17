@@ -37,8 +37,7 @@ tearDown() {
 test1() {
     export JOB_NAME=LFS_DEV_-_developer_-_Build_-_FSM-r2_-_fcmd
     export UT_LOCATION=LOCATION
-    # assertTrue "mustHaveLocationForDeveloperBuild"
-    mustHaveLocationForDeveloperBuild
+    assertTrue "mustHaveLocationForSpecialBuild"
 
     local expect=$(createTempFile)
     cat <<EOF > ${expect}
@@ -46,7 +45,7 @@ copyAndExtractBuildArtifactsFromProject ${UPSTREAM_PROJECT} ${UPSTREAM_BUILD} fs
 EOF
     assertExecutedCommands ${expect}
 
-    mustHaveLocationForDeveloperBuild
+    mustHaveLocationForSpecialBuild
     assertEquals "LOCATION" "${LFS_CI_GLOBAL_BRANCH_NAME}"
 
     return
@@ -55,7 +54,7 @@ EOF
 test2() {
     export JOB_NAME=LFS_DEV_-_developer_-_Build_-_FSM-r2_-_fcmd
     export UT_LOCATION=trunk
-    assertTrue "mustHaveLocationForDeveloperBuild"
+    assertTrue "mustHaveLocationForSpecialBuild"
 
     local expect=$(createTempFile)
     cat <<EOF > ${expect}
@@ -63,7 +62,7 @@ copyAndExtractBuildArtifactsFromProject ${UPSTREAM_PROJECT} ${UPSTREAM_BUILD} fs
 EOF
     assertExecutedCommands ${expect}
 
-    mustHaveLocationForDeveloperBuild
+    mustHaveLocationForSpecialBuild
     assertEquals "trunk" "${LFS_CI_GLOBAL_BRANCH_NAME}"
 
     return
@@ -71,7 +70,7 @@ EOF
 test3() {
     export JOB_NAME=LFS_DEV_-_developer_-_Build_-_FSM-r2_-_fcmd
     export UT_LOCATION=pronb-developer
-    assertTrue "mustHaveLocationForDeveloperBuild"
+    assertTrue "mustHaveLocationForSpecialBuild"
 
     local expect=$(createTempFile)
     cat <<EOF > ${expect}
@@ -79,7 +78,7 @@ copyAndExtractBuildArtifactsFromProject ${UPSTREAM_PROJECT} ${UPSTREAM_BUILD} fs
 EOF
     assertExecutedCommands ${expect}
 
-    mustHaveLocationForDeveloperBuild
+    mustHaveLocationForSpecialBuild
     assertEquals "pronb-developer" "${LFS_CI_GLOBAL_BRANCH_NAME}"
 
     return
@@ -88,7 +87,7 @@ EOF
 test4() {
     export JOB_NAME=LFS_DEV_-_developer_-_Build_-_FSM-r4_-_fcmd
     export UT_LOCATION=LOCATION
-    assertTrue "mustHaveLocationForDeveloperBuild"
+    assertTrue "mustHaveLocationForSpecialBuild"
 
     local expect=$(createTempFile)
     cat <<EOF > ${expect}
@@ -96,7 +95,7 @@ copyAndExtractBuildArtifactsFromProject ${UPSTREAM_PROJECT} ${UPSTREAM_BUILD} fs
 EOF
     assertExecutedCommands ${expect}
 
-    mustHaveLocationForDeveloperBuild
+    mustHaveLocationForSpecialBuild
     assertEquals "LOCATION_FSMR4" "${LFS_CI_GLOBAL_BRANCH_NAME}"
 
     return
@@ -105,7 +104,7 @@ EOF
 test5() {
     export JOB_NAME=LFS_DEV_-_developer_-_Build_-_FSM-r4_-_fcmd
     export UT_LOCATION=trunk
-    assertTrue "mustHaveLocationForDeveloperBuild"
+    assertTrue "mustHaveLocationForSpecialBuild"
 
     local expect=$(createTempFile)
     cat <<EOF > ${expect}
@@ -113,7 +112,7 @@ copyAndExtractBuildArtifactsFromProject ${UPSTREAM_PROJECT} ${UPSTREAM_BUILD} fs
 EOF
     assertExecutedCommands ${expect}
 
-    mustHaveLocationForDeveloperBuild
+    mustHaveLocationForSpecialBuild
     assertEquals "FSM_R4_DEV" "${LFS_CI_GLOBAL_BRANCH_NAME}"
 
     return
@@ -121,7 +120,7 @@ EOF
 test6() {
     export JOB_NAME=LFS_DEV_-_developer_-_Build_-_FSM-r4_-_fcmd
     export UT_LOCATION=pronb-developer
-    assertTrue "mustHaveLocationForDeveloperBuild"
+    assertTrue "mustHaveLocationForSpecialBuild"
 
     local expect=$(createTempFile)
     cat <<EOF > ${expect}
@@ -129,7 +128,7 @@ copyAndExtractBuildArtifactsFromProject ${UPSTREAM_PROJECT} ${UPSTREAM_BUILD} fs
 EOF
     assertExecutedCommands ${expect}
 
-    mustHaveLocationForDeveloperBuild
+    mustHaveLocationForSpecialBuild
     assertEquals "FSM_R4_DEV" "${LFS_CI_GLOBAL_BRANCH_NAME}"
 
     return

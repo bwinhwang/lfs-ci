@@ -78,8 +78,10 @@ usecase_LFS_KNIFE_BUILD() {
     mustExistInSubversion ${svnReposUrl}/tags/${baseLabel}/doc/scripts/ revisions.txt
     local revision=$(svnCat ${svnReposUrl}/tags/${baseLabel}/doc/scripts/revisions.txt | cut -d" " -f3 | sort -nu | tail -n 1)
 
-    mustHaveLocationFromBaseline ${KNIFE_LFS_BASELINE}
-    local location=${LFS_CI_GLOBAL_BRANCH_NAME}
+    local location=$(getConfig LFS_PROD_tag_to_branch -t tagName:${baseLabel})
+    mustHaveValue "${location}" "location from base label"
+
+    export LFS_CI_GLOBAL_BRANCH_NAME=${location}
 
     info "using revision ${location}@${revision} instead of ${KNIFE_LFS_BASELINE}"
 
@@ -93,30 +95,6 @@ usecase_LFS_KNIFE_BUILD() {
 #  @param   <none>
 #  @return  <none>
 usecase_LFS_KNIFE_BUILD_PLATFORM() {
-    requiredParameters WORKSPACE UPSTREAM_PROJECT UPSTREAM_BUILD
-
-    local workspaces=$(getWorkspaceName)
-    mustHaveWorkspaceName
-
-    copyAndExtractBuildArtifactsFromProject ${UPSTREAM_PROJECT} ${UPSTREAM_BUILD} "fsmci"
-
-    local location=$(cat ${workspaces}/bld/bld-fsmci-summary/location)
-    mustHaveValue "${location}" "location name"
-
-    local subTaskName=$(getSubTaskNameFromJobName)
-    mustHaveValue "${subTaskName}" "sub task name"
-
-
-    if ! specialBuildisRequiredForLrc ${location} ; then
-        warning "build is not required."
-        exit 0
-    fi
-
-    if [[ ${subTaskName} = "FSM-r4" ]] ; then
-        location=${location}_FSMR4
-    fi
-
-    export LFS_CI_GLOBAL_BRANCH_NAME=${location}
 
     specialBuildCreateWorkspaceAndBuild
 
@@ -143,38 +121,4 @@ usecase_LFS_KNIFE_PACKAGE() {
     info "knife is done."
     return
 }
-
-## @fn      mustHaveLocationFromBaseline()
-#  @brief   ensure, that there is a location based on a baseline
-#  @param   {location}    name of location
-#  @return  <none>
-mustHaveLocationFromBaseline() {
-
-    local tagName=$1
-    mustHaveValue "${tagName}" "baseline"
-
-    # faking the branch name for workspace creation...
-    local location=$(getConfig LFS_PROD_tag_to_branch -t tagName:${tagName})
-
-    if [[ -z ${location} ]] ; then
-        fatal "this branch is not prepared to build knives"
-    fi
-
-    debug "subtask is ${subTaskName}"
-    # for FSM-r4, it's have to do this in a different way..
-    if [[ ${subTaskName} = "FSM-r4" ]] ; then
-        case ${location} in
-            trunk)          location=FSM_R4_DEV ;;
-            pronb-deveoper) location=FSM_R4_DEV ;;
-            *)     # TODO: demx2fk3 2015-02-03 add check, if new location exists, otherwise no build
-                   location=${location}_FSMR4 ;;
-        esac
-    fi
-    mustHaveValue "${location}" "location"
-    debug "using location ${location}"
-    export LFS_CI_GLOBAL_BRANCH_NAME=${location}
-
-    return
-}
-
 

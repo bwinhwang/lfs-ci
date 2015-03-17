@@ -49,8 +49,6 @@ test1() {
 
     local expect=$(createTempFile)
     cat <<EOF > ${expect}
-copyAndExtractBuildArtifactsFromProject LFS_DEV_-_DEVELOPER_-_Build 123 fsmci
-specialBuildisRequiredForLrc location
 specialBuildCreateWorkspaceAndBuild 
 EOF
     assertExecutedCommands ${expect}
@@ -65,8 +63,7 @@ test2() {
 
     local expect=$(createTempFile)
     cat <<EOF > ${expect}
-copyAndExtractBuildArtifactsFromProject LFS_DEV_-_DEVELOPER_-_Build 123 fsmci
-specialBuildisRequiredForLrc location
+specialBuildCreateWorkspaceAndBuild 
 EOF
     assertExecutedCommands ${expect}
 

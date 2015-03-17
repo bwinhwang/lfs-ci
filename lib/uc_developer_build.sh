@@ -63,20 +63,6 @@ usecase_LFS_DEVELOPER_BUILD() {
 #  @param   <none>
 #  @return  <none>
 usecase_LFS_DEVELOPER_BUILD_PLATFORM() {
-    requiredParameters WORKSPACE        \
-                       UPSTREAM_PROJECT \
-                       UPSTREAM_BUILD
-
-    local workspace=$(getWorkspaceName)
-    mustHaveCleanWorkspace
-
-    mustHaveLocationForDeveloperBuild
-    local location=${LFS_CI_GLOBAL_BRANCH_NAME}
-
-    if ! specialBuildisRequiredForLrc ${location} ; then
-        warning "build is not required."
-        exit 0
-    fi
 
     specialBuildCreateWorkspaceAndBuild
 
@@ -106,36 +92,3 @@ usecase_LFS_DEVELOPER_PACKAGE() {
     return
 }
 
-## @fn      mustHaveLocationForDeveloperBuild()
-#  @brief   ensures, that there is a location for a developer build
-#  @param   <none>
-#  @return  <none>
-mustHaveLocationForDeveloperBuild() {
-    requiredParameters UPSTREAM_PROJECT UPSTREAM_BUILD
-
-    local workspace=$(getWorkspaceName)
-    mustHaveWorkspaceName
-
-    # we need to fake the branch for the layer below...
-    copyAndExtractBuildArtifactsFromProject ${UPSTREAM_PROJECT} ${UPSTREAM_BUILD} "fsmci"
-
-    # fakeing the branch name for workspace creation...
-    local location=$(cat ${workspace}/bld/bld-fsmci-summary/location)
-    mustHaveValue "${location}" "location"
-
-    local subTaskName=$(getSubTaskNameFromJobName)
-    mustHaveValue "${subTaskName}" "sub task name"
-
-    if [[ ${subTaskName} = "FSM-r4" ]] ; then
-        case ${location} in
-            trunk)           location=FSM_R4_DEV ;;
-            pronb-developer) location=FSM_R4_DEV ;;
-            *)     # TODO: demx2fk3 2015-02-03 add check, if new location exists, otherwise no build
-                   location=${location}_FSMR4 ;;
-        esac
-    fi
-    mustHaveValue "${location}" "location"
-
-    export LFS_CI_GLOBAL_BRANCH_NAME=${location}
-    return
-}
