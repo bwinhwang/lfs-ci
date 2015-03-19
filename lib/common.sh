@@ -880,3 +880,39 @@ mustHaveFreeDiskSpace() {
     fatal "not enough disk space on ${filesystem}. Free ${free}, required ${requiredSpace}"
     
 }
+
+sanityCheck() {
+
+    requiredParameters LFS_CI_ROOT
+
+    local LFS_CI_git_version=$(cd ${LFS_CI_ROOT} ; git describe)
+    debug "used lfs ci git version ${LFS_CI_git_version}"
+
+    # we do not want to have modifications in ${LFS_CI_ROOT}
+    local LFS_CI_git_local_modifications=$(cd ${LFS_CI_ROOT} ; git status --short | wc -l)
+    if [[ ${LFS_CI_git_local_modifications} -gt 0 ]] ; then
+        if [[ ${LFS_CI_ROOT} = /ps/lfs/ci ]] ; then
+            fatal "the are local modifications in ${LFS_CI_ROOT}, which are not commited. "\
+                "CI is rejecting such kind of working mode and refused to work until the modifications are commited."
+        fi
+    fi
+
+    # check job name convetions
+    if [[ ${JOB_NAME} =~ Admin_-_.* ]] ; then
+        debug "admin job, naming is ok"
+    elif [[ ${JOB_NAME} =~ Test-.* ]] ; then
+        debug "test job, naming is ok"
+    elif [[ ${JOB_NAME} =~ LFS_.*     || \
+            ${JOB_NAME} =~ UBOOT_.*i  || \
+            ${JOB_NAME} =~ PKGPOOL_.* ]] ; then
+        if [[ ${UPSTREAM_PROJECT} ]] ; then
+            local branchName=$(getBranchName)
+            local upstreamBranchName=$(getBranchName ${UPSTREAM_PROJECT})
+            if [[ ${branchName} != ${upstreamBranchName} ]] ; then
+                fatal "wrong configuration: upstream project ${UPSTREAM_PROJECT} is in a different branch as current job ${JOB_NAME}"
+            fi
+    else
+        fatal "unknown job type"
+    fi
+    return
+}
