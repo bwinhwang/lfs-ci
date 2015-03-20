@@ -113,6 +113,7 @@ usecase_LFS_KNIFE_PACKAGE() {
     local workspace=$(getWorkspaceName)
     mustHaveWorkspaceName
 
+    mustHaveLocationForSpecialBuild
     info "running usecase LFS package"
     ci_job_package
 
