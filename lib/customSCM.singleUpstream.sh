@@ -35,8 +35,10 @@ actionCheckout() {
     cat < /dev/null > "${CHANGELOG}"
 
 
-    local upstreamProjectName=${UPSTREAM_PROJECT:-${TESTED_BUILD_JOBNAME}}
+    # local upstreamProjectName=${UPSTREAM_PROJECT:-${TESTED_BUILD_JOBNAME}}
+    local upstreamProjectName=LFS_CI_-_trunk_-_Test
     local upstreamBuildNumber=${UPSTREAM_BUILD:-${TESTED_BUILD_NUMBER}}
+    info "upstreamProjectName ${upstreamProjectName} / upstreamBuildNumber ${upstreamBuildNumber}"
     # TODO: demx2fk3 2015-03-09 FIXME SSH_LOAD replace this with other server
     local server=$(getConfig jenkinsMasterServerHostName)
     local buildDirectory=$(getBuildDirectoryOnMaster ${upstreamProjectName} ${upstreamBuildNumber})
