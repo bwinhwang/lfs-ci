@@ -1,0 +1,262 @@
+Host psw5* psw6* fct* fsm* fsi* fsp* 129.168.*.*
+	User toor4nsn
+	IdentityFile ~/.ssh/toor4nsn_id
+	StrictHostKeyChecking=no
+	UserKnownHostsFile /dev/null
+
+Host moritz 
+    Hostname                        moritz
+    User                            psulm
+    ChallengeResponseAuthentication no
+    PasswordAuthentication          no
+    StrictHostKeyChecking           no
+    BatchMode                       yes
+    ForwardX11                      no
+    ForwardX11Trusted               no
+    Compression                     yes
+    UserKnownHostsFile              /dev/null
+    LogLevel                        quiet
+
+Host psulm.nsn-net.net
+    Hostname                        psulm.nsn-net.net
+    User                            psulm
+    ChallengeResponseAuthentication no
+    PasswordAuthentication          no
+    StrictHostKeyChecking           no
+    BatchMode                       yes
+    ForwardX11                      no
+    ForwardX11Trusted               no
+    Compression                     yes
+    UserKnownHostsFile              /dev/null
+    LogLevel                        quiet
+
+Host esling45.emea.nsn-net.net linsee_server_espoo esling
+    Hostname                        esling45.emea.nsn-net.net
+    User                            psulm
+    ChallengeResponseAuthentication no
+    PasswordAuthentication          no
+    StrictHostKeyChecking           no
+    BatchMode                       yes
+    ForwardX11                      no
+    ForwardX11Trusted               no
+    Compression                     yes
+    UserKnownHostsFile              /dev/null
+    LogLevel                        quiet
+
+Host linsee_server_ulm 
+    Hostname                        localhost
+    User                            psulm
+    ChallengeResponseAuthentication no
+    PasswordAuthentication          no
+    StrictHostKeyChecking           no
+    BatchMode                       yes
+    ForwardX11                      no
+    ForwardX11Trusted               no
+    Compression                     yes
+    UserKnownHostsFile              /dev/null
+    LogLevel                        quiet
+    ProxyCommand                     /home/psulm/bin/sshrandom linsee_server_ulm
+
+
+Host lfs_jenkins_master maxi.emea.nsn-net.net maxi 
+    Hostname                        maxi.emea.nsn-net.net
+    User                            psulm
+    ChallengeResponseAuthentication no
+    PasswordAuthentication          no
+    StrictHostKeyChecking           no
+    BatchMode                       yes
+    ForwardX11                      no
+    ForwardX11Trusted               no
+    Compression                     yes
+    UserKnownHostsFile              /dev/null
+    LogLevel                        quiet
+#    ControlMaster                   auto
+#    ControlPath                     /tmp/ssh_control.%u.%h.%p.%r
+
+Host lfs_jenkins_artifacts_host
+    Hostname                        maxi.emea.nsn-net.net
+    User                            psulm
+    ChallengeResponseAuthentication no
+    PasswordAuthentication          no
+    StrictHostKeyChecking           no
+    BatchMode                       yes
+    ForwardX11                      no
+    ForwardX11Trusted               no
+    Compression                     yes
+    UserKnownHostsFile              /dev/null
+    LogLevel                        quiet
+
+# the following entries are used by LFS CI to sync the /build/home/SC_LFS
+# share to the remote sites
+Host lfs_share_sync_host_oulu ousync
+    Hostname                        ouling06.emea.nsn-net.net
+    User                            psulm
+    ChallengeResponseAuthentication no
+    PasswordAuthentication          no
+    StrictHostKeyChecking           no
+    BatchMode                       yes
+    ForwardX11                      no
+    ForwardX11Trusted               no
+    Compression                     yes
+    UserKnownHostsFile              /dev/null
+    LogLevel                        quiet
+
+Host lfs_share_sync_host_ulm ulsync
+    Hostname                        ulling05.emea.nsn-net.net
+    User                            psulm
+    ChallengeResponseAuthentication no
+    PasswordAuthentication          no
+    StrictHostKeyChecking           no
+    BatchMode                       yes
+    ForwardX11                      no
+    ForwardX11Trusted               no
+    Compression                     yes
+    UserKnownHostsFile              /dev/null
+    LogLevel                        quiet
+
+Host lfs_share_sync_host_wroclaw wrsync
+    Hostname                        wrlinb27.emea.nsn-net.net
+    User                            psulm
+    ChallengeResponseAuthentication no
+    PasswordAuthentication          no
+    StrictHostKeyChecking           no
+    BatchMode                       yes
+    ForwardX11                      no
+    ForwardX11Trusted               no
+    Compression                     yes
+    UserKnownHostsFile              /dev/null
+    LogLevel                        quiet
+
+Host lfs_share_sync_host_bangalore bhsync
+    Hostname                        bhlbtr01.apac.nsn-net.net
+    User                            psulm
+    ChallengeResponseAuthentication no
+    PasswordAuthentication          no
+    StrictHostKeyChecking           no
+    BatchMode                       yes
+    ForwardX11                      no
+    ForwardX11Trusted               no
+    Compression                     yes
+    UserKnownHostsFile              /dev/null
+    LogLevel                        quiet
+
+Host lfs_share_sync_host_duesseldorf dusync
+#    Hostname                        dubldvm08.emea.nsn-net.net
+    Hostname                        svndu.emea.nsn-net.net
+    User                            psulm
+    ChallengeResponseAuthentication no
+    PasswordAuthentication          no
+    StrictHostKeyChecking           no
+    BatchMode                       yes
+    ForwardX11                      no
+    ForwardX11Trusted               no
+    Compression                     yes
+    UserKnownHostsFile              /dev/null
+    LogLevel                        quiet
+
+
+Host lfs_share_sync_host_chicago chsync
+    Hostname                        chling12.americas.nsn-net.net
+    User                            psulm
+    ChallengeResponseAuthentication no
+    PasswordAuthentication          no
+    StrictHostKeyChecking           no
+    BatchMode                       yes
+    ForwardX11                      no
+    ForwardX11Trusted               no
+    Compression                     yes
+    UserKnownHostsFile              /dev/null
+    LogLevel                        quiet
+
+Host lfs_share_sync_host_espoo essync
+    Hostname                        esling68.emea.nsn-net.net
+    User                            psulm
+    ChallengeResponseAuthentication no
+    PasswordAuthentication          no
+    StrictHostKeyChecking           no
+    BatchMode                       yes
+    ForwardX11                      no
+    ForwardX11Trusted               no
+    Compression                     yes
+    UserKnownHostsFile              /dev/null
+    LogLevel                        quiet
+
+Host lfs_share_sync_host_espoo2 es2sync
+    Hostname                        esling45.emea.nsn-net.net
+    User                            psulm
+    ChallengeResponseAuthentication no
+    PasswordAuthentication          no
+    StrictHostKeyChecking           no
+    BatchMode                       yes
+    ForwardX11                      no
+    ForwardX11Trusted               no
+    Compression                     yes
+    UserKnownHostsFile              /dev/null
+    LogLevel                        quiet
+
+Host lfs_share_sync_host_bejing besync
+    Hostname                        beling18.china.nsn-net.net
+    User                            demxrqh2 
+    ChallengeResponseAuthentication no
+    PasswordAuthentication          no
+    StrictHostKeyChecking           no
+    BatchMode                       yes
+    ForwardX11                      no
+    ForwardX11Trusted               no
+    Compression                     yes
+    UserKnownHostsFile              /dev/null
+    LogLevel                        quiet
+
+Host lfs_share_sync_host_bejing2 be2sync
+    Hostname                        bhling110.apac.nsn-net.net
+    User                            psulm 
+    ChallengeResponseAuthentication no
+    PasswordAuthentication          no
+    StrictHostKeyChecking           no
+    BatchMode                       yes
+    ForwardX11                      no
+    ForwardX11Trusted               no
+    Compression                     yes
+    UserKnownHostsFile              /dev/null
+    LogLevel                        quiet
+
+Host lfs_share_sync_host_hangzhou hzsync
+    Hostname                        hzling40.china.nsn-net.net
+    User                            psulm 
+    ChallengeResponseAuthentication no
+    PasswordAuthentication          no
+    StrictHostKeyChecking           no
+    BatchMode                       yes
+    ForwardX11                      no
+    ForwardX11Trusted               no
+    Compression                     yes
+    UserKnownHostsFile              /dev/null
+    LogLevel                        quiet
+
+Host lfs_share_sync_host_cloud cloudsync
+    Hostname                        euca-10-157-66-65.eucalyptus.escloc18.eecloud.nsn-net.net
+    User                            psulm 
+    ChallengeResponseAuthentication no
+    PasswordAuthentication          no
+    StrictHostKeyChecking           no
+    BatchMode                       yes
+    ForwardX11                      no
+    ForwardX11Trusted               no
+    Compression                     yes
+    UserKnownHostsFile              /dev/null
+    LogLevel                        quiet
+
+Host maxi-test
+    Hostname                        maxi.emea.nsn-net.net
+    User                            psulm
+    ChallengeResponseAuthentication no
+    PasswordAuthentication          no
+    StrictHostKeyChecking           no
+    BatchMode                       yes
+    ForwardX11                      no
+    ForwardX11Trusted               no
+    Compression                     yes
+    UserKnownHostsFile              /dev/null
+    LogLevel                        quiet
+    ControlMaster                   auto
+    ControlPath                     /tmp/.ssh_control.%h.%p.%r
