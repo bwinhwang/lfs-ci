@@ -102,13 +102,13 @@ sub newBuildEvent {
         $data   = [ $baselineName, $comment, $target, $subTarget, $jobName, $buildNumber ];
     } elsif ( $action eq "test_started"      ) {
         $method = "test_started( ?, ?, ?, ? )";
-        $data   = [ $baselineName, $comment, $target, $subTarget, $jobName, $buildNumber ];
+        $data   = [ $baselineName, $comment, $jobName, $buildNumber ];
     } elsif ( $action eq "test_failed"      ) {
         $method = "test_failed( ?, ?, ?, ? )";
-        $data   = [ $baselineName, $comment, $target, $subTarget, $jobName, $buildNumber ];
+        $data   = [ $baselineName, $comment, $jobName, $buildNumber ];
     } elsif ( $action eq "test_finished"      ) {
         $method = "test_finished( ?, ?, ?, ? )";
-        $data   = [ $baselineName, $comment, $target, $subTarget, $jobName, $buildNumber ];
+        $data   = [ $baselineName, $comment, $jobName, $buildNumber ];
     } elsif ( $action eq "subtest_started"   ) {
         $method = "subtest_started( ?, ?, ?, ?, ?, ? )";
         $data   = [ $baselineName, $comment, $target, $subTarget, $jobName, $buildNumber ];

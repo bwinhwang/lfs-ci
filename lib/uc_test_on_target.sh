@@ -29,6 +29,7 @@ ci_job_test_on_target() {
         # legacy: using the Test-<targetName> job. No detailed information about
         # the workspace is available at the moment.
         # TODO: demx2fk3 2015-02-13 we are using the wrong revision to checkout src-test
+        local branchName=$(getBranchName ${UPSTREAM_PROJECT})
         info "create workspace for testing on ${branchName}"
         createBasicWorkspace -l ${branchName} src-test
     else
