@@ -153,7 +153,6 @@ ci_job_build_version() {
     local label=$(${LFS_CI_ROOT}/bin/getNewTagName -o "${oldLabel}" -r "${labelPrefix^^}${regex}" )
     mustHaveValue "${label}" "next release label name"
 
-
     info "new version is ${label}"
     setBuildDescription "${JOB_NAME}" "${BUILD_NUMBER}" "${label}"
 
@@ -164,7 +163,7 @@ ci_job_build_version() {
     
     # we are creating a finger print file with several informations to have a unique 
     # build identifier. we are also storing the file in the build directory
-    copyRevisionStateFileToWorkspace ${JOB_NAME} ${WORKSPACE} 
+    copyRevisionStateFileToWorkspace ${JOB_NAME} ${BUILD_NUMBER} 
     mv ${WORKSPACE}/revisions.txt ${workspace}/bld/bld-fsmci-summary/revisions.txt
 
     echo "# build label ${label}"                             > ${workspace}/fingerprint.txt
