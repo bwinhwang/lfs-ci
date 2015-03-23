@@ -87,6 +87,13 @@ copyGenericBuildResults() {
         info "copy generic build results from ${bldDirectory} to ${dst}"
         execute rsync -av --exclude=rootfs.d --exclude=.svn ${bldDirectory}/ ${dst}/
     done
+
+    local dst=${workspace}/upload/C_Platform/
+    for bldDirectory in ${workspace}/bld/bld-*-*/results/psl/C_Platform ; do
+        [[ -d ${bldDirectory} ]] || continue
+        info "copy generic build results from ${bldDirectory} to ${dst}"
+        execute rsync -av  --exclude=.svn ${bldDirectory}/ ${dst}/
+    done
     return
 }
 
