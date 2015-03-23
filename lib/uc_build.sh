@@ -185,8 +185,6 @@ ci_job_build_version() {
     info "upload results to artifakts share."
     createArtifactArchive
 
-    setBuildDescription "${JOB_NAME}" "${BUILD_NUMBER}" "${label}"
-
     databaseAddNewCommits
 
     return
