@@ -130,7 +130,6 @@ ci_job_build_version() {
         fi
     fi
 
-
     info "workspace is ${workspace}"
 
     local jobDirectory=$(getBuildDirectoryOnMaster)
@@ -162,6 +161,20 @@ ci_job_build_version() {
     execute mkdir -p ${workspace}/bld/bld-fsmci-summary
     echo ${label}    > ${workspace}/bld/bld-fsmci-summary/label
     echo ${oldLabel} > ${workspace}/bld/bld-fsmci-summary/oldLabel
+    
+    # we are creating a finger print file with several informations to have a unique 
+    # build identifier. we are also storing the file in the build directory
+    copyRevisionStateFileToWorkspace ${JOB_NAME} ${WORKSPACE} 
+    mv ${WORKSPACE}/revisions.txt ${workspace}/bld/bld-fsmci-summary/revisions.txt
+
+    echo "# build label ${label}"                             > ${workspace}/fingerprint.txt
+    echo "# triggered build job ${JOB_NAME}#${BUILD_NUMBER}" >> ${workspace}/fingerprint.txt
+    echo "# trigger cause: ${BUILD_CAUSE_SCMTRIGGER}"        >> ${workspace}/fingerprint.txt
+    echo "# build triggered at $(date)"                      >> ${workspace}/fingerprint.txt
+    cat ${workspace}/bld/bld-fsmci-summary/revisions.txt     >> ${workspace}/fingerprint.txt
+
+    copyFileFromWorkspaceToBuildDirectory ${JOB_NAME} ${BUILD_NUMBER} ${workspace}/fingerprint.txt
+    execute cp ${workspace}/fingerprint.txt ${workspace}/bld/bld-fsmci-summary/
 
     # for the metrics database, we are installing a own exit handler to record the end of this job
     databaseEventBuildStarted
