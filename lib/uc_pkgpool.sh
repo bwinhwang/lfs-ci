@@ -270,6 +270,7 @@ usecase_PKGPOOL_UPDATE_DEPS() {
         echo ${newGitRevision} > ${workspace}/src/gitrevision
 
         export LFS_CI_LAST_EXECUTE_LOGFILE=$(createTempFile)
+        export LANG=en_US.UTF-8
         try
         (
             svnCommit -F ${gitLog} ${releaseFile} ${workspace}/src/gitrevision
