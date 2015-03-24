@@ -8,6 +8,10 @@
 [[ -z ${LFS_CI_SOURCE_database}   ]] && source ${LFS_CI_ROOT}/lib/database.sh
 [[ -z ${LFS_CI_SOURCE_booking}    ]] && source ${LFS_CI_ROOT}/lib/booking.sh
 
+usecase_LFS_CI_TESTING_TMF_ON_TARGET() {
+    ci_job_test_on_target
+}
+
 ## @fn      ci_job_test_on_target()
 #  @brief   usecase test on target
 #  @details runs some kind of tests on the targets via making test or fmon
@@ -21,16 +25,23 @@ ci_job_test_on_target() {
     local workspace=$(getWorkspaceName)
     mustHaveCleanWorkspace
 
-
-    # TODO: demx2fk3 2015-02-13 we are using the wrong revision to checkout src-test
-    info "create workspace for testing on ${branchName}"
-    createBasicWorkspace -l ${branchName} src-test
+    if [[ ${JOB_NAME} =~ ^Test- ]] ; then
+        # legacy: using the Test-<targetName> job. No detailed information about
+        # the workspace is available at the moment.
+        # TODO: demx2fk3 2015-02-13 we are using the wrong revision to checkout src-test
+        local branchName=$(getBranchName ${UPSTREAM_PROJECT})
+        info "create workspace for testing on ${branchName}"
+        createBasicWorkspace -l ${branchName} src-test
+    else
+        createWorkspace
+    fi
 
     copyAndExtractBuildArtifactsFromProject ${UPSTREAM_PROJECT} ${UPSTREAM_BUILD} "fsmci"
 
     mustHaveReservedTarget
     local targetName=$(_reserveTarget)
 
+    # for legacy: If job name is Test-<targetName> we don't know the type of the target
     local testType=$(getConfig LFS_CI_uc_test_making_test_type -t testTargetName:${targetName})
     mustHaveValue "${testType}" "test type"
 

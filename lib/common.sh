@@ -29,7 +29,7 @@ mustHaveTargetBoardName() {
 #  @param   <none>
 #  @return  return the branch name
 getBranchName() { 
-    getLocationName 
+    getLocationName $@
 }
 
 ## @fn      mustHaveLocationName()

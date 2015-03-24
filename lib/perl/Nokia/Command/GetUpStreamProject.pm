@@ -5,6 +5,7 @@ use warnings;
 use XML::Simple;
 use Getopt::Std;
 use Data::Dumper;
+use Log::Log4perl qw( :easy );
 
 use parent qw( Nokia::Command );
 
@@ -114,6 +115,7 @@ sub execute {
                         $self->{jobName},
                         $self->{build},
                       );
+    DEBUG "reading $file";
 
     my @results = $self->readBuildXml( file => $file );
 

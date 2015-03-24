@@ -80,7 +80,7 @@ sub loadData {
                         Nokia::Singleton::configStore( "cache", storeClass => "cache" ),
                         Nokia::Singleton::configStore( "file",  storeClass => "file", configFileName => $fileName ),
                       ) {
-        push @dataList, @{ $store->readConfig() };
+        push @dataList, @{ $store->readConfig() || [] };
     }
 
 
