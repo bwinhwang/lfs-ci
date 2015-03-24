@@ -63,7 +63,7 @@ ci_job_test_on_target() {
         esac
     done
 
-     TODO missing subtest finished
+    # TODO missing subtest finished
     info "testing done."
     return
 }
