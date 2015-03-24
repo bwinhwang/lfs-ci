@@ -67,7 +67,7 @@ sub searchTarget {
     my $param = { @_ };
 
     my @attributes = @{ $param->{attributes} || [ qw ( not_a_valid_features )] };
-    my $targetName = $param->{targetName};
+    my $targetName = $param->{targetName}    || 'not_a_valid_target_name';
 
     my $sqlString = join( " and ", 
                     map { sprintf( "target_features like '%%%s%%' or target_name = '%s'", $_, $_ ) } 
