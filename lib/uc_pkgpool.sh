@@ -273,6 +273,7 @@ usecase_PKGPOOL_UPDATE_DEPS() {
         export LANG=en_US.UTF-8
         try
         (
+            info "commiting changes in ${releaseFile} ${workspace}/src/gitrevision"
             svnCommit -F ${gitLog} ${releaseFile} ${workspace}/src/gitrevision
         )
         catch ||
@@ -281,13 +282,19 @@ usecase_PKGPOOL_UPDATE_DEPS() {
 
             # logfile from the last execution command (in svnCommit)
             errorLogFile=$(lastExecuteLogFile)
+            # LFS_CI_LAST_EXECUTE_LOGFILE is the same file all the time,
+            # if we do not unset the variable LFS_CI_LAST_EXECUTE_LOGFILE,
+            # the error logfile will be overwritten by the setBuildResultUnstable
+            unset LFS_CI_LAST_EXECUTE_LOGFILE
             mustExistFile ${errorLogFile}
 
+            debug "error log file ${errorLogFile}"
             rawDebug ${errorLogFile}
 
             setBuildResultUnstable
 
             local errorLineNumber=$(sed -ne 's,^Error in line \([0-9]\+\) : .*,\1,p' ${errorLogFile})
+            info "error line numbers: ${errorLineNumber}"
             if [[ -z "${errorLineNumber}" ]] ; then
                 error "SVN rejected our commit message for a reason we didn't understand. (see logfile)"
                 exit 0
