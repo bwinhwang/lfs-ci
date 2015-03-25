@@ -222,7 +222,7 @@ _build_fsmddal_pdf() {
     execute rm -rf ${workspace}/bld/bld-fsmifdd-defcfg
 
     if [[ -e ${workspace}/src-${component}ddal/src/doc/Doxyfile ]] ; then
-        cd ${workspace}/src-${component}ddal/
+        cd ${workspace}/
         execute doxygen ${workspace}/src-${component}ddal/src/doc/Doxyfile
         execute mv html ${destinationDir}
     fi
