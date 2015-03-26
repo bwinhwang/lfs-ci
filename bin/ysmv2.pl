@@ -140,7 +140,8 @@ if( $opt_action eq "reserveTarget" ) {
                                              targetName => $opt_targetName );
 } elsif ( $opt_action eq "searchTarget" ) {
     my @targets = Store::Database->new()->searchTarget( targetName => $opt_targetName, attributes => \@opt_attributes );
-    printf join( "\n", map { $_->{target_name} } @targets );
+    # return a randomized list
+    printf join( "\n",  sort { int( rand(3) ) -1 } map { $_->{target_name} } @targets );
     printf "\n";
 }
 
