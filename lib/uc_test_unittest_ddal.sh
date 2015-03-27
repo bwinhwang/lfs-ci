@@ -64,7 +64,7 @@ ci_job_test_unittest_ddal() {
     local mergexmltestcases=${workspace}/src-test/src/bin/mergexmltestcases
     mustExistFile ${mergexmltestcases}
     local mergeresult=testcases.merged
-    execute ${mergexmltestcases} > ${mergeresult}
+    execute -n ${mergexmltestcases} > ${mergeresult}
     execute gzip -6 -f ${mergeresult}
 
     mustExistFile ${mergeresult}.gz
