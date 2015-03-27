@@ -37,7 +37,7 @@ ci_job_test_on_target() {
     else
         copyFileFromBuildDirectoryToWorkspace ${UPSTREAM_PROJECT} ${UPSTREAM_BUILD} fingerprint.txt
         mv ${WORKSPACE}/fingerprint.txt ${WORKSPACE}/revisions.txt
-        createOrUpdateWorkspace --allowUpdate
+        createWorkspace
     fi
 
     copyAndExtractBuildArtifactsFromProject ${UPSTREAM_PROJECT} ${UPSTREAM_BUILD} "fsmci"

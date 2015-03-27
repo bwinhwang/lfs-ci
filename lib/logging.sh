@@ -66,6 +66,7 @@ startLogfile() {
         echo 1>&2 "-------------------------------------------------------------------------------------------------------------------------------------------------------------"
         echo 1>&2 "logfile is ${CI_LOGGING_LOGFILENAME}"
         echo 1>&2 "http://ullinn11.emea.nsn-net.net/lfs/ci/log/${datePath}/$(basename ${CI_LOGGING_LOGFILENAME})"
+        echo 1>&2 "https://lfs-sandbox.emea.nsn-net.net/logs/${datePath}/$(basename ${CI_LOGGING_LOGFILENAME})"
         echo 1>&2 "-------------------------------------------------------------------------------------------------------------------------------------------------------------"
         printf -- "------------------------------------------------------------------\n" >  ${CI_LOGGING_LOGFILENAME}
         printf -- "starting logfile\n"                                                   >> ${CI_LOGGING_LOGFILENAME}

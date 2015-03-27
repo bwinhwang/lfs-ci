@@ -68,11 +68,15 @@ makingTest_testconfig() {
     local testSuiteDirectory=$(makingTest_testSuiteDirectory)
     mustExistDirectory ${testSuiteDirectory}
 
+    local workspace=$(getWorkspaceName)
+    mustHaveWorkspaceName
+
     info "create testconfig for ${testSuiteDirectory}"
     execute make -C ${testSuiteDirectory}       \
                 testconfig-overwrite            \
                 TESTBUILD=${DELIVERY_DIRECTORY} \
-                TESTTARGET=${targetName,,}
+                TESTTARGET=${targetName,,}      \
+                TESTBUILD_SRC=${workspace}
     return
 }
 
