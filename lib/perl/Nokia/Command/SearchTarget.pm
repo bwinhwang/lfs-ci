@@ -1,4 +1,4 @@
-package Nokia::Command::GetConfig; 
+package Nokia::Command::SearchTarget; 
 use strict;
 use warnings;
 
