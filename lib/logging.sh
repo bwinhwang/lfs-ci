@@ -63,10 +63,18 @@ startLogfile() {
         export CI_LOGGING_DURATION_START_DATE=$(date +%s.%N)
         
 
-        echo 1>&2 "-------------------------------------------------------------------------------------------------------------------------------------------------------------"
         echo 1>&2 "logfile is ${CI_LOGGING_LOGFILENAME}"
-        echo 1>&2 "http://ullinn11.emea.nsn-net.net/lfs/ci/log/${datePath}/$(basename ${CI_LOGGING_LOGFILENAME})"
-        echo 1>&2 "-------------------------------------------------------------------------------------------------------------------------------------------------------------"
+        # hardcoded variables here. We have no possibility to use settings here - before the logfile is running
+
+        local url=
+        case ${USER} in
+            psulm)    url=http://ullinn11.emea.nsn-net.net/lfs/ci/log/ ;;
+            lfscidev) url=https://lfs-sandbox.emea.nsn-net.net/logs/ ;;
+        esac
+        if [[ ${url} ]] ; then
+            echo 1>&2 "${url}/${datePath}/$(basename ${CI_LOGGING_LOGFILENAME})"
+        fi
+
         printf -- "------------------------------------------------------------------\n" >  ${CI_LOGGING_LOGFILENAME}
         printf -- "starting logfile\n"                                                   >> ${CI_LOGGING_LOGFILENAME}
         printf -- "  script: $0\n"                                                       >> ${CI_LOGGING_LOGFILENAME}

@@ -47,6 +47,7 @@ oneTimeTearDown() {
 
 setUp() {
     rm -rf ${UT_MOCKED_COMMANDS}
+    export LFS_CI_GLOBAL_USECASE=LFS_KNIFE_PACKAGE
 }
 tearDown() {
     true 
@@ -61,7 +62,8 @@ test1() {
     export BUILD_NUMBER=1234
     export LFS_CI_GLOBAL_BRANCH_NAME=trunk
 
-    assertTrue "usecase_LFS_KNIFE_PACKAGE"
+    # assertTrue "usecase_LFS_KNIFE_PACKAGE"
+    usecase_LFS_KNIFE_PACKAGE
 
     local expect=$(createTempFile)
 
@@ -74,9 +76,8 @@ cat <<EOF > ${expect}
 ci_job_package 
 copyAndExtractBuildArtifactsFromProject upstream_project 123 knife fsmci
 mustHaveNextCiLabelName 
-execute tar -cv --transform=s:^\./:os/: -C ${WORKSPACE}/workspace/upload/ -f ${WORKSPACE}/workspace/KNIFE_LABEL.tar .
-execute ${LFS_CI_ROOT}/bin/pigz ${WORKSPACE}/workspace/KNIFE_LABEL.tar
-uploadKnifeToStorage ${WORKSPACE}/workspace/KNIFE_LABEL.tar.gz
+execute tar -cv --transform=s:^\./:os/: -C ${WORKSPACE}/workspace/upload/ -f ${WORKSPACE}/workspace/KNIFE_LABEL.tgz --use-compress-program=/home/bm/projekte/work/nsn/ci.git/bin/pigz .
+uploadKnifeToStorage ${WORKSPACE}/workspace/KNIFE_LABEL.tgz
 copyFileToArtifactDirectory ${WORKSPACE}/workspace/.00_README.txt
 execute ${LFS_CI_ROOT}/bin/sendReleaseNote -r ${WORKSPACE}/workspace/.00_README.txt -t KNIFE_LABEL -n -f ${LFS_CI_ROOT}/etc/file.cfg
 EOF
