@@ -64,8 +64,8 @@ startLogfile() {
         
 
         echo 1>&2 "logfile is ${CI_LOGGING_LOGFILENAME}"
-        # hardcoded variables here. We have no possibility to use settings here - before the logfile is running
 
+        # hardcoded variables here. We have no possibility to use settings here - before the logfile is running
         local url=
         case ${USER} in
             psulm)    url=http://ullinn11.emea.nsn-net.net/lfs/ci/log/ ;;
