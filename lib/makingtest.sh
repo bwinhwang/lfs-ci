@@ -25,6 +25,20 @@ makingTest_testFSM() {
     return
 }
 
+## @fn      makingTest_testsWithoutTarget()
+#  @brief   run a test suite, which do not need a real target.
+#  @param   <none>
+#  @return  <none>
+makingTest_testsWithoutTarget() {
+
+    makingTest_testconfig
+    makingTest_testXmloutput
+    makingTest_copyResults
+
+    return
+}
+
+
 ## @fn      makingTest_testXmloutput()
 #  @brief   running TMF tests on the target and create XML output
 #  @details this is just a make test-xmloutput with some options
@@ -252,7 +266,7 @@ makingTest_testLRC() {
     makingTest_testLRC_subBoard ${testSuiteDirectory_AHP} ${testBuildDirectory} ${testTargetName}_ahp ahp        ${xmlOutputDirectory}/ahp
     makingTest_testLRC_subBoard ${testSuiteDirectory}     ${testBuildDirectory} ${testTargetName}_ahp ahp-common ${xmlOutputDirectory}/ahp-common
 
-    find ${workspace}/xml-output -name '*.xml' | while read file ; do
+    find ${xmlOutputDirectory} -name '*.xml' | while read file ; do
         cat -v ${file} > ${file}.tmp && mv ${file}.tmp ${file}
     done
 
@@ -386,47 +400,6 @@ makingTest_install() {
     done
 
     fatal "installation failed after four attempts."
-
-    return
-}
-
-## @fn      makingTest_testsWithoutTarget()
-#  @brief   run a test suite, which do not need a real target.
-#  @param   <none>
-#  @return  <none>
-makingTest_testsWithoutTarget() {
-    requiredParameters JOB_NAME DELIVERY_DIRECTORY
-
-    local workspace=$(getWorkspaceName)
-    mustHaveWorkspaceName
-
-    local testBuildDirectory=${DELIVERY_DIRECTORY}
-    mustExistDirectory ${testBuildDirectory}
-
-    local xmlOutputDirectory=${workspace}/xml-output
-    execute mkdir -p ${xmlOutputDirectory}
-    mustExistDirectory ${xmlOutputDirectory}
-
-	local testSuiteDirectory=${workspace}/$(getConfig LFS_CI_uc_test_making_test_suite_dir)
-    mustExistDirectory ${testSuiteDirectory}
-	mustExistFile ${testSuiteDirectory}/testsuite.mk
-
-    local make="make -C ${testSuiteDirectory}"
-
-    info "create testconfig for ${testSuiteDirectory}"
-    execute ${make} testconfig-overwrite \
-                TESTBUILD=${testBuildDirectory} 
-
-    export LFS_CI_ERROR_CODE= 
-    info "running test suite"
-    execute -i ${make} --ignore-errors test-xmloutput || LFS_CI_ERROR_CODE=0 # also true
-
-    makingTest_copyResults ${testSuiteDirectory}
-
-    if [[ ${LFS_CI_ERROR_CODE} ]] ; then
-        error "some errors in test cases. please see logfile"
-        exit 1
-    fi
 
     return
 }
