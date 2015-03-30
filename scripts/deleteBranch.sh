@@ -74,6 +74,7 @@ __checkParams() {
 
 __checkOthers() {
     [[ -d ${ARCHIVE_BASE} ]] || { error "archive dir ${ARCHIVE_BASE} does not exist."; return 1; }
+    which mysql || { error "mysql not available."; return 1; }
 }
 
 __cmd() {
