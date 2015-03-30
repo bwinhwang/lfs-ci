@@ -60,6 +60,15 @@ ci_job_test_unittest_ddal() {
             execute cp -f ${name}/* ${workspace}/xml-reports
         done
 
+    cd ${workspace}
+    local mergexmltestcases=${workspace}/src-test/src/bin/mergexmltestcases
+    mustExistFile ${mergexmltestcases}
+    local mergeresult=testcases.merged
+    execute -n ${mergexmltestcases} > ${mergeresult}
+    execute gzip -6 -f ${mergeresult}
+
+    mustExistFile ${mergeresult}.gz
+    copyFileToArtifactDirectory ${mergeresult}.gz
 
     local lcov=${workspace}/src-unittests/src/frameworks/lcov/bin/lcov
     mustExistFile ${lcov}
