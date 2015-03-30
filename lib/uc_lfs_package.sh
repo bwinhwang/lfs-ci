@@ -27,10 +27,16 @@ ci_job_package() {
     mustHaveCleanWorkspace
     mustHaveWritableWorkspace
 
+    copyFileFromBuildDirectoryToWorkspace ${UPSTREAM_PROJECT} ${UPSTREAM_BUILD} fingerprint.txt
+    copyFileFromWorkspaceToBuildDirectory ${JOB_NAME} ${BUILD_NUMBER} fingerprint.txt
+
     debug "workspace is ${workspace}"
 
     local requiredArtifacts=$(getConfig LFS_CI_UC_package_required_artifacts)
     copyArtifactsToWorkspace "${UPSTREAM_PROJECT}" "${UPSTREAM_BUILD}" "${requiredArtifacts}"
+
+    databaseEventPackageStarted
+    exit_add _exitHandlerDatabaseEventPackageFinishedOrFailed
 
     mustHaveNextCiLabelName
     local label=$(getNextReleaseLabel)
@@ -61,6 +67,14 @@ ci_job_package() {
     copyReleaseCandidateToShare
 
     return
+}
+
+_exitHandlerDatabaseEventPackageFinishedOrFailed() {
+    if [[ ${1} -gt 0 ]] ; then
+        databaseEventPackageFailed
+    else
+        databaseEventPackageFinished
+    fi
 }
 
 ## @fn      copyGenericBuildResults()

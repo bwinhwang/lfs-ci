@@ -51,7 +51,7 @@ testdatabaseAddNewCommits() {
 mustHaveNextCiLabelName
 getNextCiLabelName
 copyFileFromBuildDirectoryToWorkspace jobName 123 changelog.xml
-execute -i ${LFS_CI_ROOT}/bin/newBuildEvent.pl --buildName=PS_LFS_OS_9999_88_7777 --action=new_svn_commits --changelog=${WORKSPACE}/changelog.xml
+execute -i ${LFS_CI_ROOT}/bin/newSubversionCommits --buildName=PS_LFS_OS_9999_88_7777 --changelog=${WORKSPACE}/changelog.xml
 EOF
 
     assertExecutedCommands "${expect}"

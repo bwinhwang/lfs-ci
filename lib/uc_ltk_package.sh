@@ -28,8 +28,6 @@ ci_job_package() {
     setBuildDescription "${JOB_NAME}" "${BUILD_NUMBER}" "${label}"
     info "label name is ${label}"
 
-    databaseEventBuildFinished
-
     info "do nothing here, dummy task :), have a nice day"
 
     local localDirectory=${workspace}/upload

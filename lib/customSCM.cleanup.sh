@@ -168,7 +168,7 @@ _scLfsOldReleasesOnBranches() {
     find ${directoryToCleanup} -mindepth 2 -maxdepth 2 -mtime +${days} -type d -printf "%p\n" \
         | sort -u > ${tmpFileA}
 
-    ${LFS_CI_ROOT}/bin/removalCanidates.pl  < ${tmpFileA} > ${tmpFileB}
+    ${LFS_CI_ROOT}/bin/removalCandidates.pl  < ${tmpFileA} > ${tmpFileB}
 
     grep -w -f ${tmpFileB} ${tmpFileA} | sed "s/^/1 /g" > ${resultFile}
 
@@ -186,7 +186,7 @@ _scLfsLinuxKernelOldReleasesOnBranches() {
     find ${directoryToCleanup} -mindepth 1 -maxdepth 1 -mtime +${days} -type d -printf "%p\n" \
         | sort -u > ${tmpFileA}
 
-    ${LFS_CI_ROOT}/bin/removalCanidates.pl  < ${tmpFileA} > ${tmpFileB}
+    ${LFS_CI_ROOT}/bin/removalCandidates.pl  < ${tmpFileA} > ${tmpFileB}
 
     grep -w -f ${tmpFileB} ${tmpFileA} | sed "s/^/1 /g" > ${resultFile}
 
@@ -234,7 +234,7 @@ _ciLfsOldReleasesOnBranches() {
     find ${directoryToCleanup} -mindepth 2 -maxdepth 2 -mtime +60 -type d -printf "%p\n" \
         | sort -u > ${tmpFileA}
 
-    ${LFS_CI_ROOT}/bin/removalCanidates.pl  < ${tmpFileA} > ${tmpFileB}
+    ${LFS_CI_ROOT}/bin/removalCandidates.pl  < ${tmpFileA} > ${tmpFileB}
     grep -w -f ${tmpFileB} ${tmpFileA} | sed "s/^/1 /g" > ${resultFile}
 
     return

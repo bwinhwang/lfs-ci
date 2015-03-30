@@ -45,7 +45,8 @@ test1() {
 cat <<EOF > ${expect}
 mustExistFile /path/to/file
 getConfig LFS_CI_upload_server
-execute rsync -avrPe ssh /path/to/file server:upload/
+mustExistFile /path/to/file
+execute s3cmd put /path/to/file server:upload/
 EOF
     assertExecutedCommands ${expect}
 

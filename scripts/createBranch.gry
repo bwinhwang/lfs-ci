@@ -307,7 +307,7 @@ for(job in jobs_list) {
     reloadJobConfig(new_job, config_file)
     new_branch_view_obj.doAddJobToView(new_job.getName())
     println("[INFO] added job $new_job.name to view \"$new_branch_view_obj.name\"")
-    //}
+    }
 }
 
 // enable previosly disabled jobs

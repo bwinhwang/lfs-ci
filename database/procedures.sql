@@ -12,6 +12,8 @@ BEGIN
     SELECT count(id) INTO cnt_branch_id FROM branches WHERE location_name = in_branch_name;
     IF cnt_branch_id = 0 THEN
         INSERT INTO branches ( ps_branch_name, location_name, branch_name, date_created, comment ) VALUES ( in_branch_name, in_branch_name, in_branch_name, NOW(), in_comment );
+    ELSE
+        SELECT * FROM branches WHERE location_name = in_branch_name;
     END IF;
     SELECT id INTO var_branch_id FROM branches WHERE location_name = in_branch_name;
 
@@ -55,8 +57,36 @@ CREATE PROCEDURE build_started( IN in_build_name VARCHAR(128),
                                 IN in_job_name VARCHAR(128), 
                                 IN in_build_number INT )
 BEGIN
-   CALL new_build( in_build_name, in_branch_name, in_comment, in_revision);
-   CALL new_build_event( in_build_name, 'build_started', in_comment,  in_job_name, in_build_number );
+    CALL new_build( in_build_name, in_branch_name, in_comment, in_revision);
+    CALL new_build_event( in_build_name, 'build_started', in_comment,  in_job_name, in_build_number );
+END //
+DELIMITER ;
+
+-- }}}
+-- {{{ build_failed
+
+DROP PROCEDURE IF EXISTS build_failed;
+DELIMITER //
+CREATE PROCEDURE build_failed( IN in_build_name VARCHAR(128), 
+                               IN in_comment TEXT, 
+                               IN in_job_name VARCHAR(128), 
+                               IN in_build_number INT )
+BEGIN
+    CALL new_build_event( in_build_name, 'build_failed', in_comment,  in_job_name, in_build_number );
+END //
+DELIMITER ;
+
+-- }}}
+-- {{{ build_finished
+
+DROP PROCEDURE IF EXISTS build_finished
+DELIMITER //
+CREATE PROCEDURE build_finished( IN in_build_name VARCHAR(128), 
+                                 IN in_comment TEXT, 
+                                 IN in_job_name VARCHAR(128), 
+                                 IN in_build_number INT )
+BEGIN
+    CALL new_build_event( in_build_name, 'build_finished', in_comment,  in_job_name, in_build_number );
 END //
 DELIMITER ;
 
@@ -100,11 +130,11 @@ DELIMITER ;
 DROP PROCEDURE IF EXISTS subbuild_failed;
 DELIMITER //
 CREATE PROCEDURE subbuild_failed( IN in_build_name VARCHAR(128), 
-                               IN in_comment TEXT,
-                               IN in_target VARCHAR(16),
-                               IN in_subtarget VARCHAR(16),
-                               IN in_job_name VARCHAR(128), 
-                               IN in_build_number INT )
+                                  IN in_comment TEXT,
+                                  IN in_target VARCHAR(16),
+                                  IN in_subtarget VARCHAR(16),
+                                  IN in_job_name VARCHAR(128), 
+                                  IN in_build_number INT )
 BEGIN
     CALL new_build_event( in_build_name, CONCAT( 'subbuild_failed', '_', in_target, '_', in_subtarget), in_comment, in_job_name, in_build_number );
     CALL _check_if_event_builds( in_build_name, 'build', in_comment, in_job_name, in_build_number );
@@ -122,6 +152,34 @@ CREATE PROCEDURE test_started( IN in_build_name VARCHAR(128),
                                IN in_build_number INT )
 BEGIN
     CALL new_build_event( in_build_name, 'test_started', in_comment, in_job_name, in_build_number );
+END //
+DELIMITER ;
+
+-- }}}
+-- {{{ test_failed
+
+DROP PROCEDURE IF EXISTS test_failed;
+DELIMITER //
+CREATE PROCEDURE test_failed( IN in_build_name VARCHAR(128), 
+                               IN in_comment TEXT,
+                               IN in_job_name VARCHAR(128), 
+                               IN in_build_number INT )
+BEGIN
+    CALL new_build_event( in_build_name, 'test_failed', in_comment, in_job_name, in_build_number );
+END //
+DELIMITER ;
+
+-- }}}
+-- {{{ test_finished
+
+DROP PROCEDURE IF EXISTS test_finished;
+DELIMITER //
+CREATE PROCEDURE test_finished( IN in_build_name VARCHAR(128), 
+                               IN in_comment TEXT,
+                               IN in_job_name VARCHAR(128), 
+                               IN in_build_number INT )
+BEGIN
+    CALL new_build_event( in_build_name, 'test_finished', in_comment, in_job_name, in_build_number );
 END //
 DELIMITER ;
 
@@ -148,11 +206,11 @@ DELIMITER ;
 DROP PROCEDURE IF EXISTS subtest_unstable;
 DELIMITER //
 CREATE PROCEDURE subtest_unstable( IN in_build_name VARCHAR(128), 
-                                IN in_comment TEXT,
-                                IN in_target VARCHAR(16),
-                                IN in_subtarget VARCHAR(16),
-                                IN in_job_name VARCHAR(128), 
-                                IN in_build_number INT )
+                                   IN in_comment TEXT,
+                                   IN in_target VARCHAR(16),
+                                   IN in_subtarget VARCHAR(16),
+                                   IN in_job_name VARCHAR(128), 
+                                   IN in_build_number INT )
 BEGIN
     CALL new_build_event( in_build_name, CONCAT( 'subtest_unstable', '_', in_target, '_', in_subtarget), in_comment, in_job_name, in_build_number );
     CALL _check_if_event_builds( in_build_name, 'test', in_comment, in_job_name, in_build_number );
@@ -542,6 +600,7 @@ BEGIN
        INSERT INTO subversion_commits (build_id, svn_revision, svn_author, commit_date, commit_message ) VALUES ( var_build_id, in_revision, in_author, in_date, in_msg );
    END IF;
 
-END
+END //
 DELIMITER ;
+
 -- }}}

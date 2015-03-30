@@ -12,6 +12,7 @@
 [[ -z ${LFS_CI_SOURCE_build}           ]] && source ${LFS_CI_ROOT}/lib/build.sh
 [[ -z ${LFS_CI_SOURCE_artifacts}       ]] && source ${LFS_CI_ROOT}/lib/artifacts.sh
 [[ -z ${LFS_CI_SOURCE_common}          ]] && source ${LFS_CI_ROOT}/lib/common.sh
+[[ -z ${LFS_CI_SOURCE_amazons3}        ]] && source ${LFS_CI_ROOT}/lib/amazons3.sh
 
 LFS_CI_SOURCE_special_build='$Id$'
 
@@ -190,8 +191,7 @@ uploadKnifeToStorage() {
     local uploadServer=$(getConfig LFS_CI_upload_server)
     mustHaveValue "${uploadServer}" "upload server and path"
 
-    execute rsync -avrPe ssh ${knifeFile} \
-        ${uploadServer}
+    s3PutFile ${knifeFile} ${uploadServer}
 
     return
 }
@@ -235,6 +235,9 @@ specialBuildUploadAndNotifyUser() {
     mustHaveWorkspaceName
     copyAndExtractBuildArtifactsFromProject ${UPSTREAM_PROJECT} ${UPSTREAM_BUILD} "${buildType,,} fsmci"
 
+    local uploadServer=$(getConfig LFS_CI_upload_server_http)
+    mustHaveValue "${uploadServer}" "upload server http"
+
     mustHaveNextCiLabelName
     local label=$(getNextCiLabelName)
     mustHaveValue ${label} "label name"
@@ -244,25 +247,32 @@ specialBuildUploadAndNotifyUser() {
     source ${workspace}/bld/bld-${buildType,,}-input/requestor.txt
     export REQUESTOR REQUESTOR_FIRST_NAME REQUESTOR_LAST_NAME REQUESTOR_USERID REQUESTOR_EMAIL
 
-    info "creating tarball with lfs load..."
-    local tarOpt=$(getConfig LFS_CI_uc_special_build_package_tar_options)
-
-    execute tar -cv ${tarOpt}                \
-                --transform='s:^\./:os/:'    \
-                -C ${workspace}/upload/      \
-                -f ${workspace}/${label}.tar \
-                .
-
-    info "compressing ${label}.tar..."
-    execute ${LFS_CI_ROOT}/bin/pigz ${workspace}/${label}.tar
-
-    info "upload knife to storage"
-    uploadKnifeToStorage ${workspace}/${label}.tar.gz 
-
     local readmeFile=${workspace}/.00_README.txt
-    cat > ${readmeFile} <<EOF
-/build/home/${USER}/privateBuilds/${label}.tar.gz
-EOF
+    local resultFiles="$(getConfig LFS_CI_uc_special_build_package_result_files)"
+
+    info "requested result files are ${resultFiles}"
+
+    for resultFile in ${resultFiles} ; do
+        info "creating tarball ${resultFile} with lfs load..."
+        local tarOpt="$(getConfig LFS_CI_uc_special_build_package_result_files_tar_options -t file:${resultFile})"
+        local inputFiles="$(getConfig LFS_CI_uc_special_build_package_result_files_input_files -t file:${resultFile})"
+        local outputFilePostfix=$(getConfig LFS_CI_uc_special_build_package_result_files_output_file -t file:${resultFile})
+
+        local outputFile=${label}${outputFilePostfix}.tgz
+        debug "create tar ${outputFile}"
+        execute tar -cv ${tarOpt}                                  \
+                    --transform='s:^\./:os/:'                      \
+                    -C ${workspace}/upload/                        \
+                    -f ${workspace}/${outputFile}                  \
+                    --use-compress-program=${LFS_CI_ROOT}/bin/pigz \
+                    ${inputFiles}
+
+        info "upload file ${outputFile} to storage ${uploadServer}"
+        uploadKnifeToStorage ${workspace}/${outputFile}
+
+        echo ${uploadServer}/${outputFile} >> ${readmeFile} 
+
+    done
 
     copyFileToArtifactDirectory ${readmeFile}
 
