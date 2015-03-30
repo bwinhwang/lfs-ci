@@ -113,7 +113,7 @@ subversionUploadCleanupTempDirectory() {
 #  @return  <none>
 svnCommand() {
     debug "executing svn $@"
-    execute svn --non-interactive --trust-server-cert $@
+    execute -r 3 svn --non-interactive --trust-server-cert $@
     return
 }
 
