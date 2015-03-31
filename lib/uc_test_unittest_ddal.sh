@@ -63,7 +63,7 @@ ci_job_test_unittest_ddal() {
     cd ${workspace}
     local mergexmltestcases=${workspace}/src-test/src/bin/mergexmltestcases
     mustExistFile ${mergexmltestcases}
-    local mergeresult=testcases.merged
+    local mergeresult=testcases.merged.xml
     execute -n ${mergexmltestcases} > ${mergeresult}
     execute gzip -6 -f ${mergeresult}
 
@@ -99,7 +99,8 @@ ci_job_test_unittest_ddal() {
     rawDebug lcov.summary
 
     mustExistFile coverage.xml
-    copyFileToArtifactDirectory coverage.xml
+    execute gzip -6 -f coverage.xml
+    copyFileToArtifactDirectory coverage.xml.gz
 
     # TODO: demx2fk3 2015-01-23 make this in a function
     local artifactsPathOnShare=$(getConfig artifactesShare)/${JOB_NAME}/${BUILD_NUMBER}
