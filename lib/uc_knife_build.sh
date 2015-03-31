@@ -72,15 +72,20 @@ usecase_LFS_KNIFE_BUILD() {
 
     local currentDateTime=$(date +%Y%m%d-%H%M%S)
     local label=$(printf "KNIFE_%s.%s" ${KNIFE_LFS_BASELINE} ${currentDateTime})
+    local baseLabel=${KNIFE_LFS_BASELINE/_PS_LFS_REL_/_PS_LFS_OS_}
 
-    export tagName=${baseLabel}
-    local svnReposUrl=$(getConfig LFS_PROD_svn_delivery_os_repos_url)
+    local svnReposUrl=$(getConfig LFS_PROD_svn_delivery_os_repos_url -t tagName:${baseLabel} )
     mustExistInSubversion ${svnReposUrl}/tags/${baseLabel}/doc/scripts/ revisions.txt
     local revision=$(svnCat ${svnReposUrl}/tags/${baseLabel}/doc/scripts/revisions.txt | cut -d" " -f3 | sort -nu | tail -n 1)
 
-    info "using revision ${revision} instead of ${KNIFE_LFS_BASELINE}"
+    local location=$(getConfig LFS_PROD_tag_to_branch -t tagName:${baseLabel})
+    mustHaveValue "${location}" "location from base label"
 
-    specialBuildPreparation KNIFE ${label} ${KNIFE_LFS_BASELINE} "none" 
+    export LFS_CI_GLOBAL_BRANCH_NAME=${location}
+
+    info "using revision ${location}@${revision} instead of ${KNIFE_LFS_BASELINE}"
+
+    specialBuildPreparation KNIFE ${label} ${revision} ${location}
 
     return
 }
@@ -90,21 +95,6 @@ usecase_LFS_KNIFE_BUILD() {
 #  @param   <none>
 #  @return  <none>
 usecase_LFS_KNIFE_BUILD_PLATFORM() {
-    requiredParameters KNIFE_LFS_BASELINE WORKSPACE UPSTREAM_PROJECT UPSTREAM_BUILD
-
-    local baseLabel=${KNIFE_LFS_BASELINE}
-    mustHaveValue "${baseLabel}" "base label"
-
-    # create a workspace
-    # TODO: demx2fk3 2015-02-26 do this in a different way or move it to a different place
-
-    mustHaveLocationFromBaseline ${baseLabel}
-    local location=${LFS_CI_GLOBAL_BRANCH_NAME}
-
-    if ! specialBuildisRequiredForLrc ${location} ; then
-        warning "build is not required."
-        exit 0
-    fi
 
     specialBuildCreateWorkspaceAndBuild
 
@@ -123,6 +113,7 @@ usecase_LFS_KNIFE_PACKAGE() {
     local workspace=$(getWorkspaceName)
     mustHaveWorkspaceName
 
+    mustHaveLocationForSpecialBuild
     info "running usecase LFS package"
     ci_job_package
 
@@ -131,40 +122,4 @@ usecase_LFS_KNIFE_PACKAGE() {
     info "knife is done."
     return
 }
-
-## @fn      mustHaveLocationFromBaseline()
-#  @brief   ensure, that there is a location based on a baseline
-#  @param   {location}    name of location
-#  @return  <none>
-mustHaveLocationFromBaseline() {
-
-    local tagName=$1
-    mustHaveValue "${tagName}" "baseline"
-
-    export tagName
-
-    # faking the branch name for workspace creation...
-    location=$(getConfig LFS_PROD_tag_to_branch)
-
-    if [[ -z ${location} ]] ; then
-        fatal "this branch is not prepared to build knives"
-    fi
-
-    debug "subtask is ${subTaskName}"
-    # for FSM-r4, it's have to do this in a different way..
-    if [[ ${subTaskName} = "FSM-r4" ]] ; then
-        case ${location} in
-            trunk)          location=FSM_R4_DEV ;;
-            pronb-deveoper) location=FSM_R4_DEV ;;
-            *)     # TODO: demx2fk3 2015-02-03 add check, if new location exists, otherwise no build
-                   location=${location}_FSMR4 ;;
-        esac
-    fi
-    mustHaveValue "${location}" "location"
-    debug "using location ${location}"
-    export LFS_CI_GLOBAL_BRANCH_NAME=${location}
-
-    return
-}
-
 

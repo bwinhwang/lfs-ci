@@ -44,6 +44,12 @@ oneTimeSetUp() {
         mockedCommand "svnCat $@"
         echo "src-abc http://abc 12345"
     }
+    copyAndExtractBuildArtifactsFromProject() {
+        mockedCommand "copyAndExtractBuildArtifactsFromProject $@"
+        mkdir -p ${WORKSPACE}/workspace/bld/bld-fsmci-summary/
+        echo LOCATION > ${WORKSPACE}/workspace/bld/bld-fsmci-summary/location
+        echo LABEL    > ${WORKSPACE}/workspace/bld/bld-fsmci-summary/label
+    }
 
 
 }
@@ -71,6 +77,7 @@ test1() {
 
     local expect=$(createTempFile)
 cat <<EOF > ${expect}
+copyAndExtractBuildArtifactsFromProject upstream_project 123 fsmci
 execute rm -rf ${WORKSPACE}/revisions.txt
 createWorkspace 
 copyArtifactsToWorkspace upstream_project 123 fsmci
@@ -80,18 +87,6 @@ buildLfs
 createArtifactArchive 
 EOF
     assertExecutedCommands ${expect}
-
-    return
-}
-
-test2() {
-    export WORKSPACE=$(createTempDirectory)
-    export KNIFE_LFS_BASELINE=PS_LFS_OS_INVALID
-    export UPSTREAM_PROJECT=upstream_project
-    export UPSTREAM_BUILD=123
-    export JOB_NAME=LFS_KNIFE_-_knife_-_Build_-_FSM-r2_-_fcmd
-
-    assertFalse "usecase_LFS_KNIFE_BUILD_PLATFORM"
 
     return
 }

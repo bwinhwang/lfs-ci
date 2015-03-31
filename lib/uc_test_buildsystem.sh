@@ -15,14 +15,30 @@ ci_job_test_buildsystem() {
     mustHaveWorkspaceName
     mustHaveWritableWorkspace
 
+    copyFileFromBuildDirectoryToWorkspace ${UPSTREAM_PROJECT} ${UPSTREAM_BUILD} label.txt
+
+    local label=$(cat ${WORKSPACE}/label.txt)
+
+    setBuildDescription ${JOB_NAME} ${BUILD_NUMBER} ${label}
+
+    local svnReposUrl=$(getConfig LFS_PROD_svn_delivery_os_repos_url -t tagName:${label})
+    mustExistInSubversion ${svnReposUrl}/tags/${label}/doc/scripts/ revisions.txt
+    local revision=$(svnCat ${svnReposUrl}/tags/${label}/doc/scripts/revisions.txt | cut -d" " -f3 | sort -nu | tail -n 1)
+
+    echo "src-foo http://fake/ ${revision}" > ${WORKSPACE}/revisions.txt
+
     createWorkspace
 
     local testSuiteDirectory=${workspace}/src-test/src/unittest/testsuites/buildsystem/dependencies
 
+
+    info "starting tests..."
     execute make -C ${testSuiteDirectory} clean
     execute make -C ${testSuiteDirectory} test-xmloutput
     execute mkdir ${workspace}/xml-reports/
     execute cp -f ${testSuiteDirectory}/xml-reports/*.xml* ${workspace}/xml-reports/
+
+    info "test done."
 
     return
 }

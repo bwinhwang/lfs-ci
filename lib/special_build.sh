@@ -147,6 +147,19 @@ specialBuildisRequiredForLrc() {
 specialBuildCreateWorkspaceAndBuild() {
     requiredParameters UPSTREAM_PROJECT UPSTREAM_BUILD
 
+    local workspaces=$(getWorkspaceName)
+    mustHaveWorkspaceName
+
+    mustHaveLocationForSpecialBuild
+    local location=${LFS_CI_GLOBAL_BRANCH_NAME}
+
+    if ! specialBuildisRequiredForLrc ${location} ; then
+        warning "build is not required."
+        exit 0
+    fi
+
+    export LFS_CI_GLOBAL_BRANCH_NAME=${location}
+
     # createWorkspace will copy the revision state file from the upstream job
     execute rm -rf ${WORKSPACE}/revisions.txt
     createWorkspace
@@ -155,6 +168,7 @@ specialBuildCreateWorkspaceAndBuild() {
     mustHaveNextCiLabelName
     local label=$(getNextCiLabelName)
     mustHaveValue ${label} "label name"
+
     setBuildDescription "${JOB_NAME}" "${BUILD_NUMBER}" "${label}"
 
     # apply patches to the workspace
@@ -270,3 +284,37 @@ specialBuildUploadAndNotifyUser() {
     return
 }
 
+
+## @fn      mustHaveLocationForSpecialBuild()
+#  @brief   ensures, that there is a location for a special build
+#  @param   <none>
+#  @return  <none>
+mustHaveLocationForSpecialBuild() {
+    requiredParameters UPSTREAM_PROJECT UPSTREAM_BUILD
+
+    local workspace=$(getWorkspaceName)
+    mustHaveWorkspaceName
+
+    # we need to fake the branch for the layer below...
+    copyAndExtractBuildArtifactsFromProject ${UPSTREAM_PROJECT} ${UPSTREAM_BUILD} "fsmci"
+
+    # fakeing the branch name for workspace creation...
+    local location=$(cat ${workspace}/bld/bld-fsmci-summary/location)
+    mustHaveValue "${location}" "location"
+
+    local subTaskName=$(getSubTaskNameFromJobName)
+    mustHaveValue "${subTaskName}" "sub task name"
+
+    if [[ ${subTaskName} = "FSM-r4" ]] ; then
+        case ${location} in
+            trunk)           location=FSM_R4_DEV ;;
+            pronb-developer) location=FSM_R4_DEV ;;
+            *)     # TODO: demx2fk3 2015-02-03 add check, if new location exists, otherwise no build
+                   location=${location}_FSMR4 ;;
+        esac
+    fi
+    mustHaveValue "${location}" "location"
+
+    export LFS_CI_GLOBAL_BRANCH_NAME=${location}
+    return
+}

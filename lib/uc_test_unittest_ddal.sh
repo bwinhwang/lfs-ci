@@ -44,6 +44,11 @@ ci_job_test_unittest_ddal() {
     ;; *)        TARGET_TYPE=FSM-r3
     esac
 
+    case "$JOB_NAME"
+    in *valgrind*) VALGRIND_STR=" Valgrind"
+    ;; *)          VALGRIND_STR=
+    esac
+
     local src=src-unittests/src/tests/ddal/ddal-unittests
 
     info "collecting results"
@@ -55,6 +60,15 @@ ci_job_test_unittest_ddal() {
             execute cp -f ${name}/* ${workspace}/xml-reports
         done
 
+    cd ${workspace}
+    local mergexmltestcases=${workspace}/src-test/src/bin/mergexmltestcases
+    mustExistFile ${mergexmltestcases}
+    local mergeresult=testcases.merged
+    execute -n ${mergexmltestcases} > ${mergeresult}
+    execute gzip -6 -f ${mergeresult}
+
+    mustExistFile ${mergeresult}.gz
+    copyFileToArtifactDirectory ${mergeresult}.gz
 
     local lcov=${workspace}/src-unittests/src/frameworks/lcov/bin/lcov
     mustExistFile ${lcov}
@@ -79,7 +93,7 @@ ci_job_test_unittest_ddal() {
     execute python ${lcov_cobertura} lcov.out
     execute sed -i -e 's/#FFFFFF/#FFFFEE/' gcov.css
 
-    execute -n find . -name '*.html' | execute xargs -n1 sed -i -e "s/LCOV -/${label} $TARGET_TYPE DDAL Unittests -/"
+    execute -n find . -name '*.html' | execute xargs -n1 sed -i -e "s/LCOV -/${label} $TARGET_TYPE$VALGRIND_STR DDAL Unittests -/"
     execute -n ${lcov} --summary lcov.out > lcov.summary
 
     rawDebug lcov.summary

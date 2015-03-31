@@ -40,17 +40,29 @@ ci_job_test_on_target() {
         createWorkspace
     fi
 
+<<<<<<< HEAD
     copyAndExtractBuildArtifactsFromProject ${UPSTREAM_PROJECT} ${UPSTREAM_BUILD} "fsmci"
 
     mustHaveReservedTarget
     local targetName=$(_reserveTarget)
+=======
+    info "create workspace for testing on ${branchName}"
+    # TODO: demx2fk3 2015-02-13 we are using the wrong revision to checkout src-test
+    createBasicWorkspace -l ${branchName} src-test
+>>>>>>> a4262def049dcee289fe9a55bfe5fb18daccd785
 
     # for legacy: If job name is Test-<targetName> we don't know the type of the target
     local testType=$(getConfig LFS_CI_uc_test_making_test_type -t testTargetName:${targetName})
     mustHaveValue "${testType}" "test type"
 
+<<<<<<< HEAD
     databaseEventSubTestStarted 
     exit_add _exitHandlerDatabaseEventsSubTestFailed
+=======
+    info "testing production ${LABEL}"
+
+    databaseEventTestStarted ${LABEL} ${testTargetName}
+>>>>>>> a4262def049dcee289fe9a55bfe5fb18daccd785
 
     for type in $(getConfig LFS_CI_uc_test_making_test_type) ; do
         info "running test type ${type} on target ${targetName}"
@@ -86,7 +98,10 @@ uc_job_test_on_target_archive_logs() {
     # set the correct jobName
     export JOB_NAME=${jobName}
 
-    local testReposPathOnMoritz=$(getConfig LFS_CI_uc_test_on_target_test_repos_on_moritz)
+    local branchName=$(getLocationName ${UPSTREAM_PROJECT})
+    mustHaveValue "${branchName}" "branch name"
+
+    local testReposPathOnMoritz=$(getConfig LFS_CI_uc_test_on_target_test_repos_on_moritz -t location:${branchName})
     mustHaveValue "${testReposPathOnMoritz}" "test-repos path on moritz"
     
     execute -r 10 rsync -LavrPe ssh \

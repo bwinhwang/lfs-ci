@@ -239,6 +239,13 @@ _build_fsmddal_pdf() {
     execute cp ${workspace}/src-${component}psl/src/${component}ddal.d/FSMDDAL.pdf ${destinationDir}
     execute rm -rf ${workspace}/bld/bld-fsmifdd-defcfg
 
+    if [[ -e ${workspace}/src-${component}ddal/src/doc/Doxyfile ]] ; then
+        cd ${workspace}/
+        execute doxygen ${workspace}/src-${component}ddal/src/doc/Doxyfile
+        execute mv html ${destinationDir}
+    fi
+
+
     return
 }
 

@@ -39,6 +39,9 @@ oneTimeSetUp() {
     runOnMaster() {
         mockedCommand "runOnMaster $@"
     }
+    mustHaveLocationForSpecialBuild() {
+        mockedCommand "mustHaveLocationForSpecialBuild $@"
+    }
 
 }
 oneTimeTearDown() {
@@ -73,6 +76,7 @@ test1() {
 # execute mkdir -p ${WORKSPACE}/workspace/bld/
 
 cat <<EOF > ${expect}
+mustHaveLocationForSpecialBuild 
 ci_job_package 
 copyAndExtractBuildArtifactsFromProject upstream_project 123 knife fsmci
 mustHaveNextCiLabelName 
