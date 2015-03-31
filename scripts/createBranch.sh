@@ -221,7 +221,9 @@ createBranchInGit() {
         # TODO: get GIT via getConfig()
         local gitServer="psulm.nsn-net.net"
 
-        gitRevision=$(svn cat ${SVN_REPO}/${SVN_PATH}/main/${SRC_PROJECT}/src/gitrevision)
+        # -> die SVN URL kann auch aus file.cfg geholt werden.
+        #    fix for LRC pending.
+        gitRevision=$(svn cat -r${REVISION} ${SVN_REPO}/${SVN_PATH}/main/${SRC_PROJECT}/src/gitrevision)
         info "GIT revision: ${gitRevision}"
         git clone ssh://git@${gitServer}/build/build
         cd build
