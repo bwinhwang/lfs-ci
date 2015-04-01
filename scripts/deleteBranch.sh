@@ -137,29 +137,24 @@ LRC_moveBranchSvn() {
     return 0
 }
 
-getDbData() {
-    # TODO: read from config as soon as MYSQL_ params are available in file.cfg
-    case $1 in
-        db_name) echo "lfspt" ;;
-        db_username) echo "lfspt_read" ;;
-        db_password) echo "ptread" ;;
-        db_hostname) echo "ulwiki02.emea.nsn-net.net" ;;
-        db_port) echo "3306" ;;
-    esac
-}
-
 getDirPattern() {
     local branch=$1
-    local dbName=$(getDbData db_name)
-    local dbUser=$(getDbData db_username)
-    local dbPass=$(getDbData db_password)
-    local dbHost=$(getDbData db_hostname)
-    local dbPort=$(getDbData db_port)
+    local dbName=$(getConfig MYSQL_db_name)
+    local dbUser=$(getConfig MYSQL_db_username)
+    local dbPass=$(getConfig MYSQL_db_password)
+    local dbHost=$(getConfig MYSQL_db_hostname)
+    local dbPort=$(getConfig MYSQL_db_port)
     local sqlString="SELECT release_name_regex FROM branches WHERE branch_name='${branch}'"
     local dirPattern=$(echo "${sqlString}" | mysql -N -u ${dbUser} --password=${dbPass} -h ${dbHost} -P ${dbPort} -D ${dbName})
+    [[ $? -ne 0 ]] && { echo "mysql command failed"; exit 1; }
 
     mustHaveValue ${branch} "No value for branch."
     mustHaveValue ${dirPattern} "dirPattern must have a value."
+    mustHaveValue ${dbName} "No value for dbName"
+    mustHaveValue ${dbUser} "No value for dbUser"
+    mustHaveValue ${dbPass} "No value for dbPass"
+    mustHaveValue ${dbHost} "No value for dbHost"
+    mustHaveValue ${dbPort} "No value for dbPort"
 
     dirPattern=$(echo ${dirPattern} | cut -d'(' -f1)
     echo "${dirPattern}*"
