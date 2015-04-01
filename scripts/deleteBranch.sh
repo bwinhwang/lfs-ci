@@ -317,7 +317,7 @@ dbUpdate() {
     info "--------------------------------------------------------"
 
     local branch=${BRANCH}
-    local sqlString="UPDATE branches SET status='closed' WHERE branche_name='${branch}'"
+    local sqlString="UPDATE branches SET status='closed' WHERE branch_name='${branch}'"
 
     local dbName=$(getConfig MYSQL_db_name)
     local dbUser=$(getConfig MYSQL_db_username)
