@@ -118,14 +118,14 @@ if(deleteJobs || LRC_deleteJobs) {
 
     for(p in jenkins.model.Jenkins.theInstance.getProjects()) {
         job_name = p.getName()
-        if(deleteJobs && job_name.find("_"+branch+"_") && !job_name.find("LFS_CI_-_LRC_") && !job_name.find("LFS_Prod_-_LRC_")) {
+        if(deleteJobs && job_name.find("_"+branch+"_") && !job_name.find("LFS_CI_-_LRC_") && !job_name.find("LFS_Prod_-_LRC_") && !job_name.find("PKGPOOL_-_LRC_")) {
             if(debug) {
                 println("[DEBUG] delete job: $p.name (dry run)")
             } else {
                 p.delete()
                 println("[INFO] deleted job: $p.name")
             }
-        } else if(job_name.find("LFS_CI_-_LRC_"+branch+"_-") || job_name.find("LFS_Prod_-_LRC_"+branch+"_-")) {
+        } else if(job_name.find("LFS_CI_-_LRC_"+branch+"_-") || job_name.find("LFS_Prod_-_LRC_"+branch+"_-") || job_name.find("PKGPOOL_-_LRC_"+branch+"_-")) {
             lrc_jobs.add(p)
             println("[DEBUG] added job $p.name to lrc_jobs list")
         } else if(other_job_names && job_name.find(other_job_names)) {
@@ -156,7 +156,5 @@ if(!lrc_jobs && !remaining_jobs) {
     deleteView()
 }
 else {
-    println("lrc_jobs: ${lrc_jobs}")
-    println("remaining_jobs: ${remaining_jobs}")
     println("[INFO] Not deleting list view sections. There are still jobs from another branch.")
 }
