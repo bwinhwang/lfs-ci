@@ -15,6 +15,7 @@ info "# MOVE_SHARE:          $MOVE_SHARE"
 info "# LRC_MOVE_SVN:        $LRC_MOVE_SVN"
 info "# LRC_DELETE_JOBS:     $LRC_DELETE_JOBS"
 info "# LRC_MOVE_SHARE:      $LRC_MOVE_SHARE"
+info "# DB_UPDATE:           $DB_UPDATE"
 info "# DEBUG:               $DEBUG"
 info "# COMMENT:             $COMMENT"
 info "###############################################################"
@@ -77,7 +78,7 @@ __checkParams() {
 
 __checkOthers() {
     [[ -d ${ARCHIVE_BASE} ]] || { error "archive dir ${ARCHIVE_BASE} does not exist."; return 1; }
-    which mysql || { error "mysql not available."; return 1; }
+    which mysql > /dev/null 2>&1 || { error "mysql not available."; return 1; }
 }
 
 __cmd() {
@@ -306,6 +307,34 @@ deleteTestResults() {
     __cmd ssh ${TEST_SERVER} rm -rf /lvol2/production_jenkins/test-repos/src-fsmtest/${dirPattern}
 }
 
+## @fn      dbUpdate()
+#  @brief   set branch to closed in DB
+#  @param   <branch> the name of the branch
+#  @return  <none>
+dbUpdate() {
+    info "--------------------------------------------------------"
+    info "DB: update branch to closed in lfspt database"
+    info "--------------------------------------------------------"
+
+    local branch=${BRANCH}
+    local sqlString="UPDATE branches SET status='closed' WHERE branche_name='${branch}'"
+
+    local dbName=$(getConfig MYSQL_db_name)
+    local dbUser=$(getConfig MYSQL_db_username)
+    local dbPass=$(getConfig MYSQL_db_password)
+    local dbHost=$(getConfig MYSQL_db_hostname)
+    local dbPort=$(getConfig MYSQL_db_port)
+
+    if [ $DEBUG == true ]; then
+        debug $sqlString
+        echo [DEBUG] $sqlString
+    else
+        info "updating DB: $sqlString"
+        echo $sqlString | mysql -u ${dbUser} --password=${dbPass} -h ${dbHost} -P ${dbPort} -D ${dbName}
+    fi
+}
+
+
 __checkParams || { error "Params check failed."; exit 1; }
 __checkOthers || { error "Checking some stuff failed."; exit 1; }
 
@@ -313,7 +342,8 @@ getDirPattern ${BRANCH}
 
 [[ ${MOVE_SVN} == true ]] && moveBranchSvn || info "Not moving $BRANCH in repo"
 [[ ${MOVE_SHARE} == true ]] && { archiveBranchShare; archiveBranchBldShare; } || info "Not archiving $BRANCH on share"
-[[ ${DELETE_TEST_RESULTS} == true ]] && { deleteTestResults; } || info "Not deleting test results"
+[[ ${DELETE_TEST_RESULTS} == true ]] && deleteTestResults || info "Not deleting test results"
+[[ ${DB_UPDATE} == true ]] && dbUpdate || info "Not updating DB."
 
 [[ ${LRC_MOVE_SVN} == true ]] && LRC_moveBranchSvn || info "Not moving $BRANCH in repo for LRC"
 [[ ${LRC_MOVE_SHARE} == true ]] && { LRC_archiveBranchShare; LRC_archiveBranchBldShare; } || info "Not archiving $BRANCH on share for LRC"

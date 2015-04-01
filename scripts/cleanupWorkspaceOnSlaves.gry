@@ -80,7 +80,15 @@ for(slave in jenkins.slaves) {
         // Remove any suffixes from the dir name
         def dirName = d.name.split("@")[0]
         for(jobName in jobNames) {
-            if(jobName == dirName) {
+            if(jobName == dirName && !LRC_deleteJobs && !jobName.find("LRC")) {
+                if(debug == true) {
+                    println(" [DEBUG] DELETE job: $d (dryRun)")
+                }
+                else {
+                    d.deleteRecursive()
+                    println(" [INFO] DELETED job directory: $d")
+                }
+            } else if(jobName == dirName && LRC_deleteJobs && jobName.find("LRC")) {
                 if(debug == true) {
                     println(" [DEBUG] DELETE job: $d (dryRun)")
                 }
