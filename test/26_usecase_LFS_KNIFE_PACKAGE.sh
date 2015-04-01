@@ -65,8 +65,7 @@ test1() {
     export BUILD_NUMBER=1234
     export LFS_CI_GLOBAL_BRANCH_NAME=trunk
 
-    # assertTrue "usecase_LFS_KNIFE_PACKAGE"
-    usecase_LFS_KNIFE_PACKAGE
+    assertTrue "usecase_LFS_KNIFE_PACKAGE"
 
     local expect=$(createTempFile)
 

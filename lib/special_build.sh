@@ -192,6 +192,7 @@ uploadKnifeToStorage() {
     mustHaveValue "${uploadServer}" "upload server and path"
 
     s3PutFile ${knifeFile} ${uploadServer}
+    s3SetAccessPublic ${knifeFile}
 
     return
 }

@@ -9,3 +9,4 @@ log
 doc/html
 doc/latex
 bin/.nfs*
+lib/contrib/s3cmd/*/*.pyc

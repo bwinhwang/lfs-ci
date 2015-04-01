@@ -18,7 +18,7 @@ getArchitectureFromDirectory() {
     local directory=$1
     local baseName=$(basename ${directory})
     local directoryPlatform=$(cut -d- -f3 <<< ${baseName})
-    echo ${archMap["${directoryPlatform}"]}
+    getConfig LFS_CI_map_config_to_architecture -t cfg:${directoryPlatform}
     return
 }
 
@@ -32,8 +32,7 @@ getPlatformFromDirectory() {
     local directory=$1
     local baseName=$(basename ${directory})
     local directoryPlatform=$(cut -d- -f3 <<< ${baseName})
-    local destinationsPlatform=${platformMap["${directoryPlatform}"]}
-    echo ${destinationsPlatform}
+    getConfig LFS_CI_map_config_to_config -t cfg:${directoryPlatform}
     return
 }
 
