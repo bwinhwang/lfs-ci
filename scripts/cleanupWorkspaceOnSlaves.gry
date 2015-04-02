@@ -27,6 +27,8 @@ def debug = true
 
 def branch = ""
 
+def deleteJobs = false
+
 def LRC_deleteJobs = false
 
 parameters.each {
@@ -38,6 +40,10 @@ parameters.each {
         branch = it.value
         println("[INFO] got parameter BRANCH: $branch")
     }
+    if(it.name == "DELETE_JOBS") {
+        deleteJobs = it.value
+        println("[INFO] got parameter DELETE_JOBS: $deleteJobs")
+    }
     if(it.name == "LRC_DELETE_JOBS") {
         LRC_deleteJobs = it.value
         println("[INFO] got parameter LRC_DELETE_JOBS: $LRC_deleteJobs")
@@ -47,6 +53,11 @@ parameters.each {
 if(!branch) {
     println("[ERROR] BRANCH is not specified")
     return 1
+}
+
+if(!deleteJobs && !LRC_deleteJobs) {
+    println("[INFO] Nothing should be deleted.")
+    return 0
 }
 
 if(debug == true) {
