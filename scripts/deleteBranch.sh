@@ -9,6 +9,7 @@ info "# Variables from Jenkins"
 info "# ----------------------"
 info "# BRANCH:              $BRANCH"
 info "# MOVE_SVN:            $MOVE_SVN"
+info "# MOVE_SVN_OS_BRANCH:  $MOVE_SVN_OS_BRANCH"
 info "# DELETE_JOBS:         $DELETE_JOBS"
 info "# DELETE_TEST_RESULTS: $DELETE_TEST_RESULTS"
 info "# MOVE_SHARE:          $MOVE_SHARE"
@@ -31,7 +32,7 @@ BLD_SHARE="/build/home/SC_LFS/releases/bld"
 PKG_SHARE="/build/home/SC_LFS/pkgpool"
 SVN_OPTS="--non-interactive --trust-server-cert"
 ARCHIVE_BASE=$(getConfig ADMIN_archive_share)
-TEST_SERVER="ulegcpmoritz"
+TEST_SERVER="ulegcpmoritz.emea.nsn-net.net"
 DIR_PATTERN=""
 
 
@@ -108,20 +109,14 @@ __getSubBranch() {
 #
 #######################################################################
 
-
 ## @fn      moveBranchSvn()
 #  @brief   move $BRANCH in svn
 #  @param   <none>
 #  @return  <none>
 moveBranchSvn() {
     info "--------------------------------------------------------"
-    info "SVN: move branch in SVN"
+    info "SVN: move locations and FSMr4 in SVN"
     info "--------------------------------------------------------"
-
-    svn ls ${SVN_OPTS} ${SVN_REPO}/${SVN_DIR}/${BRANCH} 2> /dev/null && {
-        __cmd svn ${SVN_OPTS} move -m \"moved ${BRANCH} to obsolete\" \
-            ${SVN_REPO}/${SVN_DIR}/${BRANCH} ${SVN_REPO}/${SVN_DIR}/obsolete;
-    }
 
     svn ls ${SVN_OPTS} ${SVN_REPO}/${SVN_DIR}/${SVN_BLD_DIR}/locations-${BRANCH} 2> /dev/null && {
         __cmd svn ${SVN_OPTS} move -m \"moved locations-${BRANCH} to obsolete\" \
@@ -132,8 +127,21 @@ moveBranchSvn() {
         __cmd svn ${SVN_OPTS} move -m \"moved locations-${BRANCH} FSMR4 to obsolete\" \
             ${SVN_REPO}/${SVN_DIR}/${SVN_BLD_DIR}/locations-${BRANCH}_FSMR4 ${SVN_REPO}/${SVN_DIR}/${SVN_BLD_DIR}/obsolete;
     }
+}
 
-    return 0
+## @fn      moveBranchSvnOS()
+#  @brief   move os/$BRANCH in svn
+#  @param   <none>
+#  @return  <none>
+moveBranchSvnOS() {
+    info "--------------------------------------------------------"
+    info "SVN: move os/${BRANCH} in SVN"
+    info "--------------------------------------------------------"
+
+    svn ls ${SVN_OPTS} ${SVN_REPO}/${SVN_DIR}/${BRANCH} 2> /dev/null && {
+        __cmd svn ${SVN_OPTS} move -m \"moved ${BRANCH} to obsolete\" \
+            ${SVN_REPO}/${SVN_DIR}/${BRANCH} ${SVN_REPO}/${SVN_DIR}/obsolete;
+    }
 }
 
 ## @fn      LRC_moveBranchSvn()
@@ -340,6 +348,7 @@ __checkOthers || { error "Checking some stuff failed."; exit 1; }
 
 getDirPattern ${BRANCH}
 
+[[ ${MOVE_SVN_OS_BRANCH} == true ]] && moveBranchSvnOS || info "Not moving os/$BRANCH in repo"
 [[ ${MOVE_SVN} == true ]] && moveBranchSvn || info "Not moving $BRANCH in repo"
 [[ ${MOVE_SHARE} == true ]] && { archiveBranchShare; archiveBranchBldShare; } || info "Not archiving $BRANCH on share"
 [[ ${DELETE_TEST_RESULTS} == true ]] && deleteTestResults || info "Not deleting test results"
