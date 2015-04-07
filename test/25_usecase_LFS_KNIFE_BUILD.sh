@@ -36,6 +36,13 @@ oneTimeSetUp() {
     date() {
         echo date
     }
+    mustExistInSubversion() {
+        mockedCommand "mustExistInSubversion $@"
+    }
+    svnCat() {
+        mockedCommand "svnCat $@"
+        echo "src-foo http://fake 12345"
+    }
 
 }
 oneTimeTearDown() {
@@ -50,7 +57,7 @@ setUp() {
     export REQUESTOR="knife requestor"
     export REQUESTOR_USERID="user"
 
-    export KNIFE_LFS_BASELINE=PS_LFS_OS_2014_01_0001
+    export KNIFE_LFS_BASELINE=PS_LFS_OS_2015_03_0001
 }
 tearDown() {
     true 
@@ -67,22 +74,24 @@ test1() {
 
     local expect=$(createTempFile)
 cat <<EOF > ${expect}
+mustExistInSubversion https://ulscmi.inside.nsn.com/isource/svnroot/BTS_D_SC_LFS_2015_03/os/tags/PS_LFS_OS_2015_03_0001/doc/scripts/ revisions.txt
+svnCat https://ulscmi.inside.nsn.com/isource/svnroot/BTS_D_SC_LFS_2015_03/os/tags/PS_LFS_OS_2015_03_0001/doc/scripts/revisions.txt
 execute mkdir -p ${WORKSPACE}/workspace
 execute mkdir -p ${WORKSPACE}/workspace/bld/bld-fsmci-summary/
 copyFileFromWorkspaceToBuildDirectory LFS_KNIFE_-_knife_-_Build 123 ${WORKSPACE}/revisionstate.xml
 execute mkdir -p ${WORKSPACE}/workspace/bld/bld-knife-input/
 execute -i cp -a ${WORKSPACE}/lfs.patch ${WORKSPACE}/workspace/bld/bld-knife-input/
 createArtifactArchive 
-setBuildDescription LFS_KNIFE_-_knife_-_Build 123 KNIFE_PS_LFS_OS_2014_01_0001.date<br>knife requestor
+setBuildDescription LFS_KNIFE_-_knife_-_Build 123 KNIFE_PS_LFS_OS_2015_03_0001.date<br>knife requestor
 EOF
     assertExecutedCommands ${expect}
 
     assertTrue "[[ -d ${WORKSPACE}/workspace/bld/bld-fsmci-summary ]]"
     assertTrue "[[ -f ${WORKSPACE}/workspace/bld/bld-fsmci-summary/label ]]"
     assertTrue "[[ -d ${WORKSPACE}/workspace/bld/bld-knife-input ]]"
-    assertEquals "$(cat ${WORKSPACE}/workspace/bld/bld-fsmci-summary/label)" "KNIFE_PS_LFS_OS_2014_01_0001.date"
+    assertEquals "$(cat ${WORKSPACE}/workspace/bld/bld-fsmci-summary/label)" "KNIFE_PS_LFS_OS_2015_03_0001.date"
     assertEquals "$(cat ${WORKSPACE}/revisionstate.xml)" \
-                 "src-fake http://fakeurl/ PS_LFS_OS_2014_01_0001"
+                 "src-fake http://fakeurl/ 12345"
 
     return
 }

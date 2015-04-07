@@ -101,6 +101,13 @@ copyGenericBuildResults() {
         info "copy generic build results from ${bldDirectory} to ${dst}"
         execute rsync -av --exclude=rootfs.d --exclude=.svn ${bldDirectory}/ ${dst}/
     done
+
+    local dst=${workspace}/upload/C_Platform/
+    for bldDirectory in ${workspace}/bld/bld-*-*/results/psl/C_Platform ; do
+        [[ -d ${bldDirectory} ]] || continue
+        info "copy generic build results from ${bldDirectory} to ${dst}"
+        execute rsync -av  --exclude=.svn ${bldDirectory}/ ${dst}/
+    done
     return
 }
 
@@ -223,7 +230,6 @@ copySysroot() {
         local sysroot_tgz
         case ${platform} in
             lrc-*)   sysroot_tgz=${workspace}/bld/bld-rfs-lcpa/results/sysroot.tar.gz ;;
-#            fsm4_*)  sysroot_tgz=${workspace}/bld/bld-rfs-arm/results/sysroot.tar.gz  ;;
             qemu_64) sysroot_tgz=${bldDirectory}/results/rfs.init_sys-root.tar.gz  
                      [[ $(getBranchName) =~ "LRC" ]] && \
                      sysroot_tgz=${workspace}/bld/bld-rfs-qemu_x86_64/results/sysroot.tar.gz ;;
@@ -261,39 +267,45 @@ copySysroot() {
                 fcmd)
                     # fetch DDAL include and libs out of DDAL.TGZ
                     # bld-psl-fxxx/results/ifddal.tgz (ifddal header) to sys-root (only needed for i686 and e500, because here we have no rfs.init_sys-root)    
+                    info "fetching files for sysroot out of ifddal.tgz"
                     execute tar xzvf ${workspace}/bld/bld-psl-fcmd/results/ifddal.tgz -C ${dst}/usr --strip-components=1
                     
                     # copy bld-psl-fcmd/results/sys-root into sys-root
-                    execute cp -rf ${workspace}/bld/bld-psl-fcmd/results/sys-root/* ${dst}/
+                    if [ -d ${workspace}/bld/bld-psl-fcmd/results/sys-root ];
+                    then
+                            info "fetching files for sysroot out of bld-psl-fcmd/results/sys-root/"
+		                    execute cp -rf ${workspace}/bld/bld-psl-fcmd/results/sys-root/* ${dst}/
+                    else
+                            # some older releases do not have a psl/results/sys-root directory
+                            info "No ${workspace}/bld/bld-psl-fcmd/results/sys-root found"
+                    fi
                     ;;
                 fspc)  
+                    info "fetching files for sysroot out of ifddal.tgz"
                     execute tar xzvf ${workspace}/bld/bld-psl-fspc/results/ifddal.tgz -C ${dst}/usr/lib ddal/lib/libDDAL.so.fspc --strip-components=2
 
+                    info "fetching files for sysroot out of rootfs_debug.tgz"
                     execute tar xvzf ${workspace}/bld/bld-psl-fspc/results/rootfs_debug.tgz -C ${dst}/
                     rm -f ${dst}/build.log
-
-                    # TODO: dems18x0 2015-03-09: fix old GCC path? But this fix path was also used in old CI Build-System
-                    local SYSROOT_DIR=/build/home/SC_LFS/packages/gcc/releases/i686-pc-linux-gnu/glibc-2.3/GCC-4.3.3_10500/usr/${destinationsArchitecture}/sys-root
-                    mustExistDirectory ${SYSROOT_DIR}
-                    execute cp -r $SYSROOT_DIR/usr/include/* ${dst}/usr/include/
-                    execute cp -r $SYSROOT_DIR/usr/lib/* ${dst}/usr/lib/
-                    execute cp -r $SYSROOT_DIR/lib ${dst}/lib/
                     ;;
                 qemu)
-                    execute tar xzvf ${workspace}/bld/bld-psl-qemu/results/ifddal.tgz -C ${dst}/usr --strip-components=1
+                    info "fetching files for sysroot out of ifddal.tgz"
+                    execute tar xzvf ${workspace}/bld/bld-ddal-qemu_i386/results/include/ifddal.tgz -C ${dst}/usr --strip-components=1
 
-                    execute tar xvzf ${workspace}/bld/bld-psl-qemu/results/rootfs_debug.tgz -C ${dst}/
+                    info "fetching files for sysroot out of rootfs_debug.tgz"
+                    execute tar xvzf ${workspace}/bld/bld-psl-qemu_i386/results/rootfs_debug.tgz -C ${dst}/
                     rm -f ${dst}/build.log
-
-                    # TODO: dems18x0 2015-03-09: fix old GCC path? But this fix path was also used in old CI Build-System
-                    local SYSROOT_DIR=/build/home/SC_LFS/packages/gcc/releases/i686-pc-linux-gnu/glibc-2.3/GCC-4.3.3_10500/usr/${destinationsArchitecture}/sys-root
-                    mustExistDirectory ${SYSROOT_DIR}
-                    execute cp -r $SYSROOT_DIR/usr/include/* ${dst}/usr/include/
-                    execute cp -r $SYSROOT_DIR/usr/lib/* ${dst}/usr/lib/
-                    execute cp -r $SYSROOT_DIR/lib ${dst}/lib/
                     ;;
                 *)  ;;
             esac
+
+            # TODO: dems18x0 2015-03-09: fix old GCC path? But this fix path was also used in old CI Build-System
+            info "fetching files for sysroot out of GCC package"
+            local SYSROOT_DIR=/build/home/SC_LFS/packages/gcc/releases/i686-pc-linux-gnu/glibc-2.3/GCC-4.3.3_10500/usr/${destinationsArchitecture}/sys-root
+            mustExistDirectory ${SYSROOT_DIR}
+            execute cp -r $SYSROOT_DIR/usr/include/* ${dst}/usr/include/
+            execute cp -r $SYSROOT_DIR/usr/lib/* ${dst}/usr/lib/
+            execute cp -r $SYSROOT_DIR/lib/* ${dst}/lib/
 
         fi
 

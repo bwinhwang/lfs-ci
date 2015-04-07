@@ -39,6 +39,9 @@ oneTimeSetUp() {
     runOnMaster() {
         mockedCommand "runOnMaster $@"
     }
+    mustHaveLocationForSpecialBuild() {
+        mockedCommand "mustHaveLocationForSpecialBuild $@"
+    }
 
 }
 oneTimeTearDown() {
@@ -62,8 +65,7 @@ test1() {
     export BUILD_NUMBER=1234
     export LFS_CI_GLOBAL_BRANCH_NAME=trunk
 
-    # assertTrue "usecase_LFS_KNIFE_PACKAGE"
-    usecase_LFS_KNIFE_PACKAGE
+    assertTrue "usecase_LFS_KNIFE_PACKAGE"
 
     local expect=$(createTempFile)
 
@@ -73,6 +75,7 @@ test1() {
 # execute mkdir -p ${WORKSPACE}/workspace/bld/
 
 cat <<EOF > ${expect}
+mustHaveLocationForSpecialBuild 
 ci_job_package 
 copyAndExtractBuildArtifactsFromProject upstream_project 123 knife fsmci
 mustHaveNextCiLabelName 

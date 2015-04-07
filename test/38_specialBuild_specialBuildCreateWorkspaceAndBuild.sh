@@ -39,6 +39,10 @@ oneTimeSetUp() {
     setBuildDescription() {
         mockedCommand "setBuildDescription $@"
     }  
+    mustHaveLocationForSpecialBuild() {
+        mockedCommand "mustHaveLocationForSpecialBuild $@"
+        export LFS_CI_GLOBAL_BRANCH_NAME=LOCATION
+    }
 
     return
 }
@@ -67,6 +71,7 @@ test1() {
 
     local expect=$(createTempFile)
     cat <<EOF > ${expect}
+mustHaveLocationForSpecialBuild 
 execute rm -rf ${WORKSPACE}/revisions.txt
 createWorkspace 
 copyArtifactsToWorkspace LFS_DEV_-_DEVELOPER_-_Build 987 fsmci

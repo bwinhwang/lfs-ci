@@ -31,6 +31,7 @@ oneTimeSetUp() {
 setUp() {
     cp -f /dev/null ${UT_MOCKED_COMMANDS}
     export DELIVERY_DIRECTORY=$(createTempDirectory)
+    export WORKSPACE=$(createTempDirectory)
     return
 }
 
@@ -47,7 +48,7 @@ test1() {
 _reserveTarget 
 makingTest_testSuiteDirectory 
 mustExistDirectory /path/to/test/suite
-execute make -C /path/to/test/suite testconfig-overwrite TESTBUILD=${DELIVERY_DIRECTORY} TESTTARGET=targetname
+execute make -C /path/to/test/suite testconfig-overwrite TESTBUILD=${DELIVERY_DIRECTORY} TESTTARGET=targetname TESTBUILD_SRC=${WORKSPACE}/workspace
 EOF
     assertExecutedCommands ${expect}
 

@@ -14,6 +14,7 @@ info "# SRC_BRANCH:           $SRC_BRANCH"
 info "# NEW_BRANCH:           $NEW_BRANCH"
 info "# REVISION:             $REVISION"
 info "# FSMR4:                $FSMR4"
+info "# FSMR4_ONLY:           $FSMR4_ONLY"
 info "# SOURCE_RELEASE:       $SOURCE_RELEASE"
 info "# ECL_URLS:             $ECL_URLS"
 info "# COMMENT:              $COMMENT"
@@ -24,6 +25,7 @@ info "# COPY_DELIVERY:        $COPY_DELIVERY"
 info "# UPDATE_LOCATIONS_TXT: $UPDATE_LOCATIONS_TXT"
 info "# DO_DB_INSERT:         $DO_DB_INSERT"
 info "# DO_GIT:               $DO_GIT"
+info "# ACTIVATE_ROOT_JOBS:   $ACTIVATE_ROOT_JOBS"
 info "###############################################################"
 
 # TODO: Get it via getConfig()
@@ -52,6 +54,7 @@ __checkParams() {
     [[ ! ${SOURCE_RELEASE} ]] && { echo "SOURCE_RELEASE is missing"; exit 1; }
     [[ ! ${ECL_URLS} ]] && { echo "ECL_URLS is missing"; exit 1; }
     [[ ! ${COMMENT} ]] && { echo "COMMENT is missing"; exit 1; }
+    [[ ${FSMR4} == false ]] && [[ ${FSMR4_ONLY} == true ]] && { echo "FSMR4 can not be false in case FSMR4_ONLY is true"; exit 1; }
 
     return 0
 }
@@ -134,7 +137,7 @@ svnCopyLocationsFSMR4() {
     mustHaveValue "${srcBranch}" "source branch"
     mustHaveValue "${newBranch}" "new branch"
 
-    svn ls ${SVN_REPO}/${SVN_DIR}/trunk/bldtools/${LOCATIONS_FSMR4} && {
+    svn ls ${SVN_REPO}/${SVN_DIR}/trunk/bldtools/locations-${newBranch}_FSMR4 || {
         svn copy -m "copy locations branch ${newBranch}" ${SVN_REPO}/${SVN_DIR}/trunk/bldtools/${LOCATIONS_FSMR4} \
             ${SVN_REPO}/${SVN_DIR}/trunk/bldtools/locations-${newBranch}_FSMR4
         svn checkout ${SVN_REPO}/${SVN_DIR}/trunk/bldtools/locations-${newBranch}_FSMR4
@@ -184,7 +187,7 @@ svnCopyLocationsLRC() {
     mustHaveValue "${srcBranch}" "source branch"
     mustHaveValue "${newBranch}" "new branch"
 
-    svn ls ${SVN_REPO}/${SVN_DIR}/trunk/bldtools/${LOCATIONS_LRC} || {
+    svn ls ${SVN_REPO}/${SVN_DIR}/trunk/bldtools/locations-${newBranch} || {
         svn copy -m "copy locations branch ${newBranch}" ${SVN_REPO}/${SVN_DIR}/trunk/bldtools/${LOCATIONS_LRC} \
             ${SVN_REPO}/${SVN_DIR}/trunk/bldtools/locations-${newBranch}
         svn checkout ${SVN_REPO}/${SVN_DIR}/trunk/bldtools/locations-${newBranch}
@@ -218,7 +221,13 @@ createBranchInGit() {
         # TODO: get GIT via getConfig()
         local gitServer="psulm.nsn-net.net"
 
-        gitRevision=$(svn cat ${SVN_REPO}/${SVN_PATH}/main/${SRC_PROJECT}/src/gitrevision)
+        # TODO: Die SVN URL kann auch aus file.cfg geholt werden.
+        if [[ ${LRC} == true ]]; then
+            gitRevision=$(svn cat -r${REVISION} ${SVN_REPO}/${SVN_PATH}/lrc/${SRC_PROJECT}/src/gitrevision)
+        else
+            gitRevision=$(svn cat -r${REVISION} ${SVN_REPO}/${SVN_PATH}/main/${SRC_PROJECT}/src/gitrevision)
+        fi
+
         info "GIT revision: ${gitRevision}"
         git clone ssh://git@${gitServer}/build/build
         cd build
@@ -426,7 +435,7 @@ dbInsert() {
     local mm=$(getBranchPart ${branch} MM)
     local regex="${branchType}_PS_LFS_OS_${yyyy}_${mm}_([0-9][0-9][0-9][0-9])"
 
-    if [[ ${LRC} == "true" ]]; then
+    if [[ ${LRC} == true ]]; then
         branch="LRC_${branch}"
         regex="${branchType}_LRC_LCP_PS_LFS_OS_${yyyy}_${mm}_([0-9][0-9][0-9][0-9])"
     fi

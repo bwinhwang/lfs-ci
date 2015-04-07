@@ -49,6 +49,7 @@ ci_job_test_on_target() {
     local testType=$(getConfig LFS_CI_uc_test_making_test_type -t testTargetName:${targetName})
     mustHaveValue "${testType}" "test type"
 
+    info "testing production ${LABEL}"
     databaseEventSubTestStarted 
     exit_add _exitHandlerDatabaseEventsSubTestFailed
 
@@ -86,7 +87,10 @@ uc_job_test_on_target_archive_logs() {
     # set the correct jobName
     export JOB_NAME=${jobName}
 
-    local testReposPathOnMoritz=$(getConfig LFS_CI_uc_test_on_target_test_repos_on_moritz)
+    local branchName=$(getLocationName ${UPSTREAM_PROJECT})
+    mustHaveValue "${branchName}" "branch name"
+
+    local testReposPathOnMoritz=$(getConfig LFS_CI_uc_test_on_target_test_repos_on_moritz -t location:${branchName})
     mustHaveValue "${testReposPathOnMoritz}" "test-repos path on moritz"
     
     execute -r 10 rsync -LavrPe ssh \

@@ -125,8 +125,8 @@ execute sed -i -e
             s|^PKGLABEL *?=.*|PKGLABEL ?= LABEL|
             s|^LRCPKGLABEL *?=.*|LRCPKGLABEL ?= LABEL|
             s|^hint *bld/pkgpool .*|hint bld/pkgpool LABEL|
-         file
-svnCommit -F ${WORKSPACE}/workspace/gitLog.txt file ${WORKSPACE}/workspace/src/gitrevision
+         ${WORKSPACE}/workspace/file
+svnCommit -F ${WORKSPACE}/workspace/gitLog.txt ${WORKSPACE}/workspace/file ${WORKSPACE}/workspace/src/gitrevision
 EOF
 
     assertExecutedCommands ${expect}
@@ -166,11 +166,11 @@ execute sed -i -e
             s|^PKGLABEL *?=.*|PKGLABEL ?= LABEL|
             s|^LRCPKGLABEL *?=.*|LRCPKGLABEL ?= LABEL|
             s|^hint *bld/pkgpool .*|hint bld/pkgpool LABEL|
-         file
-svnCommit -F ${WORKSPACE}/workspace/gitLog.txt file ${WORKSPACE}/workspace/src/gitrevision
+         ${WORKSPACE}/workspace/file
+svnCommit -F ${WORKSPACE}/workspace/gitLog.txt ${WORKSPACE}/workspace/file ${WORKSPACE}/workspace/src/gitrevision
 setBuildResultUnstable
 execute sed -i -e 1{s,%,o/o,g;s,^,SVN REJECTED: ,} ${WORKSPACE}/workspace/gitLog.txt
-svnCommit -F ${WORKSPACE}/workspace/gitLog.txt file ${WORKSPACE}/workspace/src/gitrevision
+svnCommit -F ${WORKSPACE}/workspace/gitLog.txt ${WORKSPACE}/workspace/file ${WORKSPACE}/workspace/src/gitrevision
 EOF
     assertExecutedCommands ${expect}
 
@@ -207,11 +207,11 @@ execute sed -i -e
             s|^PKGLABEL *?=.*|PKGLABEL ?= LABEL|
             s|^LRCPKGLABEL *?=.*|LRCPKGLABEL ?= LABEL|
             s|^hint *bld/pkgpool .*|hint bld/pkgpool LABEL|
-         file
-svnCommit -F ${WORKSPACE}/workspace/gitLog.txt file ${WORKSPACE}/workspace/src/gitrevision
+         ${WORKSPACE}/workspace/file
+svnCommit -F ${WORKSPACE}/workspace/gitLog.txt ${WORKSPACE}/workspace/file ${WORKSPACE}/workspace/src/gitrevision
 setBuildResultUnstable
 execute sed -i -e 1{s,%,o/o,g;s,^,SVN REJECTED: ,} ${WORKSPACE}/workspace/gitLog.txt
-svnCommit -F ${WORKSPACE}/workspace/gitLog.txt file ${WORKSPACE}/workspace/src/gitrevision
+svnCommit -F ${WORKSPACE}/workspace/gitLog.txt ${WORKSPACE}/workspace/file ${WORKSPACE}/workspace/src/gitrevision
 EOF
     assertExecutedCommands ${expect}
 
@@ -246,16 +246,16 @@ execute sed -i -e
             s|^PKGLABEL *?=.*|PKGLABEL ?= LABEL|
             s|^LRCPKGLABEL *?=.*|LRCPKGLABEL ?= LABEL|
             s|^hint *bld/pkgpool .*|hint bld/pkgpool LABEL|
-         file
-svnCommit -F ${WORKSPACE}/workspace/gitLog.txt file ${WORKSPACE}/workspace/src/gitrevision
+         ${WORKSPACE}/workspace/file
+svnCommit -F ${WORKSPACE}/workspace/gitLog.txt ${WORKSPACE}/workspace/file ${WORKSPACE}/workspace/src/gitrevision
 svnCheckout http://host/path2 ${WORKSPACE}/workspace
 gitLog --format=medium oldRevision..newRevision
 execute sed -i -e 
             s|^PKGLABEL *?=.*|PKGLABEL ?= LABEL|
             s|^LRCPKGLABEL *?=.*|LRCPKGLABEL ?= LABEL|
             s|^hint *bld/pkgpool .*|hint bld/pkgpool LABEL|
-         file2
-svnCommit -F ${WORKSPACE}/workspace/gitLog.txt file2 ${WORKSPACE}/workspace/src/gitrevision
+         ${WORKSPACE}/workspace/file2
+svnCommit -F ${WORKSPACE}/workspace/gitLog.txt ${WORKSPACE}/workspace/file2 ${WORKSPACE}/workspace/src/gitrevision
 EOF
     assertExecutedCommands ${expect}
 
@@ -290,8 +290,8 @@ execute sed -i -e
             s|^PKGLABEL *?=.*|PKGLABEL ?= LABEL|
             s|^LRCPKGLABEL *?=.*|LRCPKGLABEL ?= LABEL|
             s|^hint *bld/pkgpool .*|hint bld/pkgpool LABEL|
-         file
-svnCommit -F ${WORKSPACE}/workspace/gitLog.txt file ${WORKSPACE}/workspace/src/gitrevision
+         ${WORKSPACE}/workspace/file
+svnCommit -F ${WORKSPACE}/workspace/gitLog.txt ${WORKSPACE}/workspace/file ${WORKSPACE}/workspace/src/gitrevision
 setBuildResultUnstable
 EOF
     assertExecutedCommands ${expect}

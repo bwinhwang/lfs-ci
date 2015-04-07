@@ -7,7 +7,7 @@ initTempDirectory
 source lib/package.sh
 
 oneTimeSetUp() {
-    true        
+    export JOB_NAME=LFS_CI_-_trunk_-_Package_-_package
 }
 oneTimeTearDown() {
     true

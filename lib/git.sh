@@ -1,8 +1,8 @@
 #!/bin/bash
-
 ## @file  git.sh
 #  @brief wrapper functions for git
 
+LFS_CI_SOURCE_git='$Id$'
 
 ## @fn      gitLog()
 #  @brief   get the log from git

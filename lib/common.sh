@@ -878,5 +878,4 @@ mustHaveFreeDiskSpace() {
     fi
 
     fatal "not enough disk space on ${filesystem}. Free ${free}, required ${requiredSpace}"
-    
 }
