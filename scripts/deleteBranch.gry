@@ -97,7 +97,7 @@ def deleteView() {
     }
 
     if(debug) {
-        println("[DEBUG] delete view: $branch_view")
+        println("[DEBUG] delete view: $branch_view (dry run)")
     } else {
         try {
             vo = j.getView(branch_view).getOwner()
@@ -141,7 +141,7 @@ if(deleteJobs || LRC_deleteJobs) {
 if(LRC_deleteJobs && lrc_jobs) {
     for(p in lrc_jobs) {
         if(debug) {
-            println("[DEBUG] delete LRC job: $p.name")
+            println("[DEBUG] delete LRC job: $p.name (dry run)")
         } else {
             p.delete()
             println("[INFO] deleted LRC job: $p.name")
