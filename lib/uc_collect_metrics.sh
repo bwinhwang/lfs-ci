@@ -39,6 +39,9 @@ ci_job_test_collect_metrics() {
 #  @param   <none>
 #  @return  <none>
 usecase_LFS_COLLECT_METRICS() {
+    requiredParameters UPSTREAM_PROJECT UPSTREAM_BUILD 
+    copyAndExtractBuildArtifactsFromProject ${UPSTREAM_PROJECT} ${UPSTREAM_BUILD} fsmci
+
     collectMetricsFromBuildJobs
     collectMetricsFromPackageJob
     collectMetricsFromTestJobs
@@ -48,9 +51,15 @@ usecase_LFS_COLLECT_METRICS() {
 collectMetricsFromBuildJobs() {
     requiredParameters UPSTREAM_PROJECT UPSTREAM_BUILD 
 
+    local workspace=$(getWorkspaceName)
+    mustHaveWorkspaceName
+
     local buildJobName=$(getBuildJobNameFromUpstreamProject ${UPSTREAM_PROJECT} ${UPSTREAM_BUILD})
     local buildBuildNumber=$(getBuildBuildNumberFromUpstreamProject ${UPSTREAM_PROJECT} ${UPSTREAM_BUILD})
     info "build job ${buildJobName} ${buildBuildNumber}"
+
+    mustHaveNextCiLabelName
+    local label=$(getNextCiLabelName)
 
     # we didn't get information about the build job => early exit
     [[ -z "${buildJobName}" ]] && return
@@ -98,7 +107,6 @@ collectMetricsFromTestJobs() {
     mustHaveCleanWorkspace
     cd ${workspace}
 
-    copyArtifactsToWorkspace ${UPSTREAM_PROJECT} ${UPSTREAM_BUILD} fsmci
 
     mustHaveNextCiLabelName
     local label=$(getNextCiLabelName)
