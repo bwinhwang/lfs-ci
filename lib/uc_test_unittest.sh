@@ -7,6 +7,18 @@
 [[ -z ${LFS_CI_SOURCE_createWorkspace} ]] && source ${LFS_CI_ROOT}/lib/createWorkspace.sh
 [[ -z ${LFS_CI_SOURCE_database}        ]] && source ${LFS_CI_ROOT}/lib/database.sh
 
+# -------------------------------------------------------------------------------------------------
+#      _                 _           _           _ _ 
+#   __| | ___ _ __  _ __(_) ___ __ _| |_ ___  __| | |
+#  / _` |/ _ \ '_ \| '__| |/ __/ _` | __/ _ \/ _` | |
+# | (_| |  __/ |_) | |  | | (_| (_| | ||  __/ (_| |_|
+#  \__,_|\___| .__/|_|  |_|\___\__,_|\__\___|\__,_(_)
+#            |_|    
+#
+# do not use / extent / change this usecase any more. use uc_test_on_target with "without a target" option
+#
+# -------------------------------------------------------------------------------------------------
+
 ## @fn      ci_job_test_unittest()
 #  @brief   create a workspace and run the unit tests for ddal
 #  @todo    lot of pathes are hardcoded at the moment. make this more configureable
@@ -67,3 +79,15 @@ ci_job_test_unittest() {
 
     return
 }
+
+# -------------------------------------------------------------------------------------------------
+#      _                 _           _           _ _ 
+#   __| | ___ _ __  _ __(_) ___ __ _| |_ ___  __| | |
+#  / _` |/ _ \ '_ \| '__| |/ __/ _` | __/ _ \/ _` | |
+# | (_| |  __/ |_) | |  | | (_| (_| | ||  __/ (_| |_|
+#  \__,_|\___| .__/|_|  |_|\___\__,_|\__\___|\__,_(_)
+#            |_|    
+#
+# do not use / extent / change this usecase any more. use uc_test_on_target with "without a target" option
+#
+# -------------------------------------------------------------------------------------------------
