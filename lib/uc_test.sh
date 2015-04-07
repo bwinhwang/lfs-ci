@@ -50,7 +50,7 @@ ci_job_test() {
     #        |---- Test-fsmr4_target2
     #        \---- Test-fsmr4_target3
     # if we are the Test job, we have to prepare the upstream data for the downstream jobs          
-    if [[ ${JOB_NAME} =~ .*_-_Test$ || ${JOB_NAME} =~ .*_-_StabilityTest$ ]] ; then
+    if [[ ${JOB_NAME} =~ .*_-_Test$ || ${JOB_NAME} =~ .*_-_StabilityTest$  || ${JOB_NAME} =~ .*_-_SmokeTest$ ]] ; then
 
         debug "we are the summary test job"
 
