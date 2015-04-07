@@ -12,10 +12,13 @@
 // 7. Copy and configure promotions if there are any.
 // 8. Reload the configuration of the new job.
 //
+////////////////////////////////////////////////////////////////////////////////
+//
 // IMPORTANT:
+//
 // 1)
-// Jobs to be copied must exist within the SCM view of the
-// source branch as for example "SCM/tunk".
+// Jobs to be copied must exist within the SCM view.
+// "SCM/TUNK" and "SCM_LRC/TRUNK".
 // 2)
 // Currently works only if "trunk" is the src_branch.
 ///////////////////////////////////////////////////////////////////////////////
@@ -216,6 +219,13 @@ def updateJobConfig(job, new_job) {
             }
         }
     }
+
+    if (new_job.getName() == "PKGPOOL_-_"+new_branch+"_-_Build") {
+        processFileInplace(config_file) { text ->
+            text.replace("*/master", "*/"+new_branch)
+        }
+    }
+
     println("[INFO] updated job configuration for job \"$new_job.name\"")
     return config_file
 }
@@ -297,6 +307,7 @@ for(job in jobs_list) {
     //if(job.name == "LFS_CI_-_${src_branch}_-_Build" || job.name == "LFS_CI_-_${src_branch}_-_Test" || job.name == "LFS_Prod_-_trunk_-_Releasing_-_summary" || job.name.find("fsmr4")) {
     //if(job.name.find("LRC")) {
     //if(job.name.find("fsmr4")) {
+    //if(job.name == "PKGPOOL_-_trunk_-_Build") {
     def new_job = copyJob(job)
     new_job.save()
     disableJob(new_job)

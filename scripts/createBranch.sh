@@ -221,7 +221,13 @@ createBranchInGit() {
         # TODO: get GIT via getConfig()
         local gitServer="psulm.nsn-net.net"
 
-        gitRevision=$(svn cat ${SVN_REPO}/${SVN_PATH}/main/${SRC_PROJECT}/src/gitrevision)
+        # TODO: Die SVN URL kann auch aus file.cfg geholt werden.
+        if [[ ${LRC} == true ]]; then
+            gitRevision=$(svn cat -r${REVISION} ${SVN_REPO}/${SVN_PATH}/lrc/${SRC_PROJECT}/src/gitrevision)
+        else
+            gitRevision=$(svn cat -r${REVISION} ${SVN_REPO}/${SVN_PATH}/main/${SRC_PROJECT}/src/gitrevision)
+        fi
+
         info "GIT revision: ${gitRevision}"
         git clone ssh://git@${gitServer}/build/build
         cd build
@@ -429,7 +435,7 @@ dbInsert() {
     local mm=$(getBranchPart ${branch} MM)
     local regex="${branchType}_PS_LFS_OS_${yyyy}_${mm}_([0-9][0-9][0-9][0-9])"
 
-    if [[ ${LRC} == "true" ]]; then
+    if [[ ${LRC} == true ]]; then
         branch="LRC_${branch}"
         regex="${branchType}_LRC_LCP_PS_LFS_OS_${yyyy}_${mm}_([0-9][0-9][0-9][0-9])"
     fi
