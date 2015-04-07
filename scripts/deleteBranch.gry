@@ -42,6 +42,9 @@ parameters.each {
         } else {
             throw new RuntimeException("BRANCH is not specified")
         }
+        if(branch.startsWith("LRC_")) {
+            branch = branch[4..-1]
+        }
     }
     if(it.name == "DELETE_JOBS") {
         deleteJobs = it.value
