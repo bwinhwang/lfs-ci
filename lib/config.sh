@@ -121,7 +121,6 @@ getConfig() {
     # echo 1>&2 "taskName/${taskName}"
     # echo 1>&2 "productName/${productName}"
 
-
     ${LFS_CI_ROOT}/bin/getConfig -k "${key}" \
         -f ${configFile}              \
         -t productName:${productName} \

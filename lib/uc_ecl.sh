@@ -191,6 +191,7 @@ getEclValue() {
 #  @param   <none>
 #  @return  <none>
 mustHavePermissionToRelease() {
+
     # TODO: demx2fk3 2014-07-22 remove this, if PS SCM can handle the load of LFSes...
     local number=$(getConfig LFS_CI_uc_update_ecl_update_promote_every_xth_release)
     if [[ $(( BUILD_NUMBER % ${number} )) != 0 ]] ; then
