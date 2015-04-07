@@ -79,7 +79,7 @@ DELIMITER ;
 -- }}}
 -- {{{ build_finished
 
-DROP PROCEDURE IF EXISTS build_finished
+DROP PROCEDURE IF EXISTS build_finished;
 DELIMITER //
 CREATE PROCEDURE build_finished( IN in_build_name VARCHAR(128), 
                                  IN in_comment TEXT, 
