@@ -134,7 +134,8 @@ makingTest_poweron() {
     mustExistDirectory ${testSuiteDirectory}
 
     # not all branches have the poweroff implemented
-    execute -i make -C ${testSuiteDirectory} poweron
+    execute  make -C ${testSuiteDirectory} powercycle
+    # execute -i make -C ${testSuiteDirectory} poweron
 
     return
 }

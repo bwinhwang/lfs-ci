@@ -45,7 +45,7 @@ test1_poweron() {
 mustHaveMakingTestTestConfig 
 makingTest_testSuiteDirectory 
 mustExistDirectory /path/to/test/suite
-execute -i make -C /path/to/test/suite poweron
+execute -i make -C /path/to/test/suite powercycle
 EOF
     assertExecutedCommands ${expect}
 
