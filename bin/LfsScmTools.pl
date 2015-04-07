@@ -3,11 +3,16 @@ use strict;
 use warnings;
 
 use Data::Dumper;
-use File::Basename;
 use Log::Log4perl qw( :easy );
 
-use lib sprintf( "%s/lib/perl/", $ENV{LFS_CI_ROOT} || "/ps/lfs/ci" );
+our $lfs_ci_root;
+BEGIN {
+    use FindBin qw($Bin);
+    use File::Basename;
+    $lfs_ci_root = dirname($Bin);
+}   
 
+use lib sprintf( "%s/lib/perl/", $lfs_ci_root );
 
 use Nokia::Singleton;
 
