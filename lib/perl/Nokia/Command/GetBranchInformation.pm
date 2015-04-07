@@ -1,4 +1,4 @@
-package Nokia::Command::GetBranchInformationFile;
+package Nokia::Command::GetBranchInformation;
 use strict;
 use warnings;
 

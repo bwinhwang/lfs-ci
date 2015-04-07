@@ -117,6 +117,9 @@ sub branchInformation {
                $row->{location_name}, $row->{based_on_release} || "";
         printf "LFS_PROD_uc_release_based_on_revision < productName:LFS, location:%s > = %s\n", 
                $row->{location_name}, $row->{based_on_revision} || "";
+        printf "CUSTOM_SCM_svn_trigger_svn_is_maintenance < productName:LFS, location:%s > = 1\n", 
+               $row->{location_name} 
+            if $row->{date_closed} ne "0000-00-00 00:00:00";
     }
     return;
 }

@@ -70,8 +70,10 @@ sub searchTarget {
     my $targetName = $param->{targetName}    || 'not_a_valid_target_name';
 
     my $sqlString = join( " and ", 
-                    map { sprintf( "target_features like '%%%s%%' or target_name = '%s'", $_, $_ ) } 
+                    map { sprintf( " ( target_features like '%%%s%%' or target_name = '%s' ) ", $_, $_ ) } 
                     @attributes );
+
+    DEBUG "sql search string = $sqlString";
 
     my $sth = $self->prepare( 
         "select * from targets where ( ( $sqlString ) or target_name = '$targetName' ) and status = 'free'"
