@@ -157,7 +157,8 @@ println("[DEBUG] lrc jobs: " + lrc_jobs)
 println("[DEBUG] remaining jobs: " + remaining_jobs)
 if(!lrc_jobs && !remaining_jobs) {
     deleteView()
-}
-else {
+} else if(LRC_deleteJobs && !remaining_jobs) {
+    deleteView()
+} else {
     println("[INFO] Not deleting list view sections. There are still jobs from another branch.")
 }
