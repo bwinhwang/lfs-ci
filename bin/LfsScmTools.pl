@@ -6,7 +6,8 @@ use Data::Dumper;
 use File::Basename;
 use Log::Log4perl qw( :easy );
 
-use lib sprintf( "%s/lib/perl/", $ENV{LFS_CI_ROOT} || "." );
+use lib sprintf( "%s/lib/perl/", $ENV{LFS_CI_ROOT} || "/ps/lfs/ci" );
+
 
 use Nokia::Singleton;
 
