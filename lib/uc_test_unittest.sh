@@ -36,10 +36,16 @@ ci_job_test_unittest() {
     esac
 
     case "$JOB_NAME"
-    in *fsmddg*) subsys=drivers
+    in *ddg) subsys=drivers
     ;; *)        subsys=ddal
     esac
 
+    case "$JOB_NAME"
+    in *fsmddg)  src_type=fsmddg
+    ;; *ddg)     src_type=ddg
+    ;; *fsmddal) src_type=fsmddal
+    ;; *)        src_type=unknown
+    esac
     execute cd ${workspace}/src-unittests/src/testsuites/continuousintegration/unittest
 
     info "creating testconfig"
@@ -47,7 +53,7 @@ ci_job_test_unittest() {
 
     info "running test suite.."
     execute make clean
-    execute -i make -i test-xmloutput JOB_NAME="$JOB_NAME" TARGET_TYPE="${target_type}" SUBSYS="${subsys}"
+    execute -i make -i test-xmloutput JOB_NAME="$JOB_NAME" TARGET_TYPE="${target_type}" SUBSYS="${subsys}" SRC_TYPE="${src_type}"
 
     execute rm -rf ${workspace}/xml-reports 
     execute mkdir -p ${workspace}/xml-reports 
