@@ -85,7 +85,7 @@ def deleteScmView() {
     branch_view_obj = scm_view_obj.getView(branch_view)
 
     if(debug) {
-        println("[DEBUG] delete view: ${branch_view} in ${scm_view}")
+        println("[DEBUG] delete view: ${branch_view} in ${scm_view} (dry run)")
     } else {
         scm_view_obj.deleteView(branch_view_obj)
         println("[INFO] deleted view: ${branch_view} in ${scm_view} view")
