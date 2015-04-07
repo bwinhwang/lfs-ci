@@ -42,6 +42,9 @@ parameters.each {
         } else {
             throw new RuntimeException("BRANCH is not specified")
         }
+        if(branch.startsWith("LRC_")) {
+            branch = branch[4..-1]
+        }
     }
     if(it.name == "DELETE_JOBS") {
         deleteJobs = it.value
@@ -82,7 +85,7 @@ def deleteScmView() {
     branch_view_obj = scm_view_obj.getView(branch_view)
 
     if(debug) {
-        println("[DEBUG] delete view: ${branch_view} in ${scm_view}")
+        println("[DEBUG] delete view: ${branch_view} in ${scm_view} (dry run)")
     } else {
         scm_view_obj.deleteView(branch_view_obj)
         println("[INFO] deleted view: ${branch_view} in ${scm_view} view")
@@ -97,7 +100,7 @@ def deleteView() {
     }
 
     if(debug) {
-        println("[DEBUG] delete view: $branch_view")
+        println("[DEBUG] delete view: $branch_view (dry run)")
     } else {
         try {
             vo = j.getView(branch_view).getOwner()
@@ -149,7 +152,7 @@ if(deleteJobs || LRC_deleteJobs) {
 if(LRC_deleteJobs && lrc_jobs) {
     for(p in lrc_jobs) {
         if(debug) {
-            println("[DEBUG] delete LRC job: $p.name")
+            println("[DEBUG] delete LRC job: $p.name (dry run)")
         } else {
             p.delete()
             println("[INFO] deleted LRC job: $p.name")
@@ -162,7 +165,8 @@ println("[DEBUG] lrc jobs: " + lrc_jobs)
 println("[DEBUG] remaining jobs: " + remaining_jobs)
 if(!lrc_jobs && !remaining_jobs) {
     deleteView()
-}
-else {
+} else if(LRC_deleteJobs && !remaining_jobs) {
+    deleteView()
+} else {
     println("[INFO] Not deleting list view sections. There are still jobs from another branch.")
 }
