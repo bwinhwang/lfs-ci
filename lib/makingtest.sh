@@ -168,6 +168,9 @@ makingTest_powercycle() {
     info "powercycle the target ..."
     local powercycleOptions=$(getConfig LFS_CI_uc_test_making_test_powercycle_options)
     execute make -C ${testSuiteDirectory} powercycle ${powercycleOptions}
+    # for FSM-r2, we need a short delay after the powercycle...
+    sleep 5
+
     return
 }
 
