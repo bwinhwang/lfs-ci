@@ -121,7 +121,6 @@ getConfig() {
     # echo 1>&2 "taskName/${taskName}"
     # echo 1>&2 "productName/${productName}"
 
-
     ${LFS_CI_ROOT}/bin/getConfig -k "${key}" \
         -f ${configFile}              \
         -t productName:${productName} \
@@ -131,68 +130,5 @@ getConfig() {
         -t config:${config}           \
         ${tags}
 
-    return
-}
-
-# this is the static configuration, which is valid for all scripting
-# stuff in here.
-# it must be also valid for all slaves and the master
-
-# ....
-declare -A platformMap=(         ["fct"]="fsm3_octeon2" \
-                        ["fsm3_octeon2"]="fsm3_octeon2" \
-                                ["qemu"]="qemu"         \
-                             ["qemu_64"]="qemu_64"      \
-                           ["qemu_i386"]="qemu"         \
-                         ["qemu_x86_64"]="qemu_64"      \
-                                ["fspc"]="fspc"         \
-                                ["fcmd"]="fcmd"         \
-                                 ["arm"]="fsm4_k2"      \
-                           ["keystone2"]="fsm4_k2"      \
-                                 ["axm"]="fsm4_axm"     \
-                            ["fsm4_axm"]="fsm4_axm"     \
-                             ["fsm4_k2"]="fsm4_k2"      \
-                            ["fsm4_arm"]="fsm4_k2"      \
-                                 ["arm"]="fsm4_k2"      \
-                                ["lcpa"]="lrc-octeon2"  \
-                         ["lrc-octeon2"]="lrc-octeon2"  \
-)
-
-# ....
-declare -A archMap=(         ["fct"]="mips64-octeon2-linux-gnu"      \
-                    ["fsm3_octeon2"]="mips64-octeon2-linux-gnu"      \
-                            ["lcpa"]="mips64-octeon2-linux-gnu"      \
-                     ["lrc-octeon2"]="mips64-octeon2-linux-gnu"      \
-                            ["qemu"]="i686-pc-linux-gnu"             \
-                         ["qemu_64"]="x86_64-pc-linux-gnu"           \
-                       ["qemu_i386"]="i686-pc-linux-gnu"             \
-                     ["qemu_x86_64"]="x86_64-pc-linux-gnu"           \
-                            ["fspc"]="powerpc-e500-linux-gnu"        \
-                            ["fcmd"]="powerpc-e500-linux-gnu"        \
-                             ["axm"]="arm-cortexa15-linux-gnueabihf" \
-                       ["keystone2"]="arm-cortexa15-linux-gnueabihf" \
-                        ["fsm4_axm"]="arm-cortexa15-linux-gnueabihf" \
-                        ["fsm4_arm"]="arm-cortexa15-linux-gnueabihf" \
-                             ["arm"]="arm-cortexa15-linux-gnueabihf" \
-                         ["fsm4_k2"]="arm-cortexa15-linux-gnueabihf" \
-)
-
-
-## @fn      getDeliveryRepositoryName()
-#  @brief   get the subversion binary delivery repos name based on the defined regex
-#  @param   {tagName}    name of the tag
-#  @return  repos name
-getDeliveryRepositoryName() {
-    local tagName=$1
-    mustHaveValue "${tagName}" "name of the tag"
-
-    local reposName=$(sed 's/^.*PS_LFS_OS_\([^_]\+_[^_]\+\)_.*$/BTS_D_SC_LFS_\1/' <<< ${tagName} )
-    if [[ ${tagName} = ${reposName} ]] ; then
-        error "regex to get SVN delivery repos name didn't match to ${tagName}"
-        exit 1
-    fi
-    debug "svn delivery repos name for ${tagName} is ${reposName}"
-
-    echo ${reposName}
     return
 }

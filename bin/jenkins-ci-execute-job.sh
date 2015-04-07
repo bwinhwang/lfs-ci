@@ -30,12 +30,8 @@ fi
 # start the logfile
 initTempDirectory
 startLogfile
-# archiveLogfile
 # and end it, if the script exited in some way
 exit_add stopLogfile
-
-# TODO: demx2fk3 2014-03-31 FIXME
-# cleanupEnvironmentVariables
 
 # for better debugging
 PS4='+(${BASH_SOURCE}:${LINENO}): ${FUNCNAME[0]:+${FUNCNAME[0]}(): }'
@@ -46,8 +42,8 @@ debug "used lfs ci git version ${LFS_CI_git_version}"
 
 # we do not want to have modifications in ${LFS_CI_ROOT}
 LFS_CI_git_local_modifications=$(cd ${LFS_CI_ROOT} ; git status --short | wc -l)
-if [[ ${LFS_CI_git_local_modifications} -gt 0 ]] ; then
-    info "the are local modifications in ${LFS_CI_ROOT}, which are not commited. "\
+if [[ ${LFS_CI_git_local_modifications} -gt 0 && ${USER} = psulm ]] ; then
+    fatal "the are local modifications in ${LFS_CI_ROOT}, which are not commited. "\
           "CI is rejecting such kind of working mode and refused to work until the modifications are commited."
 fi
 
@@ -88,13 +84,6 @@ fi
 # first dispatcher, calling the correct script or function
 case "${JOB_NAME}" in
 
-    # TODO: demx2fk3 2015-01-26 remove this hack
-    Test-lcpa878)  ${LFS_CI_ROOT}/scripts/CLRC02_Test_Release_Candidate_LRC || exit 1 ;;
-    Test-lcpa914)  ${LFS_CI_ROOT}/scripts/CLRC02_Test_Release_Candidate_LRC || exit 1 ;;
-    Test-lcpa1093) ${LFS_CI_ROOT}/scripts/CLRC02_Test_Release_Candidate_LRC || exit 1 ;;
-    # Test-lcpa1105) ${LFS_CI_ROOT}/scripts/CLRC02_Test_Release_Candidate_LRC || exit 1 ;;
-    # Test-lcpa1239) ${LFS_CI_ROOT}/scripts/CLRC02_Test_Release_Candidate_LRC || exit 1 ;;
-    
     *_CI_*_Build) 
         source ${LFS_CI_ROOT}/lib/uc_build.sh
         ci_job_build_version || exit 1 
@@ -123,7 +112,7 @@ case "${JOB_NAME}" in
         source ${LFS_CI_ROOT}/lib/uc_ecl.sh
         ci_job_ecl    || exit 1 
     ;;
-    *Test_-_postProductionTest)
+    *_-_postProductionTest)
         source ${LFS_CI_ROOT}/lib/uc_test_on_target.sh
         ci_job_test_on_target || exit 1 
     ;;
@@ -164,22 +153,7 @@ case "${JOB_NAME}" in
         ci_job_release || exit 1 
     ;;
     *)
-        # legacy call for the old scripting...
-        for pathName in ${LFS_CI_ROOT}/scripts/ ${LFS_CI_ROOT}/legacy
-        do
-            if [[ -x "$pathName/${JOB_NAME}" ]] ; then
-
-                info "executing legacy script \"${JOB_NAME}\""
-
-                $pathName/${JOB_NAME} $@ || exit 1
-                break
-            else
-                # TODO: demx2fk3 2015-01-26 FIXME
-                error "don't know what I shall do for job \"${JOB_NAME}\"" 
-                exit 1
-            fi
-        done
-
+        fatal "don't know what I shall do for job \"${JOB_NAME}\"" 
     ;;
 esac
 

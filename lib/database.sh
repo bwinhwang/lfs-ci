@@ -11,19 +11,37 @@ LFS_CI_SOURCE_database='$Id$'
 databaseEventBuildStarted() {
     requiredParameters LFS_CI_ROOT JOB_NAME BUILD_NUMBER
 
-    local branch=$(getLocationName)
+    local branchName=$(getLocationName)
     mustHaveLocationName
 
     local buildDirectory=$(getBuildDirectoryOnMaster ${JOB_NAME} ${BUILD_NUMBER})
     local revision=$(runOnMaster cat ${buildDirectory}/revisionstate.xml | cut -d" " -f 3 | sort -n -u | tail -n 1)
     mustHaveValue "${revision}" "revision from revision state file"
 
-    mustHaveNextCiLabelName
-    local label=$(getNextCiLabelName)
-    mustHaveValue ${label} "label name"
+    _storeEvent build_started --revision=${revision} --branchName=${branchName}
+    return
+}
 
-    execute -i ${LFS_CI_ROOT}/bin/newBuildEvent.pl --buildName=${label} --branchName=${branch} --revision=${revision} --action=build_started --comment=${JOB_NAME}_${BUILD_NUMBER}
+## @fn      databaseEventBuildFailed()
+#  @brief   create an entry in the database table build events for a failed build
+#  @param   <none>
+#  @return  <none>
+databaseEventBuildFailed() {
+    _storeEvent build_failed
+    return
+}
 
+databaseEventBuildFinished() {
+    _storeEvent build_finished
+    return
+}
+
+## @fn      databaseEventSubBuildFinished()
+#  @brief   create an entry in the database table build_events for a started build
+#  @param   <none>
+#  @return  <none>
+databaseEventSubBuildStarted() {
+    _storeEvent subbuild_started
     return
 }
 
@@ -31,29 +49,17 @@ databaseEventBuildStarted() {
 #  @brief   create an entry in the database table build_events for a finished build
 #  @param   <none>
 #  @return  <none>
-databaseEventBuildFinished() {
-    requiredParameters LFS_CI_ROOT JOB_NAME BUILD_NUMBER
-
-    mustHaveNextCiLabelName
-    local label=$(getNextCiLabelName)
-    mustHaveValue ${label} "label name"
-
-    execute -i ${LFS_CI_ROOT}/bin/newBuildEvent.pl --buildName=${label} --action=build_finished --comment=${JOB_NAME}_${BUILD_NUMBER}
+databaseEventSubBuildFinished() {
+    _storeEvent subbuild_finished
     return
 }
 
-## @fn      databaseEventBuildFailed()
+## @fn      databaseEventSubBuildFailed()
 #  @brief   create an entry in the database table build_events for a failed build
 #  @param   <none>
 #  @return  <none>
-databaseEventBuildFailed() {
-    requiredParameters LFS_CI_ROOT JOB_NAME BUILD_NUMBER
-
-    mustHaveNextCiLabelName
-    local label=$(getNextCiLabelName)
-    mustHaveValue ${label} "label name"
-
-    execute -i ${LFS_CI_ROOT}/bin/newBuildEvent.pl --buildName=${label} --action=build_failed --comment=${JOB_NAME}_${BUILD_NUMBER}
+databaseEventSubBuildFailed() {
+    _storeEvent subbuild_failed
     return
 }
 
@@ -62,10 +68,7 @@ databaseEventBuildFailed() {
 #  @param   <none>
 #  @return  <none>
 databaseEventReleaseStarted() {
-    requiredParameters LFS_PROD_RELEASE_CURRENT_TAG_NAME
-    local label=${LFS_PROD_RELEASE_CURRENT_TAG_NAME}
-
-    execute -i ${LFS_CI_ROOT}/bin/newBuildEvent.pl --buildName=${label} --action=release_started
+    _storeEvent release_started
     return
 }
 
@@ -74,21 +77,124 @@ databaseEventReleaseStarted() {
 #  @param   <none>
 #  @return  <none>
 databaseEventReleaseFinished() {
-    requiredParameters LFS_PROD_RELEASE_CURRENT_TAG_NAME
-    local label=${LFS_PROD_RELEASE_CURRENT_TAG_NAME}
-
-    execute -i ${LFS_CI_ROOT}/bin/newBuildEvent.pl --buildName=${label} --action=release_finished
+    _storeEvent release_finished
     return
 }
 
+## @fn      databaseEventTestStarted()
+#  @brief   create an entry in the database table build_events for a started test 
+#  @param   <none>
+#  @return  <none>
 databaseEventTestStarted() {
-    local label=$1
-    local targetName=$2
-    execute -i ${LFS_CI_ROOT}/bin/newBuildEvent.pl --buildName=${label} --comment=${targetName} --action=test_started
+    _storeEvent test_started
+}
+## @fn      databaseEventTestFailed()
+#  @brief   create an entry in the database table build_events for a failed test 
+#  @param   <none>
+#  @return  <none>
+databaseEventTestFailed() {
+    _storeEvent test_failed
+}
+## @fn      databaseEventPackageStarted()
+#  @brief   create an entry in the database table build_events for a started package process
+#  @param   <none>
+#  @return  <none>
+databaseEventPackageStarted() {
+    _storeEvent package_started
+}
+
+## @fn      databaseEventPackageFinished()
+#  @brief   create an entry in the database table build_events for a finished package process
+#  @param   <none>
+#  @return  <none>
+databaseEventPackageFinished() {
+    _storeEvent package_finished
+}
+
+## @fn      databaseEventPackageFailed()
+#  @brief   create an entry in the database table build_events for a failed package process
+#  @param   <none>
+#  @return  <none>
+databaseEventPackageFailed() {
+    _storeEvent package_failed
+}
+
+## @fn      databaseEventSubBuildStarted()
+#  @brief   create an entry in the database table build_events for a started subtest process
+#  @param   <none>
+#  @return  <none>
+databaseEventSubTestStarted() {
+    _storeEvent subtest_started 
     return
 }
 
+## @fn      databaseEventSubBuildFinished()
+#  @brief   create an entry in the database table build_events for a finished subtest process
+#  @param   <none>
+#  @return  <none>
+databaseEventSubTestFinished() {
+    _storeEvent subtest_finished
+    return
+}
 
+## @fn      databaseEventSubBuildFailed()
+#  @brief   create an entry in the database table build_events for a failed subtest process
+#  @param   <none>
+#  @return  <none>
+databaseEventSubTestFailed() {
+    _storeEvent subtest_failed 
+    return
+}
+
+## @fn      _storeEvent()
+#  @brief   internal function: store the event in the database table build_events  
+#  @param   {eventType}    type of the event
+#  @param   {targetName}   name of the target
+#  @param   {targetType}   type of the target
+#  @return  <none>
+_storeEvent() {
+    requiredParameters LFS_CI_ROOT JOB_NAME BUILD_NUMBER
+
+    local eventName=$1
+    mustHaveValue "${eventName}" "event name"
+    shift
+
+    # fixme
+    local targetName=""
+    local targetType=""
+    if [[ ${JOB_NAME} =~ Test- ]] ; then
+        targetName=$(_reserveTarget)
+        targetType=$(getConfig LFS_CI_uc_test_target_type_mapping -t jobName:${targetType})
+    else
+        # target type: FSM-r2, FSM-r3, FSM-r4, LRC, host
+        targetName=$(getSubTaskNameFromJobName)
+        targetType=$(getTargetBoardName)
+    fi
+    targetType=${targetType:-other}
+    targetName=${targetName:-host}
+    mustHaveValue "${targetName}" "target name"
+    mustHaveValue "${targetType}" "target type"
+
+    mustHaveNextCiLabelName
+    local label=$(getNextCiLabelName)
+    mustHaveValue ${label} "label name"
+
+    execute -i ${LFS_CI_ROOT}/bin/newEvent    \
+                --buildName=${label}          \
+                --action=${eventName}         \
+                --jobName=${JOB_NAME}         \
+                --buildNumber=${BUILD_NUMBER} \
+                --targetName=${targetName}    \
+                --targetType=${targetType}    \
+                $@
+
+    return
+}
+
+## @fn      databaseAddNewCommits()
+#  @brief   adds all new commits from the build log into the database table subverion_commits 
+#  @param   <none>
+#  @return  <none>
 databaseAddNewCommits() {
     requiredParameters JOB_NAME BUILD_NUMBER
 
@@ -98,29 +204,29 @@ databaseAddNewCommits() {
 
     copyFileFromBuildDirectoryToWorkspace ${JOB_NAME} ${BUILD_NUMBER} changelog.xml
 
-    execute -i ${LFS_CI_ROOT}/bin/newBuildEvent.pl --buildName=${label} --action=new_svn_commits --changelog=${WORKSPACE}/changelog.xml
+    execute -i ${LFS_CI_ROOT}/bin/newSubversionCommits --buildName=${label} --changelog=${WORKSPACE}/changelog.xml
 
     return
 }
 
-databaseEventTestFinished() {
-    local label=$1
-    local targetName=$2
-    execute -i ${LFS_CI_ROOT}/bin/newBuildEvent.pl --buildName=${label} --comment=${targetName} --action=test_finished
-    return
-}
-
+## @fn      databaseTestResults()
+#  @brief   add new test results from a test job into the database
+#  @param   {labelName}        name of the label
+#  @param   {testSuiteName}    name of the test suite
+#  @param   {targetName}       name of the target
+#  @param   {targetType}       type of the target
+#  @param   {resultFile}       file with results
+#  @return  <none>
 databaseTestResults() {
-    local label=$1
+    local labelName=$1
     local testSuiteName=$2
     local targetName=$3
     local targetType=$4
     local resultFile=$5
 
-    info "adding metrics for ${label}, ${testSuiteName}, ${targetName}/${targetType}"
-    execute -i ${LFS_CI_ROOT}/bin/newBuildEvent.pl \
-            --action=new_test_result               \
-            --buildName=${label}                            \
+    info "adding metrics for ${labelName}, ${testSuiteName}, ${targetName}/${targetType}"
+    execute -i ${LFS_CI_ROOT}/bin/newTestResults   \
+            --buildName=${labelName}               \
             --resultFile=${resultFile}             \
             --testSuiteName=${testSuiteName}       \
             --targetName=${targetName}             \
@@ -129,6 +235,14 @@ databaseTestResults() {
     return
 }
 
+## @fn      addTestResultsToMetricDatabase()
+#  @brief   add test results into database
+#  @param   {resultFile}       file with results
+#  @param   {labelName}        name of the label
+#  @param   {testSuiteName}    name of the test suite
+#  @param   {targetName}       name of the target
+#  @param   {targetType}       type of the target
+#  @return  <none>
 addTestResultsToMetricDatabase() {
     local resultFileXml=${1}
     local baselineName=${2}
@@ -149,6 +263,5 @@ addTestResultsToMetricDatabase() {
                         ${targetName}   \
                         ${targetType}   \
                         ${resultFile}
-
     return
 }

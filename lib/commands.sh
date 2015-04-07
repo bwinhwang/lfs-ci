@@ -131,7 +131,7 @@ runOnMaster() {
     local server=$(getConfig jenkinsMasterServerHostName)
     mustHaveValue "${server}" "server name"
     trace "running command on server: ssh ${server} ${command}"
-    execute -n -i -r 10 ssh ${server} ${command}
+    execute -n -i ssh ${server} ${command}
     return $?
 }
 
@@ -143,49 +143,3 @@ showAllEnvironmentVariables() {
     execute printenv        
     return
 }
-
-## @fn      cleanupEnvironmentVariables()
-#  @brief   cleanup the environment variables to have a clean env.
-#  @todo    there are some problems here.. this is not working as expected.. 
-#  @param   <none>
-#  @return  <none>
-cleanupEnvironmentVariables() {
-    local key=""
-
-    # TODO: demx2fk3 2014-06-16 not in use!!
-
-    # workaround for screen / TERMCAP
-    unset TERM
-    unset TERMCAP
-    keys=`(set -o posix ; set ) | grep = | grep -v '^!' | awk -F= '{ if ( $0 ~ /\\\\$/ ) 
-                                                                        a=1; 
-                                                                     else 
-                                                                        print $1; }' `
-    for key in ${keys}; do
-        case ${key} in
-            BASH*)                   : ;; #  can not unset
-            UID|EUID)                : ;;
-            SHELLOPTS)               : ;;
-            PPID)                    : ;;
-            PATH|HOME|USER|HOSTNAME) : ;;
-            LFS_CI_ROOT)             : ;;
-            LFS_CI_SHARE_MIRROR)     : ;;
-            LFS_CI*)                 : ;;
-            CI_LOGGING_LOGFILENAME)  : ;;
-            CI_*)                    : ;;
-            WORKSPACE)               : ;;
-            SVN_REVISION)            : ;;
-            UPSTREAM_BUILD)          : ;;
-            UPSTREAM_PROJECT)        : ;;
-            BUILD_*)                 : ;;
-            NODE_LABELS)             : ;;
-            *) 
-                trace "unsetting environment variable \"${key}\" with value \"${!key}\"" 
-                unset ${key} 
-            ;;
-        esac
-    done
-
-    return
-}
-

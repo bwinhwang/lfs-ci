@@ -219,7 +219,7 @@ latestRevisionFromRevisionStateFile() {
         # TODO: demx2fk3 2014-06-25 stupid bug: adddir will not update to a higher revision, 
         #                           if the src-directory already exists...
         # revision=$(grep "^${src} " ${WORKSPACE}/revisions.txt | cut -d" " -f3)
-        revision=$(cut -d" " -f 3 ${WORKSPACE}/revisions.txt | sort -n -u | tail -n 1)
+        revision=$(grep -v "^#"  ${WORKSPACE}/revisions.txt | cut -d" " -f 3 | sort -n -u | tail -n 1)
     fi
 
     echo ${revision}
