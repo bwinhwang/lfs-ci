@@ -40,6 +40,9 @@ ci_job_test_collect_metrics() {
 #  @return  <none>
 usecase_LFS_COLLECT_METRICS() {
     requiredParameters UPSTREAM_PROJECT UPSTREAM_BUILD 
+    local workspace=$(getWorkspaceName)
+    mustHaveCleanWorkspace
+
     copyAndExtractBuildArtifactsFromProject ${UPSTREAM_PROJECT} ${UPSTREAM_BUILD} fsmci
 
     collectMetricsFromBuildJobs
@@ -104,9 +107,8 @@ collectMetricsFromTestJobs() {
     requiredParameters UPSTREAM_PROJECT UPSTREAM_BUILD 
 
     local workspace=$(getWorkspaceName)
-    mustHaveCleanWorkspace
+    mustHaveWorkspaceName
     cd ${workspace}
-
 
     mustHaveNextCiLabelName
     local label=$(getNextCiLabelName)
