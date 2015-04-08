@@ -48,15 +48,16 @@ fi
 
 
 __checkParams() {
-    [[ ! ${SRC_BRANCH} ]] && { echo "SRC_BRANCH is missing"; exit 1; }
-    [[ ! ${NEW_BRANCH} ]] && { echo "NEW_BRANCH is missing"; exit 1; }
-    [[ ! ${REVISION} ]] && { echo "REVISION is missing"; exit 1; }
-    [[ ! ${SOURCE_RELEASE} ]] && { echo "SOURCE_RELEASE is missing"; exit 1; }
-    [[ ! ${ECL_URLS} ]] && { echo "ECL_URLS is missing"; exit 1; }
-    [[ ! ${COMMENT} ]] && { echo "COMMENT is missing"; exit 1; }
-    [[ ${FSMR4} == false ]] && [[ ${FSMR4_ONLY} == true ]] && { echo "FSMR4 can not be false in case FSMR4_ONLY is true"; exit 1; }
-
-    return 0
+    [[ ! ${SRC_BRANCH} ]] && { error "SRC_BRANCH is missing"; exit 1; }
+    [[ ! ${NEW_BRANCH} ]] && { error "NEW_BRANCH is missing"; exit 1; }
+    [[ ! ${REVISION} ]] && { error "REVISION is missing"; exit 1; }
+    [[ ! ${SOURCE_RELEASE} ]] && { error "SOURCE_RELEASE is missing"; exit 1; }
+    [[ ! ${ECL_URLS} ]] && { error "ECL_URLS is missing"; exit 1; }
+    [[ ! ${COMMENT} ]] && { error "COMMENT is missing"; exit 1; }
+    [[ ${FSMR4} == false ]] && [[ ${FSMR4_ONLY} == true ]] && { error "FSMR4 can not be false in case FSMR4_ONLY is true"; exit 1; }
+    if [ ${LRC} == true ]; then
+        echo ${NEW_BRANCH} | grep -q -e "^LRC_" && { error "LRC: \"LRC_\" is automatically added as prefix to NEW_BRANCH"; exit 1; }
+    fi
 }
 
 ## @fn     __preparation()

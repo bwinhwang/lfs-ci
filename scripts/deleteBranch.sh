@@ -73,8 +73,11 @@ getValueFromEclFile() {
 
 
 __checkParams() {
-    [[ ! "$BRANCH" ]] && { error "BRANCH must be specified"; return 1; }
-    echo $BRANCH | grep -q -e "^FB[0-9]\{4\}\|^MD[0-9]\{5\}\|^LRC_FB[0-9]\{4\}\|^TST_\|TEST_ERWIN\|TESTERWIN" || { error "$BRANCH is not valid."; return 1; }
+    [[ ! "${BRANCH}" ]] && { error "BRANCH must be specified"; return 1; }
+    echo ${BRANCH} | grep -q -e "^FB[0-9]\{4\}\|^MD[0-9]\{5\}\|^LRC_FB[0-9]\{4\}\|^TST_\|TEST_ERWIN\|TESTERWIN" || { error "$BRANCH is not valid."; return 1; }
+    if [ ${LRC} == true ]; then
+        echo ${BRANCH} | grep -q -e "^LRC_" || { error "LRC: Branch name is not correct."; return 1; }
+    fi
 }
 
 __checkOthers() {
