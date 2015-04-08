@@ -881,20 +881,26 @@ mustHaveFreeDiskSpace() {
     
 }
 
+## @fn      sanityCheck()
+#  @brief   checks some very important stuff everytime, before starting some usecase
+#  @details the sanity check is checking some common issues
+#           * is there a not versioned / checkedin file in the ${LFS_CI_ROOT}
+#           * is the job name a known job name (from the naming schema)
+#           * is the branch name of the current job the same branch of the upstream project
+#  @param   <none>
+#  @return  <none>
+#  @throws  raise an error, if something is wrong
 sanityCheck() {
-
-    requiredParameters LFS_CI_ROOT
+    requiredParameters LFS_CI_ROOT JOB_NAME UPSTREAM_PROJECT
 
     local LFS_CI_git_version=$(cd ${LFS_CI_ROOT} ; git describe)
     debug "used lfs ci git version ${LFS_CI_git_version}"
 
     # we do not want to have modifications in ${LFS_CI_ROOT}
     local LFS_CI_git_local_modifications=$(cd ${LFS_CI_ROOT} ; git status --short | wc -l)
-    if [[ ${LFS_CI_git_local_modifications} -gt 0 ]] ; then
-        if [[ ${LFS_CI_ROOT} = /ps/lfs/ci ]] ; then
-            fatal "the are local modifications in ${LFS_CI_ROOT}, which are not commited. "\
-                "CI is rejecting such kind of working mode and refused to work until the modifications are commited."
-        fi
+    if [[ ${LFS_CI_git_local_modifications} -gt 0 && ${USER} = psulm ]] ; then
+        fatal "the are local modifications in ${LFS_CI_ROOT}, which are not commited. "\
+              "CI is rejecting such kind of working mode and refused to work until the modifications are commited."
     fi
 
     # check job name convetions
@@ -905,14 +911,22 @@ sanityCheck() {
     elif [[ ${JOB_NAME} =~ LFS_.*     || \
             ${JOB_NAME} =~ UBOOT_.*i  || \
             ${JOB_NAME} =~ PKGPOOL_.* ]] ; then
+        debug "normal build / test / release job, naming is ok"
+
+        # checking for same branch of upstream and current job. 
+        # this should not be different
         if [[ ${UPSTREAM_PROJECT} ]] ; then
             local branchName=$(getBranchName)
             local upstreamBranchName=$(getBranchName ${UPSTREAM_PROJECT})
             if [[ ${branchName} != ${upstreamBranchName} ]] ; then
-                fatal "wrong configuration: upstream project ${UPSTREAM_PROJECT} is in a different branch as current job ${JOB_NAME}"
+                fatal "wrong configuration: upstream project ${UPSTREAM_PROJECT} is in a different branch as current job ${JOB_NAME}. "\
+                      "Check the configuration of the jenkins projects."
             fi
+        fi
     else
-        fatal "unknown job type"
+        fatal "unknown job type."
     fi
+
     return
 }
+
