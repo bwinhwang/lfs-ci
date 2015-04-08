@@ -19,7 +19,7 @@ usecase_LFS_SMOKE_TEST_POST_ACTION() {
     info "disabling jenkins job ${UPSTREAM_PROJECT}"
     disableJob ${UPSTREAM_PROJECT}
 
-    setBuildDescription "${UPSTREAM_PROJECT} / ${UPSTREAM_BUILD}"
+    setBuildDescription ${JOB_NAME} ${BUILD_NUMBER} "${UPSTREAM_PROJECT} / ${UPSTREAM_BUILD}"
     setBuildResultUnstable
 
     return

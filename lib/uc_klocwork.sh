@@ -116,7 +116,7 @@ ci_job_klocwork_build() {
     # get this via src-proejct
     case "${kw_project}" in
         *_DDAL)      BLDCMD="${build} -C src-rfs fct; ${build} -C src-fsmddal fct"                         ;;
-        *_DDAL_DEV)      BLDCMD="${build} -C src-rfs fct; ${build} -C src-fsmddal fct"                         ;;
+        *_DDAL_DEV)  BLDCMD="${build} -C src-rfs fct; ${build} -C src-fsmddal fct"                         ;;
         *_DDG)       BLDCMD="${build} -C src-bos fct; ${build} -C src-fsmddg fct; ${build} -C src-ddg fct" ;;
         *_DDALFSMR2) BLDCMD="${build} -C src-ddal fcmd; ${build} -C src-ddal fspc"                         ;;
         *)           fatal "unknown klocwork project"                                                      ;;
