@@ -124,4 +124,22 @@ sub branchInformation {
     return;
 }
 
+sub locationsText {
+    my $self = shift;
+
+    if( not $self->{store} ) {
+        $self->{store} = Nokia::Store::Database::Branches->new();
+    }
+
+    my @data = $self->{store}->branchInformation();
+
+    printf "# This file was automatically created by %s.\n", $0;
+    printf "# Do not edit it by hand.\n";
+    print "\n";
+    foreach my $row ( @data ) {
+        printf "%40s\n", $row->{location_name};
+    }
+    return
+}
+
 1;
