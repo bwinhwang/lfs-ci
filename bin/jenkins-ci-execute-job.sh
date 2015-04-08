@@ -6,7 +6,7 @@
 # contact: lfs-ci-dev@mlist.intra.nsn-net.net
 # ---------------------------------------------------------------------
 #
-# start skript for jenkins jobs.
+# start skript for all LFS CI jenkins jobs.
 #
 
 if [[ -z "${LFS_CI_ROOT}" ]] ; then
@@ -45,6 +45,7 @@ fi
 requiredParameters LFS_CI_ROOT JOB_NAME HOSTNAME USER 
 
 showAllEnvironmentVariables
+sanityCheck
 
 info "starting jenkins job \"${JOB_NAME}\" on ${HOSTNAME} as ${USER}"
 if [[ "${UPSTREAM_PROJECT}" && "${UPSTREAM_BUILD}" ]] ; then
