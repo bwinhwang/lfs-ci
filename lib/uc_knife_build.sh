@@ -72,7 +72,7 @@ usecase_LFS_KNIFE_BUILD() {
 
     local currentDateTime=$(date +%Y%m%d-%H%M%S)
     local label=$(printf "KNIFE_%s.%s" ${KNIFE_LFS_BASELINE} ${currentDateTime})
-    local baseLabel=${KNIFE_LFS_BASELINE}
+    local baseLabel=${KNIFE_LFS_BASELINE/_PS_LFS_REL_/_PS_LFS_OS_}
 
     local svnReposUrl=$(getConfig LFS_PROD_svn_delivery_os_repos_url -t tagName:${baseLabel} )
     mustExistInSubversion ${svnReposUrl}/tags/${baseLabel}/doc/scripts/ revisions.txt
@@ -113,6 +113,7 @@ usecase_LFS_KNIFE_PACKAGE() {
     local workspace=$(getWorkspaceName)
     mustHaveWorkspaceName
 
+    mustHaveLocationForSpecialBuild
     info "running usecase LFS package"
     ci_job_package
 

@@ -55,6 +55,9 @@ uploadToSubversion() {
     # ensure, that there are 15 GB disk space
     mustHaveFreeDiskSpace ${TMPDIR} 15000000 
 
+    # ensure, that there are 15 GB disk space
+    mustHaveFreeDiskSpace ${TMPDIR} 15000000 
+
     # TMPDIR is not handled/created via createTempDirectory. So we have to
     # take care to clean up the temp directory after exit and failure
     # exit_add subversionUploadCleanupTempDirectory
@@ -113,7 +116,7 @@ subversionUploadCleanupTempDirectory() {
 #  @return  <none>
 svnCommand() {
     debug "executing svn $@"
-    execute svn --non-interactive --trust-server-cert $@
+    execute -r 3 svn --non-interactive --trust-server-cert $@
     return
 }
 

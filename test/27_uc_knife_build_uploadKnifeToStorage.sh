@@ -20,6 +20,12 @@ oneTimeSetUp() {
         mockedCommand "getConfig $@"
         echo "server:upload/"
     }
+    s3PutFile() {
+        mockedCommand "s3PutFile $@"
+    }
+    s3SetAccessPublic() {
+        mockedCommand "s3SetAccessPublic $@"
+    }
 }
 oneTimeTearDown() {
     true
@@ -45,7 +51,8 @@ test1() {
 cat <<EOF > ${expect}
 mustExistFile /path/to/file
 getConfig LFS_CI_upload_server
-execute rsync -avrPe ssh /path/to/file server:upload/
+s3PutFile /path/to/file server:upload/
+s3SetAccessPublic /path/to/file
 EOF
     assertExecutedCommands ${expect}
 

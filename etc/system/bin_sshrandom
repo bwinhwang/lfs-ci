@@ -1,0 +1,20 @@
+#!/bin/bash
+
+case $1 in
+    linsee_server_ulm)
+        declare -a hosts=( ciyellow.emea.nsn-net.net \
+                           cired.emea.nsn-net.net \
+                           cigreen.emea.nsn-net.net \
+                           ciblue.emea.nsn-net.net \
+                           ciblack.emea.nsn-net.net \
+                           ciwhite.emea.nsn-net.net \
+                           cipink.emea.nsn-net.net \
+                           civiolet.emea.nsn-net.net \
+                           ciorange.emea.nsn-net.net \
+                           cibrown.emea.nsn-net.net )
+    ;;
+esac
+hostCount=${#hosts[@]}
+index=$(( RANDOM % ${hostCount} ))
+selectedHost=${hosts[index]}
+exec /usr/bin/nc ${selectedHost} 22

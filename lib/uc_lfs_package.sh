@@ -27,10 +27,16 @@ ci_job_package() {
     mustHaveCleanWorkspace
     mustHaveWritableWorkspace
 
+    copyFileFromBuildDirectoryToWorkspace ${UPSTREAM_PROJECT} ${UPSTREAM_BUILD} fingerprint.txt
+    copyFileFromWorkspaceToBuildDirectory ${JOB_NAME} ${BUILD_NUMBER} fingerprint.txt
+
     debug "workspace is ${workspace}"
 
     local requiredArtifacts=$(getConfig LFS_CI_UC_package_required_artifacts)
     copyArtifactsToWorkspace "${UPSTREAM_PROJECT}" "${UPSTREAM_BUILD}" "${requiredArtifacts}"
+
+    databaseEventPackageStarted
+    exit_add _exitHandlerDatabaseEventPackageFinishedOrFailed
 
     mustHaveNextCiLabelName
     local label=$(getNextReleaseLabel)
@@ -63,6 +69,14 @@ ci_job_package() {
     return
 }
 
+_exitHandlerDatabaseEventPackageFinishedOrFailed() {
+    if [[ ${1} -gt 0 ]] ; then
+        databaseEventPackageFailed
+    else
+        databaseEventPackageFinished
+    fi
+}
+
 ## @fn      copyGenericBuildResults()
 #  @brief   copy the build results from the bld/bld-*-*/results/psl directory
 #           in the regarding structure of the build
@@ -86,6 +100,13 @@ copyGenericBuildResults() {
         [[ -d ${bldDirectory} ]] || continue
         info "copy generic build results from ${bldDirectory} to ${dst}"
         execute rsync -av --exclude=rootfs.d --exclude=.svn ${bldDirectory}/ ${dst}/
+    done
+
+    local dst=${workspace}/upload/C_Platform/
+    for bldDirectory in ${workspace}/bld/bld-*-*/results/psl/C_Platform ; do
+        [[ -d ${bldDirectory} ]] || continue
+        info "copy generic build results from ${bldDirectory} to ${dst}"
+        execute rsync -av  --exclude=.svn ${bldDirectory}/ ${dst}/
     done
     return
 }
@@ -209,7 +230,6 @@ copySysroot() {
         local sysroot_tgz
         case ${platform} in
             lrc-*)   sysroot_tgz=${workspace}/bld/bld-rfs-lcpa/results/sysroot.tar.gz ;;
-#            fsm4_*)  sysroot_tgz=${workspace}/bld/bld-rfs-arm/results/sysroot.tar.gz  ;;
             qemu_64) sysroot_tgz=${bldDirectory}/results/rfs.init_sys-root.tar.gz  
                      [[ $(getBranchName) =~ "LRC" ]] && \
                      sysroot_tgz=${workspace}/bld/bld-rfs-qemu_x86_64/results/sysroot.tar.gz ;;

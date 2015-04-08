@@ -40,62 +40,47 @@ ci_job_test_collect_metrics() {
 #  @return  <none>
 usecase_LFS_COLLECT_METRICS() {
     requiredParameters UPSTREAM_PROJECT UPSTREAM_BUILD 
-
     local workspace=$(getWorkspaceName)
     mustHaveCleanWorkspace
-    cd ${workspace}
+
+    copyAndExtractBuildArtifactsFromProject ${UPSTREAM_PROJECT} ${UPSTREAM_BUILD} fsmci
+
+    collectMetricsFromBuildJobs
+    collectMetricsFromPackageJob
+    collectMetricsFromTestJobs
+    return
+}
+
+collectMetricsFromBuildJobs() {
+    requiredParameters UPSTREAM_PROJECT UPSTREAM_BUILD 
+
+    local workspace=$(getWorkspaceName)
+    mustHaveWorkspaceName
 
     local buildJobName=$(getBuildJobNameFromUpstreamProject ${UPSTREAM_PROJECT} ${UPSTREAM_BUILD})
     local buildBuildNumber=$(getBuildBuildNumberFromUpstreamProject ${UPSTREAM_PROJECT} ${UPSTREAM_BUILD})
     info "build job ${buildJobName} ${buildBuildNumber}"
 
-    copyArtifactsToWorkspace ${buildJobName} ${buildBuildNumber} fsmci
-
     mustHaveNextCiLabelName
     local label=$(getNextCiLabelName)
-    # TODO: demx2fk3 2015-01-13 enable me
-    # setBuildDescription ${JOB_NAME} ${BUILD_NUMBER} ${label}
-    info "label name is ${label}"
 
-    local testJobData=$(getDownStreamProjectsData ${UPSTREAM_PROJECT} ${UPSTREAM_BUILD})
-    for line in ${testJobData} ; do
-        info ${line}
-        local buildNumber=$(cut -d: -f1 <<< ${line})
-        local jobName=$(cut -d: -f3 <<< ${line})
-        local state=$(cut -d: -f2 <<< ${line})
-
-        [[ "${jobName}" =~ _Test$             ]] && continue
-        [[ "${jobName}" =~ makingTest$        ]] && continue
-        [[ "${jobName}" =~ target$            ]] && continue
-        [[ "${jobName}" =~ MakingTest_-_lcpa$ ]] && continue
-
-        [[ "${state}"   = FAILURE   ]] && continue
-        [[ "${state}"   = ABORTED   ]] && continue
-        [[ "${state}"   = NOT_BUILT ]] && continue
-
-        storeMetricsForTestJob    ${jobName} ${buildNumber}
-        storeMetricsFromArtifacts ${jobName} ${buildNumber}
-
-    done
+    # we didn't get information about the build job => early exit
+    [[ -z "${buildJobName}" ]] && return
 
     # analysing compiler warnings of build jobs
     local downStreamData=$(getDownStreamProjectsData ${buildJobName} ${buildBuildNumber})
     for line in ${downStreamData} ; do
-        debug ${line}
         local buildNumber=$(cut -d: -f1 <<< ${line})
         local jobName=$(cut -d: -f3 <<< ${line})
         local state=$(cut -d: -f2 <<< ${line})
 
         [[ ${jobName} =~ FSMDDALpdf ]] && continue
 
-        # compiler warnings, results of compiler warnings are also in build.xml (very nice!!)
-        # copyFileFromBuildDirectoryToWorkspace ${jobName} ${buildNumber} analysis.xml
-        # mv ${WORKSPACE}/analysis.xml ${workspace}/${jobName}_analysis.xml
-
         # build duration
         copyFileFromBuildDirectoryToWorkspace ${jobName} ${buildNumber} build.xml
         mv ${WORKSPACE}/build.xml ${workspace}/${jobName}_build.xml
 
+        # compiler warnings, results of compiler warnings are also in build.xml (very nice!!)
         local resultFile=$(createTempFile)
         local duration=$(${LFS_CI_ROOT}/bin/xpath -q -e '/build/duration/node()' ${workspace}/${jobName}_build.xml)
         printf "duration;%s\n" ${duration} >> ${resultFile}
@@ -114,10 +99,58 @@ usecase_LFS_COLLECT_METRICS() {
 
         databaseTestResults ${label} "Build" ${jobName} "host" ${resultFile}
     done
+    
+    return
+}
+
+collectMetricsFromTestJobs() {
+    requiredParameters UPSTREAM_PROJECT UPSTREAM_BUILD 
+
+    local workspace=$(getWorkspaceName)
+    mustHaveWorkspaceName
+    cd ${workspace}
+
+    mustHaveNextCiLabelName
+    local label=$(getNextCiLabelName)
+
+    setBuildDescription ${JOB_NAME} ${BUILD_NUMBER} ${label}
+    info "label name is ${label}"
+
+    local testJobData=$(getDownStreamProjectsData ${UPSTREAM_PROJECT} ${UPSTREAM_BUILD})
+    for line in ${testJobData} ; do
+        info ${line}
+        local buildNumber=$(cut -d: -f1 <<< ${line})
+        local jobName=$(cut -d: -f3 <<< ${line})
+        local state=$(cut -d: -f2 <<< ${line})
+
+        # no need to collect the metrics for some types of test jobs
+        # (dummy jobs) and for some states...
+        [[ "${jobName}" =~ _Test$             ]] && continue
+        [[ "${jobName}" =~ makingTest$        ]] && continue
+        [[ "${jobName}" =~ target$            ]] && continue
+        [[ "${jobName}" =~ MakingTest_-_lcpa$ ]] && continue
+
+        [[ "${state}"   = FAILURE   ]] && continue
+        [[ "${state}"   = ABORTED   ]] && continue
+        [[ "${state}"   = NOT_BUILT ]] && continue
+
+        storeMetricsForTestJob    ${jobName} ${buildNumber}
+        storeMetricsFromArtifacts ${jobName} ${buildNumber}
+    done
+
+    return
+}
+
+collectMetricsFromPackageJob() {
+    requiredParameters UPSTREAM_PROJECT UPSTREAM_BUILD 
 
     local packageJobName=$(getPackageJobNameFromUpstreamProject ${UPSTREAM_PROJECT} ${UPSTREAM_BUILD})
     local packageBuildNumber=$(getPackageBuildNumberFromUpstreamProject ${UPSTREAM_PROJECT} ${UPSTREAM_BUILD})
     info "package job ${packageJobName} ${packageBuildNumber}"
+
+    # no need to collect metrics, if we don't get a package job => early exit
+    [[ -z "${packageJobName}" ]] && return
+
     # get package duration
     copyFileFromBuildDirectoryToWorkspace ${packageJobName} ${packageBuildNumber} build.xml
     mv ${WORKSPACE}/build.xml ${workspace}/${packageJobName}_build.xml
@@ -129,6 +162,7 @@ usecase_LFS_COLLECT_METRICS() {
 
     return
 }
+
 
 ## @fn      storeMetricsForTestJob()
 #  @brief   store the metrics from the test job into the database

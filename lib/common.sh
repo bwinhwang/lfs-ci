@@ -29,7 +29,7 @@ mustHaveTargetBoardName() {
 #  @param   <none>
 #  @return  return the branch name
 getBranchName() { 
-    getLocationName 
+    getLocationName $@
 }
 
 ## @fn      mustHaveLocationName()
@@ -878,7 +878,6 @@ mustHaveFreeDiskSpace() {
     fi
 
     fatal "not enough disk space on ${filesystem}. Free ${free}, required ${requiredSpace}"
-    
 }
 
 ## @fn      sanityCheck()

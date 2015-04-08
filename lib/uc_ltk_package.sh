@@ -21,14 +21,15 @@ ci_job_package() {
 
     debug "workspace is ${workspace}"
 
+    copyFileFromBuildDirectoryToWorkspace ${UPSTREAM_PROJECT} ${UPSTREAM_BUILD} fingerprint.txt
+    copyFileFromWorkspaceToBuildDirectory ${JOB_NAME} ${BUILD_NUMBER} fingerprint.txt
+
     copyArtifactsToWorkspace ${UPSTREAM_PROJECT} ${UPSTREAM_BUILD}
 
     mustHaveNextCiLabelName
     local label=$(getNextCiLabelName)
     setBuildDescription "${JOB_NAME}" "${BUILD_NUMBER}" "${label}"
     info "label name is ${label}"
-
-    databaseEventBuildFinished
 
     info "do nothing here, dummy task :), have a nice day"
 
