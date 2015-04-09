@@ -32,6 +32,7 @@
 #  @return  <none>
 ci_job_test_collect_metrics() {
     usecase_LFS_COLLECT_METRICS
+    info "usecase collect metrics done (legacy)"
     return
 }
 
@@ -49,6 +50,7 @@ usecase_LFS_COLLECT_METRICS() {
     collectMetricsFromBuildJobs
     collectMetricsFromPackageJob
     collectMetricsFromTestJobs
+    info "usecase collect metrics done"
     return
 }
 
