@@ -148,6 +148,9 @@ collectMetricsFromPackageJob() {
     local packageBuildNumber=$(getPackageBuildNumberFromUpstreamProject ${UPSTREAM_PROJECT} ${UPSTREAM_BUILD})
     info "package job ${packageJobName} ${packageBuildNumber}"
 
+    mustHaveNextCiLabelName
+    local label=$(getNextCiLabelName)
+
     # no need to collect metrics, if we don't get a package job => early exit
     [[ -z "${packageJobName}" ]] && return
 
