@@ -914,14 +914,14 @@ sanityCheck() {
 
         # checking for same branch of upstream and current job. 
         # this should not be different
-        if [[ ${UPSTREAM_PROJECT} ]] ; then
-            local branchName=$(getBranchName)
-            local upstreamBranchName=$(getBranchName ${UPSTREAM_PROJECT})
-            if [[ ${branchName} != ${upstreamBranchName} ]] ; then
-                fatal "wrong configuration: upstream project ${UPSTREAM_PROJECT} is in a different branch as current job ${JOB_NAME}. "\
-                      "Check the configuration of the jenkins projects."
-            fi
-        fi
+        # if [[ ${UPSTREAM_PROJECT} ]] ; then
+        #     local branchName=$(getBranchName)
+        #     local upstreamBranchName=$(getBranchName ${UPSTREAM_PROJECT})
+        #     if [[ ${branchName} != ${upstreamBranchName} ]] ; then
+        #         fatal "wrong configuration: upstream project ${UPSTREAM_PROJECT} is in a different branch as current job ${JOB_NAME}. "\
+        #               "Check the configuration of the jenkins projects."
+        #     fi
+        # fi
     else
         fatal "unknown job type."
     fi
