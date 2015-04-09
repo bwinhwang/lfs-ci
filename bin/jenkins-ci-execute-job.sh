@@ -6,7 +6,7 @@
 # contact: lfs-ci-dev@mlist.intra.nsn-net.net
 # ---------------------------------------------------------------------
 #
-# start skript for jenkins jobs.
+# start skript for all LFS CI jenkins jobs.
 #
 
 if [[ -z "${LFS_CI_ROOT}" ]] ; then
@@ -37,16 +37,6 @@ exit_add stopLogfile
 PS4='+(${BASH_SOURCE}:${LINENO}): ${FUNCNAME[0]:+${FUNCNAME[0]}(): }'
 export PS4
 
-LFS_CI_git_version=$(cd ${LFS_CI_ROOT} ; git describe)
-debug "used lfs ci git version ${LFS_CI_git_version}"
-
-# we do not want to have modifications in ${LFS_CI_ROOT}
-LFS_CI_git_local_modifications=$(cd ${LFS_CI_ROOT} ; git status --short | wc -l)
-if [[ ${LFS_CI_git_local_modifications} -gt 0 && ${USER} = psulm ]] ; then
-    fatal "the are local modifications in ${LFS_CI_ROOT}, which are not commited. "\
-          "CI is rejecting such kind of working mode and refused to work until the modifications are commited."
-fi
-
 if [[ ! -z "${1}" ]] ; then
     export JOB_NAME=$1
     shift
@@ -55,6 +45,7 @@ fi
 requiredParameters LFS_CI_ROOT JOB_NAME HOSTNAME USER 
 
 showAllEnvironmentVariables
+sanityCheck
 
 info "starting jenkins job \"${JOB_NAME}\" on ${HOSTNAME} as ${USER}"
 if [[ "${UPSTREAM_PROJECT}" && "${UPSTREAM_BUILD}" ]] ; then
