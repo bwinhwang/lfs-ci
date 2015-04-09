@@ -1,10 +1,9 @@
 #!/bin/bash
 
-
-[[ -z ${LFS_CI_SOURCE_booking}              ]] && source ${LFS_CI_ROOT}/lib/booking.sh
-[[ -z ${LFS_CI_SOURCE_artifacts}            ]] && source ${LFS_CI_ROOT}/lib/artifacts.sh
-[[ -z ${LFS_CI_SOURCE_common}               ]] && source ${LFS_CI_ROOT}/lib/common.sh
-[[ -z ${LFS_CI_SOURCE_createBasicWorkspace} ]] && source ${LFS_CI_ROOT}/lib/createBasicWorkspace.sh
+[[ -z ${LFS_CI_SOURCE_booking}         ]] && source ${LFS_CI_ROOT}/lib/booking.sh
+[[ -z ${LFS_CI_SOURCE_artifacts}       ]] && source ${LFS_CI_ROOT}/lib/artifacts.sh
+[[ -z ${LFS_CI_SOURCE_common}          ]] && source ${LFS_CI_ROOT}/lib/common.sh
+[[ -z ${LFS_CI_SOURCE_createWorkspace} ]] && source ${LFS_CI_ROOT}/lib/createWorkspace.sh
 
 usecase_LAB_REPAIR_TARGET() {
     requiredParameters REPAIR_TARGET_NAME
