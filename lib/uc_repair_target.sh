@@ -41,6 +41,8 @@ usecase_LAB_REPAIR_TARGET() {
 
     execute make poweroff
 
+    unreserveTarget
+
     return
 }
 
