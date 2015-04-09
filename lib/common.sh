@@ -890,7 +890,7 @@ mustHaveFreeDiskSpace() {
 #  @return  <none>
 #  @throws  raise an error, if something is wrong
 sanityCheck() {
-    requiredParameters LFS_CI_ROOT JOB_NAME UPSTREAM_PROJECT
+    requiredParameters LFS_CI_ROOT JOB_NAME 
 
     local LFS_CI_git_version=$(cd ${LFS_CI_ROOT} ; git describe)
     debug "used lfs ci git version ${LFS_CI_git_version}"
@@ -911,6 +911,8 @@ sanityCheck() {
             ${JOB_NAME} =~ UBOOT_.*i  || \
             ${JOB_NAME} =~ PKGPOOL_.* ]] ; then
         debug "normal build / test / release job, naming is ok"
+
+        requiredParameters UPSTREAM_PROJECT
 
         # checking for same branch of upstream and current job. 
         # this should not be different
