@@ -912,8 +912,6 @@ sanityCheck() {
             ${JOB_NAME} =~ PKGPOOL_.* ]] ; then
         debug "normal build / test / release job, naming is ok"
 
-        requiredParameters UPSTREAM_PROJECT
-
         # checking for same branch of upstream and current job. 
         # this should not be different
         if [[ ${UPSTREAM_PROJECT} ]] ; then
