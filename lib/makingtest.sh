@@ -456,9 +456,6 @@ mustHaveMakingTestRunningTarget() {
 
     mustHaveMakingTestTestConfig
 
-    # for FSM-r2, we need a short delay after the powercycle...
-    sleep 10
-
     local workspace=$(getWorkspaceName)
     mustHaveWorkspaceName
 
@@ -466,7 +463,11 @@ mustHaveMakingTestRunningTarget() {
 	mustExistFile ${testSuiteDirectory}/testsuite.mk
 
     info "checking, if target is up and running (with ssh)..."
-    execute make -C ${testSuiteDirectory} waitprompt
+    local canDoWaitPrompt=$(getConfig LFS_CI_uc_test_TMF_can_run_waitprompt)
+    if [[ ${canDoWaitPrompt} ]] ; then
+        execute sleep 60
+        execute make -C ${testSuiteDirectory} waitprompt
+    fi
     execute make -C ${testSuiteDirectory} waitssh
     debug "sleeping for 60 seconds..."
     execute sleep 60
