@@ -29,7 +29,7 @@ usecase_LAB_REPAIR_TARGET() {
 
     info "testing target in repair center..."
     execute cd ${workspace}/src-test/src/unittest/testtarget/actions/recover_partition_switch
-    execute make test-config TESTTARGET=${targetName,,} 
+    execute make testconfig TESTTARGET=${targetName,,} 
 
     info "starting target..."
     execute make powercycle
