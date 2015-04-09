@@ -369,13 +369,16 @@ makingTest_install() {
     info "installing software on target"
     execute ${make} setup
 
+    local targetName=$(_reserveTarget)
+    mustHaveValue "${targetName}" "target name"
+
     # on LRC: currently install does show wrong (old) version after reboot and
     # SHP sometimes fails to be up when install is retried.
     # We try installation up to 4 times
     for i in $(seq 1 4) ; do
         trace "install loop ${i}"
 
-        local installOptions=$(getConfig LFS_CI_uc_test_making_test_install_options)
+        local installOptions=$(getConfig LFS_CI_uc_test_making_test_install_options -t testTargetName:${targetName})
         info "running install with options ${installOptions:-none}"
         execute -i ${make} install ${installOptions} FORCE=yes || { sleep 20 ; continue ; }
 

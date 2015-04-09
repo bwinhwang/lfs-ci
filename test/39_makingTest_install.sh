@@ -77,6 +77,7 @@ test1() {
 makingTest_testSuiteDirectory 
 mustHaveMakingTestRunningTarget 
 execute make -C ${WORKSPACE}/workspace/path/to/test/suite setup
+_reserveTarget 
 execute -i make -C ${WORKSPACE}/workspace/path/to/test/suite install FORCE=yes
 makingTest_powercycle 
 mustHaveMakingTestRunningTarget 
@@ -99,6 +100,7 @@ test2() {
 makingTest_testSuiteDirectory 
 mustHaveMakingTestRunningTarget 
 execute make -C ${WORKSPACE}/workspace/path/to/test/suite setup
+_reserveTarget 
 execute -i make -C ${WORKSPACE}/workspace/path/to/test/suite install FORCE=yes
 execute -i make -C ${WORKSPACE}/workspace/path/to/test/suite install FORCE=yes
 execute -i make -C ${WORKSPACE}/workspace/path/to/test/suite install FORCE=yes
@@ -123,6 +125,7 @@ test3() {
 makingTest_testSuiteDirectory 
 mustHaveMakingTestRunningTarget 
 execute make -C ${WORKSPACE}/workspace/path/to/test/suite setup
+_reserveTarget 
 execute -i make -C ${WORKSPACE}/workspace/path/to/test/suite install FORCE=yes
 execute -i make -C ${WORKSPACE}/workspace/path/to/test/suite install FORCE=yes
 execute -i make -C ${WORKSPACE}/workspace/path/to/test/suite install FORCE=yes
@@ -144,6 +147,7 @@ test4() {
 makingTest_testSuiteDirectory 
 mustHaveMakingTestRunningTarget 
 execute make -C ${WORKSPACE}/workspace/path/to/test/suite setup
+_reserveTarget 
 execute -i make -C ${WORKSPACE}/workspace/path/to/test/suite install FORCE=yes
 makingTest_powercycle 
 mustHaveMakingTestRunningTarget 
@@ -169,6 +173,7 @@ test5() {
 makingTest_testSuiteDirectory 
 mustHaveMakingTestRunningTarget 
 execute make -C ${WORKSPACE}/workspace/path/to/test/suite setup
+_reserveTarget 
 execute -i make -C ${WORKSPACE}/workspace/path/to/test/suite install FORCE=yes
 makingTest_powercycle 
 mustHaveMakingTestRunningTarget 
@@ -202,6 +207,7 @@ test6() {
 makingTest_testSuiteDirectory 
 mustHaveMakingTestRunningTarget 
 execute make -C ${WORKSPACE}/workspace/path/to/test/suite setup
+_reserveTarget 
 execute -i make -C ${WORKSPACE}/workspace/path/to/test/suite install FORCE=yes
 makingTest_powercycle 
 mustHaveMakingTestRunningTarget 
@@ -229,6 +235,7 @@ test7() {
 makingTest_testSuiteDirectory 
 mustHaveMakingTestRunningTarget 
 execute make -C ${WORKSPACE}/workspace/path/to/test/suite setup
+_reserveTarget 
 execute -i make -C ${WORKSPACE}/workspace/path/to/test/suite install FORCE=yes
 makingTest_powercycle 
 mustHaveMakingTestRunningTarget 
@@ -266,6 +273,7 @@ test8() {
 makingTest_testSuiteDirectory 
 mustHaveMakingTestRunningTarget 
 execute make -C ${WORKSPACE}/workspace/path/to/test/suite setup
+_reserveTarget 
 execute -i make -C ${WORKSPACE}/workspace/path/to/test/suite install FORCE=yes
 execute -i make -C ${WORKSPACE}/workspace/path/to/test/suite firmwareupgrade FORCED_UPGRADE=true
 makingTest_powercycle 

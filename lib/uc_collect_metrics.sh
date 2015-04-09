@@ -32,6 +32,7 @@
 #  @return  <none>
 ci_job_test_collect_metrics() {
     usecase_LFS_COLLECT_METRICS
+    return
 }
 
 ## @fn      usecase_LFS_COLLECT_METRICS()
