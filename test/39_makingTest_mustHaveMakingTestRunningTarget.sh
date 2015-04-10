@@ -44,7 +44,6 @@ test1() {
     cat <<EOF > ${expect}
 mustHaveMakingTestTestConfig 
 makingTest_testSuiteDirectory 
-execute make -C ${WORKSPACE}/workspace/path/to/test/suite waitprompt
 execute make -C ${WORKSPACE}/workspace/path/to/test/suite waitssh
 execute sleep 60
 EOF

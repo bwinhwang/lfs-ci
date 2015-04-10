@@ -17,7 +17,8 @@ usecase_LFS_SMOKE_TEST_POST_ACTION() {
     warning "the result of this action is: disable the smoke test and prevent further actions."
 
     info "disabling jenkins job ${UPSTREAM_PROJECT}"
-    disableJob ${UPSTREAM_PROJECT}
+    warning "the job ${UPSTREAM_PROJECT} should be disabled.... Not doing it at the moment for debugging..."
+    # disableJob ${UPSTREAM_PROJECT}
 
     setBuildDescription ${JOB_NAME} ${BUILD_NUMBER} "${UPSTREAM_PROJECT} / ${UPSTREAM_BUILD}"
     setBuildResultUnstable
