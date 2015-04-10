@@ -68,8 +68,8 @@ __preparation(){
     JENKINS_API_USER=$(getConfig jenkinsApiUser)
     mustHaveValue ${JENKINS_API_TOKEN} "Jenkins API token is missing."
     mustHaveValue ${JENKINS_API_USER} "Jenkins API user is missing."
-    echo JENKINS_API_TOKEN=${JENKINS_API_TOKEN} > ${VARS_FILE}
-    echo JENKINS_API_USER=${JENKINS_API_USER} >> ${VARS_FILE}
+    echo JENKINS_API_TOKEN=${JENKINS_API_TOKEN} > ${WORKSPACE}/${VARS_FILE}
+    echo JENKINS_API_USER=${JENKINS_API_USER} >> ${WORKSPACE}/${VARS_FILE}
 }
 
 ## @fn      svnCopyBranch()
@@ -91,8 +91,8 @@ svnCopyBranch() {
     DESCRIPTION: svn cp -r${REVISION} --parents ${SVN_REPO}/${SVN_PATH} ${SVN_REPO}/${SVN_DIR}/${newBranch}/trunk. \
     $COMMENT"
 
-    # TODO:  Job shall fail in case branch already exists.
-    #        Maybe collision with master option DO_SVN.
+    # TODO: Job shall fail in case branch already exists.
+    #       This requirement is in collision with master option DO_SVN.
     svn ls ${SVN_REPO}/${SVN_DIR}/${newBranch} || {
         svn copy -r ${REVISION} -m "${message}" --parents ${SVN_REPO}/${SVN_PATH} \
             ${SVN_REPO}/${SVN_DIR}/${newBranch}/trunk;
@@ -115,7 +115,7 @@ svnCopyLocations() {
     mustHaveValue "${newBranch}" "new branch"
 
     # TODO: Job shall fail in case location already exists.
-    #       Maybe collision with master option DO_SVN.
+    #       This requirement is in collision with master option DO_SVN.
     svn ls ${SVN_REPO}/${SVN_DIR}/trunk/bldtools/locations-${LOCATIONS} \
         ${SVN_REPO}/${SVN_DIR}/trunk/bldtools/locations-${newBranch} || {
             svn copy -m "copy locations branch ${newBranch}" ${SVN_REPO}/${SVN_DIR}/trunk/bldtools/locations-${LOCATIONS} \
