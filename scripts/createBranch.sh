@@ -23,7 +23,6 @@ info "# COMMENT:              $COMMENT"
 info "# DO_SVN:               $DO_SVN"
 info "# DO_JENKINS:           $DO_JENKINS"
 info "# DUMMY_COMMIT:         $DUMMY_COMMIT"
-info "# COPY_DELIVERY:        $COPY_DELIVERY"
 info "# UPDATE_LOCATIONS_TXT: $UPDATE_LOCATIONS_TXT"
 info "# DO_DB_INSERT:         $DO_DB_INSERT"
 info "# DO_GIT:               $DO_GIT"
@@ -57,7 +56,7 @@ __checkParams() {
     [[ ! ${ECL_URLS} ]] && { error "ECL_URLS is missing"; exit 1; }
     [[ ! ${COMMENT} ]] && { error "COMMENT is missing"; exit 1; }
     [[ ${FSMR4} == false ]] && [[ ${FSMR4_ONLY} == true ]] && { error "FSMR4 can not be false in case FSMR4_ONLY is true"; exit 1; }
-    if [ ${LRC} == true ]; then
+    if [[ ${LRC} == true ]]; then
         echo ${NEW_BRANCH} | grep -q -e "^LRC_" && { error "LRC: \"LRC_\" is automatically added as prefix to NEW_BRANCH"; exit 1; }
     fi
 }
