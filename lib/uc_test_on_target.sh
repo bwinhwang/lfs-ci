@@ -71,7 +71,7 @@ ci_job_test_on_target() {
         esac
     done
 
-    # TODO missing subtest finished
+    databaseEventSubTestFinished
     info "testing done."
     return
 }
