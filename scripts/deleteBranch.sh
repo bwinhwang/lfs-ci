@@ -75,7 +75,7 @@ getValueFromEclFile() {
 __checkParams() {
     [[ ! "${BRANCH}" ]] && { error "BRANCH must be specified"; return 1; }
     echo ${BRANCH} | grep -q -e "^FB[0-9]\{4\}\|^MD[0-9]\{5\}\|^LRC_FB[0-9]\{4\}\|^TST_\|TEST_ERWIN\|TESTERWIN" || { error "$BRANCH is not valid."; return 1; }
-    if [ ${LRC} == true ]; then
+    if [[ $LRC == true ]]; then
         echo ${BRANCH} | grep -q -e "^LRC_" || { error "LRC: Branch name is not correct."; return 1; }
     fi
 }
@@ -86,7 +86,7 @@ __checkOthers() {
 }
 
 __cmd() {
-    if [ $DEBUG == true ]; then
+    if [[ $DEBUG == true ]]; then
         debug $@
         echo [DEBUG] $@
     else
@@ -180,7 +180,7 @@ getDirPattern() {
     local sqlString="SELECT release_name_regex FROM branches WHERE branch_name='${branch}'"
     local dirPattern=$(echo "${sqlString}" | mysql -N -u ${dbUser} --password=${dbPass} -h ${dbHost} -P ${dbPort} -D ${dbName})
 
-    if [ $? -ne 0 ] || [ ! ${dirPattern} ]; then
+    if [[ $? -ne 0 || ! ${dirPattern} ]]; then
         error "mysql command failed: ${sqlString}"
         exit 1
     fi
@@ -188,7 +188,7 @@ getDirPattern() {
     dirPattern=$(echo ${dirPattern} | cut -d'(' -f1)
     DIR_PATTERN="${dirPattern}*"
 
-    if [ "$DIR_PATTERN" == "*" ]; then
+    if [[ "$DIR_PATTERN" == "*" ]]; then
         error "Invalid directory patter: $DIR_PATTERN"
         exit 1
     fi 
@@ -202,6 +202,8 @@ archiveBranchShare() {
     info "--------------------------------------------------------"
     info "SHARE: archiveBranchShare()"
     info "--------------------------------------------------------"
+
+    getDirPattern ${BRANCH}
 
     local dirPattern=$DIR_PATTERN
     local dirsToDelete=$(find ${SHARE} -maxdepth 2 -type d -name "${dirPattern}")
@@ -224,6 +226,8 @@ archiveBranchBldShare() {
     info "SHARE: archiveBranchBldShare()"
     info "--------------------------------------------------------"
 
+    getDirPattern ${BRANCH}
+
     local dirPattern=$DIR_PATTERN
     local dirsToDelete=$(find ${BLD_SHARE} -maxdepth 2 -type d -name "${dirPattern}")
 
@@ -244,6 +248,8 @@ archiveBranchPkgShare() {
     info "--------------------------------------------------------"
     info "SHARE: archiveBranchPkgShare()"
     info "--------------------------------------------------------"
+
+    getDirPattern ${BRANCH}
 
     local dirPattern=$DIR_PATTERN
     local dirsToDelete=$(find ${PKG_SHARE} -maxdepth 1 -type d -name "${dirPattern}")
@@ -266,6 +272,8 @@ LRC_archiveBranchShare() {
     info "SHARE: LRC_archiveBranchShare()"
     info "--------------------------------------------------------"
 
+    getDirPattern ${BRANCH}
+
     local dirPattern=$DIR_PATTERN
     local dirsToDelete=$(find ${SHARE} -maxdepth 2 -type d -name "${dirPattern}")
 
@@ -287,6 +295,8 @@ LRC_archiveBranchBldShare() {
     info "SHARE: LRC_archiveBranchBldShare()"
     info "--------------------------------------------------------"
 
+    getDirPattern ${BRANCH}
+
     local dirPattern=$DIR_PATTERN
     local dirsToDelete=$(find ${BLD_SHARE} -maxdepth 2 -type d -name "${dirPattern}")
 
@@ -303,6 +313,8 @@ deleteTestResults() {
     info "--------------------------------------------------------"
     info "TESTS: deleteTestResults()"
     info "--------------------------------------------------------"
+
+    getDirPattern ${BRANCH}
 
     local subString=$(__getSubBranch ${BRANCH})
     local dirPattern=$DIR_PATTERN
@@ -336,7 +348,7 @@ dbUpdate() {
     local dbHost=$(getConfig MYSQL_db_hostname)
     local dbPort=$(getConfig MYSQL_db_port)
 
-    if [ $DEBUG == true ]; then
+    if [[ $DEBUG == true ]]; then
         debug $sqlString
         echo [DEBUG] $sqlString
     else
@@ -348,8 +360,6 @@ dbUpdate() {
 
 __checkParams || { error "Params check failed."; exit 1; }
 __checkOthers || { error "Checking some stuff failed."; exit 1; }
-
-getDirPattern ${BRANCH}
 
 [[ ${MOVE_SVN_OS_BRANCH} == true ]] && moveBranchSvnOS || info "Not moving os/$BRANCH in repo"
 [[ ${MOVE_SVN} == true ]] && moveBranchSvn || info "Not moving $BRANCH in repo"
