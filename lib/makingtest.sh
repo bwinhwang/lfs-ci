@@ -372,6 +372,14 @@ makingTest_install() {
     local targetName=$(_reserveTarget)
     mustHaveValue "${targetName}" "target name"
 
+    local forceInstallSameVersion=$(getConfig LFS_CI_uc_test_making_test_force_reinstall_same_version)
+    if [[ -z ${forceInstallSameVersion} ]] ; then
+        if execute -i ${make} check ; then
+            info "the version, we would install is already on the target, skipping install"
+            return
+        fi
+    fi
+
     # on LRC: currently install does show wrong (old) version after reboot and
     # SHP sometimes fails to be up when install is retried.
     # We try installation up to 4 times
