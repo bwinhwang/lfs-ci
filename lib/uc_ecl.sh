@@ -6,124 +6,47 @@
 [[ -z ${LFS_CI_SOURCE_subversion} ]] && source ${LFS_CI_ROOT}/lib/subversion.sh
 [[ -z ${LFS_CI_SOURCE_jenkins}    ]] && source ${LFS_CI_ROOT}/lib/jenkins.sh
 
+usecase_LFS_UPDATE_ECL() {
+    ci_job_ecl
+    info "usecase LFS_UPDATE_ECL done"
+    return
+}
+
 ## @fn      ci_job_ecl()
 #  @brief   update the ECL file 
 #  @todo    add more doc
 #  @param   <none>
 #  @return  <none>
 ci_job_ecl() {
-    requiredParameters JOB_NAME BUILD_NUMBER UPSTREAM_PROJECT UPSTREAM_BUILD
+    requiredParameters UPSTREAM_PROJECT UPSTREAM_BUILD
+
+    # TODO: demx2fk3 2015-04-13 this is the big question: what will be
+    # the upstream project / upstream build and where do we get the
+    # information about the build.
+    # maybe the fingerprint file is an solution here.
+    info "upstream  is ${UPSTREAM_PROJECT} / ${UPSTREAM_BUILD}"
 
     local workspace=$(getWorkspaceName)
-    mustHaveWorkspaceName
     mustHaveCleanWorkspace
 
     local eclKeysToUpdate=$(getConfig LFS_CI_uc_update_ecl_key_names)
     mustHaveValue "${eclKeysToUpdate}"
 
-    # find the related jobs of the build
-    local buildJobName=$(    getBuildJobNameFromUpstreamProject     ${UPSTREAM_PROJECT} ${UPSTREAM_BUILD})
-    local buildBuildNumber=$(getBuildBuildNumberFromUpstreamProject ${UPSTREAM_PROJECT} ${UPSTREAM_BUILD})
-    local testJobName=$(     getTestJobNameFromUpstreamProject      ${UPSTREAM_PROJECT} ${UPSTREAM_BUILD})
-    local testBuildNumber=$( getTestBuildNumberFromUpstreamProject  ${UPSTREAM_PROJECT} ${UPSTREAM_BUILD})
-    local packageJobName=
-    local packageBuildNumber=
-    
-    if [[ ! -z ${buildJobName} ]] ; then
-        packageJobName=$(    getPackageJobNameFromUpstreamProject     ${UPSTREAM_PROJECT} ${UPSTREAM_BUILD})
-        packageBuildNumber=$(getPackageBuildNumberFromUpstreamProject ${UPSTREAM_PROJECT} ${UPSTREAM_BUILD})
-    else
-        warning "can not find the build job name, try to figure out..."
-
-        # this happens, if someone started the test job, without building it.
-        # it's ok, but we have to find the build job for this test job.
-        # for this, we have a file in the ${WORKSPACE} of the test job called upstream.
-        # it contains the information about the upstream aka the package job. 
-        copyFileFromBuildDirectoryToWorkspace ${testJobName} ${testBuildNumber} upstream
-        
-        # this should be the package build job
-        rawDebug upstream
-        cat ${WORKSPACE}/upstream
-        packageJobName=$(    grep upstreamProject     ${WORKSPACE}/upstream | cut -d= -f2-)
-        packageBuildNumber=$(grep upstreamBuildNumber ${WORKSPACE}/upstream | cut -d= -f2-)
-        
-        mustHaveValue "${packageJobName}"     "package job name"
-        mustHaveValue "${packageBuildNumber}" "package job build number"
-        
-        buildJobName=$(    getBuildJobNameFromUpstreamProject     ${packageJobName} ${packageBuildNumber})
-        buildBuildNumber=$(getBuildBuildNumberFromUpstreamProject ${packageJobName} ${packageBuildNumber})
-        
-    fi  
-    
-    if [[ -z ${buildJobName} ]] ; then
-        error "not trigger an ECL update without a build job name"
-        echo setBuildResultUnstable
-        exit 0
-    fi  
-    
-    info "upstream    is ${UPSTREAM_PROJECT} / ${UPSTREAM_BUILD}"
-    info "build job   is ${buildJobName} / ${buildBuildNumber}"
-    info "package job is ${packageJobName} / ${packageBuildNumber}"
-    info "test job    is ${testJobName} / ${testBuildNumber}"
-
+    # TODO: demx2fk3 2015-04-13 which artifacts do we require here
     local requiredArtifacts=$(getConfig LFS_CI_UC_update_ecl_required_artifacts)
-    copyArtifactsToWorkspace "${buildJobName}" "${buildBuildNumber}" "${requiredArtifacts}"
-
-    local ciBuildShare=$(getConfig LFS_CI_UC_package_internal_link)
-    local releaseDirectory=${ciBuildShare}/build_${packageBuildNumber}
-    mustExistSymlink ${releaseDirectory}
-
-    local releaseDirectoryLinkDestination=$(readlink -f ${releaseDirectory})
-    mustExistDirectory ${releaseDirectoryLinkDestination}
+    copyArtifactsToWorkspace "${UPSTREAM_PROJECT}" "${UPSTREAM_BUILD}" "${requiredArtifacts}"
 
     mustHaveNextLabelName
     local labelName=$(getNextReleaseLabel)
     setBuildDescription ${JOB_NAME} ${BUILD_NUMBER} ${labelName}
-
     mustHavePermissionToRelease
+    createReleaseLinkOnCiLfsShare ${labelName}
 
-    local linkDirectory=$(getConfig LFS_CI_UC_package_copy_to_share_link_location)
-    local pathToLink=../../$(getConfig LFS_CI_UC_package_copy_to_share_path_name)/${labelName}
-    local relTagName=${labelName//PS_LFS_OS_/PS_LFS_REL_}
-    info "creating link in CI_LFS RCversion ${relTagName}"
-    execute mkdir -p ${linkDirectory}
-    execute cd ${linkDirectory}
-    execute ln -sf ${pathToLink} ${relTagName}
-
-    local counter=0
     local eclUrls=$(getConfig LFS_CI_uc_update_ecl_url)
-    mustHaveValue ${eclUrls}
-
+    mustHaveValue "${eclUrls}"
     for eclUrl in ${eclUrls} ; do
-        local eclWorkspace=${workspace}/ecl_checkout.${counter}
-
-        info "checkout ECL from ${eclUrl} to ${eclWorkspace}"
-        svnCheckout ${eclUrl} ${eclWorkspace}
-        mustHaveWritableFile ${eclWorkspace}/ECL
-
-        for eclKey in ${eclKeysToUpdate} ; do
-            local oldEclValue=$(grep "^${eclKey}=" ${eclWorkspace}/ECL | cut -d= -f2)
-            local eclValue=$(getEclValue "${eclKey}" "${oldEclValue}")
-            debug "got new value for eclKey ${eclKey} / oldValue ${oldEclValue}"
-
-            mustHaveValue "${eclKey}"   "no key ${eclKey}"
-            mustHaveValue "${eclValue}" "no value for ${eclKey}"
-
-            info "update ecl key ${eclKey} with value ${eclValue} (old: ${oldEclValue})"
-            execute perl -pi -e "s:^${eclKey}=.*:${eclKey}=${eclValue}:" ${eclWorkspace}/ECL
-
-        done
-
-        svnDiff ${eclWorkspace}/ECL
-
-        local canCommit=$(getConfig LFS_CI_uc_update_ecl_can_commit_ecl)
-        if [[ ${canCommit} ]] ; then
-            local logMessage=$(createTempFile)
-            echo "updating ECL" > ${logMessage} 
-            svnCommit -F ${logMessage} ${eclWorkspace}/ECL
-        fi
-
-        counter=$((counter + 1))
+        info "updating ECL ${eclUrl}"
+        updateAndCommitEcl ${eclUrls}
     done
 
     return
@@ -224,5 +147,51 @@ mustHavePermissionToRelease() {
         info "enforcing promotion of release. Last release is ${diff}s ago."
     fi
 
+    return
+}
+createReleaseLinkOnCiLfsShare() {
+    local labelName=$1
+    local linkDirectory=$(getConfig LFS_CI_UC_package_copy_to_share_link_location)
+    local pathToLink=../../$(getConfig LFS_CI_UC_package_copy_to_share_path_name)/${labelName}
+    local relTagName=${labelName//PS_LFS_OS_/PS_LFS_REL_}
+    info "creating link in CI_LFS RCversion ${relTagName}"
+    execute mkdir -p ${linkDirectory}
+    execute cd ${linkDirectory}
+    execute ln -sf ${pathToLink} ${relTagName}
+    return
+}
+
+updateAndCommitEcl() {
+    local eclUrl=$1
+    local workspace=$(getWorkspaceName)
+    mustHaveWorkspaceName
+
+    local eclWorkspace=${workspace}/ecl_checkout
+    execute rm -rfv ${eclWorkspace}
+
+    info "checkout ECL from ${eclUrl} to ${eclWorkspace}"
+    svnCheckout ${eclUrl} ${eclWorkspace}
+    mustHaveWritableFile ${eclWorkspace}/ECL
+
+    for eclKey in ${eclKeysToUpdate} ; do
+        local oldEclValue=$(grep "^${eclKey}=" ${eclWorkspace}/ECL | cut -d= -f2)
+        local eclValue=$(getEclValue "${eclKey}" "${oldEclValue}")
+        debug "got new value for eclKey ${eclKey} / oldValue ${oldEclValue}"
+
+        mustHaveValue "${eclKey}"   "no key ${eclKey}"
+        mustHaveValue "${eclValue}" "no value for ${eclKey}"
+
+        info "update ecl key ${eclKey} with value ${eclValue} (old: ${oldEclValue})"
+        execute perl -pi -e "s:^${eclKey}=.*:${eclKey}=${eclValue}:" ${eclWorkspace}/ECL
+    done
+
+    svnDiff ${eclWorkspace}/ECL
+
+    local canCommit=$(getConfig LFS_CI_uc_update_ecl_can_commit_ecl)
+    if [[ ${canCommit} ]] ; then
+        local logMessage=$(createTempFile)
+        echo "updating ECL" > ${logMessage} 
+        svnCommit -F ${logMessage} ${eclWorkspace}/ECL
+    fi
     return
 }
