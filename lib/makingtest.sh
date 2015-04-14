@@ -111,7 +111,6 @@ makingTest_testSuiteDirectory() {
     mustHaveValue "${branchName}" "branch name"
 
     local relativeTestSuiteDirectory=
-    set -x
     if [[ -e ${workspace}/src-project/src/TMF/testsuites.cfg ]] ; then
         relativeTestSuiteDirectory=$(getConfig test_suite                               \
                                             -t targetName:${targetName}                      \
@@ -126,7 +125,6 @@ makingTest_testSuiteDirectory() {
                                             -t branchName:${branchName}                  )
     fi
     local testSuiteDirectory=${workspace}/${relativeTestSuiteDirectory}
-    set +x
     mustExistDirectory ${testSuiteDirectory}
     mustExistFile ${testSuiteDirectory}/testsuite.mk
 
