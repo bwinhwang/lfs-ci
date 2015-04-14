@@ -111,11 +111,12 @@ makingTest_testSuiteDirectory() {
     mustHaveValue "${branchName}" "branch name"
 
     local relativeTestSuiteDirectory=
-    if [[ -e ${workspace}/src-project/src/TMF/testsuite.cfg ]] ; then
+    set -x
+    if [[ -e ${workspace}/src-project/src/TMF/testsuites.cfg ]] ; then
         relativeTestSuiteDirectory=$(getConfig test_suite                               \
                                             -t targetName:${targetName}                      \
                                             -t branchName:${branchName}                      \
-                                            -f ${workspace}/src-project/src/TMF/testsuite.cfg)
+                                            -f ${workspace}/src-project/src/TMF/testsuites.cfg)
 
     fi
     # if test suite directory is empty, try to find in test suite in the old config file
@@ -125,6 +126,7 @@ makingTest_testSuiteDirectory() {
                                             -t branchName:${branchName}                  )
     fi
     local testSuiteDirectory=${workspace}/${relativeTestSuiteDirectory}
+    set +x
     mustExistDirectory ${testSuiteDirectory}
     mustExistFile ${testSuiteDirectory}/testsuite.mk
 
