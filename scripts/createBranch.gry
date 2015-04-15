@@ -220,9 +220,15 @@ def updateJobConfig(job, new_job) {
         }
     }
 
-    if (new_job.getName() == "PKGPOOL_-_"+new_branch+"_-_Build") {
-        processFileInplace(config_file) { text ->
-            text.replace("*/master", "*/"+new_branch)
+    if(new_job.getName() == "PKGPOOL_-_"+new_branch+"_-_Build") {
+        if (src_branch == "trunk") {
+            processFileInplace(config_file) { text ->
+                text.replace("*/master", "*/"+new_branch)
+            }
+        } else {
+            processFileInplace(config_file) { text ->
+                text.replace("*/${src_branch}", "*/"+new_branch)
+            }
         }
     }
 
@@ -425,6 +431,7 @@ class MySectionedView {
     }
 
     String createListViewSectionsXml() {
+        // TODO: Adapt columns to match current LFS-CI column configuation in sction views.
         def xs = """
             <hudson.plugins.sectioned__view.ListViewSection>
               <jobNames><comparator class="hudson.util.CaseInsensitiveComparator"/></jobNames>

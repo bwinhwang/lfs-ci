@@ -131,15 +131,7 @@ if(deleteJobs || LRC_deleteJobs) {
         } else if(job_name.find("LFS_CI_-_LRC_"+branch+"_-") || job_name.find("LFS_Prod_-_LRC_"+branch+"_-") || job_name.find("PKGPOOL_-_LRC_"+branch+"_-")) {
             lrc_jobs.add(p)
             println("[DEBUG] added job $p.name to lrc_jobs list")
-<<<<<<< HEAD
         } else if(other_job_names && job_name.find(other_job_names)) {
-=======
-<<<<<<< HEAD
-        } else if(job_name.find(other_job_names)) {
-=======
-        } else if(other_job_names && job_name.find(other_job_names)) {
->>>>>>> a4262def049dcee289fe9a55bfe5fb18daccd785
->>>>>>> git-master/development
             remaining_jobs.add(p)
             println("[DEBUG] added job $p.name to remaining list")
         }

@@ -1,5 +1,7 @@
 #!/bin/bash
 
+# TODO: Add DEBUG like in deleteBranch.sh
+
 source ${LFS_CI_ROOT}/lib/common.sh
 source ${LFS_CI_ROOT}/lib/logging.sh
 source ${LFS_CI_ROOT}/lib/jenkins.sh
@@ -21,7 +23,6 @@ info "# COMMENT:              $COMMENT"
 info "# DO_SVN:               $DO_SVN"
 info "# DO_JENKINS:           $DO_JENKINS"
 info "# DUMMY_COMMIT:         $DUMMY_COMMIT"
-info "# COPY_DELIVERY:        $COPY_DELIVERY"
 info "# UPDATE_LOCATIONS_TXT: $UPDATE_LOCATIONS_TXT"
 info "# DO_DB_INSERT:         $DO_DB_INSERT"
 info "# DO_GIT:               $DO_GIT"
@@ -55,7 +56,7 @@ __checkParams() {
     [[ ! ${ECL_URLS} ]] && { error "ECL_URLS is missing"; exit 1; }
     [[ ! ${COMMENT} ]] && { error "COMMENT is missing"; exit 1; }
     [[ ${FSMR4} == false ]] && [[ ${FSMR4_ONLY} == true ]] && { error "FSMR4 can not be false in case FSMR4_ONLY is true"; exit 1; }
-    if [ ${LRC} == true ]; then
+    if [[ ${LRC} == true ]]; then
         echo ${NEW_BRANCH} | grep -q -e "^LRC_" && { error "LRC: \"LRC_\" is automatically added as prefix to NEW_BRANCH"; exit 1; }
     fi
 }
@@ -67,8 +68,8 @@ __preparation(){
     JENKINS_API_USER=$(getConfig jenkinsApiUser)
     mustHaveValue ${JENKINS_API_TOKEN} "Jenkins API token is missing."
     mustHaveValue ${JENKINS_API_USER} "Jenkins API user is missing."
-    echo JENKINS_API_TOKEN=${JENKINS_API_TOKEN} > ${VARS_FILE}
-    echo JENKINS_API_USER=${JENKINS_API_USER} >> ${VARS_FILE}
+    echo JENKINS_API_TOKEN=${JENKINS_API_TOKEN} > ${WORKSPACE}/${VARS_FILE}
+    echo JENKINS_API_USER=${JENKINS_API_USER} >> ${WORKSPACE}/${VARS_FILE}
 }
 
 ## @fn      svnCopyBranch()
@@ -90,6 +91,8 @@ svnCopyBranch() {
     DESCRIPTION: svn cp -r${REVISION} --parents ${SVN_REPO}/${SVN_PATH} ${SVN_REPO}/${SVN_DIR}/${newBranch}/trunk. \
     $COMMENT"
 
+    # TODO: Job shall fail in case branch already exists.
+    #       This requirement is in collision with master option DO_SVN.
     svn ls ${SVN_REPO}/${SVN_DIR}/${newBranch} || {
         svn copy -r ${REVISION} -m "${message}" --parents ${SVN_REPO}/${SVN_PATH} \
             ${SVN_REPO}/${SVN_DIR}/${newBranch}/trunk;
@@ -111,6 +114,8 @@ svnCopyLocations() {
     mustHaveValue "${srcBranch}" "source branch"
     mustHaveValue "${newBranch}" "new branch"
 
+    # TODO: Job shall fail in case location already exists.
+    #       This requirement is in collision with master option DO_SVN.
     svn ls ${SVN_REPO}/${SVN_DIR}/trunk/bldtools/locations-${LOCATIONS} \
         ${SVN_REPO}/${SVN_DIR}/trunk/bldtools/locations-${newBranch} || {
             svn copy -m "copy locations branch ${newBranch}" ${SVN_REPO}/${SVN_DIR}/trunk/bldtools/locations-${LOCATIONS} \
@@ -222,7 +227,7 @@ createBranchInGit() {
         # TODO: get GIT via getConfig()
         local gitServer="psulm.nsn-net.net"
 
-        # TODO: Die SVN URL kann auch aus file.cfg geholt werden.
+        # TODO: The SVN URL can be retrived from file.cfg.
         if [[ ${LRC} == true ]]; then
             gitRevision=$(svn cat -r${REVISION} ${SVN_REPO}/${SVN_PATH}/lrc/${SRC_PROJECT}/src/gitrevision)
         else
@@ -235,6 +240,8 @@ createBranchInGit() {
         git branch $newBranch $gitRevision
         git push origin $newBranch
     else
+        # TODO: Fail in case branch already exists.
+        #       Maybe collision with master option DO_SVN.
         info "Branch already exists in GIT"
     fi
 }
@@ -245,7 +252,7 @@ createBranchInGit() {
 #  @return  <none>
 svnDummyCommit() {
     info "--------------------------------------------------------"
-    info "SVN: dummy commit on $SRC_PROJECT"
+    info "SVN: dummy commit on $SRC_PROJECT for branch $1"
     info "--------------------------------------------------------"
 
     if [[ "${DUMMY_COMMIT}" == "false" ]]; then
@@ -256,14 +263,16 @@ svnDummyCommit() {
     local newBranch=$1
     mustHaveValue "${newBranch}" "new branch"
 
-    svn checkout ${SVN_REPO}/${SVN_DIR}/${newBranch}/trunk/main/${SRC_PROJECT}
-    if [[ -d ${SRC_PROJECT} ]]; then
-        cd ${SRC_PROJECT}
-        echo >> src/README
-        svn commit -m "dummy commit" src/README
-    else
-        warning "Directory $SRC_PROJECT does not exist"
-    fi
+    local workspace=$(getWorkspaceName)
+    mustHaveWorkspaceName
+
+    createBasicWorkspace -l ${newBranch} src-project
+    mustExistDirectory ${workspace}/src-project
+
+    echo "dummy commit" >> ${workspace}/src-project/src/README
+    svnCommit -m DummyCommit ${workspace}/src-project/src/README
+
+    return
 }
 
 ## @fn      svnDummyCommitLRC
@@ -271,26 +280,8 @@ svnDummyCommit() {
 #  @param   <newBranch> new branch name (without LRC_ prefix)
 #  @return  <none>
 svnDummyCommitLRC() {
-    info "--------------------------------------------------------"
-    info "SVN: dummy commit on $SRC_PROJECT for LRC"
-    info "--------------------------------------------------------"
-
-    if [[ "${DUMMY_COMMIT}" == "false" ]]; then
-        info "Not performig dummy commit."
-        return 0
-    fi
-
     local newBranch="LRC_$1"
-    mustHaveValue "${newBranch}" "new branch"
-
-    svn checkout ${SVN_REPO}/${SVN_DIR}/${newBranch}/trunk/lrc/${SRC_PROJECT}
-    if [[ -d ${SRC_PROJECT} ]]; then
-        cd ${SRC_PROJECT}
-        echo >> src/README
-        svn commit -m "dummy commit LRC" src/README
-    else
-        warning "Directory $SRC_PROJECT does not exist"
-    fi
+    svnDummyCommit "${newBranch}"
 }
 
 ## @fn      svnEditLocationsTxtFile()
@@ -342,78 +333,6 @@ svnEditLocationsTxtFile() {
     fi
 
     svn commit -m "Added ${newBranch} to file ${locationsTxt}" ${locationsTxt}
-}
-
-## @fn      svnCopyDelivery()
-#  @brief   copy delivery repository.
-#  @param   <newBranch> new branch name
-#  @param   <srcBranch> source branch name
-#  @return  <none>
-svnCopyDelivery() {
-    info "--------------------------------------------------------"
-    info "SVN: copy delivery repository"
-    info "--------------------------------------------------------"
-
-    if [[ "${COPY_DELIVERY}" == "false" ]]; then
-        info "Not coping delivery"
-        return 0
-    fi
-
-    local srcBranch=$1
-    local newBranch=$2
-    local yyyy=$(getBranchPart ${newBranch} YYYY)
-    local mm=$(getBranchPart ${newBranch} MM)
-    local svnAddress=$(echo ${SVN_REPO} | awk -F/ '{print $1"//"$2$3"/"$4"/"$5}')
-    mustHaveValue "${yyyy}" "yyyy"
-    mustHaveValue "${mm}" "mm"
-
-    if [[ "$srcBranch" == "trunk" ]]; then
-        svn ls ${svnAddress}/BTS_D_SC_LFS_${yyyy}_${mm}/os/branches/PS_LFS_OS_MAINBRANCH && {
-            svn copy -m "copy delivery repo" ${svnAddress}/BTS_D_SC_LFS_${yyyy}_${mm}/os/branches/PS_LFS_OS_MAINBRANCH \
-            ${svnAddress}/BTS_D_SC_LFS_${yyyy}_${mm}/os/branches/PS_LFS_OS_${newBranch};
-        }
-    else
-        svn ls ${svnAddress}/BTS_D_SC_LFS_${yyyy}_${mm}/os/branches/PS_LFS_OS_${newBranch} && {
-            svn copy -m "copy delivery repo" ${svnAddress}/BTS_D_SC_LFS_${yyyy}_${mm}/os/branches/PS_LFS_OS_${srcBranch} \
-            ${svnAddress}/BTS_D_SC_LFS_${yyyy}_${mm}/os/branches/PS_LFS_OS_${newBranch};
-        }
-    fi
-}
-
-## @fn      svnCopyDeliveryLRC()
-#  @brief   copy delivery repository for LRC.
-#  @param   <newBranch> new branch name
-#  @param   <srcBranch> source branch name
-#  @return  <none>
-svnCopyDeliveryLRC() {
-    info "--------------------------------------------------------"
-    info "SVN: copy delivery repository for LRC"
-    info "--------------------------------------------------------"
-
-    if [[ "${COPY_DELIVERY}" == "false" ]]; then
-        info "Not coping delivery for LRC."
-        return 0
-    fi
-
-    local srcBranch=$1
-    local newBranch=$2
-    local yyyy=$(getBranchPart ${newBranch} YYYY)
-    local mm=$(getBranchPart ${newBranch} MM)
-    local svnAddress=$(echo ${SVN_REPO} | awk -F/ '{print $1"//"$2$3"/"$4"/"$5}')
-    mustHaveValue "${yyyy}" "yyyy"
-    mustHaveValue "${mm}" "mm"
-
-    if [[ "$srcBranch" == "trunk" ]]; then
-        svn ls ${svnAddress}/BTS_D_SC_LFS_${yyyy}_${mm}/os/branches/PS_LFS_OS_LRC && {
-            svn copy -m "copy delivery repo" ${svnAddress}/BTS_D_SC_LFS_${yyyy}_${mm}/os/branches/PS_LFS_OS_LRC \
-            ${svnAddress}/BTS_D_SC_LFS_${yyyy}_${mm}/os/branches/PS_LFS_OS_LRC_${newBranch};
-        }
-    else
-        svn ls ${svnAddress}/BTS_D_SC_LFS_${yyyy}_${mm}/os/branches/PS_LFS_OS_LRC_${newBranch} && {
-            svn copy -m "copy delivery repo" ${svnAddress}/BTS_D_SC_LFS_${yyyy}_${mm}/os/branches/PS_LFS_OS_LRC_${srcBranch} \
-            ${svnAddress}/BTS_D_SC_LFS_${yyyy}_${mm}/os/branches/PS_LFS_OS_LRC_${newBranch};
-        }
-    fi
 }
 
 ## @fn      dbInsert()
@@ -469,7 +388,6 @@ main() {
             svnCopyBranch ${SRC_BRANCH} ${NEW_BRANCH}
             svnCopyLocations ${SRC_BRANCH} ${NEW_BRANCH}
             svnDummyCommit ${NEW_BRANCH}
-            svnCopyDelivery ${SRC_BRANCH} ${NEW_BRANCH}
             if [[ "${FSMR4}" == "true" ]]; then
                 svnCopyLocationsFSMR4 ${SRC_BRANCH} ${NEW_BRANCH}
             fi
@@ -477,7 +395,6 @@ main() {
             svnCopyBranchLRC ${SRC_BRANCH} ${NEW_BRANCH}
             svnCopyLocationsLRC ${SRC_BRANCH} ${NEW_BRANCH}
             svnDummyCommitLRC ${NEW_BRANCH}
-            svnCopyDeliveryLRC ${SRC_BRANCH} ${NEW_BRANCH}
         fi
         svnEditLocationsTxtFile ${NEW_BRANCH}
         dbInsert ${NEW_BRANCH}
