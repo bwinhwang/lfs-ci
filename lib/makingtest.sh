@@ -110,22 +110,23 @@ makingTest_testSuiteDirectory() {
     local  branchName=$(getLocationName ${UPSTREAM_PROJECT})
     mustHaveValue "${branchName}" "branch name"
 
-    local testSuiteDirectory=
-    if [[ -e ${workspace}/src-project/src/TMF/testsuite.cfg ]] ; then
-        testSuiteDirectory=${workspace}/$(getConfig test_suite                               \
+    local relativeTestSuiteDirectory=
+    if [[ -e ${workspace}/src-project/src/TMF/testsuites.cfg ]] ; then
+        relativeTestSuiteDirectory=$(getConfig test_suite                               \
                                             -t targetName:${targetName}                      \
                                             -t branchName:${branchName}                      \
-                                            -f ${workspace}/src-project/src/TMF/testsuite.cfg)
+                                            -f ${workspace}/src-project/src/TMF/testsuites.cfg)
 
     fi
     # if test suite directory is empty, try to find in test suite in the old config file
-    if [[ -z ${testSuiteDirectory} ]] ; then
-        testSuiteDirectory=${workspace}/$(getConfig LFS_CI_uc_test_making_test_suite_dir \
+    if [[ -z ${relativeTestSuiteDirectory} ]] ; then
+        relativeTestSuiteDirectory=$(getConfig LFS_CI_uc_test_making_test_suite_dir \
                                             -t targetName:${targetName}                  \
                                             -t branchName:${branchName}                  )
     fi
+    local testSuiteDirectory=${workspace}/${relativeTestSuiteDirectory}
     mustExistDirectory ${testSuiteDirectory}
-	mustExistFile ${testSuiteDirectory}/testsuite.mk
+    mustExistFile ${testSuiteDirectory}/testsuite.mk
 
     trace "using test suite ${testSuiteDirectory} for target ${targetName} and branch ${branchName}"
     echo ${testSuiteDirectory}
