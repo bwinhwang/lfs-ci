@@ -23,7 +23,7 @@ sub readConfig {
 
     return if not -e $file;
 
-    DEBUG "reading config file $file";
+    # DEBUG "reading config file $file";
 
     my $tagsRE  = qr/ \s*
                        < (?<tags>[^>]*) >

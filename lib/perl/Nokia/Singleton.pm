@@ -63,7 +63,7 @@ sub invalidateConfigStore {
 #  @return  config handler object
 sub config {
     if( not $obj->{config}{handler} ) {
-        DEBUG "creating config handler";
+        # DEBUG "creating config handler";
         $obj->{config}{handler} = Nokia::Config->new();
     }
     return $obj->{config}{handler};
