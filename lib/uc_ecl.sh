@@ -6,18 +6,21 @@
 [[ -z ${LFS_CI_SOURCE_subversion} ]] && source ${LFS_CI_ROOT}/lib/subversion.sh
 [[ -z ${LFS_CI_SOURCE_jenkins}    ]] && source ${LFS_CI_ROOT}/lib/jenkins.sh
 
-usecase_LFS_UPDATE_ECL() {
-    ci_job_ecl
-    info "usecase LFS_UPDATE_ECL done"
-    return
-}
-
 ## @fn      ci_job_ecl()
 #  @brief   update the ECL file 
-#  @todo    add more doc
 #  @param   <none>
 #  @return  <none>
 ci_job_ecl() {
+    usecase_LFS_UPDATE_ECL
+    info "usecase LFS_UPDATE_ECL (legacy) done"
+    return
+}
+
+## @fn      usecase_LFS_UPDATE_ECL()
+#  @brief   update the ECL file 
+#  @param   <none>
+#  @return  <none>
+usecase_LFS_UPDATE_ECL() {
     requiredParameters UPSTREAM_PROJECT UPSTREAM_BUILD
 
     # TODO: demx2fk3 2015-04-13 this is the big question: what will be
@@ -29,8 +32,6 @@ ci_job_ecl() {
     local workspace=$(getWorkspaceName)
     mustHaveCleanWorkspace
 
-    local eclKeysToUpdate=$(getConfig LFS_CI_uc_update_ecl_key_names)
-    mustHaveValue "${eclKeysToUpdate}"
 
     # TODO: demx2fk3 2015-04-13 which artifacts do we require here
     local requiredArtifacts=$(getConfig LFS_CI_UC_update_ecl_required_artifacts)
@@ -46,7 +47,7 @@ ci_job_ecl() {
     mustHaveValue "${eclUrls}"
     for eclUrl in ${eclUrls} ; do
         info "updating ECL ${eclUrl}"
-        updateAndCommitEcl ${eclUrls}
+        updateAndCommitEcl ${eclUrl}
     done
 
     return
@@ -149,6 +150,7 @@ mustHavePermissionToRelease() {
 
     return
 }
+
 createReleaseLinkOnCiLfsShare() {
     local labelName=$1
     local linkDirectory=$(getConfig LFS_CI_UC_package_copy_to_share_link_location)
@@ -173,6 +175,9 @@ updateAndCommitEcl() {
     svnCheckout ${eclUrl} ${eclWorkspace}
     mustHaveWritableFile ${eclWorkspace}/ECL
 
+    local eclKeysToUpdate=$(getConfig LFS_CI_uc_update_ecl_key_names)
+    mustHaveValue "${eclKeysToUpdate}"
+
     for eclKey in ${eclKeysToUpdate} ; do
         local oldEclValue=$(grep "^${eclKey}=" ${eclWorkspace}/ECL | cut -d= -f2)
         local eclValue=$(getEclValue "${eclKey}" "${oldEclValue}")
@@ -189,7 +194,7 @@ updateAndCommitEcl() {
 
     local canCommit=$(getConfig LFS_CI_uc_update_ecl_can_commit_ecl)
     if [[ ${canCommit} ]] ; then
-        local logMessage=$(createTempFile)
+        local logMessage=${workspace}/ecl_commit_message
         echo "updating ECL" > ${logMessage} 
         svnCommit -F ${logMessage} ${eclWorkspace}/ECL
     fi
