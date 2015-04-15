@@ -41,9 +41,6 @@ oneTimeSetUp() {
     getConfig() {
         mockedCommand "getConfig $@"
         case $1 in
-            LFS_CI_uc_update_ecl_key_names)
-                echo ECL_KEY1 ECL_KEY2
-            ;;
             LFS_CI_UC_update_ecl_required_artifacts)
                 echo fsmci
             ;;
@@ -74,7 +71,6 @@ test1() {
     local expect=$(createTempFile)
 cat <<EOF > ${expect}
 execute mkdir -p ${WORKSPACE}/workspace
-getConfig LFS_CI_uc_update_ecl_key_names
 getConfig LFS_CI_UC_update_ecl_required_artifacts
 copyArtifactsToWorkspace LFS_CI_-_trunk_-_Build 1234 fsmci
 setBuildDescription LABEL_NAME
