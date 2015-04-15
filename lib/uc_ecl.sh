@@ -27,11 +27,10 @@ usecase_LFS_UPDATE_ECL() {
     # the upstream project / upstream build and where do we get the
     # information about the build.
     # maybe the fingerprint file is an solution here.
-    info "upstream  is ${UPSTREAM_PROJECT} / ${UPSTREAM_BUILD}"
+    info "upstream is ${UPSTREAM_PROJECT} / ${UPSTREAM_BUILD}"
 
     local workspace=$(getWorkspaceName)
     mustHaveCleanWorkspace
-
 
     # TODO: demx2fk3 2015-04-13 which artifacts do we require here
     local requiredArtifacts=$(getConfig LFS_CI_UC_update_ecl_required_artifacts)
@@ -40,7 +39,7 @@ usecase_LFS_UPDATE_ECL() {
     mustHaveNextLabelName
     local labelName=$(getNextReleaseLabel)
     setBuildDescription ${JOB_NAME} ${BUILD_NUMBER} ${labelName}
-    mustHavePermissionToRelease
+    # mustHavePermissionToRelease
     createReleaseLinkOnCiLfsShare ${labelName}
 
     local eclUrls=$(getConfig LFS_CI_uc_update_ecl_url)
@@ -197,6 +196,7 @@ updateAndCommitEcl() {
         local logMessage=${workspace}/ecl_commit_message
         echo "updating ECL" > ${logMessage} 
         svnCommit -F ${logMessage} ${eclWorkspace}/ECL
+    # else part missing
     fi
     return
 }
