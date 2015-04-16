@@ -54,7 +54,7 @@ EOF
 
 test2() {
     mkdir -p ${WORKSPACE}/workspace/src-project/src/TMF
-    touch ${WORKSPACE}/workspace/src-project/src/TMF/testsuite.cfg
+    touch ${WORKSPACE}/workspace/src-project/src/TMF/testsuites.cfg
     export UT_FAKE_TEST_SUITE=my/branched/test_suite
 
     assertTrue "makingTest_testSuiteDirectory"
@@ -62,7 +62,7 @@ test2() {
     local expect=$(createTempFile)
     cat <<EOF > ${expect}
 _reserveTarget 
-getConfig test_suite -t targetName:TargetName -t branchName:pronb-developer -f ${WORKSPACE}/workspace/src-project/src/TMF/testsuite.cfg
+getConfig test_suite -t targetName:TargetName -t branchName:pronb-developer -f ${WORKSPACE}/workspace/src-project/src/TMF/testsuites.cfg
 EOF
     assertExecutedCommands ${expect}
     assertEquals "${WORKSPACE}/workspace/my/branched/test_suite" "$(makingTest_testSuiteDirectory)"
