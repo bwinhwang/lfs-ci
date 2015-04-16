@@ -74,8 +74,8 @@ sub newBuildEvent {
     my $comment      = $param->{comment}      || "";
     my $jobName      = $param->{jobName}      || "";
     my $buildNumber  = $param->{buildNumber}  || "";
-    my $target       = $param->{target}       || "";
-    my $subTarget    = $param->{subTarget}    || "";
+    my $productName  = $param->{productName}  || "";
+    my $taskName     = $param->{taskName}     || "";
     my $action       = $param->{action};
     my $method       = "";
     my $data         = [];
@@ -83,7 +83,7 @@ sub newBuildEvent {
     DEBUG "parameter" . Dumper( $param );
 
     if( $action eq "build_started" ) {
-        $method = "build_started( ?, ?, ?, ?, ?, ? )";
+        $method = "build_started( ?, ?, ?, ?, ?, ?, ?, ? )";
         $data   = [ $baselineName, $comment, $branchName, $revision, $jobName, $buildNumber ];
     } elsif ( $action eq "build_failed"  ) {
         $method = "build_failed( ?, ?, ?, ? )";
@@ -141,7 +141,7 @@ sub newBuildEvent {
     DEBUG "executing $action with $method and data (" . join( ", ", @{ $data } ) . ")";
 
     my $sth = $self->prepare(
-        "call $method"
+        "CALL $method"
     );
 
     $sth->execute( @{ $data } )
@@ -155,7 +155,7 @@ sub branchInformation {
     my $param = { @_ };
 
     my $sth = $self->prepare( 
-        "select * from branches"
+        "SELECT * FROM branches"
     );
     $sth->execute()
         or LOGDIE sprintf( "can not get branch information" );

@@ -1,6 +1,34 @@
 #!/bin/bash
 ## @file  database.sh
 #  @brief handling of metrics to the database 
+#
+# conzept for events;
+# all jobs are creating events for a build into the build_events table
+# id | build_id | event_id | timestamp | job_name | build_number 
+# --------------------------------------------------------------
+# 0  |   1      |     1    |  now      | ABC      | 1
+# ....
+# --------------------------------------------------------------
+# 
+# the event_id is a reference to the event table
+# id | product_name | task_name  | event_type | event_state 
+# ---------------------------------------------------------- 
+# 0  | LFS          | build      | build      | started     
+# 0  | UBOOT        | build      | build      | started     
+# 0  | LFS          | smoketest  | test       | started     
+# 0  | LFS          | smoketest  | subtest    | started     
+# 0  | LFS          | smoketest  | subtest    | finished    
+# 0  | LFS          | smoketest  | subtest    | started     
+# 0  | LFS          | smoketest  | subtest    | failed      
+# 0  | LFS          | smoketest  | subtest    | unstable      
+# 0  | LFS          | smoketest  | test       | failed      
+# 0  | LFS          | smoketest  | package    | failed      
+# 
+# 0  | LFS          | targettest | test       | started     
+# 0  | LFS          | targettest | subtest    | started     
+# 0  | LFS          | targettest | subtest    | failed      
+# 0  | LFS          | targettest | test       | failed      
+# ----------------------------------------------------------
 
 LFS_CI_SOURCE_database='$Id$'
 
