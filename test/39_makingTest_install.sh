@@ -42,6 +42,9 @@ oneTimeSetUp() {
             LFS_CI_uc_test_making_test_do_firmwareupgrade)
                 echo ${UT_CONFIG_FIRMWARE}
             ;;
+            LFS_CI_uc_test_making_test_force_reinstall_same_version)
+                echo ${UT_CONFIG_FORCE_REINSTALL}
+            ;;
         esac
     }
     sleep() {
@@ -59,6 +62,8 @@ setUp() {
     export WORKSPACE=$(createTempDirectory)
     mkdir -p ${WORKSPACE}/workspace/path/to/test/suite/
     touch ${WORKSPACE}/workspace/path/to/test/suite/testsuite.mk
+    export UT_CONFIG_FORCE_REINSTALL=1
+    export UT_CONFIG_FIRMWARE=
     return
 }
 
@@ -276,6 +281,49 @@ execute make -C ${WORKSPACE}/workspace/path/to/test/suite setup
 _reserveTarget 
 execute -i make -C ${WORKSPACE}/workspace/path/to/test/suite install FORCE=yes
 execute -i make -C ${WORKSPACE}/workspace/path/to/test/suite firmwareupgrade FORCED_UPGRADE=true
+makingTest_powercycle 
+mustHaveMakingTestRunningTarget 
+execute -i make -C ${WORKSPACE}/workspace/path/to/test/suite setup
+execute -i make -C ${WORKSPACE}/workspace/path/to/test/suite check
+EOF
+    assertExecutedCommands ${expect}
+
+    return
+}
+
+test9() {
+    # version is already installed and we are allowed to use it
+    export UT_CONFIG_FORCE_REINSTALL=
+    assertTrue "makingTest_install"
+
+    local expect=$(createTempFile)
+    cat <<EOF > ${expect}
+makingTest_testSuiteDirectory 
+mustHaveMakingTestRunningTarget 
+execute make -C ${WORKSPACE}/workspace/path/to/test/suite setup
+_reserveTarget 
+execute -i make -C ${WORKSPACE}/workspace/path/to/test/suite check
+EOF
+    assertExecutedCommands ${expect}
+
+    return
+}
+
+test10() {
+    # version is already installed and we are allowed to use it
+    export UT_EXECUTE_INSTALL=2
+    export UT_FAIL_CAUSE=check
+    export UT_CONFIG_FORCE_REINSTALL=
+    assertTrue "makingTest_install"
+
+    local expect=$(createTempFile)
+    cat <<EOF > ${expect}
+makingTest_testSuiteDirectory 
+mustHaveMakingTestRunningTarget 
+execute make -C ${WORKSPACE}/workspace/path/to/test/suite setup
+_reserveTarget 
+execute -i make -C ${WORKSPACE}/workspace/path/to/test/suite check
+execute -i make -C ${WORKSPACE}/workspace/path/to/test/suite install FORCE=yes
 makingTest_powercycle 
 mustHaveMakingTestRunningTarget 
 execute -i make -C ${WORKSPACE}/workspace/path/to/test/suite setup
