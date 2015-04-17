@@ -39,7 +39,6 @@ usecase_LFS_UPDATE_ECL() {
     mustHaveNextLabelName
     local labelName=$(getNextReleaseLabel)
     setBuildDescription ${JOB_NAME} ${BUILD_NUMBER} ${labelName}
-    # mustHavePermissionToRelease
     createReleaseLinkOnCiLfsShare ${labelName}
 
     local eclUrls=$(getConfig LFS_CI_uc_update_ecl_url)
@@ -97,56 +96,6 @@ getEclValue() {
 
     debug "new value is ${newValue}"
     echo ${newValue}
-    return
-}
-
-## @fn      mustHavePermissionToRelease()
-#  @brief   checks, if the release can be released 
-#  @details it was agreed with PS SCM, that LFS will not promote every release
-#           to the ECL stack to not spam CCS and PS with new LFS releases
-#           every 20-30 minutes.
-#           So we can configure, if a release candidate gets the permission to release.
-#           This can be configured in LFS_CI_uc_update_ecl_update_promote_every_xth_release
-#           In addition, a RC will be released if the last release was long time ago 
-#           (see config LFS_CI_uc_ecl_maximum_time_between_two_releases)
-#           If a RC will be not released, this ECL update job will be set to unstable
-#  @todo    This method can be removed, if PS SCM can handle the amount of LFS releases.
-#  @param   <none>
-#  @return  <none>
-mustHavePermissionToRelease() {
-
-    # TODO: demx2fk3 2014-07-22 remove this, if PS SCM can handle the load of LFSes...
-    local number=$(getConfig LFS_CI_uc_update_ecl_update_promote_every_xth_release)
-    if [[ $(( BUILD_NUMBER % ${number} )) != 0 ]] ; then
-        # as agreement with PS SCM, we are just promoting every 4th build.
-        # otherwise, we will spam ECL
-        # btw: 0 % 4 == 0 
-
-        requiredParameters WORKSPACE JOB_NAME BUILD_NUMBER LFS_CI_ROOT
-
-        # unix time stamp in milliseconds: 1422347953131
-        copyFileFromBuildDirectoryToWorkspace ${JOB_NAME} lastSuccessfulBuild build.xml
-        local lastBuildDate=$(execute -n ${LFS_CI_ROOT}/bin/xpath -q -e "/build/startTime/node()" ${WORKSPACE}/build.xml)
-        mustHaveValue "${lastBuildDate}" "last build date in ms"
-        rm -rf ${WORKSPACE}/build.xml
-
-        local currentDate=$(( $(date +%s) * 1000 ))
-        mustHaveValue "${currentDate}" "current build date in ms"
-
-        local maxDiff=$(getConfig LFS_CI_uc_ecl_maximum_time_between_two_releases)
-        local diff=$(( ${currentDate} - ${lastBuildDate} ))
-
-        if [[ ${diff} -lt ${maxDiff} ]] ; then
-            warning "not promoting this build. ONLY EVERY ${number} build will be promoted"
-            warning "timediff is too low: is ${diff}s must be ${maxDiff}s"
-            setBuildDescription ${JOB_NAME} ${BUILD_NUMBER} "${labelName}<br>not promoted"
-            setBuildResultUnstable
-            exit 0
-        fi
-
-        info "enforcing promotion of release. Last release is ${diff}s ago."
-    fi
-
     return
 }
 
