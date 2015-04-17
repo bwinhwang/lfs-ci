@@ -633,12 +633,11 @@ DELIMITER //
 CREATE PROCEDURE build_results()
 BEGIN
 
-    -- TODO: demx2fk3 2015-04-15 FIXME
     DROP TABLE IF EXISTS tmp_build_results;
     CREATE TEMPORARY TABLE tmp_build_results
     SELECT b.id, 
            b.build_name, 
-          b.branch_name, 
+           b.branch_name, 
            b.revision, 
            b.comment, 
            be1.timestamp AS build_started, 
