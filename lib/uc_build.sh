@@ -205,7 +205,7 @@ _build_fsmddal_pdf() {
     local label=$(getNextCiLabelName)
     mustHaveValue ${label} "label name"
 
-    setBuildDescription "${JOB_NAME}" "${BUILD_NUMBER}" "${newCiLabel}"
+    setBuildDescription "${JOB_NAME}" "${BUILD_NUMBER}" "${label}"
 
     # lrc | fsm
     local component=$(getConfig LFS_CI_uc_build_create_ddal_pdf_component)

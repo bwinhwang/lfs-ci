@@ -907,8 +907,9 @@ sanityCheck() {
         debug "admin job, naming is ok"
     elif [[ ${JOB_NAME} =~ Test-.* ]] ; then
         debug "test job, naming is ok"
-    elif [[ ${JOB_NAME} =~ LFS_.*     || \
-            ${JOB_NAME} =~ UBOOT_.*   || \
+    elif [[ ${JOB_NAME} =~ LFS_.*   || \
+            ${JOB_NAME} =~ UBOOT_.* || \
+            ${JOB_NAME} =~ LTK_.*   || \
             ${JOB_NAME} =~ PKGPOOL_.* ]] ; then
         debug "normal build / test / release job, naming is ok"
 
