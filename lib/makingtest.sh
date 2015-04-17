@@ -388,6 +388,8 @@ makingTest_install() {
         if execute -i ${make} check ; then
             info "the version, we would install is already on the target, skipping install"
             return
+        else
+            info "ignore the warning above. It just saying, that the software version, we want to install is not yet on the target."                
         fi
     fi
 
