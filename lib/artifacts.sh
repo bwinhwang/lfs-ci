@@ -191,7 +191,7 @@ copyArtifactsToWorkspace() {
 
         trace "jobName ${name} buildNumber ${nuber} jobResult ${result}"
 
-        if [[ ${result} != "SUCCESS" ]] ; then
+        if [[ ${result} != "SUCCESS" && ${result} != "NOT_BUILT" ]] ; then
             error "downstream job ${name} has ${result}. Was not successfull"
             exit 1
         fi
