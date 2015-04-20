@@ -635,10 +635,18 @@ while (defined (my $load_dir = &get_next_load_dir))
 
                 # Fail if the destination type exists but is of a
                 # different type of file than the source type.
+                # Exception for symb link: will be treated as delete/add operations
                 if ($dest_type ne '0' and $source_type ne $dest_type)
                   {
-                    die "$0: does not handle changing source and destination ",
-                        "type for '$source_path'.\n";
+                     if ($source_type eq 'l' or $dest_type eq 'l')
+                       {
+                         return;
+                       }
+                     else
+                       {
+                         die "$0: does not handle changing source and destination ",
+                             "type for '$source_path'.\n";
+                       }
                   }
 
                 if ($source_type ne 'd' and
@@ -974,7 +982,8 @@ while (defined (my $load_dir = &get_next_load_dir))
 
         # Fail if the destination type exists but is of a different
         # type of file than the source type.
-        if ($dest_type ne '0' and $source_type ne $dest_type)
+        # Exception for symb link: treat this case instead of dying.
+        if ($dest_type ne '0' and $source_type ne $dest_type and $source_type ne 'l' and $dest_type ne 'l' )
           {
             die "$0: does not handle changing source and destination type ",
                 "for '$source_path'.\n";
@@ -1079,6 +1088,11 @@ while (defined (my $load_dir = &get_next_load_dir))
                 mkdir($dest_path)
                   or die "$0: cannot mkdir '$dest_path': $!\n";
               }
+            elsif ($dest_type eq 'l')
+              {
+               # Specific treatment: the source is a folder but dest is a symb link
+               &link_manager($load_dir, $source_path, $dest_path, $dest_type);
+              }
           }
         elsif
           ($source_type eq 'l') {
@@ -1092,13 +1106,18 @@ while (defined (my $load_dir = &get_next_load_dir))
                 unlink($dest_path)
                   or die "$0: unlink '$dest_path' failed: $!\n";
               }
-            symlink($link_target, $dest_path)
-              or die "$0: cannot symlink '$dest_path' to '$link_target': $!\n";
+            # Specific treatment: the source is a symb link but dest is not
+            &link_manager($load_dir, $source_path, $dest_path, $dest_type);
           }
         elsif
           ($source_type eq 'f') {
+            if ($dest_type eq 'l')
+              {
+                # Specific treatment: the source is a file but dest is a symb link
+                &link_manager($load_dir, $source_path, $dest_path, $dest_type);
+              }
             # Only copy the file if the digests do not match.
-            if ($add_files{$source_path} or $upd_files{$source_path})
+            elsif ($add_files{$source_path} or $upd_files{$source_path})
               {
                 copy($source_path, $dest_path)
                   or die "$0: copy '$source_path' to '$dest_path': $!\n";
@@ -2069,6 +2088,56 @@ sub split_line
   push(@words, $current_word) if length $current_word;
 
   @words;
+}
+
+sub link_manager
+{
+  unless (@_ == 4)
+    {
+      croak "$0: link_manager $INCORRECT_NUMBER_OF_ARGS";
+    }
+
+  my $load_dir    = shift;
+  my $source_path = shift;
+  my $dest_path   = shift;
+  my $dest_type   = shift;
+
+  # for symbolic link the job is a little bit more complicated:
+  # First, the previous file or folder must be removed, and this modification must be committed
+  # Consequently, the wc must be up to date, and then we can add the symb link in the wc
+
+  my $message = wrap('', '', "Load $load_dir into $repos_load_abs_path.\n");
+
+  my $cwd = cwd;
+
+  if ($dest_type ne '0')
+    {
+      read_from_process($svn, 'rm', $dest_path);
+      chdir($wc_import_dir_cwd)
+        or die "$0: cannot chdir '$wc_import_dir_cwd': $!\n";
+
+      read_from_process($svn, 'commit', @svn_use_repos_cmd_opts, $dest_path, '-m', $message);
+      if ($opt_sleep) 
+        {
+            # add a sleep timer due to our f*cking infrastructure.
+            print "sleep for $opt_sleep s....";
+            sleep $opt_sleep;
+        }
+      read_from_process($svn, 'update', @svn_use_repos_cmd_opts, '.');
+      chdir($cwd)
+        or die "$0: cannot chdir '$cwd': $!\n";
+    }
+
+  read_from_process('cp', '-d', $source_path, $dest_path);
+
+  if ($dest_type ne '0')
+    {
+      chdir($wc_import_dir_cwd)
+        or die "$0: cannot chdir '$wc_import_dir_cwd': $!\n";
+      read_from_process($svn, 'add', $dest_path);
+      chdir($cwd)
+        or die "$0: cannot chdir '$cwd': $!\n";
+    }
 }
 
 # This package exists just to delete the temporary directory.
