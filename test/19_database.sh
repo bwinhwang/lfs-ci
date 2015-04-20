@@ -19,11 +19,9 @@ oneTimeSetUp() {
         return
     }
     mustHaveNextCiLabelName() {
-        mockCommand "mustHaveNextCiLabelName $@"
         return
     }
     getNextCiLabelName() {
-        mockCommand "getNextCiLabelName $@"
         echo PS_LFS_OS_9999_88_7777
     }
     runOnMaster() {
@@ -63,35 +61,31 @@ getLocationName
 mustHaveLocationName
 getLocationName
 runOnMaster cat /var/fpwork/psulm/lfs-jenkins/home/jobs/LFS_CI_-_trunk_-_Build_-_FSM-r2_-_fcmd/builds/123/revisionstate.xml
-mustHaveNextCiLabelName
-getNextCiLabelName
-execute -i ${LFS_CI_ROOT}/bin/newEvent --buildName=PS_LFS_OS_9999_88_7777 --action=build_started --jobName=LFS_CI_-_trunk_-_Build_-_FSM-r2_-_fcmd --buildNumber=123 --targetName=FSM-r2 --targetType=fcmd --revision=123456 --branchName=trunk
+execute -i ${LFS_CI_ROOT}/bin/newEvent --buildName=PS_LFS_OS_9999_88_7777 --action=build_started --jobName=${JOB_NAME} --buildNumber=123 --productName=LFS --taskName=build --revision=123456 --branchName=trunk
 EOF
     assertExecutedCommands ${expect}
 }
 
 
 testDatabaseEventSubBuildFinished_ok() {
+    export JOB_NAME=LFS_CI_-_trunk_-_Test_-_FSM-r3_-_FSMF
     assertTrue "databaseEventSubBuildFinished"
 
     local expect=$(createTempFile)
     cat <<EOF > ${expect}
-mustHaveNextCiLabelName
-getNextCiLabelName
-execute -i ${LFS_CI_ROOT}/bin/newEvent --buildName=PS_LFS_OS_9999_88_7777 --action=subbuild_finished --jobName=LFS_CI_-_trunk_-_Build_-_FSM-r2_-_fcmd --buildNumber=123 --targetName=FSM-r2 --targetType=fcmd
+execute -i ${LFS_CI_ROOT}/bin/newEvent --buildName=PS_LFS_OS_9999_88_7777 --action=subbuild_finished --jobName=${JOB_NAME} --buildNumber=123 --productName=LFS --taskName=test
 EOF
 
     assertExecutedCommands ${expect}
 }
 
 testDatabaseEventSubBuildFailed_ok() {
-    assertTrue "databaseEventSubBuildFinished 0"
+    export JOB_NAME=LFS_CI_-_trunk_-_Test_-_FSM-r3_-_FSMF
+    assertTrue "databaseEventSubBuildFinished"
 
     local expect=$(createTempFile)
     cat <<EOF > ${expect}
-mustHaveNextCiLabelName
-getNextCiLabelName
-execute -i ${LFS_CI_ROOT}/bin/newEvent --buildName=PS_LFS_OS_9999_88_7777 --action=subbuild_finished --jobName=LFS_CI_-_trunk_-_Build_-_FSM-r2_-_fcmd --buildNumber=123 --targetName=FSM-r2 --targetType=fcmd
+execute -i ${LFS_CI_ROOT}/bin/newEvent --buildName=PS_LFS_OS_9999_88_7777 --action=subbuild_finished --jobName=${JOB_NAME} --buildNumber=123 --productName=LFS --taskName=test
 EOF
 
     assertExecutedCommands ${expect}
@@ -99,13 +93,12 @@ EOF
 
 testdatabaseEventReleaseStarted() {
     export LFS_PROD_RELEASE_CURRENT_TAG_NAME=PS_LFS_OS_9999_88_7777
+    export JOB_NAME=LFS_CI_-_trunk_-_Test_-_FSM-r3_-_FSMF
     assertTrue "databaseEventReleaseStarted"
 
     local expect=$(createTempFile)
     cat <<EOF > ${expect}
-mustHaveNextCiLabelName
-getNextCiLabelName
-execute -i ${LFS_CI_ROOT}/bin/newEvent --buildName=PS_LFS_OS_9999_88_7777 --action=release_started --jobName=LFS_CI_-_trunk_-_Build_-_FSM-r2_-_fcmd --buildNumber=123 --targetName=FSM-r2 --targetType=fcmd
+execute -i ${LFS_CI_ROOT}/bin/newEvent --buildName=PS_LFS_OS_9999_88_7777 --action=release_started --jobName=${JOB_NAME} --buildNumber=123 --productName=LFS --taskName=test
 EOF
 
     assertExecutedCommands ${expect}
@@ -113,13 +106,12 @@ EOF
 
 testdatabaseEventReleaseFinished() {
     export LFS_PROD_RELEASE_CURRENT_TAG_NAME=PS_LFS_OS_9999_88_7777
+    export JOB_NAME=LFS_CI_-_trunk_-_Test_-_FSM-r3_-_FSMF
     assertTrue "databaseEventReleaseFinished"
 
     local expect=$(createTempFile)
     cat <<EOF > ${expect}
-mustHaveNextCiLabelName
-getNextCiLabelName
-execute -i ${LFS_CI_ROOT}/bin/newEvent --buildName=PS_LFS_OS_9999_88_7777 --action=release_finished --jobName=LFS_CI_-_trunk_-_Build_-_FSM-r2_-_fcmd --buildNumber=123 --targetName=FSM-r2 --targetType=fcmd
+execute -i ${LFS_CI_ROOT}/bin/newEvent --buildName=PS_LFS_OS_9999_88_7777 --action=release_finished --jobName=${JOB_NAME} --buildNumber=123 --productName=LFS --taskName=test
 EOF
 
     assertExecutedCommands ${expect}

@@ -46,8 +46,8 @@ sub newTestExecution {
 }
 
 sub newBuildEvent {
-    my $self = shift;
-    my $param = { @_ };
+    my $self    = shift;
+    my $param   = { @_ };
     my $release = $param->{release};
 
     if( not $self->{store} ) {
@@ -60,10 +60,10 @@ sub newBuildEvent {
                                    branchName   => $release->branchName(),
                                    comment      => $release->comment(),
                                    revision     => $release->revision(),
-                                   target       => $release->target(),
-                                   subTarget    => $release->subTarget(),
                                    jobName      => $release->jobName(),
                                    buildNumber  => $release->buildNumber(),
+                                   productName  => $release->productName(),
+                                   taskName     => $release->taskName(),
                                  );
     return;
 }

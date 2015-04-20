@@ -1,6 +1,34 @@
 #!/bin/bash
 ## @file  database.sh
 #  @brief handling of metrics to the database 
+#
+# conzept for events;
+# all jobs are creating events for a build into the build_events table
+# id | build_id | event_id | timestamp | job_name | build_number 
+# --------------------------------------------------------------
+# 0  |   1      |     1    |  now      | ABC      | 1
+# ....
+# --------------------------------------------------------------
+# 
+# the event_id is a reference to the event table
+# id | product_name | task_name  | event_type | event_state 
+# ---------------------------------------------------------- 
+# 0  | LFS          | build      | build      | started     
+# 0  | UBOOT        | build      | build      | started     
+# 0  | LFS          | smoketest  | test       | started     
+# 0  | LFS          | smoketest  | subtest    | started     
+# 0  | LFS          | smoketest  | subtest    | finished    
+# 0  | LFS          | smoketest  | subtest    | started     
+# 0  | LFS          | smoketest  | subtest    | failed      
+# 0  | LFS          | smoketest  | subtest    | unstable      
+# 0  | LFS          | smoketest  | test       | failed      
+# 0  | LFS          | smoketest  | package    | failed      
+# 
+# 0  | LFS          | targettest | test       | started     
+# 0  | LFS          | targettest | subtest    | started     
+# 0  | LFS          | targettest | subtest    | failed      
+# 0  | LFS          | targettest | test       | failed      
+# ----------------------------------------------------------
 
 LFS_CI_SOURCE_database='$Id$'
 
@@ -35,6 +63,28 @@ databaseEventBuildFinished() {
     _storeEvent build_finished
     return
 }
+
+databaseEventOtherStarted() {
+    _storeEvent other_started $1
+    return
+}
+databaseEventOtherFinished() {
+    _storeEvent other_finished $1
+    return
+}
+databaseEventOtherFailed() {
+    _storeEvent other_failed $1
+    return
+}
+databaseEventOtherUnstable() {
+    _storeEvent other_unstable $1
+    return
+}
+
+# databaseEventChangeEventTypeToUnstable() {
+#     _storeEvent changeEventTypeToUnstable ...
+#     return
+# }
 
 ## @fn      databaseEventSubBuildFinished()
 #  @brief   create an entry in the database table build_events for a started build
@@ -87,6 +137,7 @@ databaseEventReleaseFinished() {
 #  @return  <none>
 databaseEventTestStarted() {
     _storeEvent test_started
+    return
 }
 ## @fn      databaseEventTestFailed()
 #  @brief   create an entry in the database table build_events for a failed test 
@@ -94,6 +145,7 @@ databaseEventTestStarted() {
 #  @return  <none>
 databaseEventTestFailed() {
     _storeEvent test_failed
+    return
 }
 ## @fn      databaseEventPackageStarted()
 #  @brief   create an entry in the database table build_events for a started package process
@@ -101,6 +153,7 @@ databaseEventTestFailed() {
 #  @return  <none>
 databaseEventPackageStarted() {
     _storeEvent package_started
+    return
 }
 
 ## @fn      databaseEventPackageFinished()
@@ -109,6 +162,7 @@ databaseEventPackageStarted() {
 #  @return  <none>
 databaseEventPackageFinished() {
     _storeEvent package_finished
+    return
 }
 
 ## @fn      databaseEventPackageFailed()
@@ -117,6 +171,7 @@ databaseEventPackageFinished() {
 #  @return  <none>
 databaseEventPackageFailed() {
     _storeEvent package_failed
+    return
 }
 
 ## @fn      databaseEventSubBuildStarted()
@@ -159,21 +214,16 @@ _storeEvent() {
     mustHaveValue "${eventName}" "event name"
     shift
 
-    # fixme
-    local targetName=""
-    local targetType=""
-    if [[ ${JOB_NAME} =~ Test- ]] ; then
-        targetName=$(_reserveTarget)
-        targetType=$(getConfig LFS_CI_uc_test_target_type_mapping -t jobName:${targetType})
-    else
-        # target type: FSM-r2, FSM-r3, FSM-r4, LRC, host
-        targetName=$(getSubTaskNameFromJobName)
-        targetType=$(getTargetBoardName)
-    fi
-    targetType=${targetType:-other}
-    targetName=${targetName:-host}
-    mustHaveValue "${targetName}" "target name"
-    mustHaveValue "${targetType}" "target type"
+    local productName=$(getProductNameFromJobName)
+    mustHaveValue "${productName}" "product name"
+
+    local taskName=$(getTaskNameFromJobName)
+    case $1 in
+        --*) true ;; 
+        # strange behavour.....
+        *)   [[ $1 ]] && taskName=$1 ; shift ;;
+    esac
+    mustHaveValue "${taskName}" "task name"
 
     mustHaveNextCiLabelName
     local label=$(getNextCiLabelName)
@@ -184,8 +234,8 @@ _storeEvent() {
                 --action=${eventName}         \
                 --jobName=${JOB_NAME}         \
                 --buildNumber=${BUILD_NUMBER} \
-                --targetName=${targetName}    \
-                --targetType=${targetType}    \
+                --productName=${productName}  \
+                --taskName=${taskName,,}      \
                 $@
 
     return
