@@ -12,3 +12,7 @@ Last Changed Date: 2011-05-26 14:20:58 +0200 (Thu, 26 May 2011)
 
 moved svn_load_dirs.pl.in to svn_load_dirs.pl and
 modified the @SVN_BIN@ to just svn
+
+
+applied patch (by hand):
+    http://svn.haxx.se/dev/archive-2008-01/att-0002/svn_load_dirs.pl.in-PatchSymlinksReplacement
