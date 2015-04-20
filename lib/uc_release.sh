@@ -274,6 +274,7 @@ extractArtifactsOnReleaseShareKernelSources() {
             FSM-r4) location=FSM_R4_DEV ;;
             LRC)    location=LRC        ;;
             FSM-r3-FSMDDALpdf) continue ;;
+            *UT)               continue ;;
             *) fatal "subTaskName ${subTaskName} is not supported" ;;
         esac
 

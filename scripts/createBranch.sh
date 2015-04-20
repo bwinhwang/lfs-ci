@@ -362,7 +362,7 @@ dbInsert() {
 
     local sqlString="insert into branches \
     (branch_name, location_name, ps_branch_name, based_on_revision, based_on_release, release_name_regex, date_created, comment) \
-    VALUES ('$branch', '$branch', '${branch}', ${REVISION}, '${RELEASE}', '${regex}', now(), '$COMMENT')"
+    VALUES ('$branch', '$branch', '${branch}', ${REVISION}, '${SOURCE_RELEASE}', '${regex}', now(), '$COMMENT')"
 
     local dbName=$(getConfig MYSQL_db_name)
     local dbUser=$(getConfig MYSQL_db_username)
