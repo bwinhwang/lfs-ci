@@ -29,11 +29,11 @@ sub prepare {
         LOGDIE sprintf( "config file %s does not exist.", $self->{configFileName} || "<undef>" );
     }
 
-    DEBUG sprintf( "using config file %s", $self->{configFileName} );
+    # DEBUG sprintf( "using config file %s", $self->{configFileName} );
 
     foreach my $value ( @{ $opt_t } ) {
         if( $value =~ m/([\w_]+):(.*)/ ) {
-            DEBUG "adding setting $1 (value: $2)";
+            # DEBUG "adding setting $1 (value: $2)";
             Nokia::Singleton::configStore( "cache", storeClass => "cache" )->{data}->{ $1 } = $2;
         }
     }

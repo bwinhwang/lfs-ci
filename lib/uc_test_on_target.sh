@@ -25,19 +25,26 @@ ci_job_test_on_target() {
 
     local workspace=$(getWorkspaceName)
     mustHaveWorkspaceName
+    mustHaveCleanWorkspace
+
+    local branchName=$(getBranchName ${UPSTREAM_PROJECT})
 
     if [[ ${JOB_NAME} =~ ^Test- ]] ; then
         # legacy: using the Test-<targetName> job. No detailed information about
         # the workspace is available at the moment.
         # TODO: demx2fk3 2015-02-13 we are using the wrong revision to checkout src-test
-        local branchName=$(getBranchName ${UPSTREAM_PROJECT})
         info "create workspace for testing on ${branchName}"
-        mustHaveCleanWorkspace
         createBasicWorkspace -l ${branchName} src-test
     else
-        copyFileFromBuildDirectoryToWorkspace ${UPSTREAM_PROJECT} ${UPSTREAM_BUILD} fingerprint.txt
-        mv ${WORKSPACE}/fingerprint.txt ${WORKSPACE}/revisions.txt
-        createWorkspace
+        local requireCompleteWorkspace=$(getConfig LFS_CI_uc_test_require_complete_workspace)
+        if [[ ${requireCompleteWorkspace} ]] ; then
+            copyFileFromBuildDirectoryToWorkspace ${UPSTREAM_PROJECT} ${UPSTREAM_BUILD} fingerprint.txt
+            mv ${WORKSPACE}/fingerprint.txt ${WORKSPACE}/revisions.txt
+            createWorkspace
+        else
+        # TODO: demx2fk3 2015-02-13 we are using the wrong revision to checkout src-test
+            createBasicWorkspace -l ${branchName} src-test
+        fi
     fi
 
     copyAndExtractBuildArtifactsFromProject ${UPSTREAM_PROJECT} ${UPSTREAM_BUILD} "fsmci"
@@ -64,7 +71,7 @@ ci_job_test_on_target() {
         esac
     done
 
-    # TODO missing subtest finished
+    databaseEventSubTestFinished
     info "testing done."
     return
 }

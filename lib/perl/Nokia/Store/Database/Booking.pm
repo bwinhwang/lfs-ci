@@ -36,7 +36,7 @@ sub reserveTarget {
 
     my $targetName = $param->{targetName} || "not_a_valid_target_name";
     my $userName   = $param->{userName};
-    my $comment    = $param->{comment};
+    my $comment    = $param->{comment}   || "no comment";
 
     my $sth = $self->prepare( 
         'CALL reserveTarget( ?, ?, ? )'

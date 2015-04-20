@@ -16,7 +16,7 @@ oneTimeSetUp() {
     }
     getConfig(){
         mockedCommand "getConfig $@"
-        echo path/to/test/suite
+        echo ${UT_FAKE_TEST_SUITE}
     }
     return
 }
@@ -27,6 +27,8 @@ setUp() {
     export WORKSPACE=$(createTempDirectory)
     mkdir -p ${WORKSPACE}/workspace/path/to/test/suite
     touch ${WORKSPACE}/workspace/path/to/test/suite/testsuite.mk
+    mkdir -p ${WORKSPACE}/workspace/my/branched/test_suite
+    touch ${WORKSPACE}/workspace/my/branched/test_suite/testsuite.mk
     return
 }
 
@@ -36,6 +38,7 @@ tearDown() {
 }
 
 test1() {
+    export UT_FAKE_TEST_SUITE=path/to/test/suite
     assertTrue "makingTest_testSuiteDirectory"
 
     local expect=$(createTempFile)
@@ -44,12 +47,28 @@ _reserveTarget
 getConfig LFS_CI_uc_test_making_test_suite_dir -t targetName:TargetName -t branchName:pronb-developer
 EOF
     assertExecutedCommands ${expect}
-
     assertEquals "${WORKSPACE}/workspace/path/to/test/suite" "$(makingTest_testSuiteDirectory)"
 
     return
 }
 
+test2() {
+    mkdir -p ${WORKSPACE}/workspace/src-project/src/TMF
+    touch ${WORKSPACE}/workspace/src-project/src/TMF/testsuites.cfg
+    export UT_FAKE_TEST_SUITE=my/branched/test_suite
+
+    assertTrue "makingTest_testSuiteDirectory"
+
+    local expect=$(createTempFile)
+    cat <<EOF > ${expect}
+_reserveTarget 
+getConfig test_suite -t targetName:TargetName -t branchName:pronb-developer -f ${WORKSPACE}/workspace/src-project/src/TMF/testsuites.cfg
+EOF
+    assertExecutedCommands ${expect}
+    assertEquals "${WORKSPACE}/workspace/my/branched/test_suite" "$(makingTest_testSuiteDirectory)"
+
+    return
+}
 source lib/shunit2
 
 exit 0

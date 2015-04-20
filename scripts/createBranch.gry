@@ -53,6 +53,8 @@ fsmr4_jobs = false
 
 fsmr4_only = false
 
+doJenkins = false
+
 activateRootJobs = false
 
 // Environment vars
@@ -90,10 +92,14 @@ parameters.each {
         comment = it.value
     else if(it.name == "ACTIVE_ROOT_JOBS")
         activateRootJobs = it.value
-    else if(it.name == "DO_JENKINS" && it.value == false) {
-        println("DO_JENKINS: false - nothing to do.")
-        return 0
+    else if(it.name == "DO_JENKINS") {
+        doJenkins = it.value
     }
+}
+
+if(doJenkins == false) {
+    println("[INFO] DO_JENKINS: false - nothing to do.")
+    return 0
 }
 
 if(!new_branch || !src_branch || !comment) {
@@ -220,9 +226,15 @@ def updateJobConfig(job, new_job) {
         }
     }
 
-    if (new_job.getName() == "PKGPOOL_-_"+new_branch+"_-_Build") {
-        processFileInplace(config_file) { text ->
-            text.replace("*/master", "*/"+new_branch)
+    if(new_job.getName() == "PKGPOOL_-_"+new_branch+"_-_Build") {
+        if (src_branch == "trunk") {
+            processFileInplace(config_file) { text ->
+                text.replace("*/master", "*/"+new_branch)
+            }
+        } else {
+            processFileInplace(config_file) { text ->
+                text.replace("*/${src_branch}", "*/"+new_branch)
+            }
         }
     }
 
@@ -436,11 +448,17 @@ class MySectionedView {
               <columns>
                 <hudson.views.StatusColumn/>
                 <hudson.views.WeatherColumn/>
-                <hudson.views.JobColumn/>
-                <hudson.views.LastSuccessColumn/>
-                <hudson.views.LastFailureColumn/>
-                <hudson.views.LastDurationColumn/>
                 <hudson.views.BuildButtonColumn/>
+                <org.jenkins.ci.plugins.column.console.LastBuildColumn plugin="console-column-plugin@1.5"/>
+                <com.robestone.hudson.compactcolumns.JobNameColorColumn plugin="compact-columns@1.10">
+                  <colorblindHint>nohint</colorblindHint>
+                  <showColor>false</showColor>
+                  <showDescription>true</showDescription>
+                  <showLastBuild>true</showLastBuild>
+                </com.robestone.hudson.compactcolumns.JobNameColorColumn>
+                <com.robestone.hudson.compactcolumns.LastStableAndUnstableColumn plugin="compact-columns@1.10">
+                  <timeAgoTypeString>DIFF</timeAgoTypeString>
+                </com.robestone.hudson.compactcolumns.LastStableAndUnstableColumn>
               </columns>
             </hudson.plugins.sectioned__view.ListViewSection>"""
 
@@ -457,11 +475,17 @@ class MySectionedView {
               <columns>
                 <hudson.views.StatusColumn/>
                 <hudson.views.WeatherColumn/>
-                <hudson.views.JobColumn/>
-                <hudson.views.LastSuccessColumn/>
-                <hudson.views.LastFailureColumn/>
-                <hudson.views.LastDurationColumn/>
                 <hudson.views.BuildButtonColumn/>
+                <org.jenkins.ci.plugins.column.console.LastBuildColumn plugin="console-column-plugin@1.5"/>
+                <com.robestone.hudson.compactcolumns.JobNameColorColumn plugin="compact-columns@1.10">
+                  <colorblindHint>nohint</colorblindHint>
+                  <showColor>false</showColor>
+                  <showDescription>true</showDescription>
+                  <showLastBuild>true</showLastBuild>
+                </com.robestone.hudson.compactcolumns.JobNameColorColumn>
+                <com.robestone.hudson.compactcolumns.LastStableAndUnstableColumn plugin="compact-columns@1.10">
+                  <timeAgoTypeString>DIFF</timeAgoTypeString>
+                </com.robestone.hudson.compactcolumns.LastStableAndUnstableColumn>
               </columns>
             </hudson.plugins.sectioned__view.ListViewSection>"""
         }
@@ -477,7 +501,7 @@ class MySectionedView {
               <columns>
                 <hudson.views.StatusColumn/>
                 <hudson.views.WeatherColumn/>
-                <hudson.views.JobColumn/>
+                <hudson.views.BuildButtonColumn/>
                 <hudson.views.LastSuccessColumn/><hudson.views.LastFailureColumn/><hudson.views.LastDurationColumn/><hudson.views.BuildButtonColumn/></columns>
             </hudson.plugins.sectioned__view.ListViewSection>"""
 

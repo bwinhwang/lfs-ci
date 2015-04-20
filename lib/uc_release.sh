@@ -274,6 +274,7 @@ extractArtifactsOnReleaseShareKernelSources() {
             FSM-r4) location=FSM_R4_DEV ;;
             LRC)    location=LRC        ;;
             FSM-r3-FSMDDALpdf) continue ;;
+            *UT)               continue ;;
             *) fatal "subTaskName ${subTaskName} is not supported" ;;
         esac
 
@@ -702,20 +703,12 @@ createReleaseTag() {
     fi
 
     # update svn:externals
-    # TODO: demx2fk3 2014-07-09 fixme do this in a different way - more configurable
     local svnExternalsFile=$(createTempFile)
     echo "/isource/svnroot/${svnRepoName}/os/tags/${osLabelName} os " >> ${svnExternalsFile}
 
-    if [[ ${sdk3} ]] ; then 
-        echo "/isource/svnroot/BTS_D_SC_LFS_SDK_1/sdk/tags/${sdk3} sdk3" >> ${svnExternalsFile}
-    elif [[ ${sdk} ]] ; then
-        echo "/isource/svnroot/BTS_D_SC_LFS_SDK_1/sdk/tags/${sdk} sdk3" >> ${svnExternalsFile}
-    fi
-
-    # TODO: demx2fk3 2014-09-04 only required for very old stuff...
-    # if [[ ${sdk2} ]] ; then 
-    #     echo "/isource/svnroot/BTS_D_SC_LFS/sdk/tags/${sdk2} sdk2" >> ${svnExternalsFile}
-    # fi
+    local sdkExternalLine=$(getConfig LFS_uc_release_create_release_tag_sdk_external_line -t sdk2:${sdk2} -t sdk3:${sdk3})
+    mustHaveValue "${sdkExternalLine}" "sdk external line"
+    echo "${sdkExternalLine}" >> ${svnExternalsFile}
 
     # commit
     info "updating svn:externals"

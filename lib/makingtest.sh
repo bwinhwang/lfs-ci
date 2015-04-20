@@ -30,7 +30,6 @@ makingTest_testFSM() {
 #  @param   <none>
 #  @return  <none>
 makingTest_testsWithoutTarget() {
-
     makingTest_testconfig
     makingTest_testXmloutput
     makingTest_copyResults
@@ -38,14 +37,12 @@ makingTest_testsWithoutTarget() {
     return
 }
 
-
 ## @fn      makingTest_testXmloutput()
 #  @brief   running TMF tests on the target and create XML output
 #  @details this is just a make test-xmloutput with some options
 #  @param   <none>
 #  @return  <none>
 makingTest_testXmloutput() {
-
     local workspace=$(getWorkspaceName)
     mustHaveWorkspaceName
 
@@ -113,9 +110,23 @@ makingTest_testSuiteDirectory() {
     local  branchName=$(getLocationName ${UPSTREAM_PROJECT})
     mustHaveValue "${branchName}" "branch name"
 
-	local testSuiteDirectory=${workspace}/$(getConfig LFS_CI_uc_test_making_test_suite_dir -t targetName:${targetName} -t branchName:${branchName})
+    local relativeTestSuiteDirectory=
+    if [[ -e ${workspace}/src-project/src/TMF/testsuites.cfg ]] ; then
+        relativeTestSuiteDirectory=$(getConfig test_suite                               \
+                                            -t targetName:${targetName}                      \
+                                            -t branchName:${branchName}                      \
+                                            -f ${workspace}/src-project/src/TMF/testsuites.cfg)
+
+    fi
+    # if test suite directory is empty, try to find in test suite in the old config file
+    if [[ -z ${relativeTestSuiteDirectory} ]] ; then
+        relativeTestSuiteDirectory=$(getConfig LFS_CI_uc_test_making_test_suite_dir \
+                                            -t targetName:${targetName}                  \
+                                            -t branchName:${branchName}                  )
+    fi
+    local testSuiteDirectory=${workspace}/${relativeTestSuiteDirectory}
     mustExistDirectory ${testSuiteDirectory}
-	mustExistFile ${testSuiteDirectory}/testsuite.mk
+    mustExistFile ${testSuiteDirectory}/testsuite.mk
 
     trace "using test suite ${testSuiteDirectory} for target ${targetName} and branch ${branchName}"
     echo ${testSuiteDirectory}
@@ -369,13 +380,26 @@ makingTest_install() {
     info "installing software on target"
     execute ${make} setup
 
+    local targetName=$(_reserveTarget)
+    mustHaveValue "${targetName}" "target name"
+
+    local forceInstallSameVersion=$(getConfig LFS_CI_uc_test_making_test_force_reinstall_same_version)
+    if [[ -z ${forceInstallSameVersion} ]] ; then
+        if execute -i ${make} check ; then
+            info "the version, we would install is already on the target, skipping install"
+            return
+        else
+            info "ignore the warning above. It just saying, that the software version, we want to install is not yet on the target."                
+        fi
+    fi
+
     # on LRC: currently install does show wrong (old) version after reboot and
     # SHP sometimes fails to be up when install is retried.
     # We try installation up to 4 times
     for i in $(seq 1 4) ; do
         trace "install loop ${i}"
 
-        local installOptions=$(getConfig LFS_CI_uc_test_making_test_install_options)
+        local installOptions=$(getConfig LFS_CI_uc_test_making_test_install_options -t testTargetName:${targetName})
         info "running install with options ${installOptions:-none}"
         execute -i ${make} install ${installOptions} FORCE=yes || { sleep 20 ; continue ; }
 
@@ -453,9 +477,6 @@ mustHaveMakingTestRunningTarget() {
 
     mustHaveMakingTestTestConfig
 
-    # for FSM-r2, we need a short delay after the powercycle...
-    sleep 10
-
     local workspace=$(getWorkspaceName)
     mustHaveWorkspaceName
 
@@ -463,7 +484,11 @@ mustHaveMakingTestRunningTarget() {
 	mustExistFile ${testSuiteDirectory}/testsuite.mk
 
     info "checking, if target is up and running (with ssh)..."
-    execute make -C ${testSuiteDirectory} waitprompt
+    local canDoWaitPrompt=$(getConfig LFS_CI_uc_test_TMF_can_run_waitprompt)
+    if [[ ${canDoWaitPrompt} ]] ; then
+        execute sleep 60
+        execute make -C ${testSuiteDirectory} waitprompt
+    fi
     execute make -C ${testSuiteDirectory} waitssh
     debug "sleeping for 60 seconds..."
     execute sleep 60

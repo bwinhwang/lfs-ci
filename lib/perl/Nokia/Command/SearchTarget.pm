@@ -31,7 +31,7 @@ sub execute {
         targetName => $self->{opt_targetName}, 
         attributes => $self->{opt_attributes} );
 
-    printf join( "\n", map { $_->{target_name} } @targets );
+    printf join( "\n", sort { int( rand(3) ) -1 } map { $_->{target_name} } @targets );
     printf "\n";
 
     return;

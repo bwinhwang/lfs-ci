@@ -87,8 +87,8 @@ execute() {
     done
 
     if [[ ${exitCode} -gt 0 ]] ; then
-        [[ -e ${output} ]] && rawOutput ${output}
         if [[ -z ${ignoreError} ]] ; then
+            rawOutput ${output}
             error "error occoured in \"${command}\""
             exit ${exitCode}
         else

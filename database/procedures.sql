@@ -230,7 +230,7 @@ CREATE PROCEDURE subtest_failed( IN in_build_name VARCHAR(128),
                                  IN in_build_number INT )
 BEGIN
     CALL new_build_event( in_build_name, CONCAT( 'subtest_failed', '_', in_target, '_', in_subtarget), in_comment, in_job_name, in_build_number );
-    CALL _check_if_event_builds( in_build_name, 'test' );
+    CALL _check_if_event_builds( in_build_name, 'test', in_comment, in_job_name, in_build_number );
 END //
 DELIMITER ;
 

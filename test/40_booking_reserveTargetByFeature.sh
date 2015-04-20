@@ -38,6 +38,8 @@ oneTimeSetUp() {
 setUp() {
     cp -f /dev/null ${UT_MOCKED_COMMANDS}
     export WORKSPACE=$(createTempDirectory)
+    export JOB_NAME=jobName
+    export BUILD_NUMBER=123
     return
 }
 
@@ -56,7 +58,7 @@ test1() {
 getConfig LFS_uc_test_booking_target_sleep_seconds
 getConfig LFS_uc_test_booking_target_max_tries
 execute -n ${LFS_CI_ROOT}/bin/searchTarget --attribute=feature1
-execute -i ${LFS_CI_ROOT}/bin/reserveTarget --targetName=target1
+execute -i ${LFS_CI_ROOT}/bin/reserveTarget --targetName=target1 --comment=lfs-ci: jobName / 123
 EOF
     assertExecutedCommands ${expect}
 
@@ -73,7 +75,7 @@ test2() {
 getConfig LFS_uc_test_booking_target_sleep_seconds
 getConfig LFS_uc_test_booking_target_max_tries
 execute -n ${LFS_CI_ROOT}/bin/searchTarget --attribute=feature1 --attribute=feature2
-execute -i ${LFS_CI_ROOT}/bin/reserveTarget --targetName=target1
+execute -i ${LFS_CI_ROOT}/bin/reserveTarget --targetName=target1 --comment=lfs-ci: jobName / 123
 EOF
     assertExecutedCommands ${expect}
 
@@ -94,9 +96,9 @@ test3() {
 getConfig LFS_uc_test_booking_target_sleep_seconds
 getConfig LFS_uc_test_booking_target_max_tries
 execute -n ${LFS_CI_ROOT}/bin/searchTarget --attribute=feature1 --attribute=feature2
-execute -i ${LFS_CI_ROOT}/bin/reserveTarget --targetName=target1
+execute -i ${LFS_CI_ROOT}/bin/reserveTarget --targetName=target1 --comment=lfs-ci: jobName / 123
 execute -n ${LFS_CI_ROOT}/bin/searchTarget --attribute=feature1 --attribute=feature2
-execute -i ${LFS_CI_ROOT}/bin/reserveTarget --targetName=target1
+execute -i ${LFS_CI_ROOT}/bin/reserveTarget --targetName=target1 --comment=lfs-ci: jobName / 123
 EOF
     assertExecutedCommands ${expect}
 
@@ -119,11 +121,11 @@ test4() {
 getConfig LFS_uc_test_booking_target_sleep_seconds
 getConfig LFS_uc_test_booking_target_max_tries
 execute -n ${LFS_CI_ROOT}/bin/searchTarget --attribute=feature1 --attribute=feature2
-execute -i ${LFS_CI_ROOT}/bin/reserveTarget --targetName=target1
+execute -i ${LFS_CI_ROOT}/bin/reserveTarget --targetName=target1 --comment=lfs-ci: jobName / 123
 execute -n ${LFS_CI_ROOT}/bin/searchTarget --attribute=feature1 --attribute=feature2
-execute -i ${LFS_CI_ROOT}/bin/reserveTarget --targetName=target1
+execute -i ${LFS_CI_ROOT}/bin/reserveTarget --targetName=target1 --comment=lfs-ci: jobName / 123
 execute -n ${LFS_CI_ROOT}/bin/searchTarget --attribute=feature1 --attribute=feature2
-execute -i ${LFS_CI_ROOT}/bin/reserveTarget --targetName=target1
+execute -i ${LFS_CI_ROOT}/bin/reserveTarget --targetName=target1 --comment=lfs-ci: jobName / 123
 EOF
     assertExecutedCommands ${expect}
 
