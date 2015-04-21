@@ -137,7 +137,7 @@ sub locationsText {
     printf "# Do not edit it by hand.\n";
     print "\n";
     foreach my $row ( @data ) {
-        printf "%40s\n", $row->{location_name};
+        printf "%40s %10s %40s\n", $row->{location_name}, $row->{branch_status}, $row->{branch_description};
     }
     return
 }
