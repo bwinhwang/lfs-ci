@@ -57,6 +57,8 @@ doJenkins = false
 
 activateRootJobs = false
 
+debug = true
+
 // Environment vars
 jenkinsHome = build.getEnvironment(listener).get("JENKINS_HOME")
 
@@ -94,6 +96,10 @@ parameters.each {
         activateRootJobs = it.value
     else if(it.name == "DO_JENKINS") {
         doJenkins = it.value
+    }
+    else if(it.name == "DEBUG") {
+        debug = it.value
+        println("[INFO] got parameter DEBUG: $debug")
     }
 }
 
@@ -135,9 +141,13 @@ def createScmView() {
         println("[INFO] view $branch_view_name already exists.")
     }
     else {
-        new_branch_view_obj = new ListView(branch_view_name, scm_view_obj)
-        scm_view_obj.addView(new_branch_view_obj)
-        println("[INFO] Added view $branch_view_name to $scm_view view")
+        if(debug) {
+            println("[DEBUG] Adding view $branch_view_name to $scm_view view")
+        } else {
+            println("[INFO] Adding view $branch_view_name to $scm_view view")
+            new_branch_view_obj = new ListView(branch_view_name, scm_view_obj)
+            scm_view_obj.addView(new_branch_view_obj)
+        }
     }
 
     return new_branch_view_obj
@@ -152,33 +162,37 @@ jobs_to_enable = []
 def copyJob(job) {
     def new_name = ""
     def new_job = null
-    if(job.getName().find("fsmr4") && (fsmr4_jobs || fsmr4_only)) {
-        new_name = job.getName().replaceFirst("-_fsmr4_-", "-_"+new_branch+"_FSMR4_-")
-        new_job = Jenkins.instance.copy(job, new_name)
-        new_job.setDisplayName(job.getDisplayName().replaceFirst("- "+src_branch+" -", "- "+new_branch+" -"))
-    } else if(job.getName().find("LRC") && lrc_jobs) {
-        new_name = job.getName().replaceFirst("-_LRC_-", "-_LRC_"+new_branch+"_-")
-        new_job = Jenkins.instance.copy(job, new_name)
-        if(job.getDisplayName().startsWith("LFS CI - LRC "+src_branch+" -")) {
-            new_job.setDisplayName(job.getDisplayName().replaceFirst("- LRC "+src_branch+" -", "- LRC "+new_branch+" -"))
-        } else if(job.getDisplayName().startsWith("LFS Production - LRC - ")) {
-            new_job.setDisplayName(job.getDisplayName().replaceFirst("- LRC -", "- LRC "+new_branch+" -"))
+    if(!debug) {
+        if(job.getName().find("fsmr4") && (fsmr4_jobs || fsmr4_only)) {
+            new_name = job.getName().replaceFirst("-_fsmr4_-", "-_"+new_branch+"_FSMR4_-")
+            new_job = Jenkins.instance.copy(job, new_name)
+            new_job.setDisplayName(job.getDisplayName().replaceFirst("- "+src_branch+" -", "- "+new_branch+" -"))
+        } else if(job.getName().find("LRC") && lrc_jobs) {
+            new_name = job.getName().replaceFirst("-_LRC_-", "-_LRC_"+new_branch+"_-")
+            new_job = Jenkins.instance.copy(job, new_name)
+            if(job.getDisplayName().startsWith("LFS CI - LRC "+src_branch+" -")) {
+                new_job.setDisplayName(job.getDisplayName().replaceFirst("- LRC "+src_branch+" -", "- LRC "+new_branch+" -"))
+            } else if(job.getDisplayName().startsWith("LFS Production - LRC - ")) {
+                new_job.setDisplayName(job.getDisplayName().replaceFirst("- LRC -", "- LRC "+new_branch+" -"))
+            }
+        } else if(!lrc_jobs) {
+            new_name = job.getName().replaceFirst("-_"+src_branch+"_-", "-_"+new_branch+"_-")
+            new_job = Jenkins.instance.copy(job, new_name)
+            new_job.setDisplayName(job.getDisplayName().replaceFirst(src_branch, new_branch))
         }
-    } else if(!lrc_jobs) {
-        new_name = job.getName().replaceFirst("-_"+src_branch+"_-", "-_"+new_branch+"_-")
-        new_job = Jenkins.instance.copy(job, new_name)
-        new_job.setDisplayName(job.getDisplayName().replaceFirst(src_branch, new_branch))
+        if(new_name == "LFS_CI_-_${new_branch}_-_Build" || new_name == "LFS_CI_-_LRC_${new_branch}_-_Build" || new_name == "PKGPOOL_-_${new_branch}_-_Build" || new_name == "PKGPOOL_-_LRC_${new_branch}_-_Build") {
+            new_job.setDescription("Comment: ${comment}")
+            println("[INFO] set description for job \"$new_name\"")
+            // disable build jobs because not all jobs are created jet.
+            new_job.disable()
+            println("[INFO] disabled job \"$new_job.name\"")
+            jobs_to_enable.add(new_job)
+        }
+        println("[INFO] copied job \"$job.name\" -> \"$new_name\"")
+        return new_job
+    } else {
+        println("[DEBUG] copy job \"$job.name\"")
     }
-    if(new_name == "LFS_CI_-_${new_branch}_-_Build" || new_name == "LFS_CI_-_LRC_${new_branch}_-_Build" || new_name == "PKGPOOL_-_${new_branch}_-_Build" || new_name == "PKGPOOL_-_LRC_${new_branch}_-_Build") {
-        new_job.setDescription("Comment: ${comment}")
-        println("[INFO] set description for job \"$new_name\"")
-        // disable build jobs because not all jobs are created jet.
-        new_job.disable()
-        println("[INFO] disabled job \"$new_job.name\"")
-        jobs_to_enable.add(new_job)
-    }
-    println("[INFO] copied job \"$job.name\" -> \"$new_name\"")
-    return new_job
 }
 
 def disableJob(job) {
@@ -293,7 +307,12 @@ def copyPromotions(job, new_job) {
 //
 ///////////////////////////////////////////////////////////////////////
 
-new_branch_view_obj = createScmView()
+try {
+    new_branch_view_obj = createScmView()
+}
+catch(NullPointerException) {
+    println("[INFO] NullPointerException OK in case DEBUG == true")
+}
 
 // collect jobs to be created
 def jobs_list = []
@@ -322,23 +341,29 @@ for(job in jobs_list) {
     //if(job.name.find("fsmr4")) {
     //if(job.name == "PKGPOOL_-_trunk_-_Build") {
     def new_job = copyJob(job)
-    new_job.save()
-    disableJob(new_job)
-    // avoid having two projects point to the same location
-    updateWorkspace(new_job)
-    def config_file = updateJobConfig(job, new_job)
-    copyPromotions(job, new_job)
-    reloadJobConfig(new_job, config_file)
-    new_branch_view_obj.doAddJobToView(new_job.getName())
-    println("[INFO] added job $new_job.name to view \"$new_branch_view_obj.name\"")
+    if(!debug) {
+        new_job.save()
+        disableJob(new_job)
+        // avoid having two projects point to the same location
+        updateWorkspace(new_job)
+        def config_file = updateJobConfig(job, new_job)
+        copyPromotions(job, new_job)
+        reloadJobConfig(new_job, config_file)
+        new_branch_view_obj.doAddJobToView(new_job.getName())
+        println("[INFO] added job $new_job.name to view \"$new_branch_view_obj.name\"")
+    }
     //}
 }
 
 // enable previosly disabled jobs
 if(activateRootJobs) {
     for(disabled_job in jobs_to_enable) {
-        disabled_job.enable()
-        println("[INFO] enabled job \"$disabled_job.name\"")
+        if(debug) {
+            println("[DEBUG] enable job \"$disabled_job.name\"")
+        } else {
+            println("[INFO] enable job \"$disabled_job.name\"")
+            disabled_job.enable()
+        }
     }
 } else {
     println("[INFO] not enabling before disabled jobs")
@@ -351,15 +376,17 @@ config.putAll(bindings.getVariables())
 def out = config['out']
 
 sectionedView = new MySectionedView(new_branch, lrc_jobs, jenkinsUrl, apiToken, apiUser, out)
-sectionedView.createSectionedView()
-sectionedView.addListViewSections()
+if(!debug) {
+    sectionedView.createSectionedView()
+    sectionedView.addListViewSections()
+}
 
 
 ///////////////////////////////////////////////////////////////////////
 //
 // CLASSES
 //
-// In groovy the output stream must provided to a class
+// In groovy the output stream must be provided to a class
 // explicitly. Here we call it out.
 ///////////////////////////////////////////////////////////////////////
 
@@ -447,7 +474,6 @@ class MySectionedView {
               <alignment>${this.listAlignment}</alignment>
               <columns>
                 <hudson.views.StatusColumn/>
-                <hudson.views.WeatherColumn/>
                 <hudson.views.BuildButtonColumn/>
                 <org.jenkins.ci.plugins.column.console.LastBuildColumn plugin="console-column-plugin@1.5"/>
                 <com.robestone.hudson.compactcolumns.JobNameColorColumn plugin="compact-columns@1.10">
@@ -474,7 +500,6 @@ class MySectionedView {
               <alignment>${this.listAlignment}</alignment>
               <columns>
                 <hudson.views.StatusColumn/>
-                <hudson.views.WeatherColumn/>
                 <hudson.views.BuildButtonColumn/>
                 <org.jenkins.ci.plugins.column.console.LastBuildColumn plugin="console-column-plugin@1.5"/>
                 <com.robestone.hudson.compactcolumns.JobNameColorColumn plugin="compact-columns@1.10">
@@ -500,7 +525,6 @@ class MySectionedView {
               <alignment>${this.listAlignment}</alignment>
               <columns>
                 <hudson.views.StatusColumn/>
-                <hudson.views.WeatherColumn/>
                 <hudson.views.BuildButtonColumn/>
                 <hudson.views.LastSuccessColumn/><hudson.views.LastFailureColumn/><hudson.views.LastDurationColumn/><hudson.views.BuildButtonColumn/></columns>
             </hudson.plugins.sectioned__view.ListViewSection>"""
@@ -524,7 +548,6 @@ class MySectionedView {
               <alignment>${this.listAlignment}</alignment>
               <columns>
                 <hudson.views.StatusColumn/>
-                <hudson.views.WeatherColumn/>
                 <hudson.views.JobColumn/>
                 <hudson.views.LastSuccessColumn/>
                 <hudson.views.LastFailureColumn/>
@@ -541,7 +564,6 @@ class MySectionedView {
               <alignment>${this.listAlignment}</alignment>
               <columns>
                 <hudson.views.StatusColumn/>
-                <hudson.views.WeatherColumn/>
                 <hudson.views.JobColumn/>
                 <hudson.views.LastSuccessColumn/>
                 <hudson.views.LastFailureColumn/>
@@ -558,7 +580,6 @@ class MySectionedView {
               <alignment>${this.listAlignment}</alignment>
               <columns>
                 <hudson.views.StatusColumn/>
-                <hudson.views.WeatherColumn/>
                 <hudson.views.JobColumn/>
                 <hudson.views.LastSuccessColumn/><hudson.views.LastFailureColumn/><hudson.views.LastDurationColumn/><hudson.views.BuildButtonColumn/></columns>
             </hudson.plugins.sectioned__view.ListViewSection>"""
