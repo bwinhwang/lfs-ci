@@ -7,7 +7,7 @@ source ${LFS_CI_ROOT}/lib/logging.sh
 source ${LFS_CI_ROOT}/lib/jenkins.sh
 
 initTempDirectory
-setBuildDescription "${JOB_NAME}" "${BUILD_NUMBER}" "${NEW_BRANCH}"
+setBuildDescription "${JOB_NAME}" "${BUILD_NUMBER}" "${NEW_BRANCH} DEBUG=${DEBUG}"
 
 info "###############################################################"
 info "# Variables from Jenkins"
