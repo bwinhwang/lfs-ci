@@ -255,11 +255,10 @@ createBranchInGit() {
 
     if [[ "${branchExists}" == "no" ]]; then
         local newBranch=$1
+        local gitServer=$(getConfig lfsGitServer)
         mustHaveValue "${newBranch}" "new branch"
-        # TODO: get GIT via getConfig()
-        local gitServer="psulm.nsn-net.net"
+        mustHaveValue "${gitServer}" "git server"
 
-        # TODO: The SVN URL can be retrived from file.cfg.
         if [[ ${LRC} == true ]]; then
             gitRevision=$(svn cat -r${REVISION} ${SVN_REPO}/${SVN_PATH}/lrc/${SRC_PROJECT}/src/gitrevision)
         else
