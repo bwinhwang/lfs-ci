@@ -474,7 +474,6 @@ class MySectionedView {
               <alignment>${this.listAlignment}</alignment>
               <columns>
                 <hudson.views.StatusColumn/>
-                <hudson.views.WeatherColumn/>
                 <hudson.views.BuildButtonColumn/>
                 <org.jenkins.ci.plugins.column.console.LastBuildColumn plugin="console-column-plugin@1.5"/>
                 <com.robestone.hudson.compactcolumns.JobNameColorColumn plugin="compact-columns@1.10">
@@ -501,7 +500,6 @@ class MySectionedView {
               <alignment>${this.listAlignment}</alignment>
               <columns>
                 <hudson.views.StatusColumn/>
-                <hudson.views.WeatherColumn/>
                 <hudson.views.BuildButtonColumn/>
                 <org.jenkins.ci.plugins.column.console.LastBuildColumn plugin="console-column-plugin@1.5"/>
                 <com.robestone.hudson.compactcolumns.JobNameColorColumn plugin="compact-columns@1.10">
@@ -527,7 +525,6 @@ class MySectionedView {
               <alignment>${this.listAlignment}</alignment>
               <columns>
                 <hudson.views.StatusColumn/>
-                <hudson.views.WeatherColumn/>
                 <hudson.views.BuildButtonColumn/>
                 <hudson.views.LastSuccessColumn/><hudson.views.LastFailureColumn/><hudson.views.LastDurationColumn/><hudson.views.BuildButtonColumn/></columns>
             </hudson.plugins.sectioned__view.ListViewSection>"""
@@ -551,7 +548,6 @@ class MySectionedView {
               <alignment>${this.listAlignment}</alignment>
               <columns>
                 <hudson.views.StatusColumn/>
-                <hudson.views.WeatherColumn/>
                 <hudson.views.JobColumn/>
                 <hudson.views.LastSuccessColumn/>
                 <hudson.views.LastFailureColumn/>
@@ -568,7 +564,6 @@ class MySectionedView {
               <alignment>${this.listAlignment}</alignment>
               <columns>
                 <hudson.views.StatusColumn/>
-                <hudson.views.WeatherColumn/>
                 <hudson.views.JobColumn/>
                 <hudson.views.LastSuccessColumn/>
                 <hudson.views.LastFailureColumn/>
@@ -585,7 +580,6 @@ class MySectionedView {
               <alignment>${this.listAlignment}</alignment>
               <columns>
                 <hudson.views.StatusColumn/>
-                <hudson.views.WeatherColumn/>
                 <hudson.views.JobColumn/>
                 <hudson.views.LastSuccessColumn/><hudson.views.LastFailureColumn/><hudson.views.LastDurationColumn/><hudson.views.BuildButtonColumn/></columns>
             </hudson.plugins.sectioned__view.ListViewSection>"""
