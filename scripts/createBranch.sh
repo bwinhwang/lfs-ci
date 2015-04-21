@@ -79,6 +79,21 @@ __preparation(){
     echo JENKINS_API_USER=${JENKINS_API_USER} >> ${WORKSPACE}/${VARS_FILE}
 }
 
+## @fn     __get_sql_insert()
+#  @brief  Create the insert statement for branches table
+__get_sql_string() {
+    local descrCol=""
+    local descrVal=""
+    if [[ ! -z ${DESCRIPTION} ]]; then
+        descrCol=", branch_description"
+        descrVal=", '$DESCRIPTION'"
+    fi
+
+    echo "insert into branches \
+    (branch_name, location_name, ps_branch_name, based_on_revision, based_on_release, release_name_regex, date_created, comment${descrCol}) \
+    VALUES ('$branch', '$branch', '${branch}', ${REVISION}, '${SOURCE_RELEASE}', '${regex}', now(), '$COMMENT'${descrVal})"
+}
+
 __cmd() {
     if [[ $DEBUG == true ]]; then
         debug $@
@@ -377,10 +392,6 @@ dbInsert() {
         regex="${branchType}_LRC_LCP_PS_LFS_OS_${yyyy}_${mm}_([0-9][0-9][0-9][0-9])"
     fi
 
-    local sqlString="insert into branches \
-    (branch_name, location_name, ps_branch_name, based_on_revision, based_on_release, release_name_regex, date_created, comment) \
-    VALUES ('$branch', '$branch', '${branch}', ${REVISION}, '${SOURCE_RELEASE}', '${regex}', now(), '$COMMENT')"
-
     local dbName=$(getConfig MYSQL_db_name)
     local dbUser=$(getConfig MYSQL_db_username)
     local dbPass=$(getConfig MYSQL_db_password)
@@ -388,9 +399,9 @@ dbInsert() {
     local dbPort=$(getConfig MYSQL_db_port)
 
     if [[ $DEBUG == true ]]; then
-        echo "$sqlString | mysql -u ${dbUser} --password=${dbPass} -h ${dbHost} -P ${dbPort} -D ${dbName}"
+        echo "[DEBUG] $(__get_sql_string)"
     else
-        echo $sqlString | mysql -u ${dbUser} --password=${dbPass} -h ${dbHost} -P ${dbPort} -D ${dbName}
+        echo $(__get_sql_string) | mysql -u ${dbUser} --password=${dbPass} -h ${dbHost} -P ${dbPort} -D ${dbName}
     fi
 }
 
