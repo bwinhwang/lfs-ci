@@ -321,7 +321,6 @@ svnDummyCommitLRC() {
 #  @param   <newBranch> new branch name
 #  @return  <none>
 svnEditLocationsTxtFile() {
-    # TODO: Create locations.txt from DB
     info "--------------------------------------------------------"
     info "SVN: edit locations.txt file"
     info "--------------------------------------------------------"
@@ -338,7 +337,6 @@ svnEditLocationsTxtFile() {
     local yyyy=$(getBranchPart ${newBranch} YYYY)
     local mm=$(getBranchPart ${newBranch} MM)
 
-    info "Add ${newBranch} to trunk/${bldTools}/${locationsTxt}"
     __cmd mkdir ${bldTools}
     __cmd svn checkout --depth empty ${SVN_REPO}/${SVN_DIR}/trunk/${bldTools} ${bldTools}
     __cmd cd ${bldTools}
@@ -364,7 +362,7 @@ svnEditLocationsTxtFile() {
         echo "LRC_${newBranch}                       LRC locations (special LRC for ${newBranch} only)" >> ${locationsTxt}
     fi
 
-    __cmd svn commit -m \"Added ${newBranch} to file ${locationsTxt}\" ${locationsTxt}
+    __cmd svn commit -m \"Added new branch to file ${locationsTxt}\" ${locationsTxt}
 }
 
 ## @fn      dbInsert()
