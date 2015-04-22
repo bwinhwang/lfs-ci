@@ -260,6 +260,7 @@ createBranchInGit() {
         mustHaveValue "${gitServer}" "git server"
 
         if [[ ${LRC} == true ]]; then
+            newBranch=LRC_${newBranch}
             gitRevision=$(svn cat -r${REVISION} ${SVN_REPO}/${SVN_PATH}/lrc/${SRC_PROJECT}/src/gitrevision)
         else
             gitRevision=$(svn cat -r${REVISION} ${SVN_REPO}/${SVN_PATH}/main/${SRC_PROJECT}/src/gitrevision)
