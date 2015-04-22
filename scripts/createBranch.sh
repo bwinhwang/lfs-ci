@@ -362,7 +362,11 @@ svnEditLocationsTxtFile() {
         echo "LRC_${newBranch}                       LRC locations (special LRC for ${newBranch} only)" >> ${locationsTxt}
     fi
 
-    __cmd svn commit -m \"Added new branch to file ${locationsTxt}\" ${locationsTxt}
+    if [[ "${LRC}" == "true" ]]; then
+        __cmd svn commit -m \"Added branch ${newBranch} to ${locationsTxt}\" ${locationsTxt}
+    else
+        __cmd svn commit -m \"Added branch LRC_${newBranch} to ${locationsTxt}\" ${locationsTxt}
+    fi
 }
 
 ## @fn      dbInsert()
