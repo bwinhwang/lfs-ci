@@ -561,40 +561,6 @@ DELIMITER ;
 -- {{{ isFailed
 
 DROP FUNCTION IF EXISTS isFailed;
-DELIMITER //
-
-CREATE FUNCTION isFailed(in_build_id int) RETURNS int
-    DETERMINISTIC
-BEGIN
-    DECLARE cnt_isFailed1 int;
-    DECLARE cnt_isFailed2 int;
-    DECLARE isFailed INT;
-
-    SELECT count(*) INTO cnt_isFailed1 
-        FROM build_events be, events e
-        WHERE be.build_id = in_build_id 
-            AND be.event_id = e.id
-            AND event_state = 'failed';
-    IF cnt_isFailed1 >= 1 THEN
-        SET isFailed = 1;
-    ELSE
-        SELECT count(*) INTO cnt_isFailed2 
-            FROM build_events be, events e
-            WHERE be.build_id = in_build_id 
-                AND be.event_id = e.id
-                AND e.event_state NOT IN ('started', 'finished' )
-                AND TIMESTAMPDIFF(HOUR, timestamp, NOW() ) > 2;
-
-        IF cnt_isFailed2 >= 1 THEN
-            SET isFailed = 1;
-        ELSE
-            SET isFailed = 0;
-        END IF;
-    END IF;
-
-RETURN (isFailed);
-END //
-DELIMITER ;
 
 -- }}}
 -- {{{ _running_tasks
@@ -640,16 +606,13 @@ BEGIN
            b.branch_name, 
            b.revision, 
            b.comment, 
-           be1.timestamp AS build_started, 
-           CASE isFailed( b.id )
-                WHEN 0 THEN be2.timestamp
-                ELSE IF( be3.timestamp, be3.timestamp, DATE_ADD( be1.timestamp, INTERVAL 2 HOUR) )
-           END AS build_ended,
-           isFailed( b.id ) AS isFailed
+           be1.timestamp AS build_started,
+           IF( be2.timestamp, be2.timestamp, be3.timestamp) AS build_finished,
+           IF( be2.timestamp, 0, 1) AS isFailed
     FROM v_builds b
-    LEFT JOIN build_events be1 ON (b.id = be1.build_id AND be1.event_id = ( SELECT id FROM events WHERE event_type = 'build' AND event_state = 'started'  ) )
-    LEFT JOIN build_events be2 ON (b.id = be1.build_id AND be1.event_id = ( SELECT id FROM events WHERE event_type = 'build' AND event_state = 'finished' ) )
-    LEFT JOIN build_events be3 ON (b.id = be1.build_id AND be1.event_id = ( SELECT id FROM events WHERE event_type = 'build' AND event_state = 'failed'   ) )
+      LEFT JOIN build_events be1 ON (b.id = be1.build_id AND be1.event_id = 1 )
+      LEFT JOIN build_events be2 ON (b.id = be2.build_id AND be2.event_id = 2 )
+      LEFT JOIN build_events be3 ON (b.id = be3.build_id AND be3.event_id = 3 )
     ;
 
 END //
