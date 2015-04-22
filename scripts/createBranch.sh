@@ -260,6 +260,7 @@ createBranchInGit() {
         mustHaveValue "${gitServer}" "git server"
 
         if [[ ${LRC} == true ]]; then
+            newBranch=LRC_${newBranch}
             gitRevision=$(svn cat -r${REVISION} ${SVN_REPO}/${SVN_PATH}/lrc/${SRC_PROJECT}/src/gitrevision)
         else
             gitRevision=$(svn cat -r${REVISION} ${SVN_REPO}/${SVN_PATH}/main/${SRC_PROJECT}/src/gitrevision)
@@ -320,7 +321,6 @@ svnDummyCommitLRC() {
 #  @param   <newBranch> new branch name
 #  @return  <none>
 svnEditLocationsTxtFile() {
-    # TODO: Create locations.txt from DB
     info "--------------------------------------------------------"
     info "SVN: edit locations.txt file"
     info "--------------------------------------------------------"
@@ -337,7 +337,6 @@ svnEditLocationsTxtFile() {
     local yyyy=$(getBranchPart ${newBranch} YYYY)
     local mm=$(getBranchPart ${newBranch} MM)
 
-    info "Add ${newBranch} to trunk/${bldTools}/${locationsTxt}"
     __cmd mkdir ${bldTools}
     __cmd svn checkout --depth empty ${SVN_REPO}/${SVN_DIR}/trunk/${bldTools} ${bldTools}
     __cmd cd ${bldTools}
@@ -363,7 +362,11 @@ svnEditLocationsTxtFile() {
         echo "LRC_${newBranch}                       LRC locations (special LRC for ${newBranch} only)" >> ${locationsTxt}
     fi
 
-    __cmd svn commit -m \"Added ${newBranch} to file ${locationsTxt}\" ${locationsTxt}
+    if [[ "${LRC}" == "true" ]]; then
+        __cmd svn commit -m \"Added branch LRC_${newBranch} to ${locationsTxt}\" ${locationsTxt}
+    else
+        __cmd svn commit -m \"Added branch ${newBranch} to ${locationsTxt}\" ${locationsTxt}
+    fi
 }
 
 ## @fn      dbInsert()
