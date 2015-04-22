@@ -8,7 +8,6 @@ use Nokia::Singleton;
 use parent qw( Nokia::Object );
 
 use Getopt::Long;
-use Data::Dumper;
 use Log::Log4perl qw( :easy );
 
 sub prepare {

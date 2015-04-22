@@ -9,7 +9,6 @@ use parent        qw( Nokia::Object );
 
 use POSIX         qw( strftime );
 use Log::Log4perl qw( :easy );
-use Data::Dumper;
 use Getopt::Std;
 
 sub init {
