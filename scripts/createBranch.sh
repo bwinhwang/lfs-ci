@@ -111,7 +111,7 @@ __cmd() {
 #  @return  <none>
 svnCopyBranch() {
     info "--------------------------------------------------------"
-    info "SVN: create branch for"
+    info "SVN: create branch"
     info "--------------------------------------------------------"
 
     local srcBranch=$1
@@ -204,8 +204,8 @@ svnCopyBranchLRC() {
     DESCRIPTION: svn cp -r${REVISION} --parents ${SVN_REPO}/${SVN_PATH} ${SVN_REPO}/${SVN_DIR}/${newBranch}/trunk. \
     $COMMENT"
 
-    svn ls ${SVN_REPO}/${SVN_PATH} || {
-        __cmd svn copy -r${REVISION} -m \"${message}\" --parents ${SVN_REPO}/${SVN_PATH} \
+    svn ls ${SVN_REPO}/${SVN_DIR}/${newBranch} || {
+        __cmd svn copy -r ${REVISION} -m \"${message}\" --parents ${SVN_REPO}/${SVN_PATH} \
             ${SVN_REPO}/${SVN_DIR}/${newBranch}/trunk
     }
 }
