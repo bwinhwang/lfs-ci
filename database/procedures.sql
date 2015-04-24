@@ -470,7 +470,7 @@ DELIMITER ;
 -- }}}
 -- {{{ migrateBranchData
 
-DROP PROCEDURE migrateBranchData;
+DROP PROCEDURE IF EXISTS migrateBranchData;
 DELIMITER //
 CREATE PROCEDURE migrateBranchData()
 BEGIN
@@ -573,7 +573,7 @@ END //
 DELIMITER ;
 -- }}}
 -- {{{ add_new_subversion_commit
-DROP PROCEDURE add_new_subversion_commit;
+DROP PROCEDURE IF EXISTS add_new_subversion_commit;
 DELIMITER //
 CREATE  PROCEDURE add_new_subversion_commit( IN in_build_name VARCHAR(128),
                                              IN in_revision   INT,
