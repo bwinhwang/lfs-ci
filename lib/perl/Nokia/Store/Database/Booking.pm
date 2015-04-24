@@ -2,10 +2,33 @@ package Nokia::Store::Database::Booking;
 use strict;
 use warnings;
 
-use parent qw( Nokia::Store::Database );
+use parent qw( Nokia::Object );
 
 use DBI;
-use Log::Log4perl qw( :easy);
+use Log::Log4perl qw( :easy );
+
+sub prepare {
+    my $self = shift;
+    my $sql  = shift;
+
+    if( not $self->{dbi} ) {
+
+        my $dbiString = sprintf( "DBI:%s:%s:%s:%s",
+                "mysql",                      # database driver
+                "lfspt",                      # database
+                "lfs-ci-metrics-database.dynamic.nsn-net.net",  # database host
+                3306,                         # database port
+                );
+        my $userName = "lfspt";
+        my $password = "4ObryufezAm_";
+        my $dbiArgs  = { AutoCommit => 1,
+                         PrintError => 1 };
+
+        $self->{dbi} = DBI->connect( $dbiString, $userName, $password, $dbiArgs ) or LOGDIE $DBI::errstr;
+    }
+
+    return $self->{dbi}->prepare( $sql ) or LOGDIE $DBI::errstr;
+}
 
 sub reserveTarget {
     my $self  = shift;
