@@ -7,7 +7,7 @@ source ${LFS_CI_ROOT}/lib/logging.sh
 source ${LFS_CI_ROOT}/lib/jenkins.sh
 
 initTempDirectory
-setBuildDescription "${JOB_NAME}" "${BUILD_NUMBER}" "${NEW_BRANCH}"
+setBuildDescription "${JOB_NAME}" "${BUILD_NUMBER}" "${NEW_BRANCH} DEBUG=${DEBUG}"
 
 info "###############################################################"
 info "# Variables from Jenkins"
@@ -19,6 +19,7 @@ info "# FSMR4:                $FSMR4"
 info "# FSMR4_ONLY:           $FSMR4_ONLY"
 info "# SOURCE_RELEASE:       $SOURCE_RELEASE"
 info "# ECL_URLS:             $ECL_URLS"
+info "# DESCRIPTION:          $DESCRIPTION"
 info "# COMMENT:              $COMMENT"
 info "# DO_SVN:               $DO_SVN"
 info "# DO_JENKINS:           $DO_JENKINS"
@@ -27,6 +28,7 @@ info "# UPDATE_LOCATIONS_TXT: $UPDATE_LOCATIONS_TXT"
 info "# DO_DB_INSERT:         $DO_DB_INSERT"
 info "# DO_GIT:               $DO_GIT"
 info "# ACTIVATE_ROOT_JOBS:   $ACTIVATE_ROOT_JOBS"
+info "# DEBUG:                $DEBUG"
 info "###############################################################"
 
 # TODO: Get it via getConfig()
@@ -56,9 +58,14 @@ __checkParams() {
     [[ ! ${ECL_URLS} ]] && { error "ECL_URLS is missing"; exit 1; }
     [[ ! ${COMMENT} ]] && { error "COMMENT is missing"; exit 1; }
     [[ ${FSMR4} == false ]] && [[ ${FSMR4_ONLY} == true ]] && { error "FSMR4 can not be false in case FSMR4_ONLY is true"; exit 1; }
+
     if [[ ${LRC} == true ]]; then
         echo ${NEW_BRANCH} | grep -q -e "^LRC_" && { error "LRC: \"LRC_\" is automatically added as prefix to NEW_BRANCH"; exit 1; }
     fi
+
+    echo ${SOURCE_RELEASE} | grep -q _OS_ && {
+        SOURCE_RELEASE=$(echo "${SOURCE_RELEASE/_OS_/_REL_}");
+    }
 }
 
 ## @fn     __preparation()
@@ -72,6 +79,31 @@ __preparation(){
     echo JENKINS_API_USER=${JENKINS_API_USER} >> ${WORKSPACE}/${VARS_FILE}
 }
 
+## @fn     __get_sql_insert()
+#  @brief  Create the insert statement for branches table
+__get_sql_string() {
+    local descrCol=""
+    local descrVal=""
+    if [[ ! -z ${DESCRIPTION} ]]; then
+        descrCol=", branch_description"
+        descrVal=", '$DESCRIPTION'"
+    fi
+
+    echo "insert into branches \
+    (branch_name, location_name, ps_branch_name, based_on_revision, based_on_release, release_name_regex, date_created, comment${descrCol}) \
+    VALUES ('$branch', '$branch', '${branch}', ${REVISION}, '${SOURCE_RELEASE}', '${regex}', now(), '$COMMENT'${descrVal})"
+}
+
+__cmd() {
+    if [[ $DEBUG == true ]]; then
+        debug $@
+        echo [DEBUG] $@
+    else
+        info runnig command: $@
+        eval $@
+    fi
+}
+
 ## @fn      svnCopyBranch()
 #  @brief   create the new branch in SVN by coping the source branch.
 #  @param   <srcBranch> name of source branch
@@ -79,7 +111,7 @@ __preparation(){
 #  @return  <none>
 svnCopyBranch() {
     info "--------------------------------------------------------"
-    info "SVN: create branch for"
+    info "SVN: create branch"
     info "--------------------------------------------------------"
 
     local srcBranch=$1
@@ -94,7 +126,7 @@ svnCopyBranch() {
     # TODO: Job shall fail in case branch already exists.
     #       This requirement is in collision with master option DO_SVN.
     svn ls ${SVN_REPO}/${SVN_DIR}/${newBranch} || {
-        svn copy -r ${REVISION} -m "${message}" --parents ${SVN_REPO}/${SVN_PATH} \
+        __cmd svn copy -r ${REVISION} -m \"${message}\" --parents ${SVN_REPO}/${SVN_PATH} \
             ${SVN_REPO}/${SVN_DIR}/${newBranch}/trunk;
     }
 }
@@ -118,13 +150,13 @@ svnCopyLocations() {
     #       This requirement is in collision with master option DO_SVN.
     svn ls ${SVN_REPO}/${SVN_DIR}/trunk/bldtools/locations-${LOCATIONS} \
         ${SVN_REPO}/${SVN_DIR}/trunk/bldtools/locations-${newBranch} || {
-            svn copy -m "copy locations branch ${newBranch}" ${SVN_REPO}/${SVN_DIR}/trunk/bldtools/locations-${LOCATIONS} \
+            __cmd svn copy -m \"copy locations branch ${newBranch}\" ${SVN_REPO}/${SVN_DIR}/trunk/bldtools/locations-${LOCATIONS} \
                 ${SVN_REPO}/${SVN_DIR}/trunk/bldtools/locations-${newBranch};
-            svn checkout ${SVN_REPO}/${SVN_DIR}/trunk/bldtools/locations-${newBranch};
-            cd locations-${newBranch};
-            sed -i -e "s/\/${srcBranch}\//\/${newBranch}\/trunk\//" Dependencies;
-            svn commit -m "added new location ${newBranch}.";
-            svn delete -m "removed bldtools, because they are always used from MAINTRUNK" ${SVN_REPO}/${SVN_DIR}/${newBranch}/trunk/bldtools;
+            __cmd svn checkout ${SVN_REPO}/${SVN_DIR}/trunk/bldtools/locations-${newBranch};
+            __cmd cd locations-${newBranch};
+            __cmd sed -i -e "'s/\/${srcBranch}\//\/${newBranch}\/trunk\//'" Dependencies;
+            __cmd svn commit -m \"added new location ${newBranch}.\";
+            __cmd svn delete -m \"removed bldtools, because they are always used from MAINTRUNK\" ${SVN_REPO}/${SVN_DIR}/${newBranch}/trunk/bldtools;
     }
 }
 
@@ -144,12 +176,12 @@ svnCopyLocationsFSMR4() {
     mustHaveValue "${newBranch}" "new branch"
 
     svn ls ${SVN_REPO}/${SVN_DIR}/trunk/bldtools/locations-${newBranch}_FSMR4 || {
-        svn copy -m "copy locations branch ${newBranch}" ${SVN_REPO}/${SVN_DIR}/trunk/bldtools/${LOCATIONS_FSMR4} \
+        __cmd svn copy -m \"copy locations branch ${newBranch}\" ${SVN_REPO}/${SVN_DIR}/trunk/bldtools/${LOCATIONS_FSMR4} \
             ${SVN_REPO}/${SVN_DIR}/trunk/bldtools/locations-${newBranch}_FSMR4
-        svn checkout ${SVN_REPO}/${SVN_DIR}/trunk/bldtools/locations-${newBranch}_FSMR4
-        cd locations-${newBranch}_FSMR4
-        sed -i -e "s/\/${srcBranch}\//\/${newBranch}\/trunk\//" Dependencies
-        svn commit -m "added new location ${newBranch}_FSMR4."
+        __cmd svn checkout ${SVN_REPO}/${SVN_DIR}/trunk/bldtools/locations-${newBranch}_FSMR4
+        __cmd cd locations-${newBranch}_FSMR4
+        __cmd sed -i -e "'s/\/${srcBranch}\//\/${newBranch}\/trunk\//'" Dependencies
+        __cmd svn commit -m \"added new location ${newBranch}_FSMR4.\"
     }
 }
 
@@ -172,8 +204,8 @@ svnCopyBranchLRC() {
     DESCRIPTION: svn cp -r${REVISION} --parents ${SVN_REPO}/${SVN_PATH} ${SVN_REPO}/${SVN_DIR}/${newBranch}/trunk. \
     $COMMENT"
 
-    svn ls ${SVN_REPO}/${SVN_PATH} || {
-        svn copy -r${REVISION} -m "${message}" --parents ${SVN_REPO}/${SVN_PATH} \
+    svn ls ${SVN_REPO}/${SVN_DIR}/${newBranch} || {
+        __cmd svn copy -r ${REVISION} -m \"${message}\" --parents ${SVN_REPO}/${SVN_PATH} \
             ${SVN_REPO}/${SVN_DIR}/${newBranch}/trunk
     }
 }
@@ -194,14 +226,14 @@ svnCopyLocationsLRC() {
     mustHaveValue "${newBranch}" "new branch"
 
     svn ls ${SVN_REPO}/${SVN_DIR}/trunk/bldtools/locations-${newBranch} || {
-        svn copy -m "copy locations branch ${newBranch}" ${SVN_REPO}/${SVN_DIR}/trunk/bldtools/${LOCATIONS_LRC} \
+        __cmd svn copy -m \"copy locations branch ${newBranch}\" ${SVN_REPO}/${SVN_DIR}/trunk/bldtools/${LOCATIONS_LRC} \
             ${SVN_REPO}/${SVN_DIR}/trunk/bldtools/locations-${newBranch}
-        svn checkout ${SVN_REPO}/${SVN_DIR}/trunk/bldtools/locations-${newBranch}
-        cd locations-${newBranch}
-        sed -i -e "s/\/${srcBranch}\//\/${newBranch}\/trunk\//" Dependencies
-        svn commit -m "added new location ${newBranch}."
+        __cmd svn checkout ${SVN_REPO}/${SVN_DIR}/trunk/bldtools/locations-${newBranch}
+        __cmd cd locations-${newBranch}
+        __cmd sed -i -e "'s/\/${srcBranch}\//\/${newBranch}\/trunk\//'" Dependencies
+        __cmd svn commit -m \"added new location ${newBranch}.\"
     }
-    svn delete -m "removed bldtools, because they are always used from MAINTRUNK" ${SVN_REPO}/${SVN_DIR}/${newBranch}/trunk/bldtools;
+    __cmd svn delete -m \"removed bldtools, because they are always used from MAINTRUNK\" ${SVN_REPO}/${SVN_DIR}/${newBranch}/trunk/bldtools;
 }
 
 ## @fn      createBranchInGit()
@@ -223,22 +255,22 @@ createBranchInGit() {
 
     if [[ "${branchExists}" == "no" ]]; then
         local newBranch=$1
+        local gitServer=$(getConfig lfsGitServer)
         mustHaveValue "${newBranch}" "new branch"
-        # TODO: get GIT via getConfig()
-        local gitServer="psulm.nsn-net.net"
+        mustHaveValue "${gitServer}" "git server"
 
-        # TODO: The SVN URL can be retrived from file.cfg.
         if [[ ${LRC} == true ]]; then
+            newBranch=LRC_${newBranch}
             gitRevision=$(svn cat -r${REVISION} ${SVN_REPO}/${SVN_PATH}/lrc/${SRC_PROJECT}/src/gitrevision)
         else
             gitRevision=$(svn cat -r${REVISION} ${SVN_REPO}/${SVN_PATH}/main/${SRC_PROJECT}/src/gitrevision)
         fi
 
         info "GIT revision: ${gitRevision}"
-        git clone ssh://git@${gitServer}/build/build
-        cd build
-        git branch $newBranch $gitRevision
-        git push origin $newBranch
+        __cmd git clone ssh://git@${gitServer}/build/build
+        __cmd cd build
+        __cmd git branch $newBranch $gitRevision
+        __cmd git push origin $newBranch
     else
         # TODO: Fail in case branch already exists.
         #       Maybe collision with master option DO_SVN.
@@ -270,7 +302,7 @@ svnDummyCommit() {
     mustExistDirectory ${workspace}/src-project
 
     echo "dummy commit" >> ${workspace}/src-project/src/README
-    svnCommit -m DummyCommit ${workspace}/src-project/src/README
+    __cmd svn commit -m DummyCommit ${workspace}/src-project/src/README
 
     return
 }
@@ -289,7 +321,6 @@ svnDummyCommitLRC() {
 #  @param   <newBranch> new branch name
 #  @return  <none>
 svnEditLocationsTxtFile() {
-    # TODO: Create locations.txt from DB
     info "--------------------------------------------------------"
     info "SVN: edit locations.txt file"
     info "--------------------------------------------------------"
@@ -306,33 +337,36 @@ svnEditLocationsTxtFile() {
     local yyyy=$(getBranchPart ${newBranch} YYYY)
     local mm=$(getBranchPart ${newBranch} MM)
 
-    info "Add ${newBranch} to trunk/${bldTools}/${locationsTxt}"
-    mkdir ${bldTools}
-    svn checkout --depth empty ${SVN_REPO}/${SVN_DIR}/trunk/${bldTools} ${bldTools}
-    cd ${bldTools}
-    svn update ${locationsTxt}
+    __cmd mkdir ${bldTools}
+    __cmd svn checkout --depth empty ${SVN_REPO}/${SVN_DIR}/trunk/${bldTools} ${bldTools}
+    __cmd cd ${bldTools}
+    __cmd svn update ${locationsTxt}
 
-    if [[ ! "${LRC}" ]] && [[ "$(echo ${newBranch} | cut -c1,2)" == "FB" ]]; then
+    if [[ ! "${LRC}" ]] && [[ "$(echo ${newBranch} | cut -c1,2)" == "FB" ]] && [[ $DEBUG != true ]]; then
         echo "${newBranch}                           Feature Build ${newBranch} (all FB_PS_LFS_REL_${yyyy}_${mm}_xx...)" >> ${locationsTxt}
     fi
 
-    if [[ ! "${LRC}" ]] && [[ "$(echo ${newBranch} | cut -c1,2)" == "MD" ]]; then
+    if [[ ! "${LRC}" ]] && [[ "$(echo ${newBranch} | cut -c1,2)" == "MD" ]] && [[ $DEBUG != true ]]; then
         echo "${newBranch}                           Feature Build ${newBranch} (bi-weekly branch)" >> ${locationsTxt}
     fi
 
-    if [[ "${FSMR4}" == "true" ]] && [[ "$(echo ${newBranch} | cut -c1,2)" == "MD" ]]; then
+    if [[ "${FSMR4}" == "true" ]] && [[ "$(echo ${newBranch} | cut -c1,2)" == "MD" ]] && [[ $DEBUG != true ]]; then
         echo "${newBranch}_FSMR4                     Feature Build ${newBranch} FSM-r4 stuff only (bi-weekly branch)" >> ${locationsTxt}
     fi
 
-    if [[ "${FSMR4}" == "true" ]] && [[ "$(echo ${newBranch} | cut -c1,2)" == "FB" ]]; then
+    if [[ "${FSMR4}" == "true" ]] && [[ "$(echo ${newBranch} | cut -c1,2)" == "FB" ]] && [[ $DEBUG != true ]]; then
         echo "${newBranch}_FSMR4                     Feature Build ${newBranch} FSM-r4 stuff only" >> ${locationsTxt}
     fi
 
-    if [[ "${LRC}" == "true" ]]; then
+    if [[ "${LRC}" == "true" ]] && [[ $DEBUG != true ]]; then
         echo "LRC_${newBranch}                       LRC locations (special LRC for ${newBranch} only)" >> ${locationsTxt}
     fi
 
-    svn commit -m "Added ${newBranch} to file ${locationsTxt}" ${locationsTxt}
+    if [[ "${LRC}" == "true" ]]; then
+        __cmd svn commit -m \"Added branch LRC_${newBranch} to ${locationsTxt}\" ${locationsTxt}
+    else
+        __cmd svn commit -m \"Added branch ${newBranch} to ${locationsTxt}\" ${locationsTxt}
+    fi
 }
 
 ## @fn      dbInsert()
@@ -360,17 +394,17 @@ dbInsert() {
         regex="${branchType}_LRC_LCP_PS_LFS_OS_${yyyy}_${mm}_([0-9][0-9][0-9][0-9])"
     fi
 
-    local sqlString="insert into branches \
-    (branch_name, location_name, ps_branch_name, based_on_revision, based_on_release, release_name_regex, date_created, comment) \
-    VALUES ('$branch', '$branch', '${branch}', ${REVISION}, '${SOURCE_RELEASE}', '${regex}', now(), '$COMMENT')"
-
     local dbName=$(getConfig MYSQL_db_name)
     local dbUser=$(getConfig MYSQL_db_username)
     local dbPass=$(getConfig MYSQL_db_password)
     local dbHost=$(getConfig MYSQL_db_hostname)
     local dbPort=$(getConfig MYSQL_db_port)
 
-    echo $sqlString | mysql -u ${dbUser} --password=${dbPass} -h ${dbHost} -P ${dbPort} -D ${dbName}
+    if [[ $DEBUG == true ]]; then
+        echo "[DEBUG] $(__get_sql_string)"
+    else
+        echo $(__get_sql_string) | mysql -u ${dbUser} --password=${dbPass} -h ${dbHost} -P ${dbPort} -D ${dbName}
+    fi
 }
 
 
