@@ -486,7 +486,6 @@ mustHaveMakingTestRunningTarget() {
     info "checking, if target is up and running (with ssh)..."
     local canDoWaitPrompt=$(getConfig LFS_CI_uc_test_TMF_can_run_waitprompt)
     if [[ ${canDoWaitPrompt} ]] ; then
-        execute sleep 60
         execute make -C ${testSuiteDirectory} waitprompt
     fi
     execute make -C ${testSuiteDirectory} waitssh
