@@ -545,7 +545,7 @@ BEGIN
     SELECT count(id) INTO cnt_test_case_id FROM test_cases WHERE test_case_name = in_test_case_name;
    
     IF cnt_test_case_id = 0 THEN
-        INSERT INTO test_cases ( test_case_name, test_case_owner ) VALUES ( in_test_case_owner, in_test_case_name );
+        INSERT INTO test_cases ( test_case_name, test_case_owner ) VALUES ( in_test_case_name, in_test_case_owner );
     END IF;
     SELECT id INTO var_test_case_id FROM test_cases WHERE test_case_name = in_test_case_name;
    
