@@ -21,8 +21,8 @@ oneTimeSetUp() {
     linkFileToArtifactsDirectory() {
         mockedCommand "linkFileToArtifactsDirectory $@"
     }
-    mustHaveLocationForDeveloperBuild() {
-        mockedCommand "mustHaveLocationForDeveloperBuild $@"
+    mustHaveLocationForSpecialBuild() {
+        mockedCommand "mustHaveLocationForSpecialBuild $@"
     }
 
     return
@@ -48,7 +48,7 @@ test1() {
 
     local expect=$(createTempFile)
     cat <<EOF > ${expect}
-mustHaveLocationForDeveloperBuild 
+mustHaveLocationForSpecialBuild 
 ci_job_package 
 specialBuildUploadAndNotifyUser DEV
 linkFileToArtifactsDirectory /build/home/${USER}/privateBuilds/LABEL.tar.gz
