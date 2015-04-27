@@ -103,28 +103,30 @@ CREATE TABLE test_results (
 );
 
 
-DROP PROCEDURE migrateBranchData;
-DELIMITER //
-CREATE PROCEDURE migrateBranchData()
-BEGIN
-  DECLARE bDone INT;
+DROP TABLE IF EXISTS test_case_results;
+CREATE TABLE test_case_results (
+    id                  INT NOT NULL AUTO_INCREMENT,
+    test_case_id        INT NOT NULL,
+    test_execution_id   INT NOT NULL,
+    test_case_duration  INT NOT NULL,
+    test_case_result    VARCHAR(128) NOT NULL,
 
-  DECLARE var1 TEXT;
-  DECLARE var2 INT;
+    PRIMARY KEY (id),
+    FOREIGN KEY (test_execution_id)
+        REFERENCES test_executions(id)
+        ON UPDATE CASCADE     
+        ON DELETE RESTRICT,
+    FOREIGN KEY (test_case_id)
+        REFERENCES test_cases(id)
+        ON UPDATE CASCADE     
+        ON DELETE RESTRICT
+);
 
-  DECLARE curs CURSOR FOR  select branch_name, min(revision) from builds group by branch_name;
-  DECLARE CONTINUE HANDLER FOR NOT FOUND SET bDone = 1;
+DROP TABLE IF EXISTS test_cases;
+CREATE TABLE test_cases (
+    id                  INT NOT NULL AUTO_INCREMENT,
+    test_case_name      VARCHAR(128) NOT NULL,
+    test_case_owner     VARCHAR(128) NOT NULL,
 
-  OPEN curs;
-
-  SET bDone = 0;
-  REPEAT
-    FETCH curs INTO var1,var2;
-       INSERT INTO branches ( location_name, ps_branch_name, branch_name, based_on_revision, date_created) values ( var1, var1, var1, var2 , NOW());
-        UPDATE builds SET branch_id = LAST_INSERT_ID() WHERE branch_name = var1;
-        
-  UNTIL bDone END REPEAT;
-
-  CLOSE curs;
-   END //
-DELIMITER ;
+    PRIMARY KEY (id)
+);

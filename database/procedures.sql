@@ -528,6 +528,33 @@ END //
 DELIMITER ;
 
 -- }}}
+-- {{{ add_new_test_case_result
+
+DROP PROCEDURE IF EXISTS add_new_test_case_result;
+DELIMITER //
+CREATE PROCEDURE add_new_test_case_result( IN test_execution_id     INT, 
+                                           IN in_test_case_name     VARCHAR(128),
+                                           IN in_test_case_result   INT,
+                                           IN in_test_case_duration INT,
+                                           IN in_test_case_owner    VARCHAR(128)
+                                           )
+BEGIN
+    DECLARE cnt_test_case_id INT;
+    DECLARE var_test_case_id INT;
+
+    SELECT count(id) INTO cnt_test_case_id FROM test_cases WHERE test_case_name = in_test_case_name;
+   
+    IF cnt_test_case_id = 0 THEN
+        INSERT INTO test_cases ( test_case_name, test_case_owner ) VALUES ( in_test_case_owner, in_test_case_name );
+    END IF;
+    SELECT id INTO var_test_case_id FROM test_cases WHERE test_case_name = in_test_case_name;
+   
+    INSERT INTO test_case_results ( test_execution_id, test_case_id, test_case_duration, test_case_result ) 
+        VALUES ( test_execution_id, var_test_case_id, in_test_case_duration, in_test_case_result);
+END //
+DELIMITER ;
+
+-- }}}
 -- {{{ test_results
 
 DROP PROCEDURE IF EXISTS test_results;
