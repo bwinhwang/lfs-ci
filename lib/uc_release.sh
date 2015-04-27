@@ -706,7 +706,7 @@ createReleaseTag() {
     local svnExternalsFile=$(createTempFile)
     echo "/isource/svnroot/${svnRepoName}/os/tags/${osLabelName} os " >> ${svnExternalsFile}
 
-    local sdkExternalLine=$(getConfig LFS_uc_release_create_release_tag_sdk_external_line -t sdk2:${sdk2} -t sdk3:${sdk3})
+    local sdkExternalLine=$(getConfig LFS_uc_release_create_release_tag_sdk_external_line -t sdk:${sdk} -t sdk2:${sdk2} -t sdk3:${sdk3})
     mustHaveValue "${sdkExternalLine}" "sdk external line"
     echo "${sdkExternalLine}" >> ${svnExternalsFile}
 
