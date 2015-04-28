@@ -14,9 +14,9 @@ usecase_YAFT_UPDATE_REVISION() {
     mustHaveValue "${branchName}" "branch name"
 
     local yaftSvnUrl=$(getConfig LFS_CI_uc_yaft_update_revision_svn_url)
-    mustExistInSubversion ${yaftSvnUrl}
+    mustExistInSubversion ${yaftSvnUrl} trunk
 
-    local revision=$(getSvnLastChangedRevision ${yaftSvnUrl})
+    local revision=$(getSvnLastChangedRevision ${yaftSvnUrl}/trunk)
     mustHaveValue "${revision}" "latest yaft revision"
 
     local commitComment=${workspace}/commitComment

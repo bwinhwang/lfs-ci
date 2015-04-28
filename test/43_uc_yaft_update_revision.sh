@@ -69,7 +69,7 @@ test1() {
     cat <<EOF > ${expect}
 getWorkspaceName 
 mustHaveWorkspaceName 
-mustExistInSubversion https://svne1.access.nsn.com/isource/svnroot/BTS_T_YAFT/trunk
+mustExistInSubversion https://svne1.access.nsn.com/isource/svnroot/BTS_T_YAFT trunk
 getSvnLastChangedRevision https://svne1.access.nsn.com/isource/svnroot/BTS_T_YAFT/trunk
 createBasicWorkspace -l pronb-developer src-project
 execute sed -i -e s|\(hint *bld/yaft *--revision\).*|\1=1234| ${WORKSPACE}/workspace/src-project/Dependencies
