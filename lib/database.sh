@@ -179,7 +179,11 @@ databaseEventPackageFailed() {
 #  @param   <none>
 #  @return  <none>
 databaseEventSubTestStarted() {
-    _storeEvent subtest_started 
+    local taskName=
+    if [[ ${JOB_NAME} =~ ^Test- ]] ; then
+        taskName=subtest
+    fi
+    _storeEvent subtest_started ${taskName}
     return
 }
 
@@ -188,7 +192,11 @@ databaseEventSubTestStarted() {
 #  @param   <none>
 #  @return  <none>
 databaseEventSubTestFinished() {
-    _storeEvent subtest_finished
+    local taskName=
+    if [[ ${JOB_NAME} =~ ^Test- ]] ; then
+        taskName=subtest
+    fi
+    _storeEvent subtest_finished ${taskName}
     return
 }
 
@@ -197,7 +205,11 @@ databaseEventSubTestFinished() {
 #  @param   <none>
 #  @return  <none>
 databaseEventSubTestFailed() {
-    _storeEvent subtest_failed 
+    local taskName=
+    if [[ ${JOB_NAME} =~ ^Test- ]] ; then
+        taskName=subtest
+    fi
+    _storeEvent subtest_failed ${taskName}
     return
 }
 
