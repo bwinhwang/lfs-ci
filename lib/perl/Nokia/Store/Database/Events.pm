@@ -43,7 +43,7 @@ sub newSubversionCommit {
     DEBUG "executing add_new_subversion_commit with data ($baselineName, $revision, $author, $date, $msg )";
 
     $sth->execute( $baselineName, $revision, $author, $date, $msg )
-        or LOGDIE sprintf( "can not insert test execution: %s, %s, %s, %s", $baselineName, $revision, $author, $author);
+        or LOGDIE sprintf( "can not insert subversion commit: %s, %s, %s, %s, %s", $baselineName, $revision, $author, $date, $msg);
 
     return;
 }
