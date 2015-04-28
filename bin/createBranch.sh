@@ -24,7 +24,6 @@ info "# COMMENT:              $COMMENT"
 info "# DO_SVN:               $DO_SVN"
 info "# DO_JENKINS:           $DO_JENKINS"
 info "# DUMMY_COMMIT:         $DUMMY_COMMIT"
-info "# UPDATE_LOCATIONS_TXT: $UPDATE_LOCATIONS_TXT"
 info "# DO_DB_INSERT:         $DO_DB_INSERT"
 info "# DO_GIT:               $DO_GIT"
 info "# ACTIVATE_ROOT_JOBS:   $ACTIVATE_ROOT_JOBS"
@@ -316,59 +315,6 @@ svnDummyCommitLRC() {
     svnDummyCommit "${newBranch}"
 }
 
-## @fn      svnEditLocationsTxtFile()
-#  @brief   adapt locations.txt file
-#  @param   <newBranch> new branch name
-#  @return  <none>
-svnEditLocationsTxtFile() {
-    info "--------------------------------------------------------"
-    info "SVN: edit locations.txt file"
-    info "--------------------------------------------------------"
-
-    if [[ "${UPDATE_LOCATIONS_TXT}" == "false" ]]; then
-        info "Not updating locations.txt files in SVN."
-        return 0
-    fi
-
-    local newBranch=$1
-    mustHaveValue "${newBranch}" "new branch"
-    local bldTools="bldtools"
-    local locationsTxt="locations.txt"
-    local yyyy=$(getBranchPart ${newBranch} YYYY)
-    local mm=$(getBranchPart ${newBranch} MM)
-
-    __cmd mkdir ${bldTools}
-    __cmd svn checkout --depth empty ${SVN_REPO}/${SVN_DIR}/trunk/${bldTools} ${bldTools}
-    __cmd cd ${bldTools}
-    __cmd svn update ${locationsTxt}
-
-    if [[ ! "${LRC}" ]] && [[ "$(echo ${newBranch} | cut -c1,2)" == "FB" ]] && [[ $DEBUG != true ]]; then
-        echo "${newBranch}                           Feature Build ${newBranch} (all FB_PS_LFS_REL_${yyyy}_${mm}_xx...)" >> ${locationsTxt}
-    fi
-
-    if [[ ! "${LRC}" ]] && [[ "$(echo ${newBranch} | cut -c1,2)" == "MD" ]] && [[ $DEBUG != true ]]; then
-        echo "${newBranch}                           Feature Build ${newBranch} (bi-weekly branch)" >> ${locationsTxt}
-    fi
-
-    if [[ "${FSMR4}" == "true" ]] && [[ "$(echo ${newBranch} | cut -c1,2)" == "MD" ]] && [[ $DEBUG != true ]]; then
-        echo "${newBranch}_FSMR4                     Feature Build ${newBranch} FSM-r4 stuff only (bi-weekly branch)" >> ${locationsTxt}
-    fi
-
-    if [[ "${FSMR4}" == "true" ]] && [[ "$(echo ${newBranch} | cut -c1,2)" == "FB" ]] && [[ $DEBUG != true ]]; then
-        echo "${newBranch}_FSMR4                     Feature Build ${newBranch} FSM-r4 stuff only" >> ${locationsTxt}
-    fi
-
-    if [[ "${LRC}" == "true" ]] && [[ $DEBUG != true ]]; then
-        echo "LRC_${newBranch}                       LRC locations (special LRC for ${newBranch} only)" >> ${locationsTxt}
-    fi
-
-    if [[ "${LRC}" == "true" ]]; then
-        __cmd svn commit -m \"Added branch LRC_${newBranch} to ${locationsTxt}\" ${locationsTxt}
-    else
-        __cmd svn commit -m \"Added branch ${newBranch} to ${locationsTxt}\" ${locationsTxt}
-    fi
-}
-
 ## @fn      dbInsert()
 #  @brief   insert the new branch into the lfs database
 #  @param   <branch> the name of the branch
@@ -430,7 +376,6 @@ main() {
             svnCopyLocationsLRC ${SRC_BRANCH} ${NEW_BRANCH}
             svnDummyCommitLRC ${NEW_BRANCH}
         fi
-        svnEditLocationsTxtFile ${NEW_BRANCH}
         dbInsert ${NEW_BRANCH}
         createBranchInGit ${NEW_BRANCH}
     else
