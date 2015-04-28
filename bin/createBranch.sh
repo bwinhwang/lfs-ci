@@ -130,6 +130,15 @@ svnCopyBranch() {
     }
 }
 
+## @fn      svnCopyBranchLRC()
+#  @brief   invoke "svnCopyBranch srcBranch newBranch"
+#  @param   <srcBranch> name of the source branch
+#  @param   <newBranch> name of the new branch
+#  @return  <none>
+svnCopyBranchLRC() {
+    svnCopyBranch $1 "LRC_$2"
+}
+
 ## @fn      svnCopyLocations()
 #  @brief   copy locations for the branch in SVN.
 #  @param   <srcBranch> name of source branch
@@ -181,31 +190,6 @@ svnCopyLocationsFSMR4() {
         __cmd cd locations-${newBranch}_FSMR4
         __cmd sed -i -e "'s/\/${srcBranch}\//\/${newBranch}\/trunk\//'" Dependencies
         __cmd svn commit -m \"added new location ${newBranch}_FSMR4.\"
-    }
-}
-
-## @fn      svnCopyBranchLRC()
-#  @brief   copy the branch in SVN for LRC by coping source branch to new branch.
-#  @param   <srcBranch> name of the source branch
-#  @param   <newBranch> name of the new branch
-#  @return  <none>
-svnCopyBranchLRC() {
-    info "--------------------------------------------------------"
-    info "SVN: create branch for LRC"
-    info "--------------------------------------------------------"
-
-    local srcBranch=$1
-    local newBranch="LRC_$2"
-    mustHaveValue "${srcBranch}" "source branch"
-    mustHaveValue "${newBranch}" "new branch"
-
-    local message="initial creation of ${newBranch} branch based on ${srcBranch} rev. ${REVISION}. \
-    DESCRIPTION: svn cp -r${REVISION} --parents ${SVN_REPO}/${SVN_PATH} ${SVN_REPO}/${SVN_DIR}/${newBranch}/trunk. \
-    $COMMENT"
-
-    svn ls ${SVN_REPO}/${SVN_DIR}/${newBranch} || {
-        __cmd svn copy -r ${REVISION} -m \"${message}\" --parents ${SVN_REPO}/${SVN_PATH} \
-            ${SVN_REPO}/${SVN_DIR}/${newBranch}/trunk
     }
 }
 
@@ -303,35 +287,6 @@ svnDummyCommit() {
         warning "Directory $SRC_PROJECT does not exist"
     fi
 }
-
-## @fn      svnDummyCommit
-#  @brief   perform a dummy commit in SVN
-#  @param   <newBranch> new branch name
-#  @return  <none>
-#svnDummyCommit() {
-#    info "--------------------------------------------------------"
-#    info "SVN: dummy commit on $SRC_PROJECT for branch $1"
-#    info "--------------------------------------------------------"
-#
-#    if [[ "${DUMMY_COMMIT}" == "false" ]]; then
-#        info "Not performig dummy commit."
-#        return 0
-#    fi
-#
-#    local newBranch=$1
-#    mustHaveValue "${newBranch}" "new branch"
-#
-#    local workspace=$(getWorkspaceName)
-#    mustHaveWorkspaceName
-#
-#    createBasicWorkspace -l ${newBranch} src-project
-#    mustExistDirectory ${workspace}/src-project
-#
-#    echo "dummy commit" >> ${workspace}/src-project/src/README
-#    __cmd svn commit -m DummyCommit ${workspace}/src-project/src/README
-#
-#    return
-#}
 
 ## @fn      svnDummyCommitLRC
 #  @brief   perform a dummy commit in SVN for LRC
