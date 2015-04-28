@@ -227,6 +227,9 @@ _storeEvent() {
     shift
 
     local productName=$(getProductNameFromJobName)
+    if [[ ${JOB_NAME} =~ Test- ]] ; then
+        productName=LFS
+    fi
     mustHaveValue "${productName}" "product name"
 
     local taskName=$(getTaskNameFromJobName)
