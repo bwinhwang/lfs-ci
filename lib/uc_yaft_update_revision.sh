@@ -9,6 +9,7 @@ usecase_YAFT_UPDATE_REVISION() {
 
     local workspace=$(getWorkspaceName)
     mustHaveWorkspaceName
+    mustHaveCleanWorkspace
 
     local branchName=$(getBranchName)
     mustHaveValue "${branchName}" "branch name"
@@ -19,7 +20,7 @@ usecase_YAFT_UPDATE_REVISION() {
     local revision=$(getSvnLastChangedRevision ${yaftSvnUrl}/trunk)
     mustHaveValue "${revision}" "latest yaft revision"
 
-    local commitComment=${workspace}/commitComment
+    local commitComment=${WORKSPACE}/commitComment
     echo "update yaft to revision ${revision}" > ${commitComment}
 
     createBasicWorkspace -l ${branchName} src-project
