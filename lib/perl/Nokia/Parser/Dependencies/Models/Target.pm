@@ -41,7 +41,7 @@ sub matchingPlatform {
     my $platform = shift;
     
     return $self->platform() if $self->hasTargetsParameter() and scalar( grep { $platform eq $_ or $_ eq "all" } $self->targetsParameter() ) > 0;
-    return $self->platform() if $self->{target} =~ m/-$platform/;
+    return $self->platform() if $self->{target} =~ m/-$platform$/;
     return;
 }
 

@@ -3,6 +3,7 @@ use strict;
 use warnings;
 
 use Data::Dumper;
+use Log::Log4perl qw( :easy );
 
 use Nokia::Usecase::GetLocation;
 
