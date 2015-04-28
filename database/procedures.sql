@@ -845,11 +845,3 @@ END //
 DELIMITER ;
 -- }}}
 
-
--- ALTER TABLE events DROP event_name;
--- ALTER TABlE events DROP event_target;
--- ALTER TABlE events DROP event_subtarget;
--- ALTER TABlE events DROP event_description;
--- ALTER TABlE events ADD column product_name VARCHAR(128);
--- ALTER TABlE events ADD column task_name VARCHAR(128);
-
