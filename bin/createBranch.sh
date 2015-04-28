@@ -283,7 +283,7 @@ createBranchInGit() {
 #  @return  <none>
 svnDummyCommit() {
     info "--------------------------------------------------------"
-    info "SVN: dummy commit on $SRC_PROJECT for branch $1"
+    info "SVN: dummy commit on $SRC_PROJECT"
     info "--------------------------------------------------------"
 
     if [[ "${DUMMY_COMMIT}" == "false" ]]; then
@@ -294,17 +294,44 @@ svnDummyCommit() {
     local newBranch=$1
     mustHaveValue "${newBranch}" "new branch"
 
-    local workspace=$(getWorkspaceName)
-    mustHaveWorkspaceName
-
-    createBasicWorkspace -l ${newBranch} src-project
-    mustExistDirectory ${workspace}/src-project
-
-    echo "dummy commit" >> ${workspace}/src-project/src/README
-    __cmd svn commit -m DummyCommit ${workspace}/src-project/src/README
-
-    return
+    svn checkout ${SVN_REPO}/${SVN_DIR}/${newBranch}/trunk/main/${SRC_PROJECT}
+    if [[ -d ${SRC_PROJECT} ]]; then
+        cd ${SRC_PROJECT}
+        echo >> src/README
+        svn commit -m "dummy commit" src/README
+    else
+        warning "Directory $SRC_PROJECT does not exist"
+    fi
 }
+
+## @fn      svnDummyCommit
+#  @brief   perform a dummy commit in SVN
+#  @param   <newBranch> new branch name
+#  @return  <none>
+#svnDummyCommit() {
+#    info "--------------------------------------------------------"
+#    info "SVN: dummy commit on $SRC_PROJECT for branch $1"
+#    info "--------------------------------------------------------"
+#
+#    if [[ "${DUMMY_COMMIT}" == "false" ]]; then
+#        info "Not performig dummy commit."
+#        return 0
+#    fi
+#
+#    local newBranch=$1
+#    mustHaveValue "${newBranch}" "new branch"
+#
+#    local workspace=$(getWorkspaceName)
+#    mustHaveWorkspaceName
+#
+#    createBasicWorkspace -l ${newBranch} src-project
+#    mustExistDirectory ${workspace}/src-project
+#
+#    echo "dummy commit" >> ${workspace}/src-project/src/README
+#    __cmd svn commit -m DummyCommit ${workspace}/src-project/src/README
+#
+#    return
+#}
 
 ## @fn      svnDummyCommitLRC
 #  @brief   perform a dummy commit in SVN for LRC
