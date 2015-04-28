@@ -153,7 +153,7 @@ svnCopyLocations() {
                 ${SVN_REPO}/${SVN_DIR}/trunk/bldtools/locations-${newBranch};
             __cmd svn checkout ${SVN_REPO}/${SVN_DIR}/trunk/bldtools/locations-${newBranch};
             __cmd cd locations-${newBranch};
-            __cmd sed -i -e "'s/\/${srcBranch}\//\/${newBranch}\/trunk\//'" Dependencies;
+            __cmd sed -i -e "'s/\/os\/${srcBranch}\//\/os\/${newBranch}\/trunk\//'" Dependencies;
             __cmd svn commit -m \"added new location ${newBranch}.\";
             __cmd svn delete -m \"removed bldtools, because they are always used from MAINTRUNK\" ${SVN_REPO}/${SVN_DIR}/${newBranch}/trunk/bldtools;
     }
