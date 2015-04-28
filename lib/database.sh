@@ -179,7 +179,7 @@ databaseEventPackageFailed() {
 #  @param   <none>
 #  @return  <none>
 databaseEventSubTestStarted() {
-    local taskName=
+    local taskName=""
     if [[ ${JOB_NAME} =~ ^Test- ]] ; then
         taskName=subtest
     fi
@@ -192,7 +192,7 @@ databaseEventSubTestStarted() {
 #  @param   <none>
 #  @return  <none>
 databaseEventSubTestFinished() {
-    local taskName=
+    local taskName=""
     if [[ ${JOB_NAME} =~ ^Test- ]] ; then
         taskName=subtest
     fi
@@ -205,7 +205,7 @@ databaseEventSubTestFinished() {
 #  @param   <none>
 #  @return  <none>
 databaseEventSubTestFailed() {
-    local taskName=
+    local taskName=""
     if [[ ${JOB_NAME} =~ ^Test- ]] ; then
         taskName=subtest
     fi
