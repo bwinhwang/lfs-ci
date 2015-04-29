@@ -71,13 +71,14 @@ makingTest_testXmloutput() {
 #  @param   <none>
 #  @return  <none>
 makingTest_testconfig() {
-    requiredParameters DELIVERY_DIRECTORY
-
     local targetName=$(_reserveTarget)
     mustHaveValue "${targetName}" "target name"
     
     local testSuiteDirectory=$(makingTest_testSuiteDirectory)
     mustExistDirectory ${testSuiteDirectory}
+
+    local deliveryDirectory=$(getConfig LFS_CI_uc_test_on_target_delivery_directory)
+    mustExistDirectory ${deliveryDirectory}
 
     local workspace=$(getWorkspaceName)
     mustHaveWorkspaceName
@@ -85,7 +86,7 @@ makingTest_testconfig() {
     info "create testconfig for ${testSuiteDirectory}"
     execute make -C ${testSuiteDirectory}       \
                 testconfig-overwrite            \
-                TESTBUILD=${DELIVERY_DIRECTORY} \
+                TESTBUILD=${deliveryDirectory} \
                 TESTTARGET=${targetName,,}      \
                 TESTBUILD_SRC=${workspace}
     return
