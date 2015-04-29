@@ -57,6 +57,7 @@ my %commands = (
                  searchTarget                   => "Nokia::Command::SearchTarget",
                  getBranchInformation           => "Nokia::Command::GetBranchInformation",
                  getLocationsText               => "Nokia::Command::GetLocationsText",
+                 dumpConfig                     => "Nokia::Command::DumpConfig",
                );
 
 if( not exists $commands{$program} ) {
