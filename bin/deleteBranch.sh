@@ -316,11 +316,12 @@ deleteTestResults() {
 
     getDirPattern ${BRANCH}
 
-    local subString=$(__getSubBranch ${BRANCH})
+    local subBranch=$(__getSubBranch ${BRANCH})
     local dirPattern=$DIR_PATTERN
-    if [[ "${subString}" != "" ]]; then
-        info "sub branch: ${subString}"
-        echo ${dirPattern} | grep -q ${subString} || { echo sub branch ${subString} is not in directory pattern ${dirPattern}; exit 1; }
+    if [[ "${subBranch}" != "" ]]; then
+        info "sub branch: ${subBranch}"
+        #echo ${dirPattern} | grep -q ${subBranch} || { error sub branch ${subBranch} is not in directory pattern ${dirPattern}; exit 1; }
+        echo ${dirPattern} | grep -q ${subBranch} || { info "sub branch ${subBranch} is not in directory pattern ${dirPattern}"; }
     else
         yyyy=$(getBranchPart ${BRANCH} YYYY)
         mm=$(getBranchPart ${BRANCH} MM)
