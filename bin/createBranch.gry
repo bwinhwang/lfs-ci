@@ -16,17 +16,18 @@
 //
 // IMPORTANT:
 //
-// 1)
 // Jobs to be copied must exist within the SCM view.
 // "SCM/TUNK" and "SCM_LRC/TRUNK".
-// 2)
+// 
 // Sectioned view templates are read from 
-// 3)
+// 
 // Currently works only if "trunk" is the src_branch.
 ///////////////////////////////////////////////////////////////////////////////
 
 //
-// TODO: Job exclude list
+// TODO:
+//  - Job exclude list (1. Job to be excluded: *YAFT*)
+//  - Check whether all jobs are deleted if not delete it again.
 //
 
 import hudson.model.*
