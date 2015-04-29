@@ -11,6 +11,8 @@ usecase_YAFT_UPDATE_REVISION() {
     mustHaveWorkspaceName
     mustHaveCleanWorkspace
 
+    export PATH=/opt/subversion/x86_64/1.8.9/bin/:${PATH}
+
     local branchName=$(getBranchName)
     mustHaveValue "${branchName}" "branch name"
 
