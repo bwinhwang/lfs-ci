@@ -20,8 +20,14 @@
 // Jobs to be copied must exist within the SCM view.
 // "SCM/TUNK" and "SCM_LRC/TRUNK".
 // 2)
+// Sectioned view templates are read from 
+// 3)
 // Currently works only if "trunk" is the src_branch.
 ///////////////////////////////////////////////////////////////////////////////
+
+//
+// TODO: Job exclude list
+//
 
 import hudson.model.*
 import jenkins.model.Jenkins
@@ -33,7 +39,7 @@ import java.io.File
 import java.io.FileInputStream;
 
 
-println("\nRunning script createBranch.gry\n")
+println("\n\nRunning script createBranch.gry\n")
 
 def j = Jenkins.instance
 
@@ -61,12 +67,13 @@ debug = true
 
 // Environment vars
 jenkinsHome = build.getEnvironment(listener).get("JENKINS_HOME")
-
 jenkinsUrl = build.getEnvironment(listener).get("JENKINS_URL")
-
-apiToken = build.getEnvironment(listener).get("JENKINS_API_TOKEN")
-
-apiUser = build.getEnvironment(listener).get("JENKINS_API_USER")
+jenkinsApiToken = build.getEnvironment(listener).get("JENKINS_API_TOKEN")
+jenkinsApiUser = build.getEnvironment(listener).get("JENKINS_API_USER")
+ciRoot = build.getEnvironment(listener).get("LFS_CI_ROOT")
+templateDir = build.getEnvironment(listener).get("CONFIGXML_TEMPLATE_DIR")
+templateSuffix = build.getEnvironment(listener).get("CONFIGXML_TEMPLATE_SUFFIX")
+workspace = build.getEnvironment(listener).get("WORKSPACE")
 
 lrc_jobs = false
 if(build.getEnvironment(listener).get("LRC") == "true") {
@@ -340,18 +347,18 @@ for(job in jobs_list) {
     //if(job.name.find("LRC")) {
     //if(job.name.find("fsmr4")) {
     //if(job.name == "PKGPOOL_-_trunk_-_Build") {
-    def new_job = copyJob(job)
-    if(!debug) {
-        new_job.save()
-        disableJob(new_job)
-        // avoid having two projects point to the same location
-        updateWorkspace(new_job)
-        def config_file = updateJobConfig(job, new_job)
-        copyPromotions(job, new_job)
-        reloadJobConfig(new_job, config_file)
-        new_branch_view_obj.doAddJobToView(new_job.getName())
-        println("[INFO] added job $new_job.name to view \"$new_branch_view_obj.name\"")
-    }
+//    def new_job = copyJob(job)
+//    if(!debug) {
+//        new_job.save()
+//        disableJob(new_job)
+//        // avoid having two projects point to the same location
+//        updateWorkspace(new_job)
+//        def config_file = updateJobConfig(job, new_job)
+//        copyPromotions(job, new_job)
+//        reloadJobConfig(new_job, config_file)
+//        new_branch_view_obj.doAddJobToView(new_job.getName())
+//        println("[INFO] added job $new_job.name to view \"$new_branch_view_obj.name\"")
+//    }
     //}
 }
 
@@ -369,25 +376,34 @@ if(activateRootJobs) {
     println("[INFO] not enabling before disabled jobs")
 }
 
+env = new HashMap()
+env.put("JENKINS_HOME", jenkinsHome)
+env.put("JENKINS_URL", jenkinsUrl)
+env.put("JENKINS_API_TOKEN", jenkinsApiToken)
+env.put("JENKINS_API_USER", jenkinsApiUser)
+env.put("LFS_CI_ROOT", ciRoot)
+env.put("TEMPLATE_DIR", templateDir)
+env.put("TEMPLATE_SUFFIX", templateSuffix)
+env.put("WORKSPACE", workspace)
 
 def config = new HashMap()
 def bindings = getBinding()
 config.putAll(bindings.getVariables())
 def out = config['out']
 
-sectionedView = new MySectionedView(new_branch, lrc_jobs, jenkinsUrl, apiToken, apiUser, out)
+sectionedView = new MySectionedView(new_branch, lrc_jobs, env, out)
 if(!debug) {
-    sectionedView.createSectionedView()
-    sectionedView.addListViewSections()
+    //sectionedView.createNestedView()
+    //sectionedView.addSectionedView()
+    sectionedView.configureSectionedView()
 }
-
 
 ///////////////////////////////////////////////////////////////////////
 //
 // CLASSES
 //
 // In groovy the output stream must be provided to a class
-// explicitly. Here we call it out.
+// explicitly. Here we call it "out".
 ///////////////////////////////////////////////////////////////////////
 
 
@@ -397,21 +413,20 @@ if(!debug) {
  */
 class MySectionedView {
 
+    def env
     def branch
     def lrc
-    def regExLfsCiBuild
-    def regExLfsCiTesting
-    def regExLfsProd
-    def nameSectionBuild
-    def nameSectionTesting
-    def nameSectionReleasing
-    def branchSectionedView
-    def listWidth
-    def listAlignment
     def jenkinsUrl
     def apiToken
     def apiUser
+    def ciRoot
+    def tmplDir
+    def tmplSuffix
+    def workspace
     def out
+
+    def branchNestedView
+    def branchType
 
     /**
      * Constructor
@@ -423,231 +438,99 @@ class MySectionedView {
      * @param apiUser the Jenkins API user.
      * @param out the output stream so that this.out.println("...") works.
      */
-    MySectionedView(branch, lrc, jenkinsUrl, apiToken, apiUser, out) {
+    MySectionedView(branch, lrc, env, out) {
         this.branch = branch
         this.lrc = lrc
-        this.jenkinsUrl = jenkinsUrl
-        this.apiToken = apiToken
-        this.apiUser = apiUser
+        this.env = env
+        this.jenkinsUrl = env.get("JENKINS_URL")
+        this.apiToken = env.get("JENKINS_API_TOKEN")
+        this.apiUser = env.get("JENKINS_API_USER")
+        this.ciRoot = env.get("LFS_CI_ROOT")
+        this.tmplDir = env.get("TEMPLATE_DIR")
+        this.tmplSuffix = env.get("TEMPLATE_SUFFIX")
+        this.workspace = env.get("WORKSPACE")
         this.out = out
 
-        this.regExLfsCiBuild = "LFS_CI_-_(${this.branch}|${this.branch}_FSMR4)_-_(Build|KlocworkBuild).*"
-        this.regExLfsCiTesting = "LFS_CI_-_(${this.branch}|${this.branch}_FSMR4)_-_.*(Test|Unittest).*"
-        this.regExLfsProd = "LFS_Prod_-_${this.branch}_-_.*"
-        this.nameSectionBuild = "CI Builds (${this.branch})"
-        this.nameSectionTesting = "CI Testing (${this.branch})"
-        this.nameSectionReleasing = "Releasing (${this.branch})"
-        if(this.branch[0..1] == "FB")
-            this.branchSectionedView = this.branch[2..-1]
-        else
-            this.branchSectionedView = this.branch[3..-1]
-        this.listWidth = "HALF"
-        this.listAlignment = "LEFT"
-        if(this.lrc) {
-            this.listAlignment = "RIGHT"
-            this.regExLfsCiBuild = "LFS_CI_-_LRC_${this.branch}.*"
-            this.regExLfsProd = "LFS_Prod_-_LRC_${this.branch}_-_.*"
-            this.nameSectionBuild = "CI Builds and Testing (LRC_${this.branch})"
-            this.nameSectionReleasing = "Releasing (LRC_${this.branch})"
+        if(this.branch[0..1] == "FB") {
+            this.branchType = "FB"
+            this.branchNestedView = this.branch[2..-1]
+        } else if(this.branch[0..1] == "MD") {
+            this.branchType = "MD"
+            this.branchNestedView = this.branch[3..-1]
+        } else {
+            throw Exception("Invalid branch name: ${this.branch}")
         }
+
+        if(this.lrc) {
+            this.branch = "LRC_${this.branch}"
+            this.branchType = "LRC_${this.branchType}"
+        }
+
     }   
     
     /**
-     * @return String the config.xml for the sectioned view.
+     * Create the nested view for the branch.
      */
-    String getCurrentXml() {
-        def requestUrl = "${this.jenkinsUrl}view/${this.branchSectionedView}/config.xml"
-        this.out.println("==> $requestUrl")
-        def proc = ["curl", "--noproxy", "localhost", "${requestUrl}"].execute()
-        def xmlString = proc.text
-        return xmlString
-    }
-
-    String createListViewSectionsXml() {
-        def xs = """
-            <hudson.plugins.sectioned__view.ListViewSection>
-              <jobNames><comparator class="hudson.util.CaseInsensitiveComparator"/></jobNames>
-              <jobFilters/>
-              <name>${this.nameSectionBuild}</name>
-              <includeRegex>${this.regExLfsCiBuild}</includeRegex>
-              <width>${listWidth}</width>
-              <alignment>${this.listAlignment}</alignment>
-              <columns>
-                <hudson.views.StatusColumn/>
-                <hudson.views.BuildButtonColumn/>
-                <org.jenkins.ci.plugins.column.console.LastBuildColumn plugin="console-column-plugin@1.5"/>
-                <com.robestone.hudson.compactcolumns.JobNameColorColumn plugin="compact-columns@1.10">
-                  <colorblindHint>nohint</colorblindHint>
-                  <showColor>false</showColor>
-                  <showDescription>true</showDescription>
-                  <showLastBuild>true</showLastBuild>
-                </com.robestone.hudson.compactcolumns.JobNameColorColumn>
-                <com.robestone.hudson.compactcolumns.LastStableAndUnstableColumn plugin="compact-columns@1.10">
-                  <timeAgoTypeString>DIFF</timeAgoTypeString>
-                </com.robestone.hudson.compactcolumns.LastStableAndUnstableColumn>
-              </columns>
-            </hudson.plugins.sectioned__view.ListViewSection>"""
-
-        // LRC list view section does not separate build and test jobs
-        if(!this.lrc) {
-            xs+= """
-            <hudson.plugins.sectioned__view.ListViewSection>
-              <jobNames><comparator class="hudson.util.CaseInsensitiveComparator"/></jobNames>
-              <jobFilters/>
-              <name>${this.nameSectionTesting}</name>
-              <includeRegex>${this.regExLfsCiTesting}</includeRegex>
-              <width>${listWidth}</width>
-              <alignment>${this.listAlignment}</alignment>
-              <columns>
-                <hudson.views.StatusColumn/>
-                <hudson.views.BuildButtonColumn/>
-                <org.jenkins.ci.plugins.column.console.LastBuildColumn plugin="console-column-plugin@1.5"/>
-                <com.robestone.hudson.compactcolumns.JobNameColorColumn plugin="compact-columns@1.10">
-                  <colorblindHint>nohint</colorblindHint>
-                  <showColor>false</showColor>
-                  <showDescription>true</showDescription>
-                  <showLastBuild>true</showLastBuild>
-                </com.robestone.hudson.compactcolumns.JobNameColorColumn>
-                <com.robestone.hudson.compactcolumns.LastStableAndUnstableColumn plugin="compact-columns@1.10">
-                  <timeAgoTypeString>DIFF</timeAgoTypeString>
-                </com.robestone.hudson.compactcolumns.LastStableAndUnstableColumn>
-              </columns>
-            </hudson.plugins.sectioned__view.ListViewSection>"""
-        }
-
-        xs+= """
-            <hudson.plugins.sectioned__view.ListViewSection>
-              <jobNames><comparator class="hudson.util.CaseInsensitiveComparator"/></jobNames>
-              <jobFilters/>
-              <name>${this.nameSectionReleasing}</name>
-              <includeRegex>${this.regExLfsProd}</includeRegex>
-              <width>${listWidth}</width>
-              <alignment>${this.listAlignment}</alignment>
-              <columns>
-                <hudson.views.StatusColumn/>
-                <hudson.views.BuildButtonColumn/>
-                <hudson.views.LastSuccessColumn/><hudson.views.LastFailureColumn/><hudson.views.LastDurationColumn/><hudson.views.BuildButtonColumn/></columns>
-            </hudson.plugins.sectioned__view.ListViewSection>"""
-
-        return xs
-    }
-
-    /**
-     * Generates the XML String which can be used to update the config.xml file.
-     *
-     * @return String XML String defining list view sections.
-     */
-    String createListViewSectionsXml_OLD() {
-        return """
-            <hudson.plugins.sectioned__view.ListViewSection>
-              <jobNames><comparator class="hudson.util.CaseInsensitiveComparator"/></jobNames>
-              <jobFilters/>
-              <name>${this.nameSectionBuild}</name>
-              <includeRegex>${this.regExLfsCiBuild}</includeRegex>
-              <width>${listWidth}</width>
-              <alignment>${this.listAlignment}</alignment>
-              <columns>
-                <hudson.views.StatusColumn/>
-                <hudson.views.JobColumn/>
-                <hudson.views.LastSuccessColumn/>
-                <hudson.views.LastFailureColumn/>
-                <hudson.views.LastDurationColumn/>
-                <hudson.views.BuildButtonColumn/>
-              </columns>
-            </hudson.plugins.sectioned__view.ListViewSection>
-            <hudson.plugins.sectioned__view.ListViewSection>
-              <jobNames><comparator class="hudson.util.CaseInsensitiveComparator"/></jobNames>
-              <jobFilters/>
-              <name>${this.nameSectionTesting}</name>
-              <includeRegex>${this.regExLfsCiTesting}</includeRegex>
-              <width>${listWidth}</width>
-              <alignment>${this.listAlignment}</alignment>
-              <columns>
-                <hudson.views.StatusColumn/>
-                <hudson.views.JobColumn/>
-                <hudson.views.LastSuccessColumn/>
-                <hudson.views.LastFailureColumn/>
-                <hudson.views.LastDurationColumn/>
-                <hudson.views.BuildButtonColumn/>
-              </columns>
-            </hudson.plugins.sectioned__view.ListViewSection>
-            <hudson.plugins.sectioned__view.ListViewSection>
-              <jobNames><comparator class="hudson.util.CaseInsensitiveComparator"/></jobNames>
-              <jobFilters/>
-              <name>${this.nameSectionReleasing}</name>
-              <includeRegex>${this.regExLfsProd}</includeRegex>
-              <width>${listWidth}</width>
-              <alignment>${this.listAlignment}</alignment>
-              <columns>
-                <hudson.views.StatusColumn/>
-                <hudson.views.JobColumn/>
-                <hudson.views.LastSuccessColumn/><hudson.views.LastFailureColumn/><hudson.views.LastDurationColumn/><hudson.views.BuildButtonColumn/></columns>
-            </hudson.plugins.sectioned__view.ListViewSection>"""
-    }
-
-    /**
-     * Check whether the sectioned view has a list view section or not.
-     *
-     * @return boolean true if the sectioned view has a list view section false otherwise.
-     */
-    boolean hasListViewSection() {
-        if(this.getCurrentXml().find("<sections>")) {
-            return true
+    void createNestedView() {
+        if(Jenkins.instance.getView(this.branchNestedView)) {
+            this.out.println("[INFO] view ${this.branchNestedView} already exists.")
         } else {
-            return false
+            Jenkins.instance.addView(new hudson.plugins.nested_view.NestedView(this.branchNestedView))
+            this.out.println("[INFO] Created view ${this.branchNestedView}")
         }
     }
 
-    /**
+    /** 
      * Create the sectioned view for this.branch.
+     * TODO: Not working: sectioned view is added to the root view.
      */
-    void createSectionedView() {
-        def trunk_view = "trunk"
-        def trunk_view_owner_obj = null
-        def branchSectionedViewObj = Jenkins.instance.getView(this.branchSectionedView)
+    void addSectionedView() {
+        def parent_view = this.branchNestedView
+        def parent_view_obj = null
+        def branchSectionedViewObj = null
 
-        if(branchSectionedViewObj) {
-            this.out.println("[INFO] view ${this.branchSectionedView} already exists.")
+        if(branchNestedViewObj) {
+            this.out.println("[INFO] view ${this.branchNestedView} already exists.")
         } else {
-            trunk_view_owner_obj = Jenkins.instance.getView(trunk_view).getOwner();
-            branchSectionedViewObj = new SectionedView(this.branchSectionedView)
-            trunk_view_owner_obj.addView(branchSectionedViewObj)
-            this.out.println("[INFO] Created view ${this.branchSectionedView}")
-        }
+            parent_view_obj = Jenkins.instance.getView(parent_view)
+            branchSectionedViewObj = new SectionedView(this.branch)
+            parent_view_obj.addView(branchSectionedViewObj)
+            this.out.println("[INFO] Created view ${parent_view}/${this.branch}")
+        }   
+    }   
+    
+    void processFileInplace(file, Closure processText) {
+        def text = file.text
+        file.write(processText(text))
     }
 
     /**
-     * Add list view sections to the sectioned view.
-     */
-    void addListViewSections() {
-        def requestUrl = "${this.jenkinsUrl}view/${this.branchSectionedView}/config.xml"
-        def currentXml = this.getCurrentXml()
+      * Confiure the sectioned view for this branch by sending a config.xml
+      * file to Jenkins via the Jenkins HTTP API.
+      */
+    void configureSectionedView() {
+        this.out.println()
+        def requestUrl = "${this.jenkinsUrl}view/${this.branchNestedView}/view/${this.branch}/config.xml"
+        def xmlTemplate = null
         def configurationFile = null
-        def newConfigXml = null
         def proc = null
+        def configXmlFile = "${workspace}/sectioned_view_template.xml"
 
-        if(this.lrc) {
-            if(!this.hasListViewSection()) {
-                this.out.println("[INFO] view has not list view sections")
-                newConfigXml = currentXml.replaceFirst("<sections/>", "<sections>\n"+this.createListViewSectionsXml()+"\n</sections>")
-            } else {
-                this.out.println("[INFO] view already has list view sections")
-                newConfigXml = currentXml.replaceFirst("</sections>", this.createListViewSectionsXml()+"\n</sections>")
-            }
-        } else {
-            if(!this.hasListViewSection()) {
-                this.out.println("[INFO] view does not have list view sections")
-                newConfigXml = currentXml.replaceFirst("<sections/>", "<sections>\n"+this.createListViewSectionsXml()+"\n</sections>")
-            } else {
-                this.out.println("[INFO] view already has list view sections")
-                newConfigXml = currentXml.replaceFirst("<sections>", "<sections>\n"+this.createListViewSectionsXml())
-            }
+        this.out.println("[INFO] configure sectioned view")
+        this.out.println("[INFO] read ${this.tmplDir}/${this.branchType}${this.tmplSuffix}")
+        def tmplString = new File("${this.tmplDir}/${this.branchType}${this.tmplSuffix}").text
+        def sectionedViewTmpl = new File(configXmlFile)
+        this.out.println("[INFO] write config xml file to ${configXmlFile}")
+        sectionedViewTmpl.write(tmplString)
+
+        this.processFileInplace(sectionedViewTmpl) { text ->
+            text.replaceAll("##BRANCH##", this.branch)
         }
 
-        configurationFile = new File("config.xml")
-        configurationFile.write(newConfigXml)
-        proc = ["curl", "-u${this.apiUser}:${this.apiToken}", "${requestUrl}", "--noproxy", "localhost", "--data-binary", "@config.xml"].execute()
+        this.out.println("[INFO] send config xml file ${configXmlFile} to Jenkins")
+        proc = ["curl", "-u${this.apiUser}:${this.apiToken}", "${requestUrl}", "--noproxy", "localhost", "--data-binary", "@${workspace}/sectioned_view_template.xml"].execute()
         proc.waitFor()
-        this.out.println("addListViewSections() proc.text: $proc.text")
+        this.out.println("[INFO] configureSectionedView() proc.text: $proc.text")
     }
 }
+

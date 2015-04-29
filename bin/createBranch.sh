@@ -70,10 +70,16 @@ __checkParams() {
 __preparation(){
     JENKINS_API_TOKEN=$(getConfig jenkinsApiToken)
     JENKINS_API_USER=$(getConfig jenkinsApiUser)
+    CONFIGXML_TEMPLATE_DIR=$(getConfig sectionedViewTemplateDir)
+    CONFIGXML_TEMPLATE_SUFFIX=$(getConfig sectionedViewTemplateSuffix)
+
     mustHaveValue ${JENKINS_API_TOKEN} "Jenkins API token is missing."
     mustHaveValue ${JENKINS_API_USER} "Jenkins API user is missing."
+
     echo JENKINS_API_TOKEN=${JENKINS_API_TOKEN} > ${WORKSPACE}/${VARS_FILE}
     echo JENKINS_API_USER=${JENKINS_API_USER} >> ${WORKSPACE}/${VARS_FILE}
+    echo CONFIGXML_TEMPLATE_DIR=${CONFIGXML_TEMPLATE_DIR} >> ${WORKSPACE}/${VARS_FILE}
+    echo CONFIGXML_TEMPLATE_SUFFIX=${CONFIGXML_TEMPLATE_SUFFIX} >> ${WORKSPACE}/${VARS_FILE}
 }
 
 ## @fn     __get_sql_insert()
