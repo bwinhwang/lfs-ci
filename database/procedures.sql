@@ -773,7 +773,8 @@ BEGIN
    SELECT count(id) INTO cnt_is_already_done FROM subversion_commits WHERE build_id = var_build_id AND svn_revision = in_revision;
 
    IF cnt_is_already_done = 0 THEN
-       INSERT INTO subversion_commits (build_id, svn_revision, svn_author, commit_date, commit_message ) VALUES ( var_build_id, in_revision, in_author, in_date, in_msg );
+       INSERT INTO subversion_commits (build_id, svn_revision, svn_author, commit_date, commit_message ) 
+            VALUES ( var_build_id, in_revision, in_author, STR_TO_DATE( in_date, "%Y-%m-%dT%H:%i:%S.%fZ" ), in_msg );
    END IF;
 
 END //
@@ -844,12 +845,4 @@ BEGIN
 END //
 DELIMITER ;
 -- }}}
-
-
--- ALTER TABLE events DROP event_name;
--- ALTER TABlE events DROP event_target;
--- ALTER TABlE events DROP event_subtarget;
--- ALTER TABlE events DROP event_description;
--- ALTER TABlE events ADD column product_name VARCHAR(128);
--- ALTER TABlE events ADD column task_name VARCHAR(128);
 

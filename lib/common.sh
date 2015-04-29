@@ -190,13 +190,9 @@ createBasicWorkspace() {
     fi
 
     local workspace=$(getWorkspaceName)
-    mustHaveWritableWorkspace
     mustHaveWorkspaceName
-
-    if [[ -d ${workspace}/.build_workdir ]] ; then
-        execute build updateall
-    fi
     mustHaveCleanWorkspace
+    mustHaveWritableWorkspace
 
     local components=$@
 
