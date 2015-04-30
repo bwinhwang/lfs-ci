@@ -348,18 +348,18 @@ for(job in jobs_list) {
     //if(job.name.find("LRC")) {
     //if(job.name.find("fsmr4")) {
     //if(job.name == "PKGPOOL_-_trunk_-_Build") {
-//    def new_job = copyJob(job)
-//    if(!debug) {
-//        new_job.save()
-//        disableJob(new_job)
-//        // avoid having two projects point to the same location
-//        updateWorkspace(new_job)
-//        def config_file = updateJobConfig(job, new_job)
-//        copyPromotions(job, new_job)
-//        reloadJobConfig(new_job, config_file)
-//        new_branch_view_obj.doAddJobToView(new_job.getName())
-//        println("[INFO] added job $new_job.name to view \"$new_branch_view_obj.name\"")
-//    }
+    def new_job = copyJob(job)
+    if(!debug) {
+        new_job.save()
+        disableJob(new_job)
+        // avoid having two projects point to the same location
+        updateWorkspace(new_job)
+        def config_file = updateJobConfig(job, new_job)
+        copyPromotions(job, new_job)
+        reloadJobConfig(new_job, config_file)
+        new_branch_view_obj.doAddJobToView(new_job.getName())
+        println("[INFO] added job $new_job.name to view \"$new_branch_view_obj.name\"")
+    }
     //}
 }
 
