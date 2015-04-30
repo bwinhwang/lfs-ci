@@ -146,13 +146,13 @@ def createScmView() {
     new_branch_view_obj = scm_view_obj.getView(branch_view_name)
 
     if(new_branch_view_obj) {
-        println("[INFO] view $branch_view_name already exists.")
+        println("[INFO] view ${scm_view}/${branch_view_name} already exists.")
     }
     else {
         if(debug) {
-            println("[DEBUG] Adding view $branch_view_name to $scm_view view")
+            println("[DEBUG] Adding view ${scm_view}/${branch_view_name}.")
         } else {
-            println("[INFO] Adding view $branch_view_name to $scm_view view")
+            println("[INFO] Adding view ${scm_view}/${branch_view_name}")
             new_branch_view_obj = new ListView(branch_view_name, scm_view_obj)
             scm_view_obj.addView(new_branch_view_obj)
         }
@@ -348,18 +348,18 @@ for(job in jobs_list) {
     //if(job.name.find("LRC")) {
     //if(job.name.find("fsmr4")) {
     //if(job.name == "PKGPOOL_-_trunk_-_Build") {
-    def new_job = copyJob(job)
-    if(!debug) {
-        new_job.save()
-        disableJob(new_job)
-        // avoid having two projects point to the same location
-        updateWorkspace(new_job)
-        def config_file = updateJobConfig(job, new_job)
-        copyPromotions(job, new_job)
-        reloadJobConfig(new_job, config_file)
-        new_branch_view_obj.doAddJobToView(new_job.getName())
-        println("[INFO] added job $new_job.name to view \"$new_branch_view_obj.name\"")
-    }
+//    def new_job = copyJob(job)
+//    if(!debug) {
+//        new_job.save()
+//        disableJob(new_job)
+//        // avoid having two projects point to the same location
+//        updateWorkspace(new_job)
+//        def config_file = updateJobConfig(job, new_job)
+//        copyPromotions(job, new_job)
+//        reloadJobConfig(new_job, config_file)
+//        new_branch_view_obj.doAddJobToView(new_job.getName())
+//        println("[INFO] added job $new_job.name to view \"$new_branch_view_obj.name\"")
+//    }
     //}
 }
 
@@ -394,8 +394,8 @@ def out = config['out']
 
 sectionedView = new MySectionedView(new_branch, lrc_jobs, env, out)
 if(!debug) {
-    //sectionedView.createNestedView()
-    //sectionedView.addSectionedView()
+    parentViewObj = sectionedView.createNestedView()
+    sectionedView.addSectionedView(parentViewObj)
     sectionedView.configureSectionedView()
 }
 
@@ -470,33 +470,35 @@ class MySectionedView {
     }   
     
     /**
-     * Create the nested view for the branch.
+     * Create the nested view (the root view) for the branch.
+     * The name of the view is this.branchNestedView.
      */
-    void createNestedView() {
-        if(Jenkins.instance.getView(this.branchNestedView)) {
+    hudson.plugins.nested_view.NestedView createNestedView() {
+        def nestedView = Jenkins.instance.getView(this.branchNestedView)
+        if(nestedView) {
             this.out.println("[INFO] view ${this.branchNestedView} already exists.")
         } else {
-            Jenkins.instance.addView(new hudson.plugins.nested_view.NestedView(this.branchNestedView))
+            nestedView = new hudson.plugins.nested_view.NestedView(this.branchNestedView)
+            Jenkins.instance.addView(nestedView)
             this.out.println("[INFO] Created view ${this.branchNestedView}")
         }
+        return nestedView
     }
 
     /** 
      * Create the sectioned view for this.branch.
-     * TODO: Not working: sectioned view is added to the root view.
+     * 
+     * @param parentView the instance of the parent view
      */
-    void addSectionedView() {
-        def parent_view = this.branchNestedView
-        def parent_view_obj = null
-        def branchSectionedViewObj = null
-
-        if(branchNestedViewObj) {
-            this.out.println("[INFO] view ${this.branchNestedView} already exists.")
+    void addSectionedView(parentView) {
+        def sectionedView = parentView.getView(this.branch)
+        if(sectionedView) {
+            this.out.println("[INFO] view ${parentView.name}/${this.branch} already exists.")
         } else {
-            parent_view_obj = Jenkins.instance.getView(parent_view)
-            branchSectionedViewObj = new SectionedView(this.branch)
-            parent_view_obj.addView(branchSectionedViewObj)
-            this.out.println("[INFO] Created view ${parent_view}/${this.branch}")
+            sectionedView = new SectionedView(this.branch)
+            sectionedView.owner = parentView
+            parentView.addView(sectionedView)
+            this.out.println("[INFO] Created view ${parentView.name}/${this.branch}")
         }   
     }   
     
@@ -506,8 +508,8 @@ class MySectionedView {
     }
 
     /**
-      * Confiure the sectioned view for this branch by sending a config.xml
-      * file to Jenkins via the Jenkins HTTP API.
+      * Configure the sectioned view for this branch by sending a config.xml
+      * file to Jenkins.
       */
     void configureSectionedView() {
         this.out.println()
@@ -529,7 +531,8 @@ class MySectionedView {
         }
 
         this.out.println("[INFO] send config xml file ${configXmlFile} to Jenkins")
-        proc = ["curl", "-u${this.apiUser}:${this.apiToken}", "${requestUrl}", "--noproxy", "localhost", "--data-binary", "@${workspace}/sectioned_view_template.xml"].execute()
+        proc = ["curl", "-u${this.apiUser}:${this.apiToken}", "${requestUrl}", "--noproxy", "localhost", "--data-binary", "@${configXmlFile}"].execute()
+        this.out.println("[INFO] waiting for response from Jenkins")
         proc.waitFor()
         this.out.println("[INFO] configureSectionedView() proc.text: $proc.text")
     }
