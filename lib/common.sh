@@ -926,3 +926,29 @@ sanityCheck() {
     return
 }
 
+
+createFingerprintFile() {
+    requiredParameters JOB_NAME BUILD_NUMBER WORKSPACE BUILD_CAUSE_SCMTRIGGER
+
+    local workspace=$(getWorkspaceName)
+    mustHaveWorkspaceName
+
+    local label=$(getNextCiLabelName)
+    mustHaveValue ${label} "label name"
+
+    # we are creating a finger print file with several informations to have a unique 
+    # build identifier. we are also storing the file in the build directory
+    copyRevisionStateFileToWorkspace ${JOB_NAME} ${BUILD_NUMBER} 
+    mv ${WORKSPACE}/revisions.txt ${workspace}/bld/bld-fsmci-summary/revisions.txt
+
+    echo "# build label ${label}"                             > ${workspace}/fingerprint.txt
+    echo "# triggered build job ${JOB_NAME}#${BUILD_NUMBER}" >> ${workspace}/fingerprint.txt
+    echo "# trigger cause: ${BUILD_CAUSE_SCMTRIGGER}"        >> ${workspace}/fingerprint.txt
+    echo "# build triggered at $(date)"                      >> ${workspace}/fingerprint.txt
+    cat ${workspace}/bld/bld-fsmci-summary/revisions.txt     >> ${workspace}/fingerprint.txt
+
+    copyFileFromWorkspaceToBuildDirectory ${JOB_NAME} ${BUILD_NUMBER} ${workspace}/fingerprint.txt
+    execute cp ${workspace}/fingerprint.txt ${workspace}/bld/bld-fsmci-summary/
+
+    return
+}
