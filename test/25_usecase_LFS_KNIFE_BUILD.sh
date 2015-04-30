@@ -43,6 +43,9 @@ oneTimeSetUp() {
         mockedCommand "svnCat $@"
         echo "src-foo http://fake 12345"
     }
+    createFingerprintFile() {
+        mockedCommand "createFingerprintFile $@"
+    }
 
 }
 oneTimeTearDown() {
@@ -58,6 +61,7 @@ setUp() {
     export REQUESTOR_USERID="user"
 
     export KNIFE_LFS_BASELINE=PS_LFS_OS_2015_03_0001
+    export BUILD_CAUSE_SCMTRIGGER=hand
 }
 tearDown() {
     true 
@@ -78,6 +82,7 @@ mustExistInSubversion https://ulscmi.inside.nsn.com/isource/svnroot/BTS_D_SC_LFS
 svnCat https://ulscmi.inside.nsn.com/isource/svnroot/BTS_D_SC_LFS_2015_03/os/tags/PS_LFS_OS_2015_03_0001/doc/scripts/revisions.txt
 execute mkdir -p ${WORKSPACE}/workspace
 execute mkdir -p ${WORKSPACE}/workspace/bld/bld-fsmci-summary/
+createFingerprintFile 
 copyFileFromWorkspaceToBuildDirectory LFS_KNIFE_-_knife_-_Build 123 ${WORKSPACE}/revisionstate.xml
 execute mkdir -p ${WORKSPACE}/workspace/bld/bld-knife-input/
 execute -i cp -a ${WORKSPACE}/lfs.patch ${WORKSPACE}/workspace/bld/bld-knife-input/
