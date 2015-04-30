@@ -47,7 +47,8 @@ ci_job_test_on_target() {
         fi
     fi
 
-    copyAndExtractBuildArtifactsFromProject ${UPSTREAM_PROJECT} ${UPSTREAM_BUILD} "fsmci"
+    local requiredArtifacts=$(getConfig LFS_CI_UC_test_required_artifacts)
+    copyAndExtractBuildArtifactsFromProject "${UPSTREAM_PROJECT}" "${UPSTREAM_BUILD}" "${requiredArtifacts}"
 
     mustHaveReservedTarget
     local targetName=$(_reserveTarget)
