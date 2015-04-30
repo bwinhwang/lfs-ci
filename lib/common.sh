@@ -928,7 +928,7 @@ sanityCheck() {
 
 
 createFingerprintFile() {
-    requiredParameters JOB_NAME BUILD_NUMBER WORKSPACE BUILD_CAUSE_SCMTRIGGER
+    requiredParameters JOB_NAME BUILD_NUMBER WORKSPACE 
 
     local workspace=$(getWorkspaceName)
     mustHaveWorkspaceName
