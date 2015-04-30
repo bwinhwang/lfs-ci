@@ -188,8 +188,8 @@ getDirPattern() {
     dirPattern=$(echo ${dirPattern} | cut -d'(' -f1)
     DIR_PATTERN="${dirPattern}*"
 
-    if [[ "$DIR_PATTERN" == "*" ]]; then
-        error "Invalid directory patter: $DIR_PATTERN"
+    if [[ "$DIR_PATTERN" == "*" || ${#DIR_PATTERN} -lt 20 ]]; then
+        error "Invalid directory pattern: $DIR_PATTERN"
         exit 1
     fi 
 }
@@ -320,8 +320,6 @@ deleteTestResults() {
     local dirPattern=$DIR_PATTERN
     if [[ "${subBranch}" != "" ]]; then
         info "sub branch: ${subBranch}"
-        #echo ${dirPattern} | grep -q ${subBranch} || { error sub branch ${subBranch} is not in directory pattern ${dirPattern}; exit 1; }
-        echo ${dirPattern} | grep -q ${subBranch} || { info "sub branch ${subBranch} is not in directory pattern ${dirPattern}"; }
     else
         yyyy=$(getBranchPart ${BRANCH} YYYY)
         mm=$(getBranchPart ${BRANCH} MM)
