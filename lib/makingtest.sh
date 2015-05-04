@@ -71,7 +71,7 @@ makingTest_testXmloutput() {
 #  @param   <none>
 #  @return  <none>
 makingTest_testconfig() {
-    local targetName=$(_reserveTarget)
+    local targetName="$(_reserveTarget)"
     mustHaveValue "${targetName}" "target name"
     
     local testSuiteDirectory=$(makingTest_testSuiteDirectory)
@@ -86,8 +86,8 @@ makingTest_testconfig() {
     info "create testconfig for ${testSuiteDirectory}"
     execute make -C ${testSuiteDirectory}       \
                 testconfig-overwrite            \
-                TESTBUILD=${deliveryDirectory} \
-                TESTTARGET=${targetName,,}      \
+                TESTBUILD=${deliveryDirectory}  \
+                TESTTARGET="${targetName,,}"    \
                 TESTBUILD_SRC=${workspace}
     return
 }
@@ -439,9 +439,11 @@ _reserveTarget() {
     requiredParameters JOB_NAME
 
     local isBookingEnabled=$(getConfig LFS_uc_test_is_booking_enabled)
+    local isCloudEnabled=$(getConfig LFS_CI_uc_test_is_cloud_enabled)
     local targetName=""
-
-    if [[ ${isBookingEnabled} ]] ; then
+    if   [[ ${isCloudEnabled}   ]] ; then
+        targetName=$(getConfig LFS_CI_uc_test_cloud_testconfig_target_parameter)
+    elif [[ ${isBookingEnabled} ]] ; then
         # new method via booking from database
         targetName=$(reservedTarget)
     else
