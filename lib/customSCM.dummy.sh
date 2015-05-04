@@ -27,6 +27,6 @@ actionCheckout() {
 #  @param   <none>
 #  @return  <none>
 actionCalculate() {
-    touch "${REVISION_STATE_FILE}"
+    echo $(date) ${USER} > ${REVISION_STATE_FILE}
     return 
 }
