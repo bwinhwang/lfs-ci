@@ -145,9 +145,11 @@ makingTest_poweron() {
     local testSuiteDirectory=$(makingTest_testSuiteDirectory)
     mustExistDirectory ${testSuiteDirectory}
 
-    # not all branches have the poweroff implemented
-    execute  make -C ${testSuiteDirectory} powercycle
-    # execute -i make -C ${testSuiteDirectory} poweron
+    makingTest_logConsole
+
+    # This should be a poweron, but we don't know the state of the target.
+    # So we just powercycle the target
+    execute make -C ${testSuiteDirectory} powercycle
 
     return
 }
@@ -164,6 +166,8 @@ makingTest_poweroff() {
 
     # not all branches have the poweroff implemented
     execute -i make -C ${testSuiteDirectory} poweroff
+    makingTest_closeConsole
+
     return
 }
 
@@ -497,5 +501,47 @@ mustHaveMakingTestRunningTarget() {
 
     info "target is up."
 
+    return
+}
+
+
+makingTest_logConsole() {
+
+    export LFS_CI_UC_TEST_SCREEN_NAME=${USER}.$$
+
+    mustHaveMakingTestTestConfig
+
+    local workspace=$(getWorkspaceName)
+    mustHaveWorkspaceName
+
+	local testSuiteDirectory=$(makingTest_testSuiteDirectory)
+	mustExistFile ${testSuiteDirectory}/testsuite.mk
+
+    local logfilePath=${testSuiteDirectory}/__artifacts 
+    execute mkdir -a ${logfilePath}
+
+    local screenConfig=$(createTempFile)
+    cat <<EOF > ${screenConfig}
+logfile ${logfilePath}/console.%n
+logfile flush 1
+logtstamp after 10
+EOF
+     fctTarget=$(_reserveTarget)
+     fspTargets=$(${workspace}/src/src-test/analyzers/testtarget-analyzer testtarget)
+
+     for target in ${fctTarget,,} ${fspTargets,,} ; do
+        echo "screen -L -t ${target} make -C ${testSuiteDirectory} TESTTARGET=${target} console" >> ${screenConfig}
+     done
+
+     rawDebug ${screenConfig}
+
+     execute screen -S ${LFS_CI_UC_TEST_SCREEN_NAME} -L -d -m -c ${screenConfig}
+     exit_add makingTest_closeConsole
+
+     return
+}
+
+makingTest_closeConsole() {
+    execute -i screen -dr -S ${LFS_CI_UC_TEST_SCREEN_NAME} -X quit
     return
 }
