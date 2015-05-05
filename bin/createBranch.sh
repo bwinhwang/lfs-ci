@@ -158,7 +158,7 @@ svnCopyLocations() {
     local newBranch=$3
     local branchLocation=$newBranch
     echo $branchLocation | grep -q _FSMR4$ && {
-        branchLocation = ${branchLocation%_FSMR4};
+        branchLocation=${branchLocation%_FSMR4};
     }
     mustHaveValue "${locations}" "locations"
     mustHaveValue "${srcBranch}" "source branch"
