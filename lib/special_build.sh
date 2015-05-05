@@ -251,6 +251,7 @@ specialBuildUploadAndNotifyUser() {
     export REQUESTOR REQUESTOR_FIRST_NAME REQUESTOR_LAST_NAME REQUESTOR_USERID REQUESTOR_EMAIL
 
     local readmeFile=${workspace}/.00_README.txt
+    execute touch ${readmeFile}
     local resultFiles="$(getConfig LFS_CI_uc_special_build_package_result_files)"
 
     info "requested result files are ${resultFiles}"
