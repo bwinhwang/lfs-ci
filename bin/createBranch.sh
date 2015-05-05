@@ -158,7 +158,7 @@ svnCopyLocations() {
     local newBranch=$3
     local branchLocation=$newBranch
     echo $branchLocation | grep -q _FSMR4$ && {
-        branchLocation = ${branchLocation%_FSMR4};
+        branchLocation=${branchLocation%_FSMR4};
     }
     mustHaveValue "${locations}" "locations"
     mustHaveValue "${srcBranch}" "source branch"
@@ -253,13 +253,11 @@ svnDummyCommit() {
     local newBranch=$1
     mustHaveValue "${newBranch}" "new branch"
 
-    svn checkout ${SVN_REPO}/${SVN_DIR}/${newBranch}/trunk/main/${SRC_PROJECT}
+    __cmd svn checkout ${SVN_REPO}/${SVN_DIR}/${newBranch}/trunk/main/${SRC_PROJECT}
     if [[ -d ${SRC_PROJECT} ]]; then
         cd ${SRC_PROJECT}
         echo >> src/README
-        svn commit -m "dummy commit" src/README
-    else
-        warning "Directory $SRC_PROJECT does not exist"
+        __cmd svn commit -m \"dummy commit\" src/README
     fi
 }
 
