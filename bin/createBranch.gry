@@ -124,7 +124,12 @@ println("[INFO] lrc_jobs: $lrc_jobs")
 println("[INFO] fsmr4_jobs: $fsmr4_jobs")
 println("[INFO] fsmr4_only: $fsmr4_only")
 
-// Add branch list view to SCM view.
+/**
+ * Create a list view for the new branch SCM/NEW_BRANCH or SCM_LRC/NEW_BRANCH
+ * where SCM and SCM_LRC view already exists on root level of Jenkins views.
+ * 
+ * @return new_branch_view_obj which was created within SCM/SCM_LRC view.
+ */
 def createScmView() {
     def scm_view = "SCM"
     def scm_view_obj = null
@@ -134,23 +139,11 @@ def createScmView() {
     if(lrc_jobs) {
         scm_view = "SCM_LRC"
         branch_view_name = "LRC_" + new_branch
-    } else if(src_branch != "trunk") {
-        if(src_branch[0..1] == "FB") {
-            scm_view = src_branch[2..-1]
-        } else if(src_branch[0..1] == "MD") {
-            scm_view = src_branch[3..-1]
-        }
     }
 
-    println("[INFO] scm view is ${scm_view}.")
     scm_view_obj = Jenkins.instance.getView(scm_view)
-    println("[INFO] scm view object ${scm_view_obj}.")
+    // Jobs to be copied are taken from this view.
     src_branch_view_obj = scm_view_obj.getView(src_branch.toUpperCase())
-    if(!src_branch_view_obj) {
-        println("[ERROR] the src branch view ${src_branch_view_obj} does not exist.")
-        throw new RuntimeException("The src branch view ${src_branch_view_obj} does not exist.")
-    }
-    println("[INFO] src branch view: ${src_branch_view_obj}.")
     new_branch_view_obj = scm_view_obj.getView(branch_view_name)
 
     if(new_branch_view_obj) {
@@ -166,6 +159,28 @@ def createScmView() {
         }
     }
 
+    if(src_branch != "trunk") {
+        println("[INFO] Source branch is not trunk.")
+        if(new_branch[0..1] == "FB") {
+            root_view_name = new_branch[2..-1]
+        } else if(new_branch[0..1] == "MD") {
+            root_view_name = new_branch[3..-1]
+        } else {
+            throw new RuntimeException("Invalid branch name $new_branch.")
+        }
+        root_view_obj = Jenkins.instance.getView(root_view_name)
+        println("[INFO] root view: ${root_view_obj}")
+        // In this case we do not copy the jobs from SCM view, but 
+        // from source branch view (eg. 1405/FB1405).
+        src_branch_view_obj = root_view_obj.getView(src_branch.toUpperCase())
+    }
+
+    if(!src_branch_view_obj) {
+        println("[ERROR] the src branch view ${src_branch_view_obj} does not exist.")
+        throw new RuntimeException("The src branch view does not exist.")
+    }
+
+    println("[INFO] src branch view: ${src_branch_view_obj}")
     return new_branch_view_obj
 }
 
@@ -380,6 +395,8 @@ for(job in jobs_list) {
         def config_file = updateJobConfig(job, new_job)
         copyPromotions(job, new_job)
         reloadJobConfig(new_job, config_file)
+        // TODO: Use a regex instead of adding each job explicitly by
+        //       uploading a config.xml to this view in createScmView().
         new_branch_view_obj.doAddJobToView(new_job.getName())
         println("[INFO] added job $new_job.name to view \"$new_branch_view_obj.name\"")
     }
