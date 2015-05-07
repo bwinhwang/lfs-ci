@@ -531,7 +531,7 @@ logfile flush 1
 logtstamp after 10
 EOF
     local fctTarget=$(_reserveTarget)
-    local fspTargets=$(execute -n make testtarget-analyzer TESTTARGET=${fctTarget} | grep ^setupfsps | cut -d= -f2 | tr "," " ")
+    local fspTargets=$(execute -n make -C ${testSuiteDirectory} testtarget-analyzer | grep ^setupfsps | cut -d= -f2 | tr "," " ")
 
     for target in ${fctTarget,,} ${fspTargets,,} ; do
         echo "screen -L -t ${target} make -C ${testSuiteDirectory} TESTTARGET=${target} console" >> ${screenConfig}
