@@ -28,6 +28,7 @@ info "# ACTIVATE_ROOT_JOBS:   $ACTIVATE_ROOT_JOBS"
 info "# DEBUG:                $DEBUG"
 info "###############################################################"
 
+
 # TODO: Get it via getConfig()
 SVN_REPO="https://svne1.access.nsn.com/isource/svnroot/BTS_SC_LFS"
 SVN_DIR="os"
@@ -126,8 +127,6 @@ svnCopyBranch() {
     DESCRIPTION: svn cp -r${REVISION} --parents ${SVN_REPO}/${SVN_PATH} ${SVN_REPO}/${SVN_DIR}/${newBranch}/trunk. \
     $COMMENT"
 
-    # TODO: Job shall fail in case branch already exists.
-    #       This requirement is in collision with master option DO_SVN.
     svn ls ${SVN_REPO}/${SVN_DIR}/${newBranch} || {
         __cmd svn copy -r ${REVISION} -m \"${message}\" --parents ${SVN_REPO}/${SVN_PATH} \
             ${SVN_REPO}/${SVN_DIR}/${newBranch}/trunk;
@@ -198,6 +197,20 @@ svnCopyLocationsFSMR4() {
     svnCopyLocations $1 $2 $3
 }
 
+__checkGitRevisionFile() {
+    local branch=$1
+    local gitRevisionFile=$(getConfig PKGPOOL_PROD_update_dependencies_svn_url -t location:${branch})
+    local replacement="src/gitrevision"
+
+    if [[ "${gitRevisionFile}" == *Buildfile ]]; then
+        gitRevisionFile="${gitRevisionFile/Buildfile/$replacement}"
+    else
+        gitRevisionFile="${gitRevisionFile/Dependencies/$replacement}"
+    fi
+
+    svn ls ${gitRevisionFile} && { info  "Git revision file: ${gitRevisionFile}"; } \
+                              || { error "There is no git revision file: ${gitRevisionFile}."; exit 1; }
+}
 ## @fn      createBranchInGit()
 #  @brief   create new branch in GIT
 #  @param   <newBranch> new branch name
@@ -210,6 +223,8 @@ createBranchInGit() {
     if [[ "${DO_GIT}" == "false" ]]; then
         info "Not creating branch in GIT"
         return 0
+    else
+        __checkGitRevisionFile ${SRC_BRANCH}
     fi
 
     # TODO: check if branch already exists in GIT
@@ -220,6 +235,15 @@ createBranchInGit() {
         local gitServer=$(getConfig lfsGitServer)
         mustHaveValue "${newBranch}" "new branch"
         mustHaveValue "${gitServer}" "git server"
+
+        local gitRevisionFile=$(getConfig PKGPOOL_PROD_update_dependencies_svn_url -t location:$SRC_BRANCH)
+        if [[ "${gitRevisionFile}" == *Buildfile ]]; then
+            gitRevisionFile="${gitRevisionFile/Buildfile/src/gitrevision}"
+        else
+            gitRevisionFile="${gitRevisionFile/Dependencies/src/gitrevision}"
+        fi
+        svn ls ${gitRevisionFile} && { info  "Git revision file: ${gitRevisionFile}"; } \
+                                  || { error "There is no git revision file: ${gitRevisionFile}."; exit 1; }
 
         if [[ ${LRC} == true ]]; then
             newBranch=LRC_${newBranch}
@@ -234,8 +258,6 @@ createBranchInGit() {
         __cmd git branch $newBranch $gitRevision
         __cmd git push origin $newBranch
     else
-        # TODO: Fail in case branch already exists.
-        #       Maybe collision with master option DO_SVN.
         info "Branch already exists in GIT"
     fi
 }
