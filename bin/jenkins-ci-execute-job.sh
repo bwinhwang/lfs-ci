@@ -12,45 +12,14 @@
 if [[ -z "${LFS_CI_ROOT}" ]] ; then
     export LFS_CI_ROOT=${PWD}
 fi
-
-export PATH=${LFS_CI_ROOT}/bin:${PATH}
-
-source ${LFS_CI_ROOT}/lib/common.sh
-source ${LFS_CI_ROOT}/lib/logging.sh
-source ${LFS_CI_ROOT}/lib/commands.sh
-source ${LFS_CI_ROOT}/lib/config.sh
-source ${LFS_CI_ROOT}/lib/jenkins.sh
-source ${LFS_CI_ROOT}/lib/subversion.sh
-
-# load the properties from the custom SCM jenkins plugin
-if [[ -f ${WORKSPACE}/.properties ]] ; then
-    source ${WORKSPACE}/.properties
-fi
-
-# start the logfile
-initTempDirectory
-startLogfile
-# and end it, if the script exited in some way
-exit_add stopLogfile
-
-# for better debugging
-PS4='+(${BASH_SOURCE}:${LINENO}): ${FUNCNAME[0]:+${FUNCNAME[0]}(): }'
-export PS4
-
 if [[ ! -z "${1}" ]] ; then
     export JOB_NAME=$1
     shift
 fi
 
-requiredParameters LFS_CI_ROOT JOB_NAME HOSTNAME USER 
+source ${LFS_CI_ROOT}/lib/startup.sh
 
-showAllEnvironmentVariables
-sanityCheck
-
-info "starting jenkins job \"${JOB_NAME}\" on ${HOSTNAME} as ${USER}"
-if [[ "${UPSTREAM_PROJECT}" && "${UPSTREAM_BUILD}" ]] ; then
-    info "upstream job ${UPSTREAM_PROJECT} / ${UPSTREAM_BUILD}"
-fi
+prepareStartup 
 
 # new part here
 # each job defines a set of environment variables, which defines
@@ -74,7 +43,6 @@ fi
 
 # first dispatcher, calling the correct script or function
 case "${JOB_NAME}" in
-
     *_CI_*_Build) 
         source ${LFS_CI_ROOT}/lib/uc_build.sh
         ci_job_build_version || exit 1 
