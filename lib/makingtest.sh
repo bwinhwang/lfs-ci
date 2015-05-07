@@ -505,42 +505,51 @@ mustHaveMakingTestRunningTarget() {
 }
 
 
+## @fn      makingTest_logConsole()
+#  @brief   start to log all console output into an artifacts file
+#  @param   <none>
+#  @return  <none>
 makingTest_logConsole() {
-
-    export LFS_CI_UC_TEST_SCREEN_NAME=${USER}.$$
-
-    mustHaveMakingTestTestConfig
-
     local workspace=$(getWorkspaceName)
     mustHaveWorkspaceName
+
+    local shouldLogConsole=$(getConfig LFS_CI_uc_test_should_record_log_output_of_target)
+    [[ ${shouldLogConsole} ]] || return 0
 
 	local testSuiteDirectory=$(makingTest_testSuiteDirectory)
 	mustExistFile ${testSuiteDirectory}/testsuite.mk
 
-    local logfilePath=${testSuiteDirectory}/__artifacts 
-    execute mkdir -a ${logfilePath}
+    mustHaveMakingTestTestConfig
 
-    local screenConfig=$(createTempFile)
+    local logfilePath=${testSuiteDirectory}/__artifacts 
+    execute mkdir -p ${logfilePath}
+
+    local screenConfig=${WORKSPACE}/workspace/screenrc
     cat <<EOF > ${screenConfig}
 logfile ${logfilePath}/console.%n
 logfile flush 1
 logtstamp after 10
 EOF
-     fctTarget=$(_reserveTarget)
-     fspTargets=$(${workspace}/src/src-test/analyzers/testtarget-analyzer testtarget)
+    local fctTarget=$(_reserveTarget)
+    local fspTargets=$(execute -n make testtarget-analyzer TESTTARGET=${fctTarget} | grep ^setupfsps | cut -d= -f2 | tr "," " ")
 
-     for target in ${fctTarget,,} ${fspTargets,,} ; do
+    for target in ${fctTarget,,} ${fspTargets,,} ; do
         echo "screen -L -t ${target} make -C ${testSuiteDirectory} TESTTARGET=${target} console" >> ${screenConfig}
-     done
+    done
 
-     rawDebug ${screenConfig}
+    rawDebug ${screenConfig}
 
-     execute screen -S ${LFS_CI_UC_TEST_SCREEN_NAME} -L -d -m -c ${screenConfig}
-     exit_add makingTest_closeConsole
+    export LFS_CI_UC_TEST_SCREEN_NAME=lfs-jenkins.${USER}.${fctTarget}
+    execute screen -S ${LFS_CI_UC_TEST_SCREEN_NAME} -L -d -m -c ${screenConfig}
+    exit_add makingTest_closeConsole
 
      return
 }
 
+## @fn      makingTest_closeConsole()
+#  @brief   stop to log all console output into an artifacts file
+#  @param   <none>
+#  @return  <none>
 makingTest_closeConsole() {
     execute -i screen -dr -S ${LFS_CI_UC_TEST_SCREEN_NAME} -X quit
     return
