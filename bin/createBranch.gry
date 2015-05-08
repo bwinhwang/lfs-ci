@@ -66,7 +66,7 @@ activateRootJobs = false
 
 debug = true
 
-// Environment vars
+// Get environment variables
 jenkinsHome = build.getEnvironment(listener).get("JENKINS_HOME")
 jenkinsUrl = build.getEnvironment(listener).get("JENKINS_URL")
 jenkinsApiToken = build.getEnvironment(listener).get("JENKINS_API_TOKEN")
@@ -75,6 +75,7 @@ ciRoot = build.getEnvironment(listener).get("LFS_CI_ROOT")
 templateDir = build.getEnvironment(listener).get("CONFIGXML_TEMPLATE_DIR")
 templateSuffix = build.getEnvironment(listener).get("CONFIGXML_TEMPLATE_SUFFIX")
 workspace = build.getEnvironment(listener).get("WORKSPACE")
+jobs2Exclude = build.getEnvironment(listener).get("JOBS_EXLUDE_LIST")
 
 lrc_jobs = false
 if(build.getEnvironment(listener).get("LRC") == "true") {
@@ -363,6 +364,10 @@ catch(NullPointerException) {
 // collect jobs to be created
 def jobs_list = []
 for(job in src_branch_view_obj.getItems()) {
+    if(jobs2Exclude.find(job.getName())) {
+        println("[INFO] excluding job ${job.name}.")
+        continue
+    }
     if(job.getName().find(src_branch) && !lrc_jobs) {
         // fsm is requested
         jobs_list.add(job)
@@ -382,7 +387,7 @@ for(job in jobs_list) {
     //if(job.name == "LFS_CI_-_${src_branch}_-_Build") {
     //if(job.name == "LFS_CI_-_${src_branch}_-_Test" || job.name == "LFS_Prod_-_trunk_-_Releasing_-_summary" || job.name == "LFS_CI_-_LRC_-_Build" || job.name == "LFS_Prod_-_LRC_-_Releasing_-_summary") {
     //if(job.name == "LFS_CI_-_${src_branch}_-_Build" || job.name == "LFS_CI_-_${src_branch}_-_Test" || job.name == "LFS_Prod_-_trunk_-_Releasing_-_summary") {
-    //if(job.name == "LFS_CI_-_${src_branch}_-_Build" || job.name == "LFS_CI_-_${src_branch}_-_Test" || job.name == "LFS_Prod_-_trunk_-_Releasing_-_summary" || job.name.find("fsmr4")) {
+    if(job.name == "LFS_CI_-_${src_branch}_-_Build" || job.name == "LFS_CI_-_${src_branch}_-_Test" || job.name == "LFS_Prod_-_trunk_-_Releasing_-_summary" || job.name.find("fsmr4")) {
     //if(job.name.find("LRC")) {
     //if(job.name.find("fsmr4")) {
     //if(job.name == "PKGPOOL_-_trunk_-_Build") {
@@ -400,7 +405,7 @@ for(job in jobs_list) {
         new_branch_view_obj.doAddJobToView(new_job.getName())
         println("[INFO] added job $new_job.name to view \"$new_branch_view_obj.name\"")
     }
-    //}
+    }
 }
 
 // enable previosly disabled jobs

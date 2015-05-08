@@ -73,6 +73,7 @@ __preparation(){
     JENKINS_API_USER=$(getConfig jenkinsApiUser)
     CONFIGXML_TEMPLATE_DIR=$(getConfig sectionedViewTemplateDir)
     CONFIGXML_TEMPLATE_SUFFIX=$(getConfig sectionedViewTemplateSuffix)
+    JOBS_EXLUDE_LIST=$(getConfig branchingExludeJobs)
 
     mustHaveValue ${JENKINS_API_TOKEN} "Jenkins API token is missing."
     mustHaveValue ${JENKINS_API_USER} "Jenkins API user is missing."
@@ -81,6 +82,7 @@ __preparation(){
     echo JENKINS_API_USER=${JENKINS_API_USER} >> ${WORKSPACE}/${VARS_FILE}
     echo CONFIGXML_TEMPLATE_DIR=${CONFIGXML_TEMPLATE_DIR} >> ${WORKSPACE}/${VARS_FILE}
     echo CONFIGXML_TEMPLATE_SUFFIX=${CONFIGXML_TEMPLATE_SUFFIX} >> ${WORKSPACE}/${VARS_FILE}
+    echo JOBS_EXLUDE_LIST=${JOBS_EXLUDE_LIST} >> ${WORKSPACE}/${VARS_FILE}
 }
 
 ## @fn     __get_sql_insert()
