@@ -17,7 +17,7 @@ CREATE TABLE branches (
     based_on_release   VARCHAR(128) NULL,
     release_name_regex VARCHAR(128) NOT NULL DEFAULT 'PS_LFS_OS_$(date_Y)_$(date_m)_(\d\d\d\d)',
     date_created       DATETIME NOT NULL,
-    date_closed        DATETIME NOT NULL DEFAULT '0000-00-00 00:00:00',
+    date_closed        DATETIME,
     comment            TEXT,
 
     PRIMARY KEY (id),

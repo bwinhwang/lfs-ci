@@ -169,7 +169,11 @@ svnCopyLocations() {
                 ${SVN_REPO}/${SVN_DIR}/trunk/bldtools/locations-${newBranch};
             __cmd svn checkout ${SVN_REPO}/${SVN_DIR}/trunk/bldtools/locations-${newBranch};
             __cmd cd locations-${newBranch};
-            __cmd sed -i -e "'s/\/os\/${srcBranch}\//\/os\/${branchLocation}\/trunk\//'" Dependencies;
+            if [[ ! $(eco ${srcBranch} | awk -F_ '{print $2}') ]]; then
+                __cmd sed -i -e "'s/\/os\/${srcBranch}\//\/os\/${branchLocation}\/trunk\//'" Dependencies;
+            else
+                __cmd sed -i -e "'s/\/os\/${srcBranch}\//\/os\/${branchLocation}\//'" Dependencies;
+            fi
             __cmd svn commit -m \"added new location ${newBranch}.\";
             __cmd svn delete -m \"removed bldtools, because they are always used from MAINTRUNK\" ${SVN_REPO}/${SVN_DIR}/${newBranch}/trunk/bldtools;
     }
@@ -288,6 +292,10 @@ dbInsert() {
     local branchType=$(getBranchPart ${branch} TYPE)
     local yyyy=$(getBranchPart ${branch} YYYY)
     local mm=$(getBranchPart ${branch} MM)
+
+    # Do we have a special branch?
+    local subBranch=$(echo $branch | awk -F_ '{print $2}')
+    [[ ${subBranch} ]] && branchType=${subBranch}
     local regex="${branchType}_PS_LFS_OS_${yyyy}_${mm}_([0-9][0-9][0-9][0-9])"
 
     if [[ ${LRC} == true ]]; then
