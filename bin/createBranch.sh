@@ -1,7 +1,5 @@
 #!/bin/bash
 
-# TODO: Add DEBUG like in deleteBranch.sh
-
 source ${LFS_CI_ROOT}/lib/common.sh
 source ${LFS_CI_ROOT}/lib/logging.sh
 source ${LFS_CI_ROOT}/lib/jenkins.sh
@@ -24,12 +22,12 @@ info "# COMMENT:              $COMMENT"
 info "# DO_SVN:               $DO_SVN"
 info "# DO_JENKINS:           $DO_JENKINS"
 info "# DUMMY_COMMIT:         $DUMMY_COMMIT"
-info "# UPDATE_LOCATIONS_TXT: $UPDATE_LOCATIONS_TXT"
 info "# DO_DB_INSERT:         $DO_DB_INSERT"
 info "# DO_GIT:               $DO_GIT"
 info "# ACTIVATE_ROOT_JOBS:   $ACTIVATE_ROOT_JOBS"
 info "# DEBUG:                $DEBUG"
 info "###############################################################"
+
 
 # TODO: Get it via getConfig()
 SVN_REPO="https://svne1.access.nsn.com/isource/svnroot/BTS_SC_LFS"
@@ -38,12 +36,12 @@ SRC_PROJECT="src-project"
 VARS_FILE="VARIABLES.TXT"
 
 if [[ "${SRC_BRANCH}" == "trunk" ]]; then
-    LOCATIONS="pronb-developer"
+    LOCATIONS="locations-pronb-developer"
     LOCATIONS_FSMR4="locations-FSM_R4_DEV"
     LOCATIONS_LRC="locations-LRC"
     SVN_PATH="${SVN_DIR}/trunk"
 else
-    LOCATIONS="${SRC_BRANCH}"
+    LOCATIONS="locations-${SRC_BRANCH}"
     LOCATIONS_FSMR4="locations-${srcBranch}_FSMR4"
     LOCATIONS_LRC="locations-LRC_${srcBranch}"
     SVN_PATH="${SVN_DIR}/${SRC_BRANCH}/trunk"
@@ -73,10 +71,18 @@ __checkParams() {
 __preparation(){
     JENKINS_API_TOKEN=$(getConfig jenkinsApiToken)
     JENKINS_API_USER=$(getConfig jenkinsApiUser)
+    CONFIGXML_TEMPLATE_DIR=$(getConfig sectionedViewTemplateDir)
+    CONFIGXML_TEMPLATE_SUFFIX=$(getConfig sectionedViewTemplateSuffix)
+    JOBS_EXLUDE_LIST=$(getConfig branchingExludeJobs)
+
     mustHaveValue ${JENKINS_API_TOKEN} "Jenkins API token is missing."
     mustHaveValue ${JENKINS_API_USER} "Jenkins API user is missing."
+
     echo JENKINS_API_TOKEN=${JENKINS_API_TOKEN} > ${WORKSPACE}/${VARS_FILE}
     echo JENKINS_API_USER=${JENKINS_API_USER} >> ${WORKSPACE}/${VARS_FILE}
+    echo CONFIGXML_TEMPLATE_DIR=${CONFIGXML_TEMPLATE_DIR} >> ${WORKSPACE}/${VARS_FILE}
+    echo CONFIGXML_TEMPLATE_SUFFIX=${CONFIGXML_TEMPLATE_SUFFIX} >> ${WORKSPACE}/${VARS_FILE}
+    echo JOBS_EXLUDE_LIST=${JOBS_EXLUDE_LIST} >> ${WORKSPACE}/${VARS_FILE}
 }
 
 ## @fn     __get_sql_insert()
@@ -123,12 +129,19 @@ svnCopyBranch() {
     DESCRIPTION: svn cp -r${REVISION} --parents ${SVN_REPO}/${SVN_PATH} ${SVN_REPO}/${SVN_DIR}/${newBranch}/trunk. \
     $COMMENT"
 
-    # TODO: Job shall fail in case branch already exists.
-    #       This requirement is in collision with master option DO_SVN.
     svn ls ${SVN_REPO}/${SVN_DIR}/${newBranch} || {
         __cmd svn copy -r ${REVISION} -m \"${message}\" --parents ${SVN_REPO}/${SVN_PATH} \
             ${SVN_REPO}/${SVN_DIR}/${newBranch}/trunk;
     }
+}
+
+## @fn      svnCopyBranchLRC()
+#  @brief   invoke "svnCopyBranch srcBranch newBranch"
+#  @param   <srcBranch> name of the source branch
+#  @param   <newBranch> name of the new branch
+#  @return  <none>
+svnCopyBranchLRC() {
+    svnCopyBranch $1 $2
 }
 
 ## @fn      svnCopyLocations()
@@ -141,101 +154,65 @@ svnCopyLocations() {
     info "SVN: create locations"
     info "--------------------------------------------------------"
 
-    local srcBranch=$1
-    local newBranch=$2
+    local locations=$1
+    local srcBranch=$2
+    local newBranch=$3
+    local branchLocation=$newBranch
+    echo $branchLocation | grep -q _FSMR4$ && {
+        branchLocation=${branchLocation%_FSMR4};
+    }
+    mustHaveValue "${locations}" "locations"
     mustHaveValue "${srcBranch}" "source branch"
     mustHaveValue "${newBranch}" "new branch"
 
-    # TODO: Job shall fail in case location already exists.
-    #       This requirement is in collision with master option DO_SVN.
-    svn ls ${SVN_REPO}/${SVN_DIR}/trunk/bldtools/locations-${LOCATIONS} \
-        ${SVN_REPO}/${SVN_DIR}/trunk/bldtools/locations-${newBranch} || {
-            __cmd svn copy -m \"copy locations branch ${newBranch}\" ${SVN_REPO}/${SVN_DIR}/trunk/bldtools/locations-${LOCATIONS} \
+    svn ls ${SVN_REPO}/${SVN_DIR}/trunk/bldtools/locations-${newBranch} || {
+            __cmd svn copy -m \"copy locations branch ${newBranch}\" ${SVN_REPO}/${SVN_DIR}/trunk/bldtools/${locations} \
                 ${SVN_REPO}/${SVN_DIR}/trunk/bldtools/locations-${newBranch};
             __cmd svn checkout ${SVN_REPO}/${SVN_DIR}/trunk/bldtools/locations-${newBranch};
             __cmd cd locations-${newBranch};
-            __cmd sed -i -e "'s/\/${srcBranch}\//\/${newBranch}\/trunk\//'" Dependencies;
+            if [[ ! $(eco ${srcBranch} | awk -F_ '{print $2}') ]]; then
+                __cmd sed -i -e "'s/\/os\/${srcBranch}\//\/os\/${branchLocation}\/trunk\//'" Dependencies;
+            else
+                __cmd sed -i -e "'s/\/os\/${srcBranch}\//\/os\/${branchLocation}\//'" Dependencies;
+            fi
             __cmd svn commit -m \"added new location ${newBranch}.\";
             __cmd svn delete -m \"removed bldtools, because they are always used from MAINTRUNK\" ${SVN_REPO}/${SVN_DIR}/${newBranch}/trunk/bldtools;
     }
 }
 
-## @fn      svnCopyLocationsFSMR4()
-#  @brief   copy locations for the branch for FSMR4 in SVN.
-#  @param   <srcBranch> name of the source branch
-#  @param   <newBranch> name of the new branch
-#  @return  <none>
-svnCopyLocationsFSMR4() {
-    info "--------------------------------------------------------"
-    info "SVN: create locations for FSMR4"
-    info "--------------------------------------------------------"
-
-    local srcBranch=$1
-    local newBranch=$2
-    mustHaveValue "${srcBranch}" "source branch"
-    mustHaveValue "${newBranch}" "new branch"
-
-    svn ls ${SVN_REPO}/${SVN_DIR}/trunk/bldtools/locations-${newBranch}_FSMR4 || {
-        __cmd svn copy -m \"copy locations branch ${newBranch}\" ${SVN_REPO}/${SVN_DIR}/trunk/bldtools/${LOCATIONS_FSMR4} \
-            ${SVN_REPO}/${SVN_DIR}/trunk/bldtools/locations-${newBranch}_FSMR4
-        __cmd svn checkout ${SVN_REPO}/${SVN_DIR}/trunk/bldtools/locations-${newBranch}_FSMR4
-        __cmd cd locations-${newBranch}_FSMR4
-        __cmd sed -i -e "'s/\/${srcBranch}\//\/${newBranch}\/trunk\//'" Dependencies
-        __cmd svn commit -m \"added new location ${newBranch}_FSMR4.\"
-    }
-}
-
-## @fn      svnCopyBranchLRC()
-#  @brief   copy the branch in SVN for LRC by coping source branch to new branch.
-#  @param   <srcBranch> name of the source branch
-#  @param   <newBranch> name of the new branch
-#  @return  <none>
-svnCopyBranchLRC() {
-    info "--------------------------------------------------------"
-    info "SVN: create branch for LRC"
-    info "--------------------------------------------------------"
-
-    local srcBranch=$1
-    local newBranch="LRC_$2"
-    mustHaveValue "${srcBranch}" "source branch"
-    mustHaveValue "${newBranch}" "new branch"
-
-    local message="initial creation of ${newBranch} branch based on ${srcBranch} rev. ${REVISION}. \
-    DESCRIPTION: svn cp -r${REVISION} --parents ${SVN_REPO}/${SVN_PATH} ${SVN_REPO}/${SVN_DIR}/${newBranch}/trunk. \
-    $COMMENT"
-
-    svn ls ${SVN_REPO}/${SVN_DIR}/${newBranch} || {
-        __cmd svn copy -r ${REVISION} -m \"${message}\" --parents ${SVN_REPO}/${SVN_PATH} \
-            ${SVN_REPO}/${SVN_DIR}/${newBranch}/trunk
-    }
-}
-
 ## @fn      svnCopyLocationsLRC()
-#  @brief   copy locations for branch for LRC in SVN.
+#  @brief   just invokes "svnCopyLocations $1 $2 $3"
+#  @param   <location> name of the location
 #  @param   <srcBranch> name of the source branch
 #  @param   <newBranch> name of the new branch
 #  @return  <none>
 svnCopyLocationsLRC() {
-    info "--------------------------------------------------------"
-    info "SVN: create locations for LRC"
-    info "--------------------------------------------------------"
-
-    local srcBranch=$1
-    local newBranch="LRC_$2"
-    mustHaveValue "${srcBranch}" "source branch"
-    mustHaveValue "${newBranch}" "new branch"
-
-    svn ls ${SVN_REPO}/${SVN_DIR}/trunk/bldtools/locations-${newBranch} || {
-        __cmd svn copy -m \"copy locations branch ${newBranch}\" ${SVN_REPO}/${SVN_DIR}/trunk/bldtools/${LOCATIONS_LRC} \
-            ${SVN_REPO}/${SVN_DIR}/trunk/bldtools/locations-${newBranch}
-        __cmd svn checkout ${SVN_REPO}/${SVN_DIR}/trunk/bldtools/locations-${newBranch}
-        __cmd cd locations-${newBranch}
-        __cmd sed -i -e "'s/\/${srcBranch}\//\/${newBranch}\/trunk\//'" Dependencies
-        __cmd svn commit -m \"added new location ${newBranch}.\"
-    }
-    __cmd svn delete -m \"removed bldtools, because they are always used from MAINTRUNK\" ${SVN_REPO}/${SVN_DIR}/${newBranch}/trunk/bldtools;
+    svnCopyLocations $1 $2 $3
 }
 
+## @fn      svnCopyLocationsFSMR4()
+#  @brief   just invokes "svnCopyLocations $1 $2 $3"
+#  @param   <srcBranch> name of the source branch
+#  @param   <newBranch> name of the new branch
+#  @return  <none>
+svnCopyLocationsFSMR4() {
+    svnCopyLocations $1 $2 $3
+}
+
+__checkGitRevisionFile() {
+    local branch=$1
+    local gitRevisionFile=$(getConfig PKGPOOL_PROD_update_dependencies_svn_url -t location:${branch})
+    local replacement="src/gitrevision"
+
+    if [[ "${gitRevisionFile}" == *Buildfile ]]; then
+        gitRevisionFile="${gitRevisionFile/Buildfile/$replacement}"
+    else
+        gitRevisionFile="${gitRevisionFile/Dependencies/$replacement}"
+    fi
+
+    svn ls ${gitRevisionFile} && { info  "Git revision file: ${gitRevisionFile}"; } \
+                              || { error "There is no git revision file: ${gitRevisionFile}."; exit 1; }
+}
 ## @fn      createBranchInGit()
 #  @brief   create new branch in GIT
 #  @param   <newBranch> new branch name
@@ -248,6 +225,8 @@ createBranchInGit() {
     if [[ "${DO_GIT}" == "false" ]]; then
         info "Not creating branch in GIT"
         return 0
+    else
+        __checkGitRevisionFile ${SRC_BRANCH}
     fi
 
     # TODO: check if branch already exists in GIT
@@ -258,6 +237,15 @@ createBranchInGit() {
         local gitServer=$(getConfig lfsGitServer)
         mustHaveValue "${newBranch}" "new branch"
         mustHaveValue "${gitServer}" "git server"
+
+        local gitRevisionFile=$(getConfig PKGPOOL_PROD_update_dependencies_svn_url -t location:$SRC_BRANCH)
+        if [[ "${gitRevisionFile}" == *Buildfile ]]; then
+            gitRevisionFile="${gitRevisionFile/Buildfile/src/gitrevision}"
+        else
+            gitRevisionFile="${gitRevisionFile/Dependencies/src/gitrevision}"
+        fi
+        svn ls ${gitRevisionFile} && { info  "Git revision file: ${gitRevisionFile}"; } \
+                                  || { error "There is no git revision file: ${gitRevisionFile}."; exit 1; }
 
         if [[ ${LRC} == true ]]; then
             newBranch=LRC_${newBranch}
@@ -272,8 +260,6 @@ createBranchInGit() {
         __cmd git branch $newBranch $gitRevision
         __cmd git push origin $newBranch
     else
-        # TODO: Fail in case branch already exists.
-        #       Maybe collision with master option DO_SVN.
         info "Branch already exists in GIT"
     fi
 }
@@ -284,7 +270,7 @@ createBranchInGit() {
 #  @return  <none>
 svnDummyCommit() {
     info "--------------------------------------------------------"
-    info "SVN: dummy commit on $SRC_PROJECT for branch $1"
+    info "SVN: dummy commit on $SRC_PROJECT"
     info "--------------------------------------------------------"
 
     if [[ "${DUMMY_COMMIT}" == "false" ]]; then
@@ -295,16 +281,12 @@ svnDummyCommit() {
     local newBranch=$1
     mustHaveValue "${newBranch}" "new branch"
 
-    local workspace=$(getWorkspaceName)
-    mustHaveWorkspaceName
-
-    createBasicWorkspace -l ${newBranch} src-project
-    mustExistDirectory ${workspace}/src-project
-
-    echo "dummy commit" >> ${workspace}/src-project/src/README
-    __cmd svn commit -m DummyCommit ${workspace}/src-project/src/README
-
-    return
+    __cmd svn checkout ${SVN_REPO}/${SVN_DIR}/${newBranch}/trunk/main/${SRC_PROJECT}
+    if [[ -d ${SRC_PROJECT} ]]; then
+        cd ${SRC_PROJECT}
+        echo >> src/README
+        __cmd svn commit -m \"dummy commit\" src/README
+    fi
 }
 
 ## @fn      svnDummyCommitLRC
@@ -314,59 +296,6 @@ svnDummyCommit() {
 svnDummyCommitLRC() {
     local newBranch="LRC_$1"
     svnDummyCommit "${newBranch}"
-}
-
-## @fn      svnEditLocationsTxtFile()
-#  @brief   adapt locations.txt file
-#  @param   <newBranch> new branch name
-#  @return  <none>
-svnEditLocationsTxtFile() {
-    info "--------------------------------------------------------"
-    info "SVN: edit locations.txt file"
-    info "--------------------------------------------------------"
-
-    if [[ "${UPDATE_LOCATIONS_TXT}" == "false" ]]; then
-        info "Not updating locations.txt files in SVN."
-        return 0
-    fi
-
-    local newBranch=$1
-    mustHaveValue "${newBranch}" "new branch"
-    local bldTools="bldtools"
-    local locationsTxt="locations.txt"
-    local yyyy=$(getBranchPart ${newBranch} YYYY)
-    local mm=$(getBranchPart ${newBranch} MM)
-
-    __cmd mkdir ${bldTools}
-    __cmd svn checkout --depth empty ${SVN_REPO}/${SVN_DIR}/trunk/${bldTools} ${bldTools}
-    __cmd cd ${bldTools}
-    __cmd svn update ${locationsTxt}
-
-    if [[ ! "${LRC}" ]] && [[ "$(echo ${newBranch} | cut -c1,2)" == "FB" ]] && [[ $DEBUG != true ]]; then
-        echo "${newBranch}                           Feature Build ${newBranch} (all FB_PS_LFS_REL_${yyyy}_${mm}_xx...)" >> ${locationsTxt}
-    fi
-
-    if [[ ! "${LRC}" ]] && [[ "$(echo ${newBranch} | cut -c1,2)" == "MD" ]] && [[ $DEBUG != true ]]; then
-        echo "${newBranch}                           Feature Build ${newBranch} (bi-weekly branch)" >> ${locationsTxt}
-    fi
-
-    if [[ "${FSMR4}" == "true" ]] && [[ "$(echo ${newBranch} | cut -c1,2)" == "MD" ]] && [[ $DEBUG != true ]]; then
-        echo "${newBranch}_FSMR4                     Feature Build ${newBranch} FSM-r4 stuff only (bi-weekly branch)" >> ${locationsTxt}
-    fi
-
-    if [[ "${FSMR4}" == "true" ]] && [[ "$(echo ${newBranch} | cut -c1,2)" == "FB" ]] && [[ $DEBUG != true ]]; then
-        echo "${newBranch}_FSMR4                     Feature Build ${newBranch} FSM-r4 stuff only" >> ${locationsTxt}
-    fi
-
-    if [[ "${LRC}" == "true" ]] && [[ $DEBUG != true ]]; then
-        echo "LRC_${newBranch}                       LRC locations (special LRC for ${newBranch} only)" >> ${locationsTxt}
-    fi
-
-    if [[ "${LRC}" == "true" ]]; then
-        __cmd svn commit -m \"Added branch LRC_${newBranch} to ${locationsTxt}\" ${locationsTxt}
-    else
-        __cmd svn commit -m \"Added branch ${newBranch} to ${locationsTxt}\" ${locationsTxt}
-    fi
 }
 
 ## @fn      dbInsert()
@@ -387,6 +316,10 @@ dbInsert() {
     local branchType=$(getBranchPart ${branch} TYPE)
     local yyyy=$(getBranchPart ${branch} YYYY)
     local mm=$(getBranchPart ${branch} MM)
+
+    # Do we have a special branch?
+    local subBranch=$(echo $branch | awk -F_ '{print $2}')
+    [[ ${subBranch} ]] && branchType=${subBranch}
     local regex="${branchType}_PS_LFS_OS_${yyyy}_${mm}_([0-9][0-9][0-9][0-9])"
 
     if [[ ${LRC} == true ]]; then
@@ -420,17 +353,16 @@ main() {
     if [[ "${DO_SVN}" == "true" ]]; then
         if [[ ! ${LRC} ]]; then
             svnCopyBranch ${SRC_BRANCH} ${NEW_BRANCH}
-            svnCopyLocations ${SRC_BRANCH} ${NEW_BRANCH}
-            svnDummyCommit ${NEW_BRANCH}
+            svnCopyLocations ${LOCATIONS} ${SRC_BRANCH} ${NEW_BRANCH}
             if [[ "${FSMR4}" == "true" ]]; then
-                svnCopyLocationsFSMR4 ${SRC_BRANCH} ${NEW_BRANCH}
+                svnCopyLocationsFSMR4 ${LOCATIONS_FSMR4} ${SRC_BRANCH} ${NEW_BRANCH}_FSMR4
             fi
+            svnDummyCommit ${NEW_BRANCH}
         elif [[ ${LRC} == "true" ]]; then
-            svnCopyBranchLRC ${SRC_BRANCH} ${NEW_BRANCH}
-            svnCopyLocationsLRC ${SRC_BRANCH} ${NEW_BRANCH}
+            svnCopyBranchLRC ${SRC_BRANCH} LRC_${NEW_BRANCH}
+            svnCopyLocationsLRC ${LOCATIONS_LRC} ${SRC_BRANCH} LRC_${NEW_BRANCH}
             svnDummyCommitLRC ${NEW_BRANCH}
         fi
-        svnEditLocationsTxtFile ${NEW_BRANCH}
         dbInsert ${NEW_BRANCH}
         createBranchInGit ${NEW_BRANCH}
     else

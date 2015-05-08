@@ -71,13 +71,14 @@ makingTest_testXmloutput() {
 #  @param   <none>
 #  @return  <none>
 makingTest_testconfig() {
-    requiredParameters DELIVERY_DIRECTORY
-
-    local targetName=$(_reserveTarget)
+    local targetName="$(_reserveTarget)"
     mustHaveValue "${targetName}" "target name"
     
     local testSuiteDirectory=$(makingTest_testSuiteDirectory)
     mustExistDirectory ${testSuiteDirectory}
+
+    local deliveryDirectory=$(getConfig LFS_CI_uc_test_on_target_delivery_directory)
+    mustExistDirectory ${deliveryDirectory}
 
     local workspace=$(getWorkspaceName)
     mustHaveWorkspaceName
@@ -85,8 +86,8 @@ makingTest_testconfig() {
     info "create testconfig for ${testSuiteDirectory}"
     execute make -C ${testSuiteDirectory}       \
                 testconfig-overwrite            \
-                TESTBUILD=${DELIVERY_DIRECTORY} \
-                TESTTARGET=${targetName,,}      \
+                TESTBUILD=${deliveryDirectory}  \
+                TESTTARGET="${targetName,,}"    \
                 TESTBUILD_SRC=${workspace}
     return
 }
@@ -112,17 +113,17 @@ makingTest_testSuiteDirectory() {
 
     local relativeTestSuiteDirectory=
     if [[ -e ${workspace}/src-project/src/TMF/testsuites.cfg ]] ; then
-        relativeTestSuiteDirectory=$(getConfig test_suite                               \
-                                            -t targetName:${targetName}                      \
-                                            -t branchName:${branchName}                      \
+        relativeTestSuiteDirectory=$(getConfig test_suite                                     \
+                                            -t "targetName:${targetName}"                     \
+                                            -t "branchName:${branchName}"                     \
                                             -f ${workspace}/src-project/src/TMF/testsuites.cfg)
 
     fi
     # if test suite directory is empty, try to find in test suite in the old config file
     if [[ -z ${relativeTestSuiteDirectory} ]] ; then
         relativeTestSuiteDirectory=$(getConfig LFS_CI_uc_test_making_test_suite_dir \
-                                            -t targetName:${targetName}                  \
-                                            -t branchName:${branchName}                  )
+                                            -t "targetName:${targetName}"           \
+                                            -t "branchName:${branchName}"           )
     fi
     local testSuiteDirectory=${workspace}/${relativeTestSuiteDirectory}
     mustExistDirectory ${testSuiteDirectory}
@@ -375,21 +376,24 @@ makingTest_install() {
 
     local make="make -C ${testSuiteDirectory}"
 
-    mustHaveMakingTestRunningTarget
-
-    info "installing software on target"
-    execute ${make} setup
-
     local targetName=$(_reserveTarget)
     mustHaveValue "${targetName}" "target name"
 
-    local forceInstallSameVersion=$(getConfig LFS_CI_uc_test_making_test_force_reinstall_same_version)
-    if [[ -z ${forceInstallSameVersion} ]] ; then
-        if execute -i ${make} check ; then
-            info "the version, we would install is already on the target, skipping install"
-            return
-        else
-            info "ignore the warning above. It just saying, that the software version, we want to install is not yet on the target."                
+    local shouldHaveRunningTarget=$(getConfig LFS_CI_uc_test_should_target_be_running_before_make_install)
+    if [[ ${shouldHaveRunningTarget} ]] ; then
+        mustHaveMakingTestRunningTarget
+
+        info "installing software on target"
+        execute ${make} setup
+
+        local forceInstallSameVersion=$(getConfig LFS_CI_uc_test_making_test_force_reinstall_same_version)
+        if [[ -z ${forceInstallSameVersion} ]] ; then
+            if execute -i ${make} check ; then
+                info "the version, we would install is already on the target, skipping install"
+                return
+            else
+                info "ignore the warning above. It just saying, that the software version, we want to install is not yet on the target."                
+            fi
         fi
     fi
 
@@ -438,9 +442,11 @@ _reserveTarget() {
     requiredParameters JOB_NAME
 
     local isBookingEnabled=$(getConfig LFS_uc_test_is_booking_enabled)
+    local isCloudEnabled=$(getConfig LFS_CI_uc_test_is_cloud_enabled)
     local targetName=""
-
-    if [[ ${isBookingEnabled} ]] ; then
+    if   [[ ${isCloudEnabled}   ]] ; then
+        targetName=$(getConfig LFS_CI_uc_test_cloud_testconfig_target_parameter)
+    elif [[ ${isBookingEnabled} ]] ; then
         # new method via booking from database
         targetName=$(reservedTarget)
     else
@@ -448,7 +454,7 @@ _reserveTarget() {
     fi
     mustHaveValue ${targetName} "target name"
 
-    echo ${targetName}
+    echo ${targetName} 
    
     return
 }
@@ -486,7 +492,6 @@ mustHaveMakingTestRunningTarget() {
     info "checking, if target is up and running (with ssh)..."
     local canDoWaitPrompt=$(getConfig LFS_CI_uc_test_TMF_can_run_waitprompt)
     if [[ ${canDoWaitPrompt} ]] ; then
-        execute sleep 60
         execute make -C ${testSuiteDirectory} waitprompt
     fi
     execute make -C ${testSuiteDirectory} waitssh

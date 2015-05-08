@@ -48,6 +48,7 @@ test1() {
 _reserveTarget 
 makingTest_testSuiteDirectory 
 mustExistDirectory /path/to/test/suite
+mustExistDirectory ${DELIVERY_DIRECTORY}
 execute make -C /path/to/test/suite testconfig-overwrite TESTBUILD=${DELIVERY_DIRECTORY} TESTTARGET=targetname TESTBUILD_SRC=${WORKSPACE}/workspace
 EOF
     assertExecutedCommands ${expect}

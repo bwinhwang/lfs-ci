@@ -9,17 +9,20 @@ usecase_YAFT_UPDATE_REVISION() {
 
     local workspace=$(getWorkspaceName)
     mustHaveWorkspaceName
+    mustHaveCleanWorkspace
+
+    export PATH=/opt/subversion/x86_64/1.8.9/bin/:${PATH}
 
     local branchName=$(getBranchName)
     mustHaveValue "${branchName}" "branch name"
 
     local yaftSvnUrl=$(getConfig LFS_CI_uc_yaft_update_revision_svn_url)
-    mustExistInSubversion ${yaftSvnUrl}
+    mustExistInSubversion ${yaftSvnUrl} trunk
 
-    local revision=$(getSvnLastChangedRevision ${yaftSvnUrl})
+    local revision=$(getSvnLastChangedRevision ${yaftSvnUrl}/trunk)
     mustHaveValue "${revision}" "latest yaft revision"
 
-    local commitComment=${workspace}/commitComment
+    local commitComment=${WORKSPACE}/commitComment
     echo "update yaft to revision ${revision}" > ${commitComment}
 
     createBasicWorkspace -l ${branchName} src-project

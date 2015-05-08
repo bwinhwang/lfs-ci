@@ -188,8 +188,8 @@ getDirPattern() {
     dirPattern=$(echo ${dirPattern} | cut -d'(' -f1)
     DIR_PATTERN="${dirPattern}*"
 
-    if [[ "$DIR_PATTERN" == "*" ]]; then
-        error "Invalid directory patter: $DIR_PATTERN"
+    if [[ "$DIR_PATTERN" == "*" || ${#DIR_PATTERN} -lt 20 ]]; then
+        error "Invalid directory pattern: $DIR_PATTERN"
         exit 1
     fi 
 }
@@ -316,11 +316,10 @@ deleteTestResults() {
 
     getDirPattern ${BRANCH}
 
-    local subString=$(__getSubBranch ${BRANCH})
+    local subBranch=$(__getSubBranch ${BRANCH})
     local dirPattern=$DIR_PATTERN
-    if [[ "${subString}" != "" ]]; then
-        info "sub branch: ${subString}"
-        echo ${dirPattern} | grep -q ${subString} || { echo sub branch ${subString} is not in directory pattern ${dirPattern}; exit 1; }
+    if [[ "${subBranch}" != "" ]]; then
+        info "sub branch: ${subBranch}"
     else
         yyyy=$(getBranchPart ${BRANCH} YYYY)
         mm=$(getBranchPart ${BRANCH} MM)
@@ -340,7 +339,7 @@ dbUpdate() {
     info "--------------------------------------------------------"
 
     local branch=${BRANCH}
-    local sqlString="UPDATE branches SET status='closed',date_closed=now() WHERE branch_name='${branch}'"
+    local sqlString="UPDATE branches SET status='closed',date_closed=now() WHERE branch_name='${branch}' AND status!='closed'"
 
     local dbName=$(getConfig MYSQL_db_name)
     local dbUser=$(getConfig MYSQL_db_username)
@@ -358,15 +357,23 @@ dbUpdate() {
 }
 
 
-__checkParams || { error "Params check failed."; exit 1; }
-__checkOthers || { error "Checking some stuff failed."; exit 1; }
+#######################################################################
+# main
+#######################################################################
 
-[[ ${MOVE_SVN_OS_BRANCH} == true ]] && moveBranchSvnOS || info "Not moving os/$BRANCH in repo"
-[[ ${MOVE_SVN} == true ]] && moveBranchSvn || info "Not moving $BRANCH in repo"
-[[ ${MOVE_SHARE} == true ]] && { archiveBranchShare; archiveBranchBldShare; } || info "Not archiving $BRANCH on share"
-[[ ${DELETE_TEST_RESULTS} == true ]] && deleteTestResults || info "Not deleting test results"
-[[ ${DB_UPDATE} == true ]] && dbUpdate || info "Not updating DB."
+main() {
 
-[[ ${LRC_MOVE_SVN} == true ]] && LRC_moveBranchSvn || info "Not moving $BRANCH in repo for LRC"
-[[ ${LRC_MOVE_SHARE} == true ]] && { LRC_archiveBranchShare; LRC_archiveBranchBldShare; } || info "Not archiving $BRANCH on share for LRC"
+    __checkParams || { error "Params check failed."; exit 1; }
+    __checkOthers || { error "Checking some stuff failed."; exit 1; }
 
+    [[ ${MOVE_SVN_OS_BRANCH} == true ]] && moveBranchSvnOS || info "Not moving os/$BRANCH in repo"
+    [[ ${MOVE_SVN} == true ]] && moveBranchSvn || info "Not moving $BRANCH in repo"
+    [[ ${MOVE_SHARE} == true ]] && { archiveBranchShare; archiveBranchBldShare; } || info "Not archiving $BRANCH on share"
+    [[ ${DELETE_TEST_RESULTS} == true ]] && deleteTestResults || info "Not deleting test results"
+    [[ ${DB_UPDATE} == true ]] && dbUpdate || info "Not updating DB."
+
+    [[ ${LRC_MOVE_SVN} == true ]] && LRC_moveBranchSvn || info "Not moving $BRANCH in repo for LRC"
+    [[ ${LRC_MOVE_SHARE} == true ]] && { LRC_archiveBranchShare; LRC_archiveBranchBldShare; } || info "Not archiving $BRANCH on share for LRC"
+}
+
+main

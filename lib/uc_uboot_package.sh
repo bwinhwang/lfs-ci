@@ -50,6 +50,7 @@ ci_job_package() {
     done
 
     copyReleaseCandidateToShare
+    createArtifactArchive
 
     return 0
 }
