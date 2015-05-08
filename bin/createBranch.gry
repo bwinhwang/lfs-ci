@@ -546,9 +546,9 @@ class MySectionedView {
                 nestedView = new hudson.plugins.nested_view.NestedView(this.branchNestedView)
                 Jenkins.instance.addView(nestedView)
                 this.out.println("[INFO] Created view ${this.branchNestedView}")
-                return nestedView
             }
         }
+        return nestedView
     }
 
     /** 
