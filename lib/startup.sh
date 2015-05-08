@@ -40,6 +40,8 @@ prepareStartup() {
     if [[ ${selectedLinseeTools} ]] ; then
         local seesetenv=$(getConfig LINSEE_cmd_seesetenv)
         mustExistFile ${seesetenv}
+        
+        info "using ${selectedLinseeTools} from LINSEE"
 
         source ${seesetenv} ${selectedLinseeTools}
     fi
