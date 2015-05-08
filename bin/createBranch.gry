@@ -177,9 +177,9 @@ def createScmView() {
         if(root_view_name.find("_")) {
             root_view_name = root_view_name.split("_")[0]
         }
-        println("[INFO] root view: ${root_view_name}")
+        println("[INFO] root view name: ${root_view_name}")
         root_view_obj = Jenkins.instance.getView(root_view_name)
-        println("[INFO] root view: ${root_view_obj}")
+        println("[INFO] root view object: ${root_view_obj}")
         // In this case we do not copy the jobs from SCM view, but 
         // from source branch view (eg. 1405/FB1405).
         src_branch_view_obj = root_view_obj.getView(src_branch.toUpperCase())
@@ -515,6 +515,11 @@ class MySectionedView {
             this.branchNestedView = this.branch[3..-1]
         } else {
             throw Exception("Invalid branch name: ${this.branch}")
+        }
+
+        // Source branch is a sub branch eg. FB1405_LNP80
+        if(this.branchNestedView.find("_")) {
+            this.branchNestedView = branchNestedView.split("_")[0]
         }
 
         if(this.lrc) {
