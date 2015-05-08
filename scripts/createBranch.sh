@@ -111,7 +111,7 @@ __cmd() {
 #  @return  <none>
 svnCopyBranch() {
     info "--------------------------------------------------------"
-    info "SVN: create branch for"
+    info "SVN: create branch"
     info "--------------------------------------------------------"
 
     local srcBranch=$1
@@ -204,8 +204,8 @@ svnCopyBranchLRC() {
     DESCRIPTION: svn cp -r${REVISION} --parents ${SVN_REPO}/${SVN_PATH} ${SVN_REPO}/${SVN_DIR}/${newBranch}/trunk. \
     $COMMENT"
 
-    svn ls ${SVN_REPO}/${SVN_PATH} || {
-        __cmd svn copy -r${REVISION} -m \"${message}\" --parents ${SVN_REPO}/${SVN_PATH} \
+    svn ls ${SVN_REPO}/${SVN_DIR}/${newBranch} || {
+        __cmd svn copy -r ${REVISION} -m \"${message}\" --parents ${SVN_REPO}/${SVN_PATH} \
             ${SVN_REPO}/${SVN_DIR}/${newBranch}/trunk
     }
 }
@@ -260,6 +260,7 @@ createBranchInGit() {
         mustHaveValue "${gitServer}" "git server"
 
         if [[ ${LRC} == true ]]; then
+            newBranch=LRC_${newBranch}
             gitRevision=$(svn cat -r${REVISION} ${SVN_REPO}/${SVN_PATH}/lrc/${SRC_PROJECT}/src/gitrevision)
         else
             gitRevision=$(svn cat -r${REVISION} ${SVN_REPO}/${SVN_PATH}/main/${SRC_PROJECT}/src/gitrevision)
@@ -320,7 +321,6 @@ svnDummyCommitLRC() {
 #  @param   <newBranch> new branch name
 #  @return  <none>
 svnEditLocationsTxtFile() {
-    # TODO: Create locations.txt from DB
     info "--------------------------------------------------------"
     info "SVN: edit locations.txt file"
     info "--------------------------------------------------------"
@@ -337,7 +337,6 @@ svnEditLocationsTxtFile() {
     local yyyy=$(getBranchPart ${newBranch} YYYY)
     local mm=$(getBranchPart ${newBranch} MM)
 
-    info "Add ${newBranch} to trunk/${bldTools}/${locationsTxt}"
     __cmd mkdir ${bldTools}
     __cmd svn checkout --depth empty ${SVN_REPO}/${SVN_DIR}/trunk/${bldTools} ${bldTools}
     __cmd cd ${bldTools}
@@ -363,7 +362,11 @@ svnEditLocationsTxtFile() {
         echo "LRC_${newBranch}                       LRC locations (special LRC for ${newBranch} only)" >> ${locationsTxt}
     fi
 
-    __cmd svn commit -m \"Added ${newBranch} to file ${locationsTxt}\" ${locationsTxt}
+    if [[ "${LRC}" == "true" ]]; then
+        __cmd svn commit -m \"Added branch LRC_${newBranch} to ${locationsTxt}\" ${locationsTxt}
+    else
+        __cmd svn commit -m \"Added branch ${newBranch} to ${locationsTxt}\" ${locationsTxt}
+    fi
 }
 
 ## @fn      dbInsert()

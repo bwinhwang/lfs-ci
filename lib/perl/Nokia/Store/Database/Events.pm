@@ -108,8 +108,8 @@ sub newBuildEvent {
     };
 
 
-    my $data   = $dataHash->{$action};
-    my $method = sprintf( "$action( %s )", join( ", ", map { "?" } @{ $data } ) );
+    $data   = $dataHash->{$action};
+    $method = sprintf( "$action( %s )", join( ", ", map { "?" } @{ $data } ) );
 
     DEBUG "executing $action with $method and data (" . join( ", ", @{ $data } ) . ")";
 

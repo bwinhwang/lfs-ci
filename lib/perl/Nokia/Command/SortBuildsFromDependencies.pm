@@ -36,11 +36,13 @@ sub execute {
 
     my @sources = sort { $a->{directory} cmp $b->{directory} } @{ $self->{sources} };
     my %seen;
+        print Dumper( $self );
 
 SOURCES:
     while( scalar( @sources > 0 ) ) {
         my $source = shift @sources;
         next if not $source;
+
 
         my @deps = map  { $_->{directory} }
                    # grep { $_->{sourceExistsInFileSystem} }
