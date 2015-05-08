@@ -28,6 +28,7 @@ info "# ACTIVATE_ROOT_JOBS:   $ACTIVATE_ROOT_JOBS"
 info "# DEBUG:                $DEBUG"
 info "###############################################################"
 
+
 # TODO: Get it via getConfig()
 SVN_REPO="https://svne1.access.nsn.com/isource/svnroot/BTS_SC_LFS"
 SVN_DIR="os"
@@ -126,8 +127,6 @@ svnCopyBranch() {
     DESCRIPTION: svn cp -r${REVISION} --parents ${SVN_REPO}/${SVN_PATH} ${SVN_REPO}/${SVN_DIR}/${newBranch}/trunk. \
     $COMMENT"
 
-    # TODO: Job shall fail in case branch already exists.
-    #       This requirement is in collision with master option DO_SVN.
     svn ls ${SVN_REPO}/${SVN_DIR}/${newBranch} || {
         __cmd svn copy -r ${REVISION} -m \"${message}\" --parents ${SVN_REPO}/${SVN_PATH} \
             ${SVN_REPO}/${SVN_DIR}/${newBranch}/trunk;
@@ -158,7 +157,7 @@ svnCopyLocations() {
     local newBranch=$3
     local branchLocation=$newBranch
     echo $branchLocation | grep -q _FSMR4$ && {
-        branchLocation = ${branchLocation%_FSMR4};
+        branchLocation=${branchLocation%_FSMR4};
     }
     mustHaveValue "${locations}" "locations"
     mustHaveValue "${srcBranch}" "source branch"
@@ -169,7 +168,11 @@ svnCopyLocations() {
                 ${SVN_REPO}/${SVN_DIR}/trunk/bldtools/locations-${newBranch};
             __cmd svn checkout ${SVN_REPO}/${SVN_DIR}/trunk/bldtools/locations-${newBranch};
             __cmd cd locations-${newBranch};
-            __cmd sed -i -e "'s/\/os\/${srcBranch}\//\/os\/${branchLocation}\/trunk\//'" Dependencies;
+            if [[ ! $(eco ${srcBranch} | awk -F_ '{print $2}') ]]; then
+                __cmd sed -i -e "'s/\/os\/${srcBranch}\//\/os\/${branchLocation}\/trunk\//'" Dependencies;
+            else
+                __cmd sed -i -e "'s/\/os\/${srcBranch}\//\/os\/${branchLocation}\//'" Dependencies;
+            fi
             __cmd svn commit -m \"added new location ${newBranch}.\";
             __cmd svn delete -m \"removed bldtools, because they are always used from MAINTRUNK\" ${SVN_REPO}/${SVN_DIR}/${newBranch}/trunk/bldtools;
     }
@@ -194,6 +197,20 @@ svnCopyLocationsFSMR4() {
     svnCopyLocations $1 $2 $3
 }
 
+__checkGitRevisionFile() {
+    local branch=$1
+    local gitRevisionFile=$(getConfig PKGPOOL_PROD_update_dependencies_svn_url -t location:${branch})
+    local replacement="src/gitrevision"
+
+    if [[ "${gitRevisionFile}" == *Buildfile ]]; then
+        gitRevisionFile="${gitRevisionFile/Buildfile/$replacement}"
+    else
+        gitRevisionFile="${gitRevisionFile/Dependencies/$replacement}"
+    fi
+
+    svn ls ${gitRevisionFile} && { info  "Git revision file: ${gitRevisionFile}"; } \
+                              || { error "There is no git revision file: ${gitRevisionFile}."; exit 1; }
+}
 ## @fn      createBranchInGit()
 #  @brief   create new branch in GIT
 #  @param   <newBranch> new branch name
@@ -206,6 +223,8 @@ createBranchInGit() {
     if [[ "${DO_GIT}" == "false" ]]; then
         info "Not creating branch in GIT"
         return 0
+    else
+        __checkGitRevisionFile ${SRC_BRANCH}
     fi
 
     # TODO: check if branch already exists in GIT
@@ -216,6 +235,15 @@ createBranchInGit() {
         local gitServer=$(getConfig lfsGitServer)
         mustHaveValue "${newBranch}" "new branch"
         mustHaveValue "${gitServer}" "git server"
+
+        local gitRevisionFile=$(getConfig PKGPOOL_PROD_update_dependencies_svn_url -t location:$SRC_BRANCH)
+        if [[ "${gitRevisionFile}" == *Buildfile ]]; then
+            gitRevisionFile="${gitRevisionFile/Buildfile/src/gitrevision}"
+        else
+            gitRevisionFile="${gitRevisionFile/Dependencies/src/gitrevision}"
+        fi
+        svn ls ${gitRevisionFile} && { info  "Git revision file: ${gitRevisionFile}"; } \
+                                  || { error "There is no git revision file: ${gitRevisionFile}."; exit 1; }
 
         if [[ ${LRC} == true ]]; then
             newBranch=LRC_${newBranch}
@@ -230,8 +258,6 @@ createBranchInGit() {
         __cmd git branch $newBranch $gitRevision
         __cmd git push origin $newBranch
     else
-        # TODO: Fail in case branch already exists.
-        #       Maybe collision with master option DO_SVN.
         info "Branch already exists in GIT"
     fi
 }
@@ -253,13 +279,11 @@ svnDummyCommit() {
     local newBranch=$1
     mustHaveValue "${newBranch}" "new branch"
 
-    svn checkout ${SVN_REPO}/${SVN_DIR}/${newBranch}/trunk/main/${SRC_PROJECT}
+    __cmd svn checkout ${SVN_REPO}/${SVN_DIR}/${newBranch}/trunk/main/${SRC_PROJECT}
     if [[ -d ${SRC_PROJECT} ]]; then
         cd ${SRC_PROJECT}
         echo >> src/README
-        svn commit -m "dummy commit" src/README
-    else
-        warning "Directory $SRC_PROJECT does not exist"
+        __cmd svn commit -m \"dummy commit\" src/README
     fi
 }
 
@@ -290,6 +314,10 @@ dbInsert() {
     local branchType=$(getBranchPart ${branch} TYPE)
     local yyyy=$(getBranchPart ${branch} YYYY)
     local mm=$(getBranchPart ${branch} MM)
+
+    # Do we have a special branch?
+    local subBranch=$(echo $branch | awk -F_ '{print $2}')
+    [[ ${subBranch} ]] && branchType=${subBranch}
     local regex="${branchType}_PS_LFS_OS_${yyyy}_${mm}_([0-9][0-9][0-9][0-9])"
 
     if [[ ${LRC} == true ]]; then
