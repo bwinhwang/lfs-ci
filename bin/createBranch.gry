@@ -447,10 +447,14 @@ def bindings = getBinding()
 config.putAll(bindings.getVariables())
 def out = config['out']
 
-sectionedView = new MySectionedView(new_branch, lrc_jobs, env, out)
+sectionedView = new MySectionedView(src_branch, new_branch, lrc_jobs, env, out)
 parentViewObj = sectionedView.createNestedView()
 sectionedView.addSectionedView(parentViewObj)
-sectionedView.configureSectionedView()
+if(src_branch == "trunk") {
+    sectionedView.configureSectionedView()
+} else {
+    sectionedView.configureSectionedView2()
+}
 
 ///////////////////////////////////////////////////////////////////////
 //
@@ -468,6 +472,7 @@ sectionedView.configureSectionedView()
 class MySectionedView {
 
     def env
+    def src_branch
     def branch
     def lrc
     def jenkinsUrl
@@ -493,7 +498,8 @@ class MySectionedView {
      * @param apiUser the Jenkins API user.
      * @param out the output stream so that this.out.println("...") works.
      */
-    MySectionedView(branch, lrc, env, out) {
+    MySectionedView(src_branch, branch, lrc, env, out) {
+        this.src_branch = src_branch
         this.branch = branch
         this.lrc = lrc
         this.env = env
@@ -598,6 +604,44 @@ class MySectionedView {
 
         this.processFileInplace(sectionedViewTmpl) { text ->
             text.replaceAll("##BRANCH##", this.branch)
+        }
+
+        if(this.debug) {
+            this.out.println("[DEBUG] send config xml file ${configXmlFile} to Jenkins")
+        } else {
+            this.out.println("[INFO] send config xml file ${configXmlFile} to Jenkins")
+            proc = ["curl", "-u${this.apiUser}:${this.apiToken}", "${requestUrl}", "--noproxy", "localhost", "--data-binary", "@${configXmlFile}"].execute()
+            this.out.println("[INFO] waiting for response from Jenkins")
+            proc.waitFor()
+            this.out.println("[INFO] configureSectionedView() proc.text: $proc.text")
+        }
+        this.out.println("[INFO] finished configuring sectioned view")
+    }
+
+    /**
+      * Configure the sectioned view for this branch by reading the config.xml
+      * from the source branch and sending the altered config.xml file to Jenkins.
+      * This method should be used in case the source branch is not trunk.
+      */
+    void configureSectionedView2() {
+        this.out.println()
+        def requestUrl = "${this.jenkinsUrl}view/${this.branchNestedView}/view/${this.src_branch}/config.xml"
+        def proc = null
+        def configXmlFile = "${workspace}/sectioned_view_template.xml"
+        def config = null
+
+        this.out.println("[INFO] get view config from: ${requestUrl}")
+        proc = ["curl", "-u${this.apiUser}:${this.apiToken}", "${requestUrl}", "--noproxy", "localhost"].execute()
+        proc.waitFor()
+        config = proc.text
+        this.out.println(config)
+
+        def sectionedViewTmpl = new File(configXmlFile)
+        this.out.println("[INFO] write config xml file to ${configXmlFile}")
+        sectionedViewTmpl.write(config)
+
+        this.processFileInplace(sectionedViewTmpl) { text ->
+            text.replaceAll(this.src_branch, this.branch)
         }
 
         if(this.debug) {
