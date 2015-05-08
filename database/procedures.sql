@@ -446,9 +446,6 @@ CREATE PROCEDURE other_failed( IN in_build_name   VARCHAR(128),
                              )
 BEGIN
     CALL new_build_event( in_build_name, in_comment, in_job_name, in_build_number, 
-=======
-BEGIN
-    CALL new_build_event( in_build_name, in_comment, in_job_name, in_build_number, 
                           in_product_name, in_task_name, 'release', 'finished' );
 END //
 DELIMITER ;
@@ -503,7 +500,6 @@ CREATE PROCEDURE other_failed( IN in_build_name   VARCHAR(128),
                              )
 BEGIN
     CALL new_build_event( in_build_name, in_comment, in_job_name, in_build_number, 
->>>>>>> isource/master
                           in_product_name, in_task_name, 'other', 'failed' );
 END //
 DELIMITER ;
@@ -736,11 +732,6 @@ BEGIN
 END //
 DELIMITER ;
 
-=======
--- {{{ migrateBranchData
-DROP PROCEDURE IF EXISTS migrateBranchData;
->>>>>>> isource/master
--- }}}
 -- {{{ migrateBranchData
 DROP PROCEDURE IF EXISTS migrateBranchData;
 -- }}}

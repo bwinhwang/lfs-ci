@@ -43,6 +43,7 @@ SOURCES:
         my $source = shift @sources;
         next if not $source;
 
+
         my @deps = map  { $_->{directory} }
                    # grep { $_->{sourceExistsInFileSystem} }
                    $source->getDependencies();
