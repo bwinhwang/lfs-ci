@@ -371,6 +371,7 @@ catch(NullPointerException) {
 }
 
 // collect jobs to be created
+// TODO: Get jobs from trunk view rather than from SCM/TRUNK and skip those which are not needed.
 def jobs_list = []
 for(job in src_branch_view_obj.getItems()) {
     if(jobs2Exclude.find(job.getName())) {
