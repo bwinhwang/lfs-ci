@@ -144,7 +144,11 @@ def createScmView() {
 
     scm_view_obj = Jenkins.instance.getView(scm_view)
     // Jobs to be copied are taken from this view.
-    src_branch_view_obj = scm_view_obj.getView(src_branch.toUpperCase())
+    try {
+        src_branch_view_obj = scm_view_obj.getView(src_branch.toUpperCase())
+    } catch (Exception) {
+        println("[INFO] view $scm_view/src_branch.toUpperCase() does not exist.")
+    }
     new_branch_view_obj = scm_view_obj.getView(branch_view_name)
 
     if(new_branch_view_obj) {
@@ -169,6 +173,11 @@ def createScmView() {
         } else {
             throw new RuntimeException("Invalid branch name $new_branch.")
         }
+        // Source branch is a sub branch eg. FB1405_LNP80
+        if(root_view_name.find("_")) {
+            root_view_name = root_view_name.split("_")[0]
+        }
+        println("[INFO] root view: ${root_view_name}")
         root_view_obj = Jenkins.instance.getView(root_view_name)
         println("[INFO] root view: ${root_view_obj}")
         // In this case we do not copy the jobs from SCM view, but 
@@ -387,7 +396,7 @@ for(job in jobs_list) {
     //if(job.name == "LFS_CI_-_${src_branch}_-_Build") {
     //if(job.name == "LFS_CI_-_${src_branch}_-_Test" || job.name == "LFS_Prod_-_trunk_-_Releasing_-_summary" || job.name == "LFS_CI_-_LRC_-_Build" || job.name == "LFS_Prod_-_LRC_-_Releasing_-_summary") {
     //if(job.name == "LFS_CI_-_${src_branch}_-_Build" || job.name == "LFS_CI_-_${src_branch}_-_Test" || job.name == "LFS_Prod_-_trunk_-_Releasing_-_summary") {
-    if(job.name == "LFS_CI_-_${src_branch}_-_Build" || job.name == "LFS_CI_-_${src_branch}_-_Test" || job.name == "LFS_Prod_-_trunk_-_Releasing_-_summary" || job.name.find("fsmr4")) {
+    //if(job.name == "LFS_CI_-_${src_branch}_-_Build" || job.name == "LFS_CI_-_${src_branch}_-_Test" || job.name == "LFS_Prod_-_trunk_-_Releasing_-_summary" || job.name.find("fsmr4")) {
     //if(job.name.find("LRC")) {
     //if(job.name.find("fsmr4")) {
     //if(job.name == "PKGPOOL_-_trunk_-_Build") {
@@ -405,7 +414,7 @@ for(job in jobs_list) {
         new_branch_view_obj.doAddJobToView(new_job.getName())
         println("[INFO] added job $new_job.name to view \"$new_branch_view_obj.name\"")
     }
-    }
+    //}
 }
 
 // enable previosly disabled jobs
