@@ -610,7 +610,7 @@ class MySectionedView {
             this.out.println("[DEBUG] send config xml file ${configXmlFile} to Jenkins")
         } else {
             this.out.println("[INFO] send config xml file ${configXmlFile} to Jenkins")
-            proc = ["curl", "-u${this.apiUser}:${this.apiToken}", "${requestUrl}", "--noproxy", "localhost", "--data-binary", "@${configXmlFile}"].execute()
+            proc = ["curl", "-k", "-u${this.apiUser}:${this.apiToken}", "${requestUrl}", "--noproxy", "localhost", "--data-binary", "@${configXmlFile}"].execute()
             this.out.println("[INFO] waiting for response from Jenkins")
             proc.waitFor()
             this.out.println("[INFO] configureSectionedView() proc.text: $proc.text")
@@ -622,6 +622,8 @@ class MySectionedView {
       * Configure the sectioned view for this branch by reading the config.xml
       * from the source branch and sending the altered config.xml file to Jenkins.
       * This method should be used in case the source branch is not trunk.
+      *
+      * TODO: Refactor this with configureSectionedView()
       */
     void configureSectionedView2() {
         this.out.println()
@@ -631,7 +633,7 @@ class MySectionedView {
         def config = null
 
         this.out.println("[INFO] get view config from: ${requestUrl}")
-        proc = ["curl", "-u${this.apiUser}:${this.apiToken}", "${requestUrl}", "--noproxy", "localhost"].execute()
+        proc = ["curl", "-k", "-u${this.apiUser}:${this.apiToken}", "${requestUrl}", "--noproxy", "localhost"].execute()
         proc.waitFor()
         config = proc.text
         this.out.println(config)
@@ -648,7 +650,7 @@ class MySectionedView {
             this.out.println("[DEBUG] send config xml file ${configXmlFile} to Jenkins")
         } else {
             this.out.println("[INFO] send config xml file ${configXmlFile} to Jenkins")
-            proc = ["curl", "-u${this.apiUser}:${this.apiToken}", "${requestUrl}", "--noproxy", "localhost", "--data-binary", "@${configXmlFile}"].execute()
+            proc = ["curl", "-k", "-u${this.apiUser}:${this.apiToken}", "${requestUrl}", "--noproxy", "localhost", "--data-binary", "@${configXmlFile}"].execute()
             this.out.println("[INFO] waiting for response from Jenkins")
             proc.waitFor()
             this.out.println("[INFO] configureSectionedView() proc.text: $proc.text")
