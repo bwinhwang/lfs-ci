@@ -37,7 +37,6 @@ sub execute {
 
     my @sources = sort { $a->{directory} cmp $b->{directory} } @{ $self->{sources} };
     my %seen;
-        print Dumper( $self );
 
 SOURCES:
     while( scalar( @sources > 0 ) ) {
