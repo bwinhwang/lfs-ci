@@ -62,6 +62,8 @@ specialBuildPreparation() {
     echo ${label}    > ${workspace}/bld/bld-fsmci-summary/label
     echo ${location} > ${workspace}/bld/bld-fsmci-summary/location
 
+    createFingerprintFile
+
     debug "create own revision control file"
     echo "src-fake http://fakeurl/ ${revision}" > ${WORKSPACE}/revisionstate.xml
     rawDebug ${WORKSPACE}/revisionstate.xml
@@ -192,7 +194,7 @@ uploadKnifeToStorage() {
     mustHaveValue "${uploadServer}" "upload server and path"
 
     s3PutFile ${knifeFile} ${uploadServer}
-    s3SetAccessPublic ${knifeFile}
+    s3SetAccessPublic ${uploadServer}/$(basename ${knifeFile})
 
     return
 }
@@ -249,6 +251,7 @@ specialBuildUploadAndNotifyUser() {
     export REQUESTOR REQUESTOR_FIRST_NAME REQUESTOR_LAST_NAME REQUESTOR_USERID REQUESTOR_EMAIL
 
     local readmeFile=${workspace}/.00_README.txt
+    execute touch ${readmeFile}
     local resultFiles="$(getConfig LFS_CI_uc_special_build_package_result_files)"
 
     info "requested result files are ${resultFiles}"

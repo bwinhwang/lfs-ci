@@ -15,7 +15,7 @@ oneTimeSetUp() {
             return 0
         fi
     }
-    . scripts/deleteBranch.sh
+    . bin/deleteBranch.sh
 }
 
 oneTimeTearDown() {

@@ -78,6 +78,7 @@ collectMetricsFromBuildJobs() {
         local state=$(cut -d: -f2 <<< ${line})
 
         [[ ${jobName} =~ FSMDDALpdf ]] && continue
+        [[ ${state}   =~ NOT_BUILT  ]] && continue
 
         # build duration
         copyFileFromBuildDirectoryToWorkspace ${jobName} ${buildNumber} build.xml

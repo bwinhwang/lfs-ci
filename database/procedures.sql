@@ -446,6 +446,64 @@ CREATE PROCEDURE other_failed( IN in_build_name   VARCHAR(128),
                              )
 BEGIN
     CALL new_build_event( in_build_name, in_comment, in_job_name, in_build_number, 
+=======
+BEGIN
+    CALL new_build_event( in_build_name, in_comment, in_job_name, in_build_number, 
+                          in_product_name, in_task_name, 'release', 'finished' );
+END //
+DELIMITER ;
+
+-- }}}
+-- {{{ other_started
+
+DROP PROCEDURE IF EXISTS other_started;
+DELIMITER //
+CREATE PROCEDURE other_started( IN in_build_name   VARCHAR(128), 
+                                IN in_comment      TEXT,
+                                IN in_job_name     VARCHAR(128), 
+                                IN in_build_number INT,
+                                IN in_product_name VARCHAR(128),
+                                IN in_task_name    VARCHAR(128) 
+                              )
+BEGIN
+    CALL new_build_event( in_build_name, in_comment, in_job_name, in_build_number, 
+                          in_product_name, in_task_name, 'other', 'started' );
+END //
+DELIMITER ;
+
+-- }}}
+-- {{{ other_finished
+
+DROP PROCEDURE IF EXISTS other_finished;
+DELIMITER //
+CREATE PROCEDURE other_finished( IN in_build_name   VARCHAR(128), 
+                                 IN in_comment      TEXT,
+                                 IN in_job_name     VARCHAR(128), 
+                                 IN in_build_number INT,
+                                 IN in_product_name VARCHAR(128),
+                                 IN in_task_name    VARCHAR(128) 
+                               )
+BEGIN
+    CALL new_build_event( in_build_name, in_comment, in_job_name, in_build_number, 
+                          in_product_name, in_task_name, 'other', 'finished' );
+END //
+DELIMITER ;
+
+-- }}}
+-- {{{ other_failed
+
+DROP PROCEDURE IF EXISTS other_failed;
+DELIMITER //
+CREATE PROCEDURE other_failed( IN in_build_name   VARCHAR(128), 
+                               IN in_comment      TEXT,
+                               IN in_job_name     VARCHAR(128), 
+                               IN in_build_number INT,
+                               IN in_product_name VARCHAR(128),
+                               IN in_task_name    VARCHAR(128) 
+                             )
+BEGIN
+    CALL new_build_event( in_build_name, in_comment, in_job_name, in_build_number, 
+>>>>>>> isource/master
                           in_product_name, in_task_name, 'other', 'failed' );
 END //
 DELIMITER ;
@@ -528,6 +586,33 @@ END //
 DELIMITER ;
 
 -- }}}
+-- {{{ add_new_test_case_result
+
+DROP PROCEDURE IF EXISTS add_new_test_case_result;
+DELIMITER //
+CREATE PROCEDURE add_new_test_case_result( IN test_execution_id     INT, 
+                                           IN in_test_case_name     VARCHAR(128),
+                                           IN in_test_case_result   INT,
+                                           IN in_test_case_duration INT,
+                                           IN in_test_case_owner    VARCHAR(128)
+                                           )
+BEGIN
+    DECLARE cnt_test_case_id INT;
+    DECLARE var_test_case_id INT;
+
+    SELECT count(id) INTO cnt_test_case_id FROM test_cases WHERE test_case_name = in_test_case_name;
+   
+    IF cnt_test_case_id = 0 THEN
+        INSERT INTO test_cases ( test_case_name, test_case_owner ) VALUES ( in_test_case_name, in_test_case_owner );
+    END IF;
+    SELECT id INTO var_test_case_id FROM test_cases WHERE test_case_name = in_test_case_name;
+   
+    INSERT INTO test_case_results ( test_execution_id, test_case_id, test_case_duration, test_case_result ) 
+        VALUES ( test_execution_id, var_test_case_id, in_test_case_duration, in_test_case_result);
+END //
+DELIMITER ;
+
+-- }}}
 -- {{{ test_results
 
 DROP PROCEDURE IF EXISTS test_results;
@@ -561,38 +646,33 @@ DELIMITER ;
 -- {{{ isFailed
 
 DROP FUNCTION IF EXISTS isFailed;
+
+-- }}}
+-- {{{ _running_tasks
+
+DROP FUNCTION IF EXISTS _running_tasks;
 DELIMITER //
 
-CREATE FUNCTION isFailed(in_build_id int) RETURNS int
+CREATE FUNCTION _running_tasks( in_build_id     INT,
+                                in_event_type   TEXT,
+                                in_event_state  VARCHAR(128),
+                                in_product_name VARCHAR(128), 
+                                in_task_name    VARCHAR(128)
+                              ) RETURNS int
     DETERMINISTIC
 BEGIN
-    DECLARE cnt_isFailed1 int;
-    DECLARE cnt_isFailed2 int;
-    DECLARE isFailed INT;
+    DECLARE _running_tasks INT;
 
-    SELECT count(*) INTO cnt_isFailed1 
+    SELECT count(*) INTO _running_tasks
         FROM build_events be, events e
-        WHERE be.build_id = in_build_id 
-            AND be.event_id = e.events.id
-            AND event_state = 'failed';
-    IF cnt_isFailed1 >= 1 THEN
-        SET isFailed = 1;
-    ELSE
-        SELECT count(*) INTO cnt_isFailed2 
-            FROM build_events be, events e
-            WHERE be.build_id = in_build_id 
-                AND be.event_id = e.event_id
-                AND e.event_state NOT IN ('started', 'finished' )
-                AND TIMESTAMPDIFF(HOUR, timestamp, NOW() ) > 2;
+        WHERE be.build_id      = in_build_id
+            AND be.event_id    = e.id
+            AND e.event_type   = CONCAT( "sub", in_event_type )
+            AND e.event_state  = in_event_state
+            AND e.product_name = in_product_name
+            AND e.task_name    = in_task_name;
 
-        IF cnt_isFailed2 >= 1 THEN
-            SET isFailed = 1;
-        ELSE
-            SET isFailed = 0;
-        END IF;
-    END IF;
-
-RETURN (isFailed);
+RETURN (_running_tasks);
 END //
 DELIMITER ;
 
@@ -656,6 +736,10 @@ BEGIN
 END //
 DELIMITER ;
 
+=======
+-- {{{ migrateBranchData
+DROP PROCEDURE IF EXISTS migrateBranchData;
+>>>>>>> isource/master
 -- }}}
 -- {{{ migrateBranchData
 DROP PROCEDURE IF EXISTS migrateBranchData;
@@ -760,7 +844,7 @@ END //
 DELIMITER ;
 -- }}}
 -- {{{ add_new_subversion_commit
-DROP PROCEDURE add_new_subversion_commit;
+DROP PROCEDURE IF EXISTS add_new_subversion_commit;
 DELIMITER //
 CREATE  PROCEDURE add_new_subversion_commit( IN in_build_name VARCHAR(128),
                                              IN in_revision   INT,
@@ -784,7 +868,8 @@ BEGIN
    SELECT count(id) INTO cnt_is_already_done FROM subversion_commits WHERE build_id = var_build_id AND svn_revision = in_revision;
 
    IF cnt_is_already_done = 0 THEN
-       INSERT INTO subversion_commits (build_id, svn_revision, svn_author, commit_date, commit_message ) VALUES ( var_build_id, in_revision, in_author, in_date, in_msg );
+       INSERT INTO subversion_commits (build_id, svn_revision, svn_author, commit_date, commit_message ) 
+            VALUES ( var_build_id, in_revision, in_author, STR_TO_DATE( in_date, "%Y-%m-%dT%H:%i:%S.%fZ" ), in_msg );
    END IF;
 
 END //
@@ -855,12 +940,4 @@ BEGIN
 END //
 DELIMITER ;
 -- }}}
-
-
--- ALTER TABLE events DROP event_name;
--- ALTER TABlE events DROP event_target;
--- ALTER TABlE events DROP event_subtarget;
--- ALTER TABlE events DROP event_description;
--- ALTER TABlE events ADD column product_name VARCHAR(128);
--- ALTER TABlE events ADD column task_name VARCHAR(128);
 

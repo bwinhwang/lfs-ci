@@ -170,9 +170,13 @@ copyArchs() {
         local dst=${workspace}/upload/archs/${destinationsArchitecture}
         execute mkdir -p ${dst}
 
-        # TODO: demx2fk3 2014-07-21 fixme - what's about sdk without 3
-        execute ln -sf ../../../sdk3/bld-tools                    ${dst}/bld-tools
-        execute ln -sf ../../../sdk3/dbg-tools                    ${dst}/dbg-tools
+        local sdk=$(getConfig LFS_CI_UC_package_linking_component)
+        mustHaveValue "${sdk}" "sdk from configuration"
+
+        debug "linked sdk in arch is ${sdk}"
+
+        execute ln -sf ../../../${sdk}/bld-tools                  ${dst}/bld-tools
+        execute ln -sf ../../../${sdk}/dbg-tools                  ${dst}/dbg-tools
         execute ln -sf ../../sys-root/${destinationsArchitecture} ${dst}/sys-root
 
     done

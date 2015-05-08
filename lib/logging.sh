@@ -61,7 +61,6 @@ startLogfile() {
 
         export CI_LOGGING_LOGFILENAME
         export CI_LOGGING_DURATION_START_DATE=$(date +%s.%N)
-        
 
         echo 1>&2 "logfile is ${CI_LOGGING_LOGFILENAME}"
 

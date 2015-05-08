@@ -5,7 +5,7 @@ use warnings;
 use parent qw( Nokia::Object );
 
 use DBI;
-use Log::Log4perl qw( :easy);
+use Log::Log4perl qw( :easy );
 
 sub prepare {
     my $self = shift;
@@ -16,11 +16,11 @@ sub prepare {
         my $dbiString = sprintf( "DBI:%s:%s:%s:%s",
                 "mysql",                      # database driver
                 "lfspt",                      # database
-                "ulwiki02.emea.nsn-net.net",  # database host
+                "lfs-ci-metrics-database.dynamic.nsn-net.net",  # database host
                 3306,                         # database port
                 );
         my $userName = "lfspt";
-        my $password = "pt";
+        my $password = "4ObryufezAm_";
         my $dbiArgs  = { AutoCommit => 1,
                          PrintError => 1 };
 
