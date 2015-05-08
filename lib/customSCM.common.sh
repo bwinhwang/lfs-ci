@@ -95,6 +95,7 @@ getUpstreamProjectName() {
         LFS_CI_-_*_-_Test)              echo LFS_CI_-_${branchName}_-_Package_-_package   ;;
         UBOOT_CI_-_fsmr4_-_Test)        echo UBOOT_CI_-_fsmr4_-_Package_-_package ;;
         UBOOT_CI_-_*_-_Test)            echo UBOOT_CI_-_${branchName}_-_Package_-_package ;;
+        LFS_CI_-_*_-_RegularTest)       echo LFS_CI_-_${branchName}_-_Package_-_package ;;
         *) fatal "no rule to get the upstream job for ${jobName}"              ;;
     esac
 
