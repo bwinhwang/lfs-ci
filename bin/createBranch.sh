@@ -34,6 +34,7 @@ SVN_REPO="https://svne1.access.nsn.com/isource/svnroot/BTS_SC_LFS"
 SVN_DIR="os"
 SRC_PROJECT="src-project"
 VARS_FILE="VARIABLES.TXT"
+GIT_REVISION_FILE=""
 
 if [[ "${SRC_BRANCH}" == "trunk" ]]; then
     LOCATIONS="locations-pronb-developer"
@@ -170,7 +171,7 @@ svnCopyLocations() {
                 ${SVN_REPO}/${SVN_DIR}/trunk/bldtools/locations-${newBranch};
             __cmd svn checkout ${SVN_REPO}/${SVN_DIR}/trunk/bldtools/locations-${newBranch};
             __cmd cd locations-${newBranch};
-            if [[ ! $(eco ${srcBranch} | awk -F_ '{print $2}') ]]; then
+            if [[ ! $(echo ${srcBranch} | awk -F_ '{print $2}') ]]; then
                 __cmd sed -i -e "'s/\/os\/${srcBranch}\//\/os\/${branchLocation}\/trunk\//'" Dependencies;
             else
                 __cmd sed -i -e "'s/\/os\/${srcBranch}\//\/os\/${branchLocation}\//'" Dependencies;
@@ -199,8 +200,9 @@ svnCopyLocationsFSMR4() {
     svnCopyLocations $1 $2 $3
 }
 
-__checkGitRevisionFile() {
+__getGitRevisionFile() {
     local branch=$1
+    [[ ${LRC} == true ]] && branch=LRC_${branch}
     local gitRevisionFile=$(getConfig PKGPOOL_PROD_update_dependencies_svn_url -t location:${branch})
     local replacement="src/gitrevision"
 
@@ -212,7 +214,10 @@ __checkGitRevisionFile() {
 
     svn ls ${gitRevisionFile} && { info  "Git revision file: ${gitRevisionFile}"; } \
                               || { error "There is no git revision file: ${gitRevisionFile}."; exit 1; }
+
+    GIT_REVISION_FILE=${gitRevisionFile}
 }
+
 ## @fn      createBranchInGit()
 #  @brief   create new branch in GIT
 #  @param   <newBranch> new branch name
@@ -225,8 +230,6 @@ createBranchInGit() {
     if [[ "${DO_GIT}" == "false" ]]; then
         info "Not creating branch in GIT"
         return 0
-    else
-        __checkGitRevisionFile ${SRC_BRANCH}
     fi
 
     # TODO: check if branch already exists in GIT
@@ -235,26 +238,15 @@ createBranchInGit() {
     if [[ "${branchExists}" == "no" ]]; then
         local newBranch=$1
         local gitServer=$(getConfig lfsGitServer)
+        __getGitRevisionFile ${SRC_BRANCH}
+        local gitRevisionFile=$GIT_REVISION_FILE
         mustHaveValue "${newBranch}" "new branch"
         mustHaveValue "${gitServer}" "git server"
+        mustHaveValue "${gitRevisionFile}" "git revision file"
 
-        local gitRevisionFile=$(getConfig PKGPOOL_PROD_update_dependencies_svn_url -t location:$SRC_BRANCH)
-        if [[ "${gitRevisionFile}" == *Buildfile ]]; then
-            gitRevisionFile="${gitRevisionFile/Buildfile/src/gitrevision}"
-        else
-            gitRevisionFile="${gitRevisionFile/Dependencies/src/gitrevision}"
-        fi
-        svn ls ${gitRevisionFile} && { info  "Git revision file: ${gitRevisionFile}"; } \
-                                  || { error "There is no git revision file: ${gitRevisionFile}."; exit 1; }
-
-        if [[ ${LRC} == true ]]; then
-            newBranch=LRC_${newBranch}
-            gitRevision=$(svn cat -r${REVISION} ${SVN_REPO}/${SVN_PATH}/lrc/${SRC_PROJECT}/src/gitrevision)
-        else
-            gitRevision=$(svn cat -r${REVISION} ${SVN_REPO}/${SVN_PATH}/main/${SRC_PROJECT}/src/gitrevision)
-        fi
-
+        gitRevision=$(svn cat -r ${REVISION} ${gitRevisionFile})
         info "GIT revision: ${gitRevision}"
+
         __cmd git clone ssh://git@${gitServer}/build/build
         __cmd cd build
         __cmd git branch $newBranch $gitRevision

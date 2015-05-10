@@ -10,16 +10,16 @@ usecase_UPDATE_LOCATIONS_TXT() {
     local svnRepos=$(getConfig lfsSourceRepos)
     mustHaveValue "${svnRepos}" "svn repos"
 
-    svnCommit ${svnRepos}/os/trunk/bldtools/ ${WORKSPACE}/workspace
-    mustExistFile ${WORKSPACE}/workspace/bldtools/locations.txt
+    svnCheckout ${svnRepos}/os/trunk/bldtools/ ${WORKSPACE}/workspace
+    mustExistFile ${WORKSPACE}/workspace/locations.txt
 
-    execute -n ${LFS_CI_ROOT}/bin/getLocationsText > ${WORKSPACE}/workspace/bldtools/locations.txt
+    execute -n ${LFS_CI_ROOT}/bin/getLocationsText > ${WORKSPACE}/workspace/locations.txt
 
-    local commitComment=${workspace}/commitComment
+    local commitComment=${WORKSPACE}/commitComment
     echo "update locations.txt" > ${commitComment}
 
-    svnDiff ${WORKSPACE}/workspace/bldtools/locations.txt
-    svnCommit -F ${commitComment} ${WORKSPACE}/workspace/bldtools/locations.txt
+    svnDiff ${WORKSPACE}/workspace/locations.txt
+    svnCommit -F ${commitComment} ${WORKSPACE}/workspace/locations.txt
 
     info "updated locations.txt"
 
