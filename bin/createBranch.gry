@@ -109,7 +109,7 @@ parameters.each {
     }
     else if(it.name == "COMMENT")
         comment = it.value
-    else if(it.name == "ACTIVE_ROOT_JOBS")
+    else if(it.name == "ACTIVATE_ROOT_JOBS")
         activateRootJobs = it.value
     else if(it.name == "DO_JENKINS") {
         doJenkins = it.value
