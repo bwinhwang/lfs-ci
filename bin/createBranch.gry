@@ -3,7 +3,7 @@
 // Groovy script to crate a new branch in the LFS CI.
 //
 // 1. Take environment vars and parameters from Jenkins job.
-// 2. Creagte a list view and name it after the new branch.
+// 2. Create a list view and name it after the new branch.
 // 3. Add this new list view to the SCM view.
 // 4. Copy the jobs and replace $src_branch with $new_branch
 //    in the job name.
@@ -11,23 +11,13 @@
 // 6. Reconfigure the new job by editing config.xml.
 // 7. Copy and configure promotions if there are any.
 // 8. Reload the configuration of the new job.
+// 9. Create view(s).
 //
 ////////////////////////////////////////////////////////////////////////////////
-//
-// IMPORTANT:
-//
-// Jobs to be copied must exist within the SCM view.
-// "SCM/TUNK" and "SCM_LRC/TRUNK".
-// 
-// Sectioned view templates are read from 
-// 
-// Currently works only if "trunk" is the src_branch.
-///////////////////////////////////////////////////////////////////////////////
 
 //
 // TODO:
-//  - Job exclude list (1. Job to be excluded: *YAFT*)
-//  - Check whether all jobs are deleted if not delete it again.
+//  - Check whether all jobs are deleted. If not delete it again.
 //
 
 import hudson.model.*
