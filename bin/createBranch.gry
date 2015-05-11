@@ -637,7 +637,7 @@ class MySectionedView {
       */
     void configureSectionedView2() {
         this.out.println()
-        def requestUrl = "${this.jenkinsUrl}view/${this.branchNestedView}/view/${this.src_branch}/config.xml"
+        def requestUrl = "${this.jenkinsUrl}view/${this.branchNestedView}/view/${this.branch}/config.xml"
         def proc = null
         def configXmlFile = "${workspace}/sectioned_view_template.xml"
         def config = null
