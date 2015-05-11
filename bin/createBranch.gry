@@ -139,6 +139,9 @@ def createScmView() {
 
     if(lrc_jobs) {
         scm_view = "SCM_LRC"
+        if(src_branch != "trunk") {
+            src_branch = "LRC_" + src_branch
+        }
         branch_view_name = "LRC_" + new_branch
     }
 
@@ -598,7 +601,7 @@ class MySectionedView {
         def proc = null
         def configXmlFile = "${workspace}/sectioned_view_template.xml"
 
-        this.out.println("[INFO] configure sectioned view")
+        this.out.println("[INFO] configureSectionedView()")
         this.out.println("[INFO] read ${this.tmplDir}/${this.branchType}${this.tmplSuffix}")
         def tmplString = new File("${this.tmplDir}/${this.branchType}${this.tmplSuffix}").text
         def sectionedViewTmpl = new File(configXmlFile)
@@ -635,6 +638,7 @@ class MySectionedView {
         def configXmlFile = "${workspace}/sectioned_view_template.xml"
         def config = null
 
+        this.out.println("[INFO] configureSectionedView2()")
         this.out.println("[INFO] get view config from: ${requestUrl}")
         //proc = ["curl", "-k", "-u${this.apiUser}:${this.apiToken}", "${requestUrl}", "--noproxy", "localhost"].execute()
         proc = ["curl", "-k", "${requestUrl}", "--noproxy", "localhost"].execute()
