@@ -3,6 +3,7 @@ use strict;
 use warnings;
 
 use Log::Log4perl qw( :easy);
+use Data::Dumper;
 
 use parent qw( Nokia::Store::Database );
 
@@ -20,7 +21,6 @@ sub branchInformation {
          push @results, $row;
     }
     return @results;
-
 }
 
 1;

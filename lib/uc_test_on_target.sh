@@ -55,7 +55,7 @@ ci_job_test_on_target() {
     setBuildDescription ${JOB_NAME} ${BUILD_NUMBER} "${LABEL}<br>${targetName}"
 
     # for legacy: If job name is Test-<targetName> we don't know the type of the target
-    local testType=$(getConfig LFS_CI_uc_test_making_test_type -t testTargetName:${targetName})
+    local testType=$(getConfig LFS_CI_uc_test_making_test_type -t "testTargetName:${targetName}")
     mustHaveValue "${testType}" "test type"
 
     info "testing production ${LABEL}"

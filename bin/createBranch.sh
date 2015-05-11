@@ -28,11 +28,13 @@ info "# ACTIVATE_ROOT_JOBS:   $ACTIVATE_ROOT_JOBS"
 info "# DEBUG:                $DEBUG"
 info "###############################################################"
 
+
 # TODO: Get it via getConfig()
 SVN_REPO="https://svne1.access.nsn.com/isource/svnroot/BTS_SC_LFS"
 SVN_DIR="os"
 SRC_PROJECT="src-project"
 VARS_FILE="VARIABLES.TXT"
+GIT_REVISION_FILE=""
 
 if [[ "${SRC_BRANCH}" == "trunk" ]]; then
     LOCATIONS="locations-pronb-developer"
@@ -72,6 +74,7 @@ __preparation(){
     JENKINS_API_USER=$(getConfig jenkinsApiUser)
     CONFIGXML_TEMPLATE_DIR=$(getConfig sectionedViewTemplateDir)
     CONFIGXML_TEMPLATE_SUFFIX=$(getConfig sectionedViewTemplateSuffix)
+    JOBS_EXLUDE_LIST=$(getConfig branchingExludeJobs)
 
     mustHaveValue ${JENKINS_API_TOKEN} "Jenkins API token is missing."
     mustHaveValue ${JENKINS_API_USER} "Jenkins API user is missing."
@@ -80,6 +83,7 @@ __preparation(){
     echo JENKINS_API_USER=${JENKINS_API_USER} >> ${WORKSPACE}/${VARS_FILE}
     echo CONFIGXML_TEMPLATE_DIR=${CONFIGXML_TEMPLATE_DIR} >> ${WORKSPACE}/${VARS_FILE}
     echo CONFIGXML_TEMPLATE_SUFFIX=${CONFIGXML_TEMPLATE_SUFFIX} >> ${WORKSPACE}/${VARS_FILE}
+    echo JOBS_EXLUDE_LIST=${JOBS_EXLUDE_LIST} >> ${WORKSPACE}/${VARS_FILE}
 }
 
 ## @fn     __get_sql_insert()
@@ -126,8 +130,6 @@ svnCopyBranch() {
     DESCRIPTION: svn cp -r${REVISION} --parents ${SVN_REPO}/${SVN_PATH} ${SVN_REPO}/${SVN_DIR}/${newBranch}/trunk. \
     $COMMENT"
 
-    # TODO: Job shall fail in case branch already exists.
-    #       This requirement is in collision with master option DO_SVN.
     svn ls ${SVN_REPO}/${SVN_DIR}/${newBranch} || {
         __cmd svn copy -r ${REVISION} -m \"${message}\" --parents ${SVN_REPO}/${SVN_PATH} \
             ${SVN_REPO}/${SVN_DIR}/${newBranch}/trunk;
@@ -169,7 +171,7 @@ svnCopyLocations() {
                 ${SVN_REPO}/${SVN_DIR}/trunk/bldtools/locations-${newBranch};
             __cmd svn checkout ${SVN_REPO}/${SVN_DIR}/trunk/bldtools/locations-${newBranch};
             __cmd cd locations-${newBranch};
-            if [[ ! $(eco ${srcBranch} | awk -F_ '{print $2}') ]]; then
+            if [[ ! $(echo ${srcBranch} | awk -F_ '{print $2}') ]]; then
                 __cmd sed -i -e "'s/\/os\/${srcBranch}\//\/os\/${branchLocation}\/trunk\//'" Dependencies;
             else
                 __cmd sed -i -e "'s/\/os\/${srcBranch}\//\/os\/${branchLocation}\//'" Dependencies;
@@ -198,6 +200,24 @@ svnCopyLocationsFSMR4() {
     svnCopyLocations $1 $2 $3
 }
 
+__getGitRevisionFile() {
+    local branch=$1
+    [[ ${LRC} == true ]] && branch=LRC_${branch}
+    local gitRevisionFile=$(getConfig PKGPOOL_PROD_update_dependencies_svn_url -t location:${branch})
+    local replacement="src/gitrevision"
+
+    if [[ "${gitRevisionFile}" == *Buildfile ]]; then
+        gitRevisionFile="${gitRevisionFile/Buildfile/$replacement}"
+    else
+        gitRevisionFile="${gitRevisionFile/Dependencies/$replacement}"
+    fi
+
+    svn ls ${gitRevisionFile} && { info  "Git revision file: ${gitRevisionFile}"; } \
+                              || { error "There is no git revision file: ${gitRevisionFile}."; exit 1; }
+
+    GIT_REVISION_FILE=${gitRevisionFile}
+}
+
 ## @fn      createBranchInGit()
 #  @brief   create new branch in GIT
 #  @param   <newBranch> new branch name
@@ -218,24 +238,20 @@ createBranchInGit() {
     if [[ "${branchExists}" == "no" ]]; then
         local newBranch=$1
         local gitServer=$(getConfig lfsGitServer)
+        __getGitRevisionFile ${SRC_BRANCH}
+        local gitRevisionFile=$GIT_REVISION_FILE
         mustHaveValue "${newBranch}" "new branch"
         mustHaveValue "${gitServer}" "git server"
+        mustHaveValue "${gitRevisionFile}" "git revision file"
 
-        if [[ ${LRC} == true ]]; then
-            newBranch=LRC_${newBranch}
-            gitRevision=$(svn cat -r${REVISION} ${SVN_REPO}/${SVN_PATH}/lrc/${SRC_PROJECT}/src/gitrevision)
-        else
-            gitRevision=$(svn cat -r${REVISION} ${SVN_REPO}/${SVN_PATH}/main/${SRC_PROJECT}/src/gitrevision)
-        fi
-
+        gitRevision=$(svn cat -r ${REVISION} ${gitRevisionFile})
         info "GIT revision: ${gitRevision}"
+
         __cmd git clone ssh://git@${gitServer}/build/build
         __cmd cd build
         __cmd git branch $newBranch $gitRevision
         __cmd git push origin $newBranch
     else
-        # TODO: Fail in case branch already exists.
-        #       Maybe collision with master option DO_SVN.
         info "Branch already exists in GIT"
     fi
 }

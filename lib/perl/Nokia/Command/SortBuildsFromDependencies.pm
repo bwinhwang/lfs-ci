@@ -3,6 +3,7 @@ use strict;
 use warnings;
 
 use Data::Dumper;
+use Log::Log4perl qw( :easy );
 
 use Nokia::Usecase::GetLocation;
 
@@ -41,6 +42,7 @@ SOURCES:
     while( scalar( @sources > 0 ) ) {
         my $source = shift @sources;
         next if not $source;
+
 
         my @deps = map  { $_->{directory} }
                    # grep { $_->{sourceExistsInFileSystem} }

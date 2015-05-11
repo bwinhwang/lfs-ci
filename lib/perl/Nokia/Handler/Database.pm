@@ -136,9 +136,20 @@ sub locationsText {
     printf "# This file was automatically created by %s.\n", $0;
     printf "# Do not edit it by hand.\n";
     print "\n";
-    foreach my $row ( @data ) {
-        printf "%40s %10s %40s\n", $row->{location_name}, $row->{branch_status}, $row->{branch_description};
+    printf "%-20s %-10s %40s\n", "location", "status", "description";
+    print  "-"x20 . " " . "-"x10 . " " . "-"x80 . "\n";
+    foreach my $row ( sort { $a->{location_name} cmp $b->{location_name} } @data ) {
+        next if $row->{status} eq "closed";
+        printf "%-20s %-10s %-80s\n", $row->{location_name}, $row->{status}, $row->{branch_description} || sprintf( "Feature Build (all %s)", $row->{release_name_regex} );
     }
+    print  "-"x20 . " " . "-"x10 . " " . "-"x80 . "\n";
+    print "\n";
+    print "Remarks \n";
+    print "*) Please contact Wolfgang Adlassnig for current policy\n";
+    print "\n";
+    print "For Branch policy\n";
+    print "https://confluence.inside.nokiasiemensnetworks.com/display/BtsScmUlm/PS+Releases+in+the+Pipe\n";
+
     return
 }
 

@@ -446,6 +446,60 @@ CREATE PROCEDURE other_failed( IN in_build_name   VARCHAR(128),
                              )
 BEGIN
     CALL new_build_event( in_build_name, in_comment, in_job_name, in_build_number, 
+                          in_product_name, in_task_name, 'release', 'finished' );
+END //
+DELIMITER ;
+
+-- }}}
+-- {{{ other_started
+
+DROP PROCEDURE IF EXISTS other_started;
+DELIMITER //
+CREATE PROCEDURE other_started( IN in_build_name   VARCHAR(128), 
+                                IN in_comment      TEXT,
+                                IN in_job_name     VARCHAR(128), 
+                                IN in_build_number INT,
+                                IN in_product_name VARCHAR(128),
+                                IN in_task_name    VARCHAR(128) 
+                              )
+BEGIN
+    CALL new_build_event( in_build_name, in_comment, in_job_name, in_build_number, 
+                          in_product_name, in_task_name, 'other', 'started' );
+END //
+DELIMITER ;
+
+-- }}}
+-- {{{ other_finished
+
+DROP PROCEDURE IF EXISTS other_finished;
+DELIMITER //
+CREATE PROCEDURE other_finished( IN in_build_name   VARCHAR(128), 
+                                 IN in_comment      TEXT,
+                                 IN in_job_name     VARCHAR(128), 
+                                 IN in_build_number INT,
+                                 IN in_product_name VARCHAR(128),
+                                 IN in_task_name    VARCHAR(128) 
+                               )
+BEGIN
+    CALL new_build_event( in_build_name, in_comment, in_job_name, in_build_number, 
+                          in_product_name, in_task_name, 'other', 'finished' );
+END //
+DELIMITER ;
+
+-- }}}
+-- {{{ other_failed
+
+DROP PROCEDURE IF EXISTS other_failed;
+DELIMITER //
+CREATE PROCEDURE other_failed( IN in_build_name   VARCHAR(128), 
+                               IN in_comment      TEXT,
+                               IN in_job_name     VARCHAR(128), 
+                               IN in_build_number INT,
+                               IN in_product_name VARCHAR(128),
+                               IN in_task_name    VARCHAR(128) 
+                             )
+BEGIN
+    CALL new_build_event( in_build_name, in_comment, in_job_name, in_build_number, 
                           in_product_name, in_task_name, 'other', 'failed' );
 END //
 DELIMITER ;
@@ -619,6 +673,35 @@ END //
 DELIMITER ;
 
 -- }}}
+-- {{{ _running_tasks
+
+DROP FUNCTION IF EXISTS _running_tasks;
+DELIMITER //
+
+CREATE FUNCTION _running_tasks( in_build_id     INT,
+                                in_event_type   TEXT,
+                                in_event_state  VARCHAR(128),
+                                in_product_name VARCHAR(128), 
+                                in_task_name    VARCHAR(128)
+                              ) RETURNS int
+    DETERMINISTIC
+BEGIN
+    DECLARE _running_tasks INT;
+
+    SELECT count(*) INTO _running_tasks
+        FROM build_events be, events e
+        WHERE be.build_id      = in_build_id
+            AND be.event_id    = e.id
+            AND e.event_type   = CONCAT( "sub", in_event_type )
+            AND e.event_state  = in_event_state
+            AND e.product_name = in_product_name
+            AND e.task_name    = in_task_name;
+
+RETURN (_running_tasks);
+END //
+DELIMITER ;
+
+-- }}}
 -- {{{ build_results
 
 DROP PROCEDURE IF EXISTS build_results;
@@ -626,26 +709,29 @@ DELIMITER //
 CREATE PROCEDURE build_results()
 BEGIN
 
-    DROP TABLE IF EXISTS tmp_build_results;
-    CREATE TEMPORARY TABLE tmp_build_results
-    SELECT b.id, 
-           b.build_name, 
-           b.branch_name, 
-           b.revision, 
-           b.comment, 
-           be1.timestamp AS build_started,
-           IF( be2.timestamp, be2.timestamp, be3.timestamp) AS build_finished,
-           IF( be2.timestamp, 0, 1) AS isFailed
-    FROM v_builds b
-      LEFT JOIN build_events be1 ON (b.id = be1.build_id AND be1.event_id = 1 )
-      LEFT JOIN build_events be2 ON (b.id = be2.build_id AND be2.event_id = 2 )
-      LEFT JOIN build_events be3 ON (b.id = be3.build_id AND be3.event_id = 3 )
-    ;
+    -- TODO: demx2fk3 2015-04-15 FIXME
+    -- DROP TABLE IF EXISTS tmp_build_results;
+    -- CREATE TEMPORARY TABLE tmp_build_results
+    -- SELECT b.id, 
+    --        b.build_name, 
+    --       b.branch_name, 
+    --        b.revision, 
+    --        b.comment, 
+    --        be1.timestamp AS build_started, 
+    --        CASE isFailed( b.id )
+    --             WHEN 0 THEN be2.timestamp
+    --             ELSE IF( be3.timestamp, be3.timestamp, DATE_ADD( be1.timestamp, INTERVAL 2 HOUR) )
+    --        END AS build_ended,
+    --        isFailed( b.id ) AS isFailed
+    -- FROM v_builds b, 
+    -- LEFT JOIN build_events be1 ON (b.id = be1.build_id AND be1.event_id = 1 )
+    -- LEFT JOIN build_events be2 ON (b.id = be2.build_id AND be2.event_id = 2 )
+    -- LEFT JOIN build_events be3 ON (b.id = be3.build_id AND be3.event_id = 3 )
+    -- ;
 
 END //
 DELIMITER ;
 
--- }}}
 -- {{{ migrateBranchData
 DROP PROCEDURE IF EXISTS migrateBranchData;
 -- }}}
