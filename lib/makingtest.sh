@@ -145,9 +145,11 @@ makingTest_poweron() {
     local testSuiteDirectory=$(makingTest_testSuiteDirectory)
     mustExistDirectory ${testSuiteDirectory}
 
-    # not all branches have the poweroff implemented
-    execute  make -C ${testSuiteDirectory} powercycle
-    # execute -i make -C ${testSuiteDirectory} poweron
+    makingTest_logConsole
+
+    # This should be a poweron, but we don't know the state of the target.
+    # So we just powercycle the target
+    execute make -C ${testSuiteDirectory} powercycle
 
     return
 }
@@ -164,6 +166,8 @@ makingTest_poweroff() {
 
     # not all branches have the poweroff implemented
     execute -i make -C ${testSuiteDirectory} poweroff
+    makingTest_closeConsole
+
     return
 }
 
@@ -500,5 +504,63 @@ mustHaveMakingTestRunningTarget() {
 
     info "target is up."
 
+    return
+}
+
+
+## @fn      makingTest_logConsole()
+#  @brief   start to log all console output into an artifacts file
+#  @param   <none>
+#  @return  <none>
+makingTest_logConsole() {
+    local workspace=$(getWorkspaceName)
+    mustHaveWorkspaceName
+
+    local shouldLogConsole=$(getConfig LFS_CI_uc_test_should_record_log_output_of_target)
+    [[ ${shouldLogConsole} ]] || return 0
+
+	local testSuiteDirectory=$(makingTest_testSuiteDirectory)
+	mustExistFile ${testSuiteDirectory}/testsuite.mk
+
+    mustHaveMakingTestTestConfig
+
+    local logfilePath=${testSuiteDirectory}/__artifacts 
+    execute mkdir -p ${logfilePath}
+
+    local screenConfig=${WORKSPACE}/workspace/screenrc
+    cat <<EOF > ${screenConfig}
+logfile ${logfilePath}/console.%n
+logfile flush 1
+logtstamp after 10
+EOF
+    local make="make -C ${testSuiteDirectory} testtarget-analyzer | grep "
+    local fctTarget=$(_reserveTarget)
+    local fspTargets=$(execute -n ${make} setupfsps | cut -d= -f2 | tr "," " ")
+
+    for target in ${fctTarget,,} ${fspTargets,,} ; do
+        local moxa=$(execute -n ${make} moxa | cut -d= -f2)
+        if [[ ${moxa} ]] ; then
+            local localPort=$(sed "s/[\.:\]//g" )
+            localPort=$(( localPort % 64000 + 1024 ))
+            echo "screen -L -t tp_${target} ${LFS_CI_ROOT}/lib/contrib/tcp_sharer/tcp_sharer.pl --name ${target} --logfile ${logfilePath}/tp_${target}.log --remove ${moxa} --local ${localPort}" >> ${screenConfig}
+            echo "screen -L -t ${target}    sleep 3 && make -C ${testSuiteDirectory} TESTTARGET=${target} console" >> ${screenConfig}
+        fi
+    done
+
+    rawDebug ${screenConfig}
+
+    export LFS_CI_UC_TEST_SCREEN_NAME=lfs-jenkins.${USER}.${fctTarget}
+    execute screen -S ${LFS_CI_UC_TEST_SCREEN_NAME} -L -d -m -c ${screenConfig}
+    exit_add makingTest_closeConsole
+
+     return
+}
+
+## @fn      makingTest_closeConsole()
+#  @brief   stop to log all console output into an artifacts file
+#  @param   <none>
+#  @return  <none>
+makingTest_closeConsole() {
+    execute -i screen -dr -S ${LFS_CI_UC_TEST_SCREEN_NAME} -X quit
     return
 }
