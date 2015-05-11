@@ -357,10 +357,11 @@ main() {
             svnDummyCommitLRC LRC_${NEW_BRANCH}
             createBranchInGit LRC_${NEW_BRANCH}
         fi
-        dbInsert ${NEW_BRANCH}
     else
         info "$(basename $0): Nothing to do."
     fi
+
+    dbInsert ${NEW_BRANCH}
 }
 
 main
