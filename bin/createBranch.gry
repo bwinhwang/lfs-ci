@@ -147,7 +147,7 @@ def createScmView() {
     try {
         src_branch_view_obj = scm_view_obj.getView(src_branch.toUpperCase())
     } catch (Exception) {
-        println("[INFO] view $scm_view/src_branch.toUpperCase() does not exist.")
+        println("[INFO] view ${scm_view}/${src_branch.toUpperCase()} does not exist.")
     }
     new_branch_view_obj = scm_view_obj.getView(branch_view_name)
 
@@ -165,8 +165,8 @@ def createScmView() {
     }
 
     if(src_branch != "trunk") {
-        println("[INFO] Source branch is not trunk.")
-        if(new_branch.startswith("LRC_FB")) {
+        println("[INFO] Source branch is not trunk but ${src_branch}.")
+        if(new_branch.startsWith("LRC_FB")) {
             root_view_name = new_branch[6..-1]
         } else if(new_branch[0..1] == "FB") {
             root_view_name = new_branch[2..-1]
