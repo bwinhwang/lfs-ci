@@ -41,7 +41,7 @@ prepareStartup() {
         local seesetenv=$(getConfig LINSEE_cmd_seesetenv)
         mustExistFile ${seesetenv}
 
-        source ${seesetenv} ${selectedLinseeTools}
+        info source ${seesetenv} ${selectedLinseeTools}
     fi
 
     return
