@@ -15,8 +15,11 @@ oneTimeSetUp() {
         if [[ $1 == mkdir ]] ; then
             $@
         fi
-        if [[ $2 == make ]] ; then
+        if [[ $2 == make && $3 == setupfsps ]] ; then
             echo "setupfsps=${UT_CONNECTED_FSPS}"
+        fi
+        if [[ $2 == make && $3 == moxa ]] ; then
+            echo "moxa=127.123.123.123:1234"
         fi
     }
     mustHaveMakingTestTestConfig(){
@@ -64,7 +67,8 @@ makingTest_testSuiteDirectory
 mustHaveMakingTestTestConfig 
 execute mkdir -p ${WORKSPACE}/workspace/path/to/test/suite/__artifacts
 _reserveTarget 
-execute -n make testtarget-analyzer TESTTARGET=targetName
+execute -n make -C ${WORKSPACE}/workspace/path/to/test/suite testtarget-analyzer | grep setupfsps
+execute -n make -C ${WORKSPACE}/workspace/path/to/test/suite testtarget-analyzer | grep moxa
 execute screen -S lfs-jenkins.${USER}.targetName -L -d -m -c ${WORKSPACE}/workspace/screenrc
 exit_add makingTest_closeConsole
 EOF
@@ -106,7 +110,7 @@ makingTest_testSuiteDirectory
 mustHaveMakingTestTestConfig 
 execute mkdir -p ${WORKSPACE}/workspace/path/to/test/suite/__artifacts
 _reserveTarget 
-execute -n make testtarget-analyzer TESTTARGET=targetName
+execute -n make -C ${WORKSPACE}/workspace/path/to/test/suite testtarget-analyzer TESTTARGET=targetName
 execute screen -S lfs-jenkins.${USER}.targetName -L -d -m -c ${WORKSPACE}/workspace/screenrc
 exit_add makingTest_closeConsole
 EOF
