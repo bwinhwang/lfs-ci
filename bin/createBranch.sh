@@ -46,6 +46,7 @@ else
     LOCATIONS_FSMR4="locations-${SRC_BRANCH}_FSMR4"
     LOCATIONS_LRC="locations-LRC_${SRC_BRANCH}"
     SVN_PATH="${SVN_DIR}/${SRC_BRANCH}/trunk"
+    [[ $LRC == true ]] && SVN_PATH="${SVN_DIR}/LRC_${SRC_BRANCH}/trunk"
 fi
 
 
@@ -351,7 +352,7 @@ main() {
             fi
             svnDummyCommit ${NEW_BRANCH}
         elif [[ ${LRC} == "true" ]]; then
-            svnCopyBranchLRC ${SRC_BRANCH} LRC_${NEW_BRANCH}
+            svnCopyBranchLRC LRC_${SRC_BRANCH} LRC_${NEW_BRANCH}
             svnCopyLocationsLRC ${LOCATIONS_LRC} LRC_${SRC_BRANCH} LRC_${NEW_BRANCH}
             svnDummyCommitLRC ${NEW_BRANCH}
         fi
