@@ -637,7 +637,7 @@ class MySectionedView {
       */
     void configureSectionedView2() {
         this.out.println()
-        def requestUrl = "${this.jenkinsUrl}view/${this.branchNestedView}/view/${this.branch}/config.xml"
+        def requestUrl = "${this.jenkinsUrl}view/${this.branchNestedView}/view/${this.src_branch}/config.xml"
         def proc = null
         def configXmlFile = "${workspace}/sectioned_view_template.xml"
         def config = null
@@ -658,6 +658,7 @@ class MySectionedView {
             text.replaceAll(this.src_branch, this.branch)
         }
 
+        requestUrl = "${this.jenkinsUrl}view/${this.branchNestedView}/view/${this.branch}/config.xml"
         if(this.debug) {
             this.out.println("[DEBUG] send config xml file ${configXmlFile} to Jenkins")
             this.out.println("[DEBUG]      -> ${requestUrl}")
