@@ -284,11 +284,10 @@ svnDummyCommit() {
 
 ## @fn      svnDummyCommitLRC
 #  @brief   perform a dummy commit in SVN for LRC
-#  @param   <newBranch> new branch name (without LRC_ prefix)
+#  @param   <newBranch> new branch name
 #  @return  <none>
 svnDummyCommitLRC() {
-    local newBranch="LRC_$1"
-    svnDummyCommit "${newBranch}"
+    svnDummyCommit $1
 }
 
 ## @fn      dbInsert()
@@ -351,13 +350,14 @@ main() {
                 svnCopyLocationsFSMR4 ${LOCATIONS_FSMR4} ${SRC_BRANCH} ${NEW_BRANCH}_FSMR4
             fi
             svnDummyCommit ${NEW_BRANCH}
+            createBranchInGit ${NEW_BRANCH}
         elif [[ ${LRC} == "true" ]]; then
             svnCopyBranchLRC LRC_${SRC_BRANCH} LRC_${NEW_BRANCH}
             svnCopyLocationsLRC ${LOCATIONS_LRC} LRC_${SRC_BRANCH} LRC_${NEW_BRANCH}
-            svnDummyCommitLRC ${NEW_BRANCH}
+            svnDummyCommitLRC LRC_${NEW_BRANCH}
+            createBranchInGit LRC_${NEW_BRANCH}
         fi
         dbInsert ${NEW_BRANCH}
-        createBranchInGit ${NEW_BRANCH}
     else
         info "$(basename $0): Nothing to do."
     fi
