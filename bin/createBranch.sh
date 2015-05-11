@@ -43,8 +43,8 @@ if [[ "${SRC_BRANCH}" == "trunk" ]]; then
     SVN_PATH="${SVN_DIR}/trunk"
 else
     LOCATIONS="locations-${SRC_BRANCH}"
-    LOCATIONS_FSMR4="locations-${srcBranch}_FSMR4"
-    LOCATIONS_LRC="locations-LRC_${srcBranch}"
+    LOCATIONS_FSMR4="locations-${SRC_BRANCH}_FSMR4"
+    LOCATIONS_LRC="locations-LRC_${SRC_BRANCH}"
     SVN_PATH="${SVN_DIR}/${SRC_BRANCH}/trunk"
 fi
 
@@ -171,7 +171,7 @@ svnCopyLocations() {
                 ${SVN_REPO}/${SVN_DIR}/trunk/bldtools/locations-${newBranch};
             __cmd svn checkout ${SVN_REPO}/${SVN_DIR}/trunk/bldtools/locations-${newBranch};
             __cmd cd locations-${newBranch};
-            if [[ ! $(echo ${srcBranch} | awk -F_ '{print $2}') ]]; then
+            if [[ $srcBranch == trunk ]]; then
                 __cmd sed -i -e "'s/\/os\/${srcBranch}\//\/os\/${branchLocation}\/trunk\//'" Dependencies;
             else
                 __cmd sed -i -e "'s/\/os\/${srcBranch}\//\/os\/${branchLocation}\//'" Dependencies;
