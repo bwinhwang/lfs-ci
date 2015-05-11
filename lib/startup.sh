@@ -4,6 +4,8 @@ source ${LFS_CI_ROOT}/lib/common.sh
 source ${LFS_CI_ROOT}/lib/logging.sh
 source ${LFS_CI_ROOT}/lib/commands.sh
 source ${LFS_CI_ROOT}/lib/config.sh
+source ${LFS_CI_ROOT}/lib/jenkins.sh
+source ${LFS_CI_ROOT}/lib/subversion.sh
 
 prepareStartup() {
     export PATH=${LFS_CI_ROOT}/bin:${PATH}

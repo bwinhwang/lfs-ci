@@ -145,7 +145,7 @@ makingTest_poweron() {
     local testSuiteDirectory=$(makingTest_testSuiteDirectory)
     mustExistDirectory ${testSuiteDirectory}
 
-    makingTest_logConsole
+    # makingTest_logConsole
 
     # This should be a poweron, but we don't know the state of the target.
     # So we just powercycle the target
@@ -166,7 +166,7 @@ makingTest_poweroff() {
 
     # not all branches have the poweroff implemented
     execute -i make -C ${testSuiteDirectory} poweroff
-    makingTest_closeConsole
+    # makingTest_closeConsole
 
     return
 }
