@@ -380,21 +380,24 @@ makingTest_install() {
 
     local make="make -C ${testSuiteDirectory}"
 
-    mustHaveMakingTestRunningTarget
-
-    info "installing software on target"
-    execute ${make} setup
-
     local targetName=$(_reserveTarget)
     mustHaveValue "${targetName}" "target name"
 
-    local forceInstallSameVersion=$(getConfig LFS_CI_uc_test_making_test_force_reinstall_same_version)
-    if [[ -z ${forceInstallSameVersion} ]] ; then
-        if execute -i ${make} check ; then
-            info "the version, we would install is already on the target, skipping install"
-            return
-        else
-            info "ignore the warning above. It just saying, that the software version, we want to install is not yet on the target."                
+    local shouldHaveRunningTarget=$(getConfig LFS_CI_uc_test_should_target_be_running_before_make_install)
+    if [[ ${shouldHaveRunningTarget} ]] ; then
+        mustHaveMakingTestRunningTarget
+
+        info "installing software on target"
+        execute ${make} setup
+
+        local forceInstallSameVersion=$(getConfig LFS_CI_uc_test_making_test_force_reinstall_same_version)
+        if [[ -z ${forceInstallSameVersion} ]] ; then
+            if execute -i ${make} check ; then
+                info "the version, we would install is already on the target, skipping install"
+                return
+            else
+                info "ignore the warning above. It just saying, that the software version, we want to install is not yet on the target."                
+            fi
         fi
     fi
 

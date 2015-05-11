@@ -158,7 +158,7 @@ svnCopyLocations() {
     local newBranch=$3
     local branchLocation=$newBranch
     echo $branchLocation | grep -q _FSMR4$ && {
-        branchLocation = ${branchLocation%_FSMR4};
+        branchLocation=${branchLocation%_FSMR4};
     }
     mustHaveValue "${locations}" "locations"
     mustHaveValue "${srcBranch}" "source branch"
@@ -169,7 +169,11 @@ svnCopyLocations() {
                 ${SVN_REPO}/${SVN_DIR}/trunk/bldtools/locations-${newBranch};
             __cmd svn checkout ${SVN_REPO}/${SVN_DIR}/trunk/bldtools/locations-${newBranch};
             __cmd cd locations-${newBranch};
-            __cmd sed -i -e "'s/\/os\/${srcBranch}\//\/os\/${branchLocation}\/trunk\//'" Dependencies;
+            if [[ ! $(eco ${srcBranch} | awk -F_ '{print $2}') ]]; then
+                __cmd sed -i -e "'s/\/os\/${srcBranch}\//\/os\/${branchLocation}\/trunk\//'" Dependencies;
+            else
+                __cmd sed -i -e "'s/\/os\/${srcBranch}\//\/os\/${branchLocation}\//'" Dependencies;
+            fi
             __cmd svn commit -m \"added new location ${newBranch}.\";
             __cmd svn delete -m \"removed bldtools, because they are always used from MAINTRUNK\" ${SVN_REPO}/${SVN_DIR}/${newBranch}/trunk/bldtools;
     }
@@ -253,13 +257,11 @@ svnDummyCommit() {
     local newBranch=$1
     mustHaveValue "${newBranch}" "new branch"
 
-    svn checkout ${SVN_REPO}/${SVN_DIR}/${newBranch}/trunk/main/${SRC_PROJECT}
+    __cmd svn checkout ${SVN_REPO}/${SVN_DIR}/${newBranch}/trunk/main/${SRC_PROJECT}
     if [[ -d ${SRC_PROJECT} ]]; then
         cd ${SRC_PROJECT}
         echo >> src/README
-        svn commit -m "dummy commit" src/README
-    else
-        warning "Directory $SRC_PROJECT does not exist"
+        __cmd svn commit -m \"dummy commit\" src/README
     fi
 }
 
@@ -290,6 +292,10 @@ dbInsert() {
     local branchType=$(getBranchPart ${branch} TYPE)
     local yyyy=$(getBranchPart ${branch} YYYY)
     local mm=$(getBranchPart ${branch} MM)
+
+    # Do we have a special branch?
+    local subBranch=$(echo $branch | awk -F_ '{print $2}')
+    [[ ${subBranch} ]] && branchType=${subBranch}
     local regex="${branchType}_PS_LFS_OS_${yyyy}_${mm}_([0-9][0-9][0-9][0-9])"
 
     if [[ ${LRC} == true ]]; then

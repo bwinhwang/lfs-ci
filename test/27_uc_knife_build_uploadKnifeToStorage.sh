@@ -52,7 +52,7 @@ cat <<EOF > ${expect}
 mustExistFile /path/to/file
 getConfig LFS_CI_upload_server
 s3PutFile /path/to/file server:upload/
-s3SetAccessPublic /path/to/file
+s3SetAccessPublic server:upload//file
 EOF
     assertExecutedCommands ${expect}
 
