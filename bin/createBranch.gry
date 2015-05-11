@@ -166,14 +166,16 @@ def createScmView() {
 
     if(src_branch != "trunk") {
         println("[INFO] Source branch is not trunk.")
-        if(new_branch[0..1] == "FB") {
+        if(new_branch.startswith("LRC_FB")) {
+            root_view_name = new_branch[6..-1]
+        } else if(new_branch[0..1] == "FB") {
             root_view_name = new_branch[2..-1]
         } else if(new_branch[0..1] == "MD") {
             root_view_name = new_branch[3..-1]
         } else {
             throw new RuntimeException("Invalid branch name $new_branch.")
         }
-        // Source branch is a sub branch eg. FB1405_LNP80
+        // New branch is a sub branch eg. FB1405_LNP80
         if(root_view_name.find("_")) {
             root_view_name = root_view_name.split("_")[0]
         }
@@ -634,7 +636,8 @@ class MySectionedView {
         def config = null
 
         this.out.println("[INFO] get view config from: ${requestUrl}")
-        proc = ["curl", "-k", "-u${this.apiUser}:${this.apiToken}", "${requestUrl}", "--noproxy", "localhost"].execute()
+        //proc = ["curl", "-k", "-u${this.apiUser}:${this.apiToken}", "${requestUrl}", "--noproxy", "localhost"].execute()
+        proc = ["curl", "-k", "${requestUrl}", "--noproxy", "localhost"].execute()
         proc.waitFor()
         config = proc.text
         this.out.println(config)
