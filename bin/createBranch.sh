@@ -352,7 +352,7 @@ main() {
             svnDummyCommit ${NEW_BRANCH}
         elif [[ ${LRC} == "true" ]]; then
             svnCopyBranchLRC ${SRC_BRANCH} LRC_${NEW_BRANCH}
-            svnCopyLocationsLRC ${LOCATIONS_LRC} ${SRC_BRANCH} LRC_${NEW_BRANCH}
+            svnCopyLocationsLRC ${LOCATIONS_LRC} LRC_${SRC_BRANCH} LRC_${NEW_BRANCH}
             svnDummyCommitLRC ${NEW_BRANCH}
         fi
         dbInsert ${NEW_BRANCH}

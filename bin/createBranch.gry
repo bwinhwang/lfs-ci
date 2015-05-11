@@ -217,7 +217,11 @@ def copyJob(job) {
             new_job.setDisplayName(job.getDisplayName().replaceFirst("- "+src_branch+" -", "- "+new_branch+" -"))
         }
     } else if(job.getName().find("LRC") && lrc_jobs) {
-        new_name = job.getName().replaceFirst("-_LRC_-", "-_LRC_"+new_branch+"_-")
+        if(src_branch != "trunk") {
+            new_name = job.getName().replaceFirst("-_"+src_branch+"_-", "-_LRC_"+new_branch+"_-")
+        } else {
+            new_name = job.getName().replaceFirst("-_LRC_-", "-_LRC_"+new_branch+"_-")
+        }
         if(debug) {
             println("[DEBUG] copy job \"$job.name\" -> \"$new_name\"")
         } else {
