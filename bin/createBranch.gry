@@ -662,6 +662,7 @@ class MySectionedView {
             this.out.println("[DEBUG] send config xml file ${configXmlFile} to Jenkins")
         } else {
             this.out.println("[INFO] send config xml file ${configXmlFile} to Jenkins")
+            this.out.println("[INFO]      -> ${requestUrl}")
             proc = ["curl", "-k", "-u${this.apiUser}:${this.apiToken}", "${requestUrl}", "--noproxy", "localhost", "--data-binary", "@${configXmlFile}"].execute()
             this.out.println("[INFO] waiting for response from Jenkins")
             proc.waitFor()
