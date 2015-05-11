@@ -15,11 +15,12 @@ oneTimeSetUp() {
         if [[ $1 == mkdir ]] ; then
             $@
         fi
-        if [[ $2 == make && $3 == setupfsps ]] ; then
+        if [[ $2 == make && $6 == testtarget-analyzer ]] ; then
             echo "setupfsps=${UT_CONNECTED_FSPS}"
-        fi
-        if [[ $2 == make && $3 == moxa ]] ; then
             echo "moxa=127.123.123.123:1234"
+        fi
+        if [[ $2 == make && $6 == testroot ]] ; then
+            echo ${WORKSPACE}/workspace/src/src-test
         fi
     }
     mustHaveMakingTestTestConfig(){
@@ -46,8 +47,14 @@ oneTimeSetUp() {
 setUp() {
     cp -f /dev/null ${UT_MOCKED_COMMANDS}
     export WORKSPACE=$(createTempDirectory)
+
     mkdir -p ${WORKSPACE}/workspace/path/to/test/suite
+    mkdir -p ${WORKSPACE}/workspace/src/src-test/targets/
     touch ${WORKSPACE}/workspace/path/to/test/suite/testsuite.mk
+    echo "moxa=123.1.2.3:12345" > ${WORKSPACE}/workspace/src/src-test/targets/targetname
+    echo "moxa=123.1.2.3:12345" > ${WORKSPACE}/workspace/src/src-test/targets/targetname_fsp1
+    echo "moxa=123.1.2.3:12345" > ${WORKSPACE}/workspace/src/src-test/targets/targetname_fsp2
+
     export UT_CONFIG_SHOULD_LOG=1
     return
 }
@@ -67,8 +74,10 @@ makingTest_testSuiteDirectory
 mustHaveMakingTestTestConfig 
 execute mkdir -p ${WORKSPACE}/workspace/path/to/test/suite/__artifacts
 _reserveTarget 
-execute -n make -C ${WORKSPACE}/workspace/path/to/test/suite testtarget-analyzer | grep setupfsps
-execute -n make -C ${WORKSPACE}/workspace/path/to/test/suite testtarget-analyzer | grep moxa
+execute -n make -C ${WORKSPACE}/workspace/path/to/test/suite --no-print-directory testtarget-analyzer
+execute -n make -C ${WORKSPACE}/workspace/path/to/test/suite --no-print-directory testroot
+execute -n make -C ${WORKSPACE}/workspace/path/to/test/suite --no-print-directory testtarget-analyzer TESTTARGET=targetname
+execute sed -i s/moxa=127.123.123.123:1234/moxa=localhost:64258/g ${WORKSPACE}/workspace/src/src-test/targets/targetname
 execute screen -S lfs-jenkins.${USER}.targetName -L -d -m -c ${WORKSPACE}/workspace/screenrc
 exit_add makingTest_closeConsole
 EOF
@@ -78,10 +87,11 @@ EOF
 logfile ${WORKSPACE}/workspace/path/to/test/suite/__artifacts/console.%n
 logfile flush 1
 logtstamp after 10
+screen -L -t tp_targetname ${LFS_CI_ROOT}/lib/contrib/tcp_sharer/tcp_sharer.pl --name targetname --logfile ${WORKSPACE}/workspace/path/to/test/suite/__artifacts/tp_targetname.log --remote 127.123.123.123:1234 --local 64258
 screen -L -t targetname make -C ${WORKSPACE}/workspace/path/to/test/suite TESTTARGET=targetname console
 EOF
     assertEquals "$(cat ${expect})" "$(cat ${WORKSPACE}/workspace/screenrc)"
-    diff -rub ${expect} ${WORKSPACE}/workspace/screenrc
+    diff -u ${expect} ${WORKSPACE}/workspace/screenrc
 
     return
 }
@@ -110,8 +120,15 @@ makingTest_testSuiteDirectory
 mustHaveMakingTestTestConfig 
 execute mkdir -p ${WORKSPACE}/workspace/path/to/test/suite/__artifacts
 _reserveTarget 
-execute -n make -C ${WORKSPACE}/workspace/path/to/test/suite testtarget-analyzer TESTTARGET=targetName
-execute screen -S lfs-jenkins.${USER}.targetName -L -d -m -c ${WORKSPACE}/workspace/screenrc
+execute -n make -C ${WORKSPACE}/workspace/path/to/test/suite --no-print-directory testtarget-analyzer
+execute -n make -C ${WORKSPACE}/workspace/path/to/test/suite --no-print-directory testroot
+execute -n make -C ${WORKSPACE}/workspace/path/to/test/suite --no-print-directory testtarget-analyzer TESTTARGET=targetname
+execute sed -i s/moxa=127.123.123.123:1234/moxa=localhost:64258/g ${WORKSPACE}/workspace/src/src-test/targets/targetname
+execute -n make -C ${WORKSPACE}/workspace/path/to/test/suite --no-print-directory testtarget-analyzer TESTTARGET=targetname_fsp1
+execute sed -i s/moxa=127.123.123.123:1234/moxa=localhost:64258/g ${WORKSPACE}/workspace/src/src-test/targets/targetname_fsp1
+execute -n make -C ${WORKSPACE}/workspace/path/to/test/suite --no-print-directory testtarget-analyzer TESTTARGET=targetname_fsp2
+execute sed -i s/moxa=127.123.123.123:1234/moxa=localhost:64258/g ${WORKSPACE}/workspace/src/src-test/targets/targetname_fsp2
+execute screen -S lfs-jenkins.bm.targetName -L -d -m -c ${WORKSPACE}/workspace/screenrc
 exit_add makingTest_closeConsole
 EOF
     assertExecutedCommands ${expect}
@@ -120,12 +137,15 @@ EOF
 logfile ${WORKSPACE}/workspace/path/to/test/suite/__artifacts/console.%n
 logfile flush 1
 logtstamp after 10
+screen -L -t tp_targetname ${LFS_CI_ROOT}/lib/contrib/tcp_sharer/tcp_sharer.pl --name targetname --logfile ${WORKSPACE}/workspace/path/to/test/suite/__artifacts/tp_targetname.log --remote 127.123.123.123:1234 --local 64258
 screen -L -t targetname make -C ${WORKSPACE}/workspace/path/to/test/suite TESTTARGET=targetname console
+screen -L -t tp_targetname_fsp1 ${LFS_CI_ROOT}/lib/contrib/tcp_sharer/tcp_sharer.pl --name targetname_fsp1 --logfile ${WORKSPACE}/workspace/path/to/test/suite/__artifacts/tp_targetname_fsp1.log --remote 127.123.123.123:1234 --local 64258
 screen -L -t targetname_fsp1 make -C ${WORKSPACE}/workspace/path/to/test/suite TESTTARGET=targetname_fsp1 console
+screen -L -t tp_targetname_fsp2 ${LFS_CI_ROOT}/lib/contrib/tcp_sharer/tcp_sharer.pl --name targetname_fsp2 --logfile ${WORKSPACE}/workspace/path/to/test/suite/__artifacts/tp_targetname_fsp2.log --remote 127.123.123.123:1234 --local 64258
 screen -L -t targetname_fsp2 make -C ${WORKSPACE}/workspace/path/to/test/suite TESTTARGET=targetname_fsp2 console
 EOF
     assertEquals "$(cat ${expect})" "$(cat ${WORKSPACE}/workspace/screenrc)"
-    diff -rub ${expect} ${WORKSPACE}/workspace/screenrc
+    diff -u ${expect} ${WORKSPACE}/workspace/screenrc
 
     return
 }

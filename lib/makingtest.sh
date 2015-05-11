@@ -533,17 +533,24 @@ logfile ${logfilePath}/console.%n
 logfile flush 1
 logtstamp after 10
 EOF
-    local make="make -C ${testSuiteDirectory} testtarget-analyzer | grep "
+    local make="make -C ${testSuiteDirectory} --no-print-directory" 
     local fctTarget=$(_reserveTarget)
-    local fspTargets=$(execute -n ${make} setupfsps | cut -d= -f2 | tr "," " ")
+    local fspTargets=$(execute -n ${make} testtarget-analyzer | grep ^setupfsps | cut -d= -f2 | tr "," " ")
+    local testRoot=$(execute -n ${make} testroot)
 
     for target in ${fctTarget,,} ${fspTargets,,} ; do
-        local moxa=$(execute -n ${make} moxa | cut -d= -f2)
+        info "create moxa mock for ${target}"
+        local moxa=$(execute -n ${make} testtarget-analyzer TESTTARGET=${target} | grep ^moxa | cut -d= -f2)
+        info "moxa is ${moxa}"
         if [[ ${moxa} ]] ; then
-            local localPort=$(sed "s/[\.:\]//g" )
+            local localPort=$(sed "s/[\.:\]//g" <<< ${moxa}  )
             localPort=$(( localPort % 64000 + 1024 ))
-            echo "screen -L -t tp_${target} ${LFS_CI_ROOT}/lib/contrib/tcp_sharer/tcp_sharer.pl --name ${target} --logfile ${logfilePath}/tp_${target}.log --remove ${moxa} --local ${localPort}" >> ${screenConfig}
-            echo "screen -L -t ${target}    sleep 3 && make -C ${testSuiteDirectory} TESTTARGET=${target} console" >> ${screenConfig}
+            local targetConfigFile=${testRoot}/targets/${target}
+            mustExistFile ${targetConfigFile}
+            execute sed -i "s/moxa=${moxa}/moxa=localhost:${localPort}/g" ${targetConfigFile}
+
+            echo "screen -L -t tp_${target} ${LFS_CI_ROOT}/lib/contrib/tcp_sharer/tcp_sharer.pl --name ${target} --logfile ${logfilePath}/tp_${target}.log --remote ${moxa} --local ${localPort}" >> ${screenConfig}
+            echo "screen -L -t ${target} make -C ${testSuiteDirectory} TESTTARGET=${target} console" >> ${screenConfig}
         fi
     done
 
