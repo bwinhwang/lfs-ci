@@ -69,7 +69,7 @@ ciRoot = build.getEnvironment(listener).get("LFS_CI_ROOT")
 templateDir = build.getEnvironment(listener).get("CONFIGXML_TEMPLATE_DIR")
 templateSuffix = build.getEnvironment(listener).get("CONFIGXML_TEMPLATE_SUFFIX")
 workspace = build.getEnvironment(listener).get("WORKSPACE")
-jobs2Exclude = build.getEnvironment(listener).get("JOBS_EXLUDE_LIST")
+jobs2Exclude = build.getEnvironment(listener).get("JOBS_EXCLUDE_LIST")
 
 lrc_jobs = false
 if(build.getEnvironment(listener).get("LRC") == "true") {
@@ -176,6 +176,9 @@ def createScmView() {
         // New branch is a sub branch eg. FB1405_LNP80
         if(root_view_name.find("_")) {
             root_view_name = root_view_name.split("_")[0]
+        }
+        if(lrc_jobs) {
+            src_branch = "LRC_"+src_branch
         }
         println("[INFO] root view name: ${root_view_name}")
         root_view_obj = Jenkins.instance.getView(root_view_name)
@@ -379,7 +382,7 @@ catch(NullPointerException) {
     println("[INFO] NullPointerException OK in case DEBUG == true")
 }
 
-// collect jobs to be created
+// collect jobs to be branched
 // TODO: Get jobs from trunk view rather than from SCM/TRUNK and skip those which are not needed.
 def jobs_list = []
 for(job in src_branch_view_obj.getItems()) {
