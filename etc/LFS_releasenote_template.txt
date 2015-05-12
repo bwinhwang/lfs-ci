@@ -10,7 +10,6 @@ This is a collection of external links only
 __SVN_EXTERNALS__
 
 SVN externals for SDK and OS from Subversion:
-__DELIVERY_REPOS__/tags/__LFS_PROD_RELEASE_CURRENT_TAG_NAME_REL__
 https://svne1.inside.nsn.com/isource/svnroot/__SVN_REL_REPOS_NAME__/tags/__LFS_PROD_RELEASE_CURRENT_TAG_NAME_REL__
 https://beisop60.china.nsn-net.net/isource/svnroot/__SVN_REL_REPOS_NAME__/tags/__LFS_PROD_RELEASE_CURRENT_TAG_NAME_REL__
 https://bhisop60.apac.nsn-net.net/isource/svnroot/__SVN_REL_REPOS_NAME__/tags/__LFS_PROD_RELEASE_CURRENT_TAG_NAME_REL__
