@@ -166,7 +166,6 @@ makingTest_poweroff() {
 
     # not all branches have the poweroff implemented
     execute -i make -C ${testSuiteDirectory} poweroff
-    makingTest_closeConsole
 
     return
 }
