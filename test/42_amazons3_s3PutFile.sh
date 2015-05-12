@@ -30,7 +30,7 @@ test1() {
 
     local expect=$(createTempFile)
     cat <<EOF > ${expect}
-execute s3cmd put ${file} bucket
+execute ${LFS_CI_ROOT}/lib/contrib/s3cmd/s3cmd put ${file} bucket
 EOF
     assertExecutedCommands ${expect}
 
@@ -43,7 +43,7 @@ test2() {
 
     local expect=$(createTempFile)
     cat <<EOF > ${expect}
-execute s3cmd rm ${file} bucket
+execute ${LFS_CI_ROOT}/lib/contrib/s3cmd/s3cmd rm ${file} bucket
 EOF
     assertExecutedCommands ${expect}
 
@@ -56,7 +56,7 @@ test3() {
 
     local expect=$(createTempFile)
     cat <<EOF > ${expect}
-execute s3cmd --acl-public setacl s3://bucket/file
+execute ${LFS_CI_ROOT}/lib/contrib/s3cmd/s3cmd --acl-public setacl s3://bucket/file
 EOF
     assertExecutedCommands ${expect}
 
