@@ -1,0 +1,639 @@
+///////////////////////////////////////////////////////////////////////////////
+// Groovy script to crate a new branch in the LFS Jenkins.
+//
+// 1. Take environment vars and parameters from Jenkins job.
+// 2. Create a list view and name it after the new branch.
+// 3. Add this new list view to the SCM view.
+// 4. Copy the jobs from source branch to new branch.
+// 5. On the new job update the custom workspace if existing.
+// 6. Reconfigure the new job by editing config.xml.
+// 7. Copy and configure promotions if there are any.
+// 8. Reload the configuration of the new job.
+// 9. Create a sectioned view for the new branch.
+////////////////////////////////////////////////////////////////////////////////
+
+
+import hudson.model.*
+import jenkins.model.Jenkins
+import hudson.model.ParametersAction
+import hudson.model.ListView
+import hudson.plugins.sectioned_view.SectionedView
+import javax.xml.transform.stream.StreamSource
+import java.io.File
+import java.io.FileInputStream;
+
+
+println("\n\nRunning script createBranch.gry\n")
+
+def j = Jenkins.instance
+
+def thr = Thread.currentThread()
+
+def build = thr?.executable
+
+src_branch = ""
+
+display_src_branch = ""
+
+new_branch = ""
+
+comment = ""
+
+copy_jobs = false
+
+lrc = false
+
+doJenkins = false
+
+activateRootJobs = false
+
+debug = true
+
+if(build.getEnvironment(listener).get("LRC") == "true") {
+    lrc = true
+}
+println("[INFO] lrc: $lrc")
+
+// Get parameters from the Jenkins job
+
+def parameters = build?.actions.find{ it instanceof ParametersAction }?.parameters
+parameters.each {
+    if(it.name == "NEW_BRANCH") {
+        new_branch = it.value
+    }
+    else if(it.name == "SRC_BRANCH") {
+        src_branch = it.value
+    }
+    else if(it.name == "COMMENT")
+        comment = it.value
+    else if(it.name == "ACTIVATE_ROOT_JOBS")
+        activateRootJobs = it.value
+    else if(it.name == "DO_JENKINS") {
+        doJenkins = it.value
+    }
+    else if(it.name == "DEBUG") {
+        debug = it.value
+    }
+}
+
+if(doJenkins == false) {
+    println("[INFO] DO_JENKINS is false - nothing to do.")
+    return 0
+}
+
+if(!new_branch || !src_branch || !comment) {
+    throw new RuntimeException("At least one mandatory parameter is missing")
+}
+
+env = new HashMap()
+env.put("JENKINS_HOME", build.getEnvironment(listener).get("JENKINS_HOME"))
+env.put("JENKINS_URL", build.getEnvironment(listener).get("JENKINS_URL"))
+env.put("JENKINS_API_TOKEN", build.getEnvironment(listener).get("JENKINS_API_TOKEN"))
+env.put("JENKINS_API_USER", build.getEnvironment(listener).get("JENKINS_API_USER"))
+env.put("LFS_CI_ROOT", build.getEnvironment(listener).get("LFS_CI_ROOT"))
+env.put("TEMPLATE_DIR", build.getEnvironment(listener).get("CONFIGXML_TEMPLATE_DIR"))
+env.put("TEMPLATE_SUFFIX", build.getEnvironment(listener).get("CONFIGXML_TEMPLATE_SUFFIX"))
+env.put("WORKSPACE", build.getEnvironment(listener).get("WORKSPACE"))
+env.put("JOBS_EXCLUDE_LIST", build.getEnvironment(listener).get("JOBS_EXCLUDE_LIST"))
+env.put("DEBUG", debug)
+
+def config = new HashMap()
+def bindings = getBinding()
+config.putAll(bindings.getVariables())
+def out = config['out']
+
+// Copy and configure jobs
+createBranch = new CreateBranch(src_branch, new_branch, lrc, comment, activateRootJobs, debug, env, out)
+createBranch.createScmView() // TODO: to be removed when SCM view gets obsolete
+createBranch.collectJobs()
+createBranch.copyJobs()
+createBranch.activateJobs()
+
+// Create sectioned view
+sectionedView = new CreateSectionedView(src_branch, new_branch, lrc, env, out)
+parentViewObj = sectionedView.createNestedView()
+sectionedView.addSectionedView(parentViewObj)
+if(src_branch == "trunk") {
+    sectionedView.configureSectionedView()
+} else {
+    sectionedView.configureSectionedView2()
+}
+
+/**
+ * Class that can copy and configure jobs for a new branch. 
+ * This class works independent from class CreateSectionedView.
+ */
+class CreateBranch {
+
+    def srcBranch
+    def newBranch
+    def lrc
+    def comment
+    def activateRootJobs
+    def debug
+    def env
+    def out
+
+    def scmView
+    def displayNameSrcBranch
+    def displayNameNewBranch
+    def rootView
+    def srcBranchViewObj
+    def newBranchViewObj
+    def jobsList
+    def pkgPoolReplace
+    def jobsToEnable
+
+    // This part of the job name will be replaced by this.displayNameNewBranch
+    // Eg. LRC -> LRC_FB1504 or trunk -> FB1504
+    def jobNameReplace
+
+    CreateBranch(srcBranch, newBranch, lrc, comment, activateRootJobs, debug, env, out) {
+        this.srcBranch = srcBranch
+        this.newBranch = newBranch
+        this.lrc = lrc
+        this.comment = comment
+        this.activateRootJobs = activateRootJobs
+        this.debug = debug
+        this.env = env
+        this.out = out
+
+        this.displayNameSrcBranch = this.srcBranch
+        this.displayNameNewBranch = this.newBranch
+        this.scmView = "SCM"
+        this.jobsToEnable = []
+        this.jobNameReplace = srcBranch
+
+        // The root view for a branch is called YYMM
+        // Eg. the root view for FB1504 is 1504
+        if(this.newBranch[0..1] == "FB") {
+            this.rootView = this.newBranch[2..-1]
+        } else if(this.newBranch[0..1] == "MD") {
+            this.rootView = this.newBranch[3..-1]
+        } else {
+            throw new RuntimeException("Invalid branch name ${this.newBranch}.")
+        }
+
+        // Is the new branch a sub branch eg. FB1405_LNP80?
+        if(this.rootView.find("_")) {
+            rootView = rootView.split("_")[0]
+        }
+
+        this.pkgPoolReplace = "*/master"
+        if(this.srcBranch != "trunk") {
+            this.pkgPoolReplace = "*/${this.srcBranch}"
+        }
+
+        if(this.lrc) {
+            this.srcBranch = "LRC_" + srcBranch
+            this.newBranch = "LRC_" + newBranch
+            this.displayNameSrcBranch = this.srcBranch.replace("_", " ")
+            this.displayNameNewBranch = this.newBranch.replace("_", " ")
+            this.scmView = "SCM_LRC"
+            this.jobNameReplace = "LRC"
+        }
+    }
+
+    void processFileInplace(file, Closure processText) {
+        def text = file.text
+        file.write(processText(text))
+    }
+
+    /**
+     * Create a list view for the new branch SCM/NEW_BRANCH or SCM_LRC/NEW_BRANCH
+     * where SCM and SCM_LRC view already exists on root level of Jenkins views.
+     */
+    void createScmView() {
+        def scmViewObj = Jenkins.instance.getView(this.scmView)
+        // new branch view within SCM view
+        // TODO: Remove as soon as SCM view is obsolete
+        def newBranchViewObj = null
+
+        // Jobs to be copied are taken from srcBranchViewObj
+
+        try {
+            // toUpperCase is needed because of SCM/TRUNK
+            this.srcBranchViewObj = scmViewObj.getView(this.srcBranch.toUpperCase())
+        } catch (Exception) {
+            this.out.println("[INFO] view ${this.scmView}/${this.srcBranch} does not exist.")
+        }
+
+        newBranchViewObj = scmViewObj.getView(this.newBranch)
+        if(newBranchViewObj) {
+            this.out.println("[INFO] view ${this.scmView}/${this.newBranch} already exists.")
+        } else {
+            if(this.debug) {
+                this.out.println("[DEBUG] Adding view ${this.scmView}/${this.newBranch}.")
+            } else {
+                this.out.println("[INFO] Adding view ${this.scmView}/${this.newBranch}")
+                newBranchViewObj = new ListView(this.newBranch, scmViewObj)
+                scmViewObj.addView(newBranchViewObj)
+            }
+        }
+
+        if(this.srcBranch != "trunk" && this.srcBranch != "LRC_trunk") {
+            this.out.println("[INFO] Source branch is not trunk but ${this.srcBranch}.")
+            this.out.println("[INFO] root view name: ${rootView}")
+            rootViewObj = Jenkins.instance.getView(this.rootView)
+            this.out.println("[INFO] root view object: ${rootViewObj}")
+            // In this case we do not copy the jobs from SCM view, but 
+            // from source branch view (eg. 1405/FB1405).
+            this.srcBranchViewObj = rootViewObj.getView(this.srcBranch)
+        }
+
+        if(!this.srcBranchViewObj) {
+            this.out.println("[ERROR] the src branch view ${this.srcBranchViewObj} does not exist.")
+            throw new RuntimeException("The source branch view does not exist.")
+        }
+
+        this.out.println("[INFO] src branch view: ${this.srcBranchViewObj}")
+        this.newBranchViewObj = newBranchViewObj
+    }
+
+    void disableJob(job) {
+        if(job.getName().find("ECL")) {
+            this.out.println("[INFO] =======================================> Disable ECL job $job.name")
+            job.disable()
+        }
+    }
+
+    void updateWorkspace(job) {
+        AbstractProject project = job
+        def newWorkspace = project.getCustomWorkspace()
+        if(newWorkspace) {
+            newWorkspace.replace(this.srcBranch, this.newBranch)
+            project.setCustomWorkspace(newWorkspace)
+            project.save()
+        }
+    }
+
+    void reloadJobConfig(job, configFile) {
+        InputStream is = new FileInputStream(configFile);
+        job.updateByXml(new StreamSource(is));
+        job.save();
+        this.out.println("[INFO] reloaded config for job \"$job.name\"")
+    }
+
+    File updateJobConfig(job, newJob) {
+
+        def configXMLFile = newJob.getConfigFile();
+        def configFile = configXMLFile.getFile();
+
+        this.out.println("[INFO] replace -_${this.jobNameReplace}_- by -_${this.newBranch}_- in jobs config.xml.")
+        processFileInplace(configFile) { text ->
+            text.replaceAll("-_"+this.jobNameReplace+"_-", "-_"+this.newBranch+"_-")
+        }
+
+        if(newJob.getName() == "PKGPOOL_-_"+this.newBranch+"_-_Build") {
+            this.out.println("[INFO] replace ${this.pkgPoolReplace} by */${this.newBranch} in jobs config.xml.")
+            processFileInplace(configFile) { text ->
+                text.replace(this.pkgPoolReplace, "*/"+this.newBranch)
+            }
+        }
+
+        this.out.println("[INFO] updated job configuration for job \"$newJob.name\"")
+        return configFile
+    }
+
+    void copyPromotions(job, newJob) {
+
+        def promoSrcDir = new File("${this.env.get("JENKINS_HOME")}/jobs/${job.name}/promotions")
+        def promoDstDir = new File("${this.env.get("JENKINS_HOME")}/jobs/${newJob.name}/promotions")
+        for(property in job.getAllProperties()) {
+            if(property.getClass() == hudson.plugins.promoted_builds.JobPropertyImpl) {
+                this.out.println("[INFO] Job \"$job.name\" has promotions.")
+                for(action in property.getJobActions())  {
+                    for(process in action.getProcesses()) {
+                        if(process.getClass() == hudson.plugins.promoted_builds.PromotionProcess) {
+                            new File(promoDstDir.getAbsolutePath()+"/"+process.getName()).mkdirs()
+                            def builder = new AntBuilder()
+                            builder.sequential {
+                                copy(tofile: promoDstDir.getAbsolutePath()+"/"+process.getName()+"/config.xml",
+                                     file:   promoSrcDir.getAbsolutePath()+"/"+process.getName()+"/config.xml",
+                                     overwrite: true)
+                            } 
+                            def dstFile = new File(promoDstDir.getAbsolutePath()+"/"+process.getName()+"/config.xml")
+                            this.out.println("[INFO] configuring file "+dstFile.getAbsolutePath())
+                            this.out.println("[INFO] promotion - replace -_${this.jobNameReplace}_- by -_${this.newBranch}_- in jobs config.xml.")
+                            processFileInplace(dstFile) { text ->
+                                text.replaceAll("-_"+this.jobNameReplace+"_-", "-_"+this.newBranch+"_-")
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    void activateJobs() {
+        if(this.activateRootJobs) {
+            for(disabledJob in this.jobsToEnable) {
+                if(debug) {
+                    this.out.println("[DEBUG] enable job $disabledJob.name.")
+                } else {
+                    this.out.println("[INFO] enable job $disabledJob.name.")
+                    disabledJob.enable()
+                }
+            }
+        } else {
+            this.out.println("[INFO] not enabling before disabled jobs " + this.jobsToEnable)
+        }
+    }
+
+    void collectJobs() {
+        def jobsList = []
+        def numJobs = 0
+        this.out.println("[INFO] Creating list of jobs to be copied.")
+
+        for(job in this.srcBranchViewObj.getItems()) {
+            if(this.env.get("JOBS_EXCLUDE_LIST").find(job.getName())) {
+                this.out.println("[INFO] excluding job ${job.name}.")
+                continue
+            }
+
+            //////////////////////////////////////////////////////////////////////////////////////////////////////////////
+            //if(job.name == "LFS_CI_-_${this.srcBranch}_-_Build") {
+            //if(job.name == "LFS_CI_-_${this.srcBranch}_-_Build" || job.name == "LFS_CI_-_${this.srcBranch}_-_Test" || job.name == "LFS_Prod_-_${this.srcBranch}_-_Releasing_-_summary") {
+            if(job.name == "LFS_CI_-_LRC_-_Build" || job.name == "LFS_CI_-_LRC_-_Test" || job.name == "LFS_CI_-_LRC_-_Wait_for_release") {
+            //if(job.name == "PKGPOOL_-_${this.srcBranch}_-_Build") {
+            //////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+            if(job.getName().find(this.srcBranch) && !this.lrc) {
+                // fsm is requested
+                jobsList.add(job)
+            } else if(this.lrc && job.getName().find("LRC")) {
+                // LRC is requested
+                jobsList.add(job)
+            } else {
+                this.out.println("[WARNING] Job $job.name can not be added to the list of jobs to be copied.")
+                continue
+            }
+            numJobs++
+            this.out.println("[INFO] Added job $job.name.")
+
+            //////////////////////////////////////////////////////////////////////////////////////////////////////////////
+            } // for testing specific jobs
+            //////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        }
+
+
+        this.jobsList = jobsList
+        this.out.println("[INFO] $numJobs jobs to be copied.")
+    }
+
+    hudson.model.Job copyJob(job) {
+        def newName = ""
+        def newJob = null
+
+        newName = job.getName().replaceFirst("-_"+this.jobNameReplace+"_-", "-_"+this.newBranch+"_-")
+        if(this.debug) {
+            this.out.println("[DEBUG] copy job: $job.name -> $newName")
+            this.out.println("[DEBUG] set job display name: ${job.displayName} -> " + job.displayName.replaceFirst(this.displayNameSrcBranch, this.displayNameNewBranch))
+        } else {
+            newJob = Jenkins.instance.copy(job, newName)
+            newJob.setDisplayName(job.getDisplayName().replaceFirst(this.displayNameSrcBranch, this.displayNameNewBranch))
+            this.out.println("[INFO] copied job: $job.name -> $newName")
+        }
+
+        if(newName.endsWith("_-_Build")) {
+            if(this.debug) {
+                this.out.println("[DEBUG] set description of new job: ${this.comment}")
+                this.out.println("[DEBUG] disable new job: ${newName}")
+            } else {
+                newJob.setDescription(this.comment)
+                this.out.println("[INFO] set description of new job: ${this.comment}")
+                // disable build jobs because not all jobs are created jet.
+                newJob.disable()
+                this.out.println("[INFO] disable new job: ${newName}")
+                this.jobsToEnable.add(newJob)
+            }
+        }
+
+        return newJob
+    }
+
+    void copyJobs() {
+        def newJob = null
+        def configFile = null
+        def numJobs = 0
+
+        for(job in this.jobsList) {
+            newJob = copyJob(job)
+            if(!this.debug) {
+                newJob.save()
+                this.disableJob(newJob)
+                this.updateWorkspace(newJob)
+                configFile = this.updateJobConfig(job, newJob)
+                this.copyPromotions(job, newJob)
+                // avoid having two projects point to the same location
+                this.reloadJobConfig(newJob, configFile)
+                // TODO: Use a regex instead of adding each job explicitly by
+                //       uploading a config.xml to this view in createScmView().
+                this.newBranchViewObj.doAddJobToView(newJob.name)
+                this.out.println("[INFO] added job ${newJob.name} to view \"${this.newBranchViewObj.name}\"")
+            }
+            numJobs++
+        }
+
+        this.out.println("[INFO] $numJobs jobs were copied.")
+    }
+}
+
+/**
+ * Class that can create a sectioned view and add list view sections 
+ * to it. This class works independent from class CreateBranch.
+ */
+class CreateSectionedView {
+
+    def env
+    def srcBranch
+    def newBranch
+    def lrc
+    def jenkinsUrl
+    def apiToken
+    def apiUser
+    def ciRoot
+    def tmplDir
+    def tmplSuffix
+    def workspace
+    def debug
+    def out
+
+    def branchNestedView
+    def branchType
+
+    /**
+     * Constructor
+     *
+     * @param branch Name of the branch (eg. FB1408).
+     * @param lrc true in case of LRC false otherwise.
+     * @param jenkinsUrl the Jenkins URL (eg. http://jenkins-server:8090/).
+     * @param apiToken the Jenkins API token.
+     * @param apiUser the Jenkins API user.
+     * @param out the output stream so that this.out.println("...") works.
+     */
+    CreateSectionedView(srcBranch, newBranch, lrc, env, out) {
+        this.srcBranch = srcBranch
+        this.newBranch = newBranch
+        this.lrc = lrc
+        this.env = env
+        this.jenkinsUrl = env.get("JENKINS_URL")
+        this.apiToken = env.get("JENKINS_API_TOKEN")
+        this.apiUser = env.get("JENKINS_API_USER")
+        this.ciRoot = env.get("LFS_CI_ROOT")
+        this.tmplDir = env.get("TEMPLATE_DIR")
+        this.tmplSuffix = env.get("TEMPLATE_SUFFIX")
+        this.workspace = env.get("WORKSPACE")
+        this.debug = env.get("DEBUG")
+        this.out = out
+
+        if(this.newBranch[0..1] == "FB") {
+            this.branchType = "FB"
+            this.branchNestedView = this.newBranch[2..-1]
+        } else if(this.newBranch[0..1] == "MD") {
+            this.branchType = "MD"
+            this.branchNestedView = this.newBranch[3..-1]
+        } else {
+            throw Exception("Invalid branch name: ${this.newBranch}")
+        }
+
+        // Source branch is a sub branch eg. FB1405_LNP80
+        if(this.branchNestedView.find("_")) {
+            this.branchNestedView = branchNestedView.split("_")[0]
+        }
+
+        if(this.lrc) {
+            this.newBranch = "LRC_${this.newBranch}"
+            this.branchType = "LRC_${this.branchType}"
+        }
+
+    }   
+    
+    /**
+     * Create the nested view (the root view) for the branch.
+     * The name of the view is this.branchNestedView.
+     */
+    hudson.plugins.nested_view.NestedView createNestedView() {
+        def nestedView = Jenkins.instance.getView(this.branchNestedView)
+        if(nestedView) {
+            this.out.println("[INFO] view ${this.branchNestedView} already exists.")
+        } else {
+            if(this.debug) {
+                this.out.println("[DEBUG] Create nested view ${this.branchNestedView}")
+                // Return dummy view to prevent NullPointerException
+                nestedView = new hudson.plugins.nested_view.NestedView("dummy")
+            } else {
+                nestedView = new hudson.plugins.nested_view.NestedView(this.branchNestedView)
+                Jenkins.instance.addView(nestedView)
+                this.out.println("[INFO] Created view ${this.branchNestedView}")
+            }
+        }
+        return nestedView
+    }
+
+    /** 
+     * Create the sectioned view for this.newBranch.
+     * 
+     * @param parentView the instance of the parent view
+     */
+    void addSectionedView(parentView) {
+        if(this.debug) {
+            this.out.println("[DEBUG] Create sectioned view ${parentView.name}/${this.newBranch}")
+        } else {
+            def sectionedView = parentView.getView(this.newBranch)
+            if(sectionedView) {
+                this.out.println("[INFO] view ${parentView.name}/${this.newBranch} already exists.")
+            } else {
+                sectionedView = new SectionedView(this.newBranch)
+                sectionedView.owner = parentView
+                parentView.addView(sectionedView)
+                this.out.println("[INFO] Created view ${parentView.name}/${this.newBranch}")
+            }   
+        }
+    }   
+    
+    void processFileInplace(file, Closure processText) {
+        def text = file.text
+        file.write(processText(text))
+    }
+
+    /**
+      * Configure the sectioned view for this branch by sending a config.xml
+      * file to Jenkins.
+      */
+    void configureSectionedView() {
+        this.out.println()
+        def requestUrl = "${this.jenkinsUrl}view/${this.branchNestedView}/view/${this.newBranch}/config.xml"
+        def xmlTemplate = null
+        def configurationFile = null
+        def proc = null
+        def configXmlFile = "${workspace}/sectioned_view_template.xml"
+
+        this.out.println("[INFO] configureSectionedView()")
+        this.out.println("[INFO] read ${this.tmplDir}/${this.branchType}${this.tmplSuffix}")
+        def tmplString = new File("${this.tmplDir}/${this.branchType}${this.tmplSuffix}").text
+        def sectionedViewTmpl = new File(configXmlFile)
+        this.out.println("[INFO] write config xml file to ${configXmlFile}")
+        sectionedViewTmpl.write(tmplString)
+
+        this.processFileInplace(sectionedViewTmpl) { text ->
+            text.replaceAll("##BRANCH##", this.newBranch)
+        }
+
+        if(this.debug) {
+            this.out.println("[DEBUG] send config xml file ${configXmlFile} to Jenkins")
+        } else {
+            this.out.println("[INFO] send config xml file ${configXmlFile} to Jenkins")
+            proc = ["curl", "-k", "-u${this.apiUser}:${this.apiToken}", "${requestUrl}", "--noproxy", "localhost", "--data-binary", "@${configXmlFile}"].execute()
+            this.out.println("[INFO] waiting for response from Jenkins")
+            proc.waitFor()
+            this.out.println("[INFO] configureSectionedView() proc.text: $proc.text")
+        }
+        this.out.println("[INFO] finished configuring sectioned view")
+    }
+
+    /**
+      * Configure the sectioned view for this branch by reading the config.xml
+      * from the source branch and sending the altered config.xml file to Jenkins.
+      * This method should be used in case the source branch is not trunk.
+      *
+      * TODO: Refactor this with configureSectionedView()
+      */
+    void configureSectionedView2() {
+        this.out.println()
+        def requestUrl = "${this.jenkinsUrl}view/${this.branchNestedView}/view/${this.srcBranch}/config.xml"
+        def proc = null
+        def configXmlFile = "${workspace}/sectioned_view_template.xml"
+        def config = null
+
+        this.out.println("[INFO] configureSectionedView2()")
+        this.out.println("[INFO] get view config from: ${requestUrl}")
+        proc = ["curl", "-k", "${requestUrl}", "--noproxy", "localhost"].execute()
+        proc.waitFor()
+        config = proc.text
+        this.out.println(config)
+
+        def sectionedViewTmpl = new File(configXmlFile)
+        this.out.println("[INFO] write config xml file to ${configXmlFile}")
+        sectionedViewTmpl.write(config)
+
+        this.processFileInplace(sectionedViewTmpl) { text ->
+            text.replaceAll(this.srcBranch, this.newBranch)
+        }
+
+        requestUrl = "${this.jenkinsUrl}view/${this.branchNestedView}/view/${this.newBranch}/config.xml"
+        if(this.debug) {
+            this.out.println("[DEBUG] send config xml file ${configXmlFile} to Jenkins")
+            this.out.println("[DEBUG]      -> ${requestUrl}")
+        } else {
+            this.out.println("[INFO] send config xml file ${configXmlFile} to Jenkins")
+            this.out.println("[INFO]      -> ${requestUrl}")
+            proc = ["curl", "-k", "-u${this.apiUser}:${this.apiToken}", "${requestUrl}", "--noproxy", "localhost", "--data-binary", "@${configXmlFile}"].execute()
+            this.out.println("[INFO] waiting for response from Jenkins")
+            proc.waitFor()
+            this.out.println("[INFO] configureSectionedView() proc.text: $proc.text")
+        }
+        this.out.println("[INFO] finished configuring sectioned view")
+    }
+}
+
