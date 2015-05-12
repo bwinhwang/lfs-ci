@@ -557,6 +557,8 @@ EOF
 
     export LFS_CI_UC_TEST_SCREEN_NAME=lfs-jenkins.${USER}.${fctTarget}
     execute screen -S ${LFS_CI_UC_TEST_SCREEN_NAME} -L -d -m -c ${screenConfig}
+
+    exit_add makingTest_collectArtifactsOnFailure
     exit_add makingTest_closeConsole
 
      return
@@ -570,3 +572,24 @@ makingTest_closeConsole() {
     execute -i screen -dr -S ${LFS_CI_UC_TEST_SCREEN_NAME} -X quit
     return
 }
+
+makingTest_collectArtifactsOnFailure() {
+    local rc=${1}
+
+    # do thing in case of no failure
+    [[ ${rc} -eq 0 ]] && return
+
+    # collect 
+    local workspace=$(getWorkspaceName)
+    mustHaveWorkspaceName
+
+    execute -i mkdir -p ${workspace}/bld/bld-test-failure/results/
+
+	local testSuiteDirectory=$(makingTest_testSuiteDirectory)
+    execute -i rsync -av ${testSuiteDirectory}/__artifacts ${workspace}/bld/bld-test-failure/results/
+
+    createArtifactArchive
+
+    return        
+}
+
