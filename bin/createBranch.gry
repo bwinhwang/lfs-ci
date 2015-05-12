@@ -412,7 +412,7 @@ for(job in jobs_list) {
     //if(job.name == "LFS_CI_-_${src_branch}_-_Build" || job.name == "LFS_CI_-_${src_branch}_-_Test" || job.name == "LFS_Prod_-_trunk_-_Releasing_-_summary" || job.name.find("fsmr4")) {
     //if(job.name.find("LRC")) {
     //if(job.name.find("fsmr4")) {
-    //if(job.name == "PKGPOOL_-_trunk_-_Build") {
+    //if(job.name == "PKGPOOL_-_${src_branch}_-_Build") {
     def new_job = copyJob(job)
     if(!debug) {
         new_job.save()
