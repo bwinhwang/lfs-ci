@@ -321,7 +321,10 @@ requiredParameters() {
             error "required parameter ${name} is missing"
             exit 1
         fi
-        # echo "${name}=${!name}" >> ${workspace}/../.env
+        if [[ -z ${LFS_CI_internal_rerun_environment_file} ]] ; then
+            export LFS_CI_internal_rerun_environment_file=$(createTempFile)
+            echo "${name}=${!name}" >> ${LFS_CI_internal_rerun_environment_file}
+        fi
     done
 
     return
