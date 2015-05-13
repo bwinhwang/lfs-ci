@@ -58,7 +58,7 @@ Your LFS SCM Team
 EOF
 
         copyFileToArtifactDirectory $(basename ${readmeFile})
-    ]]
+    fi
 
     local artifactsPathOnShare=$(getConfig artifactesShare)/${JOB_NAME}/${BUILD_NUMBER}
     linkFileToArtifactsDirectory ${artifactsPathOnShare}
