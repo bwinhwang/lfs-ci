@@ -340,12 +340,14 @@ sendReleaseNote() {
     mustHaveValue "${osTagName}" "next os tag name"
     mustHaveValue "${oldReleaseTagName}" "old release tag name"
 
+    info "collect revisions from all sub build jobs"
+    sort -u ${workspace}/bld/bld-externalComponents-*/usedRevisions.txt > ${workspace}/revisions.txt
+
+    _getImportantNoteFileFromSubversion
+
     # create the os or uboot release note
     info "new release label is ${releaseTagName} based on ${oldReleaseTagName}"
     _createLfsOsReleaseNote ${buildJobName} ${buildBuildNumber}
-
-    info "collect revisions from all sub build jobs"
-    sort -u ${workspace}/bld/bld-externalComponents-*/usedRevisions.txt > ${workspace}/revisions.txt
 
     createReleaseInWorkflowTool ${osTagName} ${workspace}/os/os_releasenote.xml
     uploadToWorkflowTool        ${osTagName} ${workspace}/os/os_releasenote.xml
@@ -353,11 +355,16 @@ sendReleaseNote() {
     uploadToWorkflowTool        ${osTagName} ${workspace}/os/changelog.xml
     uploadToWorkflowTool        ${osTagName} ${workspace}/revisions.txt
 
+    [[ -e ${workspace}/importantnote.txt ]] &&
+        uploadToWorkflowTool    ${osTagName} ${workspace}/revisions.txt
+
     execute cp -f ${workspace}/os/os_releasenote.xml                                 ${workspace}/bld/bld-lfs-release/lfs_os_releasenote.xml
     execute cp -f ${workspace}/os/releasenote.txt                                    ${workspace}/bld/bld-lfs-release/lfs_os_releasenote.txt
     execute cp -f ${workspace}/os/changelog.xml                                      ${workspace}/bld/bld-lfs-release/lfs_os_changelog.xml
     execute cp -f ${workspace}/revisions.txt                                         ${workspace}/bld/bld-lfs-release/revisions.txt
     execute cp -f ${workspace}/bld/bld-externalComponents-summary/externalComponents ${workspace}/bld/bld-lfs-release/externalComponents.txt
+    [[ -e ${workspace}/importantnote.txt ]] &&
+        execute cp -f ${workspace}/importantnote.txt                                 ${workspace}/bld/bld-lfs-release/importantnote.txt
 
     if [[ ${productName} == "LFS" ]] ; then
         _createLfsRelReleaseNoteXml  ${releaseTagName} ${workspace}/rel/releasenote.xml
@@ -393,6 +400,25 @@ sendReleaseNote() {
     appproveReleaseForPsScm ${osTagName}
 
     info "release is done."
+    return
+}
+
+_getImportantNoteFileFromSubversion() {
+    local workspace=$(getWorkspaceName)
+    mustHaveWorkspaceName 
+
+    mustExistFile ${workspace}/revisions.txt
+    local svnUrl=$(execute -n grep ^src-project ${workspace}/revisions.txt | cut -d" " -f 2)
+    mustHaveValue "${svnUrl}" "svn url"
+
+    local svnRev=$(execute -n grep ^src-project ${workspace}/revisions.txt | cut -d" " -f 3)
+    mustHaveValue "${svnRev}" "svn rev"
+
+    if existsInSubversion "-r ${svnRev} ${svnUrl}/src" release_note &&
+       existsInSubversion "-r ${svnRev} ${svnUrl}/src/release_note" importantnote.txt ; then
+        svnCat -r ${svnRev} ${svnUrl}/src/release_note/importantnote.txt@${svnrev} > ${workspace}/importantnote.txt
+    fi
+
     return
 }
 
