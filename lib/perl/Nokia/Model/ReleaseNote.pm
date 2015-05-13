@@ -66,9 +66,11 @@ sub mustHaveFileData {
     my $self     = shift;
     my $fileType = shift;
     if( not exists $self->{ $fileType } ) {
-        my $file = sprintf( "%s/releaseNotes/%s/%s.txt", $ENV{HOME}, $self->releaseName(), $fileType );
-        if ( -e $file ) {
-            $self->{ $fileType } = [ read_file( $file ) ];
+        foreach my $file ( ( sprintf( "%s/releaseNotes/%s/%s.txt", $ENV{HOME}, $self->releaseName(), $fileType ),
+                             sprintf( "%s/svn/%s.txt", $ENV{WORKSPACE}, $fileType ) ) ) {
+            if ( -e $file ) {
+                $self->{ $fileType } = [ read_file( $file ) ];
+            }
         }
     }
     return
