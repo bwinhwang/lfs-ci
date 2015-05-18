@@ -591,7 +591,7 @@ makingTest_collectArtifactsOnFailure() {
     execute -i rsync -av ${testSuiteDirectory}/__artifacts ${workspace}/bld/bld-test-failure/results/
 
     execute -i mkdir -p ${workspace}/src-test/src/unittest/tests/makingtests/artifacts/__artifacts/
-    execute -i cd ${workspace}/src-test/src/unittest/tests/makingtest/artifacts/
+    execute -i cd ${workspace}/src-test/src/unittest/tests/makingtests/artifacts/
     execute -i cp ${testSuiteDirectory}/testconfig.mk .
     execute -i make test
     execute -i rsync -av __artifacts ${workspace}/bld/bld-test-failure/results/
