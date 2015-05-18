@@ -583,10 +583,19 @@ makingTest_collectArtifactsOnFailure() {
     local workspace=$(getWorkspaceName)
     mustHaveWorkspaceName
 
-    execute -i mkdir -p ${workspace}/bld/bld-test-failure/results/
-
 	local testSuiteDirectory=$(makingTest_testSuiteDirectory)
+
+
+    execute -i mkdir -p ${workspace}/bld/bld-test-failure/results/
+    execute -i mkdir -p ${testSuiteDirectory}/__artifacts
     execute -i rsync -av ${testSuiteDirectory}/__artifacts ${workspace}/bld/bld-test-failure/results/
+
+    execute -i mkdir -p ${workspace}/src-test/src/unittest/tests/makingtest/artifacts/__artifacts/
+    execute -i cd ${workspace}/src-test/src/unittest/tests/makingtest/artifacts/
+    execute -i cp ${testSuiteDirectory} .
+    execute -i make test
+    execute -i rsync -av __artifacts ${workspace}/bld/bld-test-failure/results/
+
 
     createArtifactArchive
 
