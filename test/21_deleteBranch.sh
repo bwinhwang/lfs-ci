@@ -3,6 +3,8 @@
 . lib/common.sh
 . lib/logging.sh
 
+exit 0
+
 oneTimeSetUp() {
     export BRANCH="FB1408"
     export LfS_CI_ROOT="."
