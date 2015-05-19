@@ -367,13 +367,16 @@ main() {
     __checkOthers || { error "Checking some stuff failed."; exit 1; }
 
     [[ ${MOVE_SVN_OS_BRANCH} == true ]] && moveBranchSvnOS || info "Not moving os/$BRANCH in repo"
-    [[ ${MOVE_SVN} == true ]] && moveBranchSvn || info "Not moving $BRANCH in repo"
-    [[ ${MOVE_SHARE} == true ]] && { archiveBranchShare; archiveBranchBldShare; } || info "Not archiving $BRANCH on share"
-    [[ ${DELETE_TEST_RESULTS} == true ]] && deleteTestResults || info "Not deleting test results"
     [[ ${DB_UPDATE} == true ]] && dbUpdate || info "Not updating DB."
 
-    [[ ${LRC_MOVE_SVN} == true ]] && LRC_moveBranchSvn || info "Not moving $BRANCH in repo for LRC"
-    [[ ${LRC_MOVE_SHARE} == true ]] && { LRC_archiveBranchShare; LRC_archiveBranchBldShare; } || info "Not archiving $BRANCH on share for LRC"
+    if [[ $LRC == true ]]; then
+        [[ ${LRC_MOVE_SVN} == true ]] && LRC_moveBranchSvn || info "Not moving $BRANCH in repo for LRC"
+        [[ ${LRC_MOVE_SHARE} == true ]] && { LRC_archiveBranchShare; LRC_archiveBranchBldShare; } || info "Not archiving $BRANCH on share for LRC"
+    else
+        [[ ${MOVE_SVN} == true ]] && moveBranchSvn || info "Not moving $BRANCH in repo"
+        [[ ${MOVE_SHARE} == true ]] && { archiveBranchShare; archiveBranchBldShare; } || info "Not archiving $BRANCH on share"
+        [[ ${DELETE_TEST_RESULTS} == true ]] && deleteTestResults || info "Not deleting test results"
+    fi
 }
 
 main
