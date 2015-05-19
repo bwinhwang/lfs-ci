@@ -531,7 +531,7 @@ makingTest_logConsole() {
 #!/usr/bin/env bash
 set -x
 sleep 1
-make -C $1 TESTTARGET=$2 console
+make -C \$1 TESTTARGET=\$2 console
 exit 0
 EOF
     execute chmod 755 ${makeConsoleWrapper}
