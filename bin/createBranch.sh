@@ -13,8 +13,8 @@ info "# ----------------------"
 info "# SRC_BRANCH:           $SRC_BRANCH"
 info "# NEW_BRANCH:           $NEW_BRANCH"
 info "# REVISION:             $REVISION"
-info "# FSMR4:                $FSMR4"
-info "# FSMR4_ONLY:           $FSMR4_ONLY"
+#info "# FSMR4:                $FSMR4"
+#info "# FSMR4_ONLY:           $FSMR4_ONLY"
 info "# SOURCE_RELEASE:       $SOURCE_RELEASE"
 info "# ECL_URLS:             $ECL_URLS"
 info "# DESCRIPTION:          $DESCRIPTION"
@@ -38,12 +38,12 @@ GIT_REVISION_FILE=""
 
 if [[ "${SRC_BRANCH}" == "trunk" ]]; then
     LOCATIONS="locations-pronb-developer"
-    LOCATIONS_FSMR4="locations-FSM_R4_DEV"
+    #LOCATIONS_FSMR4="locations-FSM_R4_DEV"
     LOCATIONS_LRC="locations-LRC"
     SVN_PATH="${SVN_DIR}/trunk"
 else
     LOCATIONS="locations-${SRC_BRANCH}"
-    LOCATIONS_FSMR4="locations-${SRC_BRANCH}_FSMR4"
+    #LOCATIONS_FSMR4="locations-${SRC_BRANCH}_FSMR4"
     LOCATIONS_LRC="locations-LRC_${SRC_BRANCH}"
     SVN_PATH="${SVN_DIR}/${SRC_BRANCH}/trunk"
     [[ $LRC == true ]] && SVN_PATH="${SVN_DIR}/LRC_${SRC_BRANCH}/trunk"
@@ -57,7 +57,7 @@ __checkParams() {
     [[ ! ${SOURCE_RELEASE} ]] && { error "SOURCE_RELEASE is missing"; exit 1; }
     [[ ! ${ECL_URLS} ]] && { error "ECL_URLS is missing"; exit 1; }
     [[ ! ${COMMENT} ]] && { error "COMMENT is missing"; exit 1; }
-    [[ ${FSMR4} == false ]] && [[ ${FSMR4_ONLY} == true ]] && { error "FSMR4 can not be false in case FSMR4_ONLY is true"; exit 1; }
+    #[[ ${FSMR4} == false ]] && [[ ${FSMR4_ONLY} == true ]] && { error "FSMR4 can not be false in case FSMR4_ONLY is true"; exit 1; }
 
     if [[ ${LRC} == true ]]; then
         echo ${NEW_BRANCH} | grep -q -e "^LRC_" && { error "LRC: \"LRC_\" is automatically added as prefix to NEW_BRANCH"; exit 1; }
@@ -160,9 +160,9 @@ svnCopyLocations() {
     local srcBranch=$2
     local newBranch=$3
     local branchLocation=$newBranch
-    echo $branchLocation | grep -q _FSMR4$ && {
-        branchLocation=${branchLocation%_FSMR4};
-    }
+    #echo $branchLocation | grep -q _FSMR4$ && {
+    #    branchLocation=${branchLocation%_FSMR4};
+    #}
     mustHaveValue "${locations}" "locations"
     mustHaveValue "${srcBranch}" "source branch"
     mustHaveValue "${newBranch}" "new branch"
@@ -203,7 +203,10 @@ svnCopyLocationsFSMR4() {
 
 __getGitRevisionFile() {
     local branch=$1
-    [[ ${LRC} == true ]] && branch=LRC_${branch}
+    [[ ${branch} == trunk ]] && branch="pronb-developer"
+    # TODO: check if following 2 lines are OK for LRC.
+    [[ ${branch} == trunk && ${LRC} == true ]] && branch=LRC
+    [[ ${branch} != trunk && ${LRC} == true ]] && branch=LRC_${branch}
     local gitRevisionFile=$(getConfig PKGPOOL_PROD_update_dependencies_svn_url -t location:${branch})
     local replacement="src/gitrevision"
 
@@ -346,16 +349,16 @@ main() {
         if [[ ! ${LRC} ]]; then
             svnCopyBranch ${SRC_BRANCH} ${NEW_BRANCH}
             svnCopyLocations ${LOCATIONS} ${SRC_BRANCH} ${NEW_BRANCH}
-            if [[ "${FSMR4}" == "true" ]]; then
-                svnCopyLocationsFSMR4 ${LOCATIONS_FSMR4} ${SRC_BRANCH} ${NEW_BRANCH}_FSMR4
-            fi
-            svnDummyCommit ${NEW_BRANCH}
+            #if [[ "${FSMR4}" == "true" ]]; then
+            #    svnCopyLocationsFSMR4 ${LOCATIONS_FSMR4} ${SRC_BRANCH} ${NEW_BRANCH}_FSMR4
+            #fi
             createBranchInGit ${NEW_BRANCH}
+            svnDummyCommit ${NEW_BRANCH}
         elif [[ ${LRC} == "true" ]]; then
             svnCopyBranchLRC LRC_${SRC_BRANCH} LRC_${NEW_BRANCH}
             svnCopyLocationsLRC ${LOCATIONS_LRC} LRC_${SRC_BRANCH} LRC_${NEW_BRANCH}
-            svnDummyCommitLRC LRC_${NEW_BRANCH}
             createBranchInGit LRC_${NEW_BRANCH}
+            svnDummyCommitLRC LRC_${NEW_BRANCH}
         fi
     else
         info "$(basename $0): Nothing to do."
