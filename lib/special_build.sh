@@ -211,12 +211,12 @@ applyKnifePatches() {
 
     for type in knife dev ; do
         if [[ -e ${workspace}/bld/bld-${type}-input/lfs.tar.gz ]] ; then
-            info "extracting knife.tar.gz..."
+            info "extracting lfs.tar.gz..."
             execute tar -xvz -C ${workspace} -f ${workspace}/bld/bld-${type}-input/lfs.tar.gz
         fi
 
         if [[ -e ${workspace}/bld/bld-${type}-input/lfs.patch ]] ; then
-            info "applying knife.patch file..."
+            info "applying lfs.patch file..."
             execute patch -p0 -d ${workspace} < ${workspace}/bld/bld-${type}-input/lfs.patch
         fi
     done
