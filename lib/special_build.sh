@@ -209,15 +209,17 @@ applyKnifePatches() {
 
     info "applying patches to workspace..."
 
-    if [[ -e ${workspace}/bld/bld-knife-input/knife.tar.gz ]] ; then
-        info "extracting knife.tar.gz..."
-        execute tar -xvz -C ${workspace} -f ${workspace}/bld/bld-knife-input/knife.tar.gz
-    fi
+    for type in knife dev ; do
+        if [[ -e ${workspace}/bld/bld-${type}-input/lfs.tar.gz ]] ; then
+            info "extracting knife.tar.gz..."
+            execute tar -xvz -C ${workspace} -f ${workspace}/bld/bld-${type}-input/lfs.tar.gz
+        fi
 
-    if [[ -e ${workspace}/bld/bld-knife-input/knife.patch ]] ; then
-        info "applying knife.patch file..."
-        execute patch -d ${workspace} < ${workspace}/bld/bld-knife-input/knife.patch
-    fi
+        if [[ -e ${workspace}/bld/bld-${type}-input/lfs.patch ]] ; then
+            info "applying knife.patch file..."
+            execute patch -d ${workspace} < ${workspace}/bld/bld-${type}-input/lfs.patch
+        fi
+    done
 
     # add more stuff here
 
