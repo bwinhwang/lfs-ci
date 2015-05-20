@@ -446,7 +446,7 @@ copyPlatform() {
                         [[ -e ${file} ]] || continue                                                                                
                         execute mv -f ${file} ${dst}
                     done
-                    execute rmdir ${workspace}/upload/platforms/qemu_x86_64                                                                                 
+                    [[ -d ${workspace}/upload/platforms/qemu_x86_64 ]] && execute rmdir ${workspace}/upload/platforms/qemu_x86_64                                                                                 
 
                 ;;
                 lrc-octeon2)

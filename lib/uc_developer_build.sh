@@ -77,7 +77,7 @@ usecase_LFS_DEVELOPER_BUILD_PLATFORM() {
 usecase_LFS_DEVELOPER_PACKAGE() {
     info "running usecase LFS package"
 
-    mustHaveLocationForDeveloperBuild
+    mustHaveLocationForSpecialBuild
     ci_job_package
 
     specialBuildUploadAndNotifyUser DEV

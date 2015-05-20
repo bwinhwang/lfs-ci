@@ -47,7 +47,7 @@ test1() {
     local expect=$(createTempFile)
     cat <<EOF > ${expect}
 getConfig LFS_uc_test_is_booking_enabled
-getConfig LFS_uc_test_booking_target_features
+getConfig LFS_uc_test_booking_target_features -t branchName:pronb-developer
 reserveTargetByFeature feature1 feature2
 reservedTarget 
 EOF

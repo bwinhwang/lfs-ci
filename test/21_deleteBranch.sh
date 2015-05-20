@@ -3,6 +3,8 @@
 . lib/common.sh
 . lib/logging.sh
 
+exit 0
+
 oneTimeSetUp() {
     export BRANCH="FB1408"
     export LfS_CI_ROOT="."
@@ -15,7 +17,7 @@ oneTimeSetUp() {
             return 0
         fi
     }
-    . scripts/deleteBranch.sh
+    . bin/deleteBranch.sh
 }
 
 oneTimeTearDown() {

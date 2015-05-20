@@ -79,6 +79,7 @@ mustHaveLocationForSpecialBuild
 ci_job_package 
 copyAndExtractBuildArtifactsFromProject upstream_project 123 knife fsmci
 mustHaveNextCiLabelName 
+execute touch ${WORKSPACE}/workspace/.00_README.txt
 execute tar -cv --transform=s:^\./:os/: -C ${WORKSPACE}/workspace/upload/ -f ${WORKSPACE}/workspace/KNIFE_LABEL.tgz --use-compress-program=${LFS_CI_ROOT}/bin/pigz .
 uploadKnifeToStorage ${WORKSPACE}/workspace/KNIFE_LABEL.tgz
 copyFileToArtifactDirectory ${WORKSPACE}/workspace/.00_README.txt

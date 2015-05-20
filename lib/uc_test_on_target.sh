@@ -47,13 +47,15 @@ ci_job_test_on_target() {
         fi
     fi
 
-    copyAndExtractBuildArtifactsFromProject ${UPSTREAM_PROJECT} ${UPSTREAM_BUILD} "fsmci"
+    local requiredArtifacts=$(getConfig LFS_CI_UC_test_required_artifacts)
+    copyAndExtractBuildArtifactsFromProject "${UPSTREAM_PROJECT}" "${UPSTREAM_BUILD}" "${requiredArtifacts}"
 
     mustHaveReservedTarget
     local targetName=$(_reserveTarget)
+    setBuildDescription ${JOB_NAME} ${BUILD_NUMBER} "${LABEL}<br>${targetName}"
 
     # for legacy: If job name is Test-<targetName> we don't know the type of the target
-    local testType=$(getConfig LFS_CI_uc_test_making_test_type -t testTargetName:${targetName})
+    local testType=$(getConfig LFS_CI_uc_test_making_test_type -t "testTargetName:${targetName}")
     mustHaveValue "${testType}" "test type"
 
     info "testing production ${LABEL}"

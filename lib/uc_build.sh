@@ -63,6 +63,7 @@
 [[ -z ${LFS_CI_SOURCE_createWorkspace} ]] && source ${LFS_CI_ROOT}/lib/createWorkspace.sh
 [[ -z ${LFS_CI_SOURCE_build}           ]] && source ${LFS_CI_ROOT}/lib/build.sh
 [[ -z ${LFS_CI_SOURCE_database}        ]] && source ${LFS_CI_ROOT}/lib/database.sh
+[[ -z ${LFS_CI_SOURCE_jenkins}         ]] && source ${LFS_CI_ROOT}/lib/jenkins.sh
 
 ## @fn      ci_job_build()
 #  @brief   usecase job ci build
@@ -161,19 +162,7 @@ ci_job_build_version() {
     echo ${label}    > ${workspace}/bld/bld-fsmci-summary/label
     echo ${oldLabel} > ${workspace}/bld/bld-fsmci-summary/oldLabel
     
-    # we are creating a finger print file with several informations to have a unique 
-    # build identifier. we are also storing the file in the build directory
-    copyRevisionStateFileToWorkspace ${JOB_NAME} ${BUILD_NUMBER} 
-    mv ${WORKSPACE}/revisions.txt ${workspace}/bld/bld-fsmci-summary/revisions.txt
-
-    echo "# build label ${label}"                             > ${workspace}/fingerprint.txt
-    echo "# triggered build job ${JOB_NAME}#${BUILD_NUMBER}" >> ${workspace}/fingerprint.txt
-    echo "# trigger cause: ${BUILD_CAUSE_SCMTRIGGER}"        >> ${workspace}/fingerprint.txt
-    echo "# build triggered at $(date)"                      >> ${workspace}/fingerprint.txt
-    cat ${workspace}/bld/bld-fsmci-summary/revisions.txt     >> ${workspace}/fingerprint.txt
-
-    copyFileFromWorkspaceToBuildDirectory ${JOB_NAME} ${BUILD_NUMBER} ${workspace}/fingerprint.txt
-    execute cp ${workspace}/fingerprint.txt ${workspace}/bld/bld-fsmci-summary/
+    createFingerprintFile
 
     # for the metrics database, we are installing a own exit handler to record the end of this job
     databaseEventBuildStarted
