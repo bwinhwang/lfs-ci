@@ -76,6 +76,7 @@ __preparation(){
     CONFIGXML_TEMPLATE_DIR=$(getConfig sectionedViewTemplateDir)
     CONFIGXML_TEMPLATE_SUFFIX=$(getConfig sectionedViewTemplateSuffix)
     JOBS_EXCLUDE_LIST=$(getConfig branchingExcludeJobs)
+    MAIN_BUILD_JOB_NAME_LRC=$(getConfig jenkinsMainBuildJobName_LRC)
 
     mustHaveValue ${JENKINS_API_TOKEN} "Jenkins API token is missing."
     mustHaveValue ${JENKINS_API_USER} "Jenkins API user is missing."
@@ -85,6 +86,7 @@ __preparation(){
     echo CONFIGXML_TEMPLATE_DIR=${CONFIGXML_TEMPLATE_DIR} >> ${WORKSPACE}/${VARS_FILE}
     echo CONFIGXML_TEMPLATE_SUFFIX=${CONFIGXML_TEMPLATE_SUFFIX} >> ${WORKSPACE}/${VARS_FILE}
     echo JOBS_EXCLUDE_LIST=${JOBS_EXCLUDE_LIST} >> ${WORKSPACE}/${VARS_FILE}
+    echo MAIN_BUILD_JOB_NAME_LRC=${MAIN_BUILD_JOB_NAME_LRC} >> ${WORKSPACE}/${VARS_FILE}
 }
 
 ## @fn     __get_sql_insert()
@@ -172,8 +174,8 @@ svnCopyLocations() {
                 ${SVN_REPO}/${SVN_DIR}/trunk/bldtools/locations-${newBranch};
             __cmd svn checkout ${SVN_REPO}/${SVN_DIR}/trunk/bldtools/locations-${newBranch};
             __cmd cd locations-${newBranch};
-            if [[ $srcBranch == trunk ]]; then
-                __cmd sed -i -e "'s/\/os\/${srcBranch}\//\/os\/${branchLocation}\/trunk\//'" Dependencies;
+            if [[ $srcBranch == trunk || $srcBranch == LRC_trunk ]]; then
+                __cmd sed -i -e "'s/\/os\/trunk\//\/os\/${branchLocation}\/trunk\//'" Dependencies;
             else
                 __cmd sed -i -e "'s/\/os\/${srcBranch}\//\/os\/${branchLocation}\//'" Dependencies;
             fi
@@ -203,10 +205,16 @@ svnCopyLocationsFSMR4() {
 
 __getGitRevisionFile() {
     local branch=$1
-    [[ ${branch} == trunk ]] && branch="pronb-developer"
-    # TODO: check if following 2 lines are OK for LRC.
-    [[ ${branch} == trunk && ${LRC} == true ]] && branch=LRC
-    [[ ${branch} != trunk && ${LRC} == true ]] && branch=LRC_${branch}
+
+    if [[ ${branch} == trunk && ${LRC} != true ]]; then
+        branch="pronb-developer"
+    elif [[ ${branch} == trunk && ${LRC} == true ]]; then
+        branch=LRC
+    elif [[ ${branch} != trunk && ${LRC} == true ]]; then
+        branch=LRC_${branch}
+    fi
+
+    info "source branch for GIT revision file: $branch"
     local gitRevisionFile=$(getConfig PKGPOOL_PROD_update_dependencies_svn_url -t location:${branch})
     local replacement="src/gitrevision"
 
