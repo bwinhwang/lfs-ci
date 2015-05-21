@@ -95,6 +95,7 @@ env.put("TEMPLATE_DIR", build.getEnvironment(listener).get("CONFIGXML_TEMPLATE_D
 env.put("TEMPLATE_SUFFIX", build.getEnvironment(listener).get("CONFIGXML_TEMPLATE_SUFFIX"))
 env.put("WORKSPACE", build.getEnvironment(listener).get("WORKSPACE"))
 env.put("JOBS_EXCLUDE_LIST", build.getEnvironment(listener).get("JOBS_EXCLUDE_LIST"))
+env.put("MAIN_BUILD_JOB_NAME_LRC", build.getEnvironment(listener).get("MAIN_BUILD_JOB_NAME_LRC"))
 
 def config = new HashMap()
 def bindings = getBinding()
@@ -102,7 +103,6 @@ config.putAll(bindings.getVariables())
 def out = config['out']
 
 // Copy jobs (inkl. promotions) and configure the copied jobs for the new branch
-createBranch = new CreateBranch(src_branch, new_branch, lrc, debug, comment, activateRootJobs, env, out)
 createBranch.main()
 
 // Create sectioned view for the new branch
@@ -274,9 +274,17 @@ class CreateBranch extends Common {
         def configXMLFile = newJob.getConfigFile();
         def configFile = configXMLFile.getFile();
 
-        inf("replace -_${this.jobNameReplace}_- by -_${this.newBranch}_- in jobs config.xml.")
-        processFileInplace(configFile) { text ->
-            text.replaceAll("-_"+this.jobNameReplace+"_-", "-_"+this.newBranch+"_-")
+        // The LRC build job has 2x "_-_LRC_-_" in its name.
+        if(job.getName() == this.env.get("MAIN_BUILD_JOB_NAME_LRC")) {
+            inf("replace LFS_CI_-_LRC_-_${this.jobNameReplace}_-_ by LFS_CI_-_LRC_-_${this.newBranch}_-_ in jobs config.xml.")
+            processFileInplace(configFile) { text ->
+                text.replaceAll("LFS_CI_-_LRC_-_"+this.jobNameReplace+"_-_", "LFS_CI_-_LRC_-_"+this.newBranch+"_-_")
+            }
+        } else {
+            inf("replace -_${this.jobNameReplace}_- by -_${this.newBranch}_- in jobs config.xml.")
+            processFileInplace(configFile) { text ->
+                text.replaceAll("-_"+this.jobNameReplace+"_-", "-_"+this.newBranch+"_-")
+            }
         }
 
         if(newJob.getName() == "PKGPOOL_-_"+this.newBranch+"_-_Build") {
