@@ -172,8 +172,8 @@ svnCopyLocations() {
                 ${SVN_REPO}/${SVN_DIR}/trunk/bldtools/locations-${newBranch};
             __cmd svn checkout ${SVN_REPO}/${SVN_DIR}/trunk/bldtools/locations-${newBranch};
             __cmd cd locations-${newBranch};
-            if [[ $srcBranch == trunk ]]; then
-                __cmd sed -i -e "'s/\/os\/${srcBranch}\//\/os\/${branchLocation}\/trunk\//'" Dependencies;
+            if [[ $srcBranch == trunk || $srcBranch == LRC_trunk ]]; then
+                __cmd sed -i -e "'s/\/os\/trunk\//\/os\/${branchLocation}\/trunk\//'" Dependencies;
             else
                 __cmd sed -i -e "'s/\/os\/${srcBranch}\//\/os\/${branchLocation}\//'" Dependencies;
             fi
@@ -203,10 +203,16 @@ svnCopyLocationsFSMR4() {
 
 __getGitRevisionFile() {
     local branch=$1
-    [[ ${branch} == trunk ]] && branch="pronb-developer"
-    # TODO: check if following 2 lines are OK for LRC.
-    [[ ${branch} == trunk && ${LRC} == true ]] && branch=LRC
-    [[ ${branch} != trunk && ${LRC} == true ]] && branch=LRC_${branch}
+
+    if [[ ${branch} == trunk && ${LRC} != true ]]; then
+        branch="pronb-developer"
+    elif [[ ${branch} == trunk && ${LRC} == true ]]; then
+        branch=LRC
+    elif [[ ${branch} != trunk && ${LRC} == true ]]; then
+        branch=LRC_${branch}
+    fi
+
+    info "source branch for GIT revision file: $branch"
     local gitRevisionFile=$(getConfig PKGPOOL_PROD_update_dependencies_svn_url -t location:${branch})
     local replacement="src/gitrevision"
 
