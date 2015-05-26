@@ -325,3 +325,21 @@ mustHaveLocationForSpecialBuild() {
     export LFS_CI_GLOBAL_BRANCH_NAME=${location}
     return
 }
+
+cleanupStorage() {
+    local bucketName=$1
+    mustHaveValue "${bucketName}" "bucket name"
+
+    local daysNotToDelete=$(createTempFile)
+    date +%Y-%m-%d --date="0 days ago"  > ${daysNotToDelete}
+    date +%Y-%m-%d --date="1 days ago" >> ${daysNotToDelete}
+    date +%Y-%m-%d --date="2 days ago" >> ${daysNotToDelete}
+    date +%Y-%m-%d --date="3 days ago" >> ${daysNotToDelete}
+
+    local listToDelete=$(createTempFile)
+    for file in $(s3List s3://${bucketName} | grep -v -f ${daysNotToDelete} | cut -d" " -f 4-) ; do
+        info "removing ${file}"
+        s3RemoveFile ${file}
+    done
+    return
+}

@@ -58,3 +58,12 @@ s3SetAccessPublic() {
     execute ${s3cmd} --acl-public setacl ${url}
     return
 }
+
+s3List() {
+    local url=${1}
+    local s3cmd=$(getConfig TOOL_amazon_s3cmd)
+    mustExistFile ${s3cmd}
+
+    execute -n ${s3cmd} ls ${url}
+    return
+}
