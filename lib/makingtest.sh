@@ -499,7 +499,8 @@ mustHaveMakingTestRunningTarget() {
     fi
     execute make -C ${testSuiteDirectory} waitssh
     debug "sleeping for 60 seconds..."
-    execute sleep 60
+    local sleepInSecond=$(getConfig LFS_CI_uc_test_sleep_in_seconds_after_waitssh)
+    execute sleep ${sleepInSecond}
 
     info "target is up."
 
