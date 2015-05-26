@@ -217,7 +217,8 @@ applyKnifePatches() {
 
         if [[ -e ${workspace}/bld/bld-${type}-input/lfs.patch ]] ; then
             info "applying lfs.patch file..."
-            execute patch -p0 -d ${workspace} < ${workspace}/bld/bld-${type}-input/lfs.patch
+            # error will be ignored, if the patch file will not apply without problems
+            execute -i patch -p0 -d ${workspace} < ${workspace}/bld/bld-${type}-input/lfs.patch
         fi
     done
 
