@@ -217,8 +217,10 @@ applyKnifePatches() {
 
         if [[ -e ${workspace}/bld/bld-${type}-input/lfs.patch ]] ; then
             info "applying lfs.patch file..."
+
             # apply patch only on files which exists in workspace
             for fileInPatch in $(execute -n lsdiff ${workspace}/bld/bld-${type}-input/lfs.patch) ; do
+                [[ -e ${workspace}/${fileInPatch} ]] || continue
                 local tmpPatchFile=$(createTempFile)
                 execute -n filterdiff -i ${fileInPatch} > ${tmpPatchFile}
                 execute -i patch -p0 -d ${workspace} < ${tmpPatchFile}

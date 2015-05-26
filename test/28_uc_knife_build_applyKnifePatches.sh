@@ -12,6 +12,10 @@ oneTimeSetUp() {
     }
     execute() {
         mockedCommand "execute $@"
+        if [[ $2 == lsdiff ]] ; then
+            shift
+            $@
+        fi                
     }
     mustExistFile() {
         mockedCommand "mustExistFile $@"
@@ -50,11 +54,11 @@ tearDown() {
 }
 
 test1() {
+    rm -rf ${WORKSPACE}/workspace/bld/bld-knife-input/lfs.patch
     assertTrue "applyKnifePatches"
     local expect=$(createTempFile)
 cat <<EOF > ${expect}
 execute tar -xvz -C ${WORKSPACE}/workspace -f ${WORKSPACE}/workspace/bld/bld-knife-input/lfs.tar.gz
-execute -i patch -p0 -d ${WORKSPACE}/workspace
 EOF
     assertExecutedCommands ${expect}
 
@@ -62,10 +66,20 @@ EOF
 }
 
 test2() {
+    rm -rf ${WORKSPACE}/workspace/bld/bld-knife-input/lfs.tar.gz
     assertTrue "applyKnifePatches"
 
     local expect=$(createTempFile)
 cat <<EOF > ${expect}
+execute -n lsdiff ${WORKSPACE}/workspace/bld/bld-knife-input/lfs.patch
+execute -n filterdiff -i src-fsmpsl/Buildfile
+execute -i patch -p0 -d ${WORKSPACE}/workspace
+execute -n filterdiff -i src-fsmpsl/Dependencies
+execute -i patch -p0 -d ${WORKSPACE}/workspace
+execute -n filterdiff -i src-rfs/Buildfile
+execute -i patch -p0 -d ${WORKSPACE}/workspace
+execute -n filterdiff -i src-rfs/Dependencies
+execute -i patch -p0 -d ${WORKSPACE}/workspace
 EOF
     assertExecutedCommands ${expect}
 
@@ -74,22 +88,16 @@ EOF
 
 
 test3() {
-    export WORKSPACE=$(createTempDirectory)
-    export KNIFE_LFS_BASELINE=PS_LFS_OS_2014_01_0001
-    export UPSTREAM_PROJECT=upstream_project
-    export UPSTREAM_BUILD=123
-    export JOB_NAME=LFS_KNIFE_-_knife_-_Build
-
-    mkdir -p ${WORKSPACE}/workspace/bld/bld-knife-input/
-    touch ${WORKSPACE}/workspace/bld/bld-knife-input/lfs.patch
-
+    # no files to patch
+    rm -rf ${WORKSPACE}/workspace/src-*
+    rm -rf ${WORKSPACE}/workspace/bld/bld-knife-input/lfs.tar.gz
     assertTrue "applyKnifePatches"
 
     local expect=$(createTempFile)
 cat <<EOF > ${expect}
-execute -i patch -p0 -d ${WORKSPACE}/workspace
+execute -n lsdiff ${WORKSPACE}/workspace/bld/bld-knife-input/lfs.patch
 EOF
-    assertEquals "$(cat ${expect})" "$(cat ${UT_MOCKED_COMMANDS})"
+    assertExecutedCommands ${expect}
 
     return
 }
