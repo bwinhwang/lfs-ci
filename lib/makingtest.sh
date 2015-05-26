@@ -410,6 +410,13 @@ makingTest_install() {
         info "running install with options ${installOptions:-none}"
         execute -i ${make} install ${installOptions} FORCE=yes || { sleep 20 ; continue ; }
 
+        local shouldSkipNextSteps=$(getConfig LFS_CI_uc_test_making_test_skip_steps_after_make_install)
+        if [[ ${shouldSkipNextSteps} ]] ; then
+            info "the steps make powercycle waitssh setup and check are skipped due to configuration."
+            warning "The new installed software is not running after this step. Please take care by yourself, that the software will be started (reboot the target!)"
+            return
+        fi
+
         local doFirmwareupgrade="$(getConfig LFS_CI_uc_test_making_test_do_firmwareupgrade)"
         if [[ ${doFirmwareupgrade} ]] ; then
             info "perform firmware upgrade an all boards of $testTargetName."
