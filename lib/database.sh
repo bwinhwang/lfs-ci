@@ -181,7 +181,7 @@ databaseEventPackageFailed() {
 databaseEventSubTestStarted() {
     local taskName=""
     if [[ ${JOB_NAME} =~ ^Test- ]] ; then
-        taskName=test
+        taskName=subtest
     fi
     _storeEvent subtest_started ${taskName}
     return
@@ -194,7 +194,7 @@ databaseEventSubTestStarted() {
 databaseEventSubTestFinished() {
     local taskName=""
     if [[ ${JOB_NAME} =~ ^Test- ]] ; then
-        taskName=test
+        taskName=subtest
     fi
     _storeEvent subtest_finished ${taskName}
     return
@@ -207,7 +207,7 @@ databaseEventSubTestFinished() {
 databaseEventSubTestFailed() {
     local taskName=""
     if [[ ${JOB_NAME} =~ ^Test- ]] ; then
-        taskName=test
+        taskName=subtest
     fi
     _storeEvent subtest_failed ${taskName}
     return
