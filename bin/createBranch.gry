@@ -103,11 +103,12 @@ config.putAll(bindings.getVariables())
 def out = config['out']
 
 // Copy jobs (inkl. promotions) and configure the copied jobs for the new branch
+createBranch = new CreateBranch(src_branch, new_branch, lrc, debug, comment, activateRootJobs, env, out)
 createBranch.main()
 
-// Create sectioned view for the new branch
-sectionedView = new CreateSectionedView(src_branch, new_branch, lrc, debug, env, out)
-sectionedView.main()
+// Create sectioned and SCM view for the new branch
+createViews = new CreateViews(src_branch, new_branch, lrc, debug, env, out)
+createViews.main()
 
 class Common {
 
@@ -120,7 +121,9 @@ class Common {
     def fromTrunk
     def rootView
     def trunkView
+    def trunkViewLRC
     def pkgPoolReplace
+    def scmViewLRC
 
     Common(srcBranch, newBranch, lrc, debug, env, out) {
         this.srcBranch = srcBranch
@@ -133,6 +136,8 @@ class Common {
         // TODO: check if this.trunkView could be replaced with this.srcBranchViewObj.name
         this.trunkView = "trunk"
         this.pkgPoolReplace = "*/master"
+        this.trunkViewLRC = "LRC"
+        this.scmViewLRC = "SCM_LRC"
 
         // The root view for a branch is called YYMM
         // Eg. the root view for FB1504 is 1504
@@ -467,7 +472,7 @@ class CreateBranch extends Common {
  * Class which can create a sectioned view and add list view sections 
  * to it.
  */
-class CreateSectionedView extends Common {
+class CreateViews extends Common {
 
     def jenkinsUrl
     def apiToken
@@ -487,7 +492,7 @@ class CreateSectionedView extends Common {
      * @param env some variables are shipped via this hash table 
      * @param out the output stream so that this.out.println() works.
      */
-    CreateSectionedView(srcBranch, newBranch, lrc, debug, env, out) {
+    CreateViews(srcBranch, newBranch, lrc, debug, env, out) {
         super(srcBranch, newBranch, lrc, debug, env, out)
         this.jenkinsUrl = env.get("JENKINS_URL")
         this.apiToken = env.get("JENKINS_API_TOKEN")
@@ -505,6 +510,62 @@ class CreateSectionedView extends Common {
         def parentViewObj = this.createNestedView()
         this.addSectionedView(parentViewObj)
         this.configureSectionedView()
+        this.createScmView()
+        this.configureScmView()
+    }
+
+    /**
+     * Configure SCM view for LRC.
+     */
+    void configureScmView() {
+        def requestUrl = "${this.jenkinsUrl}view/${this.scmViewLRC}/view/${this.newBranch}/config.xml"
+        def proc = null
+        def configXmlFile = "${workspace}/list_view_template.xml"
+        def config = null
+
+        inf("get view config from: ${requestUrl}")
+        proc = ["curl", "-k", "${requestUrl}", "--noproxy", "localhost"].execute()
+        proc.waitFor()
+        config = proc.text
+
+        def listViewTmpl = new File(configXmlFile)
+        inf("write config xml file to ${configXmlFile}")
+        listViewTmpl.write(config)
+
+        this.processFileInplace(listViewTmpl) { text ->
+            text.replace("</hudson.model.ListView>", "  <includeRegex>.*_-_${this.newBranch}_-_.*</includeRegex>\n</hudson.model.ListView>")
+        }
+
+        if(this.debug) {
+            dbg("send config xml file ${configXmlFile} to Jenkins")
+            dbg("     -> ${requestUrl}")
+        } else {
+            inf("send config xml file ${configXmlFile} to Jenkins")
+            inf("     -> ${requestUrl}")
+            proc = ["curl", "-k", "-u${this.apiUser}:${this.apiToken}", "${requestUrl}", "--noproxy", "localhost", "--data-binary", "@${configXmlFile}"].execute()
+            inf("waiting for response from Jenkins")
+            proc.waitFor()
+            inf("configureSectionedView() proc.text: $proc.text")
+        }
+        inf("finished configuring SCM list view")
+    }
+
+    /**
+     * Create SCM view for LRC.
+     */
+    void createScmView() {
+        if(this.lrc) {
+            if(this.debug) {
+                dbg("created view ${this.newBranch} within ${this.scmViewLRC}.")
+            } else {
+                def scmViewLRCObj = Jenkins.instance.getView(this.scmViewLRC)
+                def scmBranchViewObj = new ListView(this.newBranch, scmViewLRCObj)
+                scmViewLRCObj.addView(scmBranchViewObj)
+                inf("created view ${this.newBranch} within ${this.scmViewLRC}.")
+            }
+        } else {
+            inf("SCM view is used for LRC only.")
+        }
     }
 
     /**
@@ -582,7 +643,6 @@ class CreateSectionedView extends Common {
         proc = ["curl", "-k", "${requestUrl}", "--noproxy", "localhost"].execute()
         proc.waitFor()
         config = proc.text
-        this.out.println(config)
 
         def sectionedViewTmpl = new File(configXmlFile)
         inf("write config xml file to ${configXmlFile}")
