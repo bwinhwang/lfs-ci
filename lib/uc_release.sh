@@ -321,6 +321,7 @@ sendReleaseNote() {
     local buildBuildNumber=$4
     
     # TODO: demx2fk3 2014-06-25 remove the export block and do it in a different way
+    # TODO: demx2fk3 2015-05-26 this is required for the perl skript at the moment. The script is using the internal function getConfig, but don't know the used environment variables from the scripting
     export productName=$(getProductNameFromJobName)
     export taskName=$(getTaskNameFromJobName)
     export subTaskName=$(getSubTaskNameFromJobName)
@@ -355,19 +356,19 @@ sendReleaseNote() {
     uploadToWorkflowTool        ${osTagName} ${workspace}/os/changelog.xml
     uploadToWorkflowTool        ${osTagName} ${workspace}/revisions.txt
 
-    [[ -e ${workspace}/importantnote.txt ]] &&
-        uploadToWorkflowTool    ${osTagName} ${workspace}/revisions.txt
+    [[ -e ${workspace}/importantNote.txt ]] &&
+        uploadToWorkflowTool    ${osTagName} ${workspace}/importantNote.txt
 
     execute cp -f ${workspace}/os/os_releasenote.xml                                 ${workspace}/bld/bld-lfs-release/lfs_os_releasenote.xml
     execute cp -f ${workspace}/os/releasenote.txt                                    ${workspace}/bld/bld-lfs-release/lfs_os_releasenote.txt
     execute cp -f ${workspace}/os/changelog.xml                                      ${workspace}/bld/bld-lfs-release/lfs_os_changelog.xml
     execute cp -f ${workspace}/revisions.txt                                         ${workspace}/bld/bld-lfs-release/revisions.txt
     execute cp -f ${workspace}/bld/bld-externalComponents-summary/externalComponents ${workspace}/bld/bld-lfs-release/externalComponents.txt
-    [[ -e ${workspace}/importantnote.txt ]] &&
-        execute cp -f ${workspace}/importantnote.txt                                 ${workspace}/bld/bld-lfs-release/importantnote.txt
+    [[ -e ${workspace}/importantNote.txt ]] &&
+        execute cp -f ${workspace}/importantNote.txt                                 ${workspace}/bld/bld-lfs-release/importantNote.txt
 
     if [[ ${productName} == "LFS" ]] ; then
-        _createLfsRelReleaseNoteXml  ${releaseTagName} ${workspace}/rel/releasenote.xml
+        _createLfsRelReleaseNoteXml ${releaseTagName} ${workspace}/rel/releasenote.xml
         createReleaseInWorkflowTool ${releaseTagName} ${workspace}/rel/releasenote.xml
         uploadToWorkflowTool        ${releaseTagName} ${workspace}/rel/releasenote.xml
 
@@ -392,7 +393,6 @@ sendReleaseNote() {
     local artifactsPathOnShare=$(getConfig artifactesShare)/${JOB_NAME}/${BUILD_NUMBER}
     linkFileToArtifactsDirectory ${artifactsPathOnShare}
 
-
     local remoteDirectory=$(getConfig LFS_CI_UC_package_copy_to_share_real_location)/${osTagName}
     local artifactsPathOnMaster=$(getBuildDirectoryOnMaster)/archive
     executeOnMaster ln -sf ${remoteDirectory} ${artifactsPathOnMaster}/release
@@ -415,8 +415,8 @@ _getImportantNoteFileFromSubversion() {
     mustHaveValue "${svnRev}" "svn rev"
 
     if existsInSubversion "-r ${svnRev} ${svnUrl}/src" release_note &&
-       existsInSubversion "-r ${svnRev} ${svnUrl}/src/release_note" importantnote.txt ; then
-        svnCat -r ${svnRev} ${svnUrl}/src/release_note/importantnote.txt@${svnrev} > ${workspace}/importantnote.txt
+       existsInSubversion "-r ${svnRev} ${svnUrl}/src/release_note" importantNote.txt ; then
+        svnCat -r ${svnRev} ${svnUrl}/src/release_note/importantNote.txt@${svnrev} > ${workspace}/importantNote.txt
     fi
 
     return
