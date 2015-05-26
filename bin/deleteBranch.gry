@@ -23,6 +23,8 @@ def parameters = build?.actions.find{ it instanceof ParametersAction }?.paramete
 
 branch = ""
 
+devBranch = false
+
 deleteJobs = false
 
 LRC_deleteJobs = false
@@ -45,6 +47,9 @@ parameters.each {
         if(branch.startsWith("LRC_")) {
             branch = branch[4..-1]
         }
+    }
+    if(it.name == "DEVELOPER_BRANCH") {
+        devBranch = it.value
     }
     if(it.name == "DELETE_JOBS") {
         deleteJobs = it.value
@@ -79,6 +84,10 @@ def deleteScmView() {
     if(LRC_deleteJobs) {
         scm_view = "SCM_LRC"
         branch_view = "LRC_" + branch
+    }
+
+    if(devBranch) {
+        scm_view = "DEV"
     }
 
     scm_view_obj = j.getView(scm_view)
