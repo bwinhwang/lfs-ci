@@ -316,17 +316,26 @@ initTempDirectory() {
 #  @throws  raise an error, if there is a variable is not set or has no value
 requiredParameters() {
     local parameterNames=$@
+    if [[ -z ${LFS_CI_INTERNAL_RERUN_ENVIRONMENT_FILE} ]] ; then
+        export LFS_CI_INTERNAL_RERUN_ENVIRONMENT_FILE=$(createTempFile)
+    fi
     for name in ${parameterNames} ; do
         if [[ ! ${!name} ]] ; then
             error "required parameter ${name} is missing"
             exit 1
         fi
-        if [[ -z ${LFS_CI_internal_rerun_environment_file} ]] ; then
-            export LFS_CI_internal_rerun_environment_file=$(createTempFile)
-            echo "${name}=${!name}" >> ${LFS_CI_internal_rerun_environment_file}
-        fi
+        echo "export ${name}=\"${!name}\"" >> ${LFS_CI_INTERNAL_RERUN_ENVIRONMENT_FILE}
     done
 
+    return
+}
+
+logRerunCommand() {
+    rerun=$(createTempFile)
+    echo "#!/bin/bash" > ${rerun}
+    execute -n sort -u ${LFS_CI_INTERNAL_RERUN_ENVIRONMENT_FILE} >> ${rerun}
+    echo $0 ${JOB_NAME} >> ${rerun}
+    rawDebug ${rerun}
     return
 }
 
