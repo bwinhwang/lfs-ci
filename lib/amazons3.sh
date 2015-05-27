@@ -40,7 +40,7 @@ s3RemoveFile() {
     local s3cmd=$(getConfig TOOL_amazon_s3cmd)
     mustExistFile ${s3cmd}
 
-    execute ${s3cmd} rm ${fileName} ${bucketName}
+    execute ${s3cmd} rm s3://${bucketName}/${fileName}
     return
 }
 

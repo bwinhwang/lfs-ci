@@ -43,7 +43,7 @@ test2() {
 
     local expect=$(createTempFile)
     cat <<EOF > ${expect}
-execute ${LFS_CI_ROOT}/lib/contrib/s3cmd/s3cmd rm ${file} bucket
+execute ${LFS_CI_ROOT}/lib/contrib/s3cmd/s3cmd rm s3://bucket/${file}
 EOF
     assertExecutedCommands ${expect}
 
