@@ -516,9 +516,7 @@ class CreateViews extends Common {
     void main() {
         def parentViewObj = this.createNestedView()
         this.addSectionedView(parentViewObj)
-        this.configureSectionedView()
         this.createScmView()
-        this.configureScmView()
     }
 
     /**
@@ -570,6 +568,7 @@ class CreateViews extends Common {
                 scmViewLRCObj.addView(scmBranchViewObj)
                 inf("created view ${this.newBranch} within ${this.scmViewLRC}.")
             }
+            this.configureScmView()
         } else {
             inf("SCM view is used for LRC only.")
         }
@@ -620,6 +619,7 @@ class CreateViews extends Common {
                 parentView.addView(sectionedView)
                 inf("created view ${parentView.name}/${this.newBranch}")
             }   
+            this.configureSectionedView()
         }
     }   
     
