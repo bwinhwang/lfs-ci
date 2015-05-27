@@ -217,12 +217,16 @@ class CreateBranch extends Common {
             // Already set to "LRC ..." by super class constructor.
             this.displayNameNewBranch = this.newBranch.replaceFirst("_", " ")
             this.srcBranch = "LRC_" + this.srcBranch
-            this.jobNameReplace = "LRC"
+            if(this.fromTrunk) {
+                this.jobNameReplace = "LRC"
+            } else {
+                this.jobNameReplace = this.srcBranch
+            }
         }
     }
 
     void main() {
-        this.createBranchView()
+        this.getSrcBranchView()
         this.collectJobs()
         this.copyJobs()
         this.activateJobs()
@@ -233,14 +237,14 @@ class CreateBranch extends Common {
         file.write(processText(text))
     }
 
-    void createBranchView() {
+    void getSrcBranchView() {
         def sourceView = null
         if(this.fromTrunk) {
             sourceView = this.trunkView
             this.srcBranchViewObj = Jenkins.instance.getView(sourceView)
         } else {
             sourceView = this.srcBranch
-            rootViewObj = Jenkins.instance.getView(this.rootView)
+            def rootViewObj = Jenkins.instance.getView(this.rootView)
             this.srcBranchViewObj = rootViewObj.getView(sourceView)
         }
 
@@ -409,7 +413,7 @@ class CreateBranch extends Common {
      * new job ends with "_-_Build" it is disabled.
      */
     hudson.model.Job copyJob(job) {
-        def newName = ""
+        def newName = null
         def newJob = null
 
         newName = job.getName().replaceFirst("-_"+this.jobNameReplace+"_-", "-_"+this.newBranch+"_-")
@@ -470,7 +474,7 @@ class CreateBranch extends Common {
 
 /**
  * Class which can create a sectioned view and add list view sections 
- * to it.
+ * to it. Can also create the list view within the SCM view for LRC.
  */
 class CreateViews extends Common {
 
@@ -572,6 +576,7 @@ class CreateViews extends Common {
      * Create the nested view (the root view) for the new branch.
      * The name of the view is this.rootView. Returns the created
      * nested view. If the view already exists, this one is returned.
+     * A root view for instance is "1504".
      *
      * @return - an instance of hudson.plugins.nested_view.NestedView
      */
@@ -595,8 +600,9 @@ class CreateViews extends Common {
 
     /** 
      * Create the sectioned view for the new branch within parentView.
+     * A sectioned view for instance is FB1405 or FB1405_LN70P8.
      *
-     * @param parentView A view instance which should become the parent.
+     * @param parentView The view instance which is the parent.
      */
     void addSectionedView(parentView) {
         if(this.debug) {
@@ -648,8 +654,14 @@ class CreateViews extends Common {
         inf("write config xml file to ${configXmlFile}")
         sectionedViewTmpl.write(config)
 
-        this.processFileInplace(sectionedViewTmpl) { text ->
-            text.replaceAll(this.trunkView, this.newBranch)
+        if(this.fromTrunk) {
+            this.processFileInplace(sectionedViewTmpl) { text ->
+                text.replaceAll(this.trunkView, this.newBranch)
+            }
+        } else {
+            this.processFileInplace(sectionedViewTmpl) { text ->
+                text.replaceAll(this.srcBranch, this.newBranch)
+            }
         }
 
         // requestUrl for posting the config to the new view.
