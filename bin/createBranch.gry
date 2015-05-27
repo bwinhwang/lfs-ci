@@ -163,6 +163,9 @@ class Common {
         if(this.lrc) {
             this.newBranch = "LRC_${this.newBranch}"
             this.trunkView = "LRC"
+            if(this.srcBranch != "trunk") {
+                this.trunkView = "LRC_${this.srcBranch}"
+            }
         }
 
     }
@@ -197,10 +200,6 @@ class CreateBranch extends Common {
     def srcBranchViewObj
     def jobsList
     def jobsToEnable
-
-    // This part of the jobs name or display name will be replaced by this.displayNameNewBranch
-    // Eg. LRC -> LRC_FB1504 (for job name)
-    //     LRC -> LRC FB1504 (for display name)
     def jobNameReplace
 
     CreateBranch(srcBranch, newBranch, lrc, debug, comment, activateRootJobs, env, out) {
@@ -505,6 +504,10 @@ class CreateViews extends Common {
         this.tmplDir = env.get("TEMPLATE_DIR")
         this.tmplSuffix = env.get("TEMPLATE_SUFFIX")
         this.workspace = env.get("WORKSPACE")
+
+        if(this.lrc) {
+            this.srcBranch = "LRC_" + this.srcBranch
+        }
     }   
     
     /**
@@ -637,6 +640,8 @@ class CreateViews extends Common {
 
         if(this.fromTrunk) {
             requestUrl = "${this.jenkinsUrl}view/${this.trunkView}/config.xml"
+        } else if(this.lrc) {
+            requestUrl = "${this.jenkinsUrl}view/${this.rootView}/view/${this.trunkView}/config.xml"
         } else {
             requestUrl = "${this.jenkinsUrl}view/${this.rootView}/view/${this.srcBranch}/config.xml"
         }
@@ -655,10 +660,12 @@ class CreateViews extends Common {
         sectionedViewTmpl.write(config)
 
         if(this.fromTrunk) {
+            inf("-> replace ${this.trunkView} by ${this.newBranch}")
             this.processFileInplace(sectionedViewTmpl) { text ->
                 text.replaceAll(this.trunkView, this.newBranch)
             }
         } else {
+            inf("-> replace ${this.srcBranch} by ${this.newBranch}")
             this.processFileInplace(sectionedViewTmpl) { text ->
                 text.replaceAll(this.srcBranch, this.newBranch)
             }
