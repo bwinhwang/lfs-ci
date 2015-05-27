@@ -13,7 +13,6 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 
-import hudson.model.*
 import jenkins.model.Jenkins
 import hudson.model.ParametersAction
 import hudson.model.ListView
@@ -263,7 +262,7 @@ class CreateBranch extends Common {
     }
 
     void updateWorkspace(job) {
-        AbstractProject project = job
+        hudson.model.AbstractProject project = job
         def newWorkspace = project.getCustomWorkspace()
         if(newWorkspace) {
             newWorkspace.replace(this.srcBranch, this.newBranch)
