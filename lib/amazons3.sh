@@ -59,11 +59,37 @@ s3SetAccessPublic() {
     return
 }
 
+## @fn      s3List()
+#  @brief   list the content of the s3 bucket
+#  @param   {url}    url of the s3 storage (s3://bucket)
+#  @return  content
 s3List() {
     local url=${1}
     local s3cmd=$(getConfig TOOL_amazon_s3cmd)
     mustExistFile ${s3cmd}
 
     execute -n ${s3cmd} ls ${url}
+    return
+}
+
+## @fn      cleanupS3Storage()
+#  @brief   cleanup old builds from s3 storage
+#  @param   {bucketName}    name of the bucket
+#  @return  <none>
+cleanupS3Storage() {
+    local bucketName=$1
+    mustHaveValue "${bucketName}" "bucket name"
+
+    local daysNotToDelete=$(createTempFile)
+    date +%Y-%m-%d --date="0 days ago"  > ${daysNotToDelete}
+    date +%Y-%m-%d --date="1 days ago" >> ${daysNotToDelete}
+    date +%Y-%m-%d --date="2 days ago" >> ${daysNotToDelete}
+    date +%Y-%m-%d --date="3 days ago" >> ${daysNotToDelete}
+
+    local listToDelete=$(createTempFile)
+    for file in $(s3List s3://${bucketName} | grep -v -f ${daysNotToDelete} | cut -d" " -f 4-) ; do
+        info "removing ${file} from s3://${bucketName}"
+        s3RemoveFile ${file}
+    done
     return
 }
