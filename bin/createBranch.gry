@@ -549,7 +549,7 @@ class CreateViews extends Common {
             proc = ["curl", "-k", "-u${this.apiUser}:${this.apiToken}", "${requestUrl}", "--noproxy", "localhost", "--data-binary", "@${configXmlFile}"].execute()
             inf("waiting for response from Jenkins")
             proc.waitFor()
-            inf("configureSectionedView() proc.text: $proc.text")
+            inf("configureScmView() proc.text: $proc.text")
         }
         inf("finished configuring SCM list view")
     }
