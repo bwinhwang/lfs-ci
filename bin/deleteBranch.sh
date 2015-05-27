@@ -381,6 +381,9 @@ main() {
         [[ ${MOVE_SHARE} == true ]] && { archiveBranchShare; archiveBranchBldShare; }
         [[ ${DELETE_TEST_RESULTS} == true ]] && deleteTestResults
     fi
+
+    return 0
 }
 
 main
+
