@@ -44,7 +44,11 @@ specialBuildPreparation() {
                        REQUESTOR_FIRST_NAME \
                        REQUESTOR_LAST_NAME  \
                        REQUESTOR_USERID     \
-                       REQUESTOR_EMAIL
+                       REQUESTOR_EMAIL      \
+                       LFS_BUILD_FSMR2      \
+                       LFS_BUILD_FSMR3      \
+                       LFS_BUILD_FSMR4      \
+                       LFS_BUILD_LRC
 
     debug "input parameter: buildType ${buildType}"
     debug "input parameter: label ${label}"
@@ -72,6 +76,14 @@ specialBuildPreparation() {
     info "storing input as artifacts"
     execute mkdir -p ${workspace}/bld/bld-${buildType,,}-input/
     execute -i cp -a ${WORKSPACE}/lfs.patch ${workspace}/bld/bld-${buildType,,}-input/
+    cat > ${workspace}/bld/bld-${buildType,,}-input/lfs_build.txt <<EOF
+LFS_BUILD_FSMR2=${LFS_BUILD_FSMR2}
+LFS_BUILD_FSMR3=${LFS_BUILD_FSMR3}
+LFS_BUILD_FSMR4=${LFS_BUILD_FSMR4}
+LFS_BUILD_LRC=${LFS_BUILD_LRC}
+EOF
+    rawDebug ${workspace}/bld/bld-${buildType,,}-input/lfs_build.txt
+
     cat > ${workspace}/bld/bld-${buildType,,}-input/requestor.txt <<EOF
 REQUESTOR="${REQUESTOR}"
 REQUESTOR_FIRST_NAME="${REQUESTOR_FIRST_NAME}"
@@ -142,6 +154,37 @@ specialBuildisRequiredForLrc() {
     return 0
 }
 
+specialBuildisRequiredSelectedByUser() {
+    local workspace=$(getWorkspaceName)
+    mustHaveWorkspaceName
+
+    local subTaskName=$(getSubTaskNameFromJobName)
+    mustHaveValue "${subTaskName}" "subTaskName"
+
+    mustExistFile ${workspace}/bld/bld-${buildType,,}-input/lfs_build.txt
+    rawDebug ${workspace}/bld/bld-${buildType,,}-input/lfs_build.txt
+    source ${workspace}/bld/bld-${buildType,,}-input/lfs_build.txt
+
+    if [[ ${LFS_BUILD_FSMR2} != true && ${subTaskName} = "FSM-r2" ]] ; then
+        warning "build FSM-r2 was not selected by user"
+        return 1
+    fi
+    if [[ ${LFS_BUILD_FSMR3} != true && ${subTaskName} = "FSM-r3" ]] ; then
+        warning "build FSM-r3 was not selected by user"
+        return 1
+    fi
+    if [[ ${LFS_BUILD_FSMR4} != true && ${subTaskName} = "FSM-r4" ]] ; then
+        warning "build FSM-r4 was not selected by user"
+        return 1
+    fi
+    if [[ ${LFS_BUILD_LRC} != true && ${subTaskName} = "LRC" ]] ; then
+        warning "build LRC was not selected by user"
+        return 1
+    fi
+
+    return 0
+}
+
 ## @fn      specialBuildCreateWorkspaceAndBuild()
 #  @brief   create the workspaces and build the special build (knife or developer build)
 #  @param   <none>
@@ -159,6 +202,10 @@ specialBuildCreateWorkspaceAndBuild() {
         warning "build is not required."
         exit 0
     fi
+    if ! specialBuildisRequiredSelectedByUser ; then
+        warning "build is not required."
+        exit 0
+    fi
 
     export LFS_CI_GLOBAL_BRANCH_NAME=${location}
 
@@ -166,6 +213,7 @@ specialBuildCreateWorkspaceAndBuild() {
     execute rm -rf ${WORKSPACE}/revisions.txt
     createWorkspace
     copyArtifactsToWorkspace "${UPSTREAM_PROJECT}" "${UPSTREAM_BUILD}" "fsmci"
+
 
     mustHaveNextCiLabelName
     local label=$(getNextCiLabelName)

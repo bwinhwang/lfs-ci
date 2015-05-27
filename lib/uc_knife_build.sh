@@ -85,6 +85,13 @@ usecase_LFS_KNIFE_BUILD() {
 
     info "using revision ${location}@${revision} instead of ${KNIFE_LFS_BASELINE}"
 
+    # in knife usecase, there are no options to select the platform from the user
+    # side. So we are setting them up for them.
+    export LFS_BUILD_FSMR2=true
+    export LFS_BUILD_FSMR3=true
+    export LFS_BUILD_FSMR4=true
+    export LFS_BUILD_LRC=true
+
     specialBuildPreparation KNIFE ${label} ${revision} ${location}
 
     return
