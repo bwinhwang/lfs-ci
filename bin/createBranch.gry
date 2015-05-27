@@ -6,7 +6,7 @@
 // 3. Add this new list view to the SCM view.
 // 4. Copy the jobs from source branch to new branch.
 // 5. On the new job update the custom workspace if existing.
-// 6. Reconfigure the new job by editing config.xml.
+// 6. Reconfigure the new job by altering config.xml.
 // 7. Copy and configure promotions if there are any.
 // 8. Reload the configuration of the new job.
 // 9. Create a sectioned view for the new branch.
@@ -54,7 +54,6 @@ if(build.getEnvironment(listener).get("LRC") == "true") {
 println("[INFO] lrc: $lrc")
 
 // Get parameters from the Jenkins job
-
 def parameters = build?.actions.find{ it instanceof ParametersAction }?.parameters
 parameters.each {
     if(it.name == "NEW_BRANCH") {
@@ -131,9 +130,12 @@ class Common {
         this.debug = debug
         this.env = env
         this.out = out
-        this.fromTrunk = true
+
         // TODO: check if this.trunkView could be replaced with this.srcBranchViewObj.name
+        // If source branch is trunk, jobs are copied from this.trunkView.
         this.trunkView = "trunk"
+
+        this.fromTrunk = true
         this.pkgPoolReplace = "*/master"
         this.trunkViewLRC = "LRC"
         this.scmViewLRC = "SCM_LRC"
@@ -145,7 +147,7 @@ class Common {
         } else if(this.newBranch[0..1] == "MD") {
             this.rootView = this.newBranch[3..-1]
         } else {
-            throw new RuntimeException("Invalid branch name ${this.newBranch}.")
+            throw new RuntimeException("Branch name must start with either FB or MD.")
         }
 
         // Is the new branch a sub branch eg. FB1405_LNP80?
@@ -154,8 +156,8 @@ class Common {
         }
 
         if(this.srcBranch != "trunk") {
-            this.pkgPoolReplace = "*/${this.srcBranch}"
             this.fromTrunk = false
+            this.pkgPoolReplace = "*/${this.srcBranch}"
         }
 
         if(this.lrc) {
@@ -213,7 +215,6 @@ class CreateBranch extends Common {
 
         if(this.lrc) {
             this.displayNameSrcBranch = "LRC " + this.srcBranch
-            // Already set to "LRC ..." by super class constructor.
             this.displayNameNewBranch = this.newBranch.replaceFirst("_", " ")
             this.srcBranch = "LRC_" + this.srcBranch
             if(this.fromTrunk) {
