@@ -448,6 +448,7 @@ class CreateBranchLRC extends CreateBranch {
         this.trunkView = "LRC"
         this.displayNameSrcBranch = this.srcBranch.replaceFirst("_", " ")
         this.displayNameNewBranch = this.newBranch.replaceFirst("_", " ")
+        this.pkgPoolReplace = "*/LRC"
         
         if(this.fromTrunk) {
             this.jobNameReplace = "LRC"
