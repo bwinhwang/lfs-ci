@@ -81,12 +81,15 @@ __checkParams() {
 
     if [[ $LRC == true ]]; then
         echo ${BRANCH} | grep -q -e "^LRC_" || { error "LRC: Branch name is not correct."; return 1; }
+    else
+        echo ${BRANCH} | grep -q -e "^LRC_" && { error "FSM: Branch name is not correct."; return 1; }
     fi
+
+    return 0
 }
 
 __checkOthers() {
     [[ -d ${ARCHIVE_BASE} ]] || { error "archive dir ${ARCHIVE_BASE} does not exist."; return 1; }
-    echo $BRANCH | grep -q -E "^LRC_" && { error "wrong branch name."; return 1; }
     which mysql > /dev/null 2>&1 || { error "mysql not available."; return 1; }
 }
 
