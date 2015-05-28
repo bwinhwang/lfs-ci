@@ -493,11 +493,13 @@ mustHaveMakingTestRunningTarget() {
 	mustExistFile ${testSuiteDirectory}/testsuite.mk
 
     info "checking, if target is up and running (with ssh)..."
-    local canDoWaitPrompt=$(getConfig LFS_CI_uc_test_TMF_can_run_waitprompt)
-    if [[ ${canDoWaitPrompt} ]] ; then
-        execute make -C ${testSuiteDirectory} waitprompt
-    fi
-    execute make -C ${testSuiteDirectory} waitssh
+    for i in 1 2 3 4 ; do
+        local opt=
+        [[ $i -lt 4 ]] && opt=-i
+        execute ${opt} make -C ${testSuiteDirectory} waitssh && break
+        execute make -C ${testSuiteDirectory} powercycle
+    done
+
     debug "sleeping for 60 seconds..."
     execute sleep 60
 
