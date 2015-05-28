@@ -86,6 +86,7 @@ __checkParams() {
 
 __checkOthers() {
     [[ -d ${ARCHIVE_BASE} ]] || { error "archive dir ${ARCHIVE_BASE} does not exist."; return 1; }
+    echo $BRANCH | grep -q -E "^LRC_" && { error "wrong branch name."; return 1; }
     which mysql > /dev/null 2>&1 || { error "mysql not available."; return 1; }
 }
 
