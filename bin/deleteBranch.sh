@@ -81,7 +81,11 @@ __checkParams() {
 
     if [[ $LRC == true ]]; then
         echo ${BRANCH} | grep -q -e "^LRC_" || { error "LRC: Branch name is not correct."; return 1; }
+    else
+        echo ${BRANCH} | grep -q -e "^LRC_" && { error "FSM: Branch name is not correct."; return 1; }
     fi
+
+    return 0
 }
 
 __checkOthers() {
