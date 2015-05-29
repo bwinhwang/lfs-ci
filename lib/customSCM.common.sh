@@ -84,6 +84,7 @@ getUpstreamProjectName() {
     local branchName=$(getBranchName)
 
     case ${jobName} in
+        LFS_CI_-_trunk_-_Package_-_package) echo LFS_CI_-_trunk_-_Build ;;
         LFS_CI_-_trunk_-_StabilityTest) echo LFS_CI_-_trunk_-_Test ;;
         LFS_CI_-_trunk_-_RegularTest)   echo LFS_CI_-_trunk_-_Package_-_package ;;
         LFS_CI_-_trunk_-_Test)          echo LFS_CI_-_trunk_-_Package_-_package ;;
