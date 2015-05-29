@@ -362,10 +362,11 @@ class CreateBranch extends Common {
                 continue
             }
 
-            if(job.getName().find(this.srcBranch)) {
+            jn = job.getName()
+            if(jn.find(this.srcBranch) || (this.fromTrunk && jn.find("_-_fsmr4_-_"))) {
                 jobsList.add(job)
             } else {
-                this.warn("[WARNING] Job $job.name can not be added to the list of jobs to be copied.")
+                this.warn("Job $job.name can not be added to the list of jobs to be copied.")
                 continue
             }
             numJobs++
