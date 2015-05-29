@@ -109,8 +109,10 @@ if(!lrc) {
 createBranch.main()
 
 // Create sectioned and SCM view for the new branch
+// TODO: Also create two classes (CreateView and CreateViewLRC)
 createViews = new CreateViews(src_branch, new_branch, lrc, debug, env, out)
 createViews.main()
+
 
 class Common {
 
@@ -159,6 +161,11 @@ class Common {
         }
     }
 
+    void processFileInplace(file, Closure processText) {
+        def text = file.text
+        file.write(processText(text))
+    }
+
     void dbg(msg) {
         this.out.println("[DEBUG] $msg")
     }
@@ -190,6 +197,7 @@ class CreateBranch extends Common {
     def jobsList
     def jobsToEnable
     def jobNameReplace
+    def jobs2Exclude
 
     CreateBranch(srcBranch, newBranch, debug, comment, activateRootJobs, env, out) {
         super(srcBranch, newBranch, debug, env, out)
@@ -200,6 +208,9 @@ class CreateBranch extends Common {
         this.displayNameNewBranch = this.newBranch
         this.jobsToEnable = []
         this.jobNameReplace = srcBranch
+
+        this.jobs2Exclude = this.env.get("JOBS_EXCLUDE_LIST").split(",")
+        this.inf("jobs to exclude: ${this.jobs2Exclude}")
     }
 
     void main() {
@@ -207,11 +218,6 @@ class CreateBranch extends Common {
         this.collectJobs()
         this.copyJobs()
         this.activateJobs()
-    }
-
-    void processFileInplace(file, Closure processText) {
-        def text = file.text
-        file.write(processText(text))
     }
 
     void getSrcBranchView() {
@@ -230,7 +236,7 @@ class CreateBranch extends Common {
             throw new RuntimeException("The source branch view does not exist.")
         }
 
-        inf("copy jobs from view ${this.srcBranchViewObj}")
+        this.inf("copy jobs from view ${this.srcBranchViewObj}")
     }
 
     void updateWorkspace(job) {
@@ -247,26 +253,26 @@ class CreateBranch extends Common {
         InputStream is = new FileInputStream(configFile);
         job.updateByXml(new StreamSource(is));
         job.save();
-        inf("reloaded config for job \"$job.name\"")
+        this.inf("reloaded config for job \"$job.name\"")
     }
 
     File updateJobConfig(job, newJob) {
         def configXMLFile = newJob.getConfigFile();
         def configFile = configXMLFile.getFile();
 
-        inf("replace -_${this.jobNameReplace}_- by -_${this.newBranch}_- in jobs config.xml.")
+        this.inf("replace -_${this.jobNameReplace}_- by -_${this.newBranch}_- in jobs config.xml.")
         processFileInplace(configFile) { text ->
             text.replaceAll("-_"+this.jobNameReplace+"_-", "-_"+this.newBranch+"_-")
         }
 
         if(newJob.getName() == "PKGPOOL_-_"+this.newBranch+"_-_Build") {
-            inf("replace ${this.pkgPoolReplace} by */${this.newBranch} in jobs config.xml.")
+            this.inf("replace ${this.pkgPoolReplace} by */${this.newBranch} in jobs config.xml.")
             processFileInplace(configFile) { text ->
                 text.replace(this.pkgPoolReplace, "*/"+this.newBranch)
             }
         }
 
-        inf("updated job configuration for job \"$newJob.name\"")
+        this.inf("updated job configuration for job \"$newJob.name\"")
         return configFile
     }
 
@@ -278,7 +284,7 @@ class CreateBranch extends Common {
         def promoDstDir = new File("${this.env.get("JENKINS_HOME")}/jobs/${newJob.name}/promotions")
         for(property in job.getAllProperties()) {
             if(property.getClass() == hudson.plugins.promoted_builds.JobPropertyImpl) {
-                inf("Job \"$job.name\" has promotions.")
+                this.inf("Job \"$job.name\" has promotions.")
                 for(action in property.getJobActions())  {
                     for(process in action.getProcesses()) {
                         if(process.getClass() == hudson.plugins.promoted_builds.PromotionProcess) {
@@ -290,9 +296,9 @@ class CreateBranch extends Common {
                                      overwrite: true)
                             } 
                             def dstFile = new File(promoDstDir.getAbsolutePath()+"/"+process.getName()+"/config.xml")
-                            inf("configuring file "+dstFile.getAbsolutePath())
+                            this.inf("configuring file "+dstFile.getAbsolutePath())
                             if(this.debug) {
-                                inf("promotion - replace -_${this.jobNameReplace}_- by -_${this.newBranch}_- in jobs config.xml.")
+                                this.inf("promotion - replace -_${this.jobNameReplace}_- by -_${this.newBranch}_- in jobs config.xml.")
                             }
                             processFileInplace(dstFile) { text ->
                                 text.replaceAll("-_"+this.jobNameReplace+"_-", "-_"+this.newBranch+"_-")
@@ -312,14 +318,22 @@ class CreateBranch extends Common {
         if(this.activateRootJobs) {
             for(disabledJob in this.jobsToEnable) {
                 if(debug) {
-                    dbg("enable job $disabledJob.name.")
+                    this.dbg("enable job $disabledJob.name.")
                 } else {
-                    inf("enable job $disabledJob.name.")
+                    this.inf("enable job $disabledJob.name.")
                     disabledJob.enable()
                 }
             }
         } else {
-            inf("not enabling before disabled jobs " + this.jobsToEnable)
+            this.inf("not enabling before disabled jobs " + this.jobsToEnable)
+        }
+    }
+
+    boolean job2exclude(job_name) {
+        if(job_name in this.jobs2Exclude) {
+            return true
+        } else {
+            return false
         }
     }
 
@@ -331,37 +345,26 @@ class CreateBranch extends Common {
     void collectJobs() {
         def jobsList = []
         def numJobs = 0
-        def jobs2Exclude = this.env.get("JOBS_EXCLUDE_LIST").split(",")
-        inf("Creating list of jobs to be copied.")
+        this.inf("Creating list of jobs to be copied.")
 
         for(job in this.srcBranchViewObj.getItems()) {
-            if(job.name in jobs2Exclude) {
-                inf("excluding job ${job.name}.")
+            if(this.job2exclude(job.name)) {
+                this.inf("excluding job ${job.name}.")
                 continue
             }
-
-            //////////////////////////////////////////////////////////////////////////////////////////////////////////////
-            //if(job.name == "LFS_CI_-_${this.srcBranch}_-_Build") {
-            //if(job.name == "LFS_CI_-_${this.srcBranch}_-_Build" || job.name == "LFS_CI_-_${this.srcBranch}_-_Test" || job.name == "LFS_Prod_-_${this.srcBranch}_-_Releasing_-_summary") {
-            //if(job.name == "PKGPOOL_-_${this.srcBranch}_-_Build") {
-            //////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
             if(job.getName().find(this.srcBranch)) {
                 jobsList.add(job)
             } else {
-                this.out.println("[WARNING] Job $job.name can not be added to the list of jobs to be copied.")
+                this.warn("[WARNING] Job $job.name can not be added to the list of jobs to be copied.")
                 continue
             }
             numJobs++
-            inf("Added job $job.name.")
-
-            //////////////////////////////////////////////////////////////////////////////////////////////////////////////
-            //} // for testing specific jobs
-            //////////////////////////////////////////////////////////////////////////////////////////////////////////////
+            this.inf("Added job $job.name.")
         }
 
         this.jobsList = jobsList
-        inf("$numJobs jobs to be copied.")
+        this.inf("$numJobs jobs to be copied.\n")
     }
 
     /**
@@ -376,23 +379,23 @@ class CreateBranch extends Common {
 
         newName = job.getName().replaceFirst("-_"+this.jobNameReplace+"_-", "-_"+this.newBranch+"_-")
         if(this.debug) {
-            dbg("copy job: $job.name -> $newName")
+            this.dbg("copy job: $job.name -> $newName")
         } else {
             newJob = Jenkins.instance.copy(job, newName)
             newJob.setDisplayName(job.getDisplayName().replaceFirst(this.displayNameSrcBranch, this.displayNameNewBranch))
-            inf("copied job: $job.name -> $newName")
+            this.inf("copied job: $job.name -> $newName")
         }
 
         if(newName.endsWith("_-_Build")) {
             if(this.debug) {
-                dbg("set description of new job: ${this.comment}")
-                dbg("disable new job: ${newName}")
+                this.dbg("set description of new job: ${this.comment}")
+                this.dbg("disable new job: ${newName}")
             } else {
                 newJob.setDescription(this.comment)
-                inf("set description of new job: ${this.comment}")
+                this.inf("set description of new job: ${this.comment}")
                 // disable build jobs because not all jobs are created jet.
                 newJob.disable()
-                inf("disable new job: ${newName}")
+                this.inf("disable new job: ${newName}")
                 this.jobsToEnable.add(newJob)
             }
         }
@@ -408,10 +411,10 @@ class CreateBranch extends Common {
         def configFile = null
         def numJobs = 0
 
-        inf("display name src branch: ${this.displayNameSrcBranch}")
-        inf("display name new branch: ${this.displayNameNewBranch}")
-        inf("job name src branch: -_${this.jobNameReplace}_-")
-        inf("job name new branch: -_${this.newBranch}_-")
+        this.inf("display name src branch: ${this.displayNameSrcBranch}")
+        this.inf("display name new branch: ${this.displayNameNewBranch}")
+        this.inf("job name src branch: -_${this.jobNameReplace}_-")
+        this.inf("job name new branch: -_${this.newBranch}_-")
 
         for(job in this.jobsList) {
             try {
@@ -425,12 +428,12 @@ class CreateBranch extends Common {
                     this.reloadJobConfig(newJob, configFile)
                 }
                 numJobs++
-                inf("copied job nr. $numJobs")
+                this.inf("copied job nr. $numJobs")
             } catch(Exception e) {
-                warn(e)
+                this.warn(e)
             }
         }
-        inf("$numJobs jobs were copied.")
+        this.inf("$numJobs jobs were copied.")
     }
 }
 
@@ -443,17 +446,19 @@ class CreateBranchLRC extends CreateBranch {
     CreateBranchLRC(srcBranch, newBranch, debug, comment, activateRootJobs, env, out) {
         super(srcBranch, newBranch, debug, comment, activateRootJobs, env, out)
 
-        this.srcBranch = "LRC_" + this.srcBranch
+        this.srcBranch = "LRC_${this.srcBranch}"
         this.newBranch = "LRC_${this.newBranch}"
         this.trunkView = "LRC"
         this.displayNameSrcBranch = this.srcBranch.replaceFirst("_", " ")
         this.displayNameNewBranch = this.newBranch.replaceFirst("_", " ")
+        this.pkgPoolReplace = "*/LRC"
         
         if(this.fromTrunk) {
             this.jobNameReplace = "LRC"
         } else {
             this.jobNameReplace = this.srcBranch
-            this.trunkView = "LRC_${this.srcBranch}"
+            //this.trunkView = this.srcBranch
+            this.pkgPoolReplace = "*/${this.srcBranch}"
         }
     }
 
@@ -470,25 +475,25 @@ class CreateBranchLRC extends CreateBranch {
 
         // The LRC build job has 2x "_-_LRC_-_" in its name.
         if(job.getName() == this.env.get("MAIN_BUILD_JOB_NAME_LRC")) {
-            inf("replace LFS_CI_-_LRC_-_${this.jobNameReplace}_-_ by LFS_CI_-_LRC_-_${this.newBranch}_-_ in jobs config.xml.")
+            this.inf("replace LFS_CI_-_LRC_-_${this.jobNameReplace}_-_ by LFS_CI_-_LRC_-_${this.newBranch}_-_ in jobs config.xml.")
             processFileInplace(configFile) { text ->
                 text.replaceAll("LFS_CI_-_LRC_-_"+this.jobNameReplace+"_-_", "LFS_CI_-_LRC_-_"+this.newBranch+"_-_")
             }
         } else {
-            inf("replace -_${this.jobNameReplace}_- by -_${this.newBranch}_- in jobs config.xml.")
+            this.inf("replace -_${this.jobNameReplace}_- by -_${this.newBranch}_- in jobs config.xml.")
             processFileInplace(configFile) { text ->
                 text.replaceAll("-_"+this.jobNameReplace+"_-", "-_"+this.newBranch+"_-")
             }
         }
 
         if(newJob.getName() == "PKGPOOL_-_"+this.newBranch+"_-_Build") {
-            inf("replace ${this.pkgPoolReplace} by */${this.newBranch} in jobs config.xml.")
+            this.inf("replace ${this.pkgPoolReplace} by */${this.newBranch} in jobs config.xml.")
             processFileInplace(configFile) { text ->
                 text.replace(this.pkgPoolReplace, "*/"+this.newBranch)
             }
         }
 
-        inf("updated job configuration for job \"$newJob.name\"")
+        this.inf("updated job configuration for job \"$newJob.name\"")
         return configFile
     }
 
@@ -496,23 +501,19 @@ class CreateBranchLRC extends CreateBranch {
      * Collects the jobs to be copied in the list this.jobsList.
      * If there are jobs which should not be copied add them to
      * the parameter "branchingExcludeJobs" in file.cfg.
+     *
+     * TODO: move to CreateBranch
      */
     void collectJobs() {
         def jobsList = []
         def numJobs = 0
-        def jobs2Exclude = this.env.get("JOBS_EXCLUDE_LIST").split(",")
-        inf("Creating list of jobs to be copied.")
+        this.inf("Creating list of jobs to be copied.")
 
-        // TODO: Move this into an extra method
         for(job in this.srcBranchViewObj.getItems()) {
-            if(job.name in jobs2Exclude) {
-                inf("excluding job ${job.name}.")
+            if(job2exclude(job.name)) {
+                this.inf("excluding job ${job.name}.")
                 continue
             }
-
-            //////////////////////////////////////////////////////////////////////////////////////////////////////////////
-            //if(job.name == "LFS_CI_-_LRC_-_Build" || job.name == "LFS_CI_-_LRC_-_Test" || job.name == "LFS_CI_-_LRC_-_Wait_for_release") {
-            //////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
             if(job.getName().find("LRC")) {
                 jobsList.add(job)
@@ -521,15 +522,11 @@ class CreateBranchLRC extends CreateBranch {
                 continue
             }
             numJobs++
-            inf("Added job $job.name.")
-
-            //////////////////////////////////////////////////////////////////////////////////////////////////////////////
-            //} // for testing specific jobs
-            //////////////////////////////////////////////////////////////////////////////////////////////////////////////
+            this.inf("Added job $job.name.")
         }
 
         this.jobsList = jobsList
-        inf("$numJobs jobs to be copied.")
+        this.inf("$numJobs jobs to be copied.\n")
     }
 }
 
@@ -600,13 +597,13 @@ class CreateViews extends Common {
         def configXmlFile = "${workspace}/list_view_template.xml"
         def config = null
 
-        inf("get view config from: ${requestUrl}")
+        this.inf("get view config from: ${requestUrl}")
         proc = ["curl", "-k", "${requestUrl}", "--noproxy", "localhost"].execute()
         proc.waitFor()
         config = proc.text
 
         def listViewTmpl = new File(configXmlFile)
-        inf("write config xml file to ${configXmlFile}")
+        this.inf("write config xml file to ${configXmlFile}")
         listViewTmpl.write(config)
 
         this.processFileInplace(listViewTmpl) { text ->
@@ -614,17 +611,17 @@ class CreateViews extends Common {
         }
 
         if(this.debug) {
-            dbg("send config xml file ${configXmlFile} to Jenkins")
-            dbg("     -> ${requestUrl}")
+            this.dbg("send config xml file ${configXmlFile} to Jenkins")
+            this.dbg("     -> ${requestUrl}")
         } else {
-            inf("send config xml file ${configXmlFile} to Jenkins")
-            inf("     -> ${requestUrl}")
+            this.inf("send config xml file ${configXmlFile} to Jenkins")
+            this.inf("     -> ${requestUrl}")
             proc = ["curl", "-k", "-u${this.apiUser}:${this.apiToken}", "${requestUrl}", "--noproxy", "localhost", "--data-binary", "@${configXmlFile}"].execute()
-            inf("waiting for response from Jenkins")
+            this.inf("waiting for response from Jenkins")
             proc.waitFor()
-            inf("configureScmView() proc.text: $proc.text")
+            this.inf("configureScmView() proc.text: $proc.text")
         }
-        inf("finished configuring SCM list view")
+        this.inf("finished configuring SCM list view")
     }
 
     /**
@@ -632,17 +629,18 @@ class CreateViews extends Common {
      */
     void createScmView() {
         if(this.lrc) {
+            this.out.println("\n[INFO] creating SCM_LRC view.\n")
             if(this.debug) {
-                dbg("created view ${this.newBranch} within ${this.scmViewLRC}.")
+                this.dbg("create view ${this.newBranch} within ${this.scmViewLRC}.")
             } else {
                 def scmViewLRCObj = Jenkins.instance.getView(this.scmViewLRC)
                 def scmBranchViewObj = new ListView(this.newBranch, scmViewLRCObj)
                 scmViewLRCObj.addView(scmBranchViewObj)
-                inf("created view ${this.newBranch} within ${this.scmViewLRC}.")
+                this.inf("created view ${this.newBranch} within ${this.scmViewLRC}.")
             }
             this.configureScmView()
         } else {
-            inf("SCM view is used for LRC only.")
+            this.inf("SCM view is used for LRC only.")
         }
     }
 
@@ -657,16 +655,16 @@ class CreateViews extends Common {
     hudson.plugins.nested_view.NestedView createNestedView() {
         def nestedView = Jenkins.instance.getView(this.rootView)
         if(nestedView) {
-            inf("root view ${this.rootView} already exists.")
+            this.inf("root view ${this.rootView} already exists.")
         } else {
             if(this.debug) {
-                dbg("create nested view ${this.rootView}")
+                this.dbg("create nested view ${this.rootView}")
                 // Return dummy view to prevent NullPointerException
                 nestedView = new hudson.plugins.nested_view.NestedView("dummy")
             } else {
                 nestedView = new hudson.plugins.nested_view.NestedView(this.rootView)
                 Jenkins.instance.addView(nestedView)
-                inf("created view ${this.rootView}")
+                this.inf("created view ${this.rootView}")
             }
         }
         return nestedView
@@ -679,27 +677,23 @@ class CreateViews extends Common {
      * @param parentView The view instance which is the parent.
      */
     void addSectionedView(parentView) {
+        this.out.println("\n[INFO] creating sectioned view.\n")
         if(this.debug) {
-            dbg("Create sectioned view ${parentView.name}/${this.newBranch}")
+            this.dbg("Create sectioned view ${parentView.name}/${this.newBranch}")
         } else {
             def sectionedView = parentView.getView(this.newBranch)
             if(sectionedView) {
-                inf("view ${parentView.name}/${this.newBranch} already exists.")
+                this.inf("view ${parentView.name}/${this.newBranch} already exists.")
             } else {
                 sectionedView = new SectionedView(this.newBranch)
                 sectionedView.owner = parentView
                 parentView.addView(sectionedView)
-                inf("created view ${parentView.name}/${this.newBranch}")
+                this.inf("created view ${parentView.name}/${this.newBranch}")
             }   
             this.configureSectionedView()
         }
     }   
     
-    void processFileInplace(file, Closure processText) {
-        def text = file.text
-        file.write(processText(text))
-    }
-
     /**
       * Configure the sectioned view for this branch.
       * Reads the config.xml of the the source branch view and
@@ -708,7 +702,6 @@ class CreateViews extends Common {
       */
     void configureSectionedView() {
         def requestUrl = ""
-        this.out.println("\n[INFO] creating sectioned view.\n")
 
         if(this.fromTrunk) {
             requestUrl = "${this.jenkinsUrl}view/${this.trunkView}/config.xml"
@@ -722,22 +715,22 @@ class CreateViews extends Common {
         def configXmlFile = "${workspace}/sectioned_view_template.xml"
         def config = null
 
-        inf("get view config from: ${requestUrl}")
+        this.inf("get view config from: ${requestUrl}")
         proc = ["curl", "-k", "${requestUrl}", "--noproxy", "localhost"].execute()
         proc.waitFor()
         config = proc.text
 
         def sectionedViewTmpl = new File(configXmlFile)
-        inf("write config xml file to ${configXmlFile}")
+        this.inf("write config xml file to ${configXmlFile}")
         sectionedViewTmpl.write(config)
 
         if(this.fromTrunk) {
-            inf("-> replace ${this.trunkView} by ${this.newBranch}")
+            this.inf("-> replace ${this.trunkView} by ${this.newBranch}")
             this.processFileInplace(sectionedViewTmpl) { text ->
                 text.replaceAll(this.trunkView, this.newBranch)
             }
         } else {
-            inf("-> replace ${this.srcBranch} by ${this.newBranch}")
+            this.inf("-> replace ${this.srcBranch} by ${this.newBranch}")
             this.processFileInplace(sectionedViewTmpl) { text ->
                 text.replaceAll(this.srcBranch, this.newBranch)
             }
@@ -747,17 +740,17 @@ class CreateViews extends Common {
         requestUrl = "${this.jenkinsUrl}view/${this.rootView}/view/${this.newBranch}/config.xml"
 
         if(this.debug) {
-            dbg("send config xml file ${configXmlFile} to Jenkins")
-            dbg("     -> ${requestUrl}")
+            this.dbg("send config xml file ${configXmlFile} to Jenkins")
+            this.dbg("     -> ${requestUrl}")
         } else {
-            inf("send config xml file ${configXmlFile} to Jenkins")
-            inf("     -> ${requestUrl}")
+            this.inf("send config xml file ${configXmlFile} to Jenkins")
+            this.inf("     -> ${requestUrl}")
             proc = ["curl", "-k", "-u${this.apiUser}:${this.apiToken}", "${requestUrl}", "--noproxy", "localhost", "--data-binary", "@${configXmlFile}"].execute()
-            inf("waiting for response from Jenkins")
+            this.inf("waiting for response from Jenkins")
             proc.waitFor()
-            inf("configureSectionedView() proc.text: $proc.text")
+            this.inf("configureSectionedView() proc.text: $proc.text")
         }
-        inf("finished configuring sectioned view")
+        this.inf("finished configuring sectioned view")
     }
 }
 

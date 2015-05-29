@@ -198,8 +198,12 @@ def deleteJobs() {
                     println("[DEBUG] delete job: $p.name (dry run)")
                 } else {
                     deletedJobs.add(p.getName())
-                    p.delete()
-                    println("[INFO] deleted job: $p.name")
+                    try {
+                        p.delete()
+                        println("[INFO] deleted job: $p.name")
+                    } catch(e) {
+                        println("[WARNING] failed deleting job ${job.name}.")
+                    }
                 }
             } else if(job_name.find("LFS_CI_-_LRC_"+branch+"_-") || job_name.find("LFS_Prod_-_LRC_"+branch+"_-") || job_name.find("PKGPOOL_-_LRC_"+branch+"_-")) {
                 lrc_jobs.add(p)
@@ -217,8 +221,12 @@ def deleteLRCJobs() {
                 println("[DEBUG] delete LRC job: $p.name (dry run)")
             } else {
                 deletedJobs.add(p.getName())
-                p.delete()
-                println("[INFO] deleted LRC job: $p.name")
+                try {
+                    p.delete()
+                    println("[INFO] deleted LRC job: $p.name")
+                } catch(e) {
+                    println("[WARNING] failed deleting job ${job.name}.")
+                }
             }
         }
     }
