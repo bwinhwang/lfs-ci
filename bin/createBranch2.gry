@@ -362,7 +362,7 @@ class CreateBranch extends Common {
                 continue
             }
 
-            jn = job.getName()
+            def jn = job.getName()
             if(jn.find(this.srcBranch) || (this.fromTrunk && jn.find("_-_fsmr4_-_"))) {
                 jobsList.add(job)
             } else {
