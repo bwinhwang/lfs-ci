@@ -270,6 +270,7 @@ createBranchInGit() {
         mustHaveValue "${gitServer}" "git server"
         mustHaveValue "${gitRevisionFile}" "git revision file"
 
+        __cmd svn cat -r ${REVISION} ${gitRevisionFile}
         gitRevision=$(svn cat -r ${REVISION} ${gitRevisionFile})
         info "GIT revision: ${gitRevision}"
 
