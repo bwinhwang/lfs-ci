@@ -493,9 +493,12 @@ mustHaveMakingTestRunningTarget() {
 	mustExistFile ${testSuiteDirectory}/testsuite.mk
 
     info "checking, if target is up and running (with ssh)..."
+    local rebootRetry=$(getConfig LFS_CI_uc_test_TMF_retry_count_until_target_should_be_up)
+    while [[ ${rebootRetry} -gt 0 ]] ; do
+    rebootRetry=$((rebootRetry - 1))
+    [[ ${rebootRetry} -eq 0 ]] && opt=-i
     for i in 1 2 3 4 ; do
         local opt=
-        [[ $i -lt 4 ]] && opt=-i
         execute ${opt} make -C ${testSuiteDirectory} waitssh && break
         execute make -C ${testSuiteDirectory} powercycle
     done
