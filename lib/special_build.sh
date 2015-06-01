@@ -223,7 +223,7 @@ applyKnifePatches() {
                 [[ -e ${workspace}/${fileInPatch} ]] || continue
                 local tmpPatchFile=$(createTempFile)
                 execute -n filterdiff -i ${fileInPatch} > ${tmpPatchFile}
-                execute -i patch -p0 -d ${workspace} < ${tmpPatchFile}
+                execute patch -p0 -d ${workspace} < ${tmpPatchFile}
             done                     
         fi
     done

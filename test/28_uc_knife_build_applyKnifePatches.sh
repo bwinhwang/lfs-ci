@@ -73,13 +73,13 @@ test2() {
 cat <<EOF > ${expect}
 execute -n lsdiff ${WORKSPACE}/workspace/bld/bld-knife-input/lfs.patch
 execute -n filterdiff -i src-fsmpsl/Buildfile
-execute -i patch -p0 -d ${WORKSPACE}/workspace
+execute patch -p0 -d ${WORKSPACE}/workspace
 execute -n filterdiff -i src-fsmpsl/Dependencies
-execute -i patch -p0 -d ${WORKSPACE}/workspace
+execute patch -p0 -d ${WORKSPACE}/workspace
 execute -n filterdiff -i src-rfs/Buildfile
-execute -i patch -p0 -d ${WORKSPACE}/workspace
+execute patch -p0 -d ${WORKSPACE}/workspace
 execute -n filterdiff -i src-rfs/Dependencies
-execute -i patch -p0 -d ${WORKSPACE}/workspace
+execute patch -p0 -d ${WORKSPACE}/workspace
 EOF
     assertExecutedCommands ${expect}
 
