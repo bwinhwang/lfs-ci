@@ -279,6 +279,7 @@ class CreateBranch extends Common {
         processFileInplace(configFile) { text ->
             text.replaceAll("LFS_CI_-_fsmr4_-", "LFS_CI_-_"+this.newBranch+"_FSMR4_-")
         }
+        // End fsmr4 jobs
 
         if(newJob.getName() == "PKGPOOL_-_"+this.newBranch+"_-_Build") {
             this.inf("replace ${this.pkgPoolReplace} by */${this.newBranch} in jobs config.xml.")
@@ -393,8 +394,8 @@ class CreateBranch extends Common {
         def newName = null
         def newJob = null
 
+        // fsmr4 jobs
         if(job.getName().find("LFS_CI_-_fsmr4_-")) {
-            // fsmr4 jobs
             newName = job.getName().replaceFirst("LFS_CI_-_fsmr4_-", "LFS_CI_-_"+this.newBranch+"_FSMR4_-")
             if(this.debug) {
                 this.dbg("copy job: $job.name -> $newName")
@@ -403,6 +404,7 @@ class CreateBranch extends Common {
                 newJob.setDisplayName(job.getDisplayName().replaceFirst(this.displayNameSrcBranch, this.displayNameNewBranch))
                 this.inf("copied job: $job.name -> $newName")
             }
+        // End fsmr4 jobs
         } else {
             newName = job.getName().replaceFirst("-_"+this.jobNameReplace+"_-", "-_"+this.newBranch+"_-")
             if(this.debug) {
