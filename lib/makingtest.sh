@@ -56,9 +56,11 @@ makingTest_testXmloutput() {
     local testOptions=$(getConfig LFS_CI_uc_test_making_test_test_options)
 
     mustHaveMakingTestTestConfig
+    local timeoutInSeconds=$(getConfig LFS_CI_uc_test_making_test_timeout_in_seconds_for_make_test)
+    mustHaveValue "${timeoutInSeconds}" "timeoutInSeconds"
 
     info "running test suite"
-    execute -i make -C ${testSuiteDirectory}      \
+    execute timeout -s 9 ${timeoutInSeconds} make -C ${testSuiteDirectory}      \
                     --ignore-errors ${testOptions}\
                     test-xmloutput
 
@@ -556,7 +558,7 @@ EOF
 
     for target in ${fctTarget,,} ${fspTargets,,} ; do
         debug "create moxa mock for ${target}"
-        local moxa=$(execute -n ${make} testtarget-analyzer TESTTARGET=${target} | grep ^moxa | cut -d= -f2)
+        local moxa=$(execute -n ${make} testtarget-analyzer TESTTARGET=${target} | grep ^moxa= | cut -d= -f2)
         debug "moxa is ${moxa}"
         if [[ ${moxa} ]] ; then
             local localPort=$(sed "s/[\.:\]//g" <<< ${moxa}  )
