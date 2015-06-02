@@ -46,8 +46,8 @@ sub newTestExecution {
 }
 
 sub newBuildEvent {
-    my $self = shift;
-    my $param = { @_ };
+    my $self    = shift;
+    my $param   = { @_ };
     my $release = $param->{release};
 
     if( not $self->{store} ) {
@@ -60,10 +60,10 @@ sub newBuildEvent {
                                    branchName   => $release->branchName(),
                                    comment      => $release->comment(),
                                    revision     => $release->revision(),
-                                   target       => $release->target(),
-                                   subTarget    => $release->subTarget(),
                                    jobName      => $release->jobName(),
                                    buildNumber  => $release->buildNumber(),
+                                   productName  => $release->productName(),
+                                   taskName     => $release->taskName(),
                                  );
     return;
 }
@@ -122,6 +122,35 @@ sub branchInformation {
             if $row->{date_closed} ne "0000-00-00 00:00:00";
     }
     return;
+}
+
+sub locationsText {
+    my $self = shift;
+
+    if( not $self->{store} ) {
+        $self->{store} = Nokia::Store::Database::Branches->new();
+    }
+
+    my @data = $self->{store}->branchInformation();
+
+    printf "# This file was automatically created by %s.\n", $0;
+    printf "# Do not edit it by hand.\n";
+    print "\n";
+    printf "%-20s %-10s %40s\n", "location", "status", "description";
+    print  "-"x20 . " " . "-"x10 . " " . "-"x80 . "\n";
+    foreach my $row ( sort { $a->{location_name} cmp $b->{location_name} } @data ) {
+        next if $row->{status} eq "closed";
+        printf "%-20s %-10s %-80s\n", $row->{location_name}, $row->{status}, $row->{branch_description} || sprintf( "Feature Build (all %s)", $row->{release_name_regex} );
+    }
+    print  "-"x20 . " " . "-"x10 . " " . "-"x80 . "\n";
+    print "\n";
+    print "Remarks \n";
+    print "*) Please contact Wolfgang Adlassnig for current policy\n";
+    print "\n";
+    print "For Branch policy\n";
+    print "https://confluence.inside.nokiasiemensnetworks.com/display/BtsScmUlm/PS+Releases+in+the+Pipe\n";
+
+    return
 }
 
 1;

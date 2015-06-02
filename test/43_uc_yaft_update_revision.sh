@@ -35,6 +35,9 @@ oneTimeSetUp() {
     mustExistInSubversion() {
         mockedCommand "mustExistInSubversion $@"
     }
+    mustHaveCleanWorkspace() {
+        mockedCommand "mustHaveCleanWorkspace $@"
+    }
     getSvnLastChangedRevision() {
         mockedCommand "getSvnLastChangedRevision $@"
         echo 1234
@@ -69,12 +72,13 @@ test1() {
     cat <<EOF > ${expect}
 getWorkspaceName 
 mustHaveWorkspaceName 
-mustExistInSubversion https://svne1.access.nsn.com/isource/svnroot/BTS_T_YAFT/trunk
+mustHaveCleanWorkspace 
+mustExistInSubversion https://svne1.access.nsn.com/isource/svnroot/BTS_T_YAFT trunk
 getSvnLastChangedRevision https://svne1.access.nsn.com/isource/svnroot/BTS_T_YAFT/trunk
 createBasicWorkspace -l pronb-developer src-project
 execute sed -i -e s|\(hint *bld/yaft *--revision\).*|\1=1234| ${WORKSPACE}/workspace/src-project/Dependencies
 svnDiff ${WORKSPACE}/workspace/src-project/Dependencies
-svnCommit -F ${WORKSPACE}/workspace/commitComment ${WORKSPACE}/workspace/src-project/Dependencies
+svnCommit -F ${WORKSPACE}/commitComment ${WORKSPACE}/workspace/src-project/Dependencies
 setBuildDescription LFS_CI_-_trunk_-_update_yaft_revision 1234 yaft rev. 1234
 EOF
     assertExecutedCommands ${expect}

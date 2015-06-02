@@ -28,6 +28,8 @@ LFS_CI_SOURCE_booking='$Id$'
 #  @param   {targetName}    name of the target
 #  @return  <none>
 reserveTargetByName() {
+    requiredParameters JOB_NAME BUILD_NUMBER
+
     local targetName=${1}
     mustHaveValue "${targetName}" "targetName"
 
@@ -39,7 +41,7 @@ reserveTargetByName() {
     mustHaveValue "${maxTryToGetTarget}" "max tries to get target"
 
     while [[ ${counter} -lt ${maxTryToGetTarget} ]] ; do
-        if execute -i ${LFS_CI_ROOT}/bin/reserveTarget --targetName=${targetName} ; then
+        if execute -i ${LFS_CI_ROOT}/bin/reserveTarget --targetName=${targetName} --comment="lfs-ci: ${JOB_NAME} / ${BUILD_NUMBER}" ; then
             info "reservation for target ${targetName} was successful"
             export LFS_CI_BOOKING_RESERVED_TARGET=${targetName}
             return
@@ -62,6 +64,8 @@ reserveTargetByName() {
 #  @param   {features}    list of features
 #  @return  <none>
 reserveTargetByFeature() {
+    requiredParameters JOB_NAME BUILD_NUMBER
+
     local features=${@}
     mustHaveValue "${features}" "list of features"
 
@@ -85,7 +89,7 @@ reserveTargetByFeature() {
         for targetName in $(execute -n ${LFS_CI_ROOT}/bin/searchTarget ${searchParameter} ) ; do
             info "try to reserve target ${targetName}"
 
-            if execute -i ${LFS_CI_ROOT}/bin/reserveTarget --targetName=${targetName} ; then
+            if execute -i ${LFS_CI_ROOT}/bin/reserveTarget --targetName=${targetName} --comment="lfs-ci: ${JOB_NAME} / ${BUILD_NUMBER}" ; then
                 info "reservation for target ${targetName} was successful"
                 export LFS_CI_BOOKING_RESERVED_TARGET=${targetName}
                 return
@@ -133,7 +137,10 @@ mustHaveReservedTarget() {
     local targetName=""
     if [[ ${isBookingEnabled} ]] ; then
         # new method via booking from database
-        local targetFeatures="$(getConfig LFS_uc_test_booking_target_features)"
+
+        local branchName=$(getBranchName ${UPSTREAM_PROJECT})
+
+        local targetFeatures="$(getConfig LFS_uc_test_booking_target_features -t branchName:${branchName})"
         debug "requesting target with features ${targetFeatures}"
 
         reserveTargetByFeature ${targetFeatures}

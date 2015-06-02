@@ -23,9 +23,6 @@ oneTimeSetUp() {
     setBuildDescription() {
         mockedCommand "setBuildDescription $@"
     }
-    mustHavePermissionToRelease() {
-        mockedCommand "mustHavePermissionToRelease $@"
-    }
     createReleaseLinkOnCiLfsShare() {
         mockedCommand "createReleaseLinkOnCiLfsShare $@"
     }
@@ -74,8 +71,6 @@ execute mkdir -p ${WORKSPACE}/workspace
 getConfig LFS_CI_UC_update_ecl_required_artifacts
 copyArtifactsToWorkspace LFS_CI_-_trunk_-_Build 1234 fsmci
 setBuildDescription LABEL_NAME
-mustHavePermissionToRelease 
-createReleaseLinkOnCiLfsShare LABEL_NAME
 getConfig LFS_CI_uc_update_ecl_url
 updateAndCommitEcl http://svn/ecl/url1
 updateAndCommitEcl http://svn/ecl/url2

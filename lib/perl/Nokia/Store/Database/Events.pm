@@ -43,7 +43,7 @@ sub newSubversionCommit {
     DEBUG "executing add_new_subversion_commit with data ($baselineName, $revision, $author, $date, $msg )";
 
     $sth->execute( $baselineName, $revision, $author, $date, $msg )
-        or LOGDIE sprintf( "can not insert test execution: %s, %s, %s, %s", $baselineName, $revision, $author, $author);
+        or LOGDIE sprintf( "can not insert subversion commit: %s, %s, %s, %s, %s", $baselineName, $revision, $author, $date, $msg);
 
     return;
 }
@@ -74,74 +74,47 @@ sub newBuildEvent {
     my $comment      = $param->{comment}      || "";
     my $jobName      = $param->{jobName}      || "";
     my $buildNumber  = $param->{buildNumber}  || "";
-    my $target       = $param->{target}       || "";
-    my $subTarget    = $param->{subTarget}    || "";
+    my $productName  = $param->{productName}  || "";
+    my $taskName     = $param->{taskName}     || "";
     my $action       = $param->{action};
     my $method       = "";
     my $data         = [];
 
-    DEBUG "parameter" . Dumper( $param );
+    my $dataListShort = [ $baselineName, $comment,                         $jobName, $buildNumber, $productName, $taskName ];
+    my $dataListLong  = [ $baselineName, $comment, $branchName, $revision, $jobName, $buildNumber, $productName, $taskName ];
+    my $dataHash      = { 
+            build_started     => $dataListLong,
+            build_failed      => $dataListShort,
+            build_finished    => $dataListShort,
+            other_failed      => $dataListShort,
+            other_finished    => $dataListShort,
+            other_started     => $dataListShort,
+            other_unstable    => $dataListShort,
+            package_failed    => $dataListShort,
+            package_finished  => $dataListShort,
+            package_started   => $dataListShort,
+            release_finished  => $dataListShort,
+            release_started   => $dataListShort,
+            subbuild_failed   => $dataListShort,
+            subbuild_finished => $dataListShort,
+            subbuild_started  => $dataListShort,
+            subtest_failed    => $dataListShort,
+            subtest_finished  => $dataListShort,
+            subtest_started   => $dataListShort,
+            subtest_unstable  => $dataListShort,
+            test_failed       => $dataListShort,
+            test_finished     => $dataListShort,
+            test_started      => $dataListShort,
+    };
 
-    if( $action eq "build_started" ) {
-        $method = "build_started( ?, ?, ?, ?, ?, ? )";
-        $data   = [ $baselineName, $comment, $branchName, $revision, $jobName, $buildNumber ];
-    } elsif ( $action eq "build_failed"  ) {
-        $method = "build_failed( ?, ?, ?, ? )";
-        $data   = [ $baselineName, $comment, $jobName, $buildNumber ];
-    } elsif ( $action eq "build_finished"  ) {
-        $method = "build_finished( ?, ?, ?, ? )";
-        $data   = [ $baselineName, $comment, $jobName, $buildNumber ];
-    } elsif ( $action eq "subbuild_started"  ) {
-        $method = "subbuild_started( ?, ?, ?, ?, ?, ? )";
-        $data   = [ $baselineName, $comment, $target, $subTarget, $jobName, $buildNumber ];
-    } elsif ( $action eq "subbuild_finished" ) {
-        $method = "subbuild_finished( ?, ?, ?, ?, ?, ? )";
-        $data   = [ $baselineName, $comment, $target, $subTarget, $jobName, $buildNumber ];
-    } elsif ( $action eq "subbuild_failed"   ) {
-        $method = "subbuild_failed( ?, ?, ?, ?, ?, ? )";
-        $data   = [ $baselineName, $comment, $target, $subTarget, $jobName, $buildNumber ];
-    } elsif ( $action eq "test_started"      ) {
-        $method = "test_started( ?, ?, ?, ? )";
-        $data   = [ $baselineName, $comment, $jobName, $buildNumber ];
-    } elsif ( $action eq "test_failed"      ) {
-        $method = "test_failed( ?, ?, ?, ? )";
-        $data   = [ $baselineName, $comment, $jobName, $buildNumber ];
-    } elsif ( $action eq "test_finished"      ) {
-        $method = "test_finished( ?, ?, ?, ? )";
-        $data   = [ $baselineName, $comment, $jobName, $buildNumber ];
-    } elsif ( $action eq "subtest_started"   ) {
-        $method = "subtest_started( ?, ?, ?, ?, ?, ? )";
-        $data   = [ $baselineName, $comment, $target, $subTarget, $jobName, $buildNumber ];
-    } elsif ( $action eq "subtest_finished"  ) {
-        $method = "subtest_finished( ?, ?, ?, ?, ?, ? )";
-        $data   = [ $baselineName, $comment, $target, $subTarget, $jobName, $buildNumber ];
-    } elsif ( $action eq "subtest_unstable"  ) {
-        $method = "subtest_unstable( ?, ?, ?, ?, ?, ? )";
-        $data   = [ $baselineName, $comment, $target, $subTarget, $jobName, $buildNumber ];
-    } elsif ( $action eq "subtest_failed"    ) {
-        $method = "subtest_failed( ?, ?, ?, ?, ?, ? )";
-        $data   = [ $baselineName, $comment, $target, $subTarget, $jobName, $buildNumber ];
-    } elsif ( $action eq "package_started"   ) {
-        $method = "package_started( ?, ?, ?, ? )";
-        $data   = [ $baselineName, $comment, $jobName, $buildNumber ];
-    } elsif ( $action eq "package_finished"  ) {
-        $method = "package_finished( ?, ?, ?, ? )";
-        $data   = [ $baselineName, $comment, $jobName, $buildNumber ];
-    } elsif ( $action eq "package_failed"   ) {
-        $method = "package_failed( ?, ?, ?, ? )";
-        $data   = [ $baselineName, $comment, $jobName, $buildNumber ];
-    } elsif ( $action eq "release_started"   ) {
-        $method = "release_started( ?, ?, ?, ? )";
-        $data   = [ $baselineName, $comment, $jobName, $buildNumber ];
-    } elsif ( $action eq "release_finished"  ) {
-        $method = "release_finished( ?, ?, ?, ? )";
-        $data   = [ $baselineName, $comment, $jobName, $buildNumber ];
-    }
+
+    $data   = $dataHash->{$action};
+    $method = sprintf( "$action( %s )", join( ", ", map { "?" } @{ $data } ) );
 
     DEBUG "executing $action with $method and data (" . join( ", ", @{ $data } ) . ")";
 
     my $sth = $self->prepare(
-        "call $method"
+        "CALL $method"
     );
 
     $sth->execute( @{ $data } )
@@ -155,7 +128,7 @@ sub branchInformation {
     my $param = { @_ };
 
     my $sth = $self->prepare( 
-        "select * from branches"
+        "SELECT * FROM branches"
     );
     $sth->execute()
         or LOGDIE sprintf( "can not get branch information" );

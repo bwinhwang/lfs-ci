@@ -18,8 +18,8 @@ sub prepare {
                 'revision=s',      \$self->{opt_revision},
                 'action=s',        \$self->{opt_action},
                 'comment=s',       \$self->{opt_comment},
-                'targetName=s',    \$self->{opt_targetName},
-                'targetType=s',    \$self->{opt_targetType},
+                'productName=s',   \$self->{opt_productName},
+                'taskName=s',      \$self->{opt_taskName},
                 'jobName=s',       \$self->{opt_jobName},
                 'buildNumber=s',   \$self->{opt_buildNumber},
             ) or LOGDIE "invalid option";
@@ -35,8 +35,8 @@ sub execute {
             branchName   => $self->{opt_branch},
             revision     => $self->{opt_revision},
             comment      => $self->{opt_comment},
-            target       => $self->{opt_targetName},
-            subTarget    => $self->{opt_targetType},
+            productName  => $self->{opt_productName},
+            taskName     => $self->{opt_taskName},
             jobName      => $self->{opt_jobName},
             buildNumber  => $self->{opt_buildNumber}, ) 
         );

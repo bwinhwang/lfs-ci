@@ -7,8 +7,6 @@ use Nokia::Usecase::GetLocation;
 
 use parent qw( Nokia::Command );
 
-use Data::Dumper;
-
 sub prepare {
     my $self = shift;
     my @args = @_;

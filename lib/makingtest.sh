@@ -30,7 +30,6 @@ makingTest_testFSM() {
 #  @param   <none>
 #  @return  <none>
 makingTest_testsWithoutTarget() {
-
     makingTest_testconfig
     makingTest_testXmloutput
     makingTest_copyResults
@@ -38,14 +37,12 @@ makingTest_testsWithoutTarget() {
     return
 }
 
-
 ## @fn      makingTest_testXmloutput()
 #  @brief   running TMF tests on the target and create XML output
 #  @details this is just a make test-xmloutput with some options
 #  @param   <none>
 #  @return  <none>
 makingTest_testXmloutput() {
-
     local workspace=$(getWorkspaceName)
     mustHaveWorkspaceName
 
@@ -74,13 +71,14 @@ makingTest_testXmloutput() {
 #  @param   <none>
 #  @return  <none>
 makingTest_testconfig() {
-    requiredParameters DELIVERY_DIRECTORY
-
-    local targetName=$(_reserveTarget)
+    local targetName="$(_reserveTarget)"
     mustHaveValue "${targetName}" "target name"
     
     local testSuiteDirectory=$(makingTest_testSuiteDirectory)
     mustExistDirectory ${testSuiteDirectory}
+
+    local deliveryDirectory=$(getConfig LFS_CI_uc_test_on_target_delivery_directory)
+    mustExistDirectory ${deliveryDirectory}
 
     local workspace=$(getWorkspaceName)
     mustHaveWorkspaceName
@@ -88,8 +86,8 @@ makingTest_testconfig() {
     info "create testconfig for ${testSuiteDirectory}"
     execute make -C ${testSuiteDirectory}       \
                 testconfig-overwrite            \
-                TESTBUILD=${DELIVERY_DIRECTORY} \
-                TESTTARGET=${targetName,,}      \
+                TESTBUILD=${deliveryDirectory}  \
+                TESTTARGET="${targetName,,}"    \
                 TESTBUILD_SRC=${workspace}
     return
 }
@@ -113,9 +111,23 @@ makingTest_testSuiteDirectory() {
     local  branchName=$(getLocationName ${UPSTREAM_PROJECT})
     mustHaveValue "${branchName}" "branch name"
 
-	local testSuiteDirectory=${workspace}/$(getConfig LFS_CI_uc_test_making_test_suite_dir -t targetName:${targetName} -t branchName:${branchName})
+    local relativeTestSuiteDirectory=
+    if [[ -e ${workspace}/src-project/src/TMF/testsuites.cfg ]] ; then
+        relativeTestSuiteDirectory=$(getConfig test_suite                                     \
+                                            -t "targetName:${targetName}"                     \
+                                            -t "branchName:${branchName}"                     \
+                                            -f ${workspace}/src-project/src/TMF/testsuites.cfg)
+
+    fi
+    # if test suite directory is empty, try to find in test suite in the old config file
+    if [[ -z ${relativeTestSuiteDirectory} ]] ; then
+        relativeTestSuiteDirectory=$(getConfig LFS_CI_uc_test_making_test_suite_dir \
+                                            -t "targetName:${targetName}"           \
+                                            -t "branchName:${branchName}"           )
+    fi
+    local testSuiteDirectory=${workspace}/${relativeTestSuiteDirectory}
     mustExistDirectory ${testSuiteDirectory}
-	mustExistFile ${testSuiteDirectory}/testsuite.mk
+    mustExistFile ${testSuiteDirectory}/testsuite.mk
 
     trace "using test suite ${testSuiteDirectory} for target ${targetName} and branch ${branchName}"
     echo ${testSuiteDirectory}
@@ -133,9 +145,11 @@ makingTest_poweron() {
     local testSuiteDirectory=$(makingTest_testSuiteDirectory)
     mustExistDirectory ${testSuiteDirectory}
 
-    # not all branches have the poweroff implemented
-    execute  make -C ${testSuiteDirectory} powercycle
-    # execute -i make -C ${testSuiteDirectory} poweron
+    makingTest_logConsole
+
+    # This should be a poweron, but we don't know the state of the target.
+    # So we just powercycle the target
+    execute make -C ${testSuiteDirectory} powercycle
 
     return
 }
@@ -152,6 +166,7 @@ makingTest_poweroff() {
 
     # not all branches have the poweroff implemented
     execute -i make -C ${testSuiteDirectory} poweroff
+
     return
 }
 
@@ -364,13 +379,26 @@ makingTest_install() {
 
     local make="make -C ${testSuiteDirectory}"
 
-    mustHaveMakingTestRunningTarget
-
-    info "installing software on target"
-    execute ${make} setup
-
     local targetName=$(_reserveTarget)
     mustHaveValue "${targetName}" "target name"
+
+    local shouldHaveRunningTarget=$(getConfig LFS_CI_uc_test_should_target_be_running_before_make_install)
+    if [[ ${shouldHaveRunningTarget} ]] ; then
+        mustHaveMakingTestRunningTarget
+
+        info "installing software on target"
+        execute ${make} setup
+
+        local forceInstallSameVersion=$(getConfig LFS_CI_uc_test_making_test_force_reinstall_same_version)
+        if [[ -z ${forceInstallSameVersion} ]] ; then
+            if execute -i ${make} check ; then
+                info "the version, we would install is already on the target, skipping install"
+                return
+            else
+                info "ignore the warning above. It just saying, that the software version, we want to install is not yet on the target."                
+            fi
+        fi
+    fi
 
     # on LRC: currently install does show wrong (old) version after reboot and
     # SHP sometimes fails to be up when install is retried.
@@ -417,9 +445,11 @@ _reserveTarget() {
     requiredParameters JOB_NAME
 
     local isBookingEnabled=$(getConfig LFS_uc_test_is_booking_enabled)
+    local isCloudEnabled=$(getConfig LFS_CI_uc_test_is_cloud_enabled)
     local targetName=""
-
-    if [[ ${isBookingEnabled} ]] ; then
+    if   [[ ${isCloudEnabled}   ]] ; then
+        targetName=$(getConfig LFS_CI_uc_test_cloud_testconfig_target_parameter)
+    elif [[ ${isBookingEnabled} ]] ; then
         # new method via booking from database
         targetName=$(reservedTarget)
     else
@@ -427,7 +457,7 @@ _reserveTarget() {
     fi
     mustHaveValue ${targetName} "target name"
 
-    echo ${targetName}
+    echo ${targetName} 
    
     return
 }
@@ -465,7 +495,6 @@ mustHaveMakingTestRunningTarget() {
     info "checking, if target is up and running (with ssh)..."
     local canDoWaitPrompt=$(getConfig LFS_CI_uc_test_TMF_can_run_waitprompt)
     if [[ ${canDoWaitPrompt} ]] ; then
-        execute sleep 60
         execute make -C ${testSuiteDirectory} waitprompt
     fi
     execute make -C ${testSuiteDirectory} waitssh
@@ -476,3 +505,112 @@ mustHaveMakingTestRunningTarget() {
 
     return
 }
+
+
+## @fn      makingTest_logConsole()
+#  @brief   start to log all console output into an artifacts file
+#  @param   <none>
+#  @return  <none>
+makingTest_logConsole() {
+    local workspace=$(getWorkspaceName)
+    mustHaveWorkspaceName
+
+    local shouldLogConsole=$(getConfig LFS_CI_uc_test_should_record_log_output_of_target)
+    [[ ${shouldLogConsole} ]] || return 0
+
+	local testSuiteDirectory=$(makingTest_testSuiteDirectory)
+	mustExistFile ${testSuiteDirectory}/testsuite.mk
+
+    mustHaveMakingTestTestConfig
+
+    local logfilePath=${testSuiteDirectory}/__artifacts 
+    execute mkdir -p ${logfilePath}
+
+    local makeConsoleWrapper=${WORKSPACE}/workspace/makeConsoleWrapper
+    cat <<EOF > ${makeConsoleWrapper}
+#!/usr/bin/env bash
+set -x
+sleep 1
+make -C \$1 TESTTARGET=\$2 console
+exit 0
+EOF
+    execute chmod 755 ${makeConsoleWrapper}
+
+    local screenConfig=${WORKSPACE}/workspace/screenrc
+    cat <<EOF > ${screenConfig}
+logfile ${logfilePath}/console.%n
+logfile flush 1
+logtstamp after 10
+EOF
+    local make="make -C ${testSuiteDirectory} --no-print-directory" 
+    local fctTarget=$(_reserveTarget)
+    local fspTargets=$(execute -n ${make} testtarget-analyzer | grep ^setupfsps | cut -d= -f2 | tr "," " ")
+    local testRoot=$(execute -n ${make} testroot)
+
+    for target in ${fctTarget,,} ${fspTargets,,} ; do
+        debug "create moxa mock for ${target}"
+        local moxa=$(execute -n ${make} testtarget-analyzer TESTTARGET=${target} | grep ^moxa | cut -d= -f2)
+        debug "moxa is ${moxa}"
+        if [[ ${moxa} ]] ; then
+            local localPort=$(sed "s/[\.:\]//g" <<< ${moxa}  )
+            localPort=$(( localPort % 64000 + 1024 ))
+            local targetConfigFile=${testRoot}/targets/${target}
+            mustExistFile ${targetConfigFile}
+            execute sed -i "s/moxa=${moxa}/moxa=localhost:${localPort}/g" ${targetConfigFile}
+
+            echo "screen -L -t tp_${target} ${LFS_CI_ROOT}/lib/contrib/tcp_sharer/tcp_sharer.pl --name ${target} --logfile ${logfilePath}/tp_${target}.log --remote ${moxa} --local ${localPort}" >> ${screenConfig}
+            echo "screen -L -t ${target} ${makeConsoleWrapper} ${testSuiteDirectory} ${target}" >> ${screenConfig}
+        fi
+    done
+    # we have to sleep for 1 second until the make console command is running.
+    sleep 1
+
+    rawDebug ${screenConfig}
+
+    export LFS_CI_UC_TEST_SCREEN_NAME=lfs-jenkins.${USER}.${fctTarget}
+    execute screen -S ${LFS_CI_UC_TEST_SCREEN_NAME} -L -d -m -c ${screenConfig}
+
+    exit_add makingTest_collectArtifactsOnFailure
+    exit_add makingTest_closeConsole
+
+     return
+}
+
+## @fn      makingTest_closeConsole()
+#  @brief   stop to log all console output into an artifacts file
+#  @param   <none>
+#  @return  <none>
+makingTest_closeConsole() {
+    execute -i screen -dr -S ${LFS_CI_UC_TEST_SCREEN_NAME} -X quit
+    return
+}
+
+makingTest_collectArtifactsOnFailure() {
+    local rc=${1}
+
+    # do thing in case of no failure
+    [[ ${rc} -eq 0 ]] && return
+
+    # collect 
+    local workspace=$(getWorkspaceName)
+    mustHaveWorkspaceName
+
+	local testSuiteDirectory=$(makingTest_testSuiteDirectory)
+
+
+    execute -i mkdir -p ${workspace}/bld/bld-test-failure/results/
+    execute -i mkdir -p ${testSuiteDirectory}/__artifacts
+    execute -i rsync -av ${testSuiteDirectory}/__artifacts ${workspace}/bld/bld-test-failure/results/
+
+    execute -i mkdir -p ${workspace}/src-test/src/unittest/tests/makingtests/artifacts/__artifacts/
+    execute -i cd ${workspace}/src-test/src/unittest/tests/makingtests/artifacts/
+    execute -i cp ${testSuiteDirectory}/testconfig.mk .
+    execute -i make test
+    execute -i rsync -av __artifacts ${workspace}/bld/bld-test-failure/results/
+
+
+    createArtifactArchive
+
+    return        
+}
+

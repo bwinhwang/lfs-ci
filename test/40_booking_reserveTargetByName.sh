@@ -31,6 +31,8 @@ oneTimeSetUp() {
 setUp() {
     cp -f /dev/null ${UT_MOCKED_COMMANDS}
     export WORKSPACE=$(createTempDirectory)
+    export JOB_NAME=jobName
+    export BUILD_NUMBER=123
     return
 }
 
@@ -46,7 +48,7 @@ test1() {
     cat <<EOF > ${expect}
 getConfig LFS_uc_test_booking_target_sleep_seconds
 getConfig LFS_uc_test_booking_target_max_tries
-execute -i ${LFS_CI_ROOT}/bin/reserveTarget --targetName=targetName
+execute -i ${LFS_CI_ROOT}/bin/reserveTarget --targetName=targetName --comment=lfs-ci: ${JOB_NAME} / ${BUILD_NUMBER}
 EOF
     assertExecutedCommands ${expect}
 
@@ -61,8 +63,8 @@ test2() {
     cat <<EOF > ${expect}
 getConfig LFS_uc_test_booking_target_sleep_seconds
 getConfig LFS_uc_test_booking_target_max_tries
-execute -i ${LFS_CI_ROOT}/bin/reserveTarget --targetName=targetName
-execute -i ${LFS_CI_ROOT}/bin/reserveTarget --targetName=targetName
+execute -i ${LFS_CI_ROOT}/bin/reserveTarget --targetName=targetName --comment=lfs-ci: ${JOB_NAME} / ${BUILD_NUMBER}
+execute -i ${LFS_CI_ROOT}/bin/reserveTarget --targetName=targetName --comment=lfs-ci: ${JOB_NAME} / ${BUILD_NUMBER}
 EOF
     assertExecutedCommands ${expect}
 
@@ -77,9 +79,9 @@ test3() {
     cat <<EOF > ${expect}
 getConfig LFS_uc_test_booking_target_sleep_seconds
 getConfig LFS_uc_test_booking_target_max_tries
-execute -i ${LFS_CI_ROOT}/bin/reserveTarget --targetName=targetName
-execute -i ${LFS_CI_ROOT}/bin/reserveTarget --targetName=targetName
-execute -i ${LFS_CI_ROOT}/bin/reserveTarget --targetName=targetName
+execute -i ${LFS_CI_ROOT}/bin/reserveTarget --targetName=targetName --comment=lfs-ci: ${JOB_NAME} / ${BUILD_NUMBER}
+execute -i ${LFS_CI_ROOT}/bin/reserveTarget --targetName=targetName --comment=lfs-ci: ${JOB_NAME} / ${BUILD_NUMBER}
+execute -i ${LFS_CI_ROOT}/bin/reserveTarget --targetName=targetName --comment=lfs-ci: ${JOB_NAME} / ${BUILD_NUMBER}
 EOF
     assertExecutedCommands ${expect}
 
@@ -94,9 +96,9 @@ test4() {
     cat <<EOF > ${expect}
 getConfig LFS_uc_test_booking_target_sleep_seconds
 getConfig LFS_uc_test_booking_target_max_tries
-execute -i ${LFS_CI_ROOT}/bin/reserveTarget --targetName=targetName
-execute -i ${LFS_CI_ROOT}/bin/reserveTarget --targetName=targetName
-execute -i ${LFS_CI_ROOT}/bin/reserveTarget --targetName=targetName
+execute -i ${LFS_CI_ROOT}/bin/reserveTarget --targetName=targetName --comment=lfs-ci: ${JOB_NAME} / ${BUILD_NUMBER}
+execute -i ${LFS_CI_ROOT}/bin/reserveTarget --targetName=targetName --comment=lfs-ci: ${JOB_NAME} / ${BUILD_NUMBER}
+execute -i ${LFS_CI_ROOT}/bin/reserveTarget --targetName=targetName --comment=lfs-ci: ${JOB_NAME} / ${BUILD_NUMBER}
 EOF
     assertExecutedCommands ${expect}
 

@@ -43,8 +43,10 @@ createArtifactArchive() {
         copyFileToArtifactDirectory ${dir}.tar.gz
     done
 
-    local readmeFile=${workspace}/bld/.00_README_these_arent_the_files_you_are_looking_for.txt
-    cat > ${readmeFile} <<EOF
+    local shouldCreateReadMeFile=$(getConfig LFS_CI_create_artifact_archive_should_create_dummy_readme_file)
+    if [[ ${shouldCreateReadMeFile} ]] ; then
+        local readmeFile=${workspace}/bld/.00_README_these_arent_the_files_you_are_looking_for.txt
+        cat > ${readmeFile} <<EOF
 Dear User,
 
 These aren't the files you're looking for[1].
@@ -55,7 +57,8 @@ Your LFS SCM Team
 [1] https://www.youtube.com/watch?v=DIzAaY2Jm-s&t=190
 EOF
 
-    copyFileToArtifactDirectory $(basename ${readmeFile})
+        copyFileToArtifactDirectory $(basename ${readmeFile})
+    fi
 
     local artifactsPathOnShare=$(getConfig artifactesShare)/${JOB_NAME}/${BUILD_NUMBER}
     linkFileToArtifactsDirectory ${artifactsPathOnShare}
@@ -189,9 +192,11 @@ copyArtifactsToWorkspace() {
         local result=$(echo ${jobData} | cut -d: -f 2)
         local name=$(  echo ${jobData} | cut -d: -f 3-)
 
+        [[ ${result} = NOT_BUILT ]] && continue
+
         trace "jobName ${name} buildNumber ${nuber} jobResult ${result}"
 
-        if [[ ${result} != "SUCCESS" ]] ; then
+        if [[ ${result} != "SUCCESS" && ${result} != "NOT_BUILT" ]] ; then
             error "downstream job ${name} has ${result}. Was not successfull"
             exit 1
         fi

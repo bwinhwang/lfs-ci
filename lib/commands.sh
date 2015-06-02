@@ -87,8 +87,8 @@ execute() {
     done
 
     if [[ ${exitCode} -gt 0 ]] ; then
-        [[ -e ${output} ]] && rawOutput ${output}
         if [[ -z ${ignoreError} ]] ; then
+            rawOutput ${output}
             error "error occoured in \"${command}\""
             exit ${exitCode}
         else
@@ -140,6 +140,9 @@ runOnMaster() {
 #  @param   <none>
 #  @return  <none>
 showAllEnvironmentVariables() {
+    requiredParameters LFS_CI_ROOT
+
     execute printenv        
+    execute ${LFS_CI_ROOT}/bin/dumpConfig
     return
 }

@@ -56,6 +56,8 @@ my %commands = (
                  unreserveTarget                => "Nokia::Command::UnreserveTarget",
                  searchTarget                   => "Nokia::Command::SearchTarget",
                  getBranchInformation           => "Nokia::Command::GetBranchInformation",
+                 getLocationsText               => "Nokia::Command::GetLocationsText",
+                 dumpConfig                     => "Nokia::Command::DumpConfig",
                );
 
 if( not exists $commands{$program} ) {
@@ -66,8 +68,6 @@ eval "use $commands{$program};";
 if( @_ ) {
     die "@_";
 }
-
-DEBUG Dumper( \@ARGV );
 
 if( $program ne "getConfig" ) {
     Nokia::Singleton::config()->loadData( configFile => $ENV{"LFS_CI_CONFIG_FILE"} );

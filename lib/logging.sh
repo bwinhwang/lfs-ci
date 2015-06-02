@@ -61,7 +61,6 @@ startLogfile() {
 
         export CI_LOGGING_LOGFILENAME
         export CI_LOGGING_DURATION_START_DATE=$(date +%s.%N)
-        
 
         echo 1>&2 "logfile is ${CI_LOGGING_LOGFILENAME}"
 
@@ -265,7 +264,7 @@ _loggingLine() {
 _stackTrace() {
     local i=0
     local FRAMES=${#BASH_LINENO[@]}
-    printf "Strack Trace: \n"
+    printf "Stack Trace: \n"
     # FRAMES-2 skips main, the last one in arrays
     for ((i=FRAMES-2; i>=0; i--)); do
         # Grab the source code of the line
