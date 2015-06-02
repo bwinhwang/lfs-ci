@@ -13,8 +13,6 @@ info "# ----------------------"
 info "# SRC_BRANCH:           $SRC_BRANCH"
 info "# NEW_BRANCH:           $NEW_BRANCH"
 info "# REVISION:             $REVISION"
-info "# FSMR4:                $FSMR4"
-info "# FSMR4_ONLY:           $FSMR4_ONLY"
 info "# SOURCE_RELEASE:       $SOURCE_RELEASE"
 info "# ECL_URLS:             $ECL_URLS"
 info "# DESCRIPTION:          $DESCRIPTION"
@@ -43,8 +41,8 @@ if [[ "${SRC_BRANCH}" == "trunk" ]]; then
     SVN_PATH="${SVN_DIR}/trunk"
 else
     LOCATIONS="locations-${SRC_BRANCH}"
-    LOCATIONS_FSMR4="locations-${SRC_BRANCH}_FSMR4"
     LOCATIONS_LRC="locations-LRC_${SRC_BRANCH}"
+    LOCATIONS_FSMR4="locations-${srcBranch}_FSMR4"
     SVN_PATH="${SVN_DIR}/${SRC_BRANCH}/trunk"
     [[ $LRC == true ]] && SVN_PATH="${SVN_DIR}/LRC_${SRC_BRANCH}/trunk"
 fi
@@ -57,7 +55,6 @@ __checkParams() {
     [[ ! ${SOURCE_RELEASE} ]] && { error "SOURCE_RELEASE is missing"; exit 1; }
     [[ ! ${ECL_URLS} ]] && { error "ECL_URLS is missing"; exit 1; }
     [[ ! ${COMMENT} ]] && { error "COMMENT is missing"; exit 1; }
-    [[ ${FSMR4} == false ]] && [[ ${FSMR4_ONLY} == true ]] && { error "FSMR4 can not be false in case FSMR4_ONLY is true"; exit 1; }
 
     if [[ ${LRC} == true ]]; then
         echo ${NEW_BRANCH} | grep -q -e "^LRC_" && { error "LRC: \"LRC_\" is automatically added as prefix to NEW_BRANCH"; exit 1; }
@@ -76,6 +73,7 @@ __preparation(){
     CONFIGXML_TEMPLATE_DIR=$(getConfig sectionedViewTemplateDir)
     CONFIGXML_TEMPLATE_SUFFIX=$(getConfig sectionedViewTemplateSuffix)
     JOBS_EXCLUDE_LIST=$(getConfig branchingExcludeJobs)
+    MAIN_BUILD_JOB_NAME_LRC=$(getConfig jenkinsMainBuildJobName_LRC)
 
     mustHaveValue ${JENKINS_API_TOKEN} "Jenkins API token is missing."
     mustHaveValue ${JENKINS_API_USER} "Jenkins API user is missing."
@@ -85,6 +83,7 @@ __preparation(){
     echo CONFIGXML_TEMPLATE_DIR=${CONFIGXML_TEMPLATE_DIR} >> ${WORKSPACE}/${VARS_FILE}
     echo CONFIGXML_TEMPLATE_SUFFIX=${CONFIGXML_TEMPLATE_SUFFIX} >> ${WORKSPACE}/${VARS_FILE}
     echo JOBS_EXCLUDE_LIST=${JOBS_EXCLUDE_LIST} >> ${WORKSPACE}/${VARS_FILE}
+    echo MAIN_BUILD_JOB_NAME_LRC=${MAIN_BUILD_JOB_NAME_LRC} >> ${WORKSPACE}/${VARS_FILE}
 }
 
 ## @fn     __get_sql_insert()
@@ -160,9 +159,6 @@ svnCopyLocations() {
     local srcBranch=$2
     local newBranch=$3
     local branchLocation=$newBranch
-    echo $branchLocation | grep -q _FSMR4$ && {
-        branchLocation=${branchLocation%_FSMR4};
-    }
     mustHaveValue "${locations}" "locations"
     mustHaveValue "${srcBranch}" "source branch"
     mustHaveValue "${newBranch}" "new branch"
@@ -172,8 +168,8 @@ svnCopyLocations() {
                 ${SVN_REPO}/${SVN_DIR}/trunk/bldtools/locations-${newBranch};
             __cmd svn checkout ${SVN_REPO}/${SVN_DIR}/trunk/bldtools/locations-${newBranch};
             __cmd cd locations-${newBranch};
-            if [[ $srcBranch == trunk ]]; then
-                __cmd sed -i -e "'s/\/os\/${srcBranch}\//\/os\/${branchLocation}\/trunk\//'" Dependencies;
+            if [[ $srcBranch == trunk || $srcBranch == LRC_trunk ]]; then
+                __cmd sed -i -e "'s/\/os\/trunk\//\/os\/${branchLocation}\/trunk\//'" Dependencies;
             else
                 __cmd sed -i -e "'s/\/os\/${srcBranch}\//\/os\/${branchLocation}\//'" Dependencies;
             fi
@@ -198,12 +194,41 @@ svnCopyLocationsLRC() {
 #  @param   <newBranch> name of the new branch
 #  @return  <none>
 svnCopyLocationsFSMR4() {
-    svnCopyLocations $1 $2 $3
+
+    # Activate this as soon as FSMR4 has no extra handling.
+    #svnCopyLocations $1 $2 $3
+
+    info "--------------------------------------------------------"
+    info "SVN: create locations for FSMR4"
+    info "--------------------------------------------------------"
+
+    local srcBranch=$1
+    local newBranch=$2
+    mustHaveValue "${srcBranch}" "source branch"
+    mustHaveValue "${newBranch}" "new branch"
+
+    svn ls ${SVN_REPO}/${SVN_DIR}/trunk/bldtools/locations-${newBranch}_FSMR4 || {
+        __cmd svn copy -m \"copy locations branch ${newBranch}\" ${SVN_REPO}/${SVN_DIR}/trunk/bldtools/${LOCATIONS_FSMR4} \
+            ${SVN_REPO}/${SVN_DIR}/trunk/bldtools/locations-${newBranch}_FSMR4;
+        __cmd svn checkout ${SVN_REPO}/${SVN_DIR}/trunk/bldtools/locations-${newBranch}_FSMR4;
+        __cmd cd locations-${newBranch}_FSMR4;
+        __cmd sed -i -e "'s/\/os\/${srcBranch}\//\/os\/${newBranch}\/trunk\//'" Dependencies;
+        __cmd svn commit -m "added new location ${newBranch}_FSMR4.";
+    }   
 }
 
 __getGitRevisionFile() {
     local branch=$1
-    [[ ${LRC} == true ]] && branch=LRC_${branch}
+
+    if [[ ${branch} == trunk && ${LRC} != true ]]; then
+        branch="pronb-developer"
+    elif [[ ${branch} == trunk && ${LRC} == true ]]; then
+        branch=LRC
+    elif [[ ${branch} != trunk && ${LRC} == true ]]; then
+        branch=LRC_${branch}
+    fi
+
+    info "source branch for GIT revision file: $branch"
     local gitRevisionFile=$(getConfig PKGPOOL_PROD_update_dependencies_svn_url -t location:${branch})
     local replacement="src/gitrevision"
 
@@ -245,6 +270,7 @@ createBranchInGit() {
         mustHaveValue "${gitServer}" "git server"
         mustHaveValue "${gitRevisionFile}" "git revision file"
 
+        __cmd svn cat -r ${REVISION} ${gitRevisionFile}
         gitRevision=$(svn cat -r ${REVISION} ${gitRevisionFile})
         info "GIT revision: ${gitRevision}"
 
@@ -346,16 +372,14 @@ main() {
         if [[ ! ${LRC} ]]; then
             svnCopyBranch ${SRC_BRANCH} ${NEW_BRANCH}
             svnCopyLocations ${LOCATIONS} ${SRC_BRANCH} ${NEW_BRANCH}
-            if [[ "${FSMR4}" == "true" ]]; then
-                svnCopyLocationsFSMR4 ${LOCATIONS_FSMR4} ${SRC_BRANCH} ${NEW_BRANCH}_FSMR4
-            fi
-            svnDummyCommit ${NEW_BRANCH}
+            svnCopyLocationsFSMR4 ${SRC_BRANCH} ${NEW_BRANCH}
             createBranchInGit ${NEW_BRANCH}
+            svnDummyCommit ${NEW_BRANCH}
         elif [[ ${LRC} == "true" ]]; then
             svnCopyBranchLRC LRC_${SRC_BRANCH} LRC_${NEW_BRANCH}
             svnCopyLocationsLRC ${LOCATIONS_LRC} LRC_${SRC_BRANCH} LRC_${NEW_BRANCH}
-            svnDummyCommitLRC LRC_${NEW_BRANCH}
             createBranchInGit LRC_${NEW_BRANCH}
+            svnDummyCommitLRC LRC_${NEW_BRANCH}
         fi
     else
         info "$(basename $0): Nothing to do."

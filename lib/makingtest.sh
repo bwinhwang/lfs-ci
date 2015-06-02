@@ -56,9 +56,11 @@ makingTest_testXmloutput() {
     local testOptions=$(getConfig LFS_CI_uc_test_making_test_test_options)
 
     mustHaveMakingTestTestConfig
+    local timeoutInSeconds=$(getConfig LFS_CI_uc_test_making_test_timeout_in_seconds_for_make_test)
+    mustHaveValue "${timeoutInSeconds}" "timeoutInSeconds"
 
     info "running test suite"
-    execute -i make -C ${testSuiteDirectory}      \
+    execute timeout -s 9 ${timeoutInSeconds} make -C ${testSuiteDirectory}      \
                     --ignore-errors ${testOptions}\
                     test-xmloutput
 
@@ -526,6 +528,16 @@ makingTest_logConsole() {
     local logfilePath=${testSuiteDirectory}/__artifacts 
     execute mkdir -p ${logfilePath}
 
+    local makeConsoleWrapper=${WORKSPACE}/workspace/makeConsoleWrapper
+    cat <<EOF > ${makeConsoleWrapper}
+#!/usr/bin/env bash
+set -x
+sleep 1
+make -C \$1 TESTTARGET=\$2 console
+exit 0
+EOF
+    execute chmod 755 ${makeConsoleWrapper}
+
     local screenConfig=${WORKSPACE}/workspace/screenrc
     cat <<EOF > ${screenConfig}
 logfile ${logfilePath}/console.%n
@@ -539,7 +551,7 @@ EOF
 
     for target in ${fctTarget,,} ${fspTargets,,} ; do
         debug "create moxa mock for ${target}"
-        local moxa=$(execute -n ${make} testtarget-analyzer TESTTARGET=${target} | grep ^moxa | cut -d= -f2)
+        local moxa=$(execute -n ${make} testtarget-analyzer TESTTARGET=${target} | grep ^moxa= | cut -d= -f2)
         debug "moxa is ${moxa}"
         if [[ ${moxa} ]] ; then
             local localPort=$(sed "s/[\.:\]//g" <<< ${moxa}  )
@@ -549,9 +561,11 @@ EOF
             execute sed -i "s/moxa=${moxa}/moxa=localhost:${localPort}/g" ${targetConfigFile}
 
             echo "screen -L -t tp_${target} ${LFS_CI_ROOT}/lib/contrib/tcp_sharer/tcp_sharer.pl --name ${target} --logfile ${logfilePath}/tp_${target}.log --remote ${moxa} --local ${localPort}" >> ${screenConfig}
-            echo "screen -L -t ${target} make -C ${testSuiteDirectory} TESTTARGET=${target} console" >> ${screenConfig}
+            echo "screen -L -t ${target} ${makeConsoleWrapper} ${testSuiteDirectory} ${target}" >> ${screenConfig}
         fi
     done
+    # we have to sleep for 1 second until the make console command is running.
+    sleep 1
 
     rawDebug ${screenConfig}
 
@@ -583,10 +597,19 @@ makingTest_collectArtifactsOnFailure() {
     local workspace=$(getWorkspaceName)
     mustHaveWorkspaceName
 
-    execute -i mkdir -p ${workspace}/bld/bld-test-failure/results/
-
 	local testSuiteDirectory=$(makingTest_testSuiteDirectory)
+
+
+    execute -i mkdir -p ${workspace}/bld/bld-test-failure/results/
+    execute -i mkdir -p ${testSuiteDirectory}/__artifacts
     execute -i rsync -av ${testSuiteDirectory}/__artifacts ${workspace}/bld/bld-test-failure/results/
+
+    execute -i mkdir -p ${workspace}/src-test/src/unittest/tests/makingtests/artifacts/__artifacts/
+    execute -i cd ${workspace}/src-test/src/unittest/tests/makingtests/artifacts/
+    execute -i cp ${testSuiteDirectory}/testconfig.mk .
+    execute -i make test
+    execute -i rsync -av __artifacts ${workspace}/bld/bld-test-failure/results/
+
 
     createArtifactArchive
 

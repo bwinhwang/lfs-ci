@@ -52,6 +52,7 @@ setUp() {
     mkdir -p ${WORKSPACE}/workspace/src/src-test/targets/
     touch ${WORKSPACE}/workspace/path/to/test/suite/testsuite.mk
     echo "moxa=123.1.2.3:12345" > ${WORKSPACE}/workspace/src/src-test/targets/targetname
+    echo "moxa1=123.1.2.3:12345" > ${WORKSPACE}/workspace/src/src-test/targets/targetname
     echo "moxa=123.1.2.3:12345" > ${WORKSPACE}/workspace/src/src-test/targets/targetname_fsp1
     echo "moxa=123.1.2.3:12345" > ${WORKSPACE}/workspace/src/src-test/targets/targetname_fsp2
 
@@ -73,6 +74,7 @@ getConfig LFS_CI_uc_test_should_record_log_output_of_target
 makingTest_testSuiteDirectory 
 mustHaveMakingTestTestConfig 
 execute mkdir -p ${WORKSPACE}/workspace/path/to/test/suite/__artifacts
+execute chmod 755 ${WORKSPACE}/workspace/makeConsoleWrapper
 _reserveTarget 
 execute -n make -C ${WORKSPACE}/workspace/path/to/test/suite --no-print-directory testtarget-analyzer
 execute -n make -C ${WORKSPACE}/workspace/path/to/test/suite --no-print-directory testroot
@@ -89,11 +91,19 @@ logfile ${WORKSPACE}/workspace/path/to/test/suite/__artifacts/console.%n
 logfile flush 1
 logtstamp after 10
 screen -L -t tp_targetname ${LFS_CI_ROOT}/lib/contrib/tcp_sharer/tcp_sharer.pl --name targetname --logfile ${WORKSPACE}/workspace/path/to/test/suite/__artifacts/tp_targetname.log --remote 127.123.123.123:1234 --local 64258
-screen -L -t targetname make -C ${WORKSPACE}/workspace/path/to/test/suite TESTTARGET=targetname console
+screen -L -t targetname ${WORKSPACE}/workspace/makeConsoleWrapper ${WORKSPACE}/workspace/path/to/test/suite targetname
 EOF
     assertEquals "$(cat ${expect})" "$(cat ${WORKSPACE}/workspace/screenrc)"
     diff -u ${expect} ${WORKSPACE}/workspace/screenrc
 
+    cat <<EOF > ${expect}
+#!/usr/bin/env bash
+set -x
+sleep 1
+make -C \$1 TESTTARGET=\$2 console
+exit 0
+EOF
+    assertEquals "$(cat ${expect})" "$(cat ${WORKSPACE}/workspace/makeConsoleWrapper)"
     return
 }
 
@@ -120,6 +130,7 @@ getConfig LFS_CI_uc_test_should_record_log_output_of_target
 makingTest_testSuiteDirectory 
 mustHaveMakingTestTestConfig 
 execute mkdir -p ${WORKSPACE}/workspace/path/to/test/suite/__artifacts
+execute chmod 755 ${WORKSPACE}/workspace/makeConsoleWrapper
 _reserveTarget 
 execute -n make -C ${WORKSPACE}/workspace/path/to/test/suite --no-print-directory testtarget-analyzer
 execute -n make -C ${WORKSPACE}/workspace/path/to/test/suite --no-print-directory testroot
@@ -140,14 +151,23 @@ logfile ${WORKSPACE}/workspace/path/to/test/suite/__artifacts/console.%n
 logfile flush 1
 logtstamp after 10
 screen -L -t tp_targetname ${LFS_CI_ROOT}/lib/contrib/tcp_sharer/tcp_sharer.pl --name targetname --logfile ${WORKSPACE}/workspace/path/to/test/suite/__artifacts/tp_targetname.log --remote 127.123.123.123:1234 --local 64258
-screen -L -t targetname make -C ${WORKSPACE}/workspace/path/to/test/suite TESTTARGET=targetname console
+screen -L -t targetname ${WORKSPACE}/workspace/makeConsoleWrapper ${WORKSPACE}/workspace/path/to/test/suite targetname
 screen -L -t tp_targetname_fsp1 ${LFS_CI_ROOT}/lib/contrib/tcp_sharer/tcp_sharer.pl --name targetname_fsp1 --logfile ${WORKSPACE}/workspace/path/to/test/suite/__artifacts/tp_targetname_fsp1.log --remote 127.123.123.123:1234 --local 64258
-screen -L -t targetname_fsp1 make -C ${WORKSPACE}/workspace/path/to/test/suite TESTTARGET=targetname_fsp1 console
+screen -L -t targetname_fsp1 ${WORKSPACE}/workspace/makeConsoleWrapper ${WORKSPACE}/workspace/path/to/test/suite targetname_fsp1
 screen -L -t tp_targetname_fsp2 ${LFS_CI_ROOT}/lib/contrib/tcp_sharer/tcp_sharer.pl --name targetname_fsp2 --logfile ${WORKSPACE}/workspace/path/to/test/suite/__artifacts/tp_targetname_fsp2.log --remote 127.123.123.123:1234 --local 64258
-screen -L -t targetname_fsp2 make -C ${WORKSPACE}/workspace/path/to/test/suite TESTTARGET=targetname_fsp2 console
+screen -L -t targetname_fsp2 ${WORKSPACE}/workspace/makeConsoleWrapper ${WORKSPACE}/workspace/path/to/test/suite targetname_fsp2
 EOF
     assertEquals "$(cat ${expect})" "$(cat ${WORKSPACE}/workspace/screenrc)"
     diff -u ${expect} ${WORKSPACE}/workspace/screenrc
+
+    cat <<EOF > ${expect}
+#!/usr/bin/env bash
+set -x
+sleep 1
+make -C \$1 TESTTARGET=\$2 console
+exit 0
+EOF
+    assertEquals "$(cat ${expect})" "$(cat ${WORKSPACE}/workspace/makeConsoleWrapper)"
 
     return
 }

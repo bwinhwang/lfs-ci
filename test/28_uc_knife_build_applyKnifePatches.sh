@@ -1,8 +1,6 @@
 #!/bin/bash
 
-source lib/common.sh
-
-initTempDirectory
+source test/common.sh
 
 source lib/uc_knife_build.sh
 
@@ -38,15 +36,15 @@ test1() {
     export JOB_NAME=LFS_KNIFE_-_knife_-_Build
 
     mkdir -p ${WORKSPACE}/workspace/bld/bld-knife-input/
-    touch ${WORKSPACE}/workspace/bld/bld-knife-input/knife.tar.gz
+    touch ${WORKSPACE}/workspace/bld/bld-knife-input/lfs.tar.gz 
 
     assertTrue "applyKnifePatches"
 
     local expect=$(createTempFile)
 cat <<EOF > ${expect}
-execute tar -xvz -C ${WORKSPACE}/workspace -f ${WORKSPACE}/workspace/bld/bld-knife-input/knife.tar.gz
+execute tar -xvz -C ${WORKSPACE}/workspace -f ${WORKSPACE}/workspace/bld/bld-knife-input/lfs.tar.gz
 EOF
-    assertEquals "$(cat ${expect})" "$(cat ${UT_MOCKED_COMMANDS})"
+    assertExecutedCommands ${expect}
 
     return
 }
@@ -59,17 +57,17 @@ test2() {
     export JOB_NAME=LFS_KNIFE_-_knife_-_Build
 
     mkdir -p ${WORKSPACE}/workspace/bld/bld-knife-input/
-    touch ${WORKSPACE}/workspace/bld/bld-knife-input/knife.tar.gz
-    touch ${WORKSPACE}/workspace/bld/bld-knife-input/knife.patch
+    touch ${WORKSPACE}/workspace/bld/bld-knife-input/lfs.patch
+    touch ${WORKSPACE}/workspace/bld/bld-knife-input/lfs.tar.gz 
 
     assertTrue "applyKnifePatches"
 
     local expect=$(createTempFile)
 cat <<EOF > ${expect}
-execute tar -xvz -C ${WORKSPACE}/workspace -f ${WORKSPACE}/workspace/bld/bld-knife-input/knife.tar.gz
-execute patch -d ${WORKSPACE}/workspace
+execute tar -xvz -C ${WORKSPACE}/workspace -f ${WORKSPACE}/workspace/bld/bld-knife-input/lfs.tar.gz
+execute -i patch -p0 -d ${WORKSPACE}/workspace
 EOF
-    assertEquals "$(cat ${expect})" "$(cat ${UT_MOCKED_COMMANDS})"
+    assertExecutedCommands ${expect}
 
     return
 }
@@ -83,13 +81,13 @@ test3() {
     export JOB_NAME=LFS_KNIFE_-_knife_-_Build
 
     mkdir -p ${WORKSPACE}/workspace/bld/bld-knife-input/
-    touch ${WORKSPACE}/workspace/bld/bld-knife-input/knife.patch
+    touch ${WORKSPACE}/workspace/bld/bld-knife-input/lfs.patch
 
     assertTrue "applyKnifePatches"
 
     local expect=$(createTempFile)
 cat <<EOF > ${expect}
-execute patch -d ${WORKSPACE}/workspace
+execute -i patch -p0 -d ${WORKSPACE}/workspace
 EOF
     assertEquals "$(cat ${expect})" "$(cat ${UT_MOCKED_COMMANDS})"
 
