@@ -143,6 +143,6 @@ showAllEnvironmentVariables() {
     requiredParameters LFS_CI_ROOT
 
     execute printenv        
-    execute ${LFS_CI_ROOT}/bin/dumpConfig
+    # execute ${LFS_CI_ROOT}/bin/dumpConfig
     return
 }
