@@ -52,6 +52,7 @@ setUp() {
     mkdir -p ${WORKSPACE}/workspace/src/src-test/targets/
     touch ${WORKSPACE}/workspace/path/to/test/suite/testsuite.mk
     echo "moxa=123.1.2.3:12345" > ${WORKSPACE}/workspace/src/src-test/targets/targetname
+    echo "moxa1=123.1.2.3:12345" > ${WORKSPACE}/workspace/src/src-test/targets/targetname
     echo "moxa=123.1.2.3:12345" > ${WORKSPACE}/workspace/src/src-test/targets/targetname_fsp1
     echo "moxa=123.1.2.3:12345" > ${WORKSPACE}/workspace/src/src-test/targets/targetname_fsp2
 

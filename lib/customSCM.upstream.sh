@@ -83,6 +83,8 @@ actionCheckout() {
         local buildPath=$(getBuildDirectoryOnMaster ${upstreamProjectName} lastSuccessfulBuild)
         upstreamBuildNumber=$(runOnMaster readlink ${buildPath}) 
         warning "didn't find the upstream build, using ${upstreamProjectName} / ${upstreamBuildNumber}"
+        echo -n "<log/>" >"$CHANGELOG"
+        return            
     fi
 
     build=${upstreamBuildNumber}
