@@ -549,7 +549,7 @@ EOF
 
     for target in ${fctTarget,,} ${fspTargets,,} ; do
         debug "create moxa mock for ${target}"
-        local moxa=$(execute -n ${make} testtarget-analyzer TESTTARGET=${target} | grep ^moxa | cut -d= -f2)
+        local moxa=$(execute -n ${make} testtarget-analyzer TESTTARGET=${target} | grep ^moxa= | cut -d= -f2)
         debug "moxa is ${moxa}"
         if [[ ${moxa} ]] ; then
             local localPort=$(sed "s/[\.:\]//g" <<< ${moxa}  )
