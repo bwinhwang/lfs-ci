@@ -154,7 +154,8 @@ updateAndCommitEcl() {
         local logMessage=${workspace}/ecl_commit_message
         echo "updating ECL" > ${logMessage} 
         svnCommit -F ${logMessage} ${eclWorkspace}/ECL
-    # else part missing
+    else 
+        warning "svn commit of ECL is disabled via configuration"
     fi
     return
 }
