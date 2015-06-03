@@ -86,7 +86,7 @@ _getProjectDataFromFingerprint() {
     local secondByte=$(cut -c3,4  <<< ${md5sum})
     local restBytes=$( cut -c5-32 <<< ${md5sum})
 
-    local fingerprintFile=$(getConfig jenkinsRoot)/home/fingerprints/${firstByte}/${secondByte}/${restBytes}.xml
+    local fingerprintFile=$(getConfig jenkinsHome)/fingerprints/${firstByte}/${secondByte}/${restBytes}.xml
 
     runOnMaster "[[ -e ${fingerprintFile} ]] && cat ${fingerprintFile}" > ${file}
 
