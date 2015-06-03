@@ -77,13 +77,6 @@ getEclValue() {
             mustExistFile ${commonentsFile}
             newValue=$(getConfig sdk3 -f ${commonentsFile})
         ;;
-        ECL_LFS)
-            local branchNameInSubversion=$(getConfig SVN_lfs_branch_name)
-            local rev=$(cut -d" " -f 3 ${workspace}/bld/bld-externalComponents-*/usedRevisions.txt| sort -un | tail -n 1 )
-            mustHaveNextCiLabelName "${rev}" "revision"
-            debug "branch ${branchNameInSubversion} rev ${rev}"
-            newValue=$(printf "%s\@%d" "${branchNameInSubversion}" ${rev})
-        ;;
         ECL_PS_LFS_INTERFACE_REV)
             newValue=$((oldValue + 1))
         ;;
