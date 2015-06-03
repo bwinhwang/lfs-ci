@@ -1,5 +1,7 @@
 #!/bin/bash
 
+[[ -z ${LFS_CI_SOURCE_artifacts} ]] && source ${LFS_CI_ROOT}/lib/artifacts.sh
+
 usecase_LFS_READY_FOR_RELEASE() {
 
     requiredParameters UPSTREAM_BUILD UPSTREAM_PROJECT
