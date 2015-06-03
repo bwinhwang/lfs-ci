@@ -57,7 +57,7 @@ mustHavePreparedWorkspace() {
     fi
     if [[ -z ${upstreamBuild} ]] ; then
         requiredParameters UPSTREAM_BUILD
-        upstreamProject=${UPSTREAM_BUILD}
+        upstreamBuild=${UPSTREAM_BUILD}
     fi
 
     mustHaveValue "${upstreamProject}" "upstream project"
