@@ -4,13 +4,14 @@
 
 usecase_LFS_READY_FOR_RELEASE() {
 
-    requiredParameters UPSTREAM_BUILD UPSTREAM_PROJECT
+    requiredParameters UPSTREAM_PROJECT UPSTREAM_BUILD \
+                       JOB_NAME BUILD_NUMBER
 
     copyAndExtractBuildArtifactsFromProject ${UPSTREAM_PROJECT} ${UPSTREAM_BUILD} "fsmci"
     createArtifactArchive
 
     copyFileFromBuildDirectoryToWorkspace ${UPSTREAM_PROJECT} ${UPSTREAM_BUILD} fingerprint.txt
-    copyFileFromWorkspaceToBuildDirectory ${JOB_NAME}         ${BUILD_NUMBER}   fingerprint.txt
+    copyFileFromWorkspaceToBuildDirectory ${JOB_NAME}         ${BUILD_NUMBER}   ${WORKSPACE}/fingerprint.txt
 
     mustHaveNextCiLabelName
     local label=$(getNextCiLabelName)
