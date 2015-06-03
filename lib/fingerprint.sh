@@ -1,5 +1,7 @@
 #!/bin/bash
 
+LFS_CI_SOURCE_fingerprint='$Id$'
+
 getFingerprintOfCurrentJob() {
 
     requiredParameters UPSTREAM_PROJECT UPSTREAM_BUILD
