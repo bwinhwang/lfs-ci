@@ -132,6 +132,7 @@ ci_job_release() {
             sendReleaseNote "${TESTED_BUILD_JOBNAME}" "${TESTED_BUILD_NUMBER}" \
                             "${buildJobName}"         "${buildBuildNumber}"
             databaseEventReleaseFinished
+            createArtifactArchive
         ;;
         *)
             error "subJob not known (${subJob})"
