@@ -21,31 +21,58 @@ ci_job_ecl() {
 #  @param   <none>
 #  @return  <none>
 usecase_LFS_UPDATE_ECL() {
-    requiredParameters UPSTREAM_PROJECT UPSTREAM_BUILD
 
-    # TODO: demx2fk3 2015-04-13 this is the big question: what will be
-    # the upstream project / upstream build and where do we get the
-    # information about the build.
-    # maybe the fingerprint file is an solution here.
-    info "upstream is ${UPSTREAM_PROJECT} / ${UPSTREAM_BUILD}"
-
-    local workspace=$(getWorkspaceName)
-    mustHaveCleanWorkspace
-
-    # TODO: demx2fk3 2015-04-13 which artifacts do we require here
-    local requiredArtifacts=$(getConfig LFS_CI_UC_update_ecl_required_artifacts)
-    copyArtifactsToWorkspace "${UPSTREAM_PROJECT}" "${UPSTREAM_BUILD}" "${requiredArtifacts}"
-
-    mustHaveNextLabelName
-    local labelName=$(getNextReleaseLabel)
-    setBuildDescription ${JOB_NAME} ${BUILD_NUMBER} ${labelName}
+    mustHavePreparedWorkspace
 
     local eclUrls=$(getConfig LFS_CI_uc_update_ecl_url)
     mustHaveValue "${eclUrls}"
+
+    local buildJobName=$(getBuildJobNameFromFingerprint)
+    mustHaveValue "${buildJobName}"     "build JobName"
+
+    local buildBuildNumber=$(getBuildBuildNumberFromFingerprint)
+    mustHaveValue "${buildBuildNumber}" "build BuildNumber"
+
+    copyArtifactsToWorkspace ${buildJobName} ${buildBuildNumber} "externalComponents"
+
     for eclUrl in ${eclUrls} ; do
         info "updating ECL ${eclUrl}"
         updateAndCommitEcl ${eclUrl}
     done
+
+    return
+}
+
+
+mustHavePreparedWorkspace() {
+
+    requiredParameters JOB_NAME BUILD_NUMBER
+
+    local upstreamProject=${1}
+    local upstreamBuild=${2}
+
+    if [[ -z ${upstreamProject} ]] ; then
+        requiredParameters UPSTREAM_PROJECT
+        upstreamProject=${UPSTREAM_PROJECT}
+    fi
+    if [[ -z ${upstreamBuild} ]] ; then
+        requiredParameters UPSTREAM_BUILD
+        upstreamProject=${UPSTREAM_BUILD}
+    fi
+
+    mustHaveValue "${upstreamProject}" "upstream project"
+    mustHaveValue "${upstreamBuild}"   "upstream build"
+
+    local workspace=$(getWorkspaceName)
+    mustHaveCleanWorkspace
+
+    local requiredArtifacts=$(getConfig LFS_CI_prepare_workspace_required_artifacts)
+    copyArtifactsToWorkspace "${upstreamProject}" "${upstreamBuild}" "${requiredArtifacts}"
+
+    mustHaveNextLabelName
+    local labelName=$(getNextReleaseLabel)
+
+    setBuildDescription ${JOB_NAME} ${BUILD_NUMBER} ${labelName}
 
     return
 }
