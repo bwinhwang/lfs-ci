@@ -501,7 +501,8 @@ mustHaveMakingTestRunningTarget() {
         # idea: wait on ssh first with -i == ignore error.
         # if the target is up, everything is fine and dandy.
         # if not, retry until rebootRetry is 0
-        # in this case, we "make waitssh" without the -i. 
+        # in this case (rebootRetry == 0), we execute "make waitssh" without 
+        # -i option. So it wil raise an error, if make waitssh fail.
         # this will raise an error and everything exists.
         local opt=-i
         rebootRetry=$((rebootRetry - 1))
@@ -516,7 +517,6 @@ mustHaveMakingTestRunningTarget() {
         info "TMF waitssh timeout, rebooting the target and trying it again..."
         execute make -C ${testSuiteDirectory} powercycle
     done
-    execute "here"
     fatal "this code should not be reached."
     return
 }
