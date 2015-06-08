@@ -37,6 +37,7 @@ lrc_jobs = []
 
 remaining_jobs = []
 
+dev_branch = false
 
 parameters.each {
     if(it.name == "BRANCH") {
@@ -65,6 +66,10 @@ parameters.each {
         debug = it.value
         println("[INFO] got parameter DEBUG: $debug")
     }
+    if(it.name == "DEVELOPER_BRANCH") {
+        dev_branch = it.value
+        println("[INFO] got parameter DEVELOPER_BRANCH: $dev_branch")
+    }
 }
 
 if(!deleteJobs && !LRC_deleteJobs) {
@@ -86,6 +91,10 @@ def getRootView() {
 
     if(branch[0..1] == "MD") {
         root_view = branch[3..-1]
+    }
+
+    if(dev_branch) {
+        root_view = "DEV"
     }
 
     if(root_view.find("_")) {
@@ -158,11 +167,15 @@ def deleteBranchView() {
  */
 def deleteRootView() {
     def root_view = getRootView()
+    root_view_obj = j.getView(root_view)
     if(debug) {
-        println("[DEBUG] delete root view: $root_view (dry run)")
+        if(!root_view_obj.getAllItems()) {
+            println("[DEBUG] delete root view: $root_view (dry run)")
+        } else {
+            println("[DEBUG] Not deleting root view $root_view. There are still jobs from another branch.")
+        }
     } else {
         try {
-            root_view_obj = j.getView(root_view)
             if(!root_view_obj.getAllItems()) {
                 vo = root_view_obj.getOwner()
                 vo.deleteView(root_view_obj)
@@ -176,36 +189,65 @@ def deleteRootView() {
     }
 }
 
+def postChecks() {
+    println("[INFO] run post checks.")
+    for(jobName in deletedJobs) {
+        job = j.getItem(jobName)
+        if(job) {
+            println("[WARNING] job ${job.name} has not been deleted. Try to delete again.")
+            job.delete()
+        }
+    }
+}
+
 // Delete none LRC jobs and collect LRC jobs in a list.
-if(deleteJobs || LRC_deleteJobs) {
-    for(p in jenkins.model.Jenkins.theInstance.getProjects()) {
-        job_name = p.getName()
-        if(deleteJobs && job_name.find("_"+branch+"_") && !job_name.find("LFS_CI_-_LRC_") && !job_name.find("LFS_Prod_-_LRC_") && !job_name.find("PKGPOOL_-_LRC_")) {
-            if(debug) {
-                println("[DEBUG] delete job: $p.name (dry run)")
-            } else {
-                p.delete()
-                println("[INFO] deleted job: $p.name")
+deletedJobs = []
+def deleteJobs() {
+    if(deleteJobs || LRC_deleteJobs) {
+        for(p in j.getProjects()) {
+            job_name = p.getName()
+            if(deleteJobs && job_name.find("_"+branch+"_") && !job_name.find("LFS_CI_-_LRC_") && !job_name.find("LFS_Prod_-_LRC_") && !job_name.find("PKGPOOL_-_LRC_")) {
+                if(debug) {
+                    println("[DEBUG] delete job: $p.name (dry run)")
+                } else {
+                    deletedJobs.add(p.getName())
+                    try {
+                        p.delete()
+                        println("[INFO] deleted job: $p.name")
+                    } catch(e) {
+                        println("[WARNING] failed deleting job ${job.name}.")
+                    }
+                }
+            } else if(job_name.find("LFS_CI_-_LRC_"+branch+"_-") || job_name.find("LFS_Prod_-_LRC_"+branch+"_-") || job_name.find("PKGPOOL_-_LRC_"+branch+"_-")) {
+                lrc_jobs.add(p)
+                println("[DEBUG] added job $p.name to lrc_jobs list")
             }
-        } else if(job_name.find("LFS_CI_-_LRC_"+branch+"_-") || job_name.find("LFS_Prod_-_LRC_"+branch+"_-") || job_name.find("PKGPOOL_-_LRC_"+branch+"_-")) {
-            lrc_jobs.add(p)
-            println("[DEBUG] added job $p.name to lrc_jobs list")
         }
     }
 }
 
 // Delete LRC jobs.
-if(LRC_deleteJobs && lrc_jobs) {
-    for(p in lrc_jobs) {
-        if(debug) {
-            println("[DEBUG] delete LRC job: $p.name (dry run)")
-        } else {
-            p.delete()
-            println("[INFO] deleted LRC job: $p.name")
+def deleteLRCJobs() {
+    if(LRC_deleteJobs && lrc_jobs) {
+        for(p in lrc_jobs) {
+            if(debug) {
+                println("[DEBUG] delete LRC job: $p.name (dry run)")
+            } else {
+                deletedJobs.add(p.getName())
+                try {
+                    p.delete()
+                    println("[INFO] deleted LRC job: $p.name")
+                } catch(e) {
+                    println("[WARNING] failed deleting job ${job.name}.")
+                }
+            }
         }
     }
 }
 
+deleteJobs()
+deleteLRCJobs()
 deleteScmView()
 deleteBranchView()
 deleteRootView()
+postChecks()
