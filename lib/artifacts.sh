@@ -236,9 +236,10 @@ copyFileToArtifactDirectory() {
 copyFileToUserContentDirectory() {
     requiredParameters JOB_NAME BUILD_NUMBER
     local fileName=$1
+    local targetType=$2
 
     local serverName=$(getConfig jenkinsMasterServerHostName)
-    local sonarPathOnServer=$(getConfig jenkinsMasterServerPath)/userContent/sonar
+    local sonarPathOnServer=$(getConfig jenkinsMasterServerPath)/userContent/sonar/${targetType}
     # executeOnMaster mkdir -p ${artifactsPathOnShare}/save
     execute -r 10 ssh ${serverName} mkdir -p ${sonarPathOnServer}
 
