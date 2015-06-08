@@ -41,10 +41,18 @@ usecase_LFS_UPDATE_ECL() {
         updateAndCommitEcl ${eclUrl}
     done
 
+    createArtifactArchive
+
     return
 }
 
 
+## @fn      mustHavePreparedWorkspace()
+#  @brief   prepare the workspace with required artifacts and other stuff
+#  @param   {upstreamProject}    name of the upstream project
+#  @param   {upstreamBuild}      build number of the upstream project
+#  @todo    TODO: demx2fk3 2015-06-08 move into a different file (maybe common.sh)
+#  @return  <none>
 mustHavePreparedWorkspace() {
 
     requiredParameters JOB_NAME BUILD_NUMBER
@@ -120,6 +128,10 @@ getEclValue() {
 }
 
 
+## @fn      updateAndCommitEcl(  )
+#  @brief   update the ECL file with the given value and commit it
+#  @param   {eclUrl}    url of the ECL (without filename)
+#  @return  <none>
 updateAndCommitEcl() {
     local eclUrl=$1
     local workspace=$(getWorkspaceName)
@@ -133,7 +145,7 @@ updateAndCommitEcl() {
     mustHaveWritableFile ${eclWorkspace}/ECL
 
     local eclKeysToUpdate=$(getConfig LFS_CI_uc_update_ecl_key_names)
-    mustHaveValue "${eclKeysToUpdate}"
+    mustHaveValue "${eclKeysToUpdate}" "ECL Keys to update"
 
     for eclKey in ${eclKeysToUpdate} ; do
         local oldEclValue=$(grep "^${eclKey}=" ${eclWorkspace}/ECL | cut -d= -f2)

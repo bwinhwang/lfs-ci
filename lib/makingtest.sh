@@ -587,6 +587,13 @@ makingTest_closeConsole() {
     return
 }
 
+## @fn      makingTest_collectArtifactsOnFailure()
+#  @brief   collect the artifacts of a failed test job
+#  @defails in case of a failed testcase, we try to collect the
+#           helpful artifacts from the target (logfile, console, ...)
+#           which is useful for the developer to find and fix the problem.
+#  @param   {returnCode}    return code
+#  @return  <none>
 makingTest_collectArtifactsOnFailure() {
     local rc=${1}
 
@@ -599,7 +606,6 @@ makingTest_collectArtifactsOnFailure() {
 
 	local testSuiteDirectory=$(makingTest_testSuiteDirectory)
 
-
     execute -i mkdir -p ${workspace}/bld/bld-test-failure/results/
     execute -i mkdir -p ${testSuiteDirectory}/__artifacts
     execute -i rsync -av ${testSuiteDirectory}/__artifacts ${workspace}/bld/bld-test-failure/results/
@@ -609,7 +615,6 @@ makingTest_collectArtifactsOnFailure() {
     execute -i cp ${testSuiteDirectory}/testconfig.mk .
     execute -i make test
     execute -i rsync -av __artifacts ${workspace}/bld/bld-test-failure/results/
-
 
     createArtifactArchive
 

@@ -1,7 +1,14 @@
 #!/bin/bash
 
+## @@file fingerprint.sh
+#  @brief handle the fingerprints from jenkins
+
 LFS_CI_SOURCE_fingerprint='$Id$'
 
+## @fn      getFingerprintOfCurrentJob()
+#  @brief   get the fingerprint of the current running job
+#  @param   <none>
+#  @return  fingerprint of the current job
 getFingerprintOfCurrentJob() {
 
     requiredParameters UPSTREAM_PROJECT UPSTREAM_BUILD
@@ -28,26 +35,60 @@ getFingerprintOfCurrentJob() {
 
     return
 }
-    
+   
+## @fn      getTestJobNameFromFingerprint()
+#  @brief   get name of the test job from the fingerprint (current job)
+#  @param   <none>
+#  @return  name of the test job
 getTestJobNameFromFingerprint() {
     _getJobInformationFromFingerprint '_Test:' 1
 }
+   
+## @fn      getTestBuildNumberFromFingerprint()
+#  @brief   get build number of the test job from the fingerprint (current job)
+#  @param   <none>
+#  @return  build number of the test job
 getTestBuildNumberFromFingerprint() {
     _getJobInformationFromFingerprint '_Test:' 2
 }
+
+## @fn      getBuildJobNameFromFingerprint()
+#  @brief   get name of the build job from the fingerprint (current job)
+#  @param   <none>
+#  @return  name of the build job
 getBuildJobNameFromFingerprint() {
     _getJobInformationFromFingerprint '_Build:' 1
 }
+
+## @fn      getBuildBuildNumberFromFingerprint()
+#  @brief   get build number of the build job from the fingerprint (current job)
+#  @param   <none>
+#  @return  build number of the build job
 getBuildBuildNumberFromFingerprint() {
     _getJobInformationFromFingerprint '_Build:' 2
 }
+
+## @fn      getPackageBuildNumberFromFingerprint()
+#  @brief   get name of the package job from the fingerprint (current job)
+#  @param   <none>
+#  @return  name of the package job
 getPackageJobNameFromFingerprint() {
     _getPackageInformationFromFingerprint '_Package_-_package:' 1
 }
+
+## @fn      getPackageJobNameFromFingerprint()
+#  @brief   get build number of the package job from the fingerprint (current job)
+#  @param   <none>
+#  @return  build number of the package job
 getPackageBuildNumberFromFingerprint() {
     _getJobInformationFromFingerprint '_Package_-_package:' 2
 }
 
+## @fn      _getJobInformationFromFingerprint()
+#  @brief   get job information of the fingerprint
+#  @param   {jobNamePart}      name (regex) of the requested job (Build, Test, ...)
+#  @param   {fieldNumber}      number of the file
+#  @return  result value from job (job name, build number)
 _getJobInformationFromFingerprint() {
     requiredParameters LFS_CI_ROOT
 
@@ -75,13 +116,17 @@ _getJobInformationFromFingerprint() {
     return
 }
 
+## @fn      _getProjectDataFromFingerprint()
+#  @brief   get the project data from the fingerprint
+#  @param   {md5sum}    md5sum / fingerprint of the requested job
+#  @param   {file}      fine name of the result file
+#  @return  <none>
 _getProjectDataFromFingerprint() {
     local md5sum=${1}
     mustHaveValue "${md5sum}" "md5sum / finger print"
 
     local file=${2}
     mustHaveValue "${file}" "file"
-
     local firstByte=$( cut -c1,2  <<< ${md5sum})
     local secondByte=$(cut -c3,4  <<< ${md5sum})
     local restBytes=$( cut -c5-32 <<< ${md5sum})
@@ -96,6 +141,3 @@ _getProjectDataFromFingerprint() {
 
     return
 }
-
-
-

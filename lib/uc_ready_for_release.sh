@@ -19,7 +19,7 @@ usecase_LFS_READY_FOR_RELEASE() {
     createReleaseLinkOnCiLfsShare ${labelName}
 
     setBuildDescription ${JOB_NAME} ${BUILD_NUMBER} "${label}"
-    
+
     return
 }
 

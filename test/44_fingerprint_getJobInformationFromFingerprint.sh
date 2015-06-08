@@ -41,6 +41,7 @@ setUp() {
     export JOB_NAME=LFS_CI_-_trunk_-_wait_for_release
     export WORKSPACE=$(createTempDirectory)
     export UT_TMPDIR=$(createTempDirectory)
+    export JENKINS_HOME=/var/fpwork/psulm/lfs-jenkins/home
     echo 0 > ${UT_TMPDIR}/.cnt
     return
 }

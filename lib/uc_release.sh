@@ -46,13 +46,7 @@ ci_job_release() {
     mustHaveValue "${buildJobName}"       "build job name"
     mustHaveValue "${buildBuildNumber}"   "build build number"
 
-    # TODO: demx2fk3 2015-06-03 should be replaced / removed asap support for
-    #                           fingerprints is available
-    # This file be be used by UC ECL update.
-    for name in buildJobName buildBuildNumber packageJobName packageBuildNumber ; do
-        echo "${name^^}=${!name}" >> ${workspace}/build.txt
-    done
-
+    # TODO: demx2fk3 2015-06-03 HERE MONDAY
     # release label is stored in the artifacts of fsmci of the build job
     copyArtifactsToWorkspace "${buildJobName}" "${buildBuildNumber}" "fsmci"
     mustHaveNextLabelName

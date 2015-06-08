@@ -859,6 +859,11 @@ getBranchPart() {
     [[ ${what} == NR ]] && echo ${nr}
 }
 
+## @fn      mustHaveFreeDiskSpace()
+#  @brief   ensure, that there is enough free diskspace on given filesystem
+#  @param   {filesystem}    path of the filesystem (e.g. /var/fpwork)
+#  @param   {requiredSpace}    required free diskspace on the filesystem in kilobytes
+#  @return  <none>
 mustHaveFreeDiskSpace() {
     local filesystem=$1
     mustExistDirectory ${filesystem}
@@ -927,6 +932,10 @@ sanityCheck() {
 }
 
 
+## @fn      createFingerprintFile()
+#  @brief   create a file which can be used for fingerprinting
+#  @param   <none>
+#  @return  <none>
 createFingerprintFile() {
     requiredParameters JOB_NAME BUILD_NUMBER WORKSPACE 
 
@@ -952,5 +961,3 @@ createFingerprintFile() {
 
     return
 }
-
-
