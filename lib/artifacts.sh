@@ -12,6 +12,10 @@
 
 LFS_CI_SOURCE_artifacts='$Id$'
 
+[[ -z ${LFS_CI_SOURCE_config}   ]] && source ${LFS_CI_ROOT}/lib/config.sh
+[[ -z ${LFS_CI_SOURCE_logging}  ]] && source ${LFS_CI_ROOT}/lib/logging.sh
+[[ -z ${LFS_CI_SOURCE_commands} ]] && source ${LFS_CI_ROOT}/lib/commands.sh
+
 ## @fn      createArtifactArchive()
 #  @brief   create the build artifacts archives and copy them to the share on the master server
 #  @details the build artifacts are not handled by jenkins. we are doing it by ourself, because
