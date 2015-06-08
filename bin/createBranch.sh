@@ -36,11 +36,13 @@ GIT_REVISION_FILE=""
 
 if [[ "${SRC_BRANCH}" == "trunk" ]]; then
     LOCATIONS="locations-pronb-developer"
+    LOCATIONS_FSMR4="locations-FSM_R4_DEV"
     LOCATIONS_LRC="locations-LRC"
     SVN_PATH="${SVN_DIR}/trunk"
 else
     LOCATIONS="locations-${SRC_BRANCH}"
     LOCATIONS_LRC="locations-LRC_${SRC_BRANCH}"
+    LOCATIONS_FSMR4="locations-${srcBranch}_FSMR4"
     SVN_PATH="${SVN_DIR}/${SRC_BRANCH}/trunk"
     [[ $LRC == true ]] && SVN_PATH="${SVN_DIR}/LRC_${SRC_BRANCH}/trunk"
 fi
@@ -192,7 +194,27 @@ svnCopyLocationsLRC() {
 #  @param   <newBranch> name of the new branch
 #  @return  <none>
 svnCopyLocationsFSMR4() {
-    svnCopyLocations $1 $2 $3
+
+    # Activate this as soon as FSMR4 has no extra handling.
+    #svnCopyLocations $1 $2 $3
+
+    info "--------------------------------------------------------"
+    info "SVN: create locations for FSMR4"
+    info "--------------------------------------------------------"
+
+    local srcBranch=$1
+    local newBranch=$2
+    mustHaveValue "${srcBranch}" "source branch"
+    mustHaveValue "${newBranch}" "new branch"
+
+    svn ls ${SVN_REPO}/${SVN_DIR}/trunk/bldtools/locations-${newBranch}_FSMR4 || {
+        __cmd svn copy -m \"copy locations branch ${newBranch}\" ${SVN_REPO}/${SVN_DIR}/trunk/bldtools/${LOCATIONS_FSMR4} \
+            ${SVN_REPO}/${SVN_DIR}/trunk/bldtools/locations-${newBranch}_FSMR4;
+        __cmd svn checkout ${SVN_REPO}/${SVN_DIR}/trunk/bldtools/locations-${newBranch}_FSMR4;
+        __cmd cd locations-${newBranch}_FSMR4;
+        __cmd sed -i -e "'s/\/os\/${srcBranch}\//\/os\/${newBranch}\/trunk\//'" Dependencies;
+        __cmd svn commit -m "added new location ${newBranch}_FSMR4.";
+    }   
 }
 
 __getGitRevisionFile() {
@@ -248,6 +270,7 @@ createBranchInGit() {
         mustHaveValue "${gitServer}" "git server"
         mustHaveValue "${gitRevisionFile}" "git revision file"
 
+        __cmd svn cat -r ${REVISION} ${gitRevisionFile}
         gitRevision=$(svn cat -r ${REVISION} ${gitRevisionFile})
         info "GIT revision: ${gitRevision}"
 
@@ -349,6 +372,7 @@ main() {
         if [[ ! ${LRC} ]]; then
             svnCopyBranch ${SRC_BRANCH} ${NEW_BRANCH}
             svnCopyLocations ${LOCATIONS} ${SRC_BRANCH} ${NEW_BRANCH}
+            svnCopyLocationsFSMR4 ${SRC_BRANCH} ${NEW_BRANCH}
             createBranchInGit ${NEW_BRANCH}
             svnDummyCommit ${NEW_BRANCH}
         elif [[ ${LRC} == "true" ]]; then
