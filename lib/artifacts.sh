@@ -229,6 +229,27 @@ copyFileToArtifactDirectory() {
     return
 }
 
+## @fn      copyFileToUserContentDirectory()
+#  @brief   copy a file to the artifacts userContent directory
+#  @param   {fileName}    path and name of the file
+#  @return  <none>
+copyFileToUserContentDirectory() {
+    requiredParameters JOB_NAME BUILD_NUMBER
+    local fileName=$1
+
+    local serverName=$(getConfig jenkinsMasterServerHostName)
+    local sonarPathOnServer=$(getConfig jenkinsMasterServerPath)/userContent/sonar
+    # executeOnMaster mkdir -p ${artifactsPathOnShare}/save
+    execute -r 10 ssh ${serverName} mkdir -p ${sonarPathOnServer}
+
+    # sometimes, the remote host closes connection, so we try to retry...
+    execute -r 10 rsync --archive --verbose --rsh=ssh -P  \
+        ${fileName}                                 \
+        ${serverName}:${sonarPathOnServer}
+
+    return
+}
+
 ## @fn      linkFileToArtifactsDirectory()
 #  @brief   create a symlkink from the given name to the artifacts folder on the master.
 #  @warning the given fileName must be accessable via nfs from the master. otherwise, the
