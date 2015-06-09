@@ -73,7 +73,7 @@ getBuildBuildNumberFromFingerprint() {
 #  @param   <none>
 #  @return  name of the package job
 getPackageJobNameFromFingerprint() {
-    _getPackageInformationFromFingerprint '_Package_-_package:' 1
+    _getJobInformationFromFingerprint '_Package_-_package:' 1
 }
 
 ## @fn      getPackageJobNameFromFingerprint()

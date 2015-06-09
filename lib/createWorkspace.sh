@@ -375,3 +375,42 @@ synchroniceToLocalPath() {
     return
 }
 
+## @fn      mustHavePreparedWorkspace()
+#  @brief   prepare the workspace with required artifacts and other stuff
+#  @param   {upstreamProject}    name of the upstream project
+#  @param   {upstreamBuild}      build number of the upstream project
+#  @todo    TODO: demx2fk3 2015-06-08 move into a different file (maybe common.sh)
+#  @return  <none>
+mustHavePreparedWorkspace() {
+
+    requiredParameters JOB_NAME BUILD_NUMBER
+
+    local upstreamProject=${1}
+    local upstreamBuild=${2}
+
+    if [[ -z ${upstreamProject} ]] ; then
+        requiredParameters UPSTREAM_PROJECT
+        upstreamProject=${UPSTREAM_PROJECT}
+    fi
+    if [[ -z ${upstreamBuild} ]] ; then
+        requiredParameters UPSTREAM_BUILD
+        upstreamBuild=${UPSTREAM_BUILD}
+    fi
+
+    mustHaveValue "${upstreamProject}" "upstream project"
+    mustHaveValue "${upstreamBuild}"   "upstream build"
+
+    local workspace=$(getWorkspaceName)
+    mustHaveCleanWorkspace
+
+    local requiredArtifacts=$(getConfig LFS_CI_prepare_workspace_required_artifacts)
+    copyArtifactsToWorkspace "${upstreamProject}" "${upstreamBuild}" "${requiredArtifacts}"
+
+    mustHaveNextLabelName
+    local labelName=$(getNextReleaseLabel)
+
+    setBuildDescription ${JOB_NAME} ${BUILD_NUMBER} ${labelName}
+
+    return
+}
+
