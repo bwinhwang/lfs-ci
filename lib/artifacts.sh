@@ -229,28 +229,27 @@ copyFileToArtifactDirectory() {
     return
 }
 
-## @fn      copySonarFileToUserContentDirectory()
+## @fn      copyFileToUserContentDirectory()
 #  @brief   copy a file to the sonar subdir in userContent directory
-#  @param   {fileName}    path and name of the file
-#  @param   {targetType}  target type, e.g. FSM-r3
+#  @param   {srcFilePathAndName}   path and name of the file
+#  @param   {destFilePath}         sub-path of file under userContent
 #  @return  <none>
-copySonarFileToUserContentDirectory() {
-    local fileName=$1
-    local targetType=$2
+copyFileToUserContentDirectory() {
+    local srcFilePathAndName=$1
+    local destFilePath=$2
 
     local serverName=$(getConfig jenkinsMasterServerHostName)
     mustHaveValue ${serverName} "server name"
 
     local jenkinsMasterServerPath=$(getConfig jenkinsMasterServerPath)
     mustHaveValue ${jenkinsMasterServerPath} "jenkins master serverpath"
-    local sonarPathOnServer=${jenkinsMasterServerPath}/userContent/sonar/${targetType}
+    local pathOnServer=${jenkinsMasterServerPath}/userContent/${destFilePath}
+    local fileName=$(basename ${srcFilePathAndName})
 
-    execute -r 10 ssh ${serverName} mkdir -p ${sonarPathOnServer}
+    execute -r 10 ssh ${serverName} mkdir -p ${pathOnServer}
 
     # sometimes, the remote host closes connection, so we try to retry...
-    execute -r 10 rsync --archive --verbose --rsh=ssh -P  \
-        ${fileName}                                 \
-        ${serverName}:${sonarPathOnServer}
+    execute -r 10 rsync --archive --verbose --rsh=ssh -P ${srcFilePathAndName} ${serverName}:${pathOnServer}/${fileName}
 
     return
 }

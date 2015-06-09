@@ -69,7 +69,7 @@ ci_job_test_unittest_ddal() {
 
     mustExistFile ${mergeresult}.gz
     copyFileToArtifactDirectory ${mergeresult}.gz
-    copySonarFileToUserContentDirectory ${mergeresult}.gz ${TARGET_TYPE}
+    copyFileToUserContentDirectory ${mergeresult}.gz sonar/${TARGET_TYPE}
 
     local lcov=${workspace}/src-unittests/src/frameworks/lcov/bin/lcov
     mustExistFile ${lcov}
@@ -102,7 +102,7 @@ ci_job_test_unittest_ddal() {
     mustExistFile coverage.xml
     execute gzip -6 -f coverage.xml
     copyFileToArtifactDirectory coverage.xml.gz
-    copySonarFileToUserContentDirectory coverage.xml.gz ${TARGET_TYPE}
+    copyFileToUserContentDirectory coverage.xml.gz sonar/${TARGET_TYPE}
 
     # TODO: demx2fk3 2015-01-23 make this in a function
     local artifactsPathOnShare=$(getConfig artifactesShare)/${JOB_NAME}/${BUILD_NUMBER}
