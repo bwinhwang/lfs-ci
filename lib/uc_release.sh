@@ -49,7 +49,7 @@ ci_job_release() {
     info "found build   job: ${buildJobName} / ${buildBuildNumber}"
     
     local releaseDirectory=$(getConfig LFS_CI_UC_package_copy_to_share_real_location)/${releaseLabel}
-    mustExistSymlink ${releaseDirectory}
+    mustExistDirectory ${releaseDirectory}
     debug "found results of package job on share: ${releaseDirectory}"
 
     # storing new and old label name into files for later use and archive
