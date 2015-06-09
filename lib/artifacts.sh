@@ -229,18 +229,22 @@ copyFileToArtifactDirectory() {
     return
 }
 
-## @fn      copyFileToUserContentDirectory()
-#  @brief   copy a file to the artifacts userContent directory
+## @fn      copySonarFileToUserContentDirectory()
+#  @brief   copy a file to the sonar subdir in userContent directory
 #  @param   {fileName}    path and name of the file
+#  @param   {targetType}  target type, e.g. FSM-r3
 #  @return  <none>
-copyFileToUserContentDirectory() {
-    requiredParameters JOB_NAME BUILD_NUMBER
+copySonarFileToUserContentDirectory() {
     local fileName=$1
     local targetType=$2
 
     local serverName=$(getConfig jenkinsMasterServerHostName)
-    local sonarPathOnServer=$(getConfig jenkinsMasterServerPath)/userContent/sonar/${targetType}
-    # executeOnMaster mkdir -p ${artifactsPathOnShare}/save
+    mustHaveValue ${serverName} "server name"
+
+    local jenkinsMasterServerPath=$(getConfig jenkinsMasterServerPath)
+    mustHaveValue ${jenkinsMasterServerPath} "jenkins master serverpath"
+    local sonarPathOnServer=${jenkinsMasterServerPath}/userContent/sonar/${targetType}
+
     execute -r 10 ssh ${serverName} mkdir -p ${sonarPathOnServer}
 
     # sometimes, the remote host closes connection, so we try to retry...
