@@ -334,9 +334,7 @@ dbInsert() {
     local branch=$1
     if [[ "${DEVELOPER_BRANCH}" == "true" ]]; then
         info "This is a developer branch."
-        local yyyy="20[0-9][0-9]"
-        local mm="[0-9][0-9]"
-        local regex="${branch}_PS_LFS_OS_${yyyy}_${mm}_([0-9][0-9][0-9][0-9])"
+        local regex="${branch}_PS_LFS_OS_20([0-9][0-9])_([0-9][0-9])_([0-9][0-9][0-9][0-9])"
     else
         local branchType=$(getBranchPart ${branch} TYPE)
         local yyyy=$(getBranchPart ${branch} YYYY)
