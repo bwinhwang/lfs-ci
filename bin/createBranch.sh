@@ -23,6 +23,7 @@ info "# DUMMY_COMMIT:         $DUMMY_COMMIT"
 info "# DO_DB_INSERT:         $DO_DB_INSERT"
 info "# DO_GIT:               $DO_GIT"
 info "# ACTIVATE_ROOT_JOBS:   $ACTIVATE_ROOT_JOBS"
+info "# DEVELOPER_BRANCH:     $DEVELOPER_BRANCH"
 info "# DEBUG:                $DEBUG"
 info "###############################################################"
 
@@ -331,18 +332,25 @@ dbInsert() {
     fi
 
     local branch=$1
-    local branchType=$(getBranchPart ${branch} TYPE)
-    local yyyy=$(getBranchPart ${branch} YYYY)
-    local mm=$(getBranchPart ${branch} MM)
+    if [[ "${DEVELOPER_BRANCH}" == "true" ]]; then
+        info "This is a developer branch."
+        local yyyy="20[0-9][0-9]"
+        local mm="[0-9][0-9]"
+        local regex="${branch}_PS_LFS_OS_${yyyy}_${mm}_([0-9][0-9][0-9][0-9])"
+    else
+        local branchType=$(getBranchPart ${branch} TYPE)
+        local yyyy=$(getBranchPart ${branch} YYYY)
+        local mm=$(getBranchPart ${branch} MM)
 
-    # Do we have a special branch?
-    local subBranch=$(echo $branch | awk -F_ '{print $2}')
-    [[ ${subBranch} ]] && branchType=${subBranch}
-    local regex="${branchType}_PS_LFS_OS_${yyyy}_${mm}_([0-9][0-9][0-9][0-9])"
+        # Do we have a special branch?
+        local subBranch=$(echo $branch | awk -F_ '{print $2}')
+        [[ ${subBranch} ]] && branchType=${subBranch}
+        local regex="${branchType}_PS_LFS_OS_${yyyy}_${mm}_([0-9][0-9][0-9][0-9])"
 
-    if [[ ${LRC} == true ]]; then
-        branch="LRC_${branch}"
-        regex="${branchType}_LRC_LCP_PS_LFS_OS_${yyyy}_${mm}_([0-9][0-9][0-9][0-9])"
+        if [[ ${LRC} == true ]]; then
+            branch="LRC_${branch}"
+            regex="${branchType}_LRC_LCP_PS_LFS_OS_${yyyy}_${mm}_([0-9][0-9][0-9][0-9])"
+        fi
     fi
 
     local dbName=$(getConfig MYSQL_db_name)
