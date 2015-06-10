@@ -33,6 +33,7 @@ PKG_SHARE="/build/home/SC_LFS/pkgpool"
 SVN_OPTS="--non-interactive --trust-server-cert"
 ARCHIVE_BASE=$(getConfig ADMIN_archive_share)
 TEST_SERVER="ulegcpmoritz.emea.nsn-net.net"
+VARS_FILE="VARIABLES.TXT"
 DIR_PATTERN=""
 
 
@@ -91,6 +92,14 @@ __checkParams() {
 __checkOthers() {
     [[ -d ${ARCHIVE_BASE} ]] || { error "archive dir ${ARCHIVE_BASE} does not exist."; return 1; }
     which mysql > /dev/null 2>&1 || { error "mysql not available."; return 1; }
+}
+
+## @fn     __preparation()
+#  @brief  Create key=value pairs file which is sourced by Jenkins.
+__preparation(){
+    JENKINS_JOBS_DIR=$(getConfig jenkinsMasterServerJobsPath)
+    mustHaveValue ${JENKINS_JOBS_DIR} "Jenkins jobs dir is missing."
+    echo JENKINS_JOBS_DIR=${JENKINS_JOBS_DIR} >> ${WORKSPACE}/${VARS_FILE}
 }
 
 __cmd() {
@@ -373,6 +382,7 @@ main() {
 
     __checkParams || { error "Params check failed."; exit 1; }
     __checkOthers || { error "Checking some stuff failed."; exit 1; }
+    __preparation
 
     [[ ${MOVE_SVN_OS_BRANCH} == true ]] && moveBranchSvnOS || info "Not moving os/$BRANCH in repo"
     [[ ${DB_UPDATE} == true ]] && dbUpdate || info "Not updating DB."
