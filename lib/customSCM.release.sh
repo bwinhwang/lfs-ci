@@ -101,6 +101,8 @@ actionCalculate() {
     debug "storing upstream info in .properties"
     echo TESTED_BUILD_JOBNAME=${upstreamProjectName} >  ${WORKSPACE}/.properties
     echo TESTED_BUILD_NUMBER=${upstreamBuildNumber}  >> ${WORKSPACE}/.properties
+    echo UPSTREAM_PROJECT=${upstreamProjectName} >  ${WORKSPACE}/.properties
+    echo UPSTREAM_BUILD=${upstreamBuildNumber}  >> ${WORKSPACE}/.properties
 
     return 0
 }
