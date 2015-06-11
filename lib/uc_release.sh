@@ -146,16 +146,22 @@ ci_job_release() {
 prereleaseChecks() {
     requiredParameters LFS_PROD_RELEASE_PREVIOUS_TAG_NAME LFS_PROD_RELEASE_PREVIOUS_TAG_NAME_REL
 
-    if ! existsBaselineInWorkflowTool ${LFS_PROD_RELEASE_PREVIOUS_TAG_NAME} ; then
-        error "previous Version ${LFS_PROD_RELEASE_PREVIOUS_TAG_NAME} does not exist in WFT"
-        exit 1
-    fi
-    if [[ $(getProductNameFromJobName) =~ LFS ]] ; then
-        if ! existsBaselineInWorkflowTool ${LFS_PROD_RELEASE_PREVIOUS_TAG_NAME_REL} ; then
-            error "previous Release Version ${LFS_PROD_RELEASE_PREVIOUS_TAG_NAME_REL} does not exist in WFT"
+    local canCreateReleaseInWorkflowTool=$(getConfig LFS_CI_uc_release_can_create_release_in_wft)
+    if [[ ! ${canCreateReleaseInWorkflowTool} ]] ; then
+        warning "creating release in WFT is disabled via config"
+        return
+    else
+        if ! existsBaselineInWorkflowTool ${LFS_PROD_RELEASE_PREVIOUS_TAG_NAME} ; then
+            error "previous Version ${LFS_PROD_RELEASE_PREVIOUS_TAG_NAME} does not exist in WFT"
             exit 1
-        fi                
-    fi
+        fi
+        if [[ $(getProductNameFromJobName) =~ LFS ]] ; then
+            if ! existsBaselineInWorkflowTool ${LFS_PROD_RELEASE_PREVIOUS_TAG_NAME_REL} ; then
+                error "previous Release Version ${LFS_PROD_RELEASE_PREVIOUS_TAG_NAME_REL} does not exist in WFT"
+                exit 1
+            fi                
+        fi
+    fi        
     
     return
 }
