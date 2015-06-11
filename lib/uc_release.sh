@@ -344,7 +344,7 @@ sendReleaseNote() {
     info "collect revisions from all sub build jobs"
     sort -u ${workspace}/bld/bld-externalComponents-*/usedRevisions.txt > ${workspace}/revisions.txt
 
-    _getImportantNoteFileFromSubversion
+    _getImportantNoteFileFromSubversion ${buildJobName} ${buildBuildNumber}
 
     # create the os or uboot release note
     info "new release label is ${releaseTagName} based on ${oldReleaseTagName}"
@@ -404,8 +404,14 @@ sendReleaseNote() {
 }
 
 _getImportantNoteFileFromSubversion() {
+    local buildJobName=$1
+    local buildBuildNumber=$2
+
     local workspace=$(getWorkspaceName)
     mustHaveWorkspaceName 
+
+    # TODO FIME
+    copyArtifactsToWorkspace "${buildJobName}" "${buildBuildNumber}" "externalComponents fsmpsl psl fsmci lrcpsl"
 
     mustExistFile ${workspace}/revisions.txt
     local svnUrl=$(execute -n grep ^src-project ${workspace}/revisions.txt | cut -d" " -f 2)
