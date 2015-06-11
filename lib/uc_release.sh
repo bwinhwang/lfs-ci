@@ -341,6 +341,9 @@ sendReleaseNote() {
     mustHaveValue "${osTagName}" "next os tag name"
     mustHaveValue "${oldReleaseTagName}" "old release tag name"
 
+    # TODO FIME
+    copyArtifactsToWorkspace "${buildJobName}" "${buildBuildNumber}" "externalComponents fsmpsl psl fsmci lrcpsl"
+
     info "collect revisions from all sub build jobs"
     sort -u ${workspace}/bld/bld-externalComponents-*/usedRevisions.txt > ${workspace}/revisions.txt
 
@@ -404,14 +407,8 @@ sendReleaseNote() {
 }
 
 _getImportantNoteFileFromSubversion() {
-    local buildJobName=$1
-    local buildBuildNumber=$2
-
     local workspace=$(getWorkspaceName)
     mustHaveWorkspaceName 
-
-    # TODO FIME
-    copyArtifactsToWorkspace "${buildJobName}" "${buildBuildNumber}" "externalComponents fsmpsl psl fsmci lrcpsl"
 
     mustExistFile ${workspace}/revisions.txt
     local svnUrl=$(execute -n grep ^src-project ${workspace}/revisions.txt | cut -d" " -f 2)
@@ -455,9 +452,6 @@ _createLfsOsReleaseNote() {
     # TODO: demx2fk3 2015-03-09 FIXME SSH_LOAD replace this with other server
     execute -r 10 rsync -ae ssh ${serverName}:${buildDirectory}/changelog.xml ${workspace}/os/
     mustExistFile ${workspace}/os/changelog.xml
-
-    # TODO FIME
-    copyArtifactsToWorkspace "${buildJobName}" "${buildBuildNumber}" "externalComponents fsmpsl psl fsmci lrcpsl"
 
     # convert the changelog xml to a release note
     cd ${workspace}/os/
