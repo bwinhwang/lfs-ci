@@ -4,6 +4,8 @@
 
 usecase_LFS_READY_FOR_RELEASE() {
 
+    mustHaveCleanWorkspace
+
     requiredParameters UPSTREAM_PROJECT UPSTREAM_BUILD \
                        JOB_NAME BUILD_NUMBER
 
