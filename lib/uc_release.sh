@@ -105,7 +105,8 @@ ci_job_release() {
             createReleaseTag ${buildJobName} ${buildBuildNumber}
         ;;
         create_proxy_release_tag) 
-            createProxyReleaseTag ${buildJobName} ${buildBuildNumber}
+            # createProxyReleaseTag ${buildJobName} ${buildBuildNumber}
+            warning "disabled due to BI#293"
         ;;
         create_source_tag) 
             createTagOnSourceRepository ${buildJobName} ${buildBuildNumber}
