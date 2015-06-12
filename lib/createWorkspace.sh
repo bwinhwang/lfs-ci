@@ -4,7 +4,8 @@
 
 LFS_CI_SOURCE_createWorkspace='$Id$'
 
-[[ -z ${LFS_CI_SOURCE_artifacts} ]] && source ${LFS_CI_ROOT}/lib/artifacts.sh
+[[ -z ${LFS_CI_SOURCE_artifacts}   ]] && source ${LFS_CI_ROOT}/lib/artifacts.sh
+[[ -z ${LFS_CI_SOURCE_fingerprint} ]] && source ${LFS_CI_ROOT}/lib/fingerprint.sh
 
 ## @fn      createOrUpdateWorkspace()
 #  @brief   create a new or update an existing workspace
