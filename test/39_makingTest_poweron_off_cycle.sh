@@ -23,6 +23,9 @@ oneTimeSetUp() {
     mustExistDirectory() {
         mockedCommand "mustExistDirectory $@"
     }
+    makingTest_logConsole() {
+        mockedCommand "makingTest_logConsole $@"
+    }
 
     return
 }
@@ -45,6 +48,7 @@ test1_poweron() {
 mustHaveMakingTestTestConfig 
 makingTest_testSuiteDirectory 
 mustExistDirectory /path/to/test/suite
+makingTest_logConsole 
 execute make -C /path/to/test/suite powercycle
 EOF
     assertExecutedCommands ${expect}
