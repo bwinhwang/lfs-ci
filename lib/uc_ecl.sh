@@ -2,10 +2,11 @@
 ## @file  uc_ecl.sh
 #  @brief usecase update ECL with a new LFS production
 
-[[ -z ${LFS_CI_SOURCE_artifacts}   ]] && source ${LFS_CI_ROOT}/lib/artifacts.sh
-[[ -z ${LFS_CI_SOURCE_subversion}  ]] && source ${LFS_CI_ROOT}/lib/subversion.sh
-[[ -z ${LFS_CI_SOURCE_jenkins}     ]] && source ${LFS_CI_ROOT}/lib/jenkins.sh
-[[ -z ${LFS_CI_SOURCE_fingerprint} ]] && source ${LFS_CI_ROOT}/lib/fingerprint.sh
+[[ -z ${LFS_CI_SOURCE_artifacts}       ]] && source ${LFS_CI_ROOT}/lib/artifacts.sh
+[[ -z ${LFS_CI_SOURCE_subversion}      ]] && source ${LFS_CI_ROOT}/lib/subversion.sh
+[[ -z ${LFS_CI_SOURCE_jenkins}         ]] && source ${LFS_CI_ROOT}/lib/jenkins.sh
+[[ -z ${LFS_CI_SOURCE_fingerprint}     ]] && source ${LFS_CI_ROOT}/lib/fingerprint.sh
+[[ -z ${LFS_CI_SOURCE_createWorkspace} ]] && source ${LFS_CI_ROOT}/lib/createWorkspace.sh
 
 ## @fn      ci_job_ecl()
 #  @brief   update the ECL file 
