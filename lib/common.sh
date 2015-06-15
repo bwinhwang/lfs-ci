@@ -162,6 +162,8 @@ switchToNewLocation() {
 #  @return  <none>
 setupNewWorkspace() {
     local workspace=$(getWorkspaceName) 
+    mustHaveWorkspaceName
+    mustHaveCleanWorkspace
 
     debug "creating a new workspace in \"${workspace}\""
 
