@@ -76,8 +76,8 @@ __preparation(){
     JOBS_EXCLUDE_LIST=$(getConfig branchingExcludeJobs)
     MAIN_BUILD_JOB_NAME_LRC=$(getConfig jenkinsMainBuildJobName_LRC)
 
-    mustHaveValue ${JENKINS_API_TOKEN} "Jenkins API token is missing."
-    mustHaveValue ${JENKINS_API_USER} "Jenkins API user is missing."
+    mustHaveValue "${JENKINS_API_TOKEN}" "Jenkins API token is missing."
+    mustHaveValue "${JENKINS_API_USER}" "Jenkins API user is missing."
 
     echo JENKINS_API_TOKEN=${JENKINS_API_TOKEN} > ${WORKSPACE}/${VARS_FILE}
     echo JENKINS_API_USER=${JENKINS_API_USER} >> ${WORKSPACE}/${VARS_FILE}

@@ -90,7 +90,7 @@ __checkOthers() {
 #  @brief  Create key=value pairs file which is sourced by Jenkins.
 __preparation(){
     JENKINS_JOBS_DIR=$(getConfig jenkinsMasterServerJobsPath)
-    mustHaveValue ${JENKINS_JOBS_DIR} "Jenkins jobs dir is missing."
+    mustHaveValue "${JENKINS_JOBS_DIR}" "Jenkins jobs dir is missing."
     echo JENKINS_JOBS_DIR=${JENKINS_JOBS_DIR} >> ${WORKSPACE}/${VARS_FILE}
 }
 
@@ -339,8 +339,8 @@ deleteTestResults() {
     local testServer=$(getConfig LFS_CI_test_host)
     local testResultsDir=$(getConfig LFS_CI_uc_test_on_target_test_repos_on_moritz)
 
-    mustHaveValue ${testServer} "test server"
-    mustHaveValue ${testResultsDir} "test results dir"
+    mustHaveValue "${testServer}" "testServer"
+    mustHaveValue "${testResultsDir}" "testResultsDir"
 
     if [[ ! ${testResultsDir} == */ ]]; then
         testResultsDir=${testResultsDir}/
