@@ -336,8 +336,8 @@ deleteTestResults() {
         echo ${dirPattern} | grep -q ${branchType}_PS_LFS_OS_${yyyy}_${mm} || { echo ${branchType}_PS_LFS_OS_${yyyy}_${mm} is not in directory pattern ${dirPattern}; exit 1; }
     fi
 
-    local testServer=$(getConfig LFS_CI_test_host)
-    local testResultsDir=$(getConfig LFS_CI_uc_test_on_target_test_repos_on_moritz)
+    local testServer=$(getConfig LFS_CI_testresults_host)
+    local testResultsDir=$(getConfig LFS_CI_testresults_dir)
 
     mustHaveValue "${testServer}" "testServer"
     mustHaveValue "${testResultsDir}" "testResultsDir"

@@ -418,7 +418,7 @@ getJenkinsJobBuildDirectory() {
 
 ## @fn      mustHaveValue()
 #  @brief   ensure, that the value is a not empty string
-#  @param   {value}    just a value
+#  @param   {value}    just a value. Always use double quotes eg "$var1"
 #  @return  <none>
 #  @throws  raise an error, if the value is empty
 mustHaveValue() {

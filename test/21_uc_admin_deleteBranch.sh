@@ -24,7 +24,7 @@ test_deleteTestresults() {
     export BRANCH="FB1408"
     . bin/deleteBranch.sh
     deleteTestResults
-    local expected="ssh ulegcpmoritz.emea.nsn-net.net rm -rf /lvol2/production_jenkins/test-repos/FB_PS_LFS_OS_2014_08_*"
+    local expected="ssh ulegcpmoritz.emea.nsn-net.net rm -rf /lvol2/production_jenkins/test-repos/src-fsmtest/FB_PS_LFS_OS_2014_08_*"
     assertEquals "$(cat $MOCKED_COMMAND)" "$expected"
 }
 
@@ -32,7 +32,7 @@ test_deleteTestresultsLRC() {
     export BRANCH="LRC_FB1502"
     . bin/deleteBranch.sh
     deleteTestResults
-    local expected="ssh ulegcpmoritz.emea.nsn-net.net rm -rf /lvol2/production_jenkins/test-repos/FB_LRC_LCP_PS_LFS_OS_2015_02_*"
+    local expected="ssh ulegcpmoritz.emea.nsn-net.net rm -rf /lvol2/production_jenkins/test-repos/src-fsmtest/FB_LRC_LCP_PS_LFS_OS_2015_02_*"
     assertEquals "$(cat $MOCKED_COMMAND)" "$expected"
 }
 
@@ -40,7 +40,7 @@ test_deleteTestresultsSubBranch() {
     export BRANCH="FB1311_LNT4OPTUS"
     . bin/deleteBranch.sh
     deleteTestResults
-    local expected="ssh ulegcpmoritz.emea.nsn-net.net rm -rf /lvol2/production_jenkins/test-repos/LNT4_OPTUS_PS_LFS_OS_2013_11_*"
+    local expected="ssh ulegcpmoritz.emea.nsn-net.net rm -rf /lvol2/production_jenkins/test-repos/src-fsmtest/LNT4_OPTUS_PS_LFS_OS_2013_11_*"
     assertEquals "$(cat $MOCKED_COMMAND)" "$expected"
 }
 
