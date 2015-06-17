@@ -199,6 +199,10 @@ svnCopyLocationsFSMR4() {
     # Activate this as soon as FSMR4 has no extra handling.
     #svnCopyLocations $1 $2 $3
 
+    if [[ ${FSMR4} != true ]]; then
+        return 0
+    fi
+
     info "--------------------------------------------------------"
     info "SVN: create locations for FSMR4"
     info "--------------------------------------------------------"
