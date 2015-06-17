@@ -135,8 +135,8 @@ _getProjectDataFromFingerprint() {
 
     local server=$(getConfig jenkinsMasterServerHostName)
     mustHaveValue "${server}" "server name"
-    execute -r 10 -n rsync --archive --verbose --rsh=ssh -P  \
-                        ${server}:${fingerprintFile}         \
+    execute -r 10 rsync --archive --rsh=ssh --verbose \
+                        ${server}:${fingerprintFile}  \
                         ${file}
 
     if [[ -e ${file} && ! -s ${file} ]] ; then
