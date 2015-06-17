@@ -750,6 +750,16 @@ class CreateViews extends Common {
         proc.waitFor()
         config = proc.text
 
+
+
+        # Extra handling for FSMR4
+        # Can be removed when FSMR3 is using Kernel 3.14 as FSMR4 is already using.
+        this.processFileInplace(sectionedViewTmpl) { text ->
+            text.replace("<includeRegex>LFS_CI_-_(FB1506|fsmr4)", "<includeRegex>LFS_CI_-_(${this.newBranch}|${this.newBranch}_FSMR4)")
+        }
+
+
+
         def sectionedViewTmpl = new File(configXmlFile)
         this.inf("write config xml file to ${configXmlFile}")
         sectionedViewTmpl.write(config)
