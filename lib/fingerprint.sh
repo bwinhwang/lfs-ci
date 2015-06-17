@@ -24,7 +24,7 @@ getFingerprintOfCurrentJob() {
 
     local file=${workspace}/bld/bld-fsmci-summary/label
     if [[ ! -e ${file} ]] ; then
-        copyArtifactsToWorkspace ${upstreamJob} ${upstreamBuild} "fsmci"
+        copyAndExtractBuildArtifactsFromProject ${upstreamJob} ${upstreamBuild} "fsmci"
     fi
     mustExistFile ${file}
 
