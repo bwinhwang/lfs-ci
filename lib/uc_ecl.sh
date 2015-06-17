@@ -35,7 +35,7 @@ usecase_LFS_UPDATE_ECL() {
     local buildBuildNumber=$(getBuildBuildNumberFromFingerprint)
     mustHaveValue "${buildBuildNumber}" "build BuildNumber"
 
-    copyArtifactsToWorkspace ${buildJobName} ${buildBuildNumber} "externalComponents"
+    copyAndExtractBuildArtifactsFromProject ${buildJobName} ${buildBuildNumber} "externalComponents"
 
     for eclUrl in ${eclUrls} ; do
         info "updating ECL ${eclUrl}"
