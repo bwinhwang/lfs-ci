@@ -275,11 +275,17 @@ class CreateBranch extends Common {
             text.replaceAll("-_"+this.jobNameReplace+"_-", "-_"+this.newBranch+"_-")
         }
 
-        // fsmr4 jobs
+
+
+
+        // Extra handling for FSMR4
+        // Can be removed when FSMR3 is using Kernel 3.14 as FSMR4 is already using.
         processFileInplace(configFile) { text ->
             text.replaceAll("LFS_CI_-_fsmr4_-", "LFS_CI_-_"+this.newBranch+"_FSMR4_-")
         }
-        // End fsmr4 jobs
+
+
+
 
         if(newJob.getName() == "PKGPOOL_-_"+this.newBranch+"_-_Build") {
             this.inf("replace ${this.pkgPoolReplace} by */${this.newBranch} in jobs config.xml.")
@@ -356,7 +362,7 @@ class CreateBranch extends Common {
     /**
      * Collects the jobs to be copied in the list this.jobsList.
      * If there are jobs which should not be copied add them to
-     * the parameter "branchingExcludeJobs" in file.cfg.
+     * the parameter "branchingExcludeJobs" in the configuration.
      */
     void collectJobs() {
         def jobsList = []
@@ -370,12 +376,24 @@ class CreateBranch extends Common {
             }
 
             def jn = job.getName()
+
+
+
+
+            // Extra handling for FSMR4
+            // This if can be removed when FSMR3 is using Kernel 3.14 as FSMR4 is already using.
             if(jn.find(this.srcBranch) || (this.fromTrunk && jn.find("_-_fsmr4_-_"))) {
                 jobsList.add(job)
             } else {
                 this.warn("Job $job.name can not be added to the list of jobs to be copied.")
                 continue
             }
+
+
+
+
+            //jobsList.add(job)
+
             numJobs++
             this.inf("Added job $job.name.")
         }
@@ -394,6 +412,8 @@ class CreateBranch extends Common {
         def newName = null
         def newJob = null
 
+        // Extra handling for FSMR4
+        // This if can be removed when FSMR3 is using Kernel 3.14 as FSMR4 is already using.
         // fsmr4 jobs
         if(job.getName().find("LFS_CI_-_fsmr4_-")) {
             newName = job.getName().replaceFirst("LFS_CI_-_fsmr4_-", "LFS_CI_-_"+this.newBranch+"_FSMR4_-")
@@ -530,7 +550,7 @@ class CreateBranchLRC extends CreateBranch {
     /**
      * Collects the jobs to be copied in the list this.jobsList.
      * If there are jobs which should not be copied add them to
-     * the parameter "branchingExcludeJobs" in file.cfg.
+     * the parameter "branchingExcludeJobs" in the configuration.
      *
      * TODO: move to CreateBranch
      */
