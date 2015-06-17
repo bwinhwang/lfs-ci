@@ -5,6 +5,7 @@
 . lib/config.sh
 
 
+initTempDirectory
 export MOCKED_COMMAND=$(createTempFile)
 
 oneTimeSetUp() {
