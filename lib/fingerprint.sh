@@ -133,7 +133,11 @@ _getProjectDataFromFingerprint() {
 
     local fingerprintFile=$(getConfig jenkinsHome)/fingerprints/${firstByte}/${secondByte}/${restBytes}.xml
 
-    runOnMaster "[[ -e ${fingerprintFile} ]] && cat ${fingerprintFile}" > ${file}
+    local server=$(getConfig jenkinsMasterServerHostName)
+    mustHaveValue "${server}" "server name"
+    execute -r 10 -n rsync --archive --verbose --rsh=ssh -P  \
+                        ${server}:${fingerprintFile}         \
+                        ${file}
 
     if [[ -e ${file} && ! -s ${file} ]] ; then
         fatal "can not get fingerprint information from ${md5sum} / ${fingerprintFile}"
