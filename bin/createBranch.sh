@@ -23,6 +23,7 @@ info "# DUMMY_COMMIT:         $DUMMY_COMMIT"
 info "# DO_DB_INSERT:         $DO_DB_INSERT"
 info "# DO_GIT:               $DO_GIT"
 info "# ACTIVATE_ROOT_JOBS:   $ACTIVATE_ROOT_JOBS"
+info "# DEVELOPER_BRANCH:     $DEVELOPER_BRANCH"
 info "# DEBUG:                $DEBUG"
 info "###############################################################"
 
@@ -75,8 +76,8 @@ __preparation(){
     JOBS_EXCLUDE_LIST=$(getConfig branchingExcludeJobs)
     MAIN_BUILD_JOB_NAME_LRC=$(getConfig jenkinsMainBuildJobName_LRC)
 
-    mustHaveValue ${JENKINS_API_TOKEN} "Jenkins API token is missing."
-    mustHaveValue ${JENKINS_API_USER} "Jenkins API user is missing."
+    mustHaveValue "${JENKINS_API_TOKEN}" "Jenkins API token is missing."
+    mustHaveValue "${JENKINS_API_USER}" "Jenkins API user is missing."
 
     echo JENKINS_API_TOKEN=${JENKINS_API_TOKEN} > ${WORKSPACE}/${VARS_FILE}
     echo JENKINS_API_USER=${JENKINS_API_USER} >> ${WORKSPACE}/${VARS_FILE}
@@ -197,6 +198,10 @@ svnCopyLocationsFSMR4() {
 
     # Activate this as soon as FSMR4 has no extra handling.
     #svnCopyLocations $1 $2 $3
+
+    if [[ ${FSMR4} != true ]]; then
+        return 0
+    fi
 
     info "--------------------------------------------------------"
     info "SVN: create locations for FSMR4"
@@ -331,18 +336,23 @@ dbInsert() {
     fi
 
     local branch=$1
-    local branchType=$(getBranchPart ${branch} TYPE)
-    local yyyy=$(getBranchPart ${branch} YYYY)
-    local mm=$(getBranchPart ${branch} MM)
+    if [[ "${DEVELOPER_BRANCH}" == "true" ]]; then
+        info "This is a developer branch."
+        local regex="${branch}_PS_LFS_OS_20([0-9][0-9])_([0-9][0-9])_([0-9][0-9][0-9][0-9])"
+    else
+        local branchType=$(getBranchPart ${branch} TYPE)
+        local yyyy=$(getBranchPart ${branch} YYYY)
+        local mm=$(getBranchPart ${branch} MM)
 
-    # Do we have a special branch?
-    local subBranch=$(echo $branch | awk -F_ '{print $2}')
-    [[ ${subBranch} ]] && branchType=${subBranch}
-    local regex="${branchType}_PS_LFS_OS_${yyyy}_${mm}_([0-9][0-9][0-9][0-9])"
+        # Do we have a special branch?
+        local subBranch=$(echo $branch | awk -F_ '{print $2}')
+        [[ ${subBranch} ]] && branchType=${subBranch}
+        local regex="${branchType}_PS_LFS_OS_${yyyy}_${mm}_([0-9][0-9][0-9][0-9])"
 
-    if [[ ${LRC} == true ]]; then
-        branch="LRC_${branch}"
-        regex="${branchType}_LRC_LCP_PS_LFS_OS_${yyyy}_${mm}_([0-9][0-9][0-9][0-9])"
+        if [[ ${LRC} == true ]]; then
+            branch="LRC_${branch}"
+            regex="${branchType}_LRC_LCP_PS_LFS_OS_${yyyy}_${mm}_([0-9][0-9][0-9][0-9])"
+        fi
     fi
 
     local dbName=$(getConfig MYSQL_db_name)
