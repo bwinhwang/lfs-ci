@@ -752,8 +752,8 @@ class CreateViews extends Common {
 
 
 
-        # Extra handling for FSMR4
-        # Can be removed when FSMR3 is using Kernel 3.14 as FSMR4 is already using.
+        // Extra handling for FSMR4
+        // Can be removed when FSMR3 is using Kernel 3.14 as FSMR4 is already using.
         this.processFileInplace(sectionedViewTmpl) { text ->
             text.replace("<includeRegex>LFS_CI_-_(FB1506|fsmr4)", "<includeRegex>LFS_CI_-_(${this.newBranch}|${this.newBranch}_FSMR4)")
         }
