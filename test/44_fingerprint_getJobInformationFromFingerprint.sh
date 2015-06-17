@@ -7,8 +7,8 @@ oneTimeSetUp() {
     mockedCommand() {
         echo "$@" >> ${UT_MOCKED_COMMANDS}
     }
-    copyArtifactsToWorkspace() {
-        mockedCommand "copyArtifactsToWorkspace $@"
+    copyAndExtractBuildArtifactsFromProject() {
+        mockedCommand "copyAndExtractBuildArtifactsFromProject $@"
         mkdir -p ${WORKSPACE}/workspace/bld/bld-fsmci-summary/
         echo "LABEL" > ${WORKSPACE}/workspace/bld/bld-fsmci-summary/label
     }
@@ -58,8 +58,8 @@ test1() {
 
     local expect=$(createTempFile)
     cat <<EOF > ${expect}
-copyArtifactsToWorkspace LFS_CI_-_trunk_-_Test 1234 fsmci
-runOnMaster [[ -e ${jenkinsRoot}/home/fingerprints/3f/c4/5e97ece3a6d14e9826afc4746a45.xml ]] && cat ${jenkinsRoot}/home/fingerprints/3f/c4/5e97ece3a6d14e9826afc4746a45.xml
+copyAndExtractBuildArtifactsFromProject LFS_CI_-_trunk_-_Test 1234 fsmci
+execute -r 10 rsync --archive --rsh=ssh --verbose maxi.emea.nsn-net.net:/var/fpwork/psulm/lfs-jenkins/home/fingerprints/3f/c4/5e97ece3a6d14e9826afc4746a45.xml ${WORKSPACE}/tmp.1
 execute -n ${LFS_CI_ROOT}/bin/getFingerprintData ${UT_TMPDIR}/tmp.1
 EOF
     assertExecutedCommands ${expect}
@@ -75,8 +75,8 @@ test2() {
 
     local expect=$(createTempFile)
     cat <<EOF > ${expect}
-copyArtifactsToWorkspace LFS_CI_-_trunk_-_Test 1234 fsmci
-runOnMaster [[ -e ${jenkinsRoot}/home/fingerprints/3f/c4/5e97ece3a6d14e9826afc4746a45.xml ]] && cat ${jenkinsRoot}/home/fingerprints/3f/c4/5e97ece3a6d14e9826afc4746a45.xml
+copyAndExtractBuildArtifactsFromProject LFS_CI_-_trunk_-_Test 1234 fsmci
+execute -r 10 rsync --archive --rsh=ssh --verbose maxi.emea.nsn-net.net:/var/fpwork/psulm/lfs-jenkins/home/fingerprints/3f/c4/5e97ece3a6d14e9826afc4746a45.xml ${WORKSPACE}/tmp.1
 execute -n ${LFS_CI_ROOT}/bin/getFingerprintData ${UT_TMPDIR}/tmp.1
 EOF
     assertExecutedCommands ${expect}
@@ -93,8 +93,8 @@ test3() {
 
     local expect=$(createTempFile)
     cat <<EOF > ${expect}
-copyArtifactsToWorkspace LFS_CI_-_trunk_-_Test 1234 fsmci
-runOnMaster [[ -e ${jenkinsRoot}/home/fingerprints/3f/c4/5e97ece3a6d14e9826afc4746a45.xml ]] && cat ${jenkinsRoot}/home/fingerprints/3f/c4/5e97ece3a6d14e9826afc4746a45.xml
+copyAndExtractBuildArtifactsFromProject LFS_CI_-_trunk_-_Test 1234 fsmci
+execute -r 10 rsync --archive --rsh=ssh --verbose maxi.emea.nsn-net.net:/var/fpwork/psulm/lfs-jenkins/home/fingerprints/3f/c4/5e97ece3a6d14e9826afc4746a45.xml ${WORKSPACE}/tmp.1
 EOF
     assertExecutedCommands ${expect}
     return

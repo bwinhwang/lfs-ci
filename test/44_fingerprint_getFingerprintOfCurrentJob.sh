@@ -7,8 +7,8 @@ oneTimeSetUp() {
     mockedCommand() {
         echo "$@" >> ${UT_MOCKED_COMMANDS}
     }
-    copyArtifactsToWorkspace() {
-        mockedCommand "copyArtifactsToWorkspace $@"
+    copyAndExtractBuildArtifactsFromProject() {
+        mockedCommand "copyAndExtractBuildArtifactsFromProject $@"
         mkdir -p ${WORKSPACE}/workspace/bld/bld-fsmci-summary/
         echo "LABEL" > ${WORKSPACE}/workspace/bld/bld-fsmci-summary/label
     }
@@ -33,7 +33,7 @@ test1() {
 
     local expect=$(createTempFile)
     cat <<EOF > ${expect}
-copyArtifactsToWorkspace LFS_CI_-_trunk_-_Test 1234 fsmci
+copyAndExtractBuildArtifactsFromProject LFS_CI_-_trunk_-_Test 1234 fsmci
 EOF
     assertExecutedCommands ${expect}
     

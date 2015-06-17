@@ -26,8 +26,8 @@ oneTimeSetUp() {
     createReleaseLinkOnCiLfsShare() {
         mockedCommand "createReleaseLinkOnCiLfsShare $@"
     }
-    copyArtifactsToWorkspace() {
-        mockedCommand "copyArtifactsToWorkspace $@"
+    copyAndExtractBuildArtifactsFromProject() {
+        mockedCommand "copyAndExtractBuildArtifactsFromProject $@"
         mkdir -p ${WORKSPACE}/workspace/bld/bld-fsmci-summary/
         echo LABEL_NAME > ${WORKSPACE}/workspace/bld/bld-fsmci-summary/label
         return
@@ -87,7 +87,7 @@ mustHavePreparedWorkspace
 getConfig LFS_CI_uc_update_ecl_url
 getBuildJobNameFromFingerprint 
 getBuildBuildNumberFromFingerprint 
-copyArtifactsToWorkspace LFS_CI_-_trunk_-_Build 1234 externalComponents
+copyAndExtractBuildArtifactsFromProject LFS_CI_-_trunk_-_Build 1234 externalComponents
 updateAndCommitEcl http://svn/ecl/url1
 updateAndCommitEcl http://svn/ecl/url2
 createArtifactArchive 

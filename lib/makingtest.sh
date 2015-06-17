@@ -60,8 +60,8 @@ makingTest_testXmloutput() {
     mustHaveValue "${timeoutInSeconds}" "timeoutInSeconds"
 
     info "running test suite"
-    execute timeout -s 9 ${timeoutInSeconds} make -C ${testSuiteDirectory}      \
-                    --ignore-errors ${testOptions}\
+    execute timeout -s 9 ${timeoutInSeconds} make -C ${testSuiteDirectory} \
+                    --ignore-errors ${testOptions}                         \
                     test-xmloutput
 
     return

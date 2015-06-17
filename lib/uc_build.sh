@@ -135,6 +135,8 @@ ci_job_build_version() {
 
     local jobDirectory=$(getBuildDirectoryOnMaster)
     local lastSuccessfulJobDirectory=$(getBuildDirectoryOnMaster ${JOB_NAME} lastSuccessfulBuild)
+
+    # TODO: demx2fk3 2015-06-17 FIXME: if there is a problem with SSH / DNS, the build number will be _0001
     local oldLabel=$(runOnMaster "test -d ${lastSuccessfulJobDirectory} && cat ${lastSuccessfulJobDirectory}/label 2>/dev/null")
     info "old label ${oldLabel} from ${lastSuccessfulJobDirectory} on master"
 
