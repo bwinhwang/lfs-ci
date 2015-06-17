@@ -505,9 +505,9 @@ class CreateBranchLRC extends CreateBranch {
 
         // The LRC build job has 2x "_-_LRC_-_" in its name.
         if(job.getName() == this.env.get("MAIN_BUILD_JOB_NAME_LRC")) {
-            this.inf("replace LFS_CI_-_LRC_-_${this.jobNameReplace}_-_ by LFS_CI_-_LRC_-_${this.newBranch}_-_ in jobs config.xml.")
+            this.inf("replace LFS_CI_-_${this.jobNameReplace}_-_ by LFS_CI_-_${this.newBranch}_-_ in jobs config.xml.")
             processFileInplace(configFile) { text ->
-                text.replaceAll("LFS_CI_-_LRC_-_"+this.jobNameReplace+"_-_", "LFS_CI_-_LRC_-_"+this.newBranch+"_-_")
+                text.replaceAll("LFS_CI_-_"+this.jobNameReplace+"_-_", "LFS_CI_-_"+this.newBranch+"_-_")
             }
         } else {
             this.inf("replace -_${this.jobNameReplace}_- by -_${this.newBranch}_- in jobs config.xml.")
