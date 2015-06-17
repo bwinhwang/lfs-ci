@@ -750,6 +750,9 @@ class CreateViews extends Common {
         proc.waitFor()
         config = proc.text
 
+        def sectionedViewTmpl = new File(configXmlFile)
+
+
 
 
         // Extra handling for FSMR4
@@ -760,7 +763,7 @@ class CreateViews extends Common {
 
 
 
-        def sectionedViewTmpl = new File(configXmlFile)
+
         this.inf("write config xml file to ${configXmlFile}")
         sectionedViewTmpl.write(config)
 
