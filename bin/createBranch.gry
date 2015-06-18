@@ -120,7 +120,7 @@ createBranch.main()
 
 // Create sectioned and SCM view for the new branch
 // TODO: Also create two classes (CreateView and CreateViewLRC)
-createViews = new CreateViews(src_branch, new_branch, lrc, debug, env, out, dev_branch)
+createViews = new CreateViews(src_branch, new_branch, lrc, debug, env, out, dev_branch, fsmr4)
 createViews.main()
 
 
@@ -581,8 +581,8 @@ class CreateViews extends Common {
      * @param env some variables are shipped via this hash table 
      * @param out the output stream so that this.out.println() works.
      */
-    CreateViews(srcBranch, newBranch, lrc, debug, env, out, devBranch) {
-        super(srcBranch, newBranch, debug, env, out, devBranch, false)
+    CreateViews(srcBranch, newBranch, lrc, debug, env, out, devBranch, fsmr4) {
+        super(srcBranch, newBranch, debug, env, out, devBranch, fsmr4)
         this.lrc = lrc
         this.jenkinsUrl = env.get("JENKINS_URL")
         this.apiToken = env.get("JENKINS_API_TOKEN")
@@ -749,6 +749,7 @@ class CreateViews extends Common {
         sectionedViewTmpl.write(config)
 
         if(this.fsmr4) {
+            this.inf("-> replace <includeRegex>LFS_CI_-_(${this.srcBranch}|fsmr4) by <includeRegex>LFS_CI_-_(${this.newBranch}|${this.newBranch}_FSMR4)")
             this.processFileInplace(sectionedViewTmpl) { text ->
                 text.replace("<includeRegex>LFS_CI_-_(${this.srcBranch}|fsmr4)", "<includeRegex>LFS_CI_-_(${this.newBranch}|${this.newBranch}_FSMR4)")
             }

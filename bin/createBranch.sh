@@ -17,6 +17,7 @@ info "# SOURCE_RELEASE:       $SOURCE_RELEASE"
 info "# ECL_URLS:             $ECL_URLS"
 info "# DESCRIPTION:          $DESCRIPTION"
 info "# COMMENT:              $COMMENT"
+info "# FSMR4:                $FSMR4"
 info "# DO_SVN:               $DO_SVN"
 info "# DO_JENKINS:           $DO_JENKINS"
 info "# DUMMY_COMMIT:         $DUMMY_COMMIT"
@@ -28,8 +29,7 @@ info "# DEBUG:                $DEBUG"
 info "###############################################################"
 
 
-# TODO: Get it via getConfig()
-SVN_REPO="https://svne1.access.nsn.com/isource/svnroot/BTS_SC_LFS"
+SVN_REPO=$(getConfig branchingSvnServer)
 SVN_DIR="os"
 SRC_PROJECT="src-project"
 VARS_FILE="VARIABLES.TXT"
@@ -50,12 +50,12 @@ fi
 
 
 __checkParams() {
-    [[ ! ${SRC_BRANCH} ]] && { error "SRC_BRANCH is missing"; exit 1; }
-    [[ ! ${NEW_BRANCH} ]] && { error "NEW_BRANCH is missing"; exit 1; }
-    [[ ! ${REVISION} ]] && { error "REVISION is missing"; exit 1; }
-    [[ ! ${SOURCE_RELEASE} ]] && { error "SOURCE_RELEASE is missing"; exit 1; }
-    [[ ! ${ECL_URLS} ]] && { error "ECL_URLS is missing"; exit 1; }
-    [[ ! ${COMMENT} ]] && { error "COMMENT is missing"; exit 1; }
+    mustHaveValue "${SRC_BRANCH}" "SRC_BRANCH"
+    mustHaveValue "${NEW_BRANCH}" "NEW_BRANCH"
+    mustHaveValue "${REVISION}" "REVISION"
+    mustHaveValue "${SOURCE_RELEASE}" "SOURCE_RELEASE"
+    mustHaveValue "${ECL_URLS}" "ECL_URLS"
+    mustHaveValue "${COMMENT}" "COMMENT"
 
     if [[ ${LRC} == true ]]; then
         echo ${NEW_BRANCH} | grep -q -e "^LRC_" && { error "LRC: \"LRC_\" is automatically added as prefix to NEW_BRANCH"; exit 1; }
@@ -71,18 +71,15 @@ __checkParams() {
 __preparation(){
     JENKINS_API_TOKEN=$(getConfig jenkinsApiToken)
     JENKINS_API_USER=$(getConfig jenkinsApiUser)
-    CONFIGXML_TEMPLATE_DIR=$(getConfig sectionedViewTemplateDir)
-    CONFIGXML_TEMPLATE_SUFFIX=$(getConfig sectionedViewTemplateSuffix)
     JOBS_EXCLUDE_LIST=$(getConfig branchingExcludeJobs)
     MAIN_BUILD_JOB_NAME_LRC=$(getConfig jenkinsMainBuildJobName_LRC)
 
-    mustHaveValue "${JENKINS_API_TOKEN}" "Jenkins API token is missing."
-    mustHaveValue "${JENKINS_API_USER}" "Jenkins API user is missing."
+    mustHaveValue "${MAIN_BUILD_JOB_NAME_LRC}" "MAIN_BUILD_JOB_NAME_LRC"
+    mustHaveValue "${JENKINS_API_TOKEN}" "JENKINS_API_TOKEN"
+    mustHaveValue "${JENKINS_API_USER}" "JENKINS_API_USER"
 
     echo JENKINS_API_TOKEN=${JENKINS_API_TOKEN} > ${WORKSPACE}/${VARS_FILE}
     echo JENKINS_API_USER=${JENKINS_API_USER} >> ${WORKSPACE}/${VARS_FILE}
-    echo CONFIGXML_TEMPLATE_DIR=${CONFIGXML_TEMPLATE_DIR} >> ${WORKSPACE}/${VARS_FILE}
-    echo CONFIGXML_TEMPLATE_SUFFIX=${CONFIGXML_TEMPLATE_SUFFIX} >> ${WORKSPACE}/${VARS_FILE}
     echo JOBS_EXCLUDE_LIST=${JOBS_EXCLUDE_LIST} >> ${WORKSPACE}/${VARS_FILE}
     echo MAIN_BUILD_JOB_NAME_LRC=${MAIN_BUILD_JOB_NAME_LRC} >> ${WORKSPACE}/${VARS_FILE}
 }
