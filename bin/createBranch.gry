@@ -2,15 +2,22 @@
 // Groovy script to crate a new branch in the LFS Jenkins.
 //
 // 1. Take environment vars and parameters from Jenkins job.
-// 2. Create a list view and name it after the new branch.
-// 3. Add this new list view to the SCM view.
-// 4. Copy the jobs from source branch to new branch.
-// 5. On the new job update the custom workspace if existing.
-// 6. Reconfigure the new job by altering config.xml.
-// 7. Copy and configure promotions if there are any.
-// 8. Reload the configuration of the new job.
-// 9. Create a sectioned view for the new branch.
+// 2. Copy the jobs from src-branch to new-branch.
+// 3. Update the job configuration by editing config.xml .
+// 4. On the new job update the custom workspace if existing.
+// 5. Copy and configure promotions if there are any.
+// 6. Reload the configuration of the new job.
+// 7. In Case of LRC create the SCM view
+// 8. Create  sectioned view for the new branch.
+//     - Copy the config.xml from src-branch and edit it
 ////////////////////////////////////////////////////////////////////////////////
+
+/******************************************************************
+ * Note:
+ ******************************************************************
+ * As soon as fsmr4 doesn't need extra handling, the fsmr4) parts
+ * can be removed.
+ ******************************************************************/
 
 
 import jenkins.model.Jenkins
@@ -118,7 +125,7 @@ if(!lrc) {
 }
 createBranch.main()
 
-// Create sectioned and SCM view for the new branch
+// Create sectioned and SCM (LRC only) view for the new branch
 // TODO: Also create two classes (CreateView and CreateViewLRC)
 createViews = new CreateViews(src_branch, new_branch, lrc, debug, env, out, dev_branch, fsmr4)
 createViews.main()
@@ -215,6 +222,19 @@ class CreateBranch extends Common {
     def jobNameReplace
     def jobs2Exclude
 
+    /**
+     * Constructor
+     *
+     * @param srcBranch name of the branch (eg. trunk).
+     * @param newBranch name of the nes branch (eg. FB1408).
+     * @param debug true debug mode false otherwise
+     * @param comment the comment
+     * @param activateRootJobs true if the root jobs shall be activated, false otherwise
+     * @param env some variables are shipped via this hash table 
+     * @param out the output stream so that this.out.println() works.
+     * @param devBranch true if this is a development branch, false otherwise
+     * @param fsmr4 true if fsmr4 is needed, false otherwise
+     */
     CreateBranch(srcBranch, newBranch, debug, comment, activateRootJobs, env, out, devBranch, fsmr4) {
         super(srcBranch, newBranch, debug, env, out, devBranch, fsmr4)
         this.comment = comment
@@ -266,6 +286,9 @@ class CreateBranch extends Common {
         }
     }
 
+    /**
+     * Save (reload) "job" with configuration from "configFile".
+     */
     void reloadJobConfig(job, configFile) {
         InputStream is = new FileInputStream(configFile);
         job.updateByXml(new StreamSource(is));
@@ -273,6 +296,9 @@ class CreateBranch extends Common {
         this.inf("reloaded config for job \"$job.name\"")
     }
 
+    /**
+     * Update config.xml of newJob.
+     */
     File updateJobConfig(job, newJob) {
         def configXMLFile = newJob.getConfigFile();
         def configFile = configXMLFile.getFile();
@@ -304,7 +330,7 @@ class CreateBranch extends Common {
     }
 
     /**
-     * Copy and configure (altering config.xml) the promotions of "job" to "newJob".
+     * Copy and configure the promotions of "job" to "newJob".
      */
     void copyPromotions(job, newJob) {
         def promoSrcDir = new File("${this.env.get("JENKINS_HOME")}/jobs/${job.name}/promotions")
@@ -356,6 +382,10 @@ class CreateBranch extends Common {
         }
     }
 
+    /**
+      * Return true if "job_name" is in the list of jobs to be excluded,
+      * false otherwise.
+      */
     boolean job2exclude(job_name) {
         if(job_name in this.jobs2Exclude) {
             return true
@@ -365,8 +395,8 @@ class CreateBranch extends Common {
     }
 
     /**
-     * Add jobToAdd to this.jobsList if it is not yet added.
-     * Return true if added, false otherwise.
+     * Add "jobToAdd" to this.jobsList if it is not yet added.
+     * Return true if job was added to the list, false otherwise.
      */
     boolean addJob(jobToAdd) {
         for(job in this.jobsList) {
@@ -404,9 +434,9 @@ class CreateBranch extends Common {
 
     /**
      * Copy the job "job" to a new job with a new name.
-     * The new name of the new job is derived from the original 
-     * job and the name of the branch is replaced. In case the 
-     * new job ends with "_-_Build" it is disabled.
+     * The name of the new job is copied from the original job and
+     * the branch name is replaced. In case the new job ends with
+     * "_-_Build" it is disabled.
      */
     hudson.model.Job copyJob(job) {
         def newName = null
@@ -459,7 +489,7 @@ class CreateBranch extends Common {
     }
 
     /**
-     * Copy each jobs which is in this.jobsList.
+     * Copy each jobs which is part of this.jobsList.
      */
     void copyJobs() {
         def newJob = null
@@ -495,7 +525,7 @@ class CreateBranch extends Common {
 
 
 /**
- * Class which can copy and configure jobs for a new branch. 
+ * Class which can copy and configure jobs for a new LRC branch. 
  */
 class CreateBranchLRC extends CreateBranch {
 
@@ -525,6 +555,10 @@ class CreateBranchLRC extends CreateBranch {
         this.activateJobs()
     }
 
+    /**
+     * Update config.xml of newJob.
+     * Return altered config.xml file
+     */
     File updateJobConfig(job, newJob) {
         def configXMLFile = newJob.getConfigFile();
         def configFile = configXMLFile.getFile();
@@ -574,12 +608,14 @@ class CreateViews extends Common {
     /**
      * Constructor
      *
-     * @param srcBranch Name of the branch (eg. trunk).
-     * @param newBranch Name of the nes branch (eg. FB1408).
+     * @param srcBranch name of the branch (eg. trunk).
+     * @param newBranch name of the nes branch (eg. FB1408).
      * @param lrc true in case of LRC false otherwise.
      * @param debug true debug mode false otherwise
      * @param env some variables are shipped via this hash table 
      * @param out the output stream so that this.out.println() works.
+     * @param devBranch true if this is a development branch, false otherwise
+     * @param fsmr4 true if fsmr4 is needed, false otherwise
      */
     CreateViews(srcBranch, newBranch, lrc, debug, env, out, devBranch, fsmr4) {
         super(srcBranch, newBranch, debug, env, out, devBranch, fsmr4)
