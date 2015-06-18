@@ -22,7 +22,7 @@ import java.io.File
 import java.io.FileInputStream;
 
 
-println("\n\nRunning script createBranch2.gry\n")
+println("\n\nRunning script createBranch.gry\n")
 
 def j = Jenkins.instance
 
@@ -551,38 +551,6 @@ class CreateBranchLRC extends CreateBranch {
 
         this.inf("updated job configuration for job \"$newJob.name\"")
         return configFile
-    }
-
-    /**
-     * Collects the jobs to be copied in the list this.jobsList.
-     * If there are jobs which should not be copied add them to
-     * the parameter "branchingExcludeJobs" in the configuration.
-     *
-     * TODO: move to CreateBranch
-     */
-    void collectJobs() {
-        def jobsList = []
-        def numJobs = 0
-        this.inf("Creating list of jobs to be copied.")
-
-        for(job in this.srcBranchViewObj.getItems()) {
-            if(job2exclude(job.name)) {
-                this.inf("excluding job ${job.name}.")
-                continue
-            }
-
-            if(job.getName().find("LRC")) {
-                jobsList.add(job)
-            } else {
-                this.out.println("[WARNING] Job $job.name can not be added to the list of jobs to be copied.")
-                continue
-            }
-            numJobs++
-            this.inf("Added job $job.name.")
-        }
-
-        this.jobsList = jobsList
-        this.inf("$numJobs jobs to be copied.\n")
     }
 }
 
