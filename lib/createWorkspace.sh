@@ -408,7 +408,7 @@ mustHavePreparedWorkspace() {
     mustHaveCleanWorkspace
 
     local requiredArtifacts=$(getConfig LFS_CI_prepare_workspace_required_artifacts)
-    copyArtifactsToWorkspace "${upstreamProject}" "${upstreamBuild}" "${requiredArtifacts}"
+    copyAndExtractBuildArtifactsFromProject "${upstreamProject}" "${upstreamBuild}" "${requiredArtifacts}"
 
     mustHaveNextLabelName
     local labelName=$(getNextReleaseLabel)
