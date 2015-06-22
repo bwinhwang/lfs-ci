@@ -174,15 +174,15 @@ usecase_LFS_KNIFE_WFT_TRIGGER() {
     jobNumber=$(echo ${jobResult} | awk -F'#' '{print $1}' | sed -e 's/#//')
     jobStatus=$(echo ${jobResult} | awk '{print $8}')
 
-    #if [[ "${jobStatus}" == "FAILURE" ]]; then
-    #    curl -k ${wftHostAddress}/ext/knife/${knifeId}/failed?access_key=${wftApiKey}&result_url=${jenkinsMasterAddress}/job/${KNIFE_BUILD_JOB}/${jobNumber}
-    #    error "Jenkins knife build Job failed: ${jenkinsMasterAddress}/job/${KNIFE_BUILD_JOB}/${jobNumber}"
-    #fi
+    if [[ "${jobStatus}" == "FAILURE" ]]; then
+        curl -k ${wftHostAddress}/ext/knife/${knifeId}/failed?access_key=${wftApiKey}&result_url=${jenkinsMasterAddress}/job/${KNIFE_BUILD_JOB}/${jobNumber}
+        error "Jenkins knife build Job failed: ${jenkinsMasterAddress}/job/${KNIFE_BUILD_JOB}/${jobNumber}"
+    fi
 
-    #if [[ "${jobStatus}" == "SUCCESS" ]]; then
-    #    curl -k ${wftHostAddress}/ext/knife/${knifeId}/succeeded?access_key=${wftApiKey}
-    #    info "Jenkins knife build Job succeeded: ${jenkinsMasterAddress}/job/${KNIFE_BUILD_JOB}/${jobNumber}"
-    #fi
+    if [[ "${jobStatus}" == "SUCCESS" ]]; then
+        curl -k ${wftHostAddress}/ext/knife/${knifeId}/succeeded?access_key=${wftApiKey}
+        info "Jenkins knife build Job succeeded: ${jenkinsMasterAddress}/job/${KNIFE_BUILD_JOB}/${jobNumber}"
+    fi
 
     # * get artifacts / location of the results of the knife
 
