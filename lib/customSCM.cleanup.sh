@@ -259,8 +259,9 @@ _lfsArtifactsRemoveOldArtifacts() {
     return
 }
 _lfsCiLogfiles() {
+    requiredParameters LFS_CI_ROOT
     local resultFile=$1
-    find /ps/lfs/ci/log/ -type f -ctime +60 | sed "s:^:1 :" > ${resultFile}
+    find ${LFS_CI_ROOT}/log/ -type f -ctime +60 | sed "s:^:1 :" > ${resultFile}
     return
 }
 
