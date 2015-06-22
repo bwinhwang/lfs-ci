@@ -495,16 +495,29 @@ mustHaveMakingTestRunningTarget() {
 	mustExistFile ${testSuiteDirectory}/testsuite.mk
 
     info "checking, if target is up and running (with ssh)..."
-    local canDoWaitPrompt=$(getConfig LFS_CI_uc_test_TMF_can_run_waitprompt)
-    if [[ ${canDoWaitPrompt} ]] ; then
-        execute make -C ${testSuiteDirectory} waitprompt
-    fi
-    execute make -C ${testSuiteDirectory} waitssh
-    debug "sleeping for 60 seconds..."
-    execute sleep 60
+    local rebootRetry=$(getConfig LFS_CI_uc_test_TMF_retry_count_until_target_should_be_up)
+    while [[ ${rebootRetry} -gt 0 ]] ; do
 
-    info "target is up."
-
+        # idea: wait on ssh first with -i == ignore error.
+        # if the target is up, everything is fine and dandy.
+        # if not, retry until rebootRetry is 0
+        # in this case (rebootRetry == 0), we execute "make waitssh" without 
+        # -i option. So it wil raise an error, if make waitssh fail.
+        # this will raise an error and everything exists.
+        local opt=-i
+        rebootRetry=$((rebootRetry - 1))
+        [[ ${rebootRetry} -eq 0 ]] && opt=
+        if execute ${opt} make -C ${testSuiteDirectory} waitssh ; then
+            # target is up and running 
+            debug "sleeping for 60 seconds..."
+            execute sleep 60
+            info "target is up."
+            return
+        fi
+        info "TMF waitssh timeout, rebooting the target and trying it again..."
+        execute make -C ${testSuiteDirectory} powercycle
+    done
+    fatal "this code should not be reached."
     return
 }
 
