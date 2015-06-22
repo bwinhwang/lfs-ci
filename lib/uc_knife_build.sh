@@ -108,7 +108,6 @@ usecase_LFS_KNIFE_BUILD_PLATFORM() {
     return
 }
 
-
 ## @fn      usecase_LFS_KNIFE_PACKAGE()
 #  @brief   run the usecase lfs knife package
 #  @param   <none>
@@ -129,8 +128,13 @@ usecase_LFS_KNIFE_PACKAGE() {
     return
 }
 
+## @fn     usecase_LFS_KNIFE_WFT_TRIGGER
+#  @brief  interface from/to WFT for LFS knifing
+#  @param  <none>
+#  @param  <none>
 usecase_LFS_KNIFE_WFT_TRIGGER() {
     initTempDirectory
+    local zipFile="knife.zip"
     local xmlFile=$(createTempFile)
     local knifeId=$KNIFE_ID
     local wftHostAddress=$(getConfig WORKFLOWTOOL_hostname)
@@ -140,18 +144,21 @@ usecase_LFS_KNIFE_WFT_TRIGGER() {
     mustHaveValue "${wftApiKey}" "wftApiKey"
     mustHaveValue "${WORKSPACE}" "WORKSPACE"
 
+    info "kinfeId: ${knifeId}"
+
     # Get XML from WFT
     curl -k ${wftHostAddress}/ext/knife/${knifeId}/info -o ${xmlFile}
+
+    info "WFT xml file\n: ${xmlFile}"
 
     # Get info from XML and set build description
     local ftpPath=$(${LFS_CI_ROOT}/bin/xpath -e "/knife/dir/text()" $xmlFile)
     local requestor=$(${LFS_CI_ROOT}/bin/xpath -e "/knife/requestor/text()" $xmlFile)
     local lfsBaseline=$(${LFS_CI_ROOT}/bin/xpath -e "/knife/baseline/text()" $xmlFile)
-    setBuildDescription "${JOB_NAME}" "${BUILD_NUMBER}" "Knife Id: ${knifeId}, requestor: ${requestor}, LFS baseline: ${lfsBaseline}"
+    setBuildDescription "${JOB_NAME}" "${BUILD_NUMBER}" "knife id: ${knifeId}, requestor: ${requestor}, lfs baseline: ${lfsBaseline}"
 
     # wft api: set knife build as started
-    echo curl -k ${wftHostAddress}/ext/knife/${knifeId}/started?access_key=${wftApiKey}
-    ###curl -k ${wftHostAddress}/ext/knife/${knifeId}/started?access_key=${wftApiKey}
+    curl -k ${wftHostAddress}/ext/knife/${knifeId}/started?access_key=${wftApiKey}
 
     # get knife.zip from rotta location via ftp
     # check if exists
@@ -159,16 +166,15 @@ usecase_LFS_KNIFE_WFT_TRIGGER() {
     source ${LFS_CI_ROOT}/lib/autoftp.sh
     ftpPath=$(echo $ftpPath | cut -d'\' -f5- | sed -e 's,\\,/,')
     cd $WORKSPACE
-    ftpGet $ftpPath knife.zip
-    [[ ! -e knife.zip ]] && error "File knife.zip does not exist."
-    unzip knife.zip
+    ftpGet $ftpPath ${zipFile}
+    [[ ! -e ${zipFile} ]] && error { "File ${zipFile} does not exist."; exit 1; }
+    unzip ${zipFile}
 
     # trigger lfs knife build job with required parameters
     mustHaveValue "$KNIFE_BUILD_JOB" "KNIFE_BUILD_JOB"
     local jenkinsCmdl=$(getConfig jenkinsCli)
     local jenkinsMasterAddress=$(getConfig jenkinsMasterServerHttpsUrl)
     info "Trigger jenkins job $KNIFE_BUILD_JOB and wait until it is finished."
-    #echo java -jar ${jenkinsCmdl} -s ${jenkinsMasterAddress} build $KNIFE_BUILD_JOB -p "lfs.patch=${WORKSPACE}/lfs.patch" -p "KNIFE_LFS_BASELINE=${lfsBaseline}"
     local jobResult=$(java -jar ${jenkinsCmdl} -s ${jenkinsMasterAddress} build $KNIFE_BUILD_JOB -p "lfs.patch=${WORKSPACE}/lfs.patch" -p "KNIFE_LFS_BASELINE=${lfsBaseline}" -s)
 
     jobNumber=$(echo ${jobResult} | awk -F'#' '{print $1}' | sed -e 's/#//')
@@ -177,11 +183,13 @@ usecase_LFS_KNIFE_WFT_TRIGGER() {
     if [[ "${jobStatus}" == "FAILURE" ]]; then
         curl -k ${wftHostAddress}/ext/knife/${knifeId}/failed?access_key=${wftApiKey}&result_url=${jenkinsMasterAddress}/job/${KNIFE_BUILD_JOB}/${jobNumber}
         error "Jenkins knife build Job failed: ${jenkinsMasterAddress}/job/${KNIFE_BUILD_JOB}/${jobNumber}"
-    fi
-
-    if [[ "${jobStatus}" == "SUCCESS" ]]; then
+        exit 1
+    elif [[ "${jobStatus}" == "SUCCESS" ]]; then
         curl -k ${wftHostAddress}/ext/knife/${knifeId}/succeeded?access_key=${wftApiKey}
         info "Jenkins knife build Job succeeded: ${jenkinsMasterAddress}/job/${KNIFE_BUILD_JOB}/${jobNumber}"
+    else
+        error "Unkown status of Job $KNIFE_BUILD_JOB"
+        exit 1
     fi
 
     # * get artifacts / location of the results of the knife
