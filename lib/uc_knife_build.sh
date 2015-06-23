@@ -60,8 +60,6 @@
 [[ -z ${LFS_CI_SOURCE_special_build}   ]] && source ${LFS_CI_ROOT}/lib/special_build.sh
 [[ -z ${LFS_CI_SOURCE_uc_lfs_package}  ]] && source ${LFS_CI_ROOT}/lib/uc_lfs_package.sh
 
-source ${LFS_CI_ROOT}/lib/jenkins.sh
-
 ## @fn      usecase_LFS_KNIFE_BUILD()
 #  @brief   run the usecase LFS Knife Build
 #  @param   <none>
