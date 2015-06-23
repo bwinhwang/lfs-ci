@@ -43,7 +43,7 @@ if [[ "${SRC_BRANCH}" == "trunk" ]]; then
 else
     LOCATIONS="locations-${SRC_BRANCH}"
     LOCATIONS_LRC="locations-LRC_${SRC_BRANCH}"
-    LOCATIONS_FSMR4="locations-${srcBranch}_FSMR4"
+    LOCATIONS_FSMR4="locations-${SRC_BRANCH}_FSMR4"
     SVN_PATH="${SVN_DIR}/${SRC_BRANCH}/trunk"
     [[ $LRC == true ]] && SVN_PATH="${SVN_DIR}/LRC_${SRC_BRANCH}/trunk"
 fi
