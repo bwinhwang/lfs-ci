@@ -61,7 +61,6 @@
 [[ -z ${LFS_CI_SOURCE_uc_lfs_package}  ]] && source ${LFS_CI_ROOT}/lib/uc_lfs_package.sh
 [[ -z ${LFS_CI_SOURCE_jenkins}         ]] && source ${LFS_CI_ROOT}/lib/jenkins.sh
 
-source ${LFS_CI_ROOT}/lib/jenkins.sh
 
 ## @fn      usecase_LFS_KNIFE_BUILD()
 #  @brief   run the usecase LFS Knife Build
@@ -71,8 +70,6 @@ usecase_LFS_KNIFE_BUILD() {
     requiredParameters KNIFE_LFS_BASELINE REQUESTOR_USERID
 
     echo $KNIFE_LFS_BASELINE $REQUESTOR_USERID
-
-    exit 0
 
     # get the information from WFT (opt)
     # get the information from jenkins
