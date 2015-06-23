@@ -59,6 +59,7 @@
 [[ -z ${LFS_CI_SOURCE_subversion}      ]] && source ${LFS_CI_ROOT}/lib/subversion.sh
 [[ -z ${LFS_CI_SOURCE_special_build}   ]] && source ${LFS_CI_ROOT}/lib/special_build.sh
 [[ -z ${LFS_CI_SOURCE_uc_lfs_package}  ]] && source ${LFS_CI_ROOT}/lib/uc_lfs_package.sh
+[[ -z ${LFS_CI_SOURCE_jenkins}         ]] && source ${LFS_CI_ROOT}/lib/jenkins.sh
 
 source ${LFS_CI_ROOT}/lib/jenkins.sh
 
@@ -192,8 +193,6 @@ usecase_LFS_KNIFE_WFT_TRIGGER() {
         exit 1
     fi
 
-    # * get artifacts / location of the results of the knife
-
-    # * wft api: push (location of the results of the knife) s3 url to wft 
+    # * wft api: push (location of the results of the knife) s3 url to wft  -> in den artifacts fom knife package job (readme file).
     ### Please note, that currently S3 URL can be stored starting with next WFT version (after 29th of june)
 }
