@@ -22,6 +22,8 @@ ci_job_admin() {
         synchronizeShare)             synchronizeShare                      ;;
         genericShareCleanup)          genericShareCleanup                   ;;
         createLfsBaselineListFromEcl) createLfsBaselineListFromEcl          ;;
+        createBranch)                 createBranch                          ;;
+        deleteBranch)                 deleteBranch                          ;;
         *)
             error "subjob not known (${taskName})"
             exit 1;
@@ -368,4 +370,22 @@ createLfsBaselineListFromEcl() {
 
     info "done."
     return
+}
+
+## @fn      createBranch()
+#  @brief   create a LFS branch
+#  @param   <none>
+#  @retrun  <none>
+createBranch() {
+    requiredParameters WORKSPACE
+    ${LFS_CI_ROOT}/bin/createBranch.sh
+}
+
+## @fn      deleteBranch()
+#  @brief   delete a LFS branch
+#  @param   <none>
+#  @retrun  <none>
+deleteBranch() {
+    requiredParameters WORKSPACE
+    ${LFS_CI_ROOT}/bin/deleteBranch.sh
 }
