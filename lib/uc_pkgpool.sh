@@ -57,7 +57,7 @@ usecase_PKGPOOL_BUILD() {
 
     # TODO: demx2fk3 2015-03-09 add logfiles to artifacts
 
-    local releaseTag="$(execute -n sed -ne 's,^release \([^ ]*\) complete,\1,p' ${buildLogFile})"
+    local releaseTag="$(execute -n sed -ne 's,^\(\[[0-9 :-]*\] \)\?release \([^ ]*\) complete,\2,p' ${buildLogFile})"
     mustHaveValue "${releaseTag}" "release tag"
 
     info "new pkgpool release tag is ${releaseTag}"
