@@ -169,7 +169,7 @@ copyArtifactsToWorkspace() {
     mustHaveWorkspaceName
 
     execute -n -r 10 ssh ${server} \
-            /ps/lfs/ci/bin/getDownStreamProjects -j ${jobName}     \
+            ${LFS_CI_ROOT}/bin/getDownStreamProjects -j ${jobName}     \
                                                  -b ${buildNumber} \
                                                  -h ${serverPath} > ${downStreamprojectsFile}
 
