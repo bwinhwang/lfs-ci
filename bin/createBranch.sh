@@ -43,7 +43,7 @@ if [[ "${SRC_BRANCH}" == "trunk" ]]; then
 else
     LOCATIONS="locations-${SRC_BRANCH}"
     LOCATIONS_LRC="locations-LRC_${SRC_BRANCH}"
-    LOCATIONS_FSMR4="locations-${srcBranch}_FSMR4"
+    LOCATIONS_FSMR4="locations-${SRC_BRANCH}_FSMR4"
     SVN_PATH="${SVN_DIR}/${SRC_BRANCH}/trunk"
     [[ $LRC == true ]] && SVN_PATH="${SVN_DIR}/LRC_${SRC_BRANCH}/trunk"
 fi
@@ -121,8 +121,8 @@ svnCopyBranch() {
 
     local srcBranch=$1
     local newBranch=$2
-    mustHaveValue "${srcBranch}" "source branch"
-    mustHaveValue "${newBranch}" "new branch"
+    mustHaveValue "${srcBranch}" "srcBranch"
+    mustHaveValue "${newBranch}" "newBranch"
 
     local message="initial creation of ${newBranch} branch based on ${srcBranch} rev. ${REVISION}. \
     DESCRIPTION: svn cp -r${REVISION} --parents ${SVN_REPO}/${SVN_PATH} ${SVN_REPO}/${SVN_DIR}/${newBranch}/trunk. \
@@ -132,6 +132,11 @@ svnCopyBranch() {
         __cmd svn copy -r ${REVISION} -m \"${message}\" --parents ${SVN_REPO}/${SVN_PATH} \
             ${SVN_REPO}/${SVN_DIR}/${newBranch}/trunk;
     }
+
+    if [[ $? ]]; then
+        error "svn copy failed."
+        exit 1
+    fi
 }
 
 ## @fn      svnCopyBranchLRC()
@@ -158,21 +163,23 @@ svnCopyLocations() {
     local newBranch=$3
     local branchLocation=$newBranch
     mustHaveValue "${locations}" "locations"
-    mustHaveValue "${srcBranch}" "source branch"
-    mustHaveValue "${newBranch}" "new branch"
+    mustHaveValue "${srcBranch}" "srcBranch"
+    mustHaveValue "${newBranch}" "newBranch"
 
     svn ls ${SVN_REPO}/${SVN_DIR}/trunk/bldtools/locations-${newBranch} || {
-            __cmd svn copy -m \"copy locations branch ${newBranch}\" ${SVN_REPO}/${SVN_DIR}/trunk/bldtools/${locations} \
-                ${SVN_REPO}/${SVN_DIR}/trunk/bldtools/locations-${newBranch};
-            __cmd svn checkout ${SVN_REPO}/${SVN_DIR}/trunk/bldtools/locations-${newBranch};
-            __cmd cd locations-${newBranch};
-            if [[ $srcBranch == trunk || $srcBranch == LRC_trunk ]]; then
-                __cmd sed -i -e "'s/\/os\/trunk\//\/os\/${branchLocation}\/trunk\//'" Dependencies;
-            else
-                __cmd sed -i -e "'s/\/os\/${srcBranch}\//\/os\/${branchLocation}\//'" Dependencies;
-            fi
-            __cmd svn commit -m \"added new location ${newBranch}.\";
-            __cmd svn delete -m \"removed bldtools, because they are always used from MAINTRUNK\" ${SVN_REPO}/${SVN_DIR}/${newBranch}/trunk/bldtools;
+        __cmd svn copy -m \"copy locations branch ${newBranch}\" \
+            ${SVN_REPO}/${SVN_DIR}/trunk/bldtools/${locations} \
+            ${SVN_REPO}/${SVN_DIR}/trunk/bldtools/locations-${newBranch};
+        __cmd svn checkout ${SVN_REPO}/${SVN_DIR}/trunk/bldtools/locations-${newBranch};
+        __cmd cd locations-${newBranch};
+        if [[ $srcBranch == trunk || $srcBranch == LRC_trunk ]]; then
+            __cmd sed -i -e "'s,/os/trunk/,/os/${branchLocation}/trunk/,'" Dependencies;
+        else
+            __cmd sed -i -e "'s,/os/${srcBranch}/,/os/${branchLocation}/,'" Dependencies;
+        fi
+        __cmd svn commit -m \"added location locations-${newBranch}.\";
+        __cmd svn delete -m \"removed bldtools, because they are always used from MAINTRUNK\" \
+            ${SVN_REPO}/${SVN_DIR}/${newBranch}/trunk/bldtools;
     }
 }
 
@@ -206,16 +213,21 @@ svnCopyLocationsFSMR4() {
 
     local srcBranch=$1
     local newBranch=$2
-    mustHaveValue "${srcBranch}" "source branch"
-    mustHaveValue "${newBranch}" "new branch"
+    local branchLocation=$newBranch
+    mustHaveValue "${srcBranch}" "srcBranch"
+    mustHaveValue "${newBranch}" "newBranch"
 
     svn ls ${SVN_REPO}/${SVN_DIR}/trunk/bldtools/locations-${newBranch}_FSMR4 || {
         __cmd svn copy -m \"copy locations branch ${newBranch}\" ${SVN_REPO}/${SVN_DIR}/trunk/bldtools/${LOCATIONS_FSMR4} \
             ${SVN_REPO}/${SVN_DIR}/trunk/bldtools/locations-${newBranch}_FSMR4;
         __cmd svn checkout ${SVN_REPO}/${SVN_DIR}/trunk/bldtools/locations-${newBranch}_FSMR4;
         __cmd cd locations-${newBranch}_FSMR4;
-        __cmd sed -i -e "'s/\/os\/${srcBranch}\//\/os\/${newBranch}\/trunk\//'" Dependencies;
-        __cmd svn commit -m "added new location ${newBranch}_FSMR4.";
+        if [[ $srcBranch == trunk ]]; then
+            __cmd sed -i -e "'s,/os/${srcBranch}/,/os/${branchLocation}/trunk/,'" Dependencies;
+        else
+            __cmd sed -i -e "'s,/os/${srcBranch}/,/os/${branchLocation}/,'" Dependencies;
+        fi
+        __cmd svn commit -m "added location ${LOCATIONS_FSMR4}.";
     }   
 }
 
@@ -268,9 +280,9 @@ createBranchInGit() {
         local gitServer=$(getConfig lfsGitServer)
         __getGitRevisionFile ${SRC_BRANCH}
         local gitRevisionFile=$GIT_REVISION_FILE
-        mustHaveValue "${newBranch}" "new branch"
-        mustHaveValue "${gitServer}" "git server"
-        mustHaveValue "${gitRevisionFile}" "git revision file"
+        mustHaveValue "${newBranch}" "newBranch"
+        mustHaveValue "${gitServer}" "gitServer"
+        mustHaveValue "${gitRevisionFile}" "gitRevisionFile"
 
         __cmd svn cat -r ${REVISION} ${gitRevisionFile}
         gitRevision=$(svn cat -r ${REVISION} ${gitRevisionFile})
@@ -300,7 +312,7 @@ svnDummyCommit() {
     fi
 
     local newBranch=$1
-    mustHaveValue "${newBranch}" "new branch"
+    mustHaveValue "${newBranch}" "newBranch"
 
     __cmd svn checkout ${SVN_REPO}/${SVN_DIR}/${newBranch}/trunk/main/${SRC_PROJECT}
     if [[ -d ${SRC_PROJECT} ]]; then
