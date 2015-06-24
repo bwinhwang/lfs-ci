@@ -4,7 +4,8 @@
  *
  * 1. Take the parameters from the Jenkins job.
  * 2. Check which jobs shall be deleted.
- * 3. If no jobs left also delete the view of the branch.
+ * 3. Delete the jobs.
+ * 4. If no branch left also delete the YYMM root-view.
  */
 
 // TODO: Delete branches in view "DEV"
@@ -169,7 +170,7 @@ def deleteRootView() {
         if(!root_view_obj.getAllItems()) {
             println("[DEBUG] delete root view: $root_view (dry run)")
         } else {
-            println("[DEBUG] Not deleting root view $root_view. There are still jobs from another branch.")
+            println("[DEBUG] Not deleting root view $root_view. There are still related jobs.")
         }
     } else {
         try {
@@ -214,22 +215,22 @@ deletedJobs = []
 def deleteJobs() {
     if(deleteJobs || LRC_deleteJobs) {
         for(p in j.getProjects()) {
-            job_name = p.getName()
+            def job_name = p.getName()
             if(deleteJobs && job_name.find("_"+branch+"_") && !job_name.find("LFS_CI_-_LRC_") && !job_name.find("LFS_Prod_-_LRC_") && !job_name.find("PKGPOOL_-_LRC_")) {
                 if(debug) {
-                    println("[DEBUG] delete job: $p.name (dry run)")
+                    println("[DEBUG] delete job: $job_name (dry run)")
                 } else {
-                    deletedJobs.add(p.getName())
+                    deletedJobs.add(job_name)
                     try {
                         p.delete()
-                        println("[INFO] deleted job: $p.name")
+                        println("[INFO] deleted job: $job_name")
                     } catch(e) {
-                        println("[WARNING] failed deleting job ${job.name}.")
+                        println("[WARNING] failed deleting job $job_name.")
                     }
                 }
             } else if(job_name.find("LFS_CI_-_LRC_"+branch+"_-") || job_name.find("LFS_Prod_-_LRC_"+branch+"_-") || job_name.find("PKGPOOL_-_LRC_"+branch+"_-")) {
                 lrc_jobs.add(p)
-                println("[DEBUG] added job $p.name to lrc_jobs list")
+                println("[DEBUG] added job $job_name to lrc_jobs list")
             }
         }
     }
@@ -247,7 +248,7 @@ def deleteLRCJobs() {
                     p.delete()
                     println("[INFO] deleted LRC job: $p.name")
                 } catch(e) {
-                    println("[WARNING] failed deleting job ${job.name}.")
+                    println("[WARNING] failed deleting job ${p.name}.")
                 }
             }
         }

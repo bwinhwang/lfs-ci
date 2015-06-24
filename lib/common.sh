@@ -660,7 +660,7 @@ _getUpstreamProjects() {
     local server=$(getConfig jenkinsMasterServerHostName)
     mustHaveValue "${server}" "server name"
     execute -n -r 10 ssh ${server}                    \
-            /ps/lfs/ci/bin/getUpStreamProject         \
+            ${LFS_CI_ROOT}/bin/getUpStreamProject     \
                     -j ${jobName}                     \
                     -b ${buildNumber}                 \
                     -h ${serverPath} > ${upstreamsFile}
@@ -692,7 +692,7 @@ _getDownstreamProjects() {
     local server=$(getConfig jenkinsMasterServerHostName)
     mustHaveValue "${server}" "server name"
     execute -n -r 10 ssh ${server}                      \
-            /ps/lfs/ci/bin/getDownStreamProjects        \
+            ${LFS_CI_ROOT}/bin/getDownStreamProjects    \
                     -j ${jobName}                       \
                     -b ${buildNumber}                   \
                     -h ${serverPath}  > ${downstreamFile}

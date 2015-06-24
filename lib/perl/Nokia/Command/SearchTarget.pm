@@ -21,6 +21,10 @@ sub prepare {
 
     $self->{opt_attributes} = \@attributes;
 
+    Nokia::Singleton::config()->addConfig( 
+            name  => "databaseName",
+            value => "booking" );
+
     return;
 }
 
