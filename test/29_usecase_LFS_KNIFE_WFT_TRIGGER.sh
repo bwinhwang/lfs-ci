@@ -23,7 +23,7 @@ oneTimeSetUp() {
         fi
     }
     setBuildDescription() {
-        mockedCommand "setBuildDescription $@"
+        true
     }
     ftpGet() {
         mockedCommand "ftpGet $@"
@@ -85,7 +85,6 @@ test_failed() {
     usecase_LFS_KNIFE_WFT_TRIGGER
     local expected=$(createTempFile)
 cat <<EOF > ${expected}
-setBuildDescription   knife-id: 92151, requestor: Erwin Ambrosch, lfs-baseline: PS_LFS_OS_2015_06_0150
 curl -k https://wft.inside.nsn.com/ext/knife/92151/started?access_key=hPPsISs8opgRADJsfG7wO7WlJ6uAIJSh7dfTQzE1
 ftpGet ROTTA/eambrosc knife.zip
 mustExistsFile knife.zip
@@ -111,7 +110,6 @@ test_success() {
     usecase_LFS_KNIFE_WFT_TRIGGER
     local expected=$(createTempFile)
 cat <<EOF > ${expected}
-setBuildDescription   knife-id: 92151, requestor: Erwin Ambrosch, lfs-baseline: PS_LFS_OS_2015_06_0150
 curl -k https://wft.inside.nsn.com/ext/knife/92151/started?access_key=hPPsISs8opgRADJsfG7wO7WlJ6uAIJSh7dfTQzE1
 ftpGet ROTTA/eambrosc knife.zip
 mustExistsFile knife.zip
