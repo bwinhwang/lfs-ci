@@ -330,6 +330,10 @@ requiredParameters() {
     return
 }
 
+## @fn      logRerunCommand()
+#  @brief   record the command incl. environment variables, which are needed to rerun the jenkins job
+#  @param   <none>
+#  @return  <none>
 logRerunCommand() {
     rerun=$(createTempFile)
     echo "#!/bin/bash" > ${rerun}
