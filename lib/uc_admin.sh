@@ -22,6 +22,8 @@ ci_job_admin() {
         synchronizeShare)             synchronizeShare                      ;;
         genericShareCleanup)          genericShareCleanup                   ;;
         createLfsBaselineListFromEcl) createLfsBaselineListFromEcl          ;;
+        createBranch)                 createBranch                          ;;
+        deleteBranch)                 deleteBranch                          ;;
         *)
             error "subjob not known (${taskName})"
             exit 1;
