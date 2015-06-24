@@ -34,6 +34,7 @@ ci_job_test_buildsystem() {
 
     info "starting tests..."
     execute make -C ${testSuiteDirectory} clean
+    execute make -C ${testSuiteDirectory} testconfig-overwrite
     execute make -C ${testSuiteDirectory} test-xmloutput
     execute mkdir ${workspace}/xml-reports/
     execute cp -f ${testSuiteDirectory}/xml-reports/*.xml* ${workspace}/xml-reports/
