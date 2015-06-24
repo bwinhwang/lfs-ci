@@ -4,14 +4,17 @@ use strict;
 use warnings;
 use XML::Simple;
 use Data::Dumper;
+use parent qw( Nokia::Command );
 
 sub prepare {
     my $self = shift;
-    return
+    $self->{fileName} = shift;
+    return;
 }
 
 sub execute {
-    my $xml = XMLin( $ARGV[0], ForceArray => 1 );
+    my $self = shift;
+    my $xml = XMLin( $self->{fileName}, ForceArray => 1 );
 
     for my $entry ( @{ $xml->{usages}->[0]->{entry} || [] } ) {
         my $string = $entry->{string}->[0];

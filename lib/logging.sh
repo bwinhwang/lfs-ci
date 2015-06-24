@@ -270,7 +270,7 @@ _stackTrace() {
         # Grab the source code of the line
         local code=$(sed -n "${BASH_LINENO[i]}{s/^\s*//;p}" "${BASH_SOURCE[i+1]}")
         local file=${BASH_SOURCE[i+1]}
-        printf "File %-30s Line %5d %-30s: %-100s\n"   \
+        printf 1>&2 "File %-30s Line %5d %-30s: %-100s\n"   \
                 ${file//${LFS_CI_ROOT}\//}              \
                 ${BASH_LINENO[i]}                \
                 ${FUNCNAME[i+1]}                 \
