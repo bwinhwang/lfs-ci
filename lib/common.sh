@@ -316,14 +316,30 @@ initTempDirectory() {
 #  @throws  raise an error, if there is a variable is not set or has no value
 requiredParameters() {
     local parameterNames=$@
+    if [[ -z ${LFS_CI_INTERNAL_RERUN_ENVIRONMENT_FILE} ]] ; then
+        export LFS_CI_INTERNAL_RERUN_ENVIRONMENT_FILE=$(createTempFile)
+    fi
     for name in ${parameterNames} ; do
         if [[ ! ${!name} ]] ; then
             error "required parameter ${name} is missing"
             exit 1
         fi
-        # echo "${name}=${!name}" >> ${workspace}/../.env
+        echo "export ${name}=\"${!name}\"" >> ${LFS_CI_INTERNAL_RERUN_ENVIRONMENT_FILE}
     done
 
+    return
+}
+
+## @fn      logRerunCommand()
+#  @brief   record the command incl. environment variables, which are needed to rerun the jenkins job
+#  @param   <none>
+#  @return  <none>
+logRerunCommand() {
+    rerun=$(createTempFile)
+    echo "#!/bin/bash" > ${rerun}
+    execute -n sort -u ${LFS_CI_INTERNAL_RERUN_ENVIRONMENT_FILE} >> ${rerun}
+    echo $0 ${JOB_NAME} >> ${rerun}
+    rawDebug ${rerun}
     return
 }
 
@@ -660,7 +676,7 @@ _getUpstreamProjects() {
     local server=$(getConfig jenkinsMasterServerHostName)
     mustHaveValue "${server}" "server name"
     execute -n -r 10 ssh ${server}                    \
-            /ps/lfs/ci/bin/getUpStreamProject         \
+            ${LFS_CI_ROOT}/bin/getUpStreamProject     \
                     -j ${jobName}                     \
                     -b ${buildNumber}                 \
                     -h ${serverPath} > ${upstreamsFile}
@@ -692,7 +708,7 @@ _getDownstreamProjects() {
     local server=$(getConfig jenkinsMasterServerHostName)
     mustHaveValue "${server}" "server name"
     execute -n -r 10 ssh ${server}                      \
-            /ps/lfs/ci/bin/getDownStreamProjects        \
+            ${LFS_CI_ROOT}/bin/getDownStreamProjects    \
                     -j ${jobName}                       \
                     -b ${buildNumber}                   \
                     -h ${serverPath}  > ${downstreamFile}
