@@ -229,7 +229,7 @@ svnCopyLocationsFSMR4() {
         else
             __cmd sed -i -e "'s,/os/${srcBranch}/,/os/${branchLocation}/,'" Dependencies;
         fi
-        __cmd svn commit -m "added location ${LOCATIONS_FSMR4}.";
+        __cmd svn commit -m \"added location ${LOCATIONS_FSMR4}.\";
     }   
 }
 
