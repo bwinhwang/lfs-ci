@@ -179,7 +179,7 @@ svnCopyLocations() {
         else
             __cmd sed -i -e "'s,/os/${srcBranch}/,/os/${branchLocation}/,'" Dependencies;
         fi
-        __cmd svn commit -m \"added location locations-${newBranch}.\";
+        __cmd svn commit -m \"added location locations-${newBranch}.\" || exit 1;
         __cmd svn delete -m \"removed bldtools, because they are always used from MAINTRUNK\" \
             ${SVN_REPO}/${SVN_DIR}/${newBranch}/trunk/bldtools;
     }
@@ -229,8 +229,8 @@ svnCopyLocationsFSMR4() {
         else
             __cmd sed -i -e "'s,/os/${srcBranch}/,/os/${branchLocation}/,'" Dependencies;
         fi
-        __cmd svn commit -m \"added location ${LOCATIONS_FSMR4}.\";
-    }   
+        __cmd svn commit -m \"added location ${LOCATIONS_FSMR4}.\" || exit 1;
+    }
 }
 
 __getGitRevisionFile() {
