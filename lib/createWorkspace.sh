@@ -202,18 +202,33 @@ latestRevisionFromRevisionStateFile() {
     if [[ ! -f ${WORKSPACE}/revisions.txt ]] ; then
         requiredParameters UPSTREAM_PROJECT UPSTREAM_BUILD 
 
-        local jobName=$(getBuildJobNameFromFingerprint)
-        local buildNumber=$(getBuildBuildNumberFromFingerprint)
+        local taskName=$(getTaskNameFromJobName)
+        local jobName=
+        local buildNumber=
 
-        # TODO: demx2fk3 2015-06-12 can this ever happen?
+        # In case of the build job, the fingerprint file is not available yet.
+        # For this case, we take the upstream informations.
+        if [[ ${taskName} =~ Build ]] ; then
+            debug "using upstream ${UPSTREAM_BUILD} / ${UPSTREAM_PROJECT}"
+        else
+            jobName=$(getBuildJobNameFromFingerprint)  
+            buildNumber=$(getBuildBuildNumberFromFingerprint)
+        fi  
+        
         if [[ -z ${jobName} ]] ; then
             jobName=${UPSTREAM_PROJECT}
-            error "this should not happen: jobName empty after fingerprint"
-        fi
+        fi  
         if [[ -z ${buildNumber} ]] ; then
             buildNumber=${UPSTREAM_BUILD}
-            error "this should not happen: buildNumber empty after fingerprint"
-        fi
+        fi  
+        
+        # last check...
+        if [[ -z ${jobName} ]] ; then
+            fatal "this should not happen: jobName empty after fingerprint or from upstream"
+        fi  
+        if [[ -z ${buildNumber} ]] ; then
+            fatal "this should not happen: buildNumber empty after fingerprint or from upstream"
+        fi  
 
         info "using revision state file from ${jobName} / ${buildNumber} based on ${UPSTREAM_PROJECT} / ${UPSTREAM_BUILD}"
         copyRevisionStateFileToWorkspace ${jobName} ${buildNumber} 

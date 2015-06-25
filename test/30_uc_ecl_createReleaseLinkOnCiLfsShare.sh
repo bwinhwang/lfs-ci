@@ -21,6 +21,9 @@ oneTimeSetUp() {
             ;;
         esac
     }
+    mustExistDirectory() {
+        mockedCommand "mustExistDirectory $@"
+    }
 }
 oneTimeTearDown() {
     true
@@ -43,6 +46,7 @@ test1() {
     local expect=$(createTempFile)
 cat <<EOF > ${expect}
 getConfig LFS_CI_UC_package_copy_to_share_link_location
+mustExistDirectory /build/home/CI_LFS/Release/
 getConfig LFS_CI_UC_package_copy_to_share_path_name
 execute mkdir -p /build/home/CI_LFS/Release/
 execute cd /build/home/CI_LFS/Release/

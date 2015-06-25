@@ -109,6 +109,9 @@ _getJobInformationFromFingerprint() {
     _getProjectDataFromFingerprint ${md5sum} ${xmlFile}
     execute -n ${LFS_CI_ROOT}/bin/getFingerprintData ${xmlFile} > ${dataFile}
 
+    debug "build information from fingerprint file"
+    rawDebug ${dataFile}
+
     local resultValue=$(grep -e ${jobNamePart} ${dataFile} | cut -d":" -f${fieldNumber} | sort -n | tail -n 1)
     mustHaveValue "${resultValue}" "requested info"
 
@@ -138,7 +141,6 @@ _getProjectDataFromFingerprint() {
     execute -r 10 rsync --archive --rsh=ssh --verbose \
                         ${server}:${fingerprintFile}  \
                         ${file}
-
     if [[ -e ${file} && ! -s ${file} ]] ; then
         fatal "can not get fingerprint information from ${md5sum} / ${fingerprintFile}"
     fi
