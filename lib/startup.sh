@@ -20,6 +20,7 @@ prepareStartup() {
     startLogfile
     # and end it, if the script exited in some way
     exit_add stopLogfile
+    exit_add logRerunCommand
 
     # for better debugging
     PS4='+(${BASH_SOURCE}:${LINENO}): ${FUNCNAME[0]:+${FUNCNAME[0]}(): }'
@@ -38,7 +39,6 @@ prepareStartup() {
     # we can define in the configuration, which tools we want to use for different
     # usecases. This tools must be available via LINSEE. 
     local selectedLinseeTools=$(getConfig LINSEE_selected_tools)
-
     if [[ ${selectedLinseeTools} ]] ; then
         local seesetenv=$(getConfig LINSEE_cmd_seesetenv)
         mustExistFile ${seesetenv}

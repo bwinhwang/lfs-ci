@@ -121,6 +121,7 @@ svnCopyBranch() {
 
     local srcBranch=$1
     local newBranch=$2
+    local retVal=0
     mustHaveValue "${srcBranch}" "srcBranch"
     mustHaveValue "${newBranch}" "newBranch"
 
@@ -131,9 +132,10 @@ svnCopyBranch() {
     svn ls ${SVN_REPO}/${SVN_DIR}/${newBranch} || {
         __cmd svn copy -r ${REVISION} -m \"${message}\" --parents ${SVN_REPO}/${SVN_PATH} \
             ${SVN_REPO}/${SVN_DIR}/${newBranch}/trunk;
+        retVal=$?;
     }
 
-    if [[ $? ]]; then
+    if [[ ${retVal} -ne 0 ]]; then
         error "svn copy failed."
         exit 1
     fi
@@ -227,7 +229,7 @@ svnCopyLocationsFSMR4() {
         else
             __cmd sed -i -e "'s,/os/${srcBranch}/,/os/${branchLocation}/,'" Dependencies;
         fi
-        __cmd svn commit -m "added location ${LOCATIONS_FSMR4}.";
+        __cmd svn commit -m \"added location ${LOCATIONS_FSMR4}.\";
     }   
 }
 

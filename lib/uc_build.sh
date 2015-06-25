@@ -135,7 +135,8 @@ ci_job_build_version() {
 
     local jobDirectory=$(getBuildDirectoryOnMaster)
     local lastSuccessfulJobDirectory=$(getBuildDirectoryOnMaster ${JOB_NAME} lastSuccessfulBuild)
-    local oldLabel=$(runOnMaster "test -d ${lastSuccessfulJobDirectory} && cat ${lastSuccessfulJobDirectory}/label 2>/dev/null")
+    server=$(getConfig jenkinsMasterServerHostName)
+    local oldLabel=$(execute -n -r 5 ssh ${server} "test -d ${lastSuccessfulJobDirectory} && cat ${lastSuccessfulJobDirectory}/label 2>/dev/null")
     info "old label ${oldLabel} from ${lastSuccessfulJobDirectory} on master"
 
     if [[ -z ${oldLabel} ]] ; then
