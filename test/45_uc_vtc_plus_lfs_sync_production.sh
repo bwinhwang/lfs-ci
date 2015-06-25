@@ -86,7 +86,7 @@ execute -n ${LFS_CI_ROOT}/bin/xpath -q -e /versionControllFile/file/@source ${UT
 getConfig LFS_CI_uc_vtc_plus_lfs_files_to_sync
 getConfig LFS_CI_uc_vtc_plus_lfs_remote_server
 getConfig LFS_CI_uc_vtc_plus_lfs_remote_path
-execute rsync --archive --verbose --recursive --partial --progress --rsh=ssh --files-from=${WORKSPACE}/workspace/filelist_to_sync ${UT_PRODUCTION_SHARE}/LABEL remote.server.name:remote/path/name
+execute rsync --archive --verbose --recursive --partial --progress --rsh=ssh --files-from=${WORKSPACE}/workspace/filelist_to_sync ${UT_PRODUCTION_SHARE}/LABEL remote.server.name:remote/path/name/
 EOF
     assertExecutedCommands ${expect}
 
