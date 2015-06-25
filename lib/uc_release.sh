@@ -827,7 +827,6 @@ updateDependencyFiles() {
     # without the old label name, the Dependencies file will be destroyed
     mustHaveValue "${oldReleaseLabelName}" "old release label name"
     local canCommitDependencies=$(getConfig LFS_CI_uc_release_can_commit_depencencies)
-    local svnCommitMessagePrefix=$(getConfig LFS_PROD_uc_release_svn_message_prefix)
 
     info "using values: old value: ${oldReleaseLabelName} new value: ${releaseLabelName}"
     while read name url rev ; do
@@ -856,7 +855,8 @@ updateDependencyFiles() {
         if [[ ${canCommitDependencies} ]] ; then 
             info "running svn commit"
             local logMessage=$(createTempFile)
-            echo "${svnCommitMessagePrefix} : set Dependencies for Release ${releaseLabelName} r${rev} NOJCHK"  > ${logMessage}
+            local svnCommitMessage=$(getConfig LFS_PROD_uc_release_svn_message_template -t releaseName:${releaseLabelName} -t oldReleaseName:${oldReleaseLabelName} -t revision=${rev} )
+            echo ${svnCommitMessage} > ${logMessage}
             svnCommit -F ${logMessage} ${dependenciesFile}
         else
             warning "committing of dependencies is disabled in config"
