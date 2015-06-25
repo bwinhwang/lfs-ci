@@ -243,7 +243,7 @@ _ciLfsOldReleasesOnBranches() {
 _lfsArtifactsRemoveOldArtifacts() {
     local resultFile=$1
 
-    local directoryToCleanup=/build/home/psulm/LFS_internal/artifacts
+    local directoryToCleanup=$(getConfig artifactesShare)
 
     for jobName in ${directoryToCleanup}/* 
     do 
