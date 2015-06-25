@@ -45,7 +45,7 @@ usecase_VTC_PLUS_LFS_SYNC_PRODUCTION() {
                   --rsh=ssh                                   \
                   --files-from=${workspace}/filelist_to_sync  \
                   ${releaseDirectory}                         \
-                  ${remoteServer}:${remotePath}/
+                  ${remoteServer}:${remotePath}/${labelName}
 
     info "sync done of ${labelName} for VTC+LFS"
 
