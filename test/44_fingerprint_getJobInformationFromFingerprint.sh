@@ -64,8 +64,8 @@ test1() {
     local expect=$(createTempFile)
     cat <<EOF > ${expect}
 copyAndExtractBuildArtifactsFromProject LFS_CI_-_trunk_-_Test 1234 fsmci
-execute -r 10 rsync --archive --rsh=ssh --verbose maxi.emea.nsn-net.net:/var/fpwork/psulm/lfs-jenkins/home/fingerprints/3f/c4/5e97ece3a6d14e9826afc4746a45.xml ${UT_TMPDIR}/tmp.1
-execute -n ${LFS_CI_ROOT}/bin/getFingerprintData ${UT_TMPDIR}/tmp.1
+execute -r 10 rsync --archive --rsh=ssh --verbose maxi.emea.nsn-net.net:/var/fpwork/psulm/lfs-jenkins/home/fingerprints/3f/c4/5e97ece3a6d14e9826afc4746a45.xml ${UT_TMPDIR}/tmp.2
+execute -n ${LFS_CI_ROOT}/bin/getFingerprintData ${UT_TMPDIR}/tmp.2
 EOF
     assertExecutedCommands ${expect}
     local value=$(_getJobInformationFromFingerprint _Build: 1)
@@ -81,8 +81,8 @@ test2() {
     local expect=$(createTempFile)
     cat <<EOF > ${expect}
 copyAndExtractBuildArtifactsFromProject LFS_CI_-_trunk_-_Test 1234 fsmci
-execute -r 10 rsync --archive --rsh=ssh --verbose maxi.emea.nsn-net.net:/var/fpwork/psulm/lfs-jenkins/home/fingerprints/3f/c4/5e97ece3a6d14e9826afc4746a45.xml ${UT_TMPDIR}/tmp.1
-execute -n ${LFS_CI_ROOT}/bin/getFingerprintData ${UT_TMPDIR}/tmp.1
+execute -r 10 rsync --archive --rsh=ssh --verbose maxi.emea.nsn-net.net:/var/fpwork/psulm/lfs-jenkins/home/fingerprints/3f/c4/5e97ece3a6d14e9826afc4746a45.xml ${UT_TMPDIR}/tmp.2
+execute -n ${LFS_CI_ROOT}/bin/getFingerprintData ${UT_TMPDIR}/tmp.2
 EOF
     assertExecutedCommands ${expect}
     local value=$(_getJobInformationFromFingerprint _Build: 2)
@@ -99,7 +99,7 @@ test3() {
     local expect=$(createTempFile)
     cat <<EOF > ${expect}
 copyAndExtractBuildArtifactsFromProject LFS_CI_-_trunk_-_Test 1234 fsmci
-execute -r 10 rsync --archive --rsh=ssh --verbose maxi.emea.nsn-net.net:/var/fpwork/psulm/lfs-jenkins/home/fingerprints/3f/c4/5e97ece3a6d14e9826afc4746a45.xml ${UT_TMPDIR}/tmp.1
+execute -r 10 rsync --archive --rsh=ssh --verbose maxi.emea.nsn-net.net:/var/fpwork/psulm/lfs-jenkins/home/fingerprints/3f/c4/5e97ece3a6d14e9826afc4746a45.xml ${UT_TMPDIR}/tmp.2
 EOF
     assertExecutedCommands ${expect}
     return
