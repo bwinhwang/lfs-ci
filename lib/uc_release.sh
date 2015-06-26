@@ -862,7 +862,7 @@ updateDependencyFiles() {
         if [[ ${canCommitDependencies} ]] ; then 
             info "running svn commit"
             local logMessage=$(createTempFile)
-            local svnCommitMessage=$(getConfig LFS_PROD_uc_release_svn_message_template -t releaseName:${releaseLabelName} -t oldReleaseName:${oldReleaseLabelName} -t revision=${rev} )
+            local svnCommitMessage=$(getConfig LFS_PROD_uc_release_svn_message_template -t releaseName:${releaseLabelName} -t oldReleaseName:${oldReleaseLabelName} -t revision:${rev} )
             echo ${svnCommitMessage} > ${logMessage}
             svnCommit -F ${logMessage} ${dependenciesFile}
         else
