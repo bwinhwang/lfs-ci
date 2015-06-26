@@ -1,6 +1,8 @@
 #!/bin/bash
 
-[[ -z ${LFS_CI_SOURCE_artifacts} ]] && source ${LFS_CI_ROOT}/lib/artifacts.sh
+[[ -z ${LFS_CI_SOURCE_artifacts}       ]] && source ${LFS_CI_ROOT}/lib/artifacts.sh
+[[ -z ${LFS_CI_SOURCE_createWorkspace} ]] && source ${LFS_CI_ROOT}/lib/createWorkspace.sh
+
 
 ## @fn      usecase_LFS_READY_FOR_RELEASE()
 #  @brief   run usecase LFS_READY_FOR_RELEASE
@@ -10,24 +12,12 @@
 #  @param   <none>
 #  @return  <none>
 usecase_LFS_READY_FOR_RELEASE() {
-
     mustHaveCleanWorkspace
+    mustHavePreparedWorkspace
 
-    requiredParameters UPSTREAM_PROJECT UPSTREAM_BUILD \
-                       JOB_NAME BUILD_NUMBER
-
-    copyAndExtractBuildArtifactsFromProject ${UPSTREAM_PROJECT} ${UPSTREAM_BUILD} "fsmci"
-    createArtifactArchive
-
-    copyFileFromBuildDirectoryToWorkspace ${UPSTREAM_PROJECT} ${UPSTREAM_BUILD} fingerprint.txt
-    copyFileFromWorkspaceToBuildDirectory ${JOB_NAME}         ${BUILD_NUMBER}   ${WORKSPACE}/fingerprint.txt
-
-    mustHaveNextCiLabelName
-    local label=$(getNextCiLabelName)
-
+    local labelName=$(getNextCiLabelName)
     createReleaseLinkOnCiLfsShare ${labelName}
-
-    setBuildDescription ${JOB_NAME} ${BUILD_NUMBER} "${label}"
+    createArtifactArchive
 
     return
 }

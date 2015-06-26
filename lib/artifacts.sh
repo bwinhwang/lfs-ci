@@ -114,6 +114,7 @@ copyAndExtractBuildArtifactsFromProject() {
 
     execute mkdir -p ${workspace}/bld/
 
+    local file=
     for file in ${files}
     do
         local base=$(basename ${file} .tar.gz)
