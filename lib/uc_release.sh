@@ -2,19 +2,20 @@
 ## @file  uc_release.sh
 #  @brief usecase release 
 
-[[ -z ${LFS_CI_SOURCE_artifacts}    ]] && source ${LFS_CI_ROOT}/lib/artifacts.sh
-[[ -z ${LFS_CI_SOURCE_subversion}   ]] && source ${LFS_CI_ROOT}/lib/subversion.sh
-[[ -z ${LFS_CI_SOURCE_jenkins}      ]] && source ${LFS_CI_ROOT}/lib/jenkins.sh
-[[ -z ${LFS_CI_SOURCE_workflowtool} ]] && source ${LFS_CI_ROOT}/lib/workflowtool.sh
-[[ -z ${LFS_CI_SOURCE_database}     ]] && source ${LFS_CI_ROOT}/lib/database.sh
-[[ -z ${LFS_CI_SOURCE_try}          ]] && source ${LFS_CI_ROOT}/lib/try.sh
+[[ -z ${LFS_CI_SOURCE_artifacts}       ]] && source ${LFS_CI_ROOT}/lib/artifacts.sh
+[[ -z ${LFS_CI_SOURCE_subversion}      ]] && source ${LFS_CI_ROOT}/lib/subversion.sh
+[[ -z ${LFS_CI_SOURCE_jenkins}         ]] && source ${LFS_CI_ROOT}/lib/jenkins.sh
+[[ -z ${LFS_CI_SOURCE_workflowtool}    ]] && source ${LFS_CI_ROOT}/lib/workflowtool.sh
+[[ -z ${LFS_CI_SOURCE_database}        ]] && source ${LFS_CI_ROOT}/lib/database.sh
+[[ -z ${LFS_CI_SOURCE_try}             ]] && source ${LFS_CI_ROOT}/lib/try.sh
+[[ -z ${LFS_CI_SOURCE_fingerprint}     ]] && source ${LFS_CI_ROOT}/lib/fingerprint.sh
+[[ -z ${LFS_CI_SOURCE_createWorkspace} ]] && source ${LFS_CI_ROOT}/lib/createWorkspace.sh
 
 ## @fn      ci_job_release()
 #  @brief   dispatcher for the release jobs
 #  @param   <none>
 #  @return  <none>
 ci_job_release() {
-
     requiredParameters TESTED_BUILD_JOBNAME TESTED_BUILD_NUMBER
     requiredParameters JOB_NAME BUILD_NUMBER
 
@@ -23,44 +24,32 @@ ci_job_release() {
     local workspace=$(getWorkspaceName)
     mustHaveCleanWorkspace
     mustHaveWorkspaceName
+    mustHavePreparedWorkspace ${TESTED_BUILD_JOBNAME} ${TESTED_BUILD_NUMBER}
 
     local subJob=$(getSubTaskNameFromJobName)
     mustHaveValue "${subJob}" "subtask name"
 
-    local location=$(getLocationName)
-    mustHaveLocationName
-
-    local productName=$(getProductNameFromJobName)
-    mustHaveValue "${productName}" "product name"
-
-    local branch=$(getConfig LFS_PROD_uc_release_upload_to_subversion_map_location_to_branch)
-    mustHaveValue "${branch}" "branch name"
-
     # find the related jobs of the build
-    local packageJobName=$(getPackageJobNameFromUpstreamProject         ${TESTED_BUILD_JOBNAME} ${TESTED_BUILD_NUMBER})
-    local packageBuildNumber=$(getPackageBuildNumberFromUpstreamProject ${TESTED_BUILD_JOBNAME} ${TESTED_BUILD_NUMBER})
-    local buildJobName=$(getBuildJobNameFromUpstreamProject             ${TESTED_BUILD_JOBNAME} ${TESTED_BUILD_NUMBER})
-    local buildBuildNumber=$(getBuildBuildNumberFromUpstreamProject     ${TESTED_BUILD_JOBNAME} ${TESTED_BUILD_NUMBER})
+    local packageJobName=$(getPackageJobNameFromFingerprint)
     mustHaveValue "${packageJobName}"     "package job name"
+
+    local packageBuildNumber=$(getPackageBuildNumberFromFingerprint)
     mustHaveValue "${packageBuildNumber}" "package build name"
+
+    local buildJobName=$(getBuildJobNameFromFingerprint)
     mustHaveValue "${buildJobName}"       "build job name"
+
+    local buildBuildNumber=$(getBuildBuildNumberFromFingerprint)
     mustHaveValue "${buildBuildNumber}"   "build build number"
 
-    # release label is stored in the artifacts of fsmci of the build job
-    copyArtifactsToWorkspace "${buildJobName}" "${buildBuildNumber}" "fsmci"
-    mustHaveNextLabelName
     local releaseLabel=$(getNextReleaseLabel)
     mustHaveValue "${releaseLabel}" "release label"
 
     info "found package job: ${packageJobName} / ${packageBuildNumber}"
     info "found build   job: ${buildJobName} / ${buildBuildNumber}"
     
-    local ciBuildShare=$(getConfig LFS_CI_UC_package_internal_link)
-    local releaseDirectory=${ciBuildShare}/build_${packageBuildNumber}
-    mustExistSymlink ${releaseDirectory}
-    local releaseDirectoryLinkDestination=$(readlink -f ${releaseDirectory})
-    mustExistDirectory ${releaseDirectoryLinkDestination}
-
+    local releaseDirectory=$(getConfig LFS_CI_UC_package_copy_to_share_real_location)/${releaseLabel}
+    mustExistDirectory ${releaseDirectory}
     debug "found results of package job on share: ${releaseDirectory}"
 
     # storing new and old label name into files for later use and archive
@@ -72,7 +61,7 @@ ci_job_release() {
     local releaseSummaryJobName=${JOB_NAME//${subJob}/summary}
     info "release job name is ${releaseSummaryJobName}"
 
-    # TODO: demx2fk3 2014-08-08 this does not work for reRelease a build. In reReleas usecase, we need
+    # TODO: demx2fk3 2014-08-08 this does not work for reRelease a build. In reRelease usecase, we need
     # the build before the last successful build.
     local lastSuccessfulBuildDirectory=$(getBuildDirectoryOnMaster ${releaseSummaryJobName} lastSuccessfulBuild)
     if runOnMaster test -e ${lastSuccessfulBuildDirectory}/label.txt ; then
@@ -91,7 +80,9 @@ ci_job_release() {
     info "LFS os release ${LFS_PROD_RELEASE_CURRENT_TAG_NAME} is based on ${LFS_PROD_RELEASE_PREVIOUS_TAG_NAME}"
     info "LFS release ${LFS_PROD_RELEASE_CURRENT_TAG_NAME_REL} is based on ${LFS_PROD_RELEASE_PREVIOUS_TAG_NAME_REL}"
 
-    setBuildDescription "${JOB_NAME}" "${BUILD_NUMBER}" "${releaseLabel}<br>${LFS_PROD_RELEASE_CURRENT_TAG_NAME_REL}<br><a href=https://wft.inside.nsn.com/ALL/builds/${releaseLabel}>WFT</a>"
+    setBuildDescription "${JOB_NAME}" "${BUILD_NUMBER}" \
+        "<a href=https://wft.inside.nsn.com/ALL/builds/${releaseLabel}>${releaseLabel}</a><br>
+         <a href=https://wft.inside.nsn.com/ALL/builds/${LFS_PROD_RELEASE_CURRENT_TAG_NAME_REL}>${LFS_PROD_RELEASE_CURRENT_TAG_NAME_REL}</a>"
 
     info "task is ${subJob}"
     case ${subJob} in
@@ -99,6 +90,8 @@ ci_job_release() {
             updateDependencyFiles "${buildJobName}" "${buildBuildNumber}"
         ;;
         upload_to_subversion)
+            local branch=$(getConfig LFS_PROD_uc_release_upload_to_subversion_map_location_to_branch)
+            mustHaveValue "${branch}" "branch name"
             # from subversion.sh
             uploadToSubversion "${releaseDirectory}/os" "${branch}" "upload of build ${JOB_NAME} / ${BUILD_NUMBER}"
         ;;
@@ -112,7 +105,8 @@ ci_job_release() {
             createReleaseTag ${buildJobName} ${buildBuildNumber}
         ;;
         create_proxy_release_tag) 
-            createProxyReleaseTag ${buildJobName} ${buildBuildNumber}
+            # createProxyReleaseTag ${buildJobName} ${buildBuildNumber}
+            warning "disabled due to BI#293"
         ;;
         create_source_tag) 
             createTagOnSourceRepository ${buildJobName} ${buildBuildNumber}
@@ -125,6 +119,7 @@ ci_job_release() {
             sendReleaseNote "${TESTED_BUILD_JOBNAME}" "${TESTED_BUILD_NUMBER}" \
                             "${buildJobName}"         "${buildBuildNumber}"
             databaseEventReleaseFinished
+            createArtifactArchive
         ;;
         *)
             error "subJob not known (${subJob})"
@@ -389,8 +384,6 @@ sendReleaseNote() {
     local remoteDirectory=$(getConfig LFS_CI_UC_package_copy_to_share_real_location)/${osTagName}
     local artifactsPathOnMaster=$(getBuildDirectoryOnMaster)/archive
     executeOnMaster ln -sf ${remoteDirectory} ${artifactsPathOnMaster}/release
-
-    appproveReleaseForPsScm ${osTagName}
 
     info "release is done."
     return
@@ -862,7 +855,7 @@ updateDependencyFiles() {
         if [[ ${canCommitDependencies} ]] ; then 
             info "running svn commit"
             local logMessage=$(createTempFile)
-            local svnCommitMessage=$(getConfig LFS_PROD_uc_release_svn_message_template -t releaseName:${releaseLabelName} -t oldReleaseName:${oldReleaseLabelName} -t revision=${rev} )
+            local svnCommitMessage=$(getConfig LFS_PROD_uc_release_svn_message_template -t releaseName:${releaseLabelName} -t oldReleaseName:${oldReleaseLabelName} -t revision:${rev} )
             echo ${svnCommitMessage} > ${logMessage}
             svnCommit -F ${logMessage} ${dependenciesFile}
         else
@@ -873,20 +866,6 @@ updateDependencyFiles() {
     done < ${componentsFile}
 
     info "update done."
-
-    return
-}
-
-## @fn      appproveReleaseForPsScm()
-#  @brief   approves the release for Platform Services SCM team
-#  @param   {tagName}    name of the release
-#  @return  <none>
-appproveReleaseForPsScm() {
-    local tagName=$1
-
-    # TODO: demx2fk3 2014-08-19 fixme - make this in a nicer way
-    info "creating approval file on moritz for ${tagName}"
-    execute ssh moritz touch /lvol2/production_jenkins/tmp/approved/${tagName}
 
     return
 }

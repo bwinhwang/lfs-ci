@@ -118,24 +118,6 @@ EOF
     return
 }
 
-test6() {
-    export WORKSPACE=$(createTempDirectory)
-    mkdir -p ${WORKSPACE}/workspace/bld/bld-externalComponents-asdf/
-    echo "a b 1234" > ${WORKSPACE}/workspace/bld/bld-externalComponents-asdf/usedRevisions.txt
-
-    local value=$(getEclValue ECL_LFS oldValue)
-    assertEquals "${value}" "svn_branch_name\@1234"
-
-    local expect=$(createTempFile)
-cat <<EOF > ${expect}
-getConfig SVN_lfs_branch_name
-mustHaveNextCiLabelName 1234 revision
-EOF
-    assertEquals "$(cat ${expect})" "$(cat ${UT_MOCKED_COMMANDS})"
-
-    return
-}
-
 test7() {
     local value=$(getEclValue ECL_PS_LFS_INTERFACE_REV 1234)
     assertEquals "${value}" "1235"

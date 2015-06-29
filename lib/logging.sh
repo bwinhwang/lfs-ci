@@ -155,6 +155,7 @@ warning() {
 #  @return  <none>
 fatal() {
     message "FATAL_ERROR" "$@"
+    _stackTrace
     exit 1
 }
 
@@ -278,36 +279,6 @@ _stackTrace() {
                 "${fileString}"            \
                 "${code}"
     done 
-}
-
-## @fn      runAndLog()
-#  @brief   execute a command and put the output into the logfile
-#  @todo    replace this with execute -i
-#  @param   <command>    command, which should be logged
-#  @return  <none>
-runAndLog() {
-    local command=$@
-    local outputFile=$(createTempFile)
-
-    debug "DEPRECATED, use execute -i"
-    debug "execute command ${command}"
-
-    ${command} 1>${outputFile} 2>&1 
-    rc=$?
-
-    debug "logging output of command \"${command}\""
-
-    CI_LOGGING_CONFIG="MESSAGE"
-
-    while read LINE
-    do
-        debug "${LINE}"
-    done <${outputFile}
-
-    unset CI_LOGGING_CONFIG
-    debug "end of output"
-
-    return ${rc}
 }
 
 ## @fn      rawDebug()
