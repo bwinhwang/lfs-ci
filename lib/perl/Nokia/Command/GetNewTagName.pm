@@ -31,6 +31,8 @@ sub execute {
     my $newTag         = $regex;
     my $newTagLastByte = "0001";
 
+    # regex = PS_LFS_OS_20M2_12_([0-9][0-9][0-9][0-9])
+
     if( $oldTag =~ m/^$regex$/ ) {
         $newTagLastByte = sprintf( "%04d", $1 + $self->{incr} );
     }
