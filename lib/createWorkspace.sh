@@ -4,7 +4,8 @@
 
 LFS_CI_SOURCE_createWorkspace='$Id$'
 
-[[ -z ${LFS_CI_SOURCE_artifacts} ]] && source ${LFS_CI_ROOT}/lib/artifacts.sh
+[[ -z ${LFS_CI_SOURCE_artifacts}   ]] && source ${LFS_CI_ROOT}/lib/artifacts.sh
+[[ -z ${LFS_CI_SOURCE_fingerprint} ]] && source ${LFS_CI_ROOT}/lib/fingerprint.sh
 
 ## @fn      createOrUpdateWorkspace()
 #  @brief   create a new or update an existing workspace
@@ -201,15 +202,33 @@ latestRevisionFromRevisionStateFile() {
     if [[ ! -f ${WORKSPACE}/revisions.txt ]] ; then
         requiredParameters UPSTREAM_PROJECT UPSTREAM_BUILD 
 
-        local jobName=$(getBuildJobNameFromUpstreamProject ${UPSTREAM_PROJECT} ${UPSTREAM_BUILD})
-        local buildNumber=$(getBuildBuildNumberFromUpstreamProject ${UPSTREAM_PROJECT} ${UPSTREAM_BUILD})
+        local taskName=$(getTaskNameFromJobName)
+        local jobName=
+        local buildNumber=
 
+        # In case of the build job, the fingerprint file is not available yet.
+        # For this case, we take the upstream informations.
+        if [[ ${taskName} =~ Build ]] ; then
+            debug "using upstream ${UPSTREAM_BUILD} / ${UPSTREAM_PROJECT}"
+        else
+            jobName=$(getBuildJobNameFromFingerprint)  
+            buildNumber=$(getBuildBuildNumberFromFingerprint)
+        fi  
+        
         if [[ -z ${jobName} ]] ; then
             jobName=${UPSTREAM_PROJECT}
-        fi
+        fi  
         if [[ -z ${buildNumber} ]] ; then
             buildNumber=${UPSTREAM_BUILD}
-        fi
+        fi  
+        
+        # last check...
+        if [[ -z ${jobName} ]] ; then
+            fatal "this should not happen: jobName empty after fingerprint or from upstream"
+        fi  
+        if [[ -z ${buildNumber} ]] ; then
+            fatal "this should not happen: buildNumber empty after fingerprint or from upstream"
+        fi  
 
         info "using revision state file from ${jobName} / ${buildNumber} based on ${UPSTREAM_PROJECT} / ${UPSTREAM_BUILD}"
         copyRevisionStateFileToWorkspace ${jobName} ${buildNumber} 
@@ -374,7 +393,6 @@ synchroniceToLocalPath() {
 
     return
 }
-
 
 ## @fn      mustHavePreparedWorkspace()
 #  @brief   prepare the workspace with required artifacts and other stuff
