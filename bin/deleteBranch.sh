@@ -90,7 +90,7 @@ __checkOthers() {
 #  @brief  Create key=value pairs file which is sourced by Jenkins.
 __preparation(){
     JENKINS_JOBS_DIR=$(getConfig jenkinsMasterServerJobsPath)
-    mustHaveValue "${JENKINS_JOBS_DIR}" "Jenkins jobs dir is missing."
+    mustHaveValue "${JENKINS_JOBS_DIR}" "JENKINS_JOBS_DIR"
     echo JENKINS_JOBS_DIR=${JENKINS_JOBS_DIR} >> ${WORKSPACE}/${VARS_FILE}
 }
 
