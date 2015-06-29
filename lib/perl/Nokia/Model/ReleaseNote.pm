@@ -5,6 +5,7 @@ use strict;
 use parent qw( Nokia::Model );
 
 use File::Slurp;
+use Log::Log4perl qw( :easy );
 
 ## @fn      releaseName()
 #  @brief   get the name of the release
@@ -67,8 +68,9 @@ sub mustHaveFileData {
     my $fileType = shift;
     if( not exists $self->{ $fileType } ) {
         foreach my $file ( ( sprintf( "%s/releaseNotes/%s/%s.txt", $ENV{HOME}, $self->releaseName(), $fileType ),
-                             sprintf( "%s/%s.txt", $ENV{WORKSPACE}, $fileType ) ) ) {
+                             sprintf( "%s/workspace/%s.txt", $ENV{WORKSPACE}, $fileType ) ) ) {
             if ( -e $file ) {
+                DEBUG "loading important note from $file";
                 $self->{ $fileType } = [ read_file( $file ) ];
             }
         }
