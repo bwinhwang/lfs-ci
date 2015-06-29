@@ -141,16 +141,22 @@ ci_job_release() {
 prereleaseChecks() {
     requiredParameters LFS_PROD_RELEASE_PREVIOUS_TAG_NAME LFS_PROD_RELEASE_PREVIOUS_TAG_NAME_REL
 
-    if ! existsBaselineInWorkflowTool ${LFS_PROD_RELEASE_PREVIOUS_TAG_NAME} ; then
-        error "previous Version ${LFS_PROD_RELEASE_PREVIOUS_TAG_NAME} does not exist in WFT"
-        exit 1
-    fi
-    if [[ $(getProductNameFromJobName) =~ LFS ]] ; then
-        if ! existsBaselineInWorkflowTool ${LFS_PROD_RELEASE_PREVIOUS_TAG_NAME_REL} ; then
-            error "previous Release Version ${LFS_PROD_RELEASE_PREVIOUS_TAG_NAME_REL} does not exist in WFT"
+    local canCreateReleaseInWorkflowTool=$(getConfig LFS_CI_uc_release_can_create_release_in_wft)
+    if [[ ! ${canCreateReleaseInWorkflowTool} ]] ; then
+        warning "creating release in WFT is disabled via config"
+        return
+    else
+        if ! existsBaselineInWorkflowTool ${LFS_PROD_RELEASE_PREVIOUS_TAG_NAME} ; then
+            error "previous Version ${LFS_PROD_RELEASE_PREVIOUS_TAG_NAME} does not exist in WFT"
             exit 1
-        fi                
-    fi
+        fi
+        if [[ $(getProductNameFromJobName) =~ LFS ]] ; then
+            if ! existsBaselineInWorkflowTool ${LFS_PROD_RELEASE_PREVIOUS_TAG_NAME_REL} ; then
+                error "previous Release Version ${LFS_PROD_RELEASE_PREVIOUS_TAG_NAME_REL} does not exist in WFT"
+                exit 1
+            fi                
+        fi
+    fi        
     
     return
 }
@@ -316,6 +322,7 @@ sendReleaseNote() {
     local buildBuildNumber=$4
     
     # TODO: demx2fk3 2014-06-25 remove the export block and do it in a different way
+    # TODO: demx2fk3 2015-05-26 this is required for the perl skript at the moment. The script is using the internal function getConfig, but don't know the used environment variables from the scripting
     export productName=$(getProductNameFromJobName)
     export taskName=$(getTaskNameFromJobName)
     export subTaskName=$(getSubTaskNameFromJobName)
@@ -335,12 +342,17 @@ sendReleaseNote() {
     mustHaveValue "${osTagName}" "next os tag name"
     mustHaveValue "${oldReleaseTagName}" "old release tag name"
 
-    # create the os or uboot release note
-    info "new release label is ${releaseTagName} based on ${oldReleaseTagName}"
-    _createLfsOsReleaseNote ${buildJobName} ${buildBuildNumber}
+    # TODO FIME
+    copyArtifactsToWorkspace "${buildJobName}" "${buildBuildNumber}" "externalComponents fsmpsl psl fsmci lrcpsl"
 
     info "collect revisions from all sub build jobs"
     sort -u ${workspace}/bld/bld-externalComponents-*/usedRevisions.txt > ${workspace}/revisions.txt
+
+    _getImportantNoteFileFromSubversion ${buildJobName} ${buildBuildNumber}
+
+    # create the os or uboot release note
+    info "new release label is ${releaseTagName} based on ${oldReleaseTagName}"
+    _createLfsOsReleaseNote ${buildJobName} ${buildBuildNumber}
 
     createReleaseInWorkflowTool ${osTagName} ${workspace}/os/os_releasenote.xml
     uploadToWorkflowTool        ${osTagName} ${workspace}/os/os_releasenote.xml
@@ -348,14 +360,19 @@ sendReleaseNote() {
     uploadToWorkflowTool        ${osTagName} ${workspace}/os/changelog.xml
     uploadToWorkflowTool        ${osTagName} ${workspace}/revisions.txt
 
+    [[ -e ${workspace}/importantNote.txt ]] &&
+        uploadToWorkflowTool    ${osTagName} ${workspace}/importantNote.txt
+
     execute cp -f ${workspace}/os/os_releasenote.xml                                 ${workspace}/bld/bld-lfs-release/lfs_os_releasenote.xml
     execute cp -f ${workspace}/os/releasenote.txt                                    ${workspace}/bld/bld-lfs-release/lfs_os_releasenote.txt
     execute cp -f ${workspace}/os/changelog.xml                                      ${workspace}/bld/bld-lfs-release/lfs_os_changelog.xml
     execute cp -f ${workspace}/revisions.txt                                         ${workspace}/bld/bld-lfs-release/revisions.txt
     execute cp -f ${workspace}/bld/bld-externalComponents-summary/externalComponents ${workspace}/bld/bld-lfs-release/externalComponents.txt
+    [[ -e ${workspace}/importantNote.txt ]] &&
+        execute cp -f ${workspace}/importantNote.txt                                 ${workspace}/bld/bld-lfs-release/importantNote.txt
 
     if [[ ${productName} == "LFS" ]] ; then
-        _createLfsRelReleaseNoteXml  ${releaseTagName} ${workspace}/rel/releasenote.xml
+        _createLfsRelReleaseNoteXml ${releaseTagName} ${workspace}/rel/releasenote.xml
         createReleaseInWorkflowTool ${releaseTagName} ${workspace}/rel/releasenote.xml
         uploadToWorkflowTool        ${releaseTagName} ${workspace}/rel/releasenote.xml
 
@@ -380,12 +397,30 @@ sendReleaseNote() {
     local artifactsPathOnShare=$(getConfig artifactesShare)/${JOB_NAME}/${BUILD_NUMBER}
     linkFileToArtifactsDirectory ${artifactsPathOnShare}
 
-
     local remoteDirectory=$(getConfig LFS_CI_UC_package_copy_to_share_real_location)/${osTagName}
     local artifactsPathOnMaster=$(getBuildDirectoryOnMaster)/archive
     executeOnMaster ln -sf ${remoteDirectory} ${artifactsPathOnMaster}/release
 
     info "release is done."
+    return
+}
+
+_getImportantNoteFileFromSubversion() {
+    local workspace=$(getWorkspaceName)
+    mustHaveWorkspaceName 
+
+    mustExistFile ${workspace}/revisions.txt
+    local svnUrl=$(execute -n grep ^src-project ${workspace}/revisions.txt | cut -d" " -f 2)
+    mustHaveValue "${svnUrl}" "svn url"
+
+    local svnRev=$(execute -n grep ^src-project ${workspace}/revisions.txt | cut -d" " -f 3)
+    mustHaveValue "${svnRev}" "svn rev"
+
+    if existsInSubversion "-r ${svnRev} ${svnUrl}/src" release_note &&
+       existsInSubversion "-r ${svnRev} ${svnUrl}/src/release_note" importantNote.txt ; then
+        svnCat -r ${svnRev} ${svnUrl}/src/release_note/importantNote.txt@${svnrev} > ${workspace}/importantNote.txt
+    fi
+
     return
 }
 
@@ -416,9 +451,6 @@ _createLfsOsReleaseNote() {
     # TODO: demx2fk3 2015-03-09 FIXME SSH_LOAD replace this with other server
     execute -r 10 rsync -ae ssh ${serverName}:${buildDirectory}/changelog.xml ${workspace}/os/
     mustExistFile ${workspace}/os/changelog.xml
-
-    # TODO FIME
-    copyArtifactsToWorkspace "${buildJobName}" "${buildBuildNumber}" "externalComponents fsmpsl psl fsmci lrcpsl"
 
     # convert the changelog xml to a release note
     cd ${workspace}/os/
