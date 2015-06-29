@@ -21,6 +21,10 @@
 
 LFS_CI_SOURCE_booking='$Id$'
 
+[[ -z ${LFS_CI_SOURCE_config}   ]] && source ${LFS_CI_ROOT}/lib/config.sh
+[[ -z ${LFS_CI_SOURCE_logging}  ]] && source ${LFS_CI_ROOT}/lib/logging.sh
+[[ -z ${LFS_CI_SOURCE_commands} ]] && source ${LFS_CI_ROOT}/lib/commands.sh
+
 ## @fn      reserveTargetByName()
 #  @brief   reserve target by a given name
 #  @details the function will try to reserve the given target. If it does not work, the function will retry

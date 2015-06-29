@@ -162,6 +162,8 @@ switchToNewLocation() {
 #  @return  <none>
 setupNewWorkspace() {
     local workspace=$(getWorkspaceName) 
+    mustHaveWorkspaceName
+    mustHaveCleanWorkspace
 
     debug "creating a new workspace in \"${workspace}\""
 
@@ -316,14 +318,30 @@ initTempDirectory() {
 #  @throws  raise an error, if there is a variable is not set or has no value
 requiredParameters() {
     local parameterNames=$@
+    if [[ -z ${LFS_CI_INTERNAL_RERUN_ENVIRONMENT_FILE} ]] ; then
+        export LFS_CI_INTERNAL_RERUN_ENVIRONMENT_FILE=$(createTempFile)
+    fi
     for name in ${parameterNames} ; do
         if [[ ! ${!name} ]] ; then
             error "required parameter ${name} is missing"
             exit 1
         fi
-        # echo "${name}=${!name}" >> ${workspace}/../.env
+        echo "export ${name}=\"${!name}\"" >> ${LFS_CI_INTERNAL_RERUN_ENVIRONMENT_FILE}
     done
 
+    return
+}
+
+## @fn      logRerunCommand()
+#  @brief   record the command incl. environment variables, which are needed to rerun the jenkins job
+#  @param   <none>
+#  @return  <none>
+logRerunCommand() {
+    rerun=$(createTempFile)
+    echo "#!/bin/bash" > ${rerun}
+    execute -n sort -u ${LFS_CI_INTERNAL_RERUN_ENVIRONMENT_FILE} >> ${rerun}
+    echo $0 ${JOB_NAME} >> ${rerun}
+    rawDebug ${rerun}
     return
 }
 
@@ -859,6 +877,11 @@ getBranchPart() {
     [[ ${what} == NR ]] && echo ${nr}
 }
 
+## @fn      mustHaveFreeDiskSpace()
+#  @brief   ensure, that there is enough free diskspace on given filesystem
+#  @param   {filesystem}    path of the filesystem (e.g. /var/fpwork)
+#  @param   {requiredSpace}    required free diskspace on the filesystem in kilobytes
+#  @return  <none>
 mustHaveFreeDiskSpace() {
     local filesystem=$1
     mustExistDirectory ${filesystem}
@@ -927,6 +950,10 @@ sanityCheck() {
 }
 
 
+## @fn      createFingerprintFile()
+#  @brief   create a file which can be used for fingerprinting
+#  @param   <none>
+#  @return  <none>
 createFingerprintFile() {
     requiredParameters JOB_NAME BUILD_NUMBER WORKSPACE 
 
@@ -952,5 +979,3 @@ createFingerprintFile() {
 
     return
 }
-
-
