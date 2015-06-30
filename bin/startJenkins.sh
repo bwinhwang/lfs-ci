@@ -5,17 +5,15 @@
 #  @param   <none>
 #  @return  <none>
 startJenkinsMasterServer() {
-    # TODO: demx2fk3 2014-12-16 can be removed??
-    local LFS_CI_ROOT=/ps/lfs/ci
-
     source ${LFS_CI_ROOT}/lib/logging.sh
     source ${LFS_CI_ROOT}/lib/common.sh
     source ${LFS_CI_ROOT}/lib/config.sh
 
     local java=$(getConfig java)
     local jenkins_war=$(getConfig jenkinsWarFile)
-    local JENKINS_HOME=$(getConfig jenkinsRoot)/home
-    local JENKINS_ROOT=$(getConfig jenkinsRoot)/root
+    local JENKINS_HOME=$(getConfig jenkinsHome)
+    local JENKINS_ROOT=$(getConfig jenkinsRoot)
+
     local jenkinsMasterSslCertificate=$(getConfig jenkinsMasterSslCertificate)
     local jenkinsMasterSslPrivateKey=$(getConfig jenkinsMasterSslPrivateKey)
     local jenkinsMasterServerHttpPort=$(getConfig jenkinsMasterServerHttpPort)
@@ -33,11 +31,6 @@ startJenkinsMasterServer() {
 
     group=$(id -n -g)
 
-    if [[ ${group} != pronb ]] ; then
-        echo "wrong group ${group} , please switch to pronb"
-        exit 1
-    fi
-
     if [[ ! -e ${jenkins_war} ]] ; then
         echo "jenkins war file ${jenkins_war} does not exist"
         exit 1
@@ -45,25 +38,13 @@ startJenkinsMasterServer() {
 
 #            -XX:-UseGCOverheadLimit                           \
     cd ${JENKINS_HOME}
-    #exec ${java}                                              \
-    #        -XX:PermSize=512M -XX:MaxPermSize=4096M -Xmn128M -Xms1024M -Xmx4096M \
-    #        -jar ${jenkins_war}                               \
-    #        --httpsPort=${jenkinsMasterServerHttpsPort}       \
-    #        --httpPort=${jenkinsMasterServerHttpPort}         \
-    #        --ajp13Port=-1                                    \
-    #        --httpsCertificate=${jenkinsMasterSslCertificate} \
-    #        --httpsPrivateKey=${jenkinsMasterSslPrivateKey}   \
-    #        > ${JENKINS_ROOT}/log/jenkins.log 2>&1 
-    nohup ${java}                                              \
+    exec ${java}                                              \
             -XX:PermSize=512M -XX:MaxPermSize=4096M -Xmn128M -Xms1024M -Xmx4096M \
             -jar ${jenkins_war}                               \
             --httpsPort=${jenkinsMasterServerHttpsPort}       \
             --httpPort=${jenkinsMasterServerHttpPort}         \
             --ajp13Port=-1                                    \
-            --httpsCertificate=${jenkinsMasterSslCertificate} \
-            --httpsPrivateKey=${jenkinsMasterSslPrivateKey}   \
-            > ${JENKINS_ROOT}/log/jenkins.log 2>&1 &
+            > ${JENKINS_ROOT}/log/jenkins.log 2>&1 
 }
-
-export LFS_CI_ROOT=/ps/lfs/ci/
+set -x
 startJenkinsMasterServer

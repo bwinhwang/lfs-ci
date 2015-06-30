@@ -68,6 +68,7 @@ startLogfile() {
         local url=
         case ${USER} in
             psulm)    url=http://ullinn11.emea.nsn-net.net/lfs/ci/log/ ;;
+            ca_lrcci) url=http://ullteb02.emea.nsn-net.net/logs/ ;;
             lfscidev) url=https://lfs-sandbox.emea.nsn-net.net/logs/ ;;
             ca_lrcci) url=https://lfs-lrc-ci.int.net.nokia.com/logs/ ;;
         esac
