@@ -70,10 +70,6 @@ usecase_PKGPOOL_BUILD() {
 
     setBuildDescription "${JOB_NAME}" "${BUILD_NUMBER}" "${releaseTag}"
 
-    # TODO: demx2fk3 2015-02-25 FIXME hardcoded path
-    # required to start the sync 
-    execute touch /build/home/psulm/SC_LFS/pkgpool/.hashpool
-
     mkdir -p ${workspace}/bld/bld-pkgpool-release/
     echo ${oldReleaseTag}                   > ${workspace}/bld/bld-pkgpool-release/oldLabel
     echo ${releaseTag}                      > ${workspace}/bld/bld-pkgpool-release/label
