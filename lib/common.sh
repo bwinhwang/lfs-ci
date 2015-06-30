@@ -914,6 +914,7 @@ sanityCheck() {
     local LFS_CI_git_version=$(cd ${LFS_CI_ROOT} ; git describe)
     debug "used lfs ci git version ${LFS_CI_git_version}"
     local ciUserName=$(getConfig LFS_CI_GLOBAL_username)
+    mustHaveValue "${ciUserName}" "CI user name"
 
     # we do not want to have modifications in ${LFS_CI_ROOT}
     local LFS_CI_git_local_modifications=$(cd ${LFS_CI_ROOT} ; git status --short | wc -l)
