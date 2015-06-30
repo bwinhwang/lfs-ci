@@ -4,25 +4,7 @@ source ${LFS_CI_ROOT}/lib/common.sh
 source ${LFS_CI_ROOT}/lib/logging.sh
 source ${LFS_CI_ROOT}/lib/jenkins.sh
 
-info "###############################################################"
-info "# Variables from Jenkins"
-info "# ----------------------"
-info "# BRANCH:              $BRANCH"
-info "# MOVE_SVN:            $MOVE_SVN"
-info "# MOVE_SVN_OS_BRANCH:  $MOVE_SVN_OS_BRANCH"
-info "# DELETE_JOBS:         $DELETE_JOBS"
-info "# DELETE_TEST_RESULTS: $DELETE_TEST_RESULTS"
-info "# MOVE_SHARE:          $MOVE_SHARE"
-info "# LRC_MOVE_SVN:        $LRC_MOVE_SVN"
-info "# LRC_DELETE_JOBS:     $LRC_DELETE_JOBS"
-info "# LRC_MOVE_SHARE:      $LRC_MOVE_SHARE"
-info "# DB_UPDATE:           $DB_UPDATE"
-info "# DEBUG:               $DEBUG"
-info "# COMMENT:             $COMMENT"
-info "###############################################################"
-
 initTempDirectory
-setBuildDescription "${JOB_NAME}" "${BUILD_NUMBER}" "${BRANCH} DEBUG=${DEBUG}"
 
 SVN_REPO="https://svne1.access.nsn.com/isource/svnroot/BTS_SC_LFS"
 SVN_DIR="os"
@@ -32,16 +14,27 @@ BLD_SHARE="/build/home/SC_LFS/releases/bld"
 PKG_SHARE="/build/home/SC_LFS/pkgpool"
 SVN_OPTS="--non-interactive --trust-server-cert"
 ARCHIVE_BASE=$(getConfig ADMIN_archive_share)
-TEST_SERVER="ulegcpmoritz.emea.nsn-net.net"
+VARS_FILE="VARIABLES.TXT"
 DIR_PATTERN=""
 
-
-#######################################################################
-#
-# HELPER FUNCTIONS - maybe move them to common.sh
-#
-#######################################################################
-
+__printParams() {
+    info "###############################################################"
+    info "# Variables from Jenkins"
+    info "# ----------------------"
+    info "# BRANCH:              $BRANCH"
+    info "# MOVE_SVN:            $MOVE_SVN"
+    info "# MOVE_SVN_OS_BRANCH:  $MOVE_SVN_OS_BRANCH"
+    info "# DELETE_JOBS:         $DELETE_JOBS"
+    info "# DELETE_TEST_RESULTS: $DELETE_TEST_RESULTS"
+    info "# MOVE_SHARE:          $MOVE_SHARE"
+    info "# LRC_MOVE_SVN:        $LRC_MOVE_SVN"
+    info "# LRC_DELETE_JOBS:     $LRC_DELETE_JOBS"
+    info "# LRC_MOVE_SHARE:      $LRC_MOVE_SHARE"
+    info "# DB_UPDATE:           $DB_UPDATE"
+    info "# DEBUG:               $DEBUG"
+    info "# COMMENT:             $COMMENT"
+    info "###############################################################"
+}
 
 ## @fn      getValueFromEclFile()
 #  @brief   get value from ecl for key
@@ -57,7 +50,7 @@ getValueFromEclFile() {
     if [[ $? -eq 0 ]]; then
         local value=$(svn cat ${SVN_OPTS} ${svnEclRepo}/isource/svnroot/BTS_SCM_PS/ECL/${branch}/ECL_BASE/ECL | grep ${key} | cut -d'=' -f2)
     else
-        info using ECL from obsolete
+        info "using ECL from obsolete"
         local value=$(svn cat ${SVN_OPTS} ${svnEclRepo}/isource/svnroot/BTS_SCM_PS/ECL/obsolete/${branch}/ECL_BASE/ECL | grep ${key} | cut -d'=' -f2)
     fi
 
@@ -74,15 +67,31 @@ getValueFromEclFile() {
 
 __checkParams() {
     [[ ! "${BRANCH}" ]] && { error "BRANCH must be specified"; return 1; }
-    echo ${BRANCH} | grep -q -e "^FB[0-9]\{4\}\|^MD[0-9]\{5\}\|^LRC_FB[0-9]\{4\}\|^TST_\|TEST_ERWIN\|TESTERWIN" || { error "$BRANCH is not valid."; return 1; }
+
+    if [[ $DEVELOPMENT_BRANCH == false ]]; then
+        echo ${BRANCH} | grep -q -e "^FB[0-9]\{4\}\|^MD[0-9]\{5\}\|^LRC_FB[0-9]\{4\}\|^TST_\|TEST_ERWIN\|TESTERWIN" || { error "$BRANCH is not valid."; return 1; }
+    fi
+
     if [[ $LRC == true ]]; then
         echo ${BRANCH} | grep -q -e "^LRC_" || { error "LRC: Branch name is not correct."; return 1; }
+    else
+        echo ${BRANCH} | grep -q -e "^LRC_" && { error "FSM: Branch name is not correct."; return 1; }
     fi
+
+    return 0
 }
 
 __checkOthers() {
     [[ -d ${ARCHIVE_BASE} ]] || { error "archive dir ${ARCHIVE_BASE} does not exist."; return 1; }
     which mysql > /dev/null 2>&1 || { error "mysql not available."; return 1; }
+}
+
+## @fn     __preparation()
+#  @brief  Create key=value pairs file which is sourced by Jenkins.
+__preparation(){
+    JENKINS_JOBS_DIR=$(getConfig jenkinsMasterServerJobsPath)
+    mustHaveValue "${JENKINS_JOBS_DIR}" "JENKINS_JOBS_DIR"
+    echo JENKINS_JOBS_DIR=${JENKINS_JOBS_DIR} >> ${WORKSPACE}/${VARS_FILE}
 }
 
 __cmd() {
@@ -326,7 +335,18 @@ deleteTestResults() {
         branchType=$(getBranchPart ${BRANCH} TYPE)
         echo ${dirPattern} | grep -q ${branchType}_PS_LFS_OS_${yyyy}_${mm} || { echo ${branchType}_PS_LFS_OS_${yyyy}_${mm} is not in directory pattern ${dirPattern}; exit 1; }
     fi
-    __cmd ssh ${TEST_SERVER} rm -rf /lvol2/production_jenkins/test-repos/src-fsmtest/${dirPattern}
+
+    local testServer=$(getConfig LFS_CI_testresults_host)
+    local testResultsDir=$(getConfig LFS_CI_testresults_dir)
+
+    mustHaveValue "${testServer}" "testServer"
+    mustHaveValue "${testResultsDir}" "testResultsDir"
+
+    if [[ ! ${testResultsDir} == */ ]]; then
+        testResultsDir=${testResultsDir}/
+    fi
+
+    __cmd ssh ${testServer} rm -rf ${testResultsDir}${dirPattern}
 }
 
 ## @fn      dbUpdate()
@@ -363,8 +383,12 @@ dbUpdate() {
 
 main() {
 
+    setBuildDescription "${JOB_NAME}" "${BUILD_NUMBER}" "${BRANCH} DEBUG=${DEBUG}"
+
+    __printParams
     __checkParams || { error "Params check failed."; exit 1; }
     __checkOthers || { error "Checking some stuff failed."; exit 1; }
+    __preparation
 
     [[ ${MOVE_SVN_OS_BRANCH} == true ]] && moveBranchSvnOS || info "Not moving os/$BRANCH in repo"
     [[ ${DB_UPDATE} == true ]] && dbUpdate || info "Not updating DB."
@@ -377,6 +401,11 @@ main() {
         [[ ${MOVE_SHARE} == true ]] && { archiveBranchShare; archiveBranchBldShare; }
         [[ ${DELETE_TEST_RESULTS} == true ]] && deleteTestResults
     fi
+
+    return 0
 }
 
-main
+if [[ ! $TESTING ]]; then
+    main
+fi
+
