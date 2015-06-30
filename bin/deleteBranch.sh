@@ -82,16 +82,7 @@ __checkParams() {
 }
 
 __checkOthers() {
-    [[ -d ${ARCHIVE_BASE} ]] || { error "archive dir ${ARCHIVE_BASE} does not exist."; return 1; }
     which mysql > /dev/null 2>&1 || { error "mysql not available."; return 1; }
-}
-
-## @fn     __preparation()
-#  @brief  Create key=value pairs file which is sourced by Jenkins.
-__preparation(){
-    JENKINS_JOBS_DIR=$(getConfig jenkinsMasterServerJobsPath)
-    mustHaveValue "${JENKINS_JOBS_DIR}" "JENKINS_JOBS_DIR"
-    echo JENKINS_JOBS_DIR=${JENKINS_JOBS_DIR} >> ${WORKSPACE}/${VARS_FILE}
 }
 
 __cmd() {
@@ -101,6 +92,20 @@ __cmd() {
     else
         info runnig command: $@
         eval $@
+    fi
+}
+
+## @fn     __preparation()
+#  @brief  Create key=value pairs file which is sourced by Jenkins.
+__preparation(){
+    JENKINS_JOBS_DIR=$(getConfig jenkinsMasterServerJobsPath)
+    mustHaveValue "${JENKINS_JOBS_DIR}" "JENKINS_JOBS_DIR"
+    echo JENKINS_JOBS_DIR=${JENKINS_JOBS_DIR} >> ${WORKSPACE}/${VARS_FILE}
+    
+    mustHaveValue "${ARCHIVE_BASE}" "ARCHIVE_BASE"
+    if [[ ! -d ${ARCHIVE_BASE} ]]; then
+        info "create archive share ${ARCHIVE_BASE}"
+        __cmd mkdir -p ${ARCHIVE_BASE}
     fi
 }
 
