@@ -47,8 +47,10 @@ oneTimeSetUp() {
     copyAndExtractBuildArtifactsFromProject() {
         mockedCommand "copyAndExtractBuildArtifactsFromProject $@"
         mkdir -p ${WORKSPACE}/workspace/bld/bld-fsmci-summary/
+        mkdir -p ${WORKSPACE}/workspace/bld/bld-knife-input/
         echo LOCATION > ${WORKSPACE}/workspace/bld/bld-fsmci-summary/location
         echo LABEL    > ${WORKSPACE}/workspace/bld/bld-fsmci-summary/label
+        echo LFS_BUILD_FSMR2=true  > ${WORKSPACE}/workspace/bld/bld-knife-input/lfs_build.txt
     }
 
 

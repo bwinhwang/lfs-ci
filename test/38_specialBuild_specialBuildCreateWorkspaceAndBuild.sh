@@ -27,6 +27,9 @@ oneTimeSetUp() {
         echo "LABEL" > ${wd}/label
         echo "LOCATION" > ${wd}/location
     }
+    copyAndExtractBuildArtifactsFromProject() {
+        mockedCommand "copyAndExtractBuildArtifactsFromProject $@"
+    }
     applyKnifePatches() {
         mockedCommand "applyKnifePatches $@"
     }
@@ -42,6 +45,10 @@ oneTimeSetUp() {
     mustHaveLocationForSpecialBuild() {
         mockedCommand "mustHaveLocationForSpecialBuild $@"
         export LFS_CI_GLOBAL_BRANCH_NAME=LOCATION
+
+        local wd=${WORKSPACE}/workspace/bld/bld-dev-input/
+        mkdir -p ${wd}
+        echo "LFS_BUILD_FSMR2=true" > ${wd}/lfs_build.txt
     }
 
     return
@@ -67,7 +74,8 @@ tearDown() {
 
 test1() {
 
-    assertTrue "specialBuildCreateWorkspaceAndBuild"
+    # assertTrue "specialBuildCreateWorkspaceAndBuild DEV"
+    specialBuildCreateWorkspaceAndBuild DEV
 
     local expect=$(createTempFile)
     cat <<EOF > ${expect}

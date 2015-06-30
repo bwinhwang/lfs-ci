@@ -155,6 +155,9 @@ specialBuildisRequiredForLrc() {
 }
 
 specialBuildisRequiredSelectedByUser() {
+    local buildType=${1}
+    mustHaveValue "${buildType}" "build type"
+
     local workspace=$(getWorkspaceName)
     mustHaveWorkspaceName
 
@@ -192,6 +195,9 @@ specialBuildisRequiredSelectedByUser() {
 specialBuildCreateWorkspaceAndBuild() {
     requiredParameters UPSTREAM_PROJECT UPSTREAM_BUILD
 
+    local buildType=$1
+    mustHaveValue "${buildType}" "build type"
+
     local workspaces=$(getWorkspaceName)
     mustHaveWorkspaceName
 
@@ -202,7 +208,7 @@ specialBuildCreateWorkspaceAndBuild() {
         warning "build is not required."
         exit 0
     fi
-    if ! specialBuildisRequiredSelectedByUser ; then
+    if ! specialBuildisRequiredSelectedByUser ${buildType} ; then
         warning "build is not required."
         exit 0
     fi
@@ -213,7 +219,6 @@ specialBuildCreateWorkspaceAndBuild() {
     execute rm -rf ${WORKSPACE}/revisions.txt
     createWorkspace
     copyArtifactsToWorkspace "${UPSTREAM_PROJECT}" "${UPSTREAM_BUILD}" "fsmci"
-
 
     mustHaveNextCiLabelName
     local label=$(getNextCiLabelName)

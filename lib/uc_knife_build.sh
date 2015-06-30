@@ -106,8 +106,7 @@ usecase_LFS_KNIFE_BUILD() {
 #  @param   <none>
 #  @return  <none>
 usecase_LFS_KNIFE_BUILD_PLATFORM() {
-
-    specialBuildCreateWorkspaceAndBuild
+    specialBuildCreateWorkspaceAndBuild KNIFE
 
     info "build job finished."
     return
