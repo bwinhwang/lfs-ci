@@ -739,7 +739,7 @@ class CreateViews extends Common {
     void addSectionedView(parentView) {
         this.out.println("\n[INFO] creating sectioned view.")
         if(this.debug) {
-            this.dbg("Create sectioned view ${parentView.name}/${this.newBranch}")
+            this.dbg("Create sectioned view for ${this.newBranch}")
         } else {
             def sectionedView = parentView.getView(this.newBranch)
             if(sectionedView) {
