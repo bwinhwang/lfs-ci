@@ -245,6 +245,7 @@ class CreateBranch extends Common {
         this.jobsToEnable = []
         this.jobNameReplace = srcBranch
 
+        // List of jobs to be excluded. Job names can also be a regex.
         this.jobs2Exclude = this.env.get("JOBS_EXCLUDE_LIST").split(",")
         this.inf("jobs to exclude: ${this.jobs2Exclude}")
         this.jobsList = []
@@ -383,15 +384,17 @@ class CreateBranch extends Common {
     }
 
     /**
-      * Return true if "job_name" is in the list of jobs to be excluded,
+      * Return true if "job_name" matches an entry in this.jobs2Exclude,
       * false otherwise.
       */
     boolean job2exclude(job_name) {
-        if(job_name in this.jobs2Exclude) {
-            return true
-        } else {
-            return false
+        for(toExclude in this.jobs2Exclude) {
+            toExclude = toExclude.trim()
+            if(job_name =~ /${toExclude}/) {
+                return true
+            }
         }
+        return false
     }
 
     /**
