@@ -15,8 +15,8 @@ LFS_CI_SOURCE_common='$Id$'
 #  @return  <none>
 #  @throws  raise an error, if there is no target board name
 mustHaveTargetBoardName() {
-    local location=$(getTargetBoardName) 
-    if [[ ! ${location} ]] ; then
+    local targetName=$(getTargetBoardName) 
+    if [[ ! ${targetName} ]] ; then
         error "can not get the correction target board name from JOB_NAME \"${JOB_NAME}\""
         exit 1
     fi
