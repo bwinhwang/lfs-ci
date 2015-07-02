@@ -1,15 +1,14 @@
 #!/bin/bash
 
-source lib/common.sh
-initTempDirectory
+source test/common.sh
 
 source lib/createWorkspace.sh
 
-export UNITTEST_COMMAND=$(createTempFile)
+export UT_MOCKED_COMMANDS=$(createTempFile)
 
 oneTimeSetUp() {
     mockedCommand() {
-        echo "$@" >> ${UNITTEST_COMMAND}
+        echo "$@" >> ${UT_MOCKED_COMMANDS}
     }
     exit_handler() {
         echo exit
@@ -24,17 +23,17 @@ oneTimeSetUp() {
     updateWorkspace() {
         mockedCommand "updateWorkspace"
     }
-    getBuildJobNameFromUpstreamProject() {
-        mockedCommand "getBuildJobNameFromUpstreamProject $@"
-        echo "$1"
+    getBuildJobNameFromFingerprint() {
+        mockedCommand "getBuildJobNameFromFingerprint $@"
+        echo ${UT_JOB_NAME}
     }
-    getBuildBuildNumberFromUpstreamProject() {
-        mockedCommand "getBuildBuildNumberFromUpstreamProject $@"
+    getBuildBuildNumberFromFingerprint() {
+        mockedCommand "getBuildBuildNumberFromFingerprint $@"
         echo "123"
     }
     copyRevisionStateFileToWorkspace() {
         mockedCommand "copyRevisionStateFileToWorkspace $@"
-        if [[ $1 == "createRevisionStateFile" ]] ; then
+        if [[ $1 == "LFS_CI_-_trunk_-_Build" ]] ; then
             cat <<EOF > ${WORKSPACE}/revisions.txt
 src-abc http://svnurl/src-abc 1
 src-foo http://svnurl/src-foo 2
@@ -47,11 +46,12 @@ EOF
 }
 
 setUp() {
-    cp -f /dev/null ${UNITTEST_COMMAND}
+    cp -f /dev/null ${UT_MOCKED_COMMANDS}
+    export UT_JOB_NAME=LFS_CI_-_branch_-_Build
 }
 
 tearDown() {
-    rm -rf ${UNITTEST_COMMAND}
+    rm -rf ${UT_MOCKED_COMMANDS}
     rm -rf ${CI_LOGGING_LOGFILENAME}
     return
 }
@@ -90,6 +90,7 @@ testLatestRevisionFromRevisionStateFile_withoutProblem_withOutFile() {
 
 testLatestRevisionFromRevisionStateFile_withoutProblem_revisionFileDoesNotExist() {
     export WORKSPACE=$(createTempDirectory)
+    export UT_JOB_NAME=LFS_CI_-_trunk_-_Build
 
     export UPSTREAM_PROJECT=createRevisionStateFile
     export UPSTREAM_BUILD=build
@@ -99,11 +100,11 @@ testLatestRevisionFromRevisionStateFile_withoutProblem_revisionFileDoesNotExist(
 
     local expect=$(createTempFile)
 cat <<EOF > ${expect}
-getBuildJobNameFromUpstreamProject createRevisionStateFile build
-getBuildBuildNumberFromUpstreamProject createRevisionStateFile build
-copyRevisionStateFileToWorkspace createRevisionStateFile 123
+getBuildJobNameFromFingerprint 
+getBuildBuildNumberFromFingerprint 
+copyRevisionStateFileToWorkspace LFS_CI_-_trunk_-_Build 123
 EOF
-    assertEquals "$(cat ${expect})" "$(cat ${UNITTEST_COMMAND})"
+    assertExecutedCommands ${expect}
 
     # test for correct value
     local revision=$(latestRevisionFromRevisionStateFile)

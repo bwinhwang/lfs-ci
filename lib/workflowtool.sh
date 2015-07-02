@@ -106,7 +106,7 @@ existsBaselineInWorkflowTool() {
         # reverse logic due to exit code logic: 1 == failure, 0 == ok
         0)  return 0 ;; # does exist
         22) return 1 ;; # does not exist 
-        *)  error "unknown error from curl $?"; exit 1 ;;
+        *)  fatal "unknown error from curl $?" ;;
     esac
 
     # not reachable
