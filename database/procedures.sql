@@ -932,3 +932,40 @@ END //
 DELIMITER ;
 -- }}}
 
+-- {{{ get new label
+DROP FUNCTION IF EXISTS get_new_label;
+DELIMITER //
+CREATE FUNCTION get_new_label(in_regex VARCHAR(64)) RETURNS VARCHAR(64)
+BEGIN
+    DECLARE var_suffix VARCHAR(4);
+    DECLARE var_prefix VARCHAR(64);
+    DECLARE var_value VARCHAR(64);
+
+    SET var_prefix = SUBSTRING(in_regex, 1, LENGTH(in_regex)-22);
+    SET in_regex = CONCAT('^', CONCAT(in_regex, '$'));
+
+    SELECT LPAD(CONVERT(MAX(SUBSTRING(build_name, -4))+1, CHAR), 4, '0') INTO var_suffix FROM v_build_events WHERE build_name REGEXP in_regex AND event_state='finished';
+    SET var_value = CONCAT(var_prefix, var_suffix);
+
+    if var_suffix IS NULL THEN
+        SET var_value = CONCAT(var_prefix, '0001');
+    END IF;
+RETURN (var_value);
+END //
+DELIMITER ;
+-- }}}
+
+-- {{{ get old label
+DROP FUNCTION IF EXISTS get_old_label;
+DELIMITER //
+CREATE FUNCTION get_old_label(in_regex VARCHAR(64)) RETURNS VARCHAR(64)
+BEGIN
+    DECLARE var_value VARCHAR(64);
+
+    SET in_regex = CONCAT('^', CONCAT(in_regex, '$'));
+
+    SELECT MAX(build_name) INTO var_value FROM v_build_events WHERE build_name REGEXP in_regex AND event_state='finished';
+RETURN (var_value);
+END //
+DELIMITER ;
+-- }}}

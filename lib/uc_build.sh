@@ -133,26 +133,28 @@ ci_job_build_version() {
 
     info "workspace is ${workspace}"
 
-    local jobDirectory=$(getBuildDirectoryOnMaster)
-    local lastSuccessfulJobDirectory=$(getBuildDirectoryOnMaster ${JOB_NAME} lastSuccessfulBuild)
-    local oldLabel=$(runOnMaster "test -d ${lastSuccessfulJobDirectory} && cat ${lastSuccessfulJobDirectory}/label 2>/dev/null")
-    info "old label ${oldLabel} from ${lastSuccessfulJobDirectory} on master"
+    local dbName=$(getConfig MYSQL_db_name)
+    local dbUser=$(getConfig MYSQL_db_username)
+    local dbPass=$(getConfig MYSQL_db_password)
+    local dbHost=$(getConfig MYSQL_db_hostname)
+    local dbPort=$(getConfig MYSQL_db_port)
 
-    if [[ -z ${oldLabel} ]] ; then
-        oldLabel="invalid_string_which_will_not_match_do_regex"
-    fi
+    local regex=$(getConfig LFS_PROD_branch_to_tag_regex)
+    mustHaveValue "$regex" "regex"
 
+    local labelPrefix=$(getConfig LFS_PROD_label_prefix)
     local branch=$(getBranchName)
     mustHaveBranchName
 
-    local regex=$(getConfig LFS_PROD_branch_to_tag_regex)
-    mustHaveValue "${regex}" "branch to tag regex map"
-    local labelPrefix=$(getConfig LFS_PROD_label_prefix)
-
     info "using regex ${labelPrefix^^}${regex} for branch ${branch}"
 
-    local label=$(${LFS_CI_ROOT}/bin/getNewTagName -o "${oldLabel}" -r "${labelPrefix^^}${regex}" )
-    mustHaveValue "${label}" "next release label name"
+    local oldLabel=$(echo "SELECT get_old_label('"${labelPrefix^^}${regex}"')" | mysql -N -u ${dbUser} --password=${dbPass} -h ${dbHost} -P ${dbPort} -D ${dbName})
+    mustHaveValue "$oldLabel" "oldLabel"
+    info "old label ${oldLabel} from database"
+    local label=$(echo "SELECT get_new_label('"${labelPrefix^^}${regex}"')" | mysql -N -u ${dbUser} --password=${dbPass} -h ${dbHost} -P ${dbPort} -D ${dbName})
+    mustHaveValue "$label" "label"
+
+    local jobDirectory=$(getBuildDirectoryOnMaster)
 
     info "new version is ${label}"
     setBuildDescription "${JOB_NAME}" "${BUILD_NUMBER}" "${label}"
