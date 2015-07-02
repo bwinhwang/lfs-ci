@@ -28,7 +28,8 @@ getLocationName() {
 
     if [[ -z ${LFS_CI_GLOBAL_BRANCH_NAME} ]] ; then
         local location=$(${LFS_CI_ROOT}/bin/getFromString.pl "${jobName}" location)
-        local mappedLocation=$(${LFS_CI_ROOT}/bin/getConfig -k LFS_CI_global_mapping_location -t job_location:${location} -f ${LFS_CI_CONFIG_FILE})
+        local configFile=${LFS_CI_CONFIG_FILE:-${LFS_CI_ROOT}/etc/file.cfg}
+        local mappedLocation=$(${LFS_CI_ROOT}/bin/getConfig -k LFS_CI_global_mapping_location -t job_location:${location} -f ${configFile})
         export LFS_CI_GLOBAL_BRANCH_NAME=${mappedLocation}
     fi
 
