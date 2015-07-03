@@ -143,9 +143,6 @@ ci_job_build_version() {
     local labelPrefix=$(getConfig LFS_PROD_label_prefix)
     local branch=$(getBranchName)
     mustHaveBranchName
-    if [[ ${branch} == "pronb-developer" ]]; then
-        branch="trunk"
-    fi
 
     if [[ ${branch} == "pronb-developer" ]]; then
         branch="trunk"
