@@ -143,6 +143,10 @@ ci_job_build_version() {
     local branch=$(getBranchName)
     mustHaveBranchName
 
+    if [[ ${branch} == "pronb-developer" ]]; then
+        branch="trunk"
+    fi
+
     local productName='LFS'
     info "get new build name for ${branch} and product name ${productName} from database"
     local oldLabel=$(echo "SELECT get_last_successful_build_name('"${branch}"', '"${productName}"')" | \
