@@ -935,7 +935,7 @@ DELIMITER ;
 -- {{{ get new label
 DROP FUNCTION IF EXISTS get_new_build_name;
 DELIMITER //
-CREATE FUNCTION get_new_build_name(in_branch VARCHAR(32), in_product_name VARCHAR(32), in_label_prefix VARCHAR(32)) RETURNS VARCHAR(64)
+CREATE FUNCTION get_new_build_name(in_branch VARCHAR(32), in_product_name VARCHAR(32)) RETURNS VARCHAR(64)
 BEGIN
     DECLARE var_suffix VARCHAR(4);
     DECLARE var_prefix VARCHAR(64);
@@ -947,17 +947,17 @@ BEGIN
         INTO var_regex FROM branches WHERE branch_name=in_branch;
 
     SET var_prefix = SUBSTRING(var_regex, 1, LENGTH(var_regex)-22);
-    SET var_regex = CONCAT(in_label_prefix, var_regex);
     SET var_regex = CONCAT('^', CONCAT(var_regex, '$'));
 
+    -- timestamp can not be used. I got lower values when using ORDER BY timestamp.
     SELECT LPAD(CONVERT(SUBSTRING(build_name, -4)+1, CHAR), 4, '0') INTO var_suffix FROM v_build_events 
         WHERE build_name REGEXP var_regex AND event_state='finished' AND product_name=in_product_name
-        ORDER BY timestamp DESC LIMIT 1;
+        ORDER BY id DESC LIMIT 1;
 
     SET var_value = CONCAT(var_prefix, var_suffix);
 
     if var_suffix IS NULL THEN
-        SET var_value = CONCAT(CONCAT(in_label_prefix, var_prefix), '0001');
+        SET var_value = CONCAT(var_prefix, '0001');
     END IF;
 RETURN (var_value);
 END //

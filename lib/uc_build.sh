@@ -139,6 +139,7 @@ ci_job_build_version() {
     local dbHost=$(getConfig MYSQL_db_hostname)
     local dbPort=$(getConfig MYSQL_db_port)
 
+    local productName='LFS'
     local labelPrefix=$(getConfig LFS_PROD_label_prefix)
     local branch=$(getBranchName)
     mustHaveBranchName
@@ -147,31 +148,33 @@ ci_job_build_version() {
         branch="trunk"
     fi
 
-    local productName='LFS'
     info "get new build name for ${branch} and product name ${productName} from database"
-    local oldLabel=$(echo "SELECT get_last_successful_build_name('"${branch}"', '"${productName}"')" | \
-            mysql -N -u ${dbUser} --password=${dbPass} -h ${dbHost} -P ${dbPort} -D ${dbName})
-    mustHaveValue "$oldLabel" "oldLabel"
-    info "old label ${oldLabel} from database"
+    # use 2> /dev/null because newer versions of mysql client print a warning
+    # to stderr when the password is provided on the commandline.
+    local oldBuildName=$(echo "SELECT get_last_successful_build_name('"${branch}"', '"${productName}"')" | \
+            mysql -N -u ${dbUser} --password=${dbPass} -h ${dbHost} -P ${dbPort} -D ${dbName} 2> /dev/null)
+    mustHaveValue "$oldBuildName" "oldBuildName"
+    info "old build name ${oldBuildName} from database"
 
-    local label=$(echo "SELECT get_new_build_name('"${branch}"', '"${productName}"', '"${labelPrefix^^}"')" | \
-            mysql -N -u ${dbUser} --password=${dbPass} -h ${dbHost} -P ${dbPort} -D ${dbName})
-    mustHaveValue "$label" "label"
+    local buildName=$(echo "SELECT get_new_build_name('"${branch}"', '"${productName}"')" | \
+            mysql -N -u ${dbUser} --password=${dbPass} -h ${dbHost} -P ${dbPort} -D ${dbName} 2> /dev/null)
+    mustHaveValue "$buildName" "buildName"
+    buildName=${labelPrefix}${buildName}
 
-    if [[ ${oldLabel} == ${label} ]]; then
+    if [[ ${oldbuildName} == ${buildName} ]]; then
         error "old and new build name are the same"
         exit 1
     fi
 
     local jobDirectory=$(getBuildDirectoryOnMaster)
 
-    info "new version is ${label}"
-    setBuildDescription "${JOB_NAME}" "${BUILD_NUMBER}" "${label}"
+    info "new version is ${buildName}"
+    setBuildDescription "${JOB_NAME}" "${BUILD_NUMBER}" "${buildName}"
 
-    debug "writing new label file in workspace ${workspace}"
+    debug "writing new buildName file in workspace ${workspace}"
     execute mkdir -p ${workspace}/bld/bld-fsmci-summary
-    echo ${label}    > ${workspace}/bld/bld-fsmci-summary/label
-    echo ${oldLabel} > ${workspace}/bld/bld-fsmci-summary/oldLabel
+    echo ${buildName}    > ${workspace}/bld/bld-fsmci-summary/label
+    echo ${oldbuildName} > ${workspace}/bld/bld-fsmci-summary/oldLabel
     
     createFingerprintFile
 
@@ -179,8 +182,8 @@ ci_job_build_version() {
     databaseEventBuildStarted
     exit_add _recordBuildEndEvent
 
-    debug "writing new label file in ${jobDirectory}/label"
-    executeOnMaster "echo ${label} > ${jobDirectory}/label"
+    debug "writing new buildName file in ${jobDirectory}/label"
+    executeOnMaster "echo ${buildName} > ${jobDirectory}/label"
 
     info "upload results to artifakts share."
     createArtifactArchive
