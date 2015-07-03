@@ -22,6 +22,8 @@ ci_job_admin() {
         synchronizeShare)             synchronizeShare                      ;;
         genericShareCleanup)          genericShareCleanup                   ;;
         createLfsBaselineListFromEcl) createLfsBaselineListFromEcl          ;;
+        createBranch)                 createBranch                          ;;
+        deleteBranch)                 deleteBranch                          ;;
         *)
             error "subjob not known (${taskName})"
             exit 1;
@@ -323,9 +325,9 @@ cleanupBaselineShares() {
         done
     fi
 
-    if [[ -d /var/fpwork/psulm/lfs-jenkins/workspace ]] ; then
+    if [[ -d /var/fpwork/${USER}/lfs-jenkins/workspace ]] ; then
         local workspaceList=$(createTempFile)
-        execute -n find /var/fpwork/psulm/lfs-jenkins/workspace -maxdepth 1 -mindepth 1 -mtime +3 > ${workspaceList}
+        execute -n find /var/fpwork/${USER}/lfs-jenkins/workspace -maxdepth 1 -mindepth 1 -mtime +3 > ${workspaceList}
         for directory in $(cat ${workspaceList}) ; do
             info "removing ${directory}";
             execute chmod -R u+w ${directory}
