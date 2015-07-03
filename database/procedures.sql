@@ -935,7 +935,7 @@ DELIMITER ;
 -- {{{ get new label
 DROP FUNCTION IF EXISTS get_new_build_name;
 DELIMITER //
-CREATE FUNCTION get_new_build_name(in_branch VARCHAR(32), in_product_name VARCHAR(32)) RETURNS VARCHAR(64)
+CREATE FUNCTION get_new_build_name(in_branch VARCHAR(32), in_product_name VARCHAR(32), in_label_prefix VARCHAR(32)) RETURNS VARCHAR(64)
 BEGIN
     DECLARE var_suffix VARCHAR(4);
     DECLARE var_prefix VARCHAR(64);
@@ -947,6 +947,7 @@ BEGIN
         INTO var_regex FROM branches WHERE branch_name=in_branch;
 
     SET var_prefix = SUBSTRING(var_regex, 1, LENGTH(var_regex)-22);
+    SET var_regex = CONCAT(in_label_prefix, var_regex);
     SET var_regex = CONCAT('^', CONCAT(var_regex, '$'));
 
     -- timestamp can not be used. I got lower values when using ORDER BY timestamp.
@@ -958,6 +959,7 @@ BEGIN
 
     if var_suffix IS NULL THEN
         SET var_value = CONCAT(var_prefix, '0001');
+        SET var_value = CONCAT(in_labe_prefix, var_value);
     END IF;
 RETURN (var_value);
 END //
@@ -967,7 +969,7 @@ DELIMITER ;
 -- {{{ get old label
 DROP FUNCTION IF EXISTS get_last_successful_build_name;
 DELIMITER //
-CREATE FUNCTION get_last_successful_build_name(in_branch VARCHAR(32), in_product_name VARCHAR(32)) RETURNS VARCHAR(64)
+CREATE FUNCTION get_last_successful_build_name(in_branch VARCHAR(32), in_product_name VARCHAR(32), in_label_prefix VARCHAR(32)) RETURNS VARCHAR(64)
 BEGIN
     DECLARE var_value VARCHAR(64);
     DECLARE var_regex VARCHAR(64);
@@ -975,6 +977,7 @@ BEGIN
     SELECT replace(replace(release_name_regex, '${date_%Y}', YEAR(NOW())), '${date_%m}', LPAD(MONTH(NOW()), 2, 0)) 
         INTO var_regex FROM branches WHERE branch_name=in_branch;
 
+    SET var_regex = CONCAT(in_label_prefix, var_regex);
     SET var_regex = CONCAT('^', CONCAT(var_regex, '$'));
 
     SELECT build_name INTO var_value FROM v_build_events 
