@@ -53,7 +53,7 @@ usecase_PKGPOOL_BUILD() {
     cd ${workspace}
 
     info "building pkgpool..."
-    execute -l ${buildLogFile} ${gitWorkspace}/build -j100 --prepopulate --release="${releasePrefix}" 
+    execute -l ${buildLogFile} ${gitWorkspace}/build -j100 --prepopulate --pkgpool=/build/home/SC_LFS_LRC/pkgpool --release="${releasePrefix}" 
 
     # TODO: demx2fk3 2015-03-09 add logfiles to artifacts
 
