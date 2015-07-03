@@ -144,6 +144,7 @@ ci_job_build_version() {
     mustHaveBranchName
 
     local productName='LFS'
+    info "get new build name for ${branch} and product name ${productName} from database"
     local oldLabel=$(echo "SELECT get_last_successful_build_name('"${branch}"', '"${productName}"')" | \
             mysql -N -u ${dbUser} --password=${dbPass} -h ${dbHost} -P ${dbPort} -D ${dbName})
     mustHaveValue "$oldLabel" "oldLabel"
