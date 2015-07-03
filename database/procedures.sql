@@ -933,22 +933,31 @@ DELIMITER ;
 -- }}}
 
 -- {{{ get new label
-DROP FUNCTION IF EXISTS get_new_label;
+DROP FUNCTION IF EXISTS get_new_build_name;
 DELIMITER //
-CREATE FUNCTION get_new_label(in_regex VARCHAR(64)) RETURNS VARCHAR(64)
+CREATE FUNCTION get_new_build_name(in_branch VARCHAR(32), in_product_name VARCHAR(32), in_label_prefix VARCHAR(32)) RETURNS VARCHAR(64)
 BEGIN
     DECLARE var_suffix VARCHAR(4);
     DECLARE var_prefix VARCHAR(64);
     DECLARE var_value VARCHAR(64);
+    DECLARE var_regex VARCHAR(64);
 
-    SET var_prefix = SUBSTRING(in_regex, 1, LENGTH(in_regex)-22);
-    SET in_regex = CONCAT('^', CONCAT(in_regex, '$'));
 
-    SELECT LPAD(CONVERT(MAX(SUBSTRING(build_name, -4))+1, CHAR), 4, '0') INTO var_suffix FROM v_build_events WHERE build_name REGEXP in_regex AND event_state='finished';
+    SELECT replace(replace(release_name_regex, '${date_%Y}', YEAR(NOW())), '${date_%m}', LPAD(MONTH(NOW()), 2, 0)) 
+        INTO var_regex FROM branches WHERE branch_name=in_branch;
+
+    SET var_prefix = SUBSTRING(var_regex, 1, LENGTH(var_regex)-22);
+    SET var_regex = CONCAT(in_label_prefix, var_regex);
+    SET var_regex = CONCAT('^', CONCAT(var_regex, '$'));
+
+    SELECT LPAD(CONVERT(SUBSTRING(build_name, -4)+1, CHAR), 4, '0') INTO var_suffix FROM v_build_events 
+        WHERE build_name REGEXP var_regex AND event_state='finished' AND product_name=in_product_name
+        ORDER BY timestamp DESC LIMIT 1;
+
     SET var_value = CONCAT(var_prefix, var_suffix);
 
     if var_suffix IS NULL THEN
-        SET var_value = CONCAT(var_prefix, '0001');
+        SET var_value = CONCAT(CONCAT(in_label_prefix, var_prefix), '0001');
     END IF;
 RETURN (var_value);
 END //
@@ -956,15 +965,21 @@ DELIMITER ;
 -- }}}
 
 -- {{{ get old label
-DROP FUNCTION IF EXISTS get_old_label;
+DROP FUNCTION IF EXISTS get_last_successful_build_name;
 DELIMITER //
-CREATE FUNCTION get_old_label(in_regex VARCHAR(64)) RETURNS VARCHAR(64)
+CREATE FUNCTION get_last_successful_build_name(in_branch VARCHAR(32), in_product_name VARCHAR(32)) RETURNS VARCHAR(64)
 BEGIN
     DECLARE var_value VARCHAR(64);
+    DECLARE var_regex VARCHAR(64);
 
-    SET in_regex = CONCAT('^', CONCAT(in_regex, '$'));
+    SELECT replace(replace(release_name_regex, '${date_%Y}', YEAR(NOW())), '${date_%m}', LPAD(MONTH(NOW()), 2, 0)) 
+        INTO var_regex FROM branches WHERE branch_name=in_branch;
 
-    SELECT MAX(build_name) INTO var_value FROM v_build_events WHERE build_name REGEXP in_regex AND event_state='finished';
+    SET var_regex = CONCAT('^', CONCAT(var_regex, '$'));
+
+    SELECT build_name INTO var_value FROM v_build_events 
+        WHERE build_name REGEXP var_regex AND event_state='finished' AND product_name=in_product_name
+        ORDER BY timestamp DESC LIMIT 1;
 RETURN (var_value);
 END //
 DELIMITER ;

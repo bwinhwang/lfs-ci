@@ -139,20 +139,24 @@ ci_job_build_version() {
     local dbHost=$(getConfig MYSQL_db_hostname)
     local dbPort=$(getConfig MYSQL_db_port)
 
-    local regex=$(getConfig LFS_PROD_branch_to_tag_regex)
-    mustHaveValue "$regex" "regex"
-
     local labelPrefix=$(getConfig LFS_PROD_label_prefix)
     local branch=$(getBranchName)
     mustHaveBranchName
 
-    info "using regex ${labelPrefix^^}${regex} for branch ${branch}"
-
-    local oldLabel=$(echo "SELECT get_old_label('"${labelPrefix^^}${regex}"')" | mysql -N -u ${dbUser} --password=${dbPass} -h ${dbHost} -P ${dbPort} -D ${dbName})
+    local productName='LFS'
+    local oldLabel=$(echo "SELECT get_last_successful_build_name('"${branch}"', '"${productName}"')" | \
+            mysql -N -u ${dbUser} --password=${dbPass} -h ${dbHost} -P ${dbPort} -D ${dbName})
     mustHaveValue "$oldLabel" "oldLabel"
     info "old label ${oldLabel} from database"
-    local label=$(echo "SELECT get_new_label('"${labelPrefix^^}${regex}"')" | mysql -N -u ${dbUser} --password=${dbPass} -h ${dbHost} -P ${dbPort} -D ${dbName})
+
+    local label=$(echo "SELECT get_new_build_name('"${branch}"', '"${productName}"', '"${labelPrefix^^}"')" | \
+            mysql -N -u ${dbUser} --password=${dbPass} -h ${dbHost} -P ${dbPort} -D ${dbName})
     mustHaveValue "$label" "label"
+
+    if [[ ${oldLabel} == ${label} ]]; then
+        error "old and new build name are the same"
+        exit 1
+    fi
 
     local jobDirectory=$(getBuildDirectoryOnMaster)
 
