@@ -134,13 +134,14 @@ ci_job_build_version() {
     info "workspace is ${workspace}"
 
     local dbName=$(getConfig MYSQL_db_name)
+    local dbPort=$(getConfig MYSQL_db_port)
     local dbUser=$(getConfig MYSQL_db_username)
     local dbPass=$(getConfig MYSQL_db_password)
     local dbHost=$(getConfig MYSQL_db_hostname)
-    local dbPort=$(getConfig MYSQL_db_port)
 
     local productName='LFS'
-    local labelPrefix=$(getConfig LFS_PROD_label_prefix)
+    #local labelPrefix=$(getConfig LFS_PROD_label_prefix)
+    local labelPrefix=
     local branch=$(getBranchName)
     mustHaveBranchName
 
@@ -151,6 +152,7 @@ ci_job_build_version() {
     info "get new build name for ${branch} and product name ${productName} from database"
     # use 2> /dev/null because newer versions of mysql client print a warning
     # to stderr when the password is provided on the commandline.
+    info "SELECT get_last_successful_build_name('"${branch}"', '"${productName}"', '"${labelPrefix^^}"')"
     local oldBuildName=$(echo "SELECT get_last_successful_build_name('"${branch}"', '"${productName}"', '"${labelPrefix^^}"')" | \
             mysql -N -u ${dbUser} --password=${dbPass} -h ${dbHost} -P ${dbPort} -D ${dbName} 2> /dev/null)
     mustHaveValue "$oldBuildName" "oldBuildName"
