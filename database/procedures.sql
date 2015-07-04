@@ -950,15 +950,19 @@ BEGIN
     SET var_regex = CONCAT(in_label_prefix, var_regex);
     SET var_regex = CONCAT('^', CONCAT(var_regex, '$'));
 
-    -- timestamp can not be used. I got lower values when using ORDER BY timestamp.
+    -- "ORDER BY timestamp" can not be used:
+    -- I got lower values when using ORDER BY timestamp.
+
     -- SELECT LPAD(CONVERT(SUBSTRING(build_name, -4)+1, CHAR), 4, '0') INTO var_suffix FROM v_build_events 
         -- WHERE build_name REGEXP var_regex AND event_state='finished' AND product_name=in_product_name
         -- ORDER BY timestamp DESC LIMIT 1;
 
-    -- After migration producton DB so sandbox the IDs and the build names are not the same as on production server.
-    -- Meaning a later buid eg. *_0055 can have a lower ID than an earlier build eg. *_0050. So, the most stable is 
-    -- using max(build_name) and excluding build_names ending with _9999.
+    -- "ORDER BY id" can not be used:
+    -- After migration production DB so sandbox the IDs and the build names are not the same as on production server.
+    -- Meaning a later build eg. *_0055 can have a lower ID than an earlier build eg. *_0050. So, the most stable 
+    -- solution might be using max(build_name) and excluding build_names ending with _9999.
     -- TODO: make exclude string (%_9999) configurable.
+
     SELECT LPAD(CONVERT(SUBSTRING(MAX(build_name), -4)+1, CHAR), 4, '0') INTO var_suffix FROM v_build_events 
         WHERE build_name REGEXP var_regex AND event_state='finished' AND product_name=in_product_name
         AND build_name not like '%_9999';
@@ -967,7 +971,7 @@ BEGIN
 
     if var_suffix IS NULL THEN
         SET var_value = CONCAT(var_prefix, '0001');
-        SET var_value = CONCAT(in_labe_prefix, var_value);
+        SET var_value = CONCAT(in_label_prefix, var_value);
     END IF;
 RETURN (var_value);
 END //
