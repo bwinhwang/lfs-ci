@@ -140,8 +140,7 @@ ci_job_build_version() {
     local dbHost=$(getConfig MYSQL_db_hostname)
 
     local productName='LFS'
-    #local labelPrefix=$(getConfig LFS_PROD_label_prefix)
-    local labelPrefix=
+    local labelPrefix=$(getConfig LFS_PROD_label_prefix)
     local branch=$(getBranchName)
     mustHaveBranchName
 
@@ -152,7 +151,6 @@ ci_job_build_version() {
     info "get new build name for ${branch} and product name ${productName} from database"
     # use 2> /dev/null because newer versions of mysql client print a warning
     # to stderr when the password is provided on the commandline.
-    info "SELECT get_last_successful_build_name('"${branch}"', '"${productName}"', '"${labelPrefix^^}"')"
     local oldBuildName=$(echo "SELECT get_last_successful_build_name('"${branch}"', '"${productName}"', '"${labelPrefix^^}"')" | \
             mysql -N -u ${dbUser} --password=${dbPass} -h ${dbHost} -P ${dbPort} -D ${dbName} 2> /dev/null)
     mustHaveValue "$oldBuildName" "oldBuildName"
