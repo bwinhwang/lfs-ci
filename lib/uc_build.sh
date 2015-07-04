@@ -140,6 +140,8 @@ ci_job_build_version() {
     local dbHost=$(getConfig MYSQL_db_hostname)
 
     local productName='LFS'
+    # TODO: check labepPrefix. Is label prefix put into branches table.
+    #       To be clarified with Bernhard.
     local labelPrefix=$(getConfig LFS_PROD_label_prefix)
     local branch=$(getBranchName)
     mustHaveBranchName
