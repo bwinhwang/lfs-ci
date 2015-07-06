@@ -935,7 +935,7 @@ DELIMITER ;
 -- {{{ get new build name
 DROP FUNCTION IF EXISTS get_new_build_name;
 DELIMITER //
-CREATE FUNCTION get_new_build_name(in_branch VARCHAR(32), in_product_name VARCHAR(32), in_label_prefix VARCHAR(32)) RETURNS VARCHAR(64)
+CREATE FUNCTION get_new_build_name(in_branch VARCHAR(32), in_product_name VARCHAR(32)) RETURNS VARCHAR(64)
 BEGIN
     DECLARE var_suffix VARCHAR(4);
     DECLARE var_prefix VARCHAR(64);
@@ -947,7 +947,6 @@ BEGIN
         INTO var_regex FROM branches WHERE branch_name=in_branch;
 
     SET var_prefix = SUBSTRING(var_regex, 1, LENGTH(var_regex)-22);
-    SET var_regex = CONCAT(in_label_prefix, var_regex);
     SET var_regex = CONCAT('^', CONCAT(var_regex, '$'));
 
     -- "ORDER BY timestamp" can not be used:
@@ -961,7 +960,7 @@ BEGIN
     -- After migration production DB so sandbox the IDs and the build names are not the same as on production server.
     -- Meaning a later build eg. *_0055 can have a lower ID than an earlier build eg. *_0050. So, the most stable 
     -- solution might be using max(build_name) and excluding build_names ending with _9999.
-    -- TODO: make exclude string (%_9999) configurable.
+    -- TODO: make exclution configurable.
 
     SELECT LPAD(CONVERT(SUBSTRING(MAX(build_name), -4)+1, CHAR), 4, '0') INTO var_suffix FROM v_build_events 
         WHERE build_name REGEXP var_regex AND event_state='finished' AND product_name=in_product_name
@@ -971,7 +970,6 @@ BEGIN
 
     if var_suffix IS NULL THEN
         SET var_value = CONCAT(var_prefix, '0001');
-        SET var_value = CONCAT(in_label_prefix, var_value);
     END IF;
 RETURN (var_value);
 END //
@@ -981,7 +979,7 @@ DELIMITER ;
 -- {{{ get last successful build name
 DROP FUNCTION IF EXISTS get_last_successful_build_name;
 DELIMITER //
-CREATE FUNCTION get_last_successful_build_name(in_branch VARCHAR(32), in_product_name VARCHAR(32), in_label_prefix VARCHAR(32)) RETURNS VARCHAR(64)
+CREATE FUNCTION get_last_successful_build_name(in_branch VARCHAR(32), in_product_name VARCHAR(32)) RETURNS VARCHAR(64)
 BEGIN
     DECLARE var_value VARCHAR(64);
     DECLARE var_regex VARCHAR(64);
@@ -989,10 +987,9 @@ BEGIN
     SELECT replace(replace(release_name_regex, '${date_%Y}', YEAR(NOW())), '${date_%m}', LPAD(MONTH(NOW()), 2, 0)) 
         INTO var_regex FROM branches WHERE branch_name=in_branch;
 
-    SET var_regex = CONCAT(in_label_prefix, var_regex);
     SET var_regex = CONCAT('^', CONCAT(var_regex, '$'));
 
-    -- TODO: make exclude string (%_9999) configurable.
+    -- TODO: make exclution configurable.
     SELECT MAX(build_name) INTO var_value FROM v_build_events 
         WHERE build_name REGEXP var_regex AND event_state='finished' AND product_name=in_product_name
         AND build_name not like '%_9999';
