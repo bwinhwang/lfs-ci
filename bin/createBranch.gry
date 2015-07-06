@@ -310,7 +310,7 @@ class CreateBranch extends Common {
             text.replaceAll("-_"+this.jobNameReplace+"_-", "-_"+this.newBranch+"_-")
         }
 
-        # Vtc job exists on trunk only
+        // Vtc job exists on trunk only
         if(newJob.name == "LFS_CI_-_${this.newBranch}_-_Test") {
             processFileInplace(configFile) { text ->
                 text.replaceAll("LFS_CI_-_${this.newBranch}_-_TestLfsPlusVtc", "")
