@@ -153,7 +153,7 @@ ci_job_build_version() {
     # use 2> /dev/null because newer versions of mysql client print a warning
     # to stderr when the password is provided on the commandline.
 
-    local oldBuildName=$(echo "SELECT get_last_successful_build_name('"${branch}"', '"${productName}"')" | \
+    local oldBuildName=$(echo "SELECT get_last_successful_build_name('"${branch}"', '"${productName}"', '"${labelPrefix}"')" | \
             mysql -N -u ${dbUser} --password=${dbPass} -h ${dbHost} -P ${dbPort} -D ${dbName} 2> /dev/null)
     mustHaveValue "$oldBuildName" "oldBuildName"
     if [[ ${oldBuildName} == NULL ]]; then
@@ -162,7 +162,7 @@ ci_job_build_version() {
     fi
     info "old build name ${oldBuildName} from database"
 
-    local buildName=$(echo "SELECT get_new_build_name('"${branch}"', '"${productName}"')" | \
+    local buildName=$(echo "SELECT get_new_build_name('"${branch}"', '"${productName}"', '"${labelPrefix}"')" | \
             mysql -N -u ${dbUser} --password=${dbPass} -h ${dbHost} -P ${dbPort} -D ${dbName} 2> /dev/null)
     mustHaveValue "$buildName" "buildName"
     if [[ ${buildName} == NULL ]]; then
