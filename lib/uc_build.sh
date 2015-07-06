@@ -160,7 +160,7 @@ ci_job_build_version() {
         error "got NULL for oldBuildName from DB"
         exit 1
     fi
-    info "old build name ${oldBuildName} from database"
+    info "old build name ${oldBuildName}"
 
     local buildName=$(echo "SELECT get_new_build_name('"${branch}"', '"${productName}"', '"${labelPrefix}"')" | \
             mysql -N -u ${dbUser} --password=${dbPass} -h ${dbHost} -P ${dbPort} -D ${dbName} 2> /dev/null)
@@ -170,12 +170,12 @@ ci_job_build_version() {
         exit 1
     fi
 
+    buildName=${labelPrefix^^}${buildName}
+
     if [[ ${oldbuildName} == ${buildName} ]]; then
         error "old and new build name are the same"
         exit 1
     fi
-
-    buildName=${labelPrefix^^}${buildName}
 
     local jobDirectory=$(getBuildDirectoryOnMaster)
 
