@@ -156,11 +156,19 @@ ci_job_build_version() {
     local oldBuildName=$(echo "SELECT get_last_successful_build_name('"${branch}"', '"${productName}"')" | \
             mysql -N -u ${dbUser} --password=${dbPass} -h ${dbHost} -P ${dbPort} -D ${dbName} 2> /dev/null)
     mustHaveValue "$oldBuildName" "oldBuildName"
+    if [[ ${oldBuildName} == NULL ]]; then
+        error "got NULL for oldBuildName from DB"
+        exit 1
+    fi
     info "old build name ${oldBuildName} from database"
 
     local buildName=$(echo "SELECT get_new_build_name('"${branch}"', '"${productName}"')" | \
             mysql -N -u ${dbUser} --password=${dbPass} -h ${dbHost} -P ${dbPort} -D ${dbName} 2> /dev/null)
     mustHaveValue "$buildName" "buildName"
+    if [[ ${buildName} == NULL ]]; then
+        error "got NULL for buildName from DB"
+        exit 1
+    fi
 
     if [[ ${oldbuildName} == ${buildName} ]]; then
         error "old and new build name are the same"
