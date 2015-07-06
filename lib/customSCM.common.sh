@@ -91,7 +91,7 @@ getUpstreamProjectName() {
         LFS_CI_-_trunk_-_Testing_*)         echo LFS_CI_-_trunk_-_Test ;;
         LFS_CI_-_fsmr4_-_Testing_*)         echo LFS_CI_-_trunk_-_Test ;;
         LFS_Prod_-_trunk_-_Write_ECL)       echo LFS_Prod_-_trunk_-_Releasing_-_summary ;;
-        LFS_Prod_-_*_-_Write_ECL)           echo LFS_Prod_-_$(branchName)_-_Releasing_-_summary ;;
+        LFS_Prod_-_*_-_Write_ECL)           echo LFS_Prod_-_${branchName}_-_Releasing_-_summary ;;
         LFS_Post_-_trunk*)                  echo LFS_Prod_-_trunk_-_Releasing_-_summary ;;
         LFS_Post_-_pronb-developer*)        echo LFS_Prod_-_trunk_-_Releasing_-_summary ;;
         LFS_Post_-_*)                       echo LFS_Prod_-_${branchName}_-_Releasing_-_summary ;;
