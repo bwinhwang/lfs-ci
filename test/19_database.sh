@@ -28,6 +28,10 @@ oneTimeSetUp() {
         mockCommand "runOnMaster $@"
         echo src-project http-url 123456
     }
+    getBuildDirectoryOnMaster() {
+        mockCommand "getBuildDirectoryOnMaster $@"
+        echo /path/to/build/job/number
+    }
             
     mockCommand() {
         echo $@ >> ${UT_MOCKED_COMMANDS}
@@ -59,8 +63,8 @@ testDatabaseEventBuildStarted_ok() {
     cat <<EOF > ${expect}
 getLocationName
 mustHaveLocationName
-getLocationName
-runOnMaster cat /var/fpwork/psulm/lfs-jenkins/home/jobs/LFS_CI_-_trunk_-_Build_-_FSM-r2_-_fcmd/builds/123/revisionstate.xml
+getBuildDirectoryOnMaster LFS_CI_-_trunk_-_Build_-_FSM-r2_-_fcmd 123
+runOnMaster cat /path/to/build/job/number/revisionstate.xml
 execute -i ${LFS_CI_ROOT}/bin/newEvent --buildName=PS_LFS_OS_9999_88_7777 --action=build_started --jobName=${JOB_NAME} --buildNumber=123 --productName=LFS --taskName=build --revision=123456 --branchName=trunk
 EOF
     assertExecutedCommands ${expect}
