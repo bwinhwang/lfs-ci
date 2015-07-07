@@ -56,6 +56,17 @@ oneTimeSetUp() {
         mockedCommand "copyFileFromBuildDirectoryToWorkspace $@"
         echo abc >  ${WORKSPACE}/$3
     }
+    getBuildDirectoryOnMaster() {
+        mockedCommand "getBuildDirectoryOnMaster $@"
+        echo /path/to/jenkins/jobname/buildnumber
+    }
+    getConfig() {
+        case $1 in 
+            LFS_CI_uc_release_can_create_release_in_wft) echo 1 ;;
+            *) echo $1 ;;
+        esac
+            
+    }
 
     return
 }
@@ -86,7 +97,8 @@ test1() {
     cat <<EOF > ${expect}
 mustHaveCleanWorkspace
 copyArtifactsToWorkspace PKGPOOL_CI_-_trunk_-_Test 1234 pkgpool
-runOnMaster test -e /var/fpwork/psulm/lfs-jenkins/home/jobs/PKGPOOL_PROD_-_trunk_-_Release/builds/lastSuccessfulBuild/forReleaseNote.txt
+getBuildDirectoryOnMaster PKGPOOL_PROD_-_trunk_-_Release lastSuccessfulBuild
+runOnMaster test -e /path/to/jenkins/jobname/buildnumber/forReleaseNote.txt
 copyFileFromBuildDirectoryToWorkspace PKGPOOL_PROD_-_trunk_-_Release lastSuccessfulBuild forReleaseNote.txt
 execute mv ${WORKSPACE}/forReleaseNote.txt ${WORKSPACE}/workspace/forReleaseNote.txt.old
 copyFileFromBuildDirectoryToWorkspace PKGPOOL_PROD_-_trunk_-_Release lastSuccessfulBuild gitrevision
