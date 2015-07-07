@@ -116,7 +116,7 @@ copyFileToArtifactDirectory ${WORKSPACE}/workspace/releasenote.xml
 copyFileToArtifactDirectory ${WORKSPACE}/workspace/releasenote.txt
 copyFileFromWorkspaceToBuildDirectory ${JOB_NAME} ${BUILD_NUMBER} ${WORKSPACE}/workspace/bld/bld-pkgpool-release/forReleaseNote.txt
 copyFileFromWorkspaceToBuildDirectory ${JOB_NAME} ${BUILD_NUMBER} ${WORKSPACE}/workspace/gitrevision
-linkFileToArtifactsDirectory /lfs/internal/${USER}/artifacts/PKGPOOL_PROD_-_trunk_-_Release/1234
+linkFileToArtifactsDirectory artifactesShare/PKGPOOL_PROD_-_trunk_-_Release/1234
 EOF
     assertExecutedCommands ${expect}
 
