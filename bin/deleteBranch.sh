@@ -26,7 +26,6 @@ __printParams() {
     info "# ----------------------"
     info "# BRANCH:              $BRANCH"
     info "# MOVE_SVN:            $MOVE_SVN"
-    info "# MOVE_SVN_OS_BRANCH:  $MOVE_SVN_OS_BRANCH"
     info "# DELETE_JOBS:         $DELETE_JOBS"
     info "# DELETE_TEST_RESULTS: $DELETE_TEST_RESULTS"
     info "# MOVE_SHARE:          $MOVE_SHARE"
@@ -131,7 +130,7 @@ __getSubBranch() {
 #######################################################################
 
 ## @fn      moveBranchSvn()
-#  @brief   move $BRANCH in svn
+#  @brief   move locations for $BRANCH in svn
 #  @param   <none>
 #  @return  <none>
 moveBranchSvn() {
@@ -151,7 +150,7 @@ moveBranchSvn() {
 }
 
 ## @fn      moveBranchSvnOS()
-#  @brief   move os/$BRANCH in svn
+#  @brief   move the $BRANCH in svn
 #  @param   <none>
 #  @return  <none>
 moveBranchSvnOS() {
@@ -355,14 +354,13 @@ main() {
     __checkOthers || { error "Checking some stuff failed."; exit 1; }
     __preparation
 
-    [[ ${MOVE_SVN_OS_BRANCH} == true ]] && moveBranchSvnOS || info "Not moving os/$BRANCH in repo"
     [[ ${DB_UPDATE} == true ]] && dbUpdate || info "Not updating DB."
 
     if [[ $LRC == true ]]; then
         [[ ${LRC_MOVE_SVN} == true ]] && LRC_moveBranchSvn
         [[ ${LRC_MOVE_SHARE} == true ]] && { LRC_archiveBranchShare; LRC_archiveBranchBldShare; }
     else
-        [[ ${MOVE_SVN} == true ]] && moveBranchSvn
+        [[ ${MOVE_SVN} == true ]] && { moveBranchSvn; moveBranchSvnOS; }
         [[ ${MOVE_SHARE} == true ]] && { archiveBranchShare; archiveBranchBldShare; }
         [[ ${DELETE_TEST_RESULTS} == true ]] && deleteTestResults
     fi
