@@ -23,6 +23,7 @@ oneTimeTearDown() {
 
 setUp() {
     rm -rf ${UT_MOCKED_COMMANDS}
+    export JOB_NAME=LFS_CI_-_trunk_-_Build
 }
 tearDown() {
     true 
