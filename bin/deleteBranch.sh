@@ -210,9 +210,9 @@ _getDirPattern() {
 }
 
 ## @fn      archiveShare()
-#  @brief   archive data for on share
-#  @param   $1 - the share to be archived
-#  @param   $2 - value for -maxdepth parameter of find. Defaults to 2
+#  @brief   archive (move) data on share
+#  @param   {share}    the share directory to be archived
+#  @param   {findDepth}    value for -maxdepth parameter of find. Possible values are 1 or 2. Defaults to 2
 #  @return  <none>
 archiveShare() {
     info "--------------------------------------------------------"
@@ -223,7 +223,11 @@ archiveShare() {
 
     local shareToArchive=$1
     local findDepth=2
-    [[ ! -z $2 ]] && findDepth=${2}
+    if [[ ! -z $2 ]]; then
+        local re='^[12]$'
+        [[ ! $2 =~ $re ]] && { error "\$2 must be 1 or 2"; exit 1; }
+        findDepth=${2}
+    fi
     local dirPattern=$DIR_PATTERN
 
     if [[ ! -d ${shareToArchive} ]]; then
