@@ -364,10 +364,6 @@ synchroniceToLocalPath() {
     if [[ ! -e ${localCacheDir}/${tag} ]] ; then
         progressFile=${localCacheDir}/data/${tag}.in_progress
 
-        local sleep=$(( RANDOM % 60 ))
-        debug "sleeping ${sleep} s for sync based on ${progressFile}"
-        sleep ${sleep}
-
         # mkdir is an atomic operation. if it exists, mkdir fails
         if mkdir ${progressFile} 2> /dev/null ; then
 
