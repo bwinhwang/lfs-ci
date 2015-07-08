@@ -35,6 +35,10 @@ usecase_PKGPOOL_BUILD() {
     local releasePrefix=$(getConfig PKGPOOL_PROD_release_prefix)
     mustHaveValue "${releasePrefix}" "pkgpool release prefix"
 
+    local buildParameters="$(getConfig PKGPOOL_additional_build_parameters)"
+    # build parameters could be empty => no mustHaveValue
+    # mustHaveValue "${buildParameters}" "additional build parameters"
+
     info "pkgpool release name prefix is ${releasePrefix}"
 
     local buildLogFile=$(createTempFile)
@@ -53,7 +57,7 @@ usecase_PKGPOOL_BUILD() {
     cd ${workspace}
 
     info "building pkgpool..."
-    execute -l ${buildLogFile} ${gitWorkspace}/build -j100 --prepopulate --pkgpool=/build/home/SC_LFS_LRC/pkgpool --release="${releasePrefix}" 
+    execute -l ${buildLogFile} ${gitWorkspace}/build ${buildParameters} -j100 --prepopulate --release="${releasePrefix}" 
 
     # TODO: demx2fk3 2015-03-09 add logfiles to artifacts
 
