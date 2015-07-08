@@ -55,8 +55,21 @@ Host linsee_server_ulm
     Compression                     yes
     UserKnownHostsFile              /dev/null
     LogLevel                        quiet
-    ProxyCommand                     /home/psulm/bin/sshrandom linsee_server_ulm
+    ProxyCommand                    /home/psulm/bin/sshrandom linsee_server_ulm
 
+Host linsee_server_ulm_lrc
+    Hostname                        localhost
+    User                            ca_lrcci
+    ChallengeResponseAuthentication no
+    PasswordAuthentication          no
+    StrictHostKeyChecking           no
+    BatchMode                       yes
+    ForwardX11                      no
+    ForwardX11Trusted               no
+    Compression                     yes
+    UserKnownHostsFile              /dev/null
+    LogLevel                        quiet
+    ProxyCommand                    /home/ca_lrcci/bin/sshrandom linsee_server_ulm_lrc
 
 Host lfs_jenkins_master maxi.emea.nsn-net.net maxi 
     Hostname                        maxi.emea.nsn-net.net

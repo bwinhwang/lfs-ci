@@ -1,9 +1,13 @@
 #!/bin/bash
-#@ @file    amazons3.sh
+## @file    amazons3.sh
 #  @brief   interface for amazon s3 (Nokia internal s3 storage)
 #  @defails see the s3cmd for more details
 
 LFS_CI_SOURCE_amazons3='$Id$'
+
+[[ -z ${LFS_CI_SOURCE_config}   ]] && source ${LFS_CI_ROOT}/lib/config.sh
+[[ -z ${LFS_CI_SOURCE_logging}  ]] && source ${LFS_CI_ROOT}/lib/logging.sh
+[[ -z ${LFS_CI_SOURCE_commands} ]] && source ${LFS_CI_ROOT}/lib/commands.sh
 
 ## @fn      s3PutFile()
 #  @brief   put a file in the s3 storage in a defined bucket

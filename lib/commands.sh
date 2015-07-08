@@ -5,10 +5,10 @@
 #           help the developer to execute a command in the correct way including
 #           logging of the command and the proper error handling.
 
-[[ -z ${LFS_CI_SOURCE_common}  ]] && source ${LFS_CI_ROOT}/lib/common.sh
-[[ -z ${LFS_CI_SOURCE_logging} ]] && source ${LFS_CI_ROOT}/lib/logging.sh
-
 LFS_CI_SOURCE_commands='$Id$'
+
+[[ -z ${LFS_CI_SOURCE_config}   ]] && source ${LFS_CI_ROOT}/lib/config.sh
+[[ -z ${LFS_CI_SOURCE_logging}  ]] && source ${LFS_CI_ROOT}/lib/logging.sh
 
 ## @fn      execute()
 #  @brief   executes the given command in a shell
@@ -143,6 +143,6 @@ showAllEnvironmentVariables() {
     requiredParameters LFS_CI_ROOT
 
     execute printenv        
-    execute ${LFS_CI_ROOT}/bin/dumpConfig -f ${LFS_CI_CONFIG_FILE}
+    execute -i ${LFS_CI_ROOT}/bin/dumpConfig -f ${LFS_CI_CONFIG_FILE}
     return
 }
