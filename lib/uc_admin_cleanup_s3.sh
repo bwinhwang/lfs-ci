@@ -12,6 +12,7 @@
 usecase_ADMIN_CLEANUP_S3() {
     local bucketName=$(getSubTaskNameFromJobName)
     mustHaveValue "${bucketName}" "bucket name from job_name"
+
     cleanupS3Storage ${bucketName}
     return
 }
@@ -30,10 +31,10 @@ cleanupS3Storage() {
     execute -n date +%Y-%m-%d --date="2 days ago" >> ${daysNotToDelete}
     execute -n date +%Y-%m-%d --date="3 days ago" >> ${daysNotToDelete}
 
-    local listToDelete=$(createTempFile)
+    # TODO: demx2fk3 2015-07-08 add the output format or s3List here
     for file in $(s3List s3://${bucketName} | grep -v -f ${daysNotToDelete} | cut -d" " -f 4-) ; do
         info "removing ${file} from s3://${bucketName}"
-        s3RemoveFile ${file}
+        s3RemoveFile s3://${bucketName}/${file}
     done
     return
 }
