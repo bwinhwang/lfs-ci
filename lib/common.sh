@@ -921,12 +921,13 @@ sanityCheck() {
         # we do not want to have modifications in ${LFS_CI_ROOT}
         local LFS_CI_git_local_modifications=$(cd ${LFS_CI_ROOT} ; git status --short | wc -l)
         if [[ ${LFS_CI_git_local_modifications} -gt 0 ]] ; then
-            info "there are local modifications, waiting for ${waitForGit} sec."
+            info "there are local modifications which are not commited - waiting for ${waitForGit} sec."
             sleep ${waitForGit}
             LFS_CI_git_local_modifications=$(cd ${LFS_CI_ROOT} ; git status --short | wc -l)
             if [[ ${LFS_CI_git_local_modifications} -gt 0 ]] ; then
                 fatal "the are local modifications in ${LFS_CI_ROOT}, which are not commited. "\
-                  "CI is rejecting such kind of working mode and refused to work until the modifications are commited."
+                  "CI is rejecting such kind of working mode and refused to work until the modifications are commited. "\
+                  "Increase config. parameter LFS_CI_waitForGit."
             fi
         fi
     fi
