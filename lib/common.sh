@@ -913,12 +913,11 @@ sanityCheck() {
 
     local LFS_CI_git_version=$(cd ${LFS_CI_ROOT} ; git describe)
     debug "used lfs ci git version ${LFS_CI_git_version}"
-    local sanityCheckUsers=$(getConfig LFS_CI_GLOBAL_sanityCheckUsers)
-    mustHaveValue "${sanityCheckUsers}" "sanityCheckUsers"
-    local waitForGit=$(getConfig LFS_CI_waitForGit)
+    local runSanityCheck=$(getConfig LFS_CI_GLOBAL_should_run_sanity_checks)
 
-    if [[ $(echo ${sanityCheckUsers} | grep ${USER}) ]]; then
+    if [[ ${runSanityCheck} -eq 1 ]]; then
         # we do not want to have modifications in ${LFS_CI_ROOT}
+        local waitForGit=$(getConfig LFS_CI_waitForGit)
         local LFS_CI_git_local_modifications=$(cd ${LFS_CI_ROOT} ; git status --short | wc -l)
         if [[ ${LFS_CI_git_local_modifications} -gt 0 ]] ; then
             info "there are local modifications which are not commited - waiting for ${waitForGit} sec."
