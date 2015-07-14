@@ -28,16 +28,16 @@ getLocationName() {
 
     if [[ -z ${LFS_CI_GLOBAL_BRANCH_NAME} ]] ; then
         local location=$(${LFS_CI_ROOT}/bin/getFromString.pl "${jobName}" location)
+        mustHaveValue "${location}" "location from job name"
 
-        # 2014-02-17 demx2fk3 TODO do this in a better way
-        case ${location} in
-            fsmr4)    location=FSM_R4_DEV        ;;
-            kernel3x) location=KERNEL_3.x_DEV    ;;
-            trunk)    location=pronb-developer   ;;
-            20M2_09)  location=PS_LFS_OS_20M2_09 ;;
-            20M2_12)  location=PS_LFS_OS_20M2_12 ;;
-        esac
-        export LFS_CI_GLOBAL_BRANCH_NAME=${location}
+        local configFile=${LFS_CI_CONFIG_FILE:-${LFS_CI_ROOT}/etc/file.cfg}
+        # skipped due to performance
+        # mustExistDirectory ${configFile}
+        
+        local mappedLocation=$(${LFS_CI_ROOT}/bin/getConfig -k LFS_CI_global_mapping_location -t job_location:${location} -f ${configFile})
+        # skipped due to performance
+        # mustHaveValue "${mappedLocation}" "mapped location from jobname / config file"
+        export LFS_CI_GLOBAL_BRANCH_NAME=${mappedLocation}
     fi
 
     echo ${LFS_CI_GLOBAL_BRANCH_NAME}

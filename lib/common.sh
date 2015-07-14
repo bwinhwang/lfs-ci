@@ -15,12 +15,8 @@ LFS_CI_SOURCE_common='$Id$'
 #  @return  <none>
 #  @throws  raise an error, if there is no target board name
 mustHaveTargetBoardName() {
-    local location=$(getTargetBoardName) 
-    if [[ ! ${location} ]] ; then
-        error "can not get the correction target board name from JOB_NAME \"${JOB_NAME}\""
-        exit 1
-    fi
-
+    local targetName=$(getTargetBoardName) 
+    mustHaveValue "${targetName}" "correct target board name from JOB_NAME ${JOB_NAME}"
     return
 }
 
@@ -39,11 +35,7 @@ getBranchName() {
 #  @throws  raises an error, if there is no location name
 mustHaveLocationName() {
     local location=$(getLocationName) 
-    if [[ ! ${location} ]] ; then
-        error "can not get the correction location name from JOB_NAME \"${JOB_NAME}\""
-        exit 1
-    fi
-
+    mustHaveValue "${location}" "correct location name from JOB_NAME ${JOB_NAME}"
     return
 }
 
@@ -70,16 +62,8 @@ getWorkspaceName() {
 #  @return  <none>
 #  @throws  raise an error, if there is no workspace name avaibale
 mustHaveWorkspaceName() {
-
-    requiredParameters WORKSPACE
-
     local workspace=$(getWorkspaceName) 
-
-    if [[ ! "${workspace}" ]] ; then
-        error "can not get the correction workspace name from JOB_NAME \"${JOB_NAME}\""
-        exit 1
-    fi
-
+    mustHaveValue "${workspace}" "workspace location on disk"
     return
 }
 
