@@ -16,8 +16,12 @@ SVN_OPTS="--non-interactive --trust-server-cert"
 ARCHIVE_BASE=$(getConfig ADMIN_archive_share)
 VARS_FILE="VARIABLES.TXT"
 DIR_PATTERN=""
-SVN_RESULT=0
 ARCHIVE_RESULT=0
+SVN_RESULT_MOVE_BRANCH_LOCATION=0
+SVN_RESULT_MOVE_BRANCH_LOCATION_FSMR4=0
+SVN_RESULT_MOVE_BRANCH=0
+LRC_SVN_RESULT_MOVE_BRANCH_LOCATION=0
+LRC_SVN_RESULT_MOVE_BRANCH=0
 DB_UPDATE_RESULT=0
 
 __printParams() {
@@ -96,6 +100,7 @@ __cmd() {
         info runnig command: $@
         eval $@
     fi
+    return $?
 }
 
 ## @fn     __preparation()
@@ -129,11 +134,11 @@ __getSubBranch() {
 #
 #######################################################################
 
-## @fn      moveBranchSvn()
+## @fn      moveBranchLocationSvn()
 #  @brief   move locations for $BRANCH in svn
 #  @param   <none>
 #  @return  <none>
-moveBranchSvn() {
+moveBranchLocationSvn() {
     info "--------------------------------------------------------"
     info "SVN: move locations and FSMr4 in SVN"
     info "--------------------------------------------------------"
@@ -141,19 +146,21 @@ moveBranchSvn() {
     svn ls ${SVN_OPTS} ${SVN_REPO}/${SVN_DIR}/${SVN_BLD_DIR}/locations-${BRANCH} 2> /dev/null && {
         __cmd svn ${SVN_OPTS} move -m \"moved locations-${BRANCH} to obsolete\" \
             ${SVN_REPO}/${SVN_DIR}/${SVN_BLD_DIR}/locations-${BRANCH} ${SVN_REPO}/${SVN_DIR}/${SVN_BLD_DIR}/obsolete;
+        SVN_RESULT_MOVE_BRANCH_LOCATION=$?;
     }
 
     svn ls ${SVN_OPTS} ${SVN_REPO}/${SVN_DIR}/${SVN_BLD_DIR}/locations-${BRANCH}_FSMR4 2> /dev/null && {
         __cmd svn ${SVN_OPTS} move -m \"moved locations-${BRANCH} FSMR4 to obsolete\" \
             ${SVN_REPO}/${SVN_DIR}/${SVN_BLD_DIR}/locations-${BRANCH}_FSMR4 ${SVN_REPO}/${SVN_DIR}/${SVN_BLD_DIR}/obsolete;
+        SVN_RESULT_MOVE_BRANCH_LOCATION_FSMR4=$?;
     }
 }
 
-## @fn      moveBranchSvnOS()
+## @fn      moveBranchSvn()
 #  @brief   move the $BRANCH in svn
 #  @param   <none>
 #  @return  <none>
-moveBranchSvnOS() {
+moveBranchSvn() {
     info "--------------------------------------------------------"
     info "SVN: move os/${BRANCH} in SVN"
     info "--------------------------------------------------------"
@@ -161,6 +168,7 @@ moveBranchSvnOS() {
     svn ls ${SVN_OPTS} ${SVN_REPO}/${SVN_DIR}/${BRANCH} 2> /dev/null && {
         __cmd svn ${SVN_OPTS} move -m \"moved ${BRANCH} to obsolete\" \
             ${SVN_REPO}/${SVN_DIR}/${BRANCH} ${SVN_REPO}/${SVN_DIR}/obsolete;
+        SVN_RESULT_MOVE_BRANCH=$?;
     }
 }
 
@@ -177,13 +185,13 @@ LRC_moveBranchSvn() {
     svn ${SVN_OPTS} ls ${SVN_REPO}/${SVN_DIR}/${SVN_BLD_DIR}/locations-${branch} 2> /dev/null && {
         __cmd svn ${SVN_OPTS} move -m \"moved locations-${branch} to obsolete\" \
             ${SVN_REPO}/${SVN_DIR}/${SVN_BLD_DIR}/locations-${branch} ${SVN_REPO}/${SVN_DIR}/${SVN_BLD_DIR}/obsolete;
-        SVN_RESULT=$?;
+        LRC_SVN_RESULT_MOVE_BRANCH_LOCATION=$?;
     }
 
     svn ls ${SVN_OPTS} ${SVN_REPO}/${SVN_DIR}/${branch} 2> /dev/null && {
         __cmd svn ${SVN_OPTS} move -m \"moved ${branch} to obsolete\" \
             ${SVN_REPO}/${SVN_DIR}/${branch} ${SVN_REPO}/${SVN_DIR}/obsolete;
-        SVN_RESULT=$?;
+        LRC_SVN_RESULT_MOVE_BRANCH=$?;
     }
 
     return 0
@@ -236,13 +244,14 @@ archiveShare() {
     fi
 
     local dirsToDelete=$(find ${shareToArchive} -maxdepth ${findDepth} -type d -name "${dirPattern}")
-    info "archive ${SHARE}"
+    info "archive ${shareToArchive}"
     info "directory pattern: ${dirPattern}"
     for DIR in ${dirsToDelete}
     do
         local archiveDir=$(echo $DIR | sed 's/\//_/g')
         __cmd mv ${DIR} ${ARCHIVE_BASE}/${archiveDir}
-        ARCHIVE_RESULT=$?
+        local retVal=$?
+        [[ ${retVal} -ne 0 && ${ARCHIVE_RESULT} -eq 0 ]] && ARCHIVE_RESULT=${retVal}
     done
 }
 
@@ -364,16 +373,28 @@ main() {
         [[ ${LRC_MOVE_SVN} == true ]] && LRC_moveBranchSvn
         [[ ${LRC_MOVE_SHARE} == true ]] && { LRC_archiveBranchShare; LRC_archiveBranchBldShare; }
     else
-        [[ ${MOVE_SVN} == true ]] && { moveBranchSvn; moveBranchSvnOS; }
+        [[ ${MOVE_SVN} == true ]] && { moveBranchLocationSvn; moveBranchSvn; }
         [[ ${MOVE_SHARE} == true ]] && { archiveBranchShare; archiveBranchBldShare; }
         [[ ${DELETE_TEST_RESULTS} == true ]] && deleteTestResults
     fi
 
-    if [[ ${SVN_RESULT} -ne 0 || ${ARCHIVE_RESULT} -ne 0 || ${DB_UPDATE_RESULT} -ne 0 ]]; then
+    local result=$((${ARCHIVE_RESULT}+\
+                    ${SVN_RESULT_MOVE_BRANCH_LOCATION}+\
+                    ${SVN_RESULT_MOVE_BRANCH_LOCATION_FSMR4}+\
+                    ${SVN_RESULT_MOVE_BRANCH}+\
+                    ${LRC_SVN_RESULT_MOVE_BRANCH_LOCATION}+\
+                    ${LRC_SVN_RESULT_MOVE_BRANCH}+\
+                    ${DB_UPDATE_RESULT}))
+
+    if [[ ${result} -ne 0 ]]; then
         echo ""
         error "One of the following failed:"
-        info "SVN_RESULT: ${SVN_RESULT}"
         info "ARCHIVE_RESULT: ${ARCHIVE_RESULT}"
+        info "SVN_RESULT_MOVE_BRANCH_LOCATION: ${SVN_RESULT_MOVE_BRANCH_LOCATION}"
+        info "SVN_RESULT_MOVE_BRANCH_LOCATION_FSMR4: ${SVN_RESULT_MOVE_BRANCH_LOCATION_FSMR4}"
+        info "SVN_RESULT_MOVE_BRANCH: ${SVN_RESULT_MOVE_BRANCH}"
+        info "LRC_SVN_RESULT_MOVE_BRANCH_LOCATION: ${LRC_SVN_RESULT_MOVE_BRANCH_LOCATION}"
+        info "LRC_SVN_RESULT_MOVE_BRANCH: ${LRC_SVN_RESULT_MOVE_BRANCH}"
         info "DB_UPDATE_RESULT: ${DB_UPDATE_RESULT}"
         echo ""
         setBuildResultUnstable

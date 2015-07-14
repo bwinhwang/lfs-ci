@@ -913,14 +913,22 @@ sanityCheck() {
 
     local LFS_CI_git_version=$(cd ${LFS_CI_ROOT} ; git describe)
     debug "used lfs ci git version ${LFS_CI_git_version}"
-    local ciUserName=$(getConfig LFS_CI_GLOBAL_username)
-    mustHaveValue "${ciUserName}" "CI user name"
+    local runSanityCheck=$(getConfig LFS_CI_GLOBAL_should_run_sanity_checks)
 
-    # we do not want to have modifications in ${LFS_CI_ROOT}
-    local LFS_CI_git_local_modifications=$(cd ${LFS_CI_ROOT} ; git status --short | wc -l)
-    if [[ ${LFS_CI_git_local_modifications} -gt 0 && ${USER} = ${ciUserName} ]] ; then
-        fatal "the are local modifications in ${LFS_CI_ROOT}, which are not commited. "\
-              "CI is rejecting such kind of working mode and refused to work until the modifications are commited."
+    if [[ ${runSanityCheck} -eq 1 ]]; then
+        # we do not want to have modifications in ${LFS_CI_ROOT}
+        local waitForGit=$(getConfig LFS_CI_waitForGit)
+        local LFS_CI_git_local_modifications=$(cd ${LFS_CI_ROOT} ; git status --short | wc -l)
+        if [[ ${LFS_CI_git_local_modifications} -gt 0 ]] ; then
+            info "there are local modifications which are not commited - waiting for ${waitForGit} sec."
+            sleep ${waitForGit}
+            LFS_CI_git_local_modifications=$(cd ${LFS_CI_ROOT} ; git status --short | wc -l)
+            if [[ ${LFS_CI_git_local_modifications} -gt 0 ]] ; then
+                fatal "the are local modifications in ${LFS_CI_ROOT}, which are not commited. "\
+                  "CI is rejecting such kind of working mode and refused to work until the modifications are commited. "\
+                  "Increase config. parameter LFS_CI_waitForGit."
+            fi
+        fi
     fi
 
     # check job name convetions
