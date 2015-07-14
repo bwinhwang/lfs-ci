@@ -72,7 +72,7 @@ sub mustHaveFileData {
             if ( -e $file ) {
                 DEBUG "loading important note from $file";
                 # read file into an array (each line) without new line at the end
-                push @{ $self->{ $fileType } }, map { s/[\n\r]*//g; $_ } read_file( $file );
+                push @{ $self->{ $fileType } }, map { chomp; $_ } read_file( $file );
             }
         }
     }
