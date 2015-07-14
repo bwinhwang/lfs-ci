@@ -12,9 +12,12 @@ actionCompare() {
         exit 0
     fi
 
-    local fileCount=$(ls /build/home/SC_LFS/pkgpool/.manifest/*.done 2>/dev/null | wc -l)
+    local pkgpoolPath=$(getConfig PKGPOOL_location_on_share)
+    mustExistDirectory ${pkgpoolPath}
+
+    local fileCount=$(ls ${pkgpoolPath}/.manifest/*.done 2>/dev/null | wc -l)
     if [[ ${fileCount} -gt 0 ]] ; then
-        info "not todo files found in pkgpool: count = ${fileCount}"
+        info "todo files found in pkgpool: count = ${fileCount}"
         exit 0
         
     fi
@@ -36,14 +39,17 @@ actionCheckout() {
 
     local logEntries=$(createTempFile)
     local fileListString=
-    for fileList in $(ls /build/home/SC_LFS/pkgpool/.manifest/*.done 2>/dev/null ) ; do
+    local pkgpoolPath=$(getConfig PKGPOOL_location_on_share)
+    mustExistDirectory ${pkgpoolPath}
+
+    for fileList in $(ls ${pkgpoolPath}/.manifest/*.done 2>/dev/null ) ; do
         info "new fileList ${fileList} found, processing"
 
         for path in $(cat ${fileList}) ; do
             printf "<path kind=\"\" action=\"A\">%s</path>\n" ${path} >> ${logEntries}
         done                
         fileListString="${fileListString} ${fileList}"
-        execute mv -f ${fileList} ${fileList}.syned
+        execute mv -f ${fileList} ${fileList}.synced
     done
 
     # create changelog:
