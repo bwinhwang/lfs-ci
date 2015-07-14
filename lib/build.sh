@@ -6,6 +6,10 @@
 
 LFS_CI_SOURCE_build='$Id$'
 
+[[ -z ${LFS_CI_SOURCE_config}   ]] && source ${LFS_CI_ROOT}/lib/config.sh
+[[ -z ${LFS_CI_SOURCE_logging}  ]] && source ${LFS_CI_ROOT}/lib/logging.sh
+[[ -z ${LFS_CI_SOURCE_commands} ]] && source ${LFS_CI_ROOT}/lib/commands.sh
+
 ## @fn      buildLfs()
 #  @brief   make the build
 #  @details make the real build. The required build targets / configs will be determinates by

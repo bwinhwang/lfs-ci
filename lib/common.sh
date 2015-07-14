@@ -162,6 +162,8 @@ switchToNewLocation() {
 #  @return  <none>
 setupNewWorkspace() {
     local workspace=$(getWorkspaceName) 
+    mustHaveWorkspaceName
+    mustHaveCleanWorkspace
 
     debug "creating a new workspace in \"${workspace}\""
 
@@ -316,14 +318,30 @@ initTempDirectory() {
 #  @throws  raise an error, if there is a variable is not set or has no value
 requiredParameters() {
     local parameterNames=$@
+    if [[ -z ${LFS_CI_INTERNAL_RERUN_ENVIRONMENT_FILE} ]] ; then
+        export LFS_CI_INTERNAL_RERUN_ENVIRONMENT_FILE=$(createTempFile)
+    fi
     for name in ${parameterNames} ; do
         if [[ ! ${!name} ]] ; then
             error "required parameter ${name} is missing"
             exit 1
         fi
-        # echo "${name}=${!name}" >> ${workspace}/../.env
+        echo "export ${name}=\"${!name}\"" >> ${LFS_CI_INTERNAL_RERUN_ENVIRONMENT_FILE}
     done
 
+    return
+}
+
+## @fn      logRerunCommand()
+#  @brief   record the command incl. environment variables, which are needed to rerun the jenkins job
+#  @param   <none>
+#  @return  <none>
+logRerunCommand() {
+    rerun=$(createTempFile)
+    echo "#!/bin/bash" > ${rerun}
+    execute -n sort -u ${LFS_CI_INTERNAL_RERUN_ENVIRONMENT_FILE} >> ${rerun}
+    echo $0 ${JOB_NAME} >> ${rerun}
+    rawDebug ${rerun}
     return
 }
 
@@ -418,7 +436,7 @@ getJenkinsJobBuildDirectory() {
 
 ## @fn      mustHaveValue()
 #  @brief   ensure, that the value is a not empty string
-#  @param   {value}    just a value
+#  @param   {value}    just a value. Always use double quotes eg "$var1"
 #  @return  <none>
 #  @throws  raise an error, if the value is empty
 mustHaveValue() {
@@ -660,7 +678,7 @@ _getUpstreamProjects() {
     local server=$(getConfig jenkinsMasterServerHostName)
     mustHaveValue "${server}" "server name"
     execute -n -r 10 ssh ${server}                    \
-            /ps/lfs/ci/bin/getUpStreamProject         \
+            ${LFS_CI_ROOT}/bin/getUpStreamProject     \
                     -j ${jobName}                     \
                     -b ${buildNumber}                 \
                     -h ${serverPath} > ${upstreamsFile}
@@ -692,7 +710,7 @@ _getDownstreamProjects() {
     local server=$(getConfig jenkinsMasterServerHostName)
     mustHaveValue "${server}" "server name"
     execute -n -r 10 ssh ${server}                      \
-            /ps/lfs/ci/bin/getDownStreamProjects        \
+            ${LFS_CI_ROOT}/bin/getDownStreamProjects    \
                     -j ${jobName}                       \
                     -b ${buildNumber}                   \
                     -h ${serverPath}  > ${downstreamFile}
@@ -859,6 +877,11 @@ getBranchPart() {
     [[ ${what} == NR ]] && echo ${nr}
 }
 
+## @fn      mustHaveFreeDiskSpace()
+#  @brief   ensure, that there is enough free diskspace on given filesystem
+#  @param   {filesystem}    path of the filesystem (e.g. /var/fpwork)
+#  @param   {requiredSpace}    required free diskspace on the filesystem in kilobytes
+#  @return  <none>
 mustHaveFreeDiskSpace() {
     local filesystem=$1
     mustExistDirectory ${filesystem}
@@ -890,12 +913,22 @@ sanityCheck() {
 
     local LFS_CI_git_version=$(cd ${LFS_CI_ROOT} ; git describe)
     debug "used lfs ci git version ${LFS_CI_git_version}"
+    local runSanityCheck=$(getConfig LFS_CI_GLOBAL_should_run_sanity_checks)
 
-    # we do not want to have modifications in ${LFS_CI_ROOT}
-    local LFS_CI_git_local_modifications=$(cd ${LFS_CI_ROOT} ; git status --short | wc -l)
-    if [[ ${LFS_CI_git_local_modifications} -gt 0 && ${USER} = psulm ]] ; then
-        fatal "the are local modifications in ${LFS_CI_ROOT}, which are not commited. "\
-              "CI is rejecting such kind of working mode and refused to work until the modifications are commited."
+    if [[ ${runSanityCheck} -eq 1 ]]; then
+        # we do not want to have modifications in ${LFS_CI_ROOT}
+        local waitForGit=$(getConfig LFS_CI_waitForGit)
+        local LFS_CI_git_local_modifications=$(cd ${LFS_CI_ROOT} ; git status --short | wc -l)
+        if [[ ${LFS_CI_git_local_modifications} -gt 0 ]] ; then
+            info "there are local modifications which are not commited - waiting for ${waitForGit} sec."
+            sleep ${waitForGit}
+            LFS_CI_git_local_modifications=$(cd ${LFS_CI_ROOT} ; git status --short | wc -l)
+            if [[ ${LFS_CI_git_local_modifications} -gt 0 ]] ; then
+                fatal "the are local modifications in ${LFS_CI_ROOT}, which are not commited. "\
+                  "CI is rejecting such kind of working mode and refused to work until the modifications are commited. "\
+                  "Increase config. parameter LFS_CI_waitForGit."
+            fi
+        fi
     fi
 
     # check job name convetions
@@ -927,6 +960,10 @@ sanityCheck() {
 }
 
 
+## @fn      createFingerprintFile()
+#  @brief   create a file which can be used for fingerprinting
+#  @param   <none>
+#  @return  <none>
 createFingerprintFile() {
     requiredParameters JOB_NAME BUILD_NUMBER WORKSPACE 
 
@@ -952,5 +989,3 @@ createFingerprintFile() {
 
     return
 }
-
-

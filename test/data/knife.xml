@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<knife id="92151">
+  <knife_type>lfs</knife_type>
+  <state>new</state>
+  <requestor>Erwin Ambrosch</requestor>
+  <server>lfs-ci.emea.nsn-net.net</server>
+  <component></component>
+  <requestor_mail>erwin.ambrosch.ext@nsn.com</requestor_mail>
+  <additional_informed>erwin.ambrosch.ext@nsn.com</additional_informed>
+  <purpose>other</purpose>
+  <info>Testing WFT2LFS interface.</info>
+  <dir>\\nsn-intra.net\eefs\ROTTA\eambrosc</dir>
+  <force_dir>yes</force_dir>
+  <baseline>PS_LFS_OS_2015_06_0150</baseline>
+  <version_number>99</version_number>
+  <dcm_knife>false</dcm_knife>
+  <diff>
+  </diff>
+  <dummy>false</dummy>
+  <clean>false</clean>
+  <needed_results>
+    <result title="">bts</result>
+  </needed_results>
+  <config>
+  </config>
+  <module></module>
+</knife>

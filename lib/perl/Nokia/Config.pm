@@ -120,5 +120,16 @@ sub loadData {
     return
 }
 
+sub addConfig {
+    my $self  = shift;
+    my $param = { @_ };
+    push @{ $self->{configObjects} }, Nokia::Model::Config->new(
+                                                            handler => $self,
+                                                            value   => $param->{value} || "",
+                                                            name    => $param->{name}  || "",
+                                                            tags    => $param->{tags} || [],
+                                                        );
+    return
+}
 
 1;
