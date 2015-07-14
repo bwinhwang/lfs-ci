@@ -35,6 +35,11 @@ oneTimeSetUp() {
     createTempFile() {
         echo "TempFile"
     }
+    getConfig() {
+        case $1 in 
+            *) echo $1 ;;
+        esac
+    }
 
     return
 }
@@ -63,7 +68,7 @@ test1() {
 execute rm -rf ${WORKSPACE}/src/src
 gitReset --hard
 execute ./bootstrap
-execute -l TempFile ${WORKSPACE}/src/build -j100 --prepopulate --release=PS_LFS_PKG
+execute -l TempFile ${WORKSPACE}/src/build PKGPOOL_additional_build_parameters -j100 --prepopulate --release=PKGPOOL_PROD_release_prefix
 execute -n sed -ne s,^\(\[[0-9 :-]*\] \)\?release \([^ ]*\) complete,\2,p TempFile
 gitDescribe --abbrev=0
 gitTagAndPushToOrigin PKGPOOL_FOO
