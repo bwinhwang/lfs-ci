@@ -12,13 +12,6 @@
 //     - Copy the config.xml from src-branch and edit it
 ////////////////////////////////////////////////////////////////////////////////
 
-/******************************************************************
- * Note:
- ******************************************************************
- * As soon as fsmr4 doesn't need extra handling, the fsmr4 parts
- * can be removed.
- ******************************************************************/
-
 
 import jenkins.model.Jenkins
 import hudson.model.ParametersAction
@@ -221,6 +214,7 @@ class CreateBranch extends Common {
     def jobsToEnable
     def jobNameReplace
     def jobs2Exclude
+    def srcBranchNumber
 
     /**
      * Constructor
@@ -249,6 +243,41 @@ class CreateBranch extends Common {
         this.jobs2Exclude = this.env.get("JOBS_EXCLUDE_LIST").split(",")
         this.inf("jobs to exclude: ${this.jobs2Exclude}")
         this.jobsList = []
+
+        if(this.srcBranch[0..1] == "FB") {
+            this.srcBranchNumber = this.srcBranch[2..5].toInteger()
+        } else if(this.srcBranch[0..1] == "MD") {
+            this.srcBranchNumber = this.srcBranch[3..6].toInteger()
+        }
+        
+        if(this.debug) {
+            this.dbg("srcBranchNumber is ${this.srcBranchNumber}")
+        }
+
+        // If fsmr4 comes via the jenkins job and its value is true,
+        // we don't check the source branch because the user knows
+        // that the source branch contains jobs with fsmr4 specific
+        // job names.
+
+        if(this.fsmr4 == false) {
+            if(this.srcBranch == "trunk") {
+                this.inf("set fmsr4 to false because source branch is trunk.")
+                this.fsmr4 = false
+            } else if(this.srcBranch == "MD11507") {
+                // MD11507 is the last branch that contains FSMR4 specific job names
+                this.inf("set fmsr4 to true because source branch is MD11507.")
+                this.fsmr4 = true
+            } else if(this.srcBranchNumber > 1506) {
+                // Branches >= FB1507 have kernel 3.14 -> no special fsmr4 job names
+                this.inf("set fmsr4 to false because srcBranchNumber > 1506 and source branch is not MD11507.")
+                this.fsmr4 = false
+            } else {
+                this.inf("set fmsr4 to true.")
+                this.fsmr4 = true
+            }
+        } else {
+            this.inf("fsmr4 is true -> got it from jenkins job.")
+        }
     }
 
     void main() {
