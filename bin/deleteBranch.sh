@@ -244,7 +244,7 @@ archiveShare() {
     fi
 
     local dirsToDelete=$(find ${shareToArchive} -maxdepth ${findDepth} -type d -name "${dirPattern}")
-    info "archive ${SHARE}"
+    info "archive ${shareToArchive}"
     info "directory pattern: ${dirPattern}"
     for DIR in ${dirsToDelete}
     do
