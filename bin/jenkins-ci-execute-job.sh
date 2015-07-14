@@ -30,6 +30,7 @@ prepareStartup
 # * LFS_CI_GLOBAL_BUILD_CONFIG
 # ...
 if [[ ${LFS_CI_GLOBAL_USECASE} ]] ; then
+    requiredParameters LFS_CI_GLOBAL_USECASE
     info "running usecase ${LFS_CI_GLOBAL_USECASE}"
 
     sourceFile=$(getConfig LFS_CI_usecase_file)
