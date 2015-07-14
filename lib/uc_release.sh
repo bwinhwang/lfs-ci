@@ -409,6 +409,9 @@ _getImportantNoteFileFromSubversion() {
     local workspace=$(getWorkspaceName)
     mustHaveWorkspaceName 
 
+    local importantNoteFileName=$(getConfig LFS_uc_release_important_note_file)
+    mustHaveValue "${importantNoteFileName}" "important note file name"
+
     mustExistFile ${workspace}/revisions.txt
     local svnUrl=$(execute -n grep ^src-project ${workspace}/revisions.txt | cut -d" " -f 2)
     mustHaveValue "${svnUrl}" "svn url"
@@ -417,8 +420,8 @@ _getImportantNoteFileFromSubversion() {
     mustHaveValue "${svnRev}" "svn rev"
 
     if existsInSubversion "-r ${svnRev} ${svnUrl}/src" release_note &&
-       existsInSubversion "-r ${svnRev} ${svnUrl}/src/release_note" importantNote.txt ; then
-        svnCat -r ${svnRev} ${svnUrl}/src/release_note/importantNote.txt@${svnrev} > ${workspace}/importantNote.txt
+       existsInSubversion "-r ${svnRev} ${svnUrl}/src/release_note" ${importantNoteFileName} ; then
+        svnCat -r ${svnRev} ${svnUrl}/src/release_note/${importantNoteFileName}@${svnrev} > ${workspace}/importantNote.txt
     fi
 
     return
