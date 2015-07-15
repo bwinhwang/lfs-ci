@@ -122,6 +122,8 @@ sub prepare {
 sub execute {
     my $self = shift;
 
+    binmode STDOUT, ":utf8";
+
     my $importantNote = $self->{releaseNote}->importantNote();
     if( $importantNote ) {
         printf "--- Important Note ---\n\n";

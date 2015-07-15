@@ -15,7 +15,7 @@
 /******************************************************************
  * Note:
  ******************************************************************
- * As soon as fsmr4 doesn't need extra handling, the fsmr4) parts
+ * As soon as fsmr4 doesn't need extra handling, the fsmr4 parts
  * can be removed.
  ******************************************************************/
 
@@ -245,6 +245,7 @@ class CreateBranch extends Common {
         this.jobsToEnable = []
         this.jobNameReplace = srcBranch
 
+        // List of jobs to be excluded. Job names can also be a regex.
         this.jobs2Exclude = this.env.get("JOBS_EXCLUDE_LIST").split(",")
         this.inf("jobs to exclude: ${this.jobs2Exclude}")
         this.jobsList = []
@@ -309,6 +310,20 @@ class CreateBranch extends Common {
             text.replaceAll("-_"+this.jobNameReplace+"_-", "-_"+this.newBranch+"_-")
         }
 
+        // Vtc job exists on trunk only
+        if(newJob.name == "LFS_CI_-_${this.newBranch}_-_Test") {
+            processFileInplace(configFile) { text ->
+                text.replaceAll("LFS_CI_-_${this.newBranch}_-_TestLfsPlusVtc", "")
+            }
+        }
+
+        if(newJob.name == "LFS_CI_-_${this.newBranch}_-_Build") {
+            this.inf("replace <spec>* * * * *</spec> by <spec>*/3 * * * *</spec> in jobs config.xml.")
+            processFileInplace(configFile) { text ->
+                text.replaceAll("<spec>* * * * *</spec>", "<spec>*/3 * * * *</spec>")
+            }
+        }
+
         if(this.fsmr4) {
             processFileInplace(configFile) { text ->
                 text.replaceAll("LFS_CI_-_fsmr4_-", "LFS_CI_-_"+this.newBranch+"_FSMR4_-")
@@ -322,6 +337,10 @@ class CreateBranch extends Common {
             this.inf("replace ${this.pkgPoolReplace} by */${this.newBranch} in jobs config.xml.")
             processFileInplace(configFile) { text ->
                 text.replace(this.pkgPoolReplace, "*/"+this.newBranch)
+            }
+            this.inf("replace <spec>* * * * *</spec> by <spec>*/3 * * * *</spec> in jobs config.xml.")
+            processFileInplace(configFile) { text ->
+                text.replaceAll("<spec>* * * * *</spec>", "<spec>*/3 * * * *</spec>")
             }
         }
 
@@ -383,15 +402,17 @@ class CreateBranch extends Common {
     }
 
     /**
-      * Return true if "job_name" is in the list of jobs to be excluded,
+      * Return true if "job_name" matches an entry in this.jobs2Exclude,
       * false otherwise.
       */
     boolean job2exclude(job_name) {
-        if(job_name in this.jobs2Exclude) {
-            return true
-        } else {
-            return false
+        for(toExclude in this.jobs2Exclude) {
+            toExclude = toExclude.trim()
+            if(job_name =~ /${toExclude}/) {
+                return true
+            }
         }
+        return false
     }
 
     /**
@@ -739,7 +760,7 @@ class CreateViews extends Common {
     void addSectionedView(parentView) {
         this.out.println("\n[INFO] creating sectioned view.")
         if(this.debug) {
-            this.dbg("Create sectioned view ${parentView.name}/${this.newBranch}")
+            this.dbg("Create sectioned view for ${this.newBranch}")
         } else {
             def sectionedView = parentView.getView(this.newBranch)
             if(sectionedView) {

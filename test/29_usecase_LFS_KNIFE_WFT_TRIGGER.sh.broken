@@ -22,6 +22,11 @@ oneTimeSetUp() {
             mockedCommand "curl $@"
         fi
     }
+	getConfig() {
+		case $1 in
+			*) echo $1 ;;
+		esac
+	}	
     setBuildDescription() {
         true
     }
