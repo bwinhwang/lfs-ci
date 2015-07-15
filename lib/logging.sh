@@ -138,7 +138,6 @@ info() {
 #  @return  <none>
 error() {
     message "ERROR" "$@"
-    _stackTrace
 }
 
 ## @fn      warning()
@@ -155,7 +154,6 @@ warning() {
 #  @return  <none>
 fatal() {
     message "FATAL_ERROR" "$@"
-    _stackTrace
     exit 1
 }
 
