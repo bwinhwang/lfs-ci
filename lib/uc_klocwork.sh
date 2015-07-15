@@ -8,7 +8,7 @@
 # ------------------------------------------------------------------
 # settings for klocwork
 # ------------------------------------------------------------------
-# see also file.cfg
+# see also global.cfg (or subfile)
 #
 # PYTHON_HOME=/opt/python/linux64/ix86/python_3.2
 #

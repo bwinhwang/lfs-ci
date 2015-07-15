@@ -73,6 +73,7 @@ oneTimeSetUp() {
 
 setUp() {
     cp -f /dev/null ${UT_MOCKED_COMMANDS}
+    export LFS_CI_CONFIG_FILE=${LFS_CI_ROOT}/etc/lfs-ci.cfg
     return
 }
 
@@ -93,7 +94,7 @@ test1() {
     local expect=$(createTempFile)
 # createReleaseInWorkflowTool LABEL ${WORKSPACE}/workspace/releasenote.xml
 # uploadToWorkflowTool LABEL ${WORKSPACE}/workspace/releasenote.xml
-# execute ${LFS_CI_ROOT}/bin/sendReleaseNote -r ${WORKSPACE}/workspace/releasenote.txt -t LABEL -f ${LFS_CI_ROOT}/etc/file.cfg
+# execute ${LFS_CI_ROOT}/bin/sendReleaseNote -r ${WORKSPACE}/workspace/releasenote.txt -t LABEL -f ${LFS_CI_ROOT}/etc/lfs-ci.cfg
     cat <<EOF > ${expect}
 mustHaveCleanWorkspace
 copyArtifactsToWorkspace PKGPOOL_CI_-_trunk_-_Test 1234 pkgpool
@@ -104,7 +105,7 @@ execute mv ${WORKSPACE}/forReleaseNote.txt ${WORKSPACE}/workspace/forReleaseNote
 copyFileFromBuildDirectoryToWorkspace PKGPOOL_PROD_-_trunk_-_Release lastSuccessfulBuild gitrevision
 execute mv ${WORKSPACE}/gitrevision ${WORKSPACE}/workspace/gitrevision.old
 setBuildDescription PKGPOOL_PROD_-_trunk_-_Release 1234 LABEL
-execute -n ${LFS_CI_ROOT}/bin/getReleaseNoteXML -t LABEL -o OLD_LABEL -f ${LFS_CI_ROOT}/etc/file.cfg
+execute -n ${LFS_CI_ROOT}/bin/getReleaseNoteXML -t LABEL -o OLD_LABEL -f ${LFS_CI_ROOT}/etc/lfs-ci.cfg
 mustBeValidXmlReleaseNote ${WORKSPACE}/workspace/releasenote.xml
 execute touch ${WORKSPACE}/workspace/releasenote.txt
 execute sed -i -e s/PS_LFS_PKG = //g ${WORKSPACE}/workspace/forReleaseNote.txt.old

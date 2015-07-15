@@ -24,7 +24,7 @@ testConfigFileTest() {
 
 testDefaultConfigFile() {
 
-    export LFS_CI_CONFIG_FILE=${LFS_CI_ROOT}/etc/file.cfg
+    export LFS_CI_CONFIG_FILE=${LFS_CI_ROOT}/etc/global.cfg
 
     assertTrue "${LFS_CI_ROOT}/bin/getConfig -k foo"
     local value=$(${LFS_CI_ROOT}/bin/getConfig -k foo)

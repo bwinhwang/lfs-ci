@@ -232,7 +232,7 @@ applyKnifePatches() {
 #  @param   <none>
 #  @return  <none>
 specialBuildUploadAndNotifyUser() {
-    requiredParameters LFS_CI_ROOT 
+    requiredParameters LFS_CI_ROOT LFS_CI_CONFIG_FILE
 
     local buildType=$1
     mustHaveValue "${buildType}" "build type"
@@ -287,7 +287,7 @@ specialBuildUploadAndNotifyUser() {
             -r ${readmeFile}                   \
             -t ${label}                        \
             -n                                 \
-            -f ${LFS_CI_ROOT}/etc/file.cfg
+            -f ${LFS_CI_CONFIG_FILE}
     return
 }
 
