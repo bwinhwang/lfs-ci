@@ -74,8 +74,7 @@ tearDown() {
 
 test1() {
 
-    # assertTrue "specialBuildCreateWorkspaceAndBuild DEV"
-    specialBuildCreateWorkspaceAndBuild DEV
+    assertTrue "specialBuildCreateWorkspaceAndBuild DEV"
 
     local expect=$(createTempFile)
     cat <<EOF > ${expect}
