@@ -47,13 +47,13 @@ test4_getTargetBoardName() {
     return
 }
 
-test5_getPrductNameFromJobName() {
+test5_getProductNameFromJobName() {
     assertTrue "getProductNameFromJobName"
     local value=$(getProductNameFromJobName)
     assertEquals "LFS" "${value}"
     return
 }
-test6_getPrductNameFromJobName() {
+test6_getProductNameFromJobName() {
     assertTrue "getProductNameFromJobName UBOOT_CI_-_trunk_-_Build_-_FSM-r4_-_fsm4_axm"
     local value=$(getProductNameFromJobName UBOOT_CI_-_trunk_-_Build_-_FSM-r4_-_fsm4_axm)
     assertEquals "UBOOT" "${value}"
