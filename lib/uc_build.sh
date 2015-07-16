@@ -106,86 +106,40 @@ ci_job_build() {
     return
 }
 
-## @fn      ci_job_build_version()
-#  @brief   usecase which creates the version label
-#  @details the usecase get the last label name from the last successful build and calculates
-#           a new label name. The label name will be stored in a file and be artifacted.
-#           The downstream jobs will use this artifact.
+## @fn      usecase_LFS_BUILD_CREATE_VERSION
+#  @brief   usecase which creates the new build name
+#  @details this usecase get the old and new build name from the database
+#           by invoking stored procedures on the database.
 #  @param   <none>
 #  @return  <none>
-ci_job_build_version() {
+usecase_LFS_BUILD_CREATE_VERSION() {
     requiredParameters JOB_NAME BUILD_NUMBER LFS_CI_ROOT 
-
     local workspace=$(getWorkspaceName)
     mustHaveCleanWorkspace
     mustHaveWorkspaceName
-
-    debug "BUILD CAUSE by SCM trigger is: ${BUILD_CAUSE_SCMTRIGGER}"
-    if [[ ${BUILD_CAUSE_SCMTRIGGER} ]] ; then
-        copyChangelogToWorkspace ${JOB_NAME} ${BUILD_NUMBER}
-        local linesOfChangelog=$(wc -l ${WORKSPACE}/changelog.xml | cut -d" " -f 1)
-        if [[ ${linesOfChangelog} = 1 ]] ; then
-            WARNING "build was triggered by SCM change, but changelog is empty"
-            setBuildResultUnstable
-            exit 0
-        fi
-    fi
-
     info "workspace is ${workspace}"
 
-    local dbName=$(getConfig MYSQL_db_name)
-    local dbPort=$(getConfig MYSQL_db_port)
-    local dbUser=$(getConfig MYSQL_db_username)
-    local dbPass=$(getConfig MYSQL_db_password)
-    local dbHost=$(getConfig MYSQL_db_hostname)
-
-    local productName='LFS'
-    local labelPrefix=$(getConfig LFS_PROD_label_prefix)
-    local branch=$(getBranchName)
+    productName="LFS"
+    labelPrefix=$(getConfig LFS_PROD_label_prefix)
+    branch=$(getBranchName)
     mustHaveBranchName
+    [[ ${branch} == "pronb-developer" ]] && branch="trunk"
 
-    if [[ ${branch} == "pronb-developer" ]]; then
-        branch="trunk"
+    _set_db_credentials
+    local oldBuildName=$(_get_last_successful_build_name)
+    local buildName=$(_get_new_build_name)
+
+    if [[ ${oldBuildName} == ${buildName} ]]; then
+        fatal "old and new build name are the same"
     fi
-
-    info "get new build name for ${branch} and product name ${productName} from database"
-
-    # use 2> /dev/null because newer versions of mysql client print a warning
-    # to stderr when the password is provided on the commandline.
-
-    local oldBuildName=$(echo "SELECT get_last_successful_build_name('"${branch}"', '"${productName}"', '"${labelPrefix}"')" | \
-            mysql -N -u ${dbUser} --password=${dbPass} -h ${dbHost} -P ${dbPort} -D ${dbName} 2> /dev/null)
-    mustHaveValue "$oldBuildName" "oldBuildName"
-    if [[ ${oldBuildName} == NULL ]]; then
-        error "got NULL for oldBuildName from DB"
-        exit 1
-    fi
-    info "old build name ${oldBuildName}"
-
-    local buildName=$(echo "SELECT get_new_build_name('"${branch}"', '"${productName}"', '"${labelPrefix}"')" | \
-            mysql -N -u ${dbUser} --password=${dbPass} -h ${dbHost} -P ${dbPort} -D ${dbName} 2> /dev/null)
-    mustHaveValue "$buildName" "buildName"
-    if [[ ${buildName} == NULL ]]; then
-        error "got NULL for buildName from DB"
-        exit 1
-    fi
-
-    buildName=${labelPrefix^^}${buildName}
-
-    if [[ ${oldbuildName} == ${buildName} ]]; then
-        error "old and new build name are the same"
-        exit 1
-    fi
-
-    local jobDirectory=$(getBuildDirectoryOnMaster)
 
     info "new version is ${buildName}"
     setBuildDescription "${JOB_NAME}" "${BUILD_NUMBER}" "${buildName}"
 
-    debug "writing new buildName file in workspace ${workspace}"
+    debug "writing new build name file in workspace ${workspace}"
     execute mkdir -p ${workspace}/bld/bld-fsmci-summary
     echo ${buildName}    > ${workspace}/bld/bld-fsmci-summary/label
-    echo ${oldbuildName} > ${workspace}/bld/bld-fsmci-summary/oldLabel
+    echo ${oldBuildName} > ${workspace}/bld/bld-fsmci-summary/oldLabel
     
     createFingerprintFile
 
@@ -193,15 +147,17 @@ ci_job_build_version() {
     databaseEventBuildStarted
     exit_add _recordBuildEndEvent
 
-    debug "writing new buildName file in ${jobDirectory}/label"
-    executeOnMaster "echo ${buildName} > ${jobDirectory}/label"
-
     info "upload results to artifakts share."
     createArtifactArchive
 
     databaseAddNewCommits
 
     return
+}
+
+# Legacy invocation
+ci_job_build_version() {
+    usecase_LFS_BUILD_CREATE_VERSION
 }
 
 ## @fn      _build_fsmddal_pdf()
@@ -283,3 +239,48 @@ _recordBuildEndEvent() {
     return
 }
 
+_set_db_credentials() {
+    dbName=$(getConfig MYSQL_db_name)
+    mustHaveValue "${dbName}" "dbName"
+    dbPort=$(getConfig MYSQL_db_port)
+    mustHaveValue "${dbName}" "dbPort"
+    dbUser=$(getConfig MYSQL_db_username)
+    mustHaveValue "${dbName}" "dbUser"
+    dbPass=$(getConfig MYSQL_db_password)
+    mustHaveValue "${dbName}" "dbPass"
+    dbHost=$(getConfig MYSQL_db_hostname)
+    mustHaveValue "${dbName}" "dbHost"
+}
+
+_get_new_build_name() {
+    info "get new build name for ${branch} and product name ${productName} from database"
+
+    # use 2> /dev/null because newer versions of mysql client print a warning
+    # to stderr when the password is provided on the commandline.
+    local buildName=$(echo "SELECT get_new_build_name('"${branch}"', '"${productName}"', '"${labelPrefix}"')" | \
+            mysql -N -u ${dbUser} --password=${dbPass} -h ${dbHost} -P ${dbPort} -D ${dbName} 2> /dev/null)
+    mustHaveValue "$buildName" "buildName"
+
+    if [[ ${buildName} == NULL ]]; then
+        fatal "got NULL for buildName from DB"
+    fi
+
+    buildName=${labelPrefix^^}${buildName}
+
+    echo ${buildName}
+}
+
+_get_last_successful_build_name() {
+    info "get last successful build name for ${branch} and product name ${productName} from database"
+
+    local oldBuildName=$(echo "SELECT get_last_successful_build_name('"${branch}"', '"${productName}"', '"${labelPrefix}"')" | \
+            mysql -N -u ${dbUser} --password=${dbPass} -h ${dbHost} -P ${dbPort} -D ${dbName} 2> /dev/null)
+    mustHaveValue "${oldBuildName}" "oldBuildName"
+
+    if [[ ${oldBuildName} == NULL ]]; then
+        fatal "got NULL for oldBuildName from DB"
+    fi
+
+    info "old build name is ${oldBuildName}"
+    echo ${oldBuildName}
+}
