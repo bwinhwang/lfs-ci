@@ -133,7 +133,7 @@ usecase_LFS_BUILD_CREATE_VERSION() {
         fatal "old and new build name are the same"
     fi
 
-    info "new version is ${buildName}"
+    info "new build name is ${buildName}"
     setBuildDescription "${JOB_NAME}" "${BUILD_NUMBER}" "${buildName}"
 
     debug "writing new build name file in workspace ${workspace}"
@@ -259,10 +259,9 @@ _get_new_build_name() {
     # to stderr when the password is provided on the commandline.
     local buildName=$(echo "SELECT get_new_build_name('"${branch}"', '"${productName}"', '"${labelPrefix}"')" | \
             mysql -N -u ${dbUser} --password=${dbPass} -h ${dbHost} -P ${dbPort} -D ${dbName} 2> /dev/null)
-    mustHaveValue "$buildName" "buildName"
 
-    if [[ ${buildName} == NULL || ${buildName} == "" ]]; then
-        fatal "did not get new build name from DB"
+    if [[ $? != 0 || ${buildName} == NULL || ${buildName} == "" ]]; then
+        fatal "did not get a new build name from DB"
     fi
 
     buildName=${labelPrefix^^}${buildName}
@@ -275,10 +274,9 @@ _get_last_successful_build_name() {
 
     local oldBuildName=$(echo "SELECT get_last_successful_build_name('"${branch}"', '"${productName}"', '"${labelPrefix}"')" | \
             mysql -N -u ${dbUser} --password=${dbPass} -h ${dbHost} -P ${dbPort} -D ${dbName} 2> /dev/null)
-    mustHaveValue "${oldBuildName}" "oldBuildName"
 
-    if [[ ${oldBuildName} == NULL || ${oldBuildName} == "" ]]; then
-        fatal "did not get an old build name from DB"
+    if [[ $? != 0 || ${oldBuildName} == NULL || ${oldBuildName} == "" ]]; then
+        fatal "did not get the old build name from DB"
     fi
 
     info "old build name is ${oldBuildName}"
