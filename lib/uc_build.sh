@@ -119,10 +119,11 @@ usecase_LFS_BUILD_CREATE_VERSION() {
     mustHaveWorkspaceName
     info "workspace is ${workspace}"
 
-    productName="LFS"
+    productName=$(getProductNameFromJobName)
     labelPrefix=$(getConfig LFS_PROD_label_prefix)
     branch=$(getBranchName)
     mustHaveBranchName
+    # TODO remove as soon as branchName and locationName are separated
     [[ ${branch} == "pronb-developer" ]] && branch="trunk"
 
     _set_db_credentials
