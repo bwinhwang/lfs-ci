@@ -1,22 +1,17 @@
 #!/bin/bash
 
-source lib/common.sh
-initTempDirectory
+source test/common.sh
 
 source lib/createWorkspace.sh
 
-export UNITTEST_COMMAND=$(createTempFile)
+export UT_MOCKED_COMMANDS=$(createTempFile)
 
 oneTimeSetUp() {
     mockedCommand() {
-        echo "$@" >> ${UNITTEST_COMMAND}
+        echo "$@" >> ${UT_MOCKED_COMMANDS}
     }
     exit_handler() {
         echo exit
-    }
-    mustHaveValue() {
-        mockedCommand "mustHaveValue $@"
-        return
     }
     createWorkspace() {
         mockedCommand "createWorkspace"
@@ -29,11 +24,11 @@ oneTimeSetUp() {
 }
 
 setUp() {
-    cp -f /dev/null ${UNITTEST_COMMAND}
+    cp -f /dev/null ${UT_MOCKED_COMMANDS}
 }
 
 tearDown() {
-    rm -rf ${UNITTEST_COMMAND}
+    rm -rf ${UT_MOCKED_COMMANDS}
     rm -rf ${CI_LOGGING_LOGFILENAME}
     return
 }
@@ -51,7 +46,7 @@ testCreateOrUpdateWorkspace_withoutProblems() {
 cat <<EOF > ${expect}
 createWorkspace
 EOF
-    assertEquals "$(cat ${expect})" "$(cat ${UNITTEST_COMMAND})"
+    assertExecutedCommands ${expect}
 }
 
 testCreateOrUpdateWorkspace_withoutProblems_withMinusU() {
@@ -67,7 +62,7 @@ testCreateOrUpdateWorkspace_withoutProblems_withMinusU() {
 cat <<EOF > ${expect}
 updateWorkspace
 EOF
-    assertEquals "$(cat ${expect})" "$(cat ${UNITTEST_COMMAND})"
+    assertExecutedCommands ${expect}
 }
 
 testCreateOrUpdateWorkspace_withoutProblems_withoutExistingWorkspace() {
@@ -83,7 +78,7 @@ testCreateOrUpdateWorkspace_withoutProblems_withoutExistingWorkspace() {
 cat <<EOF > ${expect}
 createWorkspace
 EOF
-    assertEquals "$(cat ${expect})" "$(cat ${UNITTEST_COMMAND})"
+    assertExecutedCommands ${expect}
 }
 
 testCreateOrUpdateWorkspace_invalidParameter() {
