@@ -1,23 +1,17 @@
 #!/bin/bash
 
-source lib/common.sh
-initTempDirectory
+source test/common.sh
 
 source lib/createWorkspace.sh
 
-export UNITTEST_COMMAND=$(createTempFile)
 export UT_BUILD_SRC_LIST=$(createTempFile)
 
 oneTimeSetUp() {
     mockedCommand() {
-        echo "$@" >> ${UNITTEST_COMMAND}
+        echo "$@" >> ${UT_MOCKED_COMMANDS}
     }
     exit_handler() {
         echo exit
-    }
-    mustHaveValue() {
-        mockedCommand "mustHaveValue $@"
-        return
     }
     execute() {
         mockedCommand "execute $@"
@@ -42,11 +36,11 @@ oneTimeSetUp() {
 }
 
 setUp() {
-    cp -f /dev/null ${UNITTEST_COMMAND}
+    cp -f /dev/null ${UT_MOCKED_COMMANDS}
 }
 
 tearDown() {
-    rm -rf ${UNITTEST_COMMAND}
+    rm -rf ${UT_MOCKED_COMMANDS}
     rm -rf ${CI_LOGGING_LOGFILENAME}
     return
 }
@@ -62,16 +56,12 @@ testLatestRevisionFromRevisionStateFile_withoutProblem() {
 
     local expect=$(createTempFile)
     cat <<EOF > ${expect}
-mustHaveValue LFS product name
-mustHaveValue FSM-r4 sub task name
 getConfig LFS_CI_UC_build_onlySourceDirectories
 getConfig LFS_CI_UC_build_subsystem_to_build
-mustHaveValue src-project src directory
 execute -n build -W "${WORKSPACE}/workspace" -C src-project src-list_LFS_FSM-r4
-mustHaveValue src-abc no build targets configured
 getConfig LFS_CI_UC_build_additionalSourceDirectories
 EOF
-    assertEquals "$(cat ${expect})" "$(cat ${UNITTEST_COMMAND})"
+    assertExecutedCommands ${expect}
 
     # test for correct value
     local src=$(requiredSubprojectsForBuild 2>/dev/null)
@@ -89,16 +79,12 @@ testLatestRevisionFromRevisionStateFile_withoutProblem2() {
     assertTrue "requiredSubprojectsForBuild"
     local expect=$(createTempFile)
     cat <<EOF > ${expect}
-mustHaveValue LFS product name
-mustHaveValue FSM-r4 sub task name
 getConfig LFS_CI_UC_build_onlySourceDirectories
 getConfig LFS_CI_UC_build_subsystem_to_build
-mustHaveValue src-project src directory
 execute -n build -W "${WORKSPACE}/workspace" -C src-project src-list_LFS_FSM-r4
-mustHaveValue src-abc src-foo src-bar no build targets configured
 getConfig LFS_CI_UC_build_additionalSourceDirectories
 EOF
-    assertEquals "$(cat ${expect})" "$(cat ${UNITTEST_COMMAND})"
+    assertExecutedCommands ${expect}
 
     # test for correct value
     local src=$(requiredSubprojectsForBuild 2>/dev/null)
