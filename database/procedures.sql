@@ -941,7 +941,9 @@ BEGIN
     DECLARE var_prefix VARCHAR(64);
     DECLARE var_value VARCHAR(64);
     DECLARE var_regex VARCHAR(64);
+    DECLARE var_branch_cnt INT;
 
+    SELECT _branch_exists(in_branch) INTO var_branch_cnt;
 
     SELECT replace(replace(release_name_regex, '${date_%Y}', YEAR(NOW())), '${date_%m}', LPAD(MONTH(NOW()), 2, 0)) 
         INTO var_regex FROM branches WHERE branch_name=in_branch;
@@ -979,6 +981,9 @@ CREATE FUNCTION get_last_successful_build_name(in_branch VARCHAR(32), in_product
 BEGIN
     DECLARE var_value VARCHAR(64);
     DECLARE var_regex VARCHAR(64);
+    DECLARE var_branch_cnt INT;
+
+    SELECT _branch_exists(in_branch) INTO var_branch_cnt;
 
     SELECT replace(replace(release_name_regex, '${date_%Y}', YEAR(NOW())), '${date_%m}', LPAD(MONTH(NOW()), 2, 0)) 
         INTO var_regex FROM branches WHERE branch_name=in_branch;
@@ -991,6 +996,27 @@ BEGIN
         WHERE build_name REGEXP var_regex AND event_state='finished' AND product_name=in_product_name
         AND event_type='subbuild' AND build_name not like '%_9999';
 RETURN (var_value);
+END //
+DELIMITER ;
+-- }}}
+
+-- {{{ check if branch exists in database
+DROP FUNCTION IF EXISTS _branch_exists;
+DELIMITER //
+CREATE FUNCTION _branch_exists(in_branch VARCHAR(32)) RETURNS INT
+BEGIN
+    DECLARE var_branch_cnt INT;
+
+    SELECT COUNT(branch_name) INTO var_branch_cnt FROM branches WHERE branch_name=in_branch;
+
+    IF var_branch_cnt = 0 THEN
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'branch does not exist in table branches';
+    END IF;
+
+    IF var_branch_cnt > 1 THEN
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'branch exists more than once in table branches';
+    END IF;
+RETURN (var_branch_cnt);
 END //
 DELIMITER ;
 -- }}}

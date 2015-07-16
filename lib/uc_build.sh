@@ -261,8 +261,8 @@ _get_new_build_name() {
             mysql -N -u ${dbUser} --password=${dbPass} -h ${dbHost} -P ${dbPort} -D ${dbName} 2> /dev/null)
     mustHaveValue "$buildName" "buildName"
 
-    if [[ ${buildName} == NULL ]]; then
-        fatal "got NULL for buildName from DB"
+    if [[ ${buildName} == NULL || ${buildName} == "" ]]; then
+        fatal "did not get new build name from DB"
     fi
 
     buildName=${labelPrefix^^}${buildName}
@@ -277,8 +277,8 @@ _get_last_successful_build_name() {
             mysql -N -u ${dbUser} --password=${dbPass} -h ${dbHost} -P ${dbPort} -D ${dbName} 2> /dev/null)
     mustHaveValue "${oldBuildName}" "oldBuildName"
 
-    if [[ ${oldBuildName} == NULL ]]; then
-        fatal "got NULL for oldBuildName from DB"
+    if [[ ${oldBuildName} == NULL || ${oldBuildName} == "" ]]; then
+        fatal "did not get an old build name from DB"
     fi
 
     info "old build name is ${oldBuildName}"
