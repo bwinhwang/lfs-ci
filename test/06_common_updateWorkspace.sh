@@ -1,15 +1,12 @@
 #!/bin/bash
 
-source lib/common.sh
-initTempDirectory
+source test/common.sh
 
 source lib/createWorkspace.sh
 
-export UNITTEST_COMMAND=$(createTempFile)
-
 oneTimeSetUp() {
     mockedCommand() {
-        echo "$@" >> ${UNITTEST_COMMAND}
+        echo "$@" >> ${UT_MOCKED_COMMANDS}
     }
     exit_handler() {
         echo exit
@@ -34,10 +31,6 @@ oneTimeSetUp() {
     }
     setupNewWorkspace() {
         mkdir -p ${WORKSPACE}/workspace/.build_workdir
-    }
-    mustHaveValue() {
-        mockedCommand "mustHaveValue $@"
-        return
     }
     switchSvnServerInLocations() {
         mockedCommand "switchSvnServerInLocations $@"
@@ -67,11 +60,12 @@ oneTimeSetUp() {
 }
 
 setUp() {
-    cp -f /dev/null ${UNITTEST_COMMAND}
+    cp -f /dev/null ${UT_MOCKED_COMMANDS}
+    export WORKSPACE=$(createTempDirectory)
 }
 
 tearDown() {
-    rm -rf ${UNITTEST_COMMAND}
+    rm -rf ${UT_MOCKED_COMMANDS}
     rm -rf ${CI_LOGGING_LOGFILENAME}
     export UT_BUILD_UPDATE_ALL_FAILED=
     return
@@ -80,7 +74,6 @@ tearDown() {
 testUpdateWorkspace_withoutProblems() {
 
     export JOB_NAME=LFS_CI_-_trunk_-_Build_-_FSM-r2_-_fcmd
-    export WORKSPACE=$(createTempDirectory)
     
     mkdir -p ${WORKSPACE}/workspace/.build_workdir
 
@@ -92,12 +85,11 @@ testUpdateWorkspace_withoutProblems() {
 cat <<EOF > ${expect}
 execute rm -rf ${WORKSPACE}/revisions.txt
 latestRevisionFromRevisionStateFile
-mustHaveValue 12345 revision from revision state file
 execute --ignore-error build updateall -r 12345
 mustHaveLocalSdks
 copyAndExtractBuildArtifactsFromProject
 EOF
-    assertEquals "$(cat ${expect})" "$(cat ${UNITTEST_COMMAND})"
+    assertExecutedCommands ${expect}
 
     # TODO: demx2fk3 2014-11-24 add more tests here
 }
@@ -105,8 +97,8 @@ EOF
 testUpdateWorkspace_buildUpdateallFailed() {
 
     export JOB_NAME=LFS_CI_-_trunk_-_Build_-_FSM-r2_-_fcmd
-    export WORKSPACE=$(createTempDirectory)
     export UT_BUILD_UPDATE_ALL_FAILED=1
+    export WORKSPACE=/tmp/${USER}/abc
     mkdir -p ${WORKSPACE}/workspace/.build_workdir
 
     assertTrue updateWorkspace
@@ -116,29 +108,25 @@ testUpdateWorkspace_buildUpdateallFailed() {
 cat <<EOF > ${expect}
 execute rm -rf ${WORKSPACE}/revisions.txt
 latestRevisionFromRevisionStateFile
-mustHaveValue 12345 revision from revision state file
 execute --ignore-error build updateall -r 12345
 failed execute --ignore-error build updateall -r 12345
 createWorkspace
 EOF
-    assertEquals "$(cat ${expect})" "$(cat ${UNITTEST_COMMAND})"
+    assertExecutedCommands ${expect}
 
     # TODO: demx2fk3 2014-11-24 add more tests here
 }
 
 testUpdateWorkspace_parseErrorLocation() {
     export JOB_NAME=LFS_CI_-_
-    export WORKSPACE=$(createTempDirectory)
     assertFalse "updateWorkspace"
 }
 testUpdateWorkspace_parseErrorTarget() {
     export JOB_NAME=LFS_CI_-_trunk_-_Build_-_
-    export WORKSPACE=$(createTempDirectory)
     assertFalse "updateWorkspace"
 }
 testUpdateWorkspace_parseErrorProductName() {
     export JOB_NAME=ABC_CI_-_trunk_-_Build_-_FSM-r2_-_fcmd
-    export WORKSPACE=$(createTempDirectory)
     assertFalse "updateWorkspace"
 }
 
