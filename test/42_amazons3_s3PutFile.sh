@@ -39,7 +39,7 @@ EOF
 
 test2() {
     local file=$(createTempFile)
-    assertTrue "s3RemoveFile ${file} bucket"
+    assertTrue "s3RemoveFile s3://bucket/${file}"
 
     local expect=$(createTempFile)
     cat <<EOF > ${expect}

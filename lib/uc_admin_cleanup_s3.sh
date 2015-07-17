@@ -38,7 +38,7 @@ cleanupS3Storage() {
     # 2015-05-20 21:34 1848506442   s3://lfs-knives/KNIFE_PS_LFS_OS_2015_05_0288.20150520-200850.tgz
     for file in $(s3List s3://${bucketName} | grep -v -f ${daysNotToDelete} | cut -d" " -f 4-) ; do
         info "removing ${file} from s3://${bucketName}"
-        s3RemoveFile ${file} s3://${bucketName}
+        s3RemoveFile ${file}
     done
     return
 }
