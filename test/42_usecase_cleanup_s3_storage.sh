@@ -65,8 +65,8 @@ execute -n date +%Y-%m-%d --date=1 days ago
 execute -n date +%Y-%m-%d --date=2 days ago
 execute -n date +%Y-%m-%d --date=3 days ago
 s3List s3://lfs-knives
-s3RemoveFile B s3://lfs-knives
-s3RemoveFile C s3://lfs-knives
+s3RemoveFile s3://lfs-knives/B
+s3RemoveFile s3://lfs-knives/C
 EOF
     assertExecutedCommands ${expect}
 
