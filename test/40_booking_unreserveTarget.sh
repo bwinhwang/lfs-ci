@@ -20,6 +20,9 @@ oneTimeSetUp() {
 
 setUp() {
     cp -f /dev/null ${UT_MOCKED_COMMANDS}
+    unset JOB_NAME
+    unset BUILD_NUMBER
+    export JOB_NAME
     export LFS_CI_BOOKING_RESERVED_TARGET=targetName
     return
 }
