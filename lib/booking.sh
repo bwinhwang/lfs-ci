@@ -157,7 +157,6 @@ mustHaveReservedTarget() {
         # new method via booking from database
 
         local branchName=$(getBranchName ${UPSTREAM_PROJECT})
-        mustHaveBranchName
 
         local targetFeatures="$(getConfig LFS_uc_test_booking_target_features -t branchName:${branchName})"
         debug "requesting target with features ${targetFeatures}"
