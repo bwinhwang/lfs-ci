@@ -36,7 +36,6 @@ s3PutFile() {
 #  @return  <none>
 s3RemoveFile() {
     local fileName=${1}
-    mustExistFile ${fileName}
 
     local bucketName=${2}
     mustHaveValue "${bucketName}" "bucket name"
