@@ -44,7 +44,7 @@ s3RemoveFile() {
     local s3cmd=$(getConfig TOOL_amazon_s3cmd)
     mustExistFile ${s3cmd}
 
-    execute ${s3cmd} rm ${fileName} ${bucketName}
+    execute ${s3cmd} rm s3://${bucketName}/${fileName}
     return
 }
 
@@ -62,3 +62,17 @@ s3SetAccessPublic() {
     execute ${s3cmd} --acl-public setacl ${url}
     return
 }
+
+## @fn      s3List()
+#  @brief   list the content of the s3 bucket
+#  @param   {url}    url of the s3 storage (s3://bucket)
+#  @return  content
+s3List() {
+    local url=${1}
+    local s3cmd=$(getConfig TOOL_amazon_s3cmd)
+    mustExistFile ${s3cmd}
+
+    execute -n ${s3cmd} ls ${url}
+    return
+}
+
