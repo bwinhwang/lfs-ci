@@ -12,13 +12,6 @@
 //     - Copy the config.xml from src-branch and edit it
 ////////////////////////////////////////////////////////////////////////////////
 
-/******************************************************************
- * Note:
- ******************************************************************
- * As soon as fsmr4 doesn't need extra handling, the fsmr4) parts
- * can be removed.
- ******************************************************************/
-
 
 import jenkins.model.Jenkins
 import hudson.model.ParametersAction
@@ -221,6 +214,7 @@ class CreateBranch extends Common {
     def jobsToEnable
     def jobNameReplace
     def jobs2Exclude
+    def srcBranchNumber
 
     /**
      * Constructor
@@ -245,9 +239,45 @@ class CreateBranch extends Common {
         this.jobsToEnable = []
         this.jobNameReplace = srcBranch
 
+        // List of jobs to be excluded. Job names can also be a regex.
         this.jobs2Exclude = this.env.get("JOBS_EXCLUDE_LIST").split(",")
         this.inf("jobs to exclude: ${this.jobs2Exclude}")
         this.jobsList = []
+
+        if(this.srcBranch[0..1] == "FB") {
+            this.srcBranchNumber = this.srcBranch[2..5].toInteger()
+        } else if(this.srcBranch[0..1] == "MD") {
+            this.srcBranchNumber = this.srcBranch[3..6].toInteger()
+        }
+        
+        if(this.debug) {
+            this.dbg("srcBranchNumber is ${this.srcBranchNumber}")
+        }
+
+        // If fsmr4 comes via the jenkins job and its value is true,
+        // we don't check the source branch because the user knows
+        // that the source branch contains jobs with fsmr4 specific
+        // job names.
+
+        if(this.fsmr4 == false) {
+            if(this.srcBranch == "trunk") {
+                this.inf("set fmsr4 to false because source branch is trunk.")
+                this.fsmr4 = false
+            } else if(this.srcBranch == "MD11507") {
+                // MD11507 is the last branch that contains FSMR4 specific job names
+                this.inf("set fmsr4 to true because source branch is MD11507.")
+                this.fsmr4 = true
+            } else if(this.srcBranchNumber > 1506) {
+                // Branches >= FB1507 have kernel 3.14 -> no special fsmr4 job names
+                this.inf("set fmsr4 to false because srcBranchNumber > 1506 and source branch is not MD11507.")
+                this.fsmr4 = false
+            } else {
+                this.inf("set fmsr4 to true.")
+                this.fsmr4 = true
+            }
+        } else {
+            this.inf("fsmr4 is true -> got it from jenkins job.")
+        }
     }
 
     void main() {
@@ -309,6 +339,20 @@ class CreateBranch extends Common {
             text.replaceAll("-_"+this.jobNameReplace+"_-", "-_"+this.newBranch+"_-")
         }
 
+        // Vtc job exists on trunk only
+        if(newJob.name == "LFS_CI_-_${this.newBranch}_-_Test") {
+            processFileInplace(configFile) { text ->
+                text.replaceAll("LFS_CI_-_${this.newBranch}_-_TestLfsPlusVtc", "")
+            }
+        }
+
+        if(newJob.name == "LFS_CI_-_${this.newBranch}_-_Build") {
+            this.inf("replace <spec>* * * * *</spec> by <spec>*/3 * * * *</spec> in jobs config.xml.")
+            processFileInplace(configFile) { text ->
+                text.replaceAll("<spec>* * * * *</spec>", "<spec>*/3 * * * *</spec>")
+            }
+        }
+
         if(this.fsmr4) {
             processFileInplace(configFile) { text ->
                 text.replaceAll("LFS_CI_-_fsmr4_-", "LFS_CI_-_"+this.newBranch+"_FSMR4_-")
@@ -322,6 +366,10 @@ class CreateBranch extends Common {
             this.inf("replace ${this.pkgPoolReplace} by */${this.newBranch} in jobs config.xml.")
             processFileInplace(configFile) { text ->
                 text.replace(this.pkgPoolReplace, "*/"+this.newBranch)
+            }
+            this.inf("replace <spec>* * * * *</spec> by <spec>*/3 * * * *</spec> in jobs config.xml.")
+            processFileInplace(configFile) { text ->
+                text.replaceAll("<spec>* * * * *</spec>", "<spec>*/3 * * * *</spec>")
             }
         }
 
@@ -383,15 +431,17 @@ class CreateBranch extends Common {
     }
 
     /**
-      * Return true if "job_name" is in the list of jobs to be excluded,
+      * Return true if "job_name" matches an entry in this.jobs2Exclude,
       * false otherwise.
       */
     boolean job2exclude(job_name) {
-        if(job_name in this.jobs2Exclude) {
-            return true
-        } else {
-            return false
+        for(toExclude in this.jobs2Exclude) {
+            toExclude = toExclude.trim()
+            if(job_name =~ /${toExclude}/) {
+                return true
+            }
         }
+        return false
     }
 
     /**
@@ -739,7 +789,7 @@ class CreateViews extends Common {
     void addSectionedView(parentView) {
         this.out.println("\n[INFO] creating sectioned view.")
         if(this.debug) {
-            this.dbg("Create sectioned view ${parentView.name}/${this.newBranch}")
+            this.dbg("Create sectioned view for ${this.newBranch}")
         } else {
             def sectionedView = parentView.getView(this.newBranch)
             if(sectionedView) {

@@ -71,8 +71,7 @@ tearDown() {
 }
 
 test1() {
-    # assertTrue "usecase_VTC_PLUS_LFS_SYNC_PRODUCTION"
-    usecase_VTC_PLUS_LFS_SYNC_PRODUCTION
+    assertTrue "usecase_VTC_PLUS_LFS_SYNC_PRODUCTION"
 
     local expect=$(createTempFile)
     cat <<EOF > ${expect}

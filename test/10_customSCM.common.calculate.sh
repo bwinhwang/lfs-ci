@@ -13,10 +13,15 @@ oneTimeSetUp() {
     mockedCommand() {
         echo "$@" >> ${UT_MOCKED_COMMANDS}
     }
-    ssh() {
-        mockedCommand "ssh $@" 
+    runOnMaster() {
+        mockedCommand "runOnMaster $@" 
         echo ${MOCKED_DATA_readlink}
     }
+    getBuildDirectoryOnMaster() {
+        mockedCommand "getBuildDirectoryOnMaster $@" 
+        echo /path/to/jenkins/jobs/job/build/lastSuccessfulBuild
+    }
+
 }
 oneTimeTearDown() {
     rm -rf ${WORKSPACE}
@@ -75,7 +80,8 @@ test3() {
 
     local expect=$(createTempFile)
     cat <<EOF > ${expect}
-ssh maxi.emea.nsn-net.net readlink /var/fpwork/psulm/lfs-jenkins/home/jobs/LFS_CI_-_FB1412_-_Package_-_package/builds/lastSuccessfulBuild
+getBuildDirectoryOnMaster LFS_CI_-_FB1412_-_Package_-_package lastSuccessfulBuild
+runOnMaster readlink /path/to/jenkins/jobs/job/build/lastSuccessfulBuild
 EOF
 
     assertEquals "$(cat ${UT_MOCKED_COMMANDS})" "$(cat ${expect})"

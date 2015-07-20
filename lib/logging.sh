@@ -69,6 +69,7 @@ startLogfile() {
         case ${USER} in
             psulm)    url=http://ullinn11.emea.nsn-net.net/lfs/ci/log/ ;;
             lfscidev) url=https://lfs-sandbox.emea.nsn-net.net/logs/ ;;
+            ca_lrcci) url=https://lfs-lrc-ci.int.net.nokia.com/logs/ ;;
         esac
         if [[ ${url} ]] ; then
             echo 1>&2 "${url}/${datePath}/$(basename ${CI_LOGGING_LOGFILENAME})"
@@ -137,7 +138,6 @@ info() {
 #  @return  <none>
 error() {
     message "ERROR" "$@"
-    _stackTrace
 }
 
 ## @fn      warning()
@@ -154,7 +154,6 @@ warning() {
 #  @return  <none>
 fatal() {
     message "FATAL_ERROR" "$@"
-    _stackTrace
     exit 1
 }
 

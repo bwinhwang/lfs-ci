@@ -39,11 +39,11 @@ EOF
 
 test2() {
     local file=$(createTempFile)
-    assertTrue "s3RemoveFile ${file} bucket"
+    assertTrue "s3RemoveFile s3://bucket/${file}"
 
     local expect=$(createTempFile)
     cat <<EOF > ${expect}
-execute ${LFS_CI_ROOT}/lib/contrib/s3cmd/s3cmd rm ${file} bucket
+execute ${LFS_CI_ROOT}/lib/contrib/s3cmd/s3cmd rm s3://bucket/${file}
 EOF
     assertExecutedCommands ${expect}
 

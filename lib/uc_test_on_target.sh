@@ -62,7 +62,7 @@ ci_job_test_on_target() {
     databaseEventSubTestStarted 
     exit_add _exitHandlerDatabaseEventsSubTestFailed
 
-    for type in $(getConfig LFS_CI_uc_test_making_test_type) ; do
+    for type in ${testType} ; do
         info "running test type ${type} on target ${targetName}"
         case ${testType} in
             checkUname)        makingTest_checkUname ;;
