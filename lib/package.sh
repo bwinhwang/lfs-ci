@@ -115,6 +115,8 @@ copyReleaseCandidateToShare() {
     execute chmod -R g+w ${localDirectory}
 
     execute mkdir -p ${remoteDirectory}/os/
+    execute chmod -R g+w ${remoteDirectory}
+
     execute rsync -av --delete ${hardlink} ${localDirectory}/ ${remoteDirectory}/os/
     execute cd ${remoteDirectory}
 
