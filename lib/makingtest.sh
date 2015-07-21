@@ -85,12 +85,15 @@ makingTest_testconfig() {
     local workspace=$(getWorkspaceName)
     mustHaveWorkspaceName
 
+    local testOptions=$(getConfig LFS_CI_uc_test_making_test_testconfig_options)
+
     info "create testconfig for ${testSuiteDirectory}"
     execute make -C ${testSuiteDirectory}       \
                 testconfig-overwrite            \
                 TESTBUILD=${deliveryDirectory}  \
                 TESTTARGET="${targetName,,}"    \
-                TESTBUILD_SRC=${workspace}
+                TESTBUILD_SRC=${workspace}      \
+                ${testOptions}
     return
 }
 

@@ -416,7 +416,7 @@ mustHavePreparedWorkspace() {
     mustHaveValue "${upstreamBuild}"   "upstream build"
 
     local workspace=$(getWorkspaceName)
-    mustHaveCleanWorkspace
+    # mustHaveCleanWorkspace
 
     local requiredArtifacts=$(getConfig LFS_CI_prepare_workspace_required_artifacts)
     copyAndExtractBuildArtifactsFromProject "${upstreamProject}" "${upstreamBuild}" "${requiredArtifacts}"

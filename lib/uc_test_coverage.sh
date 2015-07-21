@@ -1,11 +1,16 @@
 #!/bin/bash
 
+source ${LFS_CI_ROOT}/lib/artifacts.sh
+source ${LFS_CI_ROOT}/lib/createWorkspace.sh
+source ${LFS_CI_ROOT}/lib/fingerprint.sh
+source ${LFS_CI_ROOT}/lib/makingtest.sh
+
 usecase_LFS_TEST_COVERAGE_COLLECT() {
 
     local branchName=$(getBranchName)
     mustHaveBranchName
 
-    createWorkspace -l ${branchName} src-test
+    createBasicWorkspace -l ${branchName} src-test
 
     mustHavePreparedWorkspace
     _copyCodecoverageArtifactsToWorkspace
@@ -19,11 +24,16 @@ usecase_LFS_TEST_COVERAGE_COLLECT() {
 
 _copyCodecoverageArtifactsToWorkspace() {
     local fingerPrint=$(getFingerprintOfCurrentJob)
-    local file=$(createTempFile)
+    local dataFile=$(createTempFile)
+    local xmlFile=$(createTempFile)
 
-    _getProjectDataFromFingerprint ${fingerPrint} ${file}
+    _getProjectDataFromFingerprint ${fingerPrint} ${xmlFile}
+    execute -n ${LFS_CI_ROOT}/bin/getFingerprintData ${xmlFile} > ${dataFile}
 
-    for jobData in $(grep CodeCoverage ${file}) ; do
+    rawDebug ${dataFile}
+    rawDebug ${xmlFile}
+
+    for jobData in $(grep CodeCoverage ${dataFile}) ; do
         local jobName=$(cut -d: -f1 <<< ${jobData})
         mustHaveValue "${jobName}" "job name"
         local buildNumber=$(cut -d: -f2 <<< ${jobData})
