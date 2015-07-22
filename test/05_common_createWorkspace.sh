@@ -69,7 +69,7 @@ testCreateWorkspace_withoutProblems() {
 
     export JOB_NAME=LFS_CI_-_trunk_-_Build_-_FSM-r2_-_fcmd
     export WORKSPACE=$(createTempDirectory)
-    assertTrue "createWorkspace"
+    createWorkspace
 
     assertTrue "[[ -d ${WORKSPACE}/workspace/.build_workdir ]]"
 
