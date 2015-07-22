@@ -138,6 +138,7 @@ info() {
 #  @return  <none>
 error() {
     message "ERROR" "$@"
+    _stackTrace
 }
 
 ## @fn      warning()
