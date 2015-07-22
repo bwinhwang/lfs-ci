@@ -155,7 +155,6 @@ warning() {
 #  @return  <none>
 fatal() {
     message "FATAL_ERROR" "$@"
-    _stackTrace
     exit 1
 }
 

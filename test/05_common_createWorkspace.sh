@@ -26,10 +26,6 @@ oneTimeSetUp() {
     setupNewWorkspace() {
         mkdir -p ${WORKSPACE}/workspace/.build_workdir
     }
-    mustHaveValue() {
-        mockedCommand "mustHaveValue $@"
-        return
-    }
     switchToNewLocation() {
         mockedCommand "switchToNewLocation $@"
     }
@@ -73,30 +69,22 @@ testCreateWorkspace_withoutProblems() {
 
     export JOB_NAME=LFS_CI_-_trunk_-_Build_-_FSM-r2_-_fcmd
     export WORKSPACE=$(createTempDirectory)
-    assertTrue "createWorkspace"
+    createWorkspace
 
     assertTrue "[[ -d ${WORKSPACE}/workspace/.build_workdir ]]"
 
     local expect=$(createTempFile)
 cat <<EOF > ${expect}
-mustHaveValue LFS product name
-mustHaveValue FSM-r2 subtask name
-mustHaveValue src-project src directory
 latestRevisionFromRevisionStateFile 
-mustHaveValue 12345 revision from revision state file
 switchToNewLocation pronb-developer
 switchSvnServerInLocations pronb-developer
 checkoutSubprojectDirectories src-project 12345
 requiredSubprojectsForBuild 
-mustHaveValue src-abc src-foo src-bar build targets
 latestRevisionFromRevisionStateFile 
-mustHaveValue 12345 revision from revision state file
 checkoutSubprojectDirectories src-abc 12345
 latestRevisionFromRevisionStateFile 
-mustHaveValue 12345 revision from revision state file
 checkoutSubprojectDirectories src-foo 12345
 latestRevisionFromRevisionStateFile 
-mustHaveValue 12345 revision from revision state file
 checkoutSubprojectDirectories src-bar 12345
 mustHaveLocalSdks 
 copyAndExtractBuildArtifactsFromProject 

@@ -348,7 +348,7 @@ sendReleaseNote() {
     info "collect revisions from all sub build jobs"
     sort -u ${workspace}/bld/bld-externalComponents-*/usedRevisions.txt > ${workspace}/revisions.txt
 
-    _getImportantNoteFileFromSubversion ${buildJobName} ${buildBuildNumber}
+    copyImportantNoteFilesFromSubversionToWorkspace 
 
     # create the os or uboot release note
     info "new release label is ${releaseTagName} based on ${oldReleaseTagName}"
@@ -405,9 +405,17 @@ sendReleaseNote() {
     return
 }
 
-_getImportantNoteFileFromSubversion() {
+
+## @fn      copyImportantNoteFilesFromSubversionToWorkspace()
+#  @brief   copy the important note files from subversion into workspace if exists
+#  @param   <none>
+#  @return  <none>
+copyImportantNoteFilesFromSubversionToWorkspace() {
     local workspace=$(getWorkspaceName)
     mustHaveWorkspaceName 
+
+    local importantNoteFileName=$(getConfig LFS_uc_release_important_note_file)
+    mustHaveValue "${importantNoteFileName}" "important note file name"
 
     mustExistFile ${workspace}/revisions.txt
     local svnUrl=$(execute -n grep ^src-project ${workspace}/revisions.txt | cut -d" " -f 2)
@@ -417,8 +425,8 @@ _getImportantNoteFileFromSubversion() {
     mustHaveValue "${svnRev}" "svn rev"
 
     if existsInSubversion "-r ${svnRev} ${svnUrl}/src" release_note &&
-       existsInSubversion "-r ${svnRev} ${svnUrl}/src/release_note" importantNote.txt ; then
-        svnCat -r ${svnRev} ${svnUrl}/src/release_note/importantNote.txt@${svnrev} > ${workspace}/importantNote.txt
+       existsInSubversion "-r ${svnRev} ${svnUrl}/src/release_note" ${importantNoteFileName} ; then
+        svnCat -r ${svnRev} ${svnUrl}/src/release_note/${importantNoteFileName}@${svnRev} > ${workspace}/importantNote.txt
     fi
 
     return
