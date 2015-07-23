@@ -307,8 +307,7 @@ requiredParameters() {
     fi
     for name in ${parameterNames} ; do
         if [[ ! ${!name} ]] ; then
-            error "required parameter ${name} is missing"
-            exit 1
+            fatal "required parameter ${name} is missing"
         fi
         echo "export ${name}=\"${!name}\"" >> ${LFS_CI_INTERNAL_RERUN_ENVIRONMENT_FILE}
     done
