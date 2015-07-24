@@ -113,6 +113,7 @@ copyReleaseCandidateToShare() {
 
     # PS SCM - which are responsible for syncing this share to the world wants the group writable
     execute chmod -R g+w ${localDirectory}
+    execute chgrp -R lfs_sync ${localDirectory}
 
     execute mkdir -p ${remoteDirectory}/os/
     execute chmod -R g+w ${remoteDirectory}
