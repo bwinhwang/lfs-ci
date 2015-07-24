@@ -42,7 +42,7 @@ usecase_ADMIN_RESTORE_SVN_CLONE() {
     local masterDirectory=$(getConfig ADMIN_lfs_svn_clone_master_directory)
     mustExistDirectory ${masterDirectory}
     local workingDirectory=$(getConfig ADMIN_lfs_svn_clone_working_directory)
-    musHaveValue "${workingDirectory}" "svn clone working directory"
+    mustHaveValue "${workingDirectory}" "svn clone working directory"
 
     execute mkdir -p ${workingDirectory}
     execute rsync --delete -avrP ${masterDirectory}/. ${workingDirectory}/.
