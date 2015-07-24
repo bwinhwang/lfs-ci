@@ -128,14 +128,13 @@ copyAndExtractBuildArtifactsFromProject() {
         fi
 
         local canOverwrite=$(getConfig LFS_CI_artifacts_can_overwrite_artifacts_from_other_project)
-        if [[ -d ${workspace}/bld/${base} ]] ; then
+        if [[ -z ${canOverwrite} && -d ${workspace}/bld/${base} ]] ; then
             trace "skipping ${file}, 'cause it's already transfered from another project"
             continue
         fi
 
         info "copy artifact ${file} from job ${jobName}#${buildNumber} to workspace and untar it"
 
-        info "$(pwd)"
         execute -r 10 rsync --archive --verbose --rsh=ssh -P          \
             ${serverName}:${artifactsPathOnMaster}/${file} \
             ${workspace}/bld/

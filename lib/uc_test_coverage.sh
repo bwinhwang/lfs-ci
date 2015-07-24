@@ -42,7 +42,7 @@ _copyCodecoverageArtifactsToWorkspace() {
         debug "getting test run artifacts for coverage of ${jobName} / ${buildNumber}"
 
         # no local here
-        LFS_CI_artifacts_can_overwrite_artifacts_from_other_project=1
+        export LFS_CI_artifacts_can_overwrite_artifacts_from_other_project=1
         copyAndExtractBuildArtifactsFromProject ${jobName} ${buildNumber} "test"
         unset LFS_CI_artifacts_can_overwrite_artifacts_from_other_project
     done
