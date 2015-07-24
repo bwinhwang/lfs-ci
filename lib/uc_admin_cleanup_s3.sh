@@ -31,10 +31,14 @@ cleanupS3Storage() {
     execute -n date +%Y-%m-%d --date="2 days ago" >> ${daysNotToDelete}
     execute -n date +%Y-%m-%d --date="3 days ago" >> ${daysNotToDelete}
 
-    # TODO: demx2fk3 2015-07-08 add the output format or s3List here
+    # example output
+    # lib/contrib/s3cmd/s3cmd ls s3://lfs-knives
+    # 2015-06-16 17:30 1810011825   s3://lfs-knives/KNIFE_MD1_PS_LFS_OS_2015_05_0070.20150616-154941.tgz
+    # 2015-05-13 07:05 1819611180   s3://lfs-knives/KNIFE_PS_LFS_OS_2015_05_0158.20150513-052838.tgz
+    # 2015-05-20 21:34 1848506442   s3://lfs-knives/KNIFE_PS_LFS_OS_2015_05_0288.20150520-200850.tgz
     for file in $(s3List s3://${bucketName} | grep -v -f ${daysNotToDelete} | cut -d" " -f 4-) ; do
         info "removing ${file} from s3://${bucketName}"
-        s3RemoveFile s3://${bucketName}/${file}
+        s3RemoveFile ${file}
     done
     return
 }

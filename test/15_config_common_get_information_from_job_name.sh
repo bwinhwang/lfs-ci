@@ -108,13 +108,13 @@ test13_getLocationName() {
 test14_getLocationName() {
     unset JOB_NAME
     export JOB_NAME
-    assertFalse "getLocationName"
+    assertTrue "test14_getLocationName" "getLocationName"
     return
 }
 
 
 test15_getBranchName() {
-    assertTrue "getLocationName"
+    assertTrue "test15_getBranchName" "getLocationName"
     local value=$(getLocationName)
     assertEquals "pronb-developer" "${value}"
     return
@@ -154,7 +154,7 @@ test20_mustHaveLocationName() {
 test21_mustHaveLocationName() {
     unset JOB_NAME
     export JOB_NAME
-    assertFalse "mustHaveLocationName"
+    assertTrue "mustHaveLocationName"
     return
 }
 test22_mustHaveLocationName() {
@@ -165,14 +165,14 @@ test22_mustHaveLocationName() {
 test23_mustHaveBranchName() {
     unset JOB_NAME
     export JOB_NAME
-    assertFalse "mustHaveBranchName"
+    assertTrue "mustHaveBranchName"
     return
 }
 
 test24_mustHaveBranchName() {
     unset JOB_NAME
     export JOB_NAME
-    assertFalse "mustHaveBranchName"
+    assertTrue "mustHaveBranchName"
     return
 }
 

@@ -38,16 +38,12 @@ s3PutFile() {
 #  @return  <none>
 s3RemoveFile() {
     local fileName=${1}
-    mustExistFile ${fileName}
-
-    local bucketName=${2}
-    mustHaveValue "${bucketName}" "bucket name"
 
     local s3cmd=$(getConfig TOOL_amazon_s3cmd)
     mustExistFile ${s3cmd}
     local s3cmdArgs=$(getConfig TOOL_amazon_s3cmd_args)
 
-    execute ${s3cmd} ${s3cmdArgs} rm s3://${bucketName}/${fileName}
+    execute ${s3cmd} ${s3cmdArgs} rm ${fileName}
     return
 }
 

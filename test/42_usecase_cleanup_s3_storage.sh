@@ -52,9 +52,9 @@ EOF
 }
 test2() {
     export UT_S3LIST_MOCK=$(createTempFile)
-    echo "$(date +%Y-%m-%d --date="3 days ago") A A A" >> ${UT_S3LIST_MOCK}
-    echo "$(date +%Y-%m-%d --date="4 days ago") B B B" >> ${UT_S3LIST_MOCK}
-    echo "$(date +%Y-%m-%d --date="6 days ago") C C C" >> ${UT_S3LIST_MOCK}
+    echo "$(date +%Y-%m-%d --date="3 days ago") A A s3://lfs-knives/A" >> ${UT_S3LIST_MOCK}
+    echo "$(date +%Y-%m-%d --date="4 days ago") B B s3://lfs-knives/B" >> ${UT_S3LIST_MOCK}
+    echo "$(date +%Y-%m-%d --date="6 days ago") C C s3://lfs-knives/C" >> ${UT_S3LIST_MOCK}
 
     assertTrue "usecase_ADMIN_CLEANUP_S3"
 
