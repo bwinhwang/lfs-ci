@@ -399,6 +399,24 @@ synchroniceToLocalPath() {
 mustHavePreparedWorkspace() {
 
     requiredParameters JOB_NAME BUILD_NUMBER
+    
+    local opt_noCleanWorkspace=
+    local opt_noBuildDescription=
+
+    local opts=$(getopt -o BC -l no-build-description,no-clean-workspace -- "$@")
+    if [[ $? != 0 ]] ; then
+         fatal "getopt parsing error in mustHavePreparedWorkspace"
+    fi
+
+    eval set -- "${opts}"
+
+    while true ; do
+        case "$1" in
+            -B | --no-build-description) opt_noBuildDescription=1 ; shift ;;
+            -C | --no-clean-workspace) opt_noCleanWorkspace=1 ; shift ;;
+            --) shift; break;;
+        esac
+    done
 
     local upstreamProject=${1}
     local upstreamBuild=${2}
@@ -416,15 +434,17 @@ mustHavePreparedWorkspace() {
     mustHaveValue "${upstreamBuild}"   "upstream build"
 
     local workspace=$(getWorkspaceName)
-    # mustHaveCleanWorkspace
+    [[ -z ${opt_noCleanWorkspace} ]] && mustHaveCleanWorkspace
 
-    local requiredArtifacts=$(getConfig LFS_CI_prepare_workspace_required_artifacts)
-    copyAndExtractBuildArtifactsFromProject "${upstreamProject}" "${upstreamBuild}" "${requiredArtifacts}"
+    if [[ -z ${opt_noBuildDescription} ]] ; then
+        local requiredArtifacts=$(getConfig LFS_CI_prepare_workspace_required_artifacts)
+        copyAndExtractBuildArtifactsFromProject "${upstreamProject}" "${upstreamBuild}" "${requiredArtifacts}"
 
-    mustHaveNextLabelName
-    local labelName=$(getNextReleaseLabel)
+        mustHaveNextLabelName
+        local labelName=$(getNextReleaseLabel)
 
-    setBuildDescription ${JOB_NAME} ${BUILD_NUMBER} ${labelName}
+        setBuildDescription ${JOB_NAME} ${BUILD_NUMBER} ${labelName}
+    fi
 
     return
 }

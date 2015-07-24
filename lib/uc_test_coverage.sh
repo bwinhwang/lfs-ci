@@ -20,7 +20,7 @@ usecase_LFS_TEST_COVERAGE_COLLECT() {
 
     createBasicWorkspace -l ${branchName} src-test
 
-    mustHavePreparedWorkspace
+    mustHavePreparedWorkspace --no-clean-workspace
     _copyCodecoverageArtifactsToWorkspace
     makingTest_testsWithoutTarget
 
