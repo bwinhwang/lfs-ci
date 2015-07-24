@@ -49,7 +49,7 @@ test1() {
     local expect=$(createTempFile)
     cat <<EOF > ${expect}
 createBasicWorkspace -l branchName src-test
-mustHavePreparedWorkspace 
+mustHavePreparedWorkspace --no-clean-workspace
 _copyCodecoverageArtifactsToWorkspace 
 makingTest_testsWithoutTarget 
 EOF
