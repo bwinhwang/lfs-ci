@@ -16,6 +16,7 @@ oneTimeSetUp() {
 
 setUp() {
     cp -f /dev/null ${UT_MOCKED_COMMANDS}
+    export LFS_CI_CONFIG_FILE=${LFS_CI_ROOT}/etc/file.cfg
     return
 }
 
