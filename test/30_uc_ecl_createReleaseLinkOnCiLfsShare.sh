@@ -21,6 +21,10 @@ oneTimeSetUp() {
             ;;
         esac
     }
+    getNextCiLabelName() {
+        mockedCommand "getNextCiLabelName $@"
+        echo "PS_LFS_OS_2015_07_0000"
+    }
 }
 oneTimeTearDown() {
     true
@@ -40,15 +44,16 @@ tearDown() {
 }
 
 test1() {
-    assertTrue "createReleaseLinkOnCiLfsShare PS_LFS_OS_2015_01_0000"
+    assertTrue "createReleaseLinkOnCiLfsShare"
 
     local expect=$(createTempFile)
 cat <<EOF > ${expect}
+getNextCiLabelName 
 getConfig LFS_CI_UC_package_copy_to_share_link_location
 getConfig LFS_CI_UC_package_copy_to_share_path_name
 execute mkdir -p ${UT_LINK_DIRECTORY}/RCversion/os
 execute cd ${UT_LINK_DIRECTORY}/RCversion/os
-execute ln -sf ../../Release_Candidate/FSM-r3/PS_LFS_OS_2015_01_0000 PS_LFS_REL_2015_01_0000
+execute ln -sf ../../Release_Candidate/FSM-r3/PS_LFS_OS_2015_07_0000 PS_LFS_REL_2015_07_0000
 EOF
     assertExecutedCommands ${expect}
 
@@ -56,11 +61,12 @@ EOF
 }
 
 test2() {
-    ln -fs /dev/null ${UT_LINK_DIRECTORY}/RCversion/os/PS_LFS_REL_2015_01_0000
-    assertFalse "createReleaseLinkOnCiLfsShare PS_LFS_OS_2015_01_0000"
+    ln -fs /dev/null ${UT_LINK_DIRECTORY}/RCversion/os/PS_LFS_REL_2015_07_0000
+    assertFalse "createReleaseLinkOnCiLfsShare PS_LFS_OS_2015_07_0000"
 
     local expect=$(createTempFile)
 cat <<EOF > ${expect}
+getNextCiLabelName 
 getConfig LFS_CI_UC_package_copy_to_share_link_location
 getConfig LFS_CI_UC_package_copy_to_share_path_name
 execute mkdir -p ${UT_LINK_DIRECTORY}/RCversion/os
