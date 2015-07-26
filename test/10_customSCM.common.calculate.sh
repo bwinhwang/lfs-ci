@@ -36,7 +36,7 @@ tearDown() {
     export MOCKED_DATA_readlink
 }
 setUp() {
-    export LFS_CI_CONFIG_FILE=${LFS_CI_ROOT}/etc/file.cfg
+    export LFS_CI_CONFIG_FILE=${LFS_CI_ROOT}/etc/lfs-ci.cfg
 }
 
 test1() {
