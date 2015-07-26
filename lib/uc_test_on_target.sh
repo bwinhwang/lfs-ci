@@ -42,7 +42,7 @@ ci_job_test_on_target() {
             mv ${WORKSPACE}/fingerprint.txt ${WORKSPACE}/revisions.txt
             createWorkspace
         else
-        # TODO: demx2fk3 2015-02-13 we are using the wrong revision to checkout src-test
+            # TODO: demx2fk3 2015-02-13 we are using the wrong revision to checkout src-test
             createBasicWorkspace -l ${branchName} src-test
         fi
     fi
