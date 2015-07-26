@@ -28,7 +28,8 @@ getLocationName() {
 
     if [[ -z ${LFS_CI_GLOBAL_BRANCH_NAME} ]] ; then
         local location=$(${LFS_CI_ROOT}/bin/getFromString.pl "${jobName}" location)
-        mustHaveValue "${location}" "location from job name"
+        # skipped due to performance
+        # mustHaveValue "${location}" "location from job name"
 
         local configFile=${LFS_CI_CONFIG_FILE:-${LFS_CI_ROOT}/etc/global.cfg}
         # skipped due to performance

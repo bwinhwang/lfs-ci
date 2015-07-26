@@ -35,6 +35,8 @@ sub execute {
     my $string = $self->{string};
     my $wanted = $self->{wanted};
 
+    return if not $string;
+
     my $wantMap = {
                     productName => 0,
                     location    => 1,
