@@ -35,6 +35,9 @@ tearDown() {
     unset MOCKED_DATA_readlink
     export MOCKED_DATA_readlink
 }
+setUp() {
+    export LFS_CI_CONFIG_FILE=${LFS_CI_ROOT}/etc/file.cfg
+}
 
 test1() {
     export UPSTREAM_BUILD=1
@@ -75,8 +78,8 @@ test3() {
 
     assertTrue actionCalculate
 
-    assertEquals "$(cat ${REVISION_STATE_FILE} | head -n 1)" "LFS_CI_-_FB1412_-_SmokeTest"
-    assertEquals "$(cat ${REVISION_STATE_FILE} | tail -n 1)" "1"
+    assertEquals "LFS_CI_-_FB1412_-_SmokeTest" "$(cat ${REVISION_STATE_FILE} | head -n 1)" 
+    assertEquals "1" "$(cat ${REVISION_STATE_FILE} | tail -n 1)" 
 
     local expect=$(createTempFile)
     cat <<EOF > ${expect}
