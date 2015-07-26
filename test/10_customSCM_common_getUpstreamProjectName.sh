@@ -23,24 +23,24 @@ tearDown() {
 
 test1() {
     local value=$(getUpstreamProjectName LFS_CI_-_FB1507_-_Test)
-    assertEquals "LFS_CI_-_FB1507_-_Package_-_package" "${value}"
+    assertEquals "LFS_CI_-_FB1507_-_SmokeTest" "${value}"
     return
 }
 test2() {
     export JOB_NAME=LFS_CI_-_FB1507_-_Test
     local value=$(getUpstreamProjectName)
-    assertEquals "LFS_CI_-_FB1507_-_Package_-_package" "${value}"
+    assertEquals "LFS_CI_-_FB1507_-_SmokeTest" "${value}"
     return
 }
 test3() {
     local value=$(getUpstreamProjectName LFS_CI_-_trunk_-_Test)
-    assertEquals "LFS_CI_-_trunk_-_Package_-_package" "${value}"
+    assertEquals "LFS_CI_-_trunk_-_SmokeTest" "${value}"
     return
 }
 test4() {
     export JOB_NAME=LFS_CI_-_trunk_-_Test
     local value=$(getUpstreamProjectName)
-    assertEquals "LFS_CI_-_trunk_-_Package_-_package" "${value}"
+    assertEquals "LFS_CI_-_trunk_-_SmokeTest" "${value}"
     return
 }
 

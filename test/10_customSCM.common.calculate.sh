@@ -75,12 +75,12 @@ test3() {
 
     assertTrue actionCalculate
 
-    assertEquals "$(cat ${REVISION_STATE_FILE} | head -n 1)" "LFS_CI_-_FB1412_-_Package_-_package"
+    assertEquals "$(cat ${REVISION_STATE_FILE} | head -n 1)" "LFS_CI_-_FB1412_-_SmokeTest"
     assertEquals "$(cat ${REVISION_STATE_FILE} | tail -n 1)" "1"
 
     local expect=$(createTempFile)
     cat <<EOF > ${expect}
-getBuildDirectoryOnMaster LFS_CI_-_FB1412_-_Package_-_package lastSuccessfulBuild
+getBuildDirectoryOnMaster LFS_CI_-_FB1412_-_SmokeTest lastSuccessfulBuild
 runOnMaster readlink /path/to/jenkins/jobs/job/build/lastSuccessfulBuild
 EOF
 
