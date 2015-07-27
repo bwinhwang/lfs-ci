@@ -54,7 +54,7 @@ createLatestReleaseOfBranchLinkOnCiLfsShare() {
     local buildName=$(getNextCiLabelName)
     mustHaveValue "${buildName}" "buildName name"
 
-    local rcDirectory=$(getConfig LFS_CI_UC_package_copy_to_share_path_name)
+    local rcDirectory=$(getConfig LFS_CI_UC_package_copy_to_share_real_location)
     mustExistDirectory ${rcDirectory}
 
     local src=${rcDirectory}/${buildName}
