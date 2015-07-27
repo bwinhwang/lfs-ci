@@ -410,6 +410,7 @@ makingTest_install() {
     # We try installation up to 4 times
     local maxInstallTries=$(getConfig LFS_CI_uc_test_making_test_installation_tries -t targetName:${targetName} -t testTargetName:${targetName})
     mustHaveValue "${maxInstallTries}" "max installation tries"
+
     for i in $(seq 1 ${maxInstallTries}) ; do
         trace "install loop ${i}"
 
@@ -446,7 +447,7 @@ makingTest_install() {
         return
     done
 
-    fatal "installation failed after four attempts."
+    fatal "installation failed after ${maxInstallTries} attempts."
 
     return
 }
