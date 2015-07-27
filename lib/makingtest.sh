@@ -265,7 +265,7 @@ makingTest_testLRC() {
                 TESTBUILD=${testBuildDirectory}                    \
                 TESTTARGET=${testTargetName}_shp
 
-    makingTest_powercycle
+    makingTest_poweron
     mustHaveMakingTestRunningTarget
 
     info "installing software"
