@@ -40,10 +40,10 @@ test1() {
 
     local expect=$(createTempFile)
     cat <<EOF > ${expect}
-mustExistDirectory LFS_CI_UC_package_copy_to_share_path_name
-mustExistDirectory LFS_CI_UC_package_copy_to_share_path_name/PS_LFS_OS_2015_07_01
-execute rm -f LFS_CI_UC_package_copy_to_share_path_name/latest_branchName
-execute ln -sf LFS_CI_UC_package_copy_to_share_path_name/PS_LFS_OS_2015_07_01 LFS_CI_UC_package_copy_to_share_path_name/latest_branchName
+mustExistDirectory LFS_CI_UC_package_copy_to_share_real_location
+mustExistDirectory LFS_CI_UC_package_copy_to_share_real_location/PS_LFS_OS_2015_07_01
+execute rm -f LFS_CI_UC_package_copy_to_share_real_location/latest_branchName
+execute ln -sf LFS_CI_UC_package_copy_to_share_real_location/PS_LFS_OS_2015_07_01 LFS_CI_UC_package_copy_to_share_real_location/latest_branchName
 EOF
     assertExecutedCommands ${expect}
 

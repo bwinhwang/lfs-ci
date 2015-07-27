@@ -1,13 +1,9 @@
 #!/bin/bash
 
-source lib/common.sh
-
-initTempDirectory
+source test/common.sh
 
 source lib/customSCM.upstream.sh
 source lib/customSCM.common.sh
-
-export UT_MOCKED_COMMANDS=$(createTempFile)
 
 oneTimeSetUp() {
     mockedCommand() {
@@ -35,17 +31,20 @@ tearDown() {
     unset MOCKED_DATA_readlink
     export MOCKED_DATA_readlink
 }
+
 setUp() {
     export LFS_CI_CONFIG_FILE=${LFS_CI_ROOT}/etc/file.cfg
+    export REVISION_STATE_FILE=$(createTempFile)
+    export WORKSPACE=$(createTempDirectory)
+    export UPSTREAM_BUILD=1
+    export MOCKED_DATA_readlink=1
+    cp -f /dev/null ${UT_MOCKED_COMMANDS}
 }
 
 test1() {
-    export UPSTREAM_BUILD=1
     export UPSTREAM_PROJECT=LFS_CI_-_FB1412_-_Test
     export JOB_NAME=LFS_CI_-_FB1412_-_Test_-_FSM-r3
 
-    export REVISION_STATE_FILE=$(createTempFile)
-    export WORKSPACE=$(createTempDirectory)
 
     assertTrue actionCalculate
 
@@ -55,12 +54,8 @@ test1() {
     return
 }
 test2() {
-    export UPSTREAM_BUILD=1
     export UPSTREAM_PROJECT=LFS_CI_-_FB1412_-_Test
     export JOB_NAME=LFS_CI_-_FB1412_-_Test_-_FSM-r3
-
-    export REVISION_STATE_FILE=$(createTempFile)
-    export WORKSPACE=$(createTempDirectory)
 
     assertTrue actionCalculate
 
@@ -71,10 +66,7 @@ test2() {
 }
 
 test3() {
-    export REVISION_STATE_FILE=$(createTempFile)
-    export WORKSPACE=$(createTempDirectory)
     export JOB_NAME=LFS_CI_-_FB1412_-_Test
-    export MOCKED_DATA_readlink=1
 
     assertTrue actionCalculate
 
@@ -87,11 +79,48 @@ getBuildDirectoryOnMaster LFS_CI_-_FB1412_-_SmokeTest lastSuccessfulBuild
 runOnMaster readlink /path/to/jenkins/jobs/job/build/lastSuccessfulBuild
 EOF
 
-    assertEquals "$(cat ${UT_MOCKED_COMMANDS})" "$(cat ${expect})"
+    assertExecutedCommands ${expect}
 
     return
 }
 
+test4() {
+    export JOB_NAME=LFS_CI_-_FB1412_-_Wait_for_release
+
+    assertTrue actionCalculate
+
+    assertEquals "LFS_CI_-_FB1412_-_Test" "$(cat ${REVISION_STATE_FILE} | head -n 1)" 
+    assertEquals "1" "$(cat ${REVISION_STATE_FILE} | tail -n 1)" 
+
+    local expect=$(createTempFile)
+    cat <<EOF > ${expect}
+getBuildDirectoryOnMaster LFS_CI_-_FB1412_-_Test lastSuccessfulBuild
+runOnMaster readlink /path/to/jenkins/jobs/job/build/lastSuccessfulBuild
+EOF
+
+    assertExecutedCommands ${expect}
+
+    return
+}
+
+test5() {
+    export JOB_NAME=LFS_CI_-_LRC_FB1412_-_Test
+
+    assertTrue actionCalculate
+
+    assertEquals "LFS_CI_-_LRC_FB1412_-_Package_-_package" "$(cat ${REVISION_STATE_FILE} | head -n 1)" 
+    assertEquals "1" "$(cat ${REVISION_STATE_FILE} | tail -n 1)" 
+
+    local expect=$(createTempFile)
+    cat <<EOF > ${expect}
+getBuildDirectoryOnMaster LFS_CI_-_LRC_FB1412_-_Package_-_package lastSuccessfulBuild
+runOnMaster readlink /path/to/jenkins/jobs/job/build/lastSuccessfulBuild
+EOF
+
+    assertExecutedCommands ${expect}
+
+    return
+}
 source lib/shunit2
 
 exit 0
