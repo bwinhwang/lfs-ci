@@ -13,7 +13,7 @@ oneTimeTearDown() {
     true
 }
 setUp() {
-    export LFS_CI_CONFIG_FILE=${LFS_CI_ROOT}/etc/file.cfg
+    export LFS_CI_CONFIG_FILE=${LFS_CI_ROOT}/etc/lfs-ci.cfg
     export JOB_NAME=LFS_CI_-_FB1507_-_ABC
     true
 }

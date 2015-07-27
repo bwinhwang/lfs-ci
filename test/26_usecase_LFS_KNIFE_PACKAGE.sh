@@ -51,6 +51,7 @@ oneTimeTearDown() {
 setUp() {
     rm -rf ${UT_MOCKED_COMMANDS}
     export LFS_CI_GLOBAL_USECASE=LFS_KNIFE_PACKAGE
+    export LFS_CI_CONFIG_FILE=${LFS_CI_ROOT}/etc/lfs-ci.cfg
 }
 tearDown() {
     true 
@@ -83,7 +84,7 @@ execute touch ${WORKSPACE}/workspace/.00_README.txt
 execute tar -cv --transform=s:^\./:os/: -C ${WORKSPACE}/workspace/upload/ -f ${WORKSPACE}/workspace/KNIFE_LABEL.tgz --use-compress-program=${LFS_CI_ROOT}/bin/pigz .
 uploadKnifeToStorage ${WORKSPACE}/workspace/KNIFE_LABEL.tgz
 copyFileToArtifactDirectory ${WORKSPACE}/workspace/.00_README.txt
-execute ${LFS_CI_ROOT}/bin/sendReleaseNote -r ${WORKSPACE}/workspace/.00_README.txt -t KNIFE_LABEL -n -f ${LFS_CI_ROOT}/etc/file.cfg
+execute ${LFS_CI_ROOT}/bin/sendReleaseNote -r ${WORKSPACE}/workspace/.00_README.txt -t KNIFE_LABEL -n -f ${LFS_CI_ROOT}/etc/lfs-ci.cfg
 EOF
     assertExecutedCommands ${expect}
 
