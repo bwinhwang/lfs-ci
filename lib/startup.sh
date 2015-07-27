@@ -48,6 +48,11 @@ prepareStartup() {
         source ${seesetenv} ${selectedLinseeTools}
     fi
 
+    # TODO: demx2fk3 2015-07-27 workaround - remove me
+    if [[ -z ${LFS_CI_CONFIG_FILE} ]] ; then
+        export LFS_CI_CONFIG_FILE=${LFS_CI_ROOT}/etc/lfs-ci.cfg
+    fi
+
     return
 }
 
