@@ -104,7 +104,8 @@ usecase_PKGPOOL_TEST() {
 #  @return  <none>
 usecase_PKGPOOL_RELEASE() {
     requiredParameters LFS_CI_ROOT UPSTREAM_PROJECT UPSTREAM_BUILD \
-                       JOB_NAME BUILD_NUMBER 
+                       JOB_NAME BUILD_NUMBER \
+                       LFS_CI_CONFIG_FILE
 
     local workspace=$(getWorkspaceName)
     mustHaveCleanWorkspace
