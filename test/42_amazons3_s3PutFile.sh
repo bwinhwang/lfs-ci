@@ -16,6 +16,7 @@ oneTimeSetUp() {
 
 setUp() {
     cp -f /dev/null ${UT_MOCKED_COMMANDS}
+    export LFS_CI_CONFIG_FILE=${LFS_CI_ROOT}/etc/lfs-ci.cfg
     return
 }
 
@@ -30,7 +31,7 @@ test1() {
 
     local expect=$(createTempFile)
     cat <<EOF > ${expect}
-execute ${LFS_CI_ROOT}/lib/contrib/s3cmd/s3cmd put ${file} bucket
+execute ${LFS_CI_ROOT}/lib/contrib/s3cmd/s3cmd -c ${LFS_CI_ROOT}/etc/system/dot_s3cfg put ${file} bucket
 EOF
     assertExecutedCommands ${expect}
 
@@ -39,11 +40,11 @@ EOF
 
 test2() {
     local file=$(createTempFile)
-    assertTrue "s3RemoveFile ${file} bucket"
+    assertTrue "s3RemoveFile s3://bucket/${file}"
 
     local expect=$(createTempFile)
     cat <<EOF > ${expect}
-execute ${LFS_CI_ROOT}/lib/contrib/s3cmd/s3cmd rm ${file} bucket
+execute ${LFS_CI_ROOT}/lib/contrib/s3cmd/s3cmd -c ${LFS_CI_ROOT}/etc/system/dot_s3cfg rm s3://bucket/${file}
 EOF
     assertExecutedCommands ${expect}
 
@@ -56,7 +57,7 @@ test3() {
 
     local expect=$(createTempFile)
     cat <<EOF > ${expect}
-execute ${LFS_CI_ROOT}/lib/contrib/s3cmd/s3cmd --acl-public setacl s3://bucket/file
+execute ${LFS_CI_ROOT}/lib/contrib/s3cmd/s3cmd -c ${LFS_CI_ROOT}/etc/system/dot_s3cfg --acl-public setacl s3://bucket/file
 EOF
     assertExecutedCommands ${expect}
 

@@ -270,8 +270,14 @@ applyKnifePatches() {
 
         if [[ -e ${workspace}/bld/bld-${type}-input/lfs.patch ]] ; then
             info "applying lfs.patch file..."
-            # error will be ignored, if the patch file will not apply without problems
-            execute -i patch -p0 -d ${workspace} < ${workspace}/bld/bld-${type}-input/lfs.patch
+
+            # apply patch only on files which exists in workspace
+            for fileInPatch in $(execute -n lsdiff ${workspace}/bld/bld-${type}-input/lfs.patch) ; do
+                [[ -e ${workspace}/${fileInPatch} ]] || continue
+                local tmpPatchFile=$(createTempFile)
+                execute -n filterdiff -i ${fileInPatch} > ${tmpPatchFile}
+                execute patch -p0 -d ${workspace} < ${tmpPatchFile}
+            done                     
         fi
     done
 
@@ -285,7 +291,7 @@ applyKnifePatches() {
 #  @param   <none>
 #  @return  <none>
 specialBuildUploadAndNotifyUser() {
-    requiredParameters LFS_CI_ROOT 
+    requiredParameters LFS_CI_ROOT LFS_CI_CONFIG_FILE
 
     local buildType=$1
     mustHaveValue "${buildType}" "build type"
@@ -340,7 +346,7 @@ specialBuildUploadAndNotifyUser() {
             -r ${readmeFile}                   \
             -t ${label}                        \
             -n                                 \
-            -f ${LFS_CI_ROOT}/etc/file.cfg
+            -f ${LFS_CI_CONFIG_FILE}
     return
 }
 
@@ -365,16 +371,7 @@ mustHaveLocationForSpecialBuild() {
     local subTaskName=$(getSubTaskNameFromJobName)
     mustHaveValue "${subTaskName}" "sub task name"
 
-    if [[ ${subTaskName} = "FSM-r4" ]] ; then
-        case ${location} in
-            trunk)           location=FSM_R4_DEV ;;
-            pronb-developer) location=FSM_R4_DEV ;;
-            *)     # TODO: demx2fk3 2015-02-03 add check, if new location exists, otherwise no build
-                   location=${location}_FSMR4 ;;
-        esac
-    fi
-    mustHaveValue "${location}" "location"
-
     export LFS_CI_GLOBAL_BRANCH_NAME=${location}
     return
 }
+

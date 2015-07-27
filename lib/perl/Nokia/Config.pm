@@ -68,7 +68,7 @@ sub loadData {
     my $param = { @_ };
 
     # TODO: demx2fk3 2014-10-06 FIXME
-    my $fileName = $param->{configFileName} || $ENV{LFS_CI_CONFIG_FILE} || sprintf( "%s/etc/file.cfg", $ENV{LFS_CI_ROOT} || "." );
+    my $fileName = $param->{configFileName} || $ENV{LFS_CI_CONFIG_FILE} || sprintf( "%s/etc/global.cfg", $ENV{LFS_CI_ROOT} || "." );
     # DEBUG "used config file in handler: $fileName";
     Nokia::Singleton::invalidateConfigStore( "file" );
 

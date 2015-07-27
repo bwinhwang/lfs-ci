@@ -127,7 +127,8 @@ copyAndExtractBuildArtifactsFromProject() {
             fi
         fi
 
-        if [[ -d ${workspace}/bld/${base} ]] ; then
+        local canOverwrite=$(getConfig LFS_CI_artifacts_can_overwrite_artifacts_from_other_project)
+        if [[ -z ${canOverwrite} && -d ${workspace}/bld/${base} ]] ; then
             trace "skipping ${file}, 'cause it's already transfered from another project"
             continue
         fi

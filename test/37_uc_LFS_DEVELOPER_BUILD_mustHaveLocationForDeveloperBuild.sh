@@ -96,7 +96,7 @@ EOF
     assertExecutedCommands ${expect}
 
     mustHaveLocationForSpecialBuild
-    assertEquals "LOCATION_FSMR4" "${LFS_CI_GLOBAL_BRANCH_NAME}"
+    assertEquals "LOCATION" "${LFS_CI_GLOBAL_BRANCH_NAME}"
 
     return
 }
@@ -113,7 +113,7 @@ EOF
     assertExecutedCommands ${expect}
 
     mustHaveLocationForSpecialBuild
-    assertEquals "FSM_R4_DEV" "${LFS_CI_GLOBAL_BRANCH_NAME}"
+    assertEquals "trunk" "${LFS_CI_GLOBAL_BRANCH_NAME}"
 
     return
 }
@@ -129,7 +129,7 @@ EOF
     assertExecutedCommands ${expect}
 
     mustHaveLocationForSpecialBuild
-    assertEquals "FSM_R4_DEV" "${LFS_CI_GLOBAL_BRANCH_NAME}"
+    assertEquals "pronb-developer" "${LFS_CI_GLOBAL_BRANCH_NAME}"
 
     return
 }

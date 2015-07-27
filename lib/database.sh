@@ -39,8 +39,8 @@ LFS_CI_SOURCE_database='$Id$'
 databaseEventBuildStarted() {
     requiredParameters LFS_CI_ROOT JOB_NAME BUILD_NUMBER
 
-    local branchName=$(getLocationName)
-    mustHaveLocationName
+    local branchName=$(getBranchName)
+    mustHaveBranchName
 
     local buildDirectory=$(getBuildDirectoryOnMaster ${JOB_NAME} ${BUILD_NUMBER})
     local revision=$(runOnMaster cat ${buildDirectory}/revisionstate.xml | cut -d" " -f 3 | sort -n -u | tail -n 1)

@@ -85,12 +85,15 @@ makingTest_testconfig() {
     local workspace=$(getWorkspaceName)
     mustHaveWorkspaceName
 
+    local testOptions=$(getConfig LFS_CI_uc_test_making_test_testconfig_options)
+
     info "create testconfig for ${testSuiteDirectory}"
     execute make -C ${testSuiteDirectory}       \
                 testconfig-overwrite            \
                 TESTBUILD=${deliveryDirectory}  \
                 TESTTARGET="${targetName,,}"    \
-                TESTBUILD_SRC=${workspace}
+                TESTBUILD_SRC=${workspace}      \
+                ${testOptions}
     return
 }
 
@@ -110,8 +113,8 @@ makingTest_testSuiteDirectory() {
     # we can not use location here, because the job name is "Test-ABC".
     # there is no location in the job name. So we have to use the
     # location of the upstream job.
-    local  branchName=$(getLocationName ${UPSTREAM_PROJECT})
-    mustHaveValue "${branchName}" "branch name"
+    local  branchName=$(getBranchName ${UPSTREAM_PROJECT})
+    mustHaveBranchName
 
     local relativeTestSuiteDirectory=
     if [[ -e ${workspace}/src-project/src/TMF/testsuites.cfg ]] ; then

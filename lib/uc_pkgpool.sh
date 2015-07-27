@@ -32,14 +32,9 @@ usecase_PKGPOOL_BUILD() {
     local workspace=$(getWorkspaceName)
     mustHaveCleanWorkspace
 
-    local releasePrefix=$(getConfig PKGPOOL_PROD_release_prefix)
-    mustHaveValue "${releasePrefix}" "pkgpool release prefix"
-
     local buildParameters="$(getConfig PKGPOOL_additional_build_parameters)"
     # build parameters could be empty => no mustHaveValue
     # mustHaveValue "${buildParameters}" "additional build parameters"
-
-    info "pkgpool release name prefix is ${releasePrefix}"
 
     local buildLogFile=$(createTempFile)
     local gitWorkspace=${WORKSPACE}/src
@@ -57,7 +52,7 @@ usecase_PKGPOOL_BUILD() {
     cd ${workspace}
 
     info "building pkgpool..."
-    execute -l ${buildLogFile} ${gitWorkspace}/build ${buildParameters} -j100 --prepopulate --release="${releasePrefix}" 
+    execute -l ${buildLogFile} ${gitWorkspace}/build ${buildParameters} 
 
     # TODO: demx2fk3 2015-03-09 add logfiles to artifacts
 
@@ -109,7 +104,8 @@ usecase_PKGPOOL_TEST() {
 #  @return  <none>
 usecase_PKGPOOL_RELEASE() {
     requiredParameters LFS_CI_ROOT UPSTREAM_PROJECT UPSTREAM_BUILD \
-                       JOB_NAME BUILD_NUMBER
+                       JOB_NAME BUILD_NUMBER \
+                       LFS_CI_CONFIG_FILE
 
     local workspace=$(getWorkspaceName)
     mustHaveCleanWorkspace
@@ -152,7 +148,7 @@ usecase_PKGPOOL_RELEASE() {
     execute -n ${LFS_CI_ROOT}/bin/getReleaseNoteXML \
                 -t ${label}                         \
                 -o ${oldLabel}                      \
-                -f ${LFS_CI_ROOT}/etc/file.cfg > ${workspace}/releasenote.xml
+                -f ${LFS_CI_CONFIG_FILE} > ${workspace}/releasenote.xml
     
     rawDebug ${workspace}/releasenote.xml
 
@@ -182,7 +178,7 @@ usecase_PKGPOOL_RELEASE() {
         if [[ -s ${releaseNoteTxt} ]] ; then
             execute ${LFS_CI_ROOT}/bin/sendReleaseNote  -r ${releaseNoteTxt}          \
                                                         -t ${label}                   \
-                                                        -f ${LFS_CI_ROOT}/etc/file.cfg
+                                                        -f ${LFS_CI_CONFIG_FILE}
         fi                                                            
     else
         warning "sending release note is disabled via config"

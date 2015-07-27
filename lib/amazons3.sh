@@ -24,8 +24,10 @@ s3PutFile() {
     local s3cmd=$(getConfig TOOL_amazon_s3cmd)
     mustExistFile ${s3cmd}
 
+    local s3cmdArgs=$(getConfig TOOL_amazon_s3cmd_args)
+
     info "uploading ${fileName} to ${bucketName}"
-    execute ${s3cmd} put ${fileName} ${bucketName}
+    execute ${s3cmd} ${s3cmdArgs} put ${fileName} ${bucketName}
     return
 }
 
@@ -36,15 +38,12 @@ s3PutFile() {
 #  @return  <none>
 s3RemoveFile() {
     local fileName=${1}
-    mustExistFile ${fileName}
-
-    local bucketName=${2}
-    mustHaveValue "${bucketName}" "bucket name"
 
     local s3cmd=$(getConfig TOOL_amazon_s3cmd)
     mustExistFile ${s3cmd}
+    local s3cmdArgs=$(getConfig TOOL_amazon_s3cmd_args)
 
-    execute ${s3cmd} rm ${fileName} ${bucketName}
+    execute ${s3cmd} ${s3cmdArgs} rm ${fileName}
     return
 }
 
@@ -58,7 +57,23 @@ s3SetAccessPublic() {
 
     local s3cmd=$(getConfig TOOL_amazon_s3cmd)
     mustExistFile ${s3cmd}
+    local s3cmdArgs=$(getConfig TOOL_amazon_s3cmd_args)
 
-    execute ${s3cmd} --acl-public setacl ${url}
+    execute ${s3cmd} ${s3cmdArgs} --acl-public setacl ${url}
     return
 }
+
+## @fn      s3List()
+#  @brief   list the content of the s3 bucket
+#  @param   {url}    url of the s3 storage (s3://bucket)
+#  @return  content
+s3List() {
+    local url=${1}
+    local s3cmd=$(getConfig TOOL_amazon_s3cmd)
+    mustExistFile ${s3cmd}
+    local s3cmdArgs=$(getConfig TOOL_amazon_s3cmd_args)
+
+    execute -n ${s3cmd} ${s3cmdArgs} ls ${url}
+    return
+}
+

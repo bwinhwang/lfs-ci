@@ -47,13 +47,13 @@ test4_getTargetBoardName() {
     return
 }
 
-test5_getPrductNameFromJobName() {
+test5_getProductNameFromJobName() {
     assertTrue "getProductNameFromJobName"
     local value=$(getProductNameFromJobName)
     assertEquals "LFS" "${value}"
     return
 }
-test6_getPrductNameFromJobName() {
+test6_getProductNameFromJobName() {
     assertTrue "getProductNameFromJobName UBOOT_CI_-_trunk_-_Build_-_FSM-r4_-_fsm4_axm"
     local value=$(getProductNameFromJobName UBOOT_CI_-_trunk_-_Build_-_FSM-r4_-_fsm4_axm)
     assertEquals "UBOOT" "${value}"
@@ -108,13 +108,13 @@ test13_getLocationName() {
 test14_getLocationName() {
     unset JOB_NAME
     export JOB_NAME
-    assertFalse "getLocationName"
+    assertTrue "test14_getLocationName" "getLocationName"
     return
 }
 
 
 test15_getBranchName() {
-    assertTrue "getLocationName"
+    assertTrue "test15_getBranchName" "getLocationName"
     local value=$(getLocationName)
     assertEquals "pronb-developer" "${value}"
     return
@@ -154,7 +154,7 @@ test20_mustHaveLocationName() {
 test21_mustHaveLocationName() {
     unset JOB_NAME
     export JOB_NAME
-    assertFalse "mustHaveLocationName"
+    assertTrue "mustHaveLocationName"
     return
 }
 test22_mustHaveLocationName() {
@@ -165,14 +165,14 @@ test22_mustHaveLocationName() {
 test23_mustHaveBranchName() {
     unset JOB_NAME
     export JOB_NAME
-    assertFalse "mustHaveBranchName"
+    assertTrue "mustHaveBranchName"
     return
 }
 
 test24_mustHaveBranchName() {
     unset JOB_NAME
     export JOB_NAME
-    assertFalse "mustHaveBranchName"
+    assertTrue "mustHaveBranchName"
     return
 }
 

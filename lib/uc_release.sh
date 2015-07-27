@@ -316,6 +316,8 @@ extractArtifactsOnReleaseShareKernelSources() {
 #  @param   <none>
 #  @return  <none>
 sendReleaseNote() {
+    requiredParameters LFS_CI_CONFIG_FILE LFS_CI_ROOT
+
     local testedJobName=$1
     local testedBuildNumber=$2
     local buildJobName=$3
@@ -348,7 +350,7 @@ sendReleaseNote() {
     info "collect revisions from all sub build jobs"
     sort -u ${workspace}/bld/bld-externalComponents-*/usedRevisions.txt > ${workspace}/revisions.txt
 
-    _getImportantNoteFileFromSubversion ${buildJobName} ${buildBuildNumber}
+    copyImportantNoteFilesFromSubversionToWorkspace 
 
     # create the os or uboot release note
     info "new release label is ${releaseTagName} based on ${oldReleaseTagName}"
@@ -383,7 +385,7 @@ sendReleaseNote() {
         info "send release note"
         execute ${LFS_CI_ROOT}/bin/sendReleaseNote  -r ${workspace}/os/releasenote.txt \
                                                     -t ${releaseTagName}               \
-                                                    -f ${LFS_CI_ROOT}/etc/file.cfg
+                                                    -f ${LFS_CI_CONFIG_FILE}
     else
         warning "sending the release note is disabled in config"
     fi
@@ -405,9 +407,17 @@ sendReleaseNote() {
     return
 }
 
-_getImportantNoteFileFromSubversion() {
+
+## @fn      copyImportantNoteFilesFromSubversionToWorkspace()
+#  @brief   copy the important note files from subversion into workspace if exists
+#  @param   <none>
+#  @return  <none>
+copyImportantNoteFilesFromSubversionToWorkspace() {
     local workspace=$(getWorkspaceName)
     mustHaveWorkspaceName 
+
+    local importantNoteFileName=$(getConfig LFS_uc_release_important_note_file)
+    mustHaveValue "${importantNoteFileName}" "important note file name"
 
     mustExistFile ${workspace}/revisions.txt
     local svnUrl=$(execute -n grep ^src-project ${workspace}/revisions.txt | cut -d" " -f 2)
@@ -417,8 +427,8 @@ _getImportantNoteFileFromSubversion() {
     mustHaveValue "${svnRev}" "svn rev"
 
     if existsInSubversion "-r ${svnRev} ${svnUrl}/src" release_note &&
-       existsInSubversion "-r ${svnRev} ${svnUrl}/src/release_note" importantNote.txt ; then
-        svnCat -r ${svnRev} ${svnUrl}/src/release_note/importantNote.txt@${svnrev} > ${workspace}/importantNote.txt
+       existsInSubversion "-r ${svnRev} ${svnUrl}/src/release_note" ${importantNoteFileName} ; then
+        svnCat -r ${svnRev} ${svnUrl}/src/release_note/${importantNoteFileName}@${svnRev} > ${workspace}/importantNote.txt
     fi
 
     return
@@ -433,8 +443,9 @@ _createLfsOsReleaseNote() {
     local buildJobName=$1
     local buildBuildNumber=$2
 
-    requiredParameters LFS_PROD_RELEASE_CURRENT_TAG_NAME LFS_PROD_RELEASE_PREVIOUS_TAG_NAME LFS_CI_ROOT \
-                       JOB_NAME BUILD_NUMBER
+    requiredParameters LFS_PROD_RELEASE_CURRENT_TAG_NAME LFS_PROD_RELEASE_PREVIOUS_TAG_NAME \
+                       LFS_CI_ROOT LFS_CI_CONFIG_FILE \
+                       JOB_NAME BUILD_NUMBER \
 
     local workspace=$(getWorkspaceName)
     mustHaveWorkspaceName 
@@ -466,7 +477,7 @@ _createLfsOsReleaseNote() {
 
     execute -n ${LFS_CI_ROOT}/bin/getReleaseNoteXML -t ${LFS_PROD_RELEASE_CURRENT_TAG_NAME}  \
                                                     -o ${LFS_PROD_RELEASE_PREVIOUS_TAG_NAME} \
-                                                    -f ${LFS_CI_ROOT}/etc/file.cfg > releasenote.xml
+                                                    -f ${LFS_CI_CONFIG_FILE} > releasenote.xml
     rawDebug ${workspace}/os/releasenote.xml
     execute mv -f ${workspace}/os/releasenote.xml ${workspace}/os/os_releasenote.xml
 
@@ -488,7 +499,7 @@ _createLfsRelReleaseNoteXml() {
     mustHaveWorkspaceName
 
     requiredParameters LFS_PROD_RELEASE_PREVIOUS_TAG_NAME_REL LFS_PROD_RELEASE_CURRENT_TAG_NAME_REL \
-                       LFS_PROD_RELEASE_PREVIOUS_TAG_NAME LFS_CI_ROOT
+                       LFS_PROD_RELEASE_PREVIOUS_TAG_NAME LFS_CI_ROOT LFS_CI_CONFIG_FILE
 
     info "creating release note xml for ${LFS_PROD_RELEASE_CURRENT_TAG_NAME_REL}"
     execute mkdir -p ${workspace}/rel/bld/bld-externalComponents-summary
@@ -505,7 +516,7 @@ _createLfsRelReleaseNoteXml() {
     export type=REL
     execute -n ${LFS_CI_ROOT}/bin/getReleaseNoteXML -t ${LFS_PROD_RELEASE_CURRENT_TAG_NAME_REL}  \
                                                     -o ${LFS_PROD_RELEASE_PREVIOUS_TAG_NAME_REL} \
-                                                    -f ${LFS_CI_ROOT}/etc/file.cfg > releasenote.xml
+                                                    -f ${LFS_CI_CONFIG_FILE} > releasenote.xml
     rawDebug ${workspace}/releasenote.xml
     unset type
     export type
