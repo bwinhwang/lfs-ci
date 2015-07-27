@@ -16,6 +16,10 @@ case $(hostname -s) in
         export LFS_CI_ROOT=/ps/lfs/ci 
         user=psulm
     ;;
+    ullteb02)
+        export LFS_CI_ROOT=/home/ca_lrcci/lfs-ci
+        user=ca_lrcci
+    ;;
     ulegcpeag15) 
         export LFS_CI_ROOT=/home/lfscidev/lfs-ci 
         user=lfscidev
