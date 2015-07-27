@@ -27,14 +27,15 @@ ci_job_test_on_target() {
     mustHaveWorkspaceName
     mustHaveCleanWorkspace
 
-    local branchName=$(getBranchName ${UPSTREAM_PROJECT})
+    local locationName=$(getLocationName ${UPSTREAM_PROJECT})
+    mustHaveLocationName
 
     if [[ ${JOB_NAME} =~ ^Test- ]] ; then
         # legacy: using the Test-<targetName> job. No detailed information about
         # the workspace is available at the moment.
         # TODO: demx2fk3 2015-02-13 we are using the wrong revision to checkout src-test
-        info "create workspace for testing on ${branchName}"
-        createBasicWorkspace -l ${branchName} src-test
+        info "create workspace for testing on ${locationName}"
+        createBasicWorkspace -l ${locationName} src-test
     else
         local requireCompleteWorkspace=$(getConfig LFS_CI_uc_test_require_complete_workspace)
         if [[ ${requireCompleteWorkspace} ]] ; then
@@ -42,8 +43,8 @@ ci_job_test_on_target() {
             mv ${WORKSPACE}/fingerprint.txt ${WORKSPACE}/revisions.txt
             createWorkspace
         else
-        # TODO: demx2fk3 2015-02-13 we are using the wrong revision to checkout src-test
-            createBasicWorkspace -l ${branchName} src-test
+            # TODO: demx2fk3 2015-02-13 we are using the wrong revision to checkout src-test
+            createBasicWorkspace -l ${locationName} src-test
         fi
     fi
 
@@ -96,8 +97,8 @@ uc_job_test_on_target_archive_logs() {
     # set the correct jobName
     export JOB_NAME=${jobName}
 
-    local branchName=$(getLocationName ${UPSTREAM_PROJECT})
-    mustHaveValue "${branchName}" "branch name"
+    local branchName=$(getBranchName ${UPSTREAM_PROJECT})
+    mustHaveBranchName
 
     local testReposPathOnMoritz=$(getConfig LFS_CI_uc_test_on_target_test_repos_on_moritz -t location:${branchName})
     mustHaveValue "${testReposPathOnMoritz}" "test-repos path on moritz"

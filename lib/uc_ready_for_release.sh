@@ -14,8 +14,8 @@ usecase_LFS_READY_FOR_RELEASE() {
     mustHaveCleanWorkspace
     mustHavePreparedWorkspace
 
-    local labelName=$(getNextCiLabelName)
-    createReleaseLinkOnCiLfsShare ${labelName}
+    createReleaseLinkOnCiLfsShare 
+    createLatestReleaseOfBranchLinkOnCiLfsShare 
     createArtifactArchive
 
     return
@@ -23,17 +23,17 @@ usecase_LFS_READY_FOR_RELEASE() {
 
 ## @fn      createReleaseLinkOnCiLfsShare()
 #  @brief   create a link in CI_LFS to trigger the sync to remote sites
-#  @param   {labelName}    name of the production
+#  @param   {buildName}    name of the build
 #  @return  <none>
 createReleaseLinkOnCiLfsShare() {
-    local labelName=$1
-    mustHaveValue "${labelName}" "label name"
+    local buildName=$(getNextCiLabelName)
+    mustHaveValue "${buildName}" "buildName name"
 
     local linkDirectory=$(getConfig LFS_CI_UC_package_copy_to_share_link_location)
     mustExistDirectory ${linkDirectory}
 
-    local pathToLink=../../$(getConfig LFS_CI_UC_package_copy_to_share_path_name)/${labelName}
-    local relTagName=${labelName/PS_LFS_OS_/PS_LFS_REL_}
+    local pathToLink=../../$(getConfig LFS_CI_UC_package_copy_to_share_path_name)/${buildName}
+    local relTagName=${buildName/PS_LFS_OS_/PS_LFS_REL_}
     info "creating link in CI_LFS RCversion ${relTagName}"
     execute mkdir -p ${linkDirectory}
     execute cd ${linkDirectory}
@@ -43,5 +43,28 @@ createReleaseLinkOnCiLfsShare() {
     fi
 
     execute ln -sf ${pathToLink} ${relTagName}
+    return
+}
+
+## @fn      createLatestReleaseOfBranchLinkOnCiLfsShare()
+#  @brief   create a link to the latest (released) LFS on CI_LFS share in release canidates
+#  @param   {buildName}    name of the build
+#  @return  <none>
+createLatestReleaseOfBranchLinkOnCiLfsShare() {
+    local buildName=$(getNextCiLabelName)
+    mustHaveValue "${buildName}" "buildName name"
+
+    local rcDirectory=$(getConfig LFS_CI_UC_package_copy_to_share_real_location)
+    mustExistDirectory ${rcDirectory}
+
+    local src=${rcDirectory}/${buildName}
+    mustExistDirectory ${src}
+
+    local branchName=$(getBranchName)
+    mustHaveValue "${branchName}" "branch name"
+
+    execute rm -f ${rcDirectory}/latest_${branchName}
+    execute ln -sf ${src} ${rcDirectory}/latest_${branchName}
+
     return
 }

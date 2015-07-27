@@ -1,0 +1,172 @@
+Index: src-fsmddal/Dependencies
+===================================================================
+--- src-fsmddal/Dependencies	(revision 207699)
++++ src-fsmddal/Dependencies	(working copy)
+@@ -5,7 +5,7 @@
+ use src-project
+ 
+ use-readonly bld/bld-rfs-fct
+-use-readonly bld/bld-rfs-arm
++use-readonly bld/bld-rfs-fsm4_arm
+ use-readonly bld/bld-rfs-qemu_x86_64
+ 
+ use-readonly bld/pkgpool
+Index: src-fsmpsl/Buildfile
+--- src-fsmpsl/Buildfile	(revision 207699)
++++ src-fsmpsl/Buildfile	(working copy)
+@@ -161,10 +161,10 @@
+ 	cp -rf $(BLD)-fsmbrm35-axm/results/factory $(BLD)-$(SUBSYS)-fsm4_axm/results/
+ endif
+ 	mkdir $(BLD)-$(SUBSYS)-fsm4_axm/results/addons
+-	cp -f $(BLD)-rfs-arm/results/addons/python.tar.gz $(BLD)-$(SUBSYS)-fsm4_axm/results/addons/python.tgz
+-	cp -f $(BLD)-rfs-arm/results/addons/iic.tar.gz $(BLD)-$(SUBSYS)-fsm4_axm/results/addons/iic.tgz
+-	cp -f $(BLD)-rfs-arm/results/addon_devtools.tar.gz $(BLD)-$(SUBSYS)-fsm4_axm/results/addons/devtools.tgz	
+-	cp -f $(BLD)-rfs-arm/results/addon_lighttpd.tar.gz $(BLD)-$(SUBSYS)-fsm4_axm/results/addons/lighttpd.tgz
++	cp -f $(BLD)-rfs-fsm4_arm/results/addons/python.tar.gz $(BLD)-$(SUBSYS)-fsm4_axm/results/addons/python.tgz
++	cp -f $(BLD)-rfs-fsm4_arm/results/addons/iic.tar.gz $(BLD)-$(SUBSYS)-fsm4_axm/results/addons/iic.tgz
++	cp -f $(BLD)-rfs-fsm4_arm/results/addon_devtools.tar.gz $(BLD)-$(SUBSYS)-fsm4_axm/results/addons/devtools.tgz	
++	cp -f $(BLD)-rfs-fsm4_arm/results/addon_lighttpd.tar.gz $(BLD)-$(SUBSYS)-fsm4_axm/results/addons/lighttpd.tgz
+ 	#cp -f src/addons/TouchAppDef.tgz $(BLD)-$(SUBSYS)-fsm4_axm/results/addons/TouchAppDef.tgz
+ 	#cp -f src/addons/uRec_ptsw_appdef.tgz $(BLD)-$(SUBSYS)-fsm4_axm/results/addons/uRec_ptsw_appdef.tgz
+ 	#cp -f src/addons/SetHWYConnectorType.tgz $(BLD)-$(SUBSYS)-fsm4_axm/results/addons/SetHWYConnectorType.tgz
+@@ -230,20 +230,20 @@
+ endif
+ 
+ 	mkdir $(BLD)-$(SUBSYS)-fsm4_k2/results/addons
+-	cp -f $(BLD)-rfs-arm/results/addons/python.tar.gz $(BLD)-$(SUBSYS)-fsm4_k2/results/addons/python.tgz
+-	#cp -f $(BLD)-rfs-arm/results/hotplug.tar.gz $(BLD)-$(SUBSYS)-fsm4_k2/results/addons/hotplug.tgz
+-	#cp -f $(BLD)-rfs-arm/results/addon_lighttpd.tar.gz $(BLD)-$(SUBSYS)-fsm4_k2/results/addons/lighttpd.tgz
+-	#cp -f $(BLD)-rfs-arm/results/addon_lxc.tar.gz $(BLD)-$(SUBSYS)-fsm4_k2/results/addons/lxc.tgz
+-	#cp -f $(BLD)-rfs-arm/results/addon_openssh.tar.gz $(BLD)-$(SUBSYS)-fsm4_k2/results/addons/ssh.tgz
+-	#cp -f $(BLD)-rfs-arm/results/addon_gdb.tar.gz $(BLD)-$(SUBSYS)-fsm4_k2/results/addons/gdb.tgz
+-	cp -f $(BLD)-rfs-arm/results/addon_devtools.tar.gz $(BLD)-$(SUBSYS)-fsm4_k2/results/addons/devtools.tgz
+-	#cp -f $(BLD)-rfs-arm/results/addon_ipsec.tar.gz $(BLD)-$(SUBSYS)-fsm4_k2/results/addons/ipsec.tgz
+-	#cp -f $(BLD)-rfs-arm/results/addon_dhcp.tar.gz $(BLD)-$(SUBSYS)-fsm4_k2/results/addons/dhcp.tgz
+-	#cp -f $(BLD)-rfs-arm/results/addon_ntp.tar.gz $(BLD)-$(SUBSYS)-fsm4_k2/results/addons/ntp.tgz
++	cp -f $(BLD)-rfs-fsm4_arm/results/addons/python.tar.gz $(BLD)-$(SUBSYS)-fsm4_k2/results/addons/python.tgz
++	#cp -f $(BLD)-rfs-fsm4_arm/results/hotplug.tar.gz $(BLD)-$(SUBSYS)-fsm4_k2/results/addons/hotplug.tgz
++	#cp -f $(BLD)-rfs-fsm4_arm/results/addon_lighttpd.tar.gz $(BLD)-$(SUBSYS)-fsm4_k2/results/addons/lighttpd.tgz
++	#cp -f $(BLD)-rfs-fsm4_arm/results/addon_lxc.tar.gz $(BLD)-$(SUBSYS)-fsm4_k2/results/addons/lxc.tgz
++	#cp -f $(BLD)-rfs-fsm4_arm/results/addon_openssh.tar.gz $(BLD)-$(SUBSYS)-fsm4_k2/results/addons/ssh.tgz
++	#cp -f $(BLD)-rfs-fsm4_arm/results/addon_gdb.tar.gz $(BLD)-$(SUBSYS)-fsm4_k2/results/addons/gdb.tgz
++	cp -f $(BLD)-rfs-fsm4_arm/results/addon_devtools.tar.gz $(BLD)-$(SUBSYS)-fsm4_k2/results/addons/devtools.tgz
++	#cp -f $(BLD)-rfs-fsm4_arm/results/addon_ipsec.tar.gz $(BLD)-$(SUBSYS)-fsm4_k2/results/addons/ipsec.tgz
++	#cp -f $(BLD)-rfs-fsm4_arm/results/addon_dhcp.tar.gz $(BLD)-$(SUBSYS)-fsm4_k2/results/addons/dhcp.tgz
++	#cp -f $(BLD)-rfs-fsm4_arm/results/addon_ntp.tar.gz $(BLD)-$(SUBSYS)-fsm4_k2/results/addons/ntp.tgz
+ 	#cp -f $(BLD)-fsmrfs-addon_fakefile_octeon2/results/rfs.tgz $(BLD)-$(SUBSYS)-fsm4_k2/results/addons/fakefile.tgz
+-	#cp -f $(BLD)-rfs-arm/results/addon_ip_setup.tar.gz $(BLD)-$(SUBSYS)-fsm4_k2/results/addons/setupDefLMP.tgz
+-	#cp -f $(BLD)-rfs-arm/results/addon_resetcnt.tar.gz $(BLD)-$(SUBSYS)-fsm4_k2/results/addons/resetCnt.tgz
+-	#cp -f $(BLD)-rfs-arm/results/addon_ptsw_cacert.tar.gz $(BLD)-$(SUBSYS)-fsm4_k2/results/addons/ptsw_cacert.tgz
++	#cp -f $(BLD)-rfs-fsm4_arm/results/addon_ip_setup.tar.gz $(BLD)-$(SUBSYS)-fsm4_k2/results/addons/setupDefLMP.tgz
++	#cp -f $(BLD)-rfs-fsm4_arm/results/addon_resetcnt.tar.gz $(BLD)-$(SUBSYS)-fsm4_k2/results/addons/resetCnt.tgz
++	#cp -f $(BLD)-rfs-fsm4_arm/results/addon_ptsw_cacert.tar.gz $(BLD)-$(SUBSYS)-fsm4_k2/results/addons/ptsw_cacert.tgz
+ 	cp -f src/addons/TouchAppDef.tgz $(BLD)-$(SUBSYS)-fsm4_k2/results/addons/TouchAppDef.tgz
+ 	cp -f src/addons/uRec_ptsw_appdef.tgz $(BLD)-$(SUBSYS)-fsm4_k2/results/addons/uRec_ptsw_appdef.tgz
+ 	cp -f src/addons/SetHWYConnectorType.tgz $(BLD)-$(SUBSYS)-fsm4_k2/results/addons/SetHWYConnectorType.tgz
+Index: src-fsmpsl/Dependencies
+--- src-fsmpsl/Dependencies	(revision 207699)
++++ src-fsmpsl/Dependencies	(working copy)
+@@ -30,7 +30,7 @@
+ 
+ use-readonly bld/bld-rfs-fct
+ use-readonly bld/bld-rfs-qemu_x86_64
+-use-readonly bld/bld-rfs-arm
++use-readonly bld/bld-rfs-fsm4_arm
+ 
+ use-readonly bld/bld-fsmfmon-fct
+ 
+Index: src-project/Dependencies
+--- src-project/Dependencies	(revision 207699)
++++ src-project/Dependencies	(working copy)
+@@ -51,7 +51,7 @@
+ hint bld/bld-rfs-fcmd               PS_LFS_OS_2015_05_0288
+ hint bld/bld-rfs-qemu_i386          PS_LFS_OS_2015_05_0288
+ hint bld/bld-rfs-qemu_x86_64        PS_LFS_OS_2015_05_0288
+-hint bld/bld-rfs-arm                PS_LFS_OS_2015_05_0288
++hint bld/bld-rfs-fsm4_arm                PS_LFS_OS_2015_05_0288
+ 
+ hint bld/bld-fsmfmon-fct            PS_LFS_OS_2015_05_0288
+ 
+Index: src-rfs/Buildfile
+--- src-rfs/Buildfile	(revision 207699)
++++ src-rfs/Buildfile	(working copy)
+@@ -1,5 +1,5 @@
+ SUBSYS := rfs
+-CFGS   := fcmd fct lcpa qemu_i386 qemu_x86_64 arm
++CFGS   := fcmd fct lcpa qemu_i386 qemu_x86_64 fsm4_arm
+ BLD    := $(BUILD_WORKDIR)/bld/bld
+ 
+ all: $(CFGS)
+@@ -150,11 +150,11 @@
+ 	xzcat src/fcmd/fsmr20_rootfs.cpio.xz | cpio -i --to-stdout etc/PS_LFS_PKG-version > ../bld/bld-rfs-fcmd/results/rfs_version
+ 	echo $(LABEL) >"$@"
+ 
+-.PHONY: $(BLD)-$(SUBSYS)-arm/Version
+-$(BLD)-$(SUBSYS)-arm/Version:
++.PHONY: $(BLD)-$(SUBSYS)-fsm4_arm/Version
++$(BLD)-$(SUBSYS)-fsm4_arm/Version:
+ 	rm -rf $(@D)
+-	mkdir -p ../bld/bld-rfs-arm/results/addons
+-	src/mkrootfs arm "$(PKGLABEL)" arm-cortexa15-linux-gnueabihf \
++	mkdir -p ../bld/bld-rfs-fsm4_arm/results/addons
++	src/mkrootfs fsm4_arm "$(PKGLABEL)" arm-cortexa15-linux-gnueabihf \
+ 		fsmr35_rootfs \
+ 		fsmr35_addon_iic:fsmr35_rootfs \
+ 		fsmr35_addon_lsof:fsmr35_rootfs \
+@@ -162,22 +162,22 @@
+ 		fsmr35_addon_devtools:fsmr35_rootfs \
+ 		addon_lighttpd:fsmr35_rootfs \
+ 		sysroot_arm:+sysroot
+-	cp -rf src/arm/fsmr35_rootfs.cpio.xz ../bld/bld-rfs-arm/results/rootfs.cpio.xz
+-	cp -rf src/arm/fsmr35_addon_iic.tar.gz ../bld/bld-rfs-arm/results/addons/iic.tar.gz
+-	cp -rf src/arm/fsmr35_addon_lsof.tar.gz ../bld/bld-rfs-arm/results/addons/lsof.tar.gz
+-	cp -rf src/arm/fsmr35_addon_python.tar.gz ../bld/bld-rfs-arm/results/addons/python.tar.gz
+-	cp -rf src/arm/fsmr35_addon_devtools.tar.gz ../bld/bld-rfs-arm/results/addon_devtools.tar.gz
+-	cp -rf src/arm/addon_lighttpd.tar.gz ../bld/bld-rfs-arm/results/addon_lighttpd.tar.gz
+-	cp -rf src/arm/sysroot_arm.tar.gz ../bld/bld-rfs-arm/results/sysroot.tar.gz
+-	mkdir -p ../bld/bld-rfs-arm/results/sys-root/arm-cortexa15-linux-gnueabihf
+-	tar -C ../bld/bld-rfs-arm/results/sys-root/arm-cortexa15-linux-gnueabihf -xzf $(BUILD_WORKDIR)/bld/bld-rfs-arm/results/sysroot.tar.gz
+-	xzcat src/arm/fsmr35_rootfs.cpio.xz | cpio -i --to-stdout etc/PS_LFS_PKG-version > ../bld/bld-rfs-arm/results/rfs_version
++	cp -rf src/fsm4_arm/fsmr35_rootfs.cpio.xz ../bld/bld-rfs-fsm4_arm/results/rootfs.cpio.xz
++	cp -rf src/fsm4_arm/fsmr35_addon_iic.tar.gz ../bld/bld-rfs-fsm4_arm/results/addons/iic.tar.gz
++	cp -rf src/fsm4_arm/fsmr35_addon_lsof.tar.gz ../bld/bld-rfs-fsm4_arm/results/addons/lsof.tar.gz
++	cp -rf src/fsm4_arm/fsmr35_addon_python.tar.gz ../bld/bld-rfs-fsm4_arm/results/addons/python.tar.gz
++	cp -rf src/fsm4_arm/fsmr35_addon_devtools.tar.gz ../bld/bld-rfs-fsm4_arm/results/addon_devtools.tar.gz
++	cp -rf src/fsm4_arm/addon_lighttpd.tar.gz ../bld/bld-rfs-fsm4_arm/results/addon_lighttpd.tar.gz
++	cp -rf src/fsm4_arm/sysroot_arm.tar.gz ../bld/bld-rfs-fsm4_arm/results/sysroot.tar.gz
++	mkdir -p ../bld/bld-rfs-fsm4_arm/results/sys-root/arm-cortexa15-linux-gnueabihf
++	tar -C ../bld/bld-rfs-fsm4_arm/results/sys-root/arm-cortexa15-linux-gnueabihf -xzf $(BUILD_WORKDIR)/bld/bld-rfs-fsm4_arm/results/sysroot.tar.gz
++	xzcat src/fsm4_arm/fsmr35_rootfs.cpio.xz | cpio -i --to-stdout etc/PS_LFS_PKG-version > ../bld/bld-rfs-fsm4_arm/results/rfs_version
+ 	# Convert tarball to squashfs - no longer needed
+-	# for tarball in $$(ls ../bld/bld-rfs-arm/results/addons); do \
++	# for tarball in $$(ls ../bld/bld-rfs-fsm4_arm/results/addons); do \
+ 	# 	tmp_root_dir=$$(mktemp -dt "tmp.dir.XXXXXXXXX" --tmpdir=$$(pwd)); \
+ 	# 	echo $$tmp_root_dir; \
+-	# 	tar xf ../bld/bld-rfs-arm/results/addons/$$tarball -C $$tmp_root_dir; \
+-	# 	mksquashfs $$tmp_root_dir ../bld/bld-rfs-arm/results/$$(basename $$tarball .tar.gz).squashfs -force-uid 0 -force-gid 0;  \
++	# 	tar xf ../bld/bld-rfs-fsm4_arm/results/addons/$$tarball -C $$tmp_root_dir; \
++	# 	mksquashfs $$tmp_root_dir ../bld/bld-rfs-fsm4_arm/results/$$(basename $$tarball .tar.gz).squashfs -force-uid 0 -force-gid 0;  \
+ 	# 	rm -rf $$tmp_root_dir; \
+ 	# done
+ 	echo $(LABEL) >"$@"
+@@ -190,7 +190,7 @@
+ 	@echo "  build qemu_i386"
+ 	@echo "  build qemu_x86_64"
+ 	@echo "  build lcpa"
+-	@echo "  build arm"
++	@echo "  build fsm4_arm"
+ 
+ # ======================================================================
+ include $(BUILD_WORKDIR)/src-project/Buildfile.common
+Index: src-rfs/Dependencies
+--- src-rfs/Dependencies	(revision 207699)
++++ src-rfs/Dependencies	(working copy)
+@@ -3,7 +3,7 @@
+ target bld/bld-rfs-fct         --cfgs=fsm3_octeon2
+ target bld/bld-rfs-qemu_i386   --cfgs=qemu
+ target bld/bld-rfs-qemu_x86_64 --cfgs=qemu_64
+-target bld/bld-rfs-arm         --cfgs=fsm4_k2,fsm4_axm
++target bld/bld-rfs-fsm4_arm         --cfgs=fsm4_k2,fsm4_axm
+ 
+ use src-project
+ 

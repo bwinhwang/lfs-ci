@@ -156,14 +156,7 @@ _getUpstream() {
     upstreamBuildNumber=${UPSTREAM_BUILD}
 
     debug "build was triggered manually, get last promoted upstream"
-    # workaround
-    local backlogItemTwentyFiveMigration=$(getConfig backlogItemTwentyFiveMigration)
-
-    if [[ ${backlogItemTwentyFiveMigration} ]] ; then
-        upstreamProjectName=$(sed 's/\(.*\)_Prod_-_\(.*\)_-_Releasing_-_summary/\1_CI_-_\2_-_Wait_for_release/' <<< ${JOB_NAME} )
-    else
-        upstreamProjectName=$(sed 's/\(.*\)_Prod_-_\(.*\)_-_Releasing_-_summary/\1_CI_-_\2_-_Test/' <<< ${JOB_NAME} )
-    fi
+    upstreamProjectName=$(sed 's/\(.*\)_Prod_-_\(.*\)_-_Releasing_-_summary/\1_CI_-_\2_-_Wait_for_release/' <<< ${JOB_NAME} )
 
     copyFileFromBuildDirectoryToWorkspace "${upstreamProjectName}/promotions/Test_ok" "lastStableBuild" build.xml
     mustExistFile ${WORKSPACE}/build.xml

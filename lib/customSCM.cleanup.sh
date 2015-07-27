@@ -74,6 +74,8 @@ actionCheckout() {
                 *_in_wr) _scLfsRemoteSites wr ${tmpFileA} ;;
                 *_in_bh) _scLfsRemoteSites bh ${tmpFileA} ;;
                 *_in_hz) _scLfsRemoteSites hz ${tmpFileA} ;;
+                *_in_cloud) 
+                        _scLfsRemoteSites cloud ${tmpFileA} ;;
                 *_in_du) 
                     execute sed -i "s:/build/home/SC_LFS/releases/bld:/usrd9/build/home/SC_LFS/releases/bld:g" ${tmpFileB}
                     _scLfsRemoteSites du ${tmpFileA} 

@@ -77,8 +77,7 @@ mustHaveWritableWorkspace() {
     mustHaveWorkspaceName
 
     if [[ ! -w "${workspace}" ]] ; then
-        error "workspace ${workspace} is not writable"
-        exit 1
+        fatal "workspace ${workspace} is not writable"
     fi
 
     return
@@ -129,8 +128,7 @@ switchToNewLocation() {
     # TODO: demx2fk3 2014-03-28 fixme
     # trace "check, if user can use this location"
     # if id -ng ${USER} | grep pronb ; then
-    #     error "${USER} has wrong group id. correct is pronb"
-    #     exit 1
+    #     fatal "${USER} has wrong group id. correct is pronb"
     # fi
 
     info "switching to new location \"${location}\""
@@ -307,8 +305,7 @@ requiredParameters() {
     fi
     for name in ${parameterNames} ; do
         if [[ ! ${!name} ]] ; then
-            error "required parameter ${name} is missing"
-            exit 1
+            fatal "required parameter ${name} is missing"
         fi
         echo "export ${name}=\"${!name}\"" >> ${LFS_CI_INTERNAL_RERUN_ENVIRONMENT_FILE}
     done
@@ -357,8 +354,7 @@ mustHavePreviousLabelName() {
     mustHaveWorkspaceName
 
     if [[ ! -e ${workspace}/bld/bld-fsmci-summary/oldLabel ]] ; then
-        error "label artifacts file does not exist"
-        exit 1
+        fatal "label artifacts file does not exist"
     fi            
 
     if [[ -z "${LFS_CI_PREV_CI_LABEL_NAME}" ]] ; then
@@ -382,8 +378,7 @@ mustHaveNextLabelName() {
     mustHaveWorkspaceName
 
     if [[ ! -e ${workspace}/bld/bld-fsmci-summary/label ]] ; then
-        error "label artifacts file does not exist"
-        exit 1
+        fatal "label artifacts file does not exist"
     fi            
 
     if [[ -z "${LFS_CI_NEXT_CI_LABEL_NAME}" ]] ; then
@@ -428,8 +423,7 @@ mustHaveValue() {
     local message="${2:-unkown variable name}"
 
     if [[ -z "${value}" ]] ; then
-        error "excpect a value for ${message}, but didn't got one..."
-        exit 1
+        fatal "excpect a value for ${message}, but didn't got one..."
     fi
 
     return
@@ -445,13 +439,11 @@ mustHaveWritableFile() {
     mustHaveValue "${file}"
 
     if [[ ! -e ${file} ]] ; then
-        error "the file ${file} does not exist"
-        exit 1
+        fatal "the file ${file} does not exist"
     fi
 
     if [[ ! -w ${file} ]] ; then
-        error "the file ${file} is not writable"
-        exit 1
+        fatal "the file ${file} is not writable"
     fi
 
     return
@@ -466,8 +458,7 @@ mustExistDirectory() {
     local directory=$1
 
     if [[ ! -d ${directory} ]] ; then
-        error "${directory} is not a directory"
-        exit 1
+        fatal "${directory} is not a directory"
     fi
     return
 }
@@ -481,8 +472,7 @@ mustExistSymlink() {
     local file=$1
 
     if [[ ! -L ${file} ]] ; then
-        error "${file} is not a symlink"
-        exit 1
+        fatal "${file} is not a symlink"
     fi
     return
 }
@@ -496,8 +486,7 @@ mustExistFile() {
     local file=$1
 
     if [[ ! -f ${file} ]] ; then
-        error "${file} is not a file"
-        exit 1
+        fatal "${file} is not a file"
     fi
     return
 }
@@ -512,8 +501,7 @@ mustBeSuccessfull() {
     local msg="${2:-unkown message}"
 
     if [[ ${rc} != 0 ]] ; then
-        error "error: ${msg} failed"
-        exit 1
+        fatal "error: ${msg} failed"
     fi
     return
 }
