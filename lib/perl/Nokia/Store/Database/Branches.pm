@@ -23,4 +23,20 @@ sub branchInformation {
     return @results;
 }
 
+sub platformBranchInformation {
+    my $self  = shift;
+    my $param = { @_ };
+
+    my $sth = $self->prepare( 
+        "select * from v_ps_branches"
+    );
+    $sth->execute()
+        or LOGDIE sprintf( "can not get ps branch information" );
+    my $results;
+    while ( my $row = $sth->fetchrow_hashref() ) {
+         push @{ $results->{ $row->{branch_name} } }, $row;
+    }
+    return $results;
+}
+
 1;

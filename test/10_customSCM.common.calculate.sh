@@ -33,7 +33,7 @@ tearDown() {
 }
 
 setUp() {
-    export LFS_CI_CONFIG_FILE=${LFS_CI_ROOT}/etc/file.cfg
+    export LFS_CI_CONFIG_FILE=${LFS_CI_ROOT}/etc/lfs-ci.cfg
     export REVISION_STATE_FILE=$(createTempFile)
     export WORKSPACE=$(createTempDirectory)
     export UPSTREAM_BUILD=1

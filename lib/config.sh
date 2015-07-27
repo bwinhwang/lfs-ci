@@ -31,7 +31,7 @@ getLocationName() {
         # skipped due to performance
         # mustHaveValue "${location}" "location from job name"
 
-        local configFile=${LFS_CI_CONFIG_FILE:-${LFS_CI_ROOT}/etc/file.cfg}
+        local configFile=${LFS_CI_CONFIG_FILE:-${LFS_CI_ROOT}/etc/global.cfg}
         # skipped due to performance
         # mustExistDirectory ${configFile}
         
@@ -95,7 +95,7 @@ getProductNameFromJobName() {
 #                                    multible tags are allowed
 #  @return  value for the key
 getConfig() {
-    local configFile=${LFS_CI_CONFIG_FILE:-${LFS_CI_ROOT}/etc/file.cfg}
+    local configFile=${LFS_CI_CONFIG_FILE:-${LFS_CI_ROOT}/etc/global.cfg}
     local tags=
 
     while [[ $# -gt 0 ]] ; do

@@ -104,7 +104,8 @@ usecase_PKGPOOL_TEST() {
 #  @return  <none>
 usecase_PKGPOOL_RELEASE() {
     requiredParameters LFS_CI_ROOT UPSTREAM_PROJECT UPSTREAM_BUILD \
-                       JOB_NAME BUILD_NUMBER
+                       JOB_NAME BUILD_NUMBER \
+                       LFS_CI_CONFIG_FILE
 
     local workspace=$(getWorkspaceName)
     mustHaveCleanWorkspace
@@ -147,7 +148,7 @@ usecase_PKGPOOL_RELEASE() {
     execute -n ${LFS_CI_ROOT}/bin/getReleaseNoteXML \
                 -t ${label}                         \
                 -o ${oldLabel}                      \
-                -f ${LFS_CI_ROOT}/etc/file.cfg > ${workspace}/releasenote.xml
+                -f ${LFS_CI_CONFIG_FILE} > ${workspace}/releasenote.xml
     
     rawDebug ${workspace}/releasenote.xml
 
@@ -177,7 +178,7 @@ usecase_PKGPOOL_RELEASE() {
         if [[ -s ${releaseNoteTxt} ]] ; then
             execute ${LFS_CI_ROOT}/bin/sendReleaseNote  -r ${releaseNoteTxt}          \
                                                         -t ${label}                   \
-                                                        -f ${LFS_CI_ROOT}/etc/file.cfg
+                                                        -f ${LFS_CI_CONFIG_FILE}
         fi                                                            
     else
         warning "sending release note is disabled via config"
