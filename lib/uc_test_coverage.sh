@@ -43,8 +43,6 @@ _copyCodecoverageArtifactsToWorkspace() {
     local dataFile=${workspace}/data.txt
 
     _getProjectDataFromFingerprint ${fingerPrint} ${xmlFile}
-    touch ${dataFile}
-    ls -la ${dataFile}
     execute -n ${LFS_CI_ROOT}/bin/getFingerprintData ${xmlFile} > ${dataFile}
 
     rawDebug ${dataFile}
