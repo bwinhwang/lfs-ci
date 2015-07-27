@@ -106,11 +106,6 @@ usecase_PKGPOOL_RELEASE() {
     requiredParameters LFS_CI_ROOT UPSTREAM_PROJECT UPSTREAM_BUILD \
                        JOB_NAME BUILD_NUMBER 
 
-    # TODO: demx2fk3 2015-07-27 workaround - remove me
-    if [[ -z ${LFS_CI_CONFIG_FILE} ]] ; then
-        LFS_CI_CONFIG_FILE=${LFS_CI_ROOT}/etc/lfs-ci.cfg
-    fi
-
     local workspace=$(getWorkspaceName)
     mustHaveCleanWorkspace
 
