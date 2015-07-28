@@ -932,3 +932,88 @@ END //
 DELIMITER ;
 -- }}}
 
+-- {{{ get new build name
+DROP FUNCTION IF EXISTS get_new_build_name;
+DELIMITER //
+CREATE FUNCTION get_new_build_name(in_branch VARCHAR(32), in_product_name VARCHAR(32), in_label_prefix VARCHAR(32)) RETURNS VARCHAR(64)
+BEGIN
+    DECLARE var_suffix VARCHAR(4);
+    DECLARE var_prefix VARCHAR(64);
+    DECLARE var_value VARCHAR(64);
+    DECLARE var_regex VARCHAR(64);
+    DECLARE var_branch_cnt INT;
+
+    SELECT _branch_exists(in_branch) INTO var_branch_cnt;
+
+    SELECT replace(replace(release_name_regex, '${date_%Y}', YEAR(NOW())), '${date_%m}', LPAD(MONTH(NOW()), 2, 0)) 
+        INTO var_regex FROM branches WHERE branch_name=in_branch;
+
+    SET var_prefix = SUBSTRING(var_regex, 1, LENGTH(var_regex)-22);
+    SET var_regex = CONCAT(in_label_prefix, var_regex);
+    SET var_regex = CONCAT('^', CONCAT(var_regex, '$'));
+
+    -- "ORDER BY timestamp" can not be used:
+    -- I got lower values when using ORDER BY timestamp.
+
+    -- "ORDER BY id" can not be used:
+    -- I got lower values when using ORDER BY id.
+
+    SELECT LPAD(CONVERT(SUBSTRING(MAX(build_name), -4)+1, CHAR), 4, '0') INTO var_suffix FROM v_build_events 
+        WHERE build_name REGEXP var_regex AND event_state='finished' AND product_name=in_product_name
+        AND event_type='subbuild' AND task_name='build' AND build_name NOT REGEXP '_99[0-9][0-9]$';
+
+    SET var_value = CONCAT(var_prefix, var_suffix);
+
+    IF var_suffix IS NULL THEN
+        SET var_value = CONCAT(var_prefix, '0001');
+    END IF;
+RETURN (var_value);
+END //
+DELIMITER ;
+-- }}}
+
+-- {{{ get last successful build name
+DROP FUNCTION IF EXISTS get_last_successful_build_name;
+DELIMITER //
+CREATE FUNCTION get_last_successful_build_name(in_branch VARCHAR(32), in_product_name VARCHAR(32), in_label_prefix VARCHAR(32)) RETURNS VARCHAR(64)
+BEGIN
+    DECLARE var_value VARCHAR(64);
+    DECLARE var_regex VARCHAR(64);
+    DECLARE var_branch_cnt INT;
+
+    SELECT _branch_exists(in_branch) INTO var_branch_cnt;
+
+    SELECT replace(replace(release_name_regex, '${date_%Y}', YEAR(NOW())), '${date_%m}', LPAD(MONTH(NOW()), 2, 0)) 
+        INTO var_regex FROM branches WHERE branch_name=in_branch;
+
+    SET var_regex = CONCAT(in_label_prefix, var_regex);
+    SET var_regex = CONCAT('^', CONCAT(var_regex, '$'));
+
+    SELECT MAX(build_name) INTO var_value FROM v_build_events 
+        WHERE build_name REGEXP var_regex AND event_state='finished' AND product_name=in_product_name
+        AND event_type='subbuild' AND build_name NOT REGEXP '_99[0-9][0-9]$';
+RETURN (var_value);
+END //
+DELIMITER ;
+-- }}}
+
+-- {{{ check if branch exists in database
+DROP FUNCTION IF EXISTS _branch_exists;
+DELIMITER //
+CREATE FUNCTION _branch_exists(in_branch VARCHAR(32)) RETURNS INT
+BEGIN
+    DECLARE var_branch_cnt INT;
+
+    SELECT COUNT(branch_name) INTO var_branch_cnt FROM branches WHERE branch_name=in_branch;
+
+    IF var_branch_cnt = 0 THEN
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'branch does not exist in table branches';
+    END IF;
+
+    IF var_branch_cnt > 1 THEN
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'branch exists more than once in table branches';
+    END IF;
+RETURN (var_branch_cnt);
+END //
+DELIMITER ;
+-- }}}

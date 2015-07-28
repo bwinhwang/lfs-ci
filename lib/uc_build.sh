@@ -106,61 +106,41 @@ ci_job_build() {
     return
 }
 
-## @fn      ci_job_build_version()
-#  @brief   usecase which creates the version label
-#  @details the usecase get the last label name from the last successful build and calculates
-#           a new label name. The label name will be stored in a file and be artifacted.
-#           The downstream jobs will use this artifact.
+## @fn      usecase_LFS_BUILD_CREATE_VERSION
+#  @brief   usecase which creates the new build name
+#  @details this usecase get the old and new build name from the database
+#           by invoking stored procedures on the database.
 #  @param   <none>
 #  @return  <none>
-ci_job_build_version() {
+usecase_LFS_BUILD_CREATE_VERSION() {
     requiredParameters JOB_NAME BUILD_NUMBER LFS_CI_ROOT 
-
     local workspace=$(getWorkspaceName)
     mustHaveCleanWorkspace
     mustHaveWorkspaceName
-
-    debug "BUILD CAUSE by SCM trigger is: ${BUILD_CAUSE_SCMTRIGGER}"
-    if [[ ${BUILD_CAUSE_SCMTRIGGER} ]] ; then
-        copyChangelogToWorkspace ${JOB_NAME} ${BUILD_NUMBER}
-        local linesOfChangelog=$(wc -l ${WORKSPACE}/changelog.xml | cut -d" " -f 1)
-        if [[ ${linesOfChangelog} = 1 ]] ; then
-            WARNING "build was triggered by SCM change, but changelog is empty"
-            setBuildResultUnstable
-            exit 0
-        fi
-    fi
-
     info "workspace is ${workspace}"
 
-    local jobDirectory=$(getBuildDirectoryOnMaster)
-    local lastSuccessfulJobDirectory=$(getBuildDirectoryOnMaster ${JOB_NAME} lastSuccessfulBuild)
-    local oldLabel=$(runOnMaster "test -d ${lastSuccessfulJobDirectory} && cat ${lastSuccessfulJobDirectory}/label 2>/dev/null")
-    info "old label ${oldLabel} from ${lastSuccessfulJobDirectory} on master"
+    productName=$(getProductNameFromJobName)
+    labelPrefix=$(getConfig LFS_PROD_label_prefix)
+    branch=$(getBranchName)
+    mustHaveBranchName
+    # TODO remove as soon as branchName and locationName are separated
+    [[ ${branch} == "pronb-developer" ]] && branch="trunk"
 
-    if [[ -z ${oldLabel} ]] ; then
-        oldLabel="invalid_string_which_will_not_match_do_regex"
+    _set_db_credentials
+    local oldBuildName=$(_get_last_successful_build_name)
+    local buildName=$(_get_new_build_name)
+
+    if [[ ${oldBuildName} == ${buildName} ]]; then
+        fatal "old and new build name are the same"
     fi
 
-    local branch=$(getBranchName)
-    mustHaveBranchName
+    info "new build name is ${buildName}"
+    setBuildDescription "${JOB_NAME}" "${BUILD_NUMBER}" "${buildName}"
 
-    local regex=$(getConfig LFS_PROD_branch_to_tag_regex)
-    mustHaveValue "${regex}" "branch to tag regex map"
-    local labelPrefix=$(getConfig LFS_PROD_label_prefix)
-
-    info "using regex ${labelPrefix^^}${regex} for branch ${branch}"
-
-    local label=$(${LFS_CI_ROOT}/bin/getNewTagName -o "${oldLabel}" -r "${labelPrefix^^}${regex}" )
-    mustHaveValue "${label}" "next release label name"
-
-    info "new version is ${label}"
-    setBuildDescription "${JOB_NAME}" "${BUILD_NUMBER}" "${label}"
-
-    debug "writing new label file in workspace ${workspace}"
+    debug "writing new build name file in workspace ${workspace}"
     execute mkdir -p ${workspace}/bld/bld-fsmci-summary
-    echo ${label}    > ${workspace}/bld/bld-fsmci-summary/label
-    echo ${oldLabel} > ${workspace}/bld/bld-fsmci-summary/oldLabel
+    echo ${buildName}    > ${workspace}/bld/bld-fsmci-summary/label
+    echo ${oldBuildName} > ${workspace}/bld/bld-fsmci-summary/oldLabel
     
     createFingerprintFile
 
@@ -168,15 +148,17 @@ ci_job_build_version() {
     databaseEventBuildStarted
     exit_add _recordBuildEndEvent
 
-    debug "writing new label file in ${jobDirectory}/label"
-    executeOnMaster "echo ${label} > ${jobDirectory}/label"
-
     info "upload results to artifakts share."
     createArtifactArchive
 
     databaseAddNewCommits
 
     return
+}
+
+# Legacy invocation
+ci_job_build_version() {
+    usecase_LFS_BUILD_CREATE_VERSION
 }
 
 ## @fn      _build_fsmddal_pdf()
@@ -258,3 +240,46 @@ _recordBuildEndEvent() {
     return
 }
 
+_set_db_credentials() {
+    dbName=$(getConfig MYSQL_db_name)
+    mustHaveValue "${dbName}" "dbName"
+    dbPort=$(getConfig MYSQL_db_port)
+    mustHaveValue "${dbName}" "dbPort"
+    dbUser=$(getConfig MYSQL_db_username)
+    mustHaveValue "${dbName}" "dbUser"
+    dbPass=$(getConfig MYSQL_db_password)
+    mustHaveValue "${dbName}" "dbPass"
+    dbHost=$(getConfig MYSQL_db_hostname)
+    mustHaveValue "${dbName}" "dbHost"
+}
+
+_get_new_build_name() {
+    info "get new build name for ${branch} and product name ${productName} from database"
+
+    # use 2> /dev/null because newer versions of mysql client print a warning
+    # to stderr when the password is provided on the commandline.
+    local buildName=$(echo "SELECT get_new_build_name('"${branch}"', '"${productName}"', '"${labelPrefix}"')" | \
+            mysql -N -u ${dbUser} --password=${dbPass} -h ${dbHost} -P ${dbPort} -D ${dbName} 2> /dev/null)
+
+    if [[ $? != 0 || ${buildName} == NULL || ${buildName} == "" ]]; then
+        fatal "did not get a new build name from DB"
+    fi
+
+    buildName=${labelPrefix^^}${buildName}
+
+    echo ${buildName}
+}
+
+_get_last_successful_build_name() {
+    info "get last successful build name for ${branch} and product name ${productName} from database"
+
+    local oldBuildName=$(echo "SELECT get_last_successful_build_name('"${branch}"', '"${productName}"', '"${labelPrefix}"')" | \
+            mysql -N -u ${dbUser} --password=${dbPass} -h ${dbHost} -P ${dbPort} -D ${dbName} 2> /dev/null)
+
+    if [[ $? != 0 || ${oldBuildName} == NULL || ${oldBuildName} == "" ]]; then
+        fatal "did not get the old build name from DB"
+    fi
+
+    info "old build name is ${oldBuildName}"
+    echo ${oldBuildName}
+}
