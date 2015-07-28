@@ -958,8 +958,6 @@ BEGIN
     -- "ORDER BY id" can not be used:
     -- I got lower values when using ORDER BY id.
 
-    -- TODO: make exclution configurable.
-
     SELECT LPAD(CONVERT(SUBSTRING(MAX(build_name), -4)+1, CHAR), 4, '0') INTO var_suffix FROM v_build_events 
         WHERE build_name REGEXP var_regex AND event_state='finished' AND product_name=in_product_name
         AND event_type='subbuild' AND task_name='build' AND build_name NOT REGEXP '_99[0-9][0-9]$';
@@ -991,10 +989,9 @@ BEGIN
     SET var_regex = CONCAT(in_label_prefix, var_regex);
     SET var_regex = CONCAT('^', CONCAT(var_regex, '$'));
 
-    -- TODO: make exclution configurable.
     SELECT MAX(build_name) INTO var_value FROM v_build_events 
         WHERE build_name REGEXP var_regex AND event_state='finished' AND product_name=in_product_name
-        AND event_type='subbuild' AND build_name not like '%_9999';
+        AND event_type='subbuild' AND build_name NOT REGEXP '_99[0-9][0-9]$';
 RETURN (var_value);
 END //
 DELIMITER ;
