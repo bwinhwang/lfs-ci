@@ -991,7 +991,7 @@ BEGIN
 
     SELECT MAX(build_name) INTO var_value FROM v_build_events 
         WHERE build_name REGEXP var_regex AND event_state='finished' AND product_name=in_product_name
-        AND event_type='subbuild' AND build_name NOT REGEXP '_99[0-9][0-9]$';
+        AND event_type='subbuild' AND task_name='build' AND build_name NOT REGEXP '_99[0-9][0-9]$';
 RETURN (var_value);
 END //
 DELIMITER ;
