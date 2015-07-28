@@ -946,7 +946,7 @@ BEGIN
     SELECT _branch_exists(in_branch) INTO var_branch_cnt;
 
     SELECT replace(replace(release_name_regex, '${date_%Y}', YEAR(NOW())), '${date_%m}', LPAD(MONTH(NOW()), 2, 0)) 
-        INTO var_regex FROM branches WHERE branch_name=in_branch;
+        INTO var_regex FROM branches WHERE branch_name=in_branch AND location_name != CONCAT(in_branch, '_FSMR4');
 
     SET var_prefix = SUBSTRING(var_regex, 1, LENGTH(var_regex)-22);
     SET var_regex = CONCAT(in_label_prefix, var_regex);
@@ -984,7 +984,7 @@ BEGIN
     SELECT _branch_exists(in_branch) INTO var_branch_cnt;
 
     SELECT replace(replace(release_name_regex, '${date_%Y}', YEAR(NOW())), '${date_%m}', LPAD(MONTH(NOW()), 2, 0)) 
-        INTO var_regex FROM branches WHERE branch_name=in_branch;
+        INTO var_regex FROM branches WHERE branch_name=in_branch AND location_name != CONCAT(in_branch, '_FSMR4');
 
     SET var_regex = CONCAT(in_label_prefix, var_regex);
     SET var_regex = CONCAT('^', CONCAT(var_regex, '$'));
@@ -1004,7 +1004,8 @@ CREATE FUNCTION _branch_exists(in_branch VARCHAR(32)) RETURNS INT
 BEGIN
     DECLARE var_branch_cnt INT;
 
-    SELECT COUNT(branch_name) INTO var_branch_cnt FROM branches WHERE branch_name=in_branch;
+    SELECT COUNT(branch_name) INTO var_branch_cnt FROM branches 
+        WHERE branch_name=in_branch AND location_name != CONCAT(in_branch, '_FSMR4');
 
     IF var_branch_cnt = 0 THEN
         SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'branch does not exist in table branches';
