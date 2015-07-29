@@ -153,7 +153,10 @@ specialBuildisRequiredForLrc() {
 
     return 0
 }
-
+## @fn      specialBuildisRequiredSelectedByUser(  )
+#  @brief   checks, if the build is requested by the user (via jenkins input)
+#  @param   {buildType}    type of the build, values DEV or KNIFE
+#  @return  <none>
 specialBuildisRequiredSelectedByUser() {
     local buildType=${1}
     mustHaveValue "${buildType}" "build type"
@@ -190,7 +193,7 @@ specialBuildisRequiredSelectedByUser() {
 
 ## @fn      specialBuildCreateWorkspaceAndBuild()
 #  @brief   create the workspaces and build the special build (knife or developer build)
-#  @param   <none>
+#  @param   {buildType}    type of the build, values DEV or KNIFE
 #  @return  <none>
 specialBuildCreateWorkspaceAndBuild() {
     requiredParameters UPSTREAM_PROJECT UPSTREAM_BUILD
@@ -240,7 +243,7 @@ specialBuildCreateWorkspaceAndBuild() {
 
 ## @fn      uploadKnifeToStorage()
 #  @brief   upload the knife results to the storage
-#  @param   <none>
+#  @param   {knifeFile} output file, which should be uploaded to storage
 #  @return  <none>
 uploadKnifeToStorage() {
     knifeFile=${1}
