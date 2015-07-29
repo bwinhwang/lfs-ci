@@ -408,7 +408,10 @@ makingTest_install() {
     # on LRC: currently install does show wrong (old) version after reboot and
     # SHP sometimes fails to be up when install is retried.
     # We try installation up to 4 times
-    for i in $(seq 1 4) ; do
+    local maxInstallTries=$(getConfig LFS_CI_uc_test_making_test_installation_tries -t testTargetName:${targetName})
+    mustHaveValue "${maxInstallTries}" "max installation tries"
+
+    for i in $(seq 1 ${maxInstallTries}) ; do
         trace "install loop ${i}"
 
         local installOptions=$(getConfig LFS_CI_uc_test_making_test_install_options -t testTargetName:${targetName})
@@ -444,7 +447,7 @@ makingTest_install() {
         return
     done
 
-    fatal "installation failed after four attempts."
+    fatal "installation failed after ${maxInstallTries} attempts."
 
     return
 }

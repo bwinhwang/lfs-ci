@@ -51,6 +51,9 @@ oneTimeSetUp() {
             LFS_CI_uc_test_making_test_skip_steps_after_make_install)
                 echo ${UT_CONFIG_SKIP_NEXT_STEPS}
             ;;
+            LFS_CI_uc_test_making_test_installation_tries)
+                echo ${UT_INSTALL_TRIED}
+            ;;
         esac
     }
     sleep() {
@@ -71,6 +74,7 @@ setUp() {
     export UT_CONFIG_FORCE_REINSTALL=1
     export UT_CONFIG_FIRMWARE=
     export UC_CONFIG_SHOULD_TARGET_RUN=1
+    export UT_INSTALL_TRIED=4
     return
 }
 
@@ -359,6 +363,25 @@ EOF
     return
 }
 
+test12() {
+    # install failed all the time
+    export UT_EXECUTE_INSTALL=5
+    export UT_INSTALL_TRIED=1
+    export UT_FAIL_CAUSE=install
+    assertFalse "makingTest_install"
+
+    local expect=$(createTempFile)
+    cat <<EOF > ${expect}
+makingTest_testSuiteDirectory 
+_reserveTarget 
+mustHaveMakingTestRunningTarget 
+execute make -C ${WORKSPACE}/workspace/path/to/test/suite setup
+execute -i make -C ${WORKSPACE}/workspace/path/to/test/suite install FORCE=yes
+EOF
+    assertExecutedCommands ${expect}
+
+    return
+}
 source lib/shunit2
 
 exit 0
