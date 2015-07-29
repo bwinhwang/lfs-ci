@@ -200,6 +200,9 @@ specialBuildCreateWorkspaceAndBuild() {
 
     local workspaces=$(getWorkspaceName)
     mustHaveWorkspaceName
+    mustHaveCleanWorkspace
+
+    copyArtifactsToWorkspace "${UPSTREAM_PROJECT}" "${UPSTREAM_BUILD}"
 
     mustHaveLocationForSpecialBuild
     local location=${LFS_CI_GLOBAL_BRANCH_NAME}
