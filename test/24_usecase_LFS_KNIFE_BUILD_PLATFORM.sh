@@ -22,6 +22,9 @@ oneTimeSetUp() {
     mustHaveNextCiLabelName() {
         true
     }
+    mustHaveCleanWorkspace() {
+        mockedCommand "mustHaveCleanWorkspace $@"
+    }
     getNextCiLabelName() {
         echo "PS_LFS_OS_NEXT"
     }
@@ -47,8 +50,10 @@ oneTimeSetUp() {
     copyAndExtractBuildArtifactsFromProject() {
         mockedCommand "copyAndExtractBuildArtifactsFromProject $@"
         mkdir -p ${WORKSPACE}/workspace/bld/bld-fsmci-summary/
+        mkdir -p ${WORKSPACE}/workspace/bld/bld-knife-input/
         echo LOCATION > ${WORKSPACE}/workspace/bld/bld-fsmci-summary/location
         echo LABEL    > ${WORKSPACE}/workspace/bld/bld-fsmci-summary/label
+        echo LFS_BUILD_FSMR2=true  > ${WORKSPACE}/workspace/bld/bld-knife-input/lfs_build.txt
     }
 
 
@@ -77,10 +82,12 @@ test1() {
 
     local expect=$(createTempFile)
 cat <<EOF > ${expect}
+mustHaveCleanWorkspace 
+copyArtifactsToWorkspace upstream_project 123
 copyAndExtractBuildArtifactsFromProject upstream_project 123 fsmci
 execute rm -rf ${WORKSPACE}/revisions.txt
 createWorkspace 
-copyArtifactsToWorkspace upstream_project 123 fsmci
+copyArtifactsToWorkspace upstream_project 123
 setBuildDescription LFS_KNIFE_-_knife_-_Build_-_FSM-r2_-_fcmd 123 PS_LFS_OS_NEXT
 applyKnifePatches 
 buildLfs 

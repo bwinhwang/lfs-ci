@@ -27,6 +27,9 @@ oneTimeSetUp() {
         echo "LABEL" > ${wd}/label
         echo "LOCATION" > ${wd}/location
     }
+    copyAndExtractBuildArtifactsFromProject() {
+        mockedCommand "copyAndExtractBuildArtifactsFromProject $@"
+    }
     applyKnifePatches() {
         mockedCommand "applyKnifePatches $@"
     }
@@ -39,9 +42,16 @@ oneTimeSetUp() {
     setBuildDescription() {
         mockedCommand "setBuildDescription $@"
     }  
+    mustHaveCleanWorkspace() {
+        mockedCommand "mustHaveCleanWorkspace $@"
+    }
     mustHaveLocationForSpecialBuild() {
         mockedCommand "mustHaveLocationForSpecialBuild $@"
         export LFS_CI_GLOBAL_BRANCH_NAME=LOCATION
+
+        local wd=${WORKSPACE}/workspace/bld/bld-dev-input/
+        mkdir -p ${wd}
+        echo "LFS_BUILD_FSMR2=true" > ${wd}/lfs_build.txt
     }
 
     return
@@ -67,14 +77,16 @@ tearDown() {
 
 test1() {
 
-    assertTrue "specialBuildCreateWorkspaceAndBuild"
+    assertTrue "specialBuildCreateWorkspaceAndBuild DEV"
 
     local expect=$(createTempFile)
     cat <<EOF > ${expect}
+mustHaveCleanWorkspace 
+copyArtifactsToWorkspace LFS_DEV_-_DEVELOPER_-_Build 987
 mustHaveLocationForSpecialBuild 
 execute rm -rf ${WORKSPACE}/revisions.txt
 createWorkspace 
-copyArtifactsToWorkspace LFS_DEV_-_DEVELOPER_-_Build 987 fsmci
+copyArtifactsToWorkspace LFS_DEV_-_DEVELOPER_-_Build 987
 setBuildDescription LFS_DEV_-_DEVELOPER_-_Build_-_FSM-r2_-_fcmd 123 LABEL
 applyKnifePatches 
 buildLfs 
