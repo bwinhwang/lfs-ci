@@ -218,7 +218,7 @@ specialBuildCreateWorkspaceAndBuild() {
     # createWorkspace will copy the revision state file from the upstream job
     execute rm -rf ${WORKSPACE}/revisions.txt
     createWorkspace
-    copyArtifactsToWorkspace "${UPSTREAM_PROJECT}" "${UPSTREAM_BUILD}" "fsmci dev knife"
+    copyArtifactsToWorkspace "${UPSTREAM_PROJECT}" "${UPSTREAM_BUILD}"
 
     mustHaveNextCiLabelName
     local label=$(getNextCiLabelName)
