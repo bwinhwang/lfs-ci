@@ -6,9 +6,14 @@
 [[ -z ${LFS_CI_SOURCE_artifacts} ]] && source ${LFS_CI_ROOT}/lib/artifacts.sh
 [[ -z ${LFS_CI_SOURCE_database}  ]] && source ${LFS_CI_ROOT}/lib/database.sh
 
+## @fn      usecase_LFS_TEST()
+#  @brief   runs the usecase LFS_TEST (wrapper only)
+#  @param   <none>
+#  @return  <none>
 usecase_LFS_TEST() {
     ci_job_test
 }
+
 ## @fn      ci_job_test()
 #  @brief   dispatcher for test jobs
 #  @details prepare the build artifacts to have it in the correct way for the test framework

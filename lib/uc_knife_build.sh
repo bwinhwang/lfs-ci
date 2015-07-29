@@ -126,7 +126,7 @@ usecase_LFS_KNIFE_PACKAGE() {
     return
 }
 
-## @fn     usecase_LFS_KNIFE_WFT_TRIGGER
+## @fn     usecase_LFS_KNIFE_WFT_TRIGGER()
 #  @brief  interface from/to WFT for LFS knifing
 #  @param  <none>
 #  @param  <none>

@@ -4,6 +4,12 @@
 [[ -z ${LFS_CI_SOURCE_subversion} ]] && source ${LFS_CI_ROOT}/lib/subversion.sh
 
 # job name: ADMIN_-_update_locations_txt
+
+## @fn      usecase_UPDATE_LOCATIONS_TXT()
+#  @brief   update the locations.txt file in os/trunk/bldtools/ in svn
+#  @details content of the file is comming from database
+#  @param   <none>
+#  @return  <none>
 usecase_UPDATE_LOCATIONS_TXT() {
     requiredParameters WORKSPACE
 
