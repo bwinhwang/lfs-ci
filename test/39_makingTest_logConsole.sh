@@ -172,7 +172,7 @@ EOF
     return
 }
 
-test3() {
+test4() {
     export UT_TESTROOT=
     assertTrue "makingTest_logConsole"
 
