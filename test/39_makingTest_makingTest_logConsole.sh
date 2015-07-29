@@ -141,7 +141,7 @@ execute -n make -C ${WORKSPACE}/workspace/path/to/test/suite --no-print-director
 execute sed -i s/moxa=127.123.123.123:1234/moxa=localhost:64258/g ${UT_TESTROOT}/targets/targetname_fsp1
 execute -n make -C ${WORKSPACE}/workspace/path/to/test/suite --no-print-directory testtarget-analyzer TESTTARGET=targetname_fsp2
 execute sed -i s/moxa=127.123.123.123:1234/moxa=localhost:64258/g ${UT_TESTROOT}/targets/targetname_fsp2
-execute screen -S lfs-jenkins.${USER} -L -d -m -c ${WORKSPACE}/workspace/screenrc
+execute screen -S lfs-jenkins.${USER}.targetName -L -d -m -c ${WORKSPACE}/workspace/screenrc
 exit_add makingTest_collectArtifactsOnFailure
 exit_add makingTest_closeConsole
 EOF
