@@ -265,7 +265,7 @@ makingTest_testLRC() {
                 TESTBUILD=${testBuildDirectory}                    \
                 TESTTARGET=${testTargetName}_shp
 
-    makingTest_powercycle
+    makingTest_poweron
     mustHaveMakingTestRunningTarget
 
     info "installing software"
@@ -537,6 +537,20 @@ mustHaveMakingTestRunningTarget() {
 
 ## @fn      makingTest_logConsole()
 #  @brief   start to log all console output into an artifacts file
+#  @details some of our serial console devices (moxa, s4d, ...) are not supporing
+#           multiple connection to the device. So we are changing this a little bit
+#           * start a tcp sharer, which starts a tcp connection on a port, and connects
+#             to the serial console device.
+#           * start a 2nd command "make console" 
+#           * screen is logging the output into a file of all started programms
+#           * start a tcp sharer and "make console" on each configured moxa in/on requested target (config) 
+#           * change all target config files (just in workspace) and replace the moxa ip / port with the
+#             ip (localhost) and port (random) from tcp sharer
+#           * install exit handler to stop screen and put logfiles into artifacts
+#           Why screen?
+#           - screen is able to log the output of a terminal into a logfile
+#           - screen can be stopped with a single command, which also terminates all running command
+#             within screen
 #  @param   <none>
 #  @return  <none>
 makingTest_logConsole() {
@@ -574,6 +588,11 @@ EOF
     local fctTarget=$(_reserveTarget)
     local fspTargets=$(execute -n ${make} testtarget-analyzer | grep ^setupfsps | cut -d= -f2 | tr "," " ")
     local testRoot=$(execute -n ${make} testroot)
+
+    if [[ -z "${testRoot}" || ! -d "${testRoot}" ]] ; then
+        warning "unable to start logging of the serial console(s) of the target. The TMF command 'make testroot' is not available, but this is required here."
+        return
+    fi
 
     for target in ${fctTarget,,} ${fspTargets,,} ; do
         debug "create moxa mock for ${target}"
