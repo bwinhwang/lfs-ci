@@ -172,6 +172,34 @@ EOF
     return
 }
 
+test3() {
+    export UT_TESTROOT=
+    assertTrue "makingTest_logConsole"
+
+    local expect=$(createTempFile)
+    cat <<EOF > ${expect}
+getConfig LFS_CI_uc_test_should_record_log_output_of_target
+makingTest_testSuiteDirectory 
+mustHaveMakingTestTestConfig 
+execute mkdir -p ${WORKSPACE}/workspace/path/to/test/suite/__artifacts
+execute chmod 755 ${WORKSPACE}/workspace/makeConsoleWrapper
+_reserveTarget 
+execute -n make -C ${WORKSPACE}/workspace/path/to/test/suite --no-print-directory testtarget-analyzer
+execute -n make -C ${WORKSPACE}/workspace/path/to/test/suite --no-print-directory testroot
+execute -n make -C ${WORKSPACE}/workspace/path/to/test/suite --no-print-directory testtarget-analyzer TESTTARGET=targetname
+execute sed -i s/moxa=127.123.123.123:1234/moxa=localhost:64258/g ${WORKSPACE}/workspace/src/src-test/targets/targetname
+execute -n make -C ${WORKSPACE}/workspace/path/to/test/suite --no-print-directory testtarget-analyzer TESTTARGET=targetname_fsp1
+execute sed -i s/moxa=127.123.123.123:1234/moxa=localhost:64258/g ${WORKSPACE}/workspace/src/src-test/targets/targetname_fsp1
+execute -n make -C ${WORKSPACE}/workspace/path/to/test/suite --no-print-directory testtarget-analyzer TESTTARGET=targetname_fsp2
+execute sed -i s/moxa=127.123.123.123:1234/moxa=localhost:64258/g ${WORKSPACE}/workspace/src/src-test/targets/targetname_fsp2
+execute screen -S lfs-jenkins.${USER}.targetName -L -d -m -c ${WORKSPACE}/workspace/screenrc
+exit_add makingTest_collectArtifactsOnFailure
+exit_add makingTest_closeConsole
+EOF
+    assertExecutedCommands ${expect}
+
+    return
+}
 source lib/shunit2
 
 exit 0

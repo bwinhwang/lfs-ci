@@ -155,6 +155,28 @@ EOF
     return
 }
 
+test4() {
+    # if there is no test root, no console logging is possible
+    export UT_TESTROOT=
+    assertTrue "makingTest_logConsole"
+
+    local expect=$(createTempFile)
+    cat <<EOF > ${expect}
+getConfig LFS_CI_uc_test_should_record_log_output_of_target
+makingTest_testSuiteDirectory 
+mustHaveMakingTestTestConfig 
+execute mkdir -p ${WORKSPACE}/workspace/path/to/test/suite/__artifacts
+execute chmod 755 ${WORKSPACE}/workspace/makeConsoleWrapper
+_reserveTarget 
+execute -n make -C ${WORKSPACE}/workspace/path/to/test/suite --no-print-directory testtarget-analyzer
+execute -n make -C ${WORKSPACE}/workspace/path/to/test/suite --no-print-directory testroot
+EOF
+    assertExecutedCommands ${expect}
+
+    return
+}
+
+
 source lib/shunit2
 
 exit 0
