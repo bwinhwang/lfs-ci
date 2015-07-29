@@ -96,6 +96,15 @@ EOF
     diff -rub ${expect} ${WORKSPACE}/workspace/screenrc
     assertEquals "$(cat ${expect})" "$(cat ${WORKSPACE}/workspace/screenrc)"
 
+    cat <<EOF > ${expect}
+#!/usr/bin/env bash
+set -x
+sleep 1
+make -C \$1 TESTTARGET=\$2 console
+exit 0
+EOF
+    assertEquals "$(cat ${expect})" "$(cat ${WORKSPACE}/workspace/makeConsoleWrapper)"
+
     return
 }
 
@@ -151,6 +160,15 @@ screen -L -t targetname_fsp2 ${WORKSPACE}/workspace/makeConsoleWrapper ${WORKSPA
 EOF
     assertEquals "$(cat ${expect})" "$(cat ${WORKSPACE}/workspace/screenrc)"
     diff -rub ${expect} ${WORKSPACE}/workspace/screenrc
+
+    cat <<EOF > ${expect}
+#!/usr/bin/env bash
+set -x
+sleep 1
+make -C \$1 TESTTARGET=\$2 console
+exit 0
+EOF
+    assertEquals "$(cat ${expect})" "$(cat ${WORKSPACE}/workspace/makeConsoleWrapper)"
 
     return
 }
