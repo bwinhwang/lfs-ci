@@ -224,7 +224,7 @@ _build_fsmddal_pdf() {
 }
 
 ## @fn      _recordSubBuildEndEvent()
-#  @brief   exit handler for recoding the event for the sub build job
+#  @brief   exit handler for recording the event for the sub build job
 #  @param   {rc}    exit code of the programm
 #  @return  <none>
 _recordSubBuildEndEvent() {
@@ -238,7 +238,7 @@ _recordSubBuildEndEvent() {
 }
 
 ## @fn      _recordBuildEndEvent()
-#  @brief   exit handler for recoding the event for the build job
+#  @brief   exit handler for recording the event for the build job
 #  @param   {rc}    exit code of the programm
 #  @return  <none>
 _recordBuildEndEvent() {

@@ -69,7 +69,7 @@ databaseEventBuildStarted() {
 }
 
 ## @fn      databaseEventBuildFailed()
-#  @brief   create an entry in the database table build events for a failed build
+#  @brief   create an entry in the database table build_events for a failed build
 #  @param   <none>
 #  @return  <none>
 databaseEventBuildFailed() {
@@ -78,7 +78,7 @@ databaseEventBuildFailed() {
 }
 
 ## @fn      databaseEventBuildFinished()
-#  @brief   create an entry in the database table build events for a finished build
+#  @brief   create an entry in the database table build_events for a finished build
 #  @param   <none>
 #  @return  <none>
 databaseEventBuildFinished() {
@@ -87,7 +87,7 @@ databaseEventBuildFinished() {
 }
 
 ## @fn      databaseEventOtherStarted()
-#  @brief   create an entry in the database table build events for a started "other" event
+#  @brief   create an entry in the database table build_events for a started "other" event
 #  @param   <none>
 #  @return  <none>
 databaseEventOtherStarted() {
@@ -96,7 +96,7 @@ databaseEventOtherStarted() {
 }
 
 ## @fn      databaseEventOtherFinished()
-#  @brief   create an entry in the database table build events for a finished "other" event
+#  @brief   create an entry in the database table build_events for a finished "other" event
 #  @param   <none>
 #  @return  <none>
 databaseEventOtherFinished() {
@@ -105,7 +105,7 @@ databaseEventOtherFinished() {
 }
 
 ## @fn      databaseEventOtherFailed()
-#  @brief   create an entry in the database table build events for a failed "other" event
+#  @brief   create an entry in the database table build_events for a failed "other" event
 #  @param   <none>
 #  @return  <none>
 databaseEventOtherFailed() {
@@ -114,7 +114,7 @@ databaseEventOtherFailed() {
 }
 
 ## @fn      databaseEventOtherUnstable()
-#  @brief   create an entry in the database table build events for a unstable "other" event
+#  @brief   create an entry in the database table build_events for a unstable "other" event
 #  @param   <none>
 #  @return  <none>
 databaseEventOtherUnstable() {
