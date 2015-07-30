@@ -54,6 +54,13 @@ usecase_LFS_COLLECT_METRICS() {
     return
 }
 
+
+## @fn      collectMetricsFromBuildJobs()
+#  @brief   collect the metrics of a build job and store them into the database
+#  @details all datas from a build job (and subbuild) will be collected and stored
+#           in the database. 
+#  @param   <none>
+#  @return  <none>
 collectMetricsFromBuildJobs() {
     requiredParameters UPSTREAM_PROJECT UPSTREAM_BUILD 
 
@@ -107,6 +114,10 @@ collectMetricsFromBuildJobs() {
     return
 }
 
+## @fn      collectMetricsFromTestJobs()
+#  @brief   collect all metrics from a test job (and sub tests) and store them into the database
+#  @param   <none>
+#  @return  <none>
 collectMetricsFromTestJobs() {
     requiredParameters UPSTREAM_PROJECT UPSTREAM_BUILD 
 
@@ -145,6 +156,10 @@ collectMetricsFromTestJobs() {
     return
 }
 
+## @fn      collectMetricsFromPackageJob()
+#  @brief   collect all metrics of a package job and store them into the database
+#  @param   <none>
+#  @return  <none>
 collectMetricsFromPackageJob() {
     requiredParameters UPSTREAM_PROJECT UPSTREAM_BUILD 
 

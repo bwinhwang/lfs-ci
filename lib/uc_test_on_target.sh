@@ -82,7 +82,10 @@ ci_job_test_on_target() {
     info "testing done."
     return
 }
-
+## @fn      _exitHandlerDatabaseEventsSubTestFailed()
+#  @brief   exit handler for a sub test job to store the event into the database
+#  @param   {rc}    exit code
+#  @return  <none>
 _exitHandlerDatabaseEventsSubTestFailed() {
     [[ ${1} -gt 0 ]] && databaseEventSubTestFailed 
 }

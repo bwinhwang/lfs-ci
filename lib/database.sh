@@ -59,23 +59,46 @@ databaseEventBuildFailed() {
     return
 }
 
+## @fn      databaseEventBuildFinished()
+#  @brief   create an entry in the database table build events for a finished build
+#  @param   <none>
+#  @return  <none>
 databaseEventBuildFinished() {
     _storeEvent build_finished
     return
 }
 
+## @fn      databaseEventOtherStarted()
+#  @brief   create an entry in the database table build events for a started "other" event
+#  @param   <none>
+#  @return  <none>
 databaseEventOtherStarted() {
     _storeEvent other_started $1
     return
 }
+
+## @fn      databaseEventOtherFinished()
+#  @brief   create an entry in the database table build events for a finished "other" event
+#  @param   <none>
+#  @return  <none>
 databaseEventOtherFinished() {
     _storeEvent other_finished $1
     return
 }
+
+## @fn      databaseEventOtherFailed()
+#  @brief   create an entry in the database table build events for a failed "other" event
+#  @param   <none>
+#  @return  <none>
 databaseEventOtherFailed() {
     _storeEvent other_failed $1
     return
 }
+
+## @fn      databaseEventOtherUnstable()
+#  @brief   create an entry in the database table build events for a unstable "other" event
+#  @param   <none>
+#  @return  <none>
 databaseEventOtherUnstable() {
     _storeEvent other_unstable $1
     return
@@ -86,7 +109,7 @@ databaseEventOtherUnstable() {
 #     return
 # }
 
-## @fn      databaseEventSubBuildFinished()
+## @fn      databaseEventSubBuildStarted()
 #  @brief   create an entry in the database table build_events for a started build
 #  @param   <none>
 #  @return  <none>
@@ -95,7 +118,7 @@ databaseEventSubBuildStarted() {
     return
 }
 
-## @fn      databaseEventBuildFinished()
+## @fn      databaseEventSubBuildFinished()
 #  @brief   create an entry in the database table build_events for a finished build
 #  @param   <none>
 #  @return  <none>
@@ -174,7 +197,7 @@ databaseEventPackageFailed() {
     return
 }
 
-## @fn      databaseEventSubBuildStarted()
+## @fn      databaseEventSubTestStarted()
 #  @brief   create an entry in the database table build_events for a started subtest process
 #  @param   <none>
 #  @return  <none>
@@ -187,7 +210,7 @@ databaseEventSubTestStarted() {
     return
 }
 
-## @fn      databaseEventSubBuildFinished()
+## @fn      databaseEventSubTestFinished()
 #  @brief   create an entry in the database table build_events for a finished subtest process
 #  @param   <none>
 #  @return  <none>
@@ -200,7 +223,7 @@ databaseEventSubTestFinished() {
     return
 }
 
-## @fn      databaseEventSubBuildFailed()
+## @fn      databaseEventSubTestFailed()
 #  @brief   create an entry in the database table build_events for a failed subtest process
 #  @param   <none>
 #  @return  <none>

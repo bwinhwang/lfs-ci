@@ -130,6 +130,10 @@ ci_job_test() {
     return
 }
 
+## @fn      _exitHandlerDatabaseTestFailed()
+#  @brief   exit handler for storing the event in the database for a failed test
+#  @param   {rc}    exit code
+#  @return  <none>
 _exitHandlerDatabaseTestFailed() {
     [[ ${1} -gt 0 ]] && databaseEventTestFailed
 }

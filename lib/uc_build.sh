@@ -238,6 +238,10 @@ _build_fsmddal_pdf() {
     return
 }
 
+## @fn      _recordSubBuildEndEvent()
+#  @brief   exit handler for recoding the event for the sub build job
+#  @param   {rc}    exit code of the programm
+#  @return  <none>
 _recordSubBuildEndEvent() {
     local rc=${1}
     if [[ ${rc} -gt 0 ]] ; then
@@ -248,6 +252,10 @@ _recordSubBuildEndEvent() {
     return
 }
 
+## @fn      _recordBuildEndEvent()
+#  @brief   exit handler for recoding the event for the build job
+#  @param   {rc}    exit code of the programm
+#  @return  <none>
 _recordBuildEndEvent() {
     local rc=${1}
     if [[ ${rc} -gt 0 ]] ; then

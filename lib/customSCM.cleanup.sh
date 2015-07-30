@@ -41,10 +41,6 @@ actionCheckout() {
         phase_3_CI_LFS_in_Ulm)
             fatal "not implemented"
         ;;
-        phase_2_SC_LFS_linuxKernel_in_Ulm)
-            _scLfsLinuxKernelOldReleasesOnBranches ${tmpFileA}
-            execute touch ${tmpFileB}
-        ;;
         phase_2_SC_LFS_in_Ulm)
             _scLfsOldReleasesOnBranches ${tmpFileA}
             execute touch ${tmpFileB}
@@ -119,6 +115,10 @@ actionCheckout() {
     return
 }
 
+## @fn      _ciLfsNotReleasedBuilds()
+#  @brief   create a list of al not released builds on CI_LFS share
+#  @param   {resultFile}    name of the result file
+#  @return  <none>
 _ciLfsNotReleasedBuilds() {
 
     # format of the result file is
@@ -159,6 +159,10 @@ _ciLfsNotReleasedBuilds() {
     return
 }
 
+## @fn      _scLfsOldReleasesOnBranches()
+#  @brief   create a list of all old releases on all branches (> 60 days)
+#  @param   {resultFile}    file which contains the results
+#  @return  <none>
 _scLfsOldReleasesOnBranches() {
     local resultFile=$1
     local tmpFileA=$(createTempFile)
@@ -177,23 +181,11 @@ _scLfsOldReleasesOnBranches() {
     return
 }
 
-_scLfsLinuxKernelOldReleasesOnBranches() {
-    local resultFile=$1
-    local tmpFileA=$(createTempFile)
-    local tmpFileB=$(createTempFile)
-    local directoryToCleanup=/build/home/SC_LFS/linuxkernels
-    local days=1500
-
-    info "check for baselines older than ${days} days in ${directoryToCleanup}"
-    find ${directoryToCleanup} -mindepth 1 -maxdepth 1 -mtime +${days} -type d -printf "%p\n" \
-        | sort -u > ${tmpFileA}
-
-    ${LFS_CI_ROOT}/bin/removalCandidates.pl  < ${tmpFileA} > ${tmpFileB}
-
-    grep -w -f ${tmpFileB} ${tmpFileA} | sed "s/^/1 /g" > ${resultFile}
-
-    return
-}
+## @fn      _ciLfsRemoteSites()
+#  @brief   create a list of al releases in CI_LFS on a remove site
+#  @param   {siteName}    name of the site (two letters)
+#  @param   {resultFile}  file which contains the results  
+#  @return  <none>
 _ciLfsRemoteSites() {
     local siteName=$1
     local resultFile=$2
@@ -209,6 +201,12 @@ _ciLfsRemoteSites() {
 
     return
 }
+
+## @fn      _scLfsRemoteSites()
+#  @brief   create a list of al releases in SC_LFS on a remove site
+#  @param   {siteName}    name of the site (two letters)
+#  @param   {resultFile}  file which contains the results  
+#  @return  <none>
 _scLfsRemoteSites() {
     local siteName=$1
     local resultFile=$2
@@ -226,6 +224,11 @@ _scLfsRemoteSites() {
     return
 }
 
+## @fn      _ciLfsOldReleasesOnBranches()
+#  @brief   create a list of all old releases on all branches in CI_LFS share (> 60 days)
+#  @param   {resultFile}    file which contains the results
+#  @param   {«parameter name»}    «parameter description»
+#  @return  <none>
 _ciLfsOldReleasesOnBranches() {
     local resultFile=$1
 
@@ -242,6 +245,11 @@ _ciLfsOldReleasesOnBranches() {
     return
 }
 
+
+## @fn      _lfsArtifactsRemoveOldArtifacts()
+#  @brief   create a list of all old artifacts on the artifacts share
+#  @param   {resultFile}    file which contains the results
+#  @return  <none>
 _lfsArtifactsRemoveOldArtifacts() {
     local resultFile=$1
 
@@ -260,16 +268,9 @@ _lfsArtifactsRemoveOldArtifacts() {
 
     return
 }
-_lfsCiLogfiles() {
-    requiredParameters LFS_CI_ROOT
-    local resultFile=$1
-    find ${LFS_CI_ROOT}/log/ -type f -ctime +60 | sed "s:^:1 :" > ${resultFile}
-    return
-}
 
 ## @fn      actionCalculate()
-#  @brief   action ...
-#  @details 
+#  @brief   calculate command for custom SCM
 #  @param   <none>
 #  @return  <none>
 actionCalculate() {
