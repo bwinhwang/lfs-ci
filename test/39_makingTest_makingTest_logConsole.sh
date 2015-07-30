@@ -15,12 +15,12 @@ oneTimeSetUp() {
         if [[ $1 == mkdir ]] ; then
             $@
         fi
-        if [[ $2 == make && $6 == testtarget-analyzer ]] ; then
-            echo "setupfsps=${UT_CONNECTED_FSPS}"
+        if [[ $2 == make && $6 == "testtarget-analyzer" ]] ; then
             echo "moxa=127.123.123.123:1234"
+            echo "setupfsps=${UT_CONNECTED_FSPS}"
         fi
         if [[ $2 == make && $6 == testroot ]] ; then
-            echo ${WORKSPACE}/workspace/src/src-test
+            echo ${UT_TESTROOT}
         fi
     }
     mustHaveMakingTestTestConfig(){
@@ -47,16 +47,15 @@ oneTimeSetUp() {
 setUp() {
     cp -f /dev/null ${UT_MOCKED_COMMANDS}
     export WORKSPACE=$(createTempDirectory)
-
     mkdir -p ${WORKSPACE}/workspace/path/to/test/suite
-    mkdir -p ${WORKSPACE}/workspace/src/src-test/targets/
     touch ${WORKSPACE}/workspace/path/to/test/suite/testsuite.mk
-    echo "moxa=123.1.2.3:12345" > ${WORKSPACE}/workspace/src/src-test/targets/targetname
-    echo "moxa1=123.1.2.3:12345" > ${WORKSPACE}/workspace/src/src-test/targets/targetname
-    echo "moxa=123.1.2.3:12345" > ${WORKSPACE}/workspace/src/src-test/targets/targetname_fsp1
-    echo "moxa=123.1.2.3:12345" > ${WORKSPACE}/workspace/src/src-test/targets/targetname_fsp2
-
     export UT_CONFIG_SHOULD_LOG=1
+    export UT_TESTROOT=$(createTempDirectory)
+    mkdir -p ${UT_TESTROOT}/targets
+    echo "moxa=127.123.123.123:1234" > ${UT_TESTROOT}/targets/targetname
+    echo "moxa=127.123.123.123:1234" > ${UT_TESTROOT}/targets/targeta
+    echo "moxa=127.123.123.123:1234" > ${UT_TESTROOT}/targets/targetname_fsp1
+    echo "moxa=127.123.123.123:1234" > ${UT_TESTROOT}/targets/targetname_fsp2
     return
 }
 
@@ -66,7 +65,8 @@ tearDown() {
 }
 
 test1() {
-    assertTrue "makingTest_logConsole"
+    # assertTrue "makingTest_logConsole"
+    makingTest_logConsole
 
     local expect=$(createTempFile)
     cat <<EOF > ${expect}
@@ -79,7 +79,7 @@ _reserveTarget
 execute -n make -C ${WORKSPACE}/workspace/path/to/test/suite --no-print-directory testtarget-analyzer
 execute -n make -C ${WORKSPACE}/workspace/path/to/test/suite --no-print-directory testroot
 execute -n make -C ${WORKSPACE}/workspace/path/to/test/suite --no-print-directory testtarget-analyzer TESTTARGET=targetname
-execute sed -i s/moxa=127.123.123.123:1234/moxa=localhost:64258/g ${WORKSPACE}/workspace/src/src-test/targets/targetname
+execute sed -i s/moxa=127.123.123.123:1234/moxa=localhost:64258/g ${UT_TESTROOT}/targets/targetname
 execute screen -S lfs-jenkins.${USER}.targetName -L -d -m -c ${WORKSPACE}/workspace/screenrc
 exit_add makingTest_collectArtifactsOnFailure
 exit_add makingTest_closeConsole
@@ -93,8 +93,8 @@ logtstamp after 10
 screen -L -t tp_targetname ${LFS_CI_ROOT}/lib/contrib/tcp_sharer/tcp_sharer.pl --name targetname --logfile ${WORKSPACE}/workspace/path/to/test/suite/__artifacts/tp_targetname.log --remote 127.123.123.123:1234 --local 64258
 screen -L -t targetname ${WORKSPACE}/workspace/makeConsoleWrapper ${WORKSPACE}/workspace/path/to/test/suite targetname
 EOF
+    diff -rub ${expect} ${WORKSPACE}/workspace/screenrc
     assertEquals "$(cat ${expect})" "$(cat ${WORKSPACE}/workspace/screenrc)"
-    diff -u ${expect} ${WORKSPACE}/workspace/screenrc
 
     cat <<EOF > ${expect}
 #!/usr/bin/env bash
@@ -104,6 +104,7 @@ make -C \$1 TESTTARGET=\$2 console
 exit 0
 EOF
     assertEquals "$(cat ${expect})" "$(cat ${WORKSPACE}/workspace/makeConsoleWrapper)"
+
     return
 }
 
@@ -135,11 +136,11 @@ _reserveTarget
 execute -n make -C ${WORKSPACE}/workspace/path/to/test/suite --no-print-directory testtarget-analyzer
 execute -n make -C ${WORKSPACE}/workspace/path/to/test/suite --no-print-directory testroot
 execute -n make -C ${WORKSPACE}/workspace/path/to/test/suite --no-print-directory testtarget-analyzer TESTTARGET=targetname
-execute sed -i s/moxa=127.123.123.123:1234/moxa=localhost:64258/g ${WORKSPACE}/workspace/src/src-test/targets/targetname
+execute sed -i s/moxa=127.123.123.123:1234/moxa=localhost:64258/g ${UT_TESTROOT}/targets/targetname
 execute -n make -C ${WORKSPACE}/workspace/path/to/test/suite --no-print-directory testtarget-analyzer TESTTARGET=targetname_fsp1
-execute sed -i s/moxa=127.123.123.123:1234/moxa=localhost:64258/g ${WORKSPACE}/workspace/src/src-test/targets/targetname_fsp1
+execute sed -i s/moxa=127.123.123.123:1234/moxa=localhost:64258/g ${UT_TESTROOT}/targets/targetname_fsp1
 execute -n make -C ${WORKSPACE}/workspace/path/to/test/suite --no-print-directory testtarget-analyzer TESTTARGET=targetname_fsp2
-execute sed -i s/moxa=127.123.123.123:1234/moxa=localhost:64258/g ${WORKSPACE}/workspace/src/src-test/targets/targetname_fsp2
+execute sed -i s/moxa=127.123.123.123:1234/moxa=localhost:64258/g ${UT_TESTROOT}/targets/targetname_fsp2
 execute screen -S lfs-jenkins.${USER}.targetName -L -d -m -c ${WORKSPACE}/workspace/screenrc
 exit_add makingTest_collectArtifactsOnFailure
 exit_add makingTest_closeConsole
@@ -158,7 +159,7 @@ screen -L -t tp_targetname_fsp2 ${LFS_CI_ROOT}/lib/contrib/tcp_sharer/tcp_sharer
 screen -L -t targetname_fsp2 ${WORKSPACE}/workspace/makeConsoleWrapper ${WORKSPACE}/workspace/path/to/test/suite targetname_fsp2
 EOF
     assertEquals "$(cat ${expect})" "$(cat ${WORKSPACE}/workspace/screenrc)"
-    diff -u ${expect} ${WORKSPACE}/workspace/screenrc
+    diff -rub ${expect} ${WORKSPACE}/workspace/screenrc
 
     cat <<EOF > ${expect}
 #!/usr/bin/env bash
@@ -171,6 +172,28 @@ EOF
 
     return
 }
+
+test4() {
+    # if there is no test root, no console logging is possible
+    export UT_TESTROOT=
+    assertTrue "makingTest_logConsole"
+
+    local expect=$(createTempFile)
+    cat <<EOF > ${expect}
+getConfig LFS_CI_uc_test_should_record_log_output_of_target
+makingTest_testSuiteDirectory 
+mustHaveMakingTestTestConfig 
+execute mkdir -p ${WORKSPACE}/workspace/path/to/test/suite/__artifacts
+execute chmod 755 ${WORKSPACE}/workspace/makeConsoleWrapper
+_reserveTarget 
+execute -n make -C ${WORKSPACE}/workspace/path/to/test/suite --no-print-directory testtarget-analyzer
+execute -n make -C ${WORKSPACE}/workspace/path/to/test/suite --no-print-directory testroot
+EOF
+    assertExecutedCommands ${expect}
+
+    return
+}
+
 
 source lib/shunit2
 

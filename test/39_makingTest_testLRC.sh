@@ -48,6 +48,9 @@ oneTimeSetUp() {
     makingTest_powercycle() {
         mockedCommand "makingTest_powercycle $@"
     }
+    makingTest_poweron() {
+        mockedCommand "makingTest_poweron $@"
+    }
     makingTest_install() {
         mockedCommand "makingTest_install $@"
     }
@@ -93,7 +96,7 @@ execute make -C ${WORKSPACE}/workspace/path/to/test/suite clean
 execute make -C ${WORKSPACE}/workspace/path/to/test/suite testconfig-overwrite TESTBUILD=${DELIVERY_DIRECTORY} TESTTARGET=TargetName
 execute make -C ${WORKSPACE}/workspace/path/to/test/suite_ahp testconfig-overwrite TESTBUILD=${DELIVERY_DIRECTORY} TESTTARGET=TargetName_ahp
 execute make -C ${WORKSPACE}/workspace/path/to/test/suite_shp testconfig-overwrite TESTBUILD=${DELIVERY_DIRECTORY} TESTTARGET=TargetName_shp
-makingTest_powercycle 
+makingTest_poweron 
 mustHaveMakingTestRunningTarget 
 makingTest_install 
 makingTest_check ${WORKSPACE}/workspace/path/to/test/suite TargetName

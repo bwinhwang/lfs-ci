@@ -141,7 +141,8 @@ def deleteScmView() {
 }
 
 /**
- * Delete the "branch view" eg. 1405/FB1405.
+ * Delete the branch view eg. 1405/FB1405.
+ * Continue if branch view does not exist.
  */
 def deleteBranchView() {
     def root_view = getRootView()
@@ -155,25 +156,26 @@ def deleteBranchView() {
             rootViewObj.deleteView(branch_view_obj)
             println("[INFO] deleted branch view: $root_view/$branch_view")
         } catch(e) {
-            println("[ERROR] deleteBranchView(): " + e)
+            println("[WARNING] deleteBranchView() - a view does not exist: " + e)
         }
     }
 }
 
 /**
- * Delete the "root view" eg. 1405.
+ * Delete the root view eg. 1405.
+ * Continue if root view does not exist.
  */
 def deleteRootView() {
-    def root_view = getRootView()
-    root_view_obj = j.getView(root_view)
-    if(debug) {
-        if(!root_view_obj.getAllItems()) {
-            println("[DEBUG] delete root view: $root_view (dry run)")
+    try {
+        def root_view = getRootView()
+        root_view_obj = j.getView(root_view)
+        if(debug) {
+            if(!root_view_obj.getAllItems()) {
+                println("[DEBUG] delete root view: $root_view (dry run)")
+            } else {
+                println("[DEBUG] Not deleting root view $root_view. There are still related jobs.")
+            }
         } else {
-            println("[DEBUG] Not deleting root view $root_view. There are still related jobs.")
-        }
-    } else {
-        try {
             if(!root_view_obj.getAllItems()) {
                 vo = root_view_obj.getOwner()
                 vo.deleteView(root_view_obj)
@@ -181,9 +183,9 @@ def deleteRootView() {
             } else {
                 println("[INFO] Not deleting root view $root_view. There are still jobs from another branch.")
             }
-        } catch(e) {
-            println("[ERROR] deleteRootView(): " + e)
         }
+    } catch(e) {
+        println("[WARNING] deleteRootView() - root view does not exist: " + e)
     }
 }
 
