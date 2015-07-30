@@ -156,7 +156,10 @@ usecase_LFS_BUILD_CREATE_VERSION() {
     return
 }
 
-# Legacy invocation
+## @fn      ci_job_build_version()
+#  @brief   usecase wrapper for usecase_LFS_BUILD_CREATE_VERSION
+#  @param   <none>
+#  @return  <none>
 ci_job_build_version() {
     usecase_LFS_BUILD_CREATE_VERSION
 }
