@@ -1,0 +1,53 @@
+import jenkins.model.Jenkins
+import hudson.model.ParametersAction
+import hudson.plugins.sectioned_view.SectionedView
+import javax.xml.transform.stream.StreamSource
+import java.io.File
+import java.io.FileInputStream;
+
+
+def j = Jenkins.instance
+
+what=args[0]
+rootViews = []
+nestedViews = []
+
+if(args.length > 1) {
+    rootViews=args[1].split(",")
+}
+
+if(args.length > 2) {
+    nestedViews=args[2].split(",")
+}
+
+if(args.length > 3) {
+    branchViews=args[3].split(",")
+}
+
+if(what == "create_views") {
+    for(view in rootViews) {
+        println("    create root view $view")
+        v = new SectionedView(view)
+        j.addView(v)
+    }
+    cnt = 1
+    for(view in nestedViews) {
+        parentView = view.split("/")[0]
+        childView = view.split("/")[1]
+        if(cnt == 1) {
+            println("    create root view $parentView")
+            parentTab = new hudson.plugins.nested_view.NestedView(parentView)
+            j.addView(parentTab)
+            cnt++;
+        }
+        println("    create sub view $childView")
+        childTab = new hudson.model.ListView(childView, parentTab)
+        parentTab.addView(childTab)
+    }
+    for(view in branchViews) {
+        println("    create branch view $view")
+        v = new SectionedView(view)
+        j.addView(v)
+    }
+}
+
