@@ -452,7 +452,7 @@ makingTest_install() {
     return
 }
 
-## @fn      _reserveTarget
+## @fn      _reserveTarget()
 #  @brief   make a reserveration from TAToo/YSMv2 to get a target name
 #  @param   <none>
 #  @return  name of the target

@@ -69,6 +69,10 @@ ci_job_package() {
     return
 }
 
+## @fn      _exitHandlerDatabaseEventPackageFinishedOrFailed()
+#  @brief   exit handler for the package job to store a finished / failed event into the database
+#  @param   {rc}    exit code
+#  @return  <none>
 _exitHandlerDatabaseEventPackageFinishedOrFailed() {
     if [[ ${1} -gt 0 ]] ; then
         databaseEventPackageFailed

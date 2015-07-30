@@ -156,7 +156,10 @@ usecase_LFS_BUILD_CREATE_VERSION() {
     return
 }
 
-# Legacy invocation
+## @fn      ci_job_build_version()
+#  @brief   usecase wrapper for usecase_LFS_BUILD_CREATE_VERSION
+#  @param   <none>
+#  @return  <none>
 ci_job_build_version() {
     usecase_LFS_BUILD_CREATE_VERSION
 }
@@ -220,6 +223,10 @@ _build_fsmddal_pdf() {
     return
 }
 
+## @fn      _recordSubBuildEndEvent()
+#  @brief   exit handler for recording the event for the sub build job
+#  @param   {rc}    exit code of the programm
+#  @return  <none>
 _recordSubBuildEndEvent() {
     local rc=${1}
     if [[ ${rc} -gt 0 ]] ; then
@@ -230,6 +237,10 @@ _recordSubBuildEndEvent() {
     return
 }
 
+## @fn      _recordBuildEndEvent()
+#  @brief   exit handler for recording the event for the build job
+#  @param   {rc}    exit code of the programm
+#  @return  <none>
 _recordBuildEndEvent() {
     local rc=${1}
     if [[ ${rc} -gt 0 ]] ; then

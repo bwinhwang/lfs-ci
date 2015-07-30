@@ -9,6 +9,10 @@
 [[ -z ${LFS_CI_SOURCE_booking}         ]] && source ${LFS_CI_ROOT}/lib/booking.sh
 [[ -z ${LFS_CI_SOURCE_createWorkspace} ]] && source ${LFS_CI_ROOT}/lib/createWorkspace.sh
 
+## @fn      usecase_LFS_CI_TESTING_TMF_ON_TARGET()
+#  @brief   runs the usecase LFS_CI_TESTING_TMF_ON_TARGET (wrapper only)
+#  @param   <none>
+#  @return  <none>
 usecase_LFS_CI_TESTING_TMF_ON_TARGET() {
     ci_job_test_on_target
 }
@@ -78,7 +82,10 @@ ci_job_test_on_target() {
     info "testing done."
     return
 }
-
+## @fn      _exitHandlerDatabaseEventsSubTestFailed()
+#  @brief   exit handler for a sub test job to store the event into the database
+#  @param   {rc}    exit code
+#  @return  <none>
 _exitHandlerDatabaseEventsSubTestFailed() {
     [[ ${1} -gt 0 ]] && databaseEventSubTestFailed 
 }
