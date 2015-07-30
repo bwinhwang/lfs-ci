@@ -4,13 +4,16 @@
 #
 # conzept for events;
 # all jobs are creating events for a build into the build_events table
+# <pre>
 # id | build_id | event_id | timestamp | job_name | build_number 
 # --------------------------------------------------------------
 # 0  |   1      |     1    |  now      | ABC      | 1
 # ....
 # --------------------------------------------------------------
+# </pre>
 # 
 # the event_id is a reference to the event table
+# <pre>
 # id | product_name | task_name  | event_type | event_state 
 # ---------------------------------------------------------- 
 # 0  | LFS          | build      | build      | started     
@@ -29,6 +32,7 @@
 # 0  | LFS          | targettest | subtest    | failed      
 # 0  | LFS          | targettest | test       | failed      
 # ----------------------------------------------------------
+# </pre>
 
 LFS_CI_SOURCE_database='$Id$'
 
