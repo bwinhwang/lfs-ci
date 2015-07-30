@@ -57,7 +57,7 @@ usecase_LFS_COLLECT_METRICS() {
 
 ## @fn      collectMetricsFromBuildJobs()
 #  @brief   collect the metrics of a build job and store them into the database
-#  @details all datas from a build job (and subbuild) will be collected and stored
+#  @details all data from a build job (and subbuild) will be collected and stored
 #           in the database. 
 #  @param   <none>
 #  @return  <none>

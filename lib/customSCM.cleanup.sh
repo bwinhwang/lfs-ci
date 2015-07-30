@@ -1,5 +1,12 @@
 #!/bin/bash
 
+## @file    customSCM.cleanup.sh 
+#  @brief   customSCM actions / functions for cleaning up the shares
+#  @details see https://bts.inside.nokiasiemensnetworks.com/twiki/bin/view/MacPsWmp/CiInternals#The_CustomSCM_Plugin
+#           In LFS, we have several shares, which must be cleaned up regularly. 
+#           For this task, we have several admin cleanup jobs in Jenkins.
+#           Every job is cleaning up a share on a site.
+
 ## @fn      actionCompare()
 #  @brief   
 #  @details INPUT: REVISION_STATE_FILE revision state file from the old build
@@ -9,7 +16,6 @@ actionCompare() {
     info "no change in ${directoryNameToSynchronize} / ${checksum}"
     exit 1
 }
-
 
 ## @fn      actionCheckout()
 #  @brief   action which is called by custom scm jenkins plugin to create or update a workspace and create the changelog
@@ -116,7 +122,7 @@ actionCheckout() {
 }
 
 ## @fn      _ciLfsNotReleasedBuilds()
-#  @brief   create a list of al not released builds on CI_LFS share
+#  @brief   create a list of all not released builds on CI_LFS share
 #  @param   {resultFile}    name of the result file
 #  @return  <none>
 _ciLfsNotReleasedBuilds() {
@@ -160,7 +166,7 @@ _ciLfsNotReleasedBuilds() {
 }
 
 ## @fn      _scLfsOldReleasesOnBranches()
-#  @brief   create a list of all old releases on all branches (> 60 days)
+#  @brief   create a list of all old releases on all branches from SC_LFS share (> 60 days)
 #  @param   {resultFile}    file which contains the results
 #  @return  <none>
 _scLfsOldReleasesOnBranches() {
@@ -182,7 +188,7 @@ _scLfsOldReleasesOnBranches() {
 }
 
 ## @fn      _ciLfsRemoteSites()
-#  @brief   create a list of al releases in CI_LFS on a remove site
+#  @brief   create a list of all releases in CI_LFS on a remove site
 #  @param   {siteName}    name of the site (two letters)
 #  @param   {resultFile}  file which contains the results  
 #  @return  <none>
@@ -203,7 +209,7 @@ _ciLfsRemoteSites() {
 }
 
 ## @fn      _scLfsRemoteSites()
-#  @brief   create a list of al releases in SC_LFS on a remove site
+#  @brief   create a list of all releases in SC_LFS on a remove site
 #  @param   {siteName}    name of the site (two letters)
 #  @param   {resultFile}  file which contains the results  
 #  @return  <none>
@@ -247,7 +253,7 @@ _ciLfsOldReleasesOnBranches() {
 
 
 ## @fn      _lfsArtifactsRemoveOldArtifacts()
-#  @brief   create a list of all old artifacts on the artifacts share
+#  @brief   create a list of all old artifacts on the artifacts share (> 5 days)
 #  @param   {resultFile}    file which contains the results
 #  @return  <none>
 _lfsArtifactsRemoveOldArtifacts() {
