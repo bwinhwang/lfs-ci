@@ -133,12 +133,17 @@ _ciLfsNotReleasedBuilds() {
 
     # TODO: demx2fk3 2014-07-28 cleanup
 
+    # TODO: demx2fk3 2015-07-30 replace with getconfig
     local directoryToCleanup=/build/home/CI_LFS/Release_Candidates
+    # TODO: demx2fk3 2015-07-30 replace with getconfig
     local rcVersions=/build/home/CI_LFS/RCversion/os
 
     local tmpFileA=$(createTempFile)
     local tmpFileB=$(createTempFile)
     local tmpFile=$(createTempFile)
+
+    # TODO: demx2fk3 2015-07-30 replace with getconfig
+    local retentionTime=4
 
     for link in ${rcVersions}/* ; do
         echo test ${link}
@@ -150,7 +155,7 @@ _ciLfsNotReleasedBuilds() {
     done
 
     sort -u ${tmpFile} > ${tmpFileA}
-    find ${directoryToCleanup} -mindepth 2 -maxdepth 2 -mtime +4 -type d -printf "%p\n" | sort -u > ${tmpFileB}
+    find ${directoryToCleanup} -mindepth 2 -maxdepth 2 -mtime +${retentionTime} -type d -printf "%p\n" | sort -u > ${tmpFileB}
 
     debug "list from find"
     rawDebug ${tmpFileB}
@@ -173,7 +178,9 @@ _scLfsOldReleasesOnBranches() {
     local resultFile=$1
     local tmpFileA=$(createTempFile)
     local tmpFileB=$(createTempFile)
+    # TODO: demx2fk3 2015-07-30 replace with getconfig
     local directoryToCleanup=/build/home/SC_LFS/releases/bld/
+    # TODO: demx2fk3 2015-07-30 replace with getconfig
     local days=60
 
     info "check for baselines older than ${days} days in ${directoryToCleanup}"
@@ -197,6 +204,7 @@ _ciLfsRemoteSites() {
     local resultFile=$2
 
     export siteName
+    # TODO: demx2fk3 2015-07-30 replace with getconfig
     local directoryToCleanup=/build/home/CI_LFS/Release_Candidates/
     local find=$(getConfig ADMIN_sync_share_find_command)
 
@@ -240,9 +248,12 @@ _ciLfsOldReleasesOnBranches() {
 
     local tmpFileA=$(createTempFile)
     local tmpFileB=$(createTempFile)
+    # TODO: demx2fk3 2015-07-30 replace this with getConfig
     local directoryToCleanup=/build/home/CI_LFS/Release_Candidates/
+    # TODO: demx2fk3 2015-07-30 replace this with getConfig
+    local retentionTime=60
 
-    find ${directoryToCleanup} -mindepth 2 -maxdepth 2 -mtime +60 -type d -printf "%p\n" \
+    find ${directoryToCleanup} -mindepth 2 -maxdepth 2 -mtime +${retentionTime} -type d -printf "%p\n" \
         | sort -u > ${tmpFileA}
 
     ${LFS_CI_ROOT}/bin/removalCandidates.pl  < ${tmpFileA} > ${tmpFileB}
@@ -260,12 +271,14 @@ _lfsArtifactsRemoveOldArtifacts() {
     local resultFile=$1
 
     local directoryToCleanup=$(getConfig artifactesShare)
+    # TODO: demx2fk3 2015-07-30 replace this with getConfig
+    local retentionTime=5
 
     for jobName in ${directoryToCleanup}/* 
     do 
         [[ -d ${jobName} ]] || continue
         info "checking for artifacts for ${jobName}"
-        find ${jobName} -mindepth 1 -maxdepth 1 -ctime +5 -type d -printf "%C@ %p\n" \
+        find ${jobName} -mindepth 1 -maxdepth 1 -ctime +${retentionTime} -type d -printf "%C@ %p\n" \
             | sort -n     \
             | tac         \
             | tail -n +10 \
