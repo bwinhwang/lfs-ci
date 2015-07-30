@@ -71,27 +71,37 @@
 #  @param   <none>
 #  @return  <none>
 ci_job_build() {
+    usecase_LFS_BUILD_PLATFORM
+}
+
+## @fn      usecase_LFS_BUILD_PLATFORM()
+#  @brief   run the usecase LFS BUILD PLATFORM
+#  @details build the software for a platform / hardware variant
+#  @param   <none>
+#  @return  <none>
+usecase_LFS_BUILD_PLATFORM() {
     requiredParameters UPSTREAM_PROJECT UPSTREAM_BUILD JOB_NAME BUILD_NUMBER
 
     info "building targets..."
     local subTaskName=$(getSubTaskNameFromJobName)
     mustHaveValue "${subTaskName}"
 
-    execute rm -rf ${WORKSPACE}/revisions.txt
-    createWorkspace
-
-    # release label is stored in the artifacts of fsmci of the build job
-    # TODO: demx2fk3 2014-07-15 fix me - wrong function
     copyAndExtractBuildArtifactsFromProject "${UPSTREAM_PROJECT}" "${UPSTREAM_BUILD}" "fsmci"
     mustHaveNextCiLabelName
+
+    # for the metrics database, we are installing a own exit handler to record the end of this job
+    databaseEventSubBuildStarted
+    exit_add _recordSubBuildEndEvent
 
     local label=$(getNextCiLabelName)
     mustHaveValue ${label} "label name"
     setBuildDescription "${JOB_NAME}" "${BUILD_NUMBER}" "${label}"
 
-    # for the metrics database, we are installing a own exit handler to record the end of this job
-    databaseEventSubBuildStarted
-    exit_add _recordSubBuildEndEvent
+    execute rm -rf ${WORKSPACE}/revisions.txt
+    createWorkspace
+
+    copyAndExtractBuildArtifactsFromProject "${UPSTREAM_PROJECT}" "${UPSTREAM_BUILD}" "fsmci"
+    mustHaveNextCiLabelName
 
     info "subTaskName is ${subTaskName}"
     case ${subTaskName} in
