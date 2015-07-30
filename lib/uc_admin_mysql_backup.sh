@@ -12,7 +12,7 @@ usecase_ADMIN_MYSQL_BACKUP() {
     execute mkdir -p ${HOME}/mysql_backup
     execute cd ${HOME}/mysql_backup
     [[ ! -d .git ]] && execute git init
-    execute mysqldump -h ${dbHost} -u ${dbUser} -p${dbPass} --routines ${dbName} --result-file=dump.sql 
+    execute ssh ${dbHost} mysqldump -h ${dbHost} -u ${dbUser} -p${dbPass} --routines ${dbName} --result-file=${HOME}/mysql_backup/dump.sql 
     execute git add dump.sql 
     execute git commit -q -m "backup $@"
     execute git gc -q
