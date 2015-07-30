@@ -34,6 +34,20 @@
 # ----------------------------------------------------------
 # </pre>
 
+# difference between event_type and task_name:
+
+# event_type can be
+# * build or subbuild for a build job, which is compiling software
+# * test or subtest for a test job, which is testing software
+# * package for the package job
+# * release for the release job
+# * other for other jobs, which are not listed above
+
+# task_name can be more. In most of the cases, task_name is the same as event_type,
+# but for test, it is different. There are several tests jobs, with different 
+# task_names: smoketest regulartest test testnonblocking stabilitytest ...
+# 
+
 LFS_CI_SOURCE_database='$Id$'
 
 ## @fn      databaseEventBuildStarted()
