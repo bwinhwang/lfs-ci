@@ -330,3 +330,22 @@ addTestResultsToMetricDatabase() {
                         ${resultFile}
     return
 }
+
+## @fn      mustHaveDatabaseCredentials()
+#  @brief   ensures, that the database credentials are set
+#  @param   <none>
+#  @return  <none>
+mustHaveDatabaseCredentials() {
+    [[ -z ${dbName} ]] && dbName=$(getConfig MYSQL_db_name)
+    mustHaveValue "${dbName}" "dbName"
+    [[ -z ${dbPort} ]] && dbPort=$(getConfig MYSQL_db_port)
+    mustHaveValue "${dbName}" "dbPort"
+    [[ -z ${dbUser} ]] && dbUser=$(getConfig MYSQL_db_username)
+    mustHaveValue "${dbName}" "dbUser"
+    [[ -z ${dbPass} ]] && dbPass=$(getConfig MYSQL_db_password)
+    mustHaveValue "${dbName}" "dbPass"
+    [[ -z ${dbHost} ]] && dbHost=$(getConfig MYSQL_db_hostname)
+    mustHaveValue "${dbName}" "dbHost"
+
+    return
+}
