@@ -5,7 +5,8 @@
 #
 
 #TODO:
-# - Mail von Bernhard (lfs-jenkins done)
+# - Copy LRC trunk
+# - Copy database from backup
 
 ITSME=$(basename $0)
 
@@ -19,6 +20,7 @@ BRANCH_VIEWS="trunk"
 ROOT_VIEWS="ADMIN,UBOOT"
 NESTED_VIEWS="DEV/Developer_Build,DEV/Knife_alpha"
 DISABLE_BUILD_JOBS=true
+LRC=true
 
 while getopts ":r:n:b:h:e" OPT; do
     case ${OPT} in
@@ -33,6 +35,9 @@ while getopts ":r:n:b:h:e" OPT; do
         ;;
         e)
             DISABLE_BUILD_JOBS=false
+        ;;
+        l)
+            LRC=false
         ;;
         h)
             help
@@ -64,10 +69,11 @@ cat << EOF
     CI scripting will be cloned to \$USER/lfs-ci pointing to branch development.
     Job and view configuration are copied from Jenkins server ${PROD_JENKINS_SERVER}.
     All .*_Build$ Jobs are disabled sandbox. If you want them enabled use the -e flag.
+    LRC trunk is copied per default. If this should not be done use the -l flag.
     After the script has been finished check the system settings of the new sandbox.
 
-    Usage:   $ITSME <create_views> <-r ROOT_VIEW_1,ROOT_VIEW_2,...,ROOT_VIEW_n> <-n ROOT_VIEW_1_1/SUB_VIEW,ROOT_VIEW_2_2/SUB_VIEW,...,ROOT_VIEW_n_n/SUB_VIEW> <-b trunk,FB1506> <-e>
-    Example: $ITSME <creabe_view> -r ADMIN,UBOOT -n DEV/Developer_Build
+    Usage:   $ITSME <create_views> <-r ROOT_VIEW_1,ROOT_VIEW_2,...,ROOT_VIEW_n> <-n ROOT_VIEW_1_1/SUB_VIEW,ROOT_VIEW_2_2/SUB_VIEW,...,ROOT_VIEW_n_n/SUB_VIEW> <-b trunk,FB1506> <-e> <-l>
+    Example: $ITSME <creabe_view> -r UBOOT -n DEV/Developer_Build -b trunk,FB1503 -l
 
     Default arguments are: -r ADMIN,UBOOT -n DEV/Developer_Build,DEV/Knife_alpha -b trunk
 
