@@ -97,7 +97,7 @@ uploadToSubversion() {
     return
 }
 
-## @fn      subversion()
+## @fn      subversionUploadCleanupTempDirectory()
 #  @brief   cleanup the created temp directory in svn upload function
 #  @param   <none>
 #  @return  <none>

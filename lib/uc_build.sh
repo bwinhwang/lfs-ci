@@ -71,27 +71,37 @@
 #  @param   <none>
 #  @return  <none>
 ci_job_build() {
+    usecase_LFS_BUILD_PLATFORM
+}
+
+## @fn      usecase_LFS_BUILD_PLATFORM()
+#  @brief   run the usecase LFS BUILD PLATFORM
+#  @details build the software for a platform / hardware variant
+#  @param   <none>
+#  @return  <none>
+usecase_LFS_BUILD_PLATFORM() {
     requiredParameters UPSTREAM_PROJECT UPSTREAM_BUILD JOB_NAME BUILD_NUMBER
 
     info "building targets..."
     local subTaskName=$(getSubTaskNameFromJobName)
     mustHaveValue "${subTaskName}"
 
-    execute rm -rf ${WORKSPACE}/revisions.txt
-    createWorkspace
-
-    # release label is stored in the artifacts of fsmci of the build job
-    # TODO: demx2fk3 2014-07-15 fix me - wrong function
     copyAndExtractBuildArtifactsFromProject "${UPSTREAM_PROJECT}" "${UPSTREAM_BUILD}" "fsmci"
     mustHaveNextCiLabelName
+
+    # for the metrics database, we are installing a own exit handler to record the end of this job
+    databaseEventSubBuildStarted
+    exit_add _recordSubBuildEndEvent
 
     local label=$(getNextCiLabelName)
     mustHaveValue ${label} "label name"
     setBuildDescription "${JOB_NAME}" "${BUILD_NUMBER}" "${label}"
 
-    # for the metrics database, we are installing a own exit handler to record the end of this job
-    databaseEventSubBuildStarted
-    exit_add _recordSubBuildEndEvent
+    execute rm -rf ${WORKSPACE}/revisions.txt
+    createWorkspace
+
+    copyAndExtractBuildArtifactsFromProject "${UPSTREAM_PROJECT}" "${UPSTREAM_BUILD}" "fsmci"
+    mustHaveNextCiLabelName
 
     info "subTaskName is ${subTaskName}"
     case ${subTaskName} in
@@ -156,7 +166,10 @@ usecase_LFS_BUILD_CREATE_VERSION() {
     return
 }
 
-# Legacy invocation
+## @fn      ci_job_build_version()
+#  @brief   usecase wrapper for usecase_LFS_BUILD_CREATE_VERSION
+#  @param   <none>
+#  @return  <none>
 ci_job_build_version() {
     usecase_LFS_BUILD_CREATE_VERSION
 }
@@ -220,6 +233,10 @@ _build_fsmddal_pdf() {
     return
 }
 
+## @fn      _recordSubBuildEndEvent()
+#  @brief   exit handler for recording the event for the sub build job
+#  @param   {rc}    exit code of the programm
+#  @return  <none>
 _recordSubBuildEndEvent() {
     local rc=${1}
     if [[ ${rc} -gt 0 ]] ; then
@@ -230,6 +247,10 @@ _recordSubBuildEndEvent() {
     return
 }
 
+## @fn      _recordBuildEndEvent()
+#  @brief   exit handler for recording the event for the build job
+#  @param   {rc}    exit code of the programm
+#  @return  <none>
 _recordBuildEndEvent() {
     local rc=${1}
     if [[ ${rc} -gt 0 ]] ; then

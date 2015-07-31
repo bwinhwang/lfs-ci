@@ -84,8 +84,7 @@ actionCheckout() {
 }
 
 ## @fn      actionCalculate()
-#  @brief   action ...
-#  @details 
+#  @brief   calculate action of custom SCM
 #  @param   <none>
 #  @return  <none>
 actionCalculate() {
@@ -108,6 +107,12 @@ actionCalculate() {
 }
 
 
+## @fn      _createChangelog()
+#  @brief   create the changelog
+#  @param   {oldUpstreamBuildNumber}    old upstream build number
+#  @param   {upstreamBuildNumber}       upstream build number
+#  @param   {changeLog}                 name of the changelog
+#  @return  <none>
 _createChangelog() {
     local oldUpstreamBuildNumber=$1
     local upstreamBuildNumber=$2
@@ -148,6 +153,10 @@ _createChangelog() {
     return
 }
 
+## @fn      _getUpstream()
+#  @brief   get the name of the upstream job 
+#  @param   <none>
+#  @return  <none>
 _getUpstream() {
 
     requiredParameters JOB_NAME LFS_CI_ROOT
