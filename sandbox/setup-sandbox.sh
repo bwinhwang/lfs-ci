@@ -5,7 +5,7 @@
 #
 
 #TODO:
-# - Copy database from backup
+# - Database
 
 ITSME=$(basename $0)
 
@@ -81,6 +81,7 @@ PID_FILE="${JENKINS_HOME}/jenkins.pid"
 LOG_FILE="${JENKINS_HOME}/jenkins.log"
 HOST=$(hostname)
 TMP="/tmp"
+GIT_URL="ssh://git@psulm.nsn-net.net/projects/lfs-ci.git"
 
 help() {
 cat << EOF
@@ -106,7 +107,7 @@ cat << EOF
         -b Comma separated list of BRANCHES to be copied from lfs-ci (not LRC branches). Defaluts to ${BRANCH_VIEWS}.
         -n Comma separated list of nested view that should be created in sandbox. Defaluts to ${NESTED_VIEWS}.
         -r Comma separated list of root views (top level tabs) that should be created in sandbox. Defaults to ${ROOT_VIEWS}.
-        -d Override default \$LOCAL_WORK_DIR directory. Defaults to ${LOCAL_WORK_DIR}.
+        -d Specify \$LOCAL_WORK_DIR directory for Jenkins installation. Defaults to ${LOCAL_WORK_DIR}.
         -i lfs ci user. Defaults to ${CI_USER}.
         -c lfs lrc ci user. Defaults to ${LRC_CI_USER}.
         -e (flag) Disable all .*_Build$ jobs in sandbox. Defaults to ${DISABLE_BUILD_JOBS}.
@@ -146,8 +147,8 @@ git_stuff() {
     else
         echo "    Git repo does not exist in ${LFS_CI_ROOT}."
         cd ${HOME}
-        echo "    Clone git repo psulm.nsn-net.net/projects/lfs-ci.git into ${LFS_CI_ROOT}"
-        git clone ssh://git@psulm.nsn-net.net/projects/lfs-ci.git
+        echo "    Clone git repo ${GIT_URL} into ${LFS_CI_ROOT}"
+        git clone ${GIT_URL}
         cd ${LFS_CI_ROOT}
         echo "    Checkout branch development"
         git checkout development
