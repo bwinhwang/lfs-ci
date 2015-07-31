@@ -227,22 +227,23 @@ jenkins_disable_deploy_ci_scripting_job() {
 #  @param   the mode (copy|restore).
 #  @return  <none>
 jenkins_plugins() {
-    local saveDir="Jenkins_plugins.bak"
+    local saveDir="/tmp/Jenkins_plugins.bak"
     local mode=$1
+    [[ ! -d ${saveDir} ]] && mkdir -p ${saveDir}
 
     echo "Jenkins plugins"
     if [[ ${KEEP_JENKINS_PLUGINS} == false && ${mode} == copy ]]; then
         echo "    Copy plugins from ${PROD_JENKINS_SERVER}"
-        rsync -a ${PROD_JENKINS_SERVER}:${PROD_JENKINS_HOME}/plugins /tmp/${saveDir}/
+        rsync -a ${PROD_JENKINS_SERVER}:${PROD_JENKINS_HOME}/plugins ${saveDir}/
     fi
 
     if [[ ${KEEP_JENKINS_PLUGINS} == true && ${mode} == "copy" ]]; then
         echo "    Backup local plugins"
-        cp -a ${JENKINS_PLUGINS} /tmp/${saveDir}
+        cp -a ${JENKINS_PLUGINS} ${saveDir}
     elif [[ ${mode} == "restore" ]]; then
         echo "    Restore local plugins"
-        cp -a /tmp/${saveDir} ${JENKINS_PLUGINS}
-        rm -rf /tmp/${saveDir}
+        cp -a ${saveDir}/plugins ${JENKINS_HOME}
+        rm -rf ${saveDir}
     fi
 }
 
