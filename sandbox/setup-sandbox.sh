@@ -5,22 +5,24 @@
 #
 
 #TODO:
-# - Mail von Bernhard (lfs-jenkins done)
+# - Database
 
 ITSME=$(basename $0)
 
-WORK_DIR="/var/fpwork"
-PROD_JENKINS_SERVER="lfs-ci.emea.nsn-net.net"
-PROD_JENKINS_HOME="${WORK_DIR}/psulm/lfs-jenkins/home"
-PROD_JENKINS_JOBS="${PROD_JENKINS_HOME}/jobs"
-
 # Defaults
 BRANCH_VIEWS="trunk"
-ROOT_VIEWS="ADMIN,UBOOT"
 NESTED_VIEWS="DEV/Developer_Build,DEV/Knife_alpha"
+ROOT_VIEWS="ADMIN,UBOOT"
 DISABLE_BUILD_JOBS=true
+LRC=true
+KEEP_JENKINS_PLUGINS=false
+WORK_DIR="/var/fpwork"
+LOCAL_WORK_DIR=${WORK_DIR}
+CI_USER="psulm"
+LRC_CI_USER="ca_lrcci"
+SANDBOX_USER=${USER}
 
-while getopts ":r:n:b:h:e" OPT; do
+while getopts ":r:n:b:d:i:c:h:elp" OPT; do
     case ${OPT} in
         b)
             BRANCH_VIEWS=$OPTARG
@@ -31,8 +33,23 @@ while getopts ":r:n:b:h:e" OPT; do
         r)
             ROOT_VIEWS=$OPTARG
         ;;
+        d)
+            LOCAL_WORK_DIR=$OPTARG
+        ;;
+        i)
+            CI_USER=$OPTARG
+        ;;
+        c)
+            LRC_CI_USER=$OPTARG
+        ;;
         e)
             DISABLE_BUILD_JOBS=false
+        ;;
+        l)
+            LRC=false
+        ;;
+        p)
+            KEEP_JENKINS_PLUGINS=true
         ;;
         h)
             help
@@ -41,10 +58,19 @@ while getopts ":r:n:b:h:e" OPT; do
     esac
 done
 
+PROD_JENKINS_SERVER="lfs-ci.emea.nsn-net.net"
+PROD_JENKINS_HOME="${WORK_DIR}/${CI_USER}/lfs-jenkins/home"
+PROD_JENKINS_JOBS="${PROD_JENKINS_HOME}/jobs"
+
+LRC_PROD_JENKINS_SERVER="lfs-lrc-ci.int.net.nokia.com"
+LRC_PROD_JENKINS_HOME="${WORK_DIR}/${LRC_CI_USER}/lfs-jenkins/home"
+LRC_PROD_JENKINS_JOBS="${LRC_PROD_JENKINS_HOME}/jobs"
+
 HTTP_ADDRESS="0.0.0.0"
 HTTP_PORT="8090"
 JENKNIS_VERSION="1.532.3"
-JENKINS_HOME="${WORK_DIR}/${USER}/lfs-jenkins/home"
+JENKINS_HOME="${LOCAL_WORK_DIR}/${SANDBOX_USER}/lfs-jenkins/home"
+JENKINS_PLUGINS="${JENKINS_HOME}/plugins"
 JVM_OPTS="-Djava.io.tmpdir=/var/tmp"
 JENKINS_OPTS="--httpListenAddress=${HTTP_ADDRESS} --httpPort=${HTTP_PORT}"
 LFS_CI_ROOT="${HOME}/lfs-ci"
@@ -55,22 +81,39 @@ PID_FILE="${JENKINS_HOME}/jenkins.pid"
 LOG_FILE="${JENKINS_HOME}/jenkins.log"
 HOST=$(hostname)
 TMP="/tmp"
+GIT_URL="ssh://git@psulm.nsn-net.net/projects/lfs-ci.git"
 
 help() {
 cat << EOF
 
     Script in order to setup a LFS CI sandbox on the local machine.
-    Jenkins will be installed into directory ${WORK_DIR}/\$USER/jenkins.
+
+    Jenkins will be installed into directory ${LOCAL_WORK_DIR}/\$USER/lfs-jenkins/home in
+    which \$LOCAL_WORK_DIR defaults to /var/fpwork. This can be overridden by -d LOCAL_WORK_DIR.
+    Be aware, that \$USER is always appended to \$WORK_DIR.
     CI scripting will be cloned to \$USER/lfs-ci pointing to branch development.
-    Job and view configuration are copied from Jenkins server ${PROD_JENKINS_SERVER}.
-    All .*_Build$ Jobs are disabled sandbox. If you want them enabled use the -e flag.
+    Job and view configuration are copied from Jenkins server ${PROD_JENKINS_SERVER}
+    or ${PROD_JENKINS_SERVER} respectively. Per default all .*_Build$ Jobs will be 
+    disabled in the sandbox. If you want them enabled use the -e flag. LRC trunk is 
+    copied per default except -p flag is present.
+
     After the script has been finished check the system settings of the new sandbox.
 
-    Usage:   $ITSME <create_views> <-r ROOT_VIEW_1,ROOT_VIEW_2,...,ROOT_VIEW_n> <-n ROOT_VIEW_1_1/SUB_VIEW,ROOT_VIEW_2_2/SUB_VIEW,...,ROOT_VIEW_n_n/SUB_VIEW> <-b trunk,FB1506> <-e>
-    Example: $ITSME <creabe_view> -r ADMIN,UBOOT -n DEV/Developer_Build
+    Example: $ITSME -r UBOOT -n DEV/Developer_Build -b trunk,FB1503 -l -p
+             --> Copy UBOOT, Developer_Build (within DEV view) and trunk. Skip creating LRC on sandbox (-l).
+                 Disable all .*_Build$ jobs (-e is missing) and keep already existing Jenkins plugins (-p).
 
-    Default arguments are: -r ADMIN,UBOOT -n DEV/Developer_Build,DEV/Knife_alpha -b trunk
-
+    Options and Flag:
+        -b Comma separated list of BRANCHES to be copied from lfs-ci (not LRC branches). Defaluts to ${BRANCH_VIEWS}.
+        -n Comma separated list of nested view that should be created in sandbox. Defaluts to ${NESTED_VIEWS}.
+        -r Comma separated list of root views (top level tabs) that should be created in sandbox. Defaults to ${ROOT_VIEWS}.
+        -d Specify \$LOCAL_WORK_DIR directory for Jenkins installation. Defaults to ${LOCAL_WORK_DIR}.
+        -i lfs ci user. Defaults to ${CI_USER}.
+        -c lfs lrc ci user. Defaults to ${LRC_CI_USER}.
+        -e (flag) Disable all .*_Build$ jobs in sandbox. Defaults to ${DISABLE_BUILD_JOBS}.
+        -l (flag) Create LRC trunk within sandbox. Defaults to ${LRC}.
+        -p (flag) Keep jenkins plugins from existing sandbox installation. Defaults to ${KEEP_JENKINS_PLUGINS}.
+        -h get help
 
 EOF
 }
@@ -83,9 +126,8 @@ pre_actions() {
         echo -e "\n\tERROR: Jenkins is sill running.\n"
         exit 1
     fi
-
-    if [[ ! -w ${WORK_DIR} ]]; then
-        echo -e "\n\tERROR: Ensure that ${WORK_DIR} is writable for user ${USER}.\n"
+    if [[ -d ${LOCAL_WORK_DIR} && ! -w ${LOCAL_WORK_DIR} ]]; then
+        echo -e "\n\tERROR: Ensure that ${LOCAL_WORK_DIR} is writable for user ${SANDBOX_USER}.\n"
         exit 2
     fi
 }
@@ -105,8 +147,8 @@ git_stuff() {
     else
         echo "    Git repo does not exist in ${LFS_CI_ROOT}."
         cd ${HOME}
-        echo "    Clone git repo psulm.nsn-net.net/projects/lfs-ci.git into ${LFS_CI_ROOT}"
-        git clone ssh://git@psulm.nsn-net.net/projects/lfs-ci.git
+        echo "    Clone git repo ${GIT_URL} into ${LFS_CI_ROOT}"
+        git clone ${GIT_URL}
         cd ${LFS_CI_ROOT}
         echo "    Checkout branch development"
         git checkout development
@@ -118,9 +160,9 @@ git_stuff() {
 #  @return  <none>
 jenkins_prepare_sandbox() {
     echo "Jenkins stuff..."
-    if [[ -d ${JENKINS_HOME} ]]; then 
-        echo "    Remove dir ${JENKINS_HOME}"
-        rm -rf ${WORK_DIR}/${USER}
+    if [[ -d ${LOCAL_WORK_DIR}/${SANDBOX_USER} ]]; then 
+        echo "    Remove dir ${LOCAL_WORK_DIR}/${SANDBOX_USER}"
+        rm -rf ${LOCAL_WORK_DIR}/${SANDBOX_USER}
     fi
     echo "    Create dir ${JENKINS_HOME}/jobs"
     mkdir -p ${JENKINS_HOME}/jobs
@@ -162,12 +204,19 @@ jenkins_copy_jobs() {
             done
         fi
     done
+
+    if [[ ${LRC} == true ]]; then
+        echo "    Copy jobs from ${LRC_PROD_JENKINS_SERVER}"
+        for JOB_PREFIX in LFS_CI_-_LRC_-_ LFS_Prod_-_LRC_-_ PKGPOOL_-_LRC_-_; do
+            rsync -a ${excludes} ${LRC_PROD_JENKINS_SERVER}:${LRC_PROD_JENKINS_JOBS}/${JOB_PREFIX}* ${JENKINS_HOME}/jobs/
+        done
+    fi
 }
 
-## @fn      jenkins_disable_doply_ci_scripting_job()
+## @fn      jenkins_disable_deploy_ci_scripting_job()
 #  @brief   disable some jobs in new sandbox Jenkins.
 #  @return  <none>
-jenkins_disable_doply_ci_scripting_job() {
+jenkins_disable_deploy_ci_scripting_job() {
     [[ ! -f ${JENKINS_HOME}/jobs/Admin_-_deployCiScripting/config.xml ]] && return
     echo "    Disable job Admin_-_deployCiScripting"
     sed -i -e "s,<disabled>false</disabled>,<disabled>true</disabled>," ${JENKINS_HOME}/jobs/Admin_-_deployCiScripting/config.xml
@@ -175,10 +224,26 @@ jenkins_disable_doply_ci_scripting_job() {
 
 ## @fn      jenkins_copy_plugins()
 #  @brief   copy over plugins from LFS production jenkins.
+#  @param   the mode (copy|restore).
 #  @return  <none>
-jenkins_copy_plugins() {
-    echo "    Copy plugins from ${PROD_JENKINS_SERVER}"
-    rsync -a ${PROD_JENKINS_SERVER}:${PROD_JENKINS_HOME}/plugins ${JENKINS_HOME}
+jenkins_plugins() {
+    local saveDir="Jenkins_plugins.bak"
+    local mode=$1
+
+    echo "Jenkins plugins"
+    if [[ ${KEEP_JENKINS_PLUGINS} == false && ${mode} == copy ]]; then
+        echo "    Copy plugins from ${PROD_JENKINS_SERVER}"
+        rsync -a ${PROD_JENKINS_SERVER}:${PROD_JENKINS_HOME}/plugins /tmp/${saveDir}/
+    fi
+
+    if [[ ${KEEP_JENKINS_PLUGINS} == true && ${mode} == "copy" ]]; then
+        echo "    Backup local plugins"
+        cp -a ${JENKINS_PLUGINS} /tmp/${saveDir}
+    elif [[ ${mode} == "restore" ]]; then
+        echo "    Restore local plugins"
+        cp -a /tmp/${saveDir} ${JENKINS_PLUGINS}
+        rm -rf /tmp/${saveDir}
+    fi
 }
 
 ## @fn      jenkins_get_configs()
@@ -209,6 +274,11 @@ jenkins_get_configs() {
         echo "    Get ${parentTab}/view/${childTab} view configuration"
         curl -k https://${PROD_JENKINS_SERVER}/view/${parentTab}/view/${childTab}/config.xml --noproxy localhost > ${TMP}/${parentTab}_${childTab}_view_config.xml 2> /dev/null
     done
+
+    if [[ ${LRC} == true ]]; then
+        echo "    Get LRC view configuration"
+        curl -k https://${LRC_PROD_JENKINS_SERVER}/view/LRC/config.xml --noproxy localhost > ${TMP}/LRC_view_config.xml 2> /dev/null
+    fi
 }
 
 ## @fn      jenkins_start_sandbox()
@@ -234,7 +304,7 @@ jenkins_configure_sandbox() {
     echo "Invoke groovy script on new sandbox..."
     #TODO: HC path to .gry Script
     java -jar ${JENKINS_CLI_JAR} -s http://localhost:${HTTP_PORT}/ groovy \
-        /home/eambrosc/nsn/LFS/lfs-ci/sandbox/setup-sandbox.gry create_views ${ROOT_VIEWS} ${NESTED_VIEWS} ${BRANCH_VIEWS}
+        /home/eambrosc/nsn/LFS/lfs-ci/sandbox/setup-sandbox.gry create_views ${ROOT_VIEWS} ${NESTED_VIEWS} ${BRANCH_VIEWS} ${LRC}
 
     echo "Configure Jenkins top branch views (tabs) in new sandbox"
     for VIEW in $(echo ${BRANCH_VIEWS} | tr ',' ' '); do
@@ -255,6 +325,11 @@ jenkins_configure_sandbox() {
         echo "    Configure ${parentTab}/view/${childTab} view"
         curl http://localhost:${HTTP_PORT}/view/${parentTab}/view/${childTab}/config.xml --noproxy localhost --data-binary @${TMP}/${parentTab}_${childTab}_view_config.xml
     done
+
+    if [[ ${LRC} == true ]]; then
+        echo "    Configure LRC view"
+        curl http://localhost:${HTTP_PORT}/view/LRC/config.xml --noproxy localhost --data-binary @${TMP}/LRC_view_config.xml
+    fi
 }
 
 ## @fn      jenkins_configure_primary_view()
@@ -278,7 +353,7 @@ jenkins_configure_master_executors() {
 #  @brief   set version number of Jenkins
 #  @return  <none>
 jenkins_configure_version() {
-    echo "Set version number of Jenkins to ${version}"
+    echo "Set version number of Jenkins to ${JENKNIS_VERSION}"
     sed -i -e "s,<version>1.0</version>,<version>${JENKNIS_VERSION}</version>," ${JENKINS_HOME}/config.xml
 }
 
@@ -306,16 +381,6 @@ jenkins_configure_node_properties() {
     </nodeProperties>," ${JENKINS_HOME}/config.xml
 }
 
-## @fn      jenkins_reload_config()
-#  @brief   reload jenkins config from disk.
-#  @return  <none>
-jenkins_reload_config() {
-    echo "Reload Jenkins configuration from disk"
-    java -jar ${JENKINS_CLI_JAR} -s http://localhost:${HTTP_PORT} reload-configuration
-    echo "    wait for Jenkins master node"
-    java -jar ${JENKINS_CLI_JAR} -s http://localhost:${HTTP_PORT} wait-node-online ""
-}
-
 ## @fn      jenkins_disable_build_jobs()
 #  @brief   disable all jobs ending matching .*_Build$
 #  @return  <none>
@@ -327,24 +392,14 @@ jenkins_disable_build_jobs() {
     fi
 }
 
-
-## @fn      jenkins_stuff()
-#  @brief   invoke all jenkins_* functions.
+## @fn      jenkins_reload_config()
+#  @brief   reload jenkins config from disk.
 #  @return  <none>
-jenkins_stuff() {
-    jenkins_prepare_sandbox
-    jenkins_copy_jobs
-    jenkins_disable_doply_ci_scripting_job
-    jenkins_copy_plugins
-    jenkins_get_configs
-    jenkins_start_sandbox
-    jenkins_configure_sandbox
-    jenkins_configure_primary_view
-    jenkins_configure_master_executors
-    jenkins_configure_version
-    jenkins_configure_node_properties
-    jenkins_disable_build_jobs
-    jenkins_reload_config
+jenkins_reload_config() {
+    echo "Reload Jenkins configuration from disk"
+    java -jar ${JENKINS_CLI_JAR} -s http://localhost:${HTTP_PORT} reload-configuration
+    echo "    wait for Jenkins master node"
+    java -jar ${JENKINS_CLI_JAR} -s http://localhost:${HTTP_PORT} wait-node-online ""
 }
 
 ## @fn      post_actions()
@@ -356,6 +411,26 @@ post_actions() {
     echo "    - This jenkins is not secured."
     echo "    - If security is needed, activate \"Enable security\" via http://${HOST}:${HTTP_PORT}/configureSecurity."
     echo "    - Java process ID is $(cat ${PID_FILE})"
+}
+
+## @fn      jenkins_stuff()
+#  @brief   invoke all jenkins_* functions.
+#  @return  <none>
+jenkins_stuff() {
+    jenkins_plugins "copy"
+    jenkins_prepare_sandbox
+    jenkins_copy_jobs
+    jenkins_disable_deploy_ci_scripting_job
+    jenkins_get_configs
+    jenkins_plugins "restore"
+    jenkins_start_sandbox
+    jenkins_configure_sandbox
+    jenkins_configure_primary_view
+    jenkins_configure_master_executors
+    jenkins_configure_version
+    jenkins_configure_node_properties
+    jenkins_disable_build_jobs
+    jenkins_reload_config
 }
 
 main() {
