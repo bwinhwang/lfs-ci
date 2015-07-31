@@ -11,6 +11,7 @@ def j = Jenkins.instance
 what=args[0]
 rootViews = []
 nestedViews = []
+lrc = true
 
 if(args.length > 1) {
     rootViews=args[1].split(",")
@@ -22,6 +23,12 @@ if(args.length > 2) {
 
 if(args.length > 3) {
     branchViews=args[3].split(",")
+}
+
+if(args.length > 4) {
+    if(args[4] == "false") {
+        lrc = false
+    }
 }
 
 if(what == "create_views") {
@@ -47,6 +54,11 @@ if(what == "create_views") {
     for(view in branchViews) {
         println("    create branch view $view")
         v = new SectionedView(view)
+        j.addView(v)
+    }
+    if(lrc) {
+        println("    create root view LRC")
+        v = new SectionedView("LRC")
         j.addView(v)
     }
 }
