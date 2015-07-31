@@ -91,7 +91,7 @@ cat << EOF
     Jenkins will be installed into directory ${LOCAL_WORK_DIR}/\$USER/lfs-jenkins/home in
     which \$LOCAL_WORK_DIR defaults to /var/fpwork. This can be overridden by -d LOCAL_WORK_DIR.
     Be aware, that \$USER is always appended to \$WORK_DIR.
-    CI scripting will be cloned to \$USER/lfs-ci pointing to branch development.
+    CI scripting will be cloned to \${LFS_CI_ROOT} pointing to branch development.
     Job and view configuration are copied from Jenkins server ${PROD_JENKINS_SERVER}
     or ${PROD_JENKINS_SERVER} respectively. Per default all .*_Build$ Jobs will be 
     disabled in the sandbox. If you want them enabled use the -e flag. LRC trunk is 
@@ -104,7 +104,7 @@ cat << EOF
                  Disable all .*_Build$ jobs (-e is missing) and keep already existing Jenkins plugins (-p).
 
     Options and Flag:
-        -b Comma separated list of BRANCHES to be copied from lfs-ci (not LRC branches). Defaluts to ${BRANCH_VIEWS}.
+        -b Comma separated list of BRANCHES to be copied from LFS CI (not LRC branches). Defaluts to ${BRANCH_VIEWS}.
         -n Comma separated list of nested view that should be created in sandbox. Defaluts to ${NESTED_VIEWS}.
         -r Comma separated list of root views (top level tabs) that should be created in sandbox. Defaults to ${ROOT_VIEWS}.
         -d Specify \$LOCAL_WORK_DIR directory for Jenkins installation. Defaults to ${LOCAL_WORK_DIR}.
@@ -302,9 +302,8 @@ jenkins_start_sandbox() {
 #  @return  <none>
 jenkins_configure_sandbox() {
     echo "Invoke groovy script on new sandbox..."
-    #TODO: HC path to .gry Script
     java -jar ${JENKINS_CLI_JAR} -s http://localhost:${HTTP_PORT}/ groovy \
-        /home/eambrosc/nsn/LFS/lfs-ci/sandbox/setup-sandbox.gry create_views ${ROOT_VIEWS} ${NESTED_VIEWS} ${BRANCH_VIEWS} ${LRC}
+        ${LFS_CI_ROOT}/sandbox/setup-sandbox.gry create_views ${ROOT_VIEWS} ${NESTED_VIEWS} ${BRANCH_VIEWS} ${LRC}
 
     echo "Configure Jenkins top branch views (tabs) in new sandbox"
     for VIEW in $(echo ${BRANCH_VIEWS} | tr ',' ' '); do
@@ -372,7 +371,7 @@ jenkins_configure_node_properties() {
            </default>\n\
            <int>2</int>\n\
            <string>LFS_CI_ROOT</string>\n\
-           <string>${HOME}/lfs-ci</string>\n\
+           <string>${LFS_CI_ROOT}</string>\n\
            <string>LFS_CI_SHARE_MIRROR</string>\n\
            <string>/var/fpwork</string>\n\
          </tree-map>\n\
