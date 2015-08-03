@@ -455,26 +455,26 @@ post_actions() {
 jenkins_stuff() {
     jenkins_plugins "copy"
     jenkins_prepare_sandbox
-#    jenkins_copy_jobs
-#    jenkins_disable_deploy_ci_scripting_job
-#    jenkins_get_configs
+    jenkins_copy_jobs
+    jenkins_disable_deploy_ci_scripting_job
+    jenkins_get_configs
     jenkins_plugins "restore"
-#    jenkins_start_sandbox
-#    jenkins_configure_sandbox
-#    jenkins_configure_primary_view
-#    jenkins_configure_master_executors
-#    jenkins_configure_version
-#    jenkins_configure_node_properties
-#    jenkins_disable_build_jobs
-#    jenkins_reload_config
+    jenkins_start_sandbox
+    jenkins_configure_sandbox
+    jenkins_configure_primary_view
+    jenkins_configure_master_executors
+    jenkins_configure_version
+    jenkins_configure_node_properties
+    jenkins_disable_build_jobs
+    jenkins_reload_config
 }
 
 remove_sandbox() {
     local ans=""
     read -p "Removing ${JENKINS_HOME} and $LFS_CI_ROOT} (y|N): " ans
     if [[ "${ans}" == "y" || "${ans}" == "Y" ]]; then
-        echo rm -rf ${JENKINS_HOME}
-        echo rm -rf ${LFS_CI_ROOT}
+        rm -rf ${JENKINS_HOME}
+        rm -rf ${LFS_CI_ROOT}
     else
         echo "Nothing was deleted"
     fi
