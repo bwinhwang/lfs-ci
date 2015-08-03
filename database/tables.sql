@@ -19,6 +19,7 @@ CREATE TABLE branches (
     date_created       DATETIME NOT NULL,
     date_closed        DATETIME,
     comment            TEXT,
+    branch_description TEXT,
 
     PRIMARY KEY (id),
     INDEX(branch_name)
@@ -40,10 +41,11 @@ CREATE TABLE builds (
 
 DROP TABLE IF EXISTS events;
 CREATE TABLE events (
-    id INT NOT NULL AUTO_INCREMENT,
-    event_name VARCHAR(128) NOT NULL,
-    event_type VARCHAR(128),
-    event_description TEXT,
+    id INT       NOT NULL AUTO_INCREMENT,
+    event_type   VARCHAR(128) NOT NULL DEFAULT 'build',
+    event_state  VARCHAR(128) NOT NULL DEFAULT 'started',,
+    product_name VARCHAR(128),
+    task_name    VARCHAR(128),
 
     PRIMARY KEY (id),
     INDEX(id)
@@ -51,11 +53,13 @@ CREATE TABLE events (
 
 DROP TABLE IF EXISTS build_events;
 CREATE TABLE build_events (
-    id         INT NOT NULL AUTO_INCREMENT,
-    build_id   INT NOT NULL,
-    event_id   INT NOT NULL,
-    timestamp  DATETIME NOT NULL,
-    comment    TEXT,
+    id           INT NOT NULL AUTO_INCREMENT,
+    build_id     INT NOT NULL,
+    event_id     INT NOT NULL,
+    timestamp    DATETIME NOT NULL,
+    comment      TEXT,
+    job_name     VARCHAR(128) NOT NULL,
+    build_number INT NOT NULL,
 
     PRIMARY KEY (id),
     FOREIGN KEY (event_id)
