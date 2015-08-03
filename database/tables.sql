@@ -106,6 +106,14 @@ CREATE TABLE test_results (
         REFERENCES test_result_names(id)
 );
 
+DROP TABLE IF EXISTS test_cases;
+CREATE TABLE test_cases (
+    id                  INT NOT NULL AUTO_INCREMENT,
+    test_case_name      VARCHAR(128) NOT NULL,
+    test_case_owner     VARCHAR(128) NOT NULL,
+
+    PRIMARY KEY (id)
+);
 
 DROP TABLE IF EXISTS test_case_results;
 CREATE TABLE test_case_results (
@@ -126,11 +134,3 @@ CREATE TABLE test_case_results (
         ON DELETE RESTRICT
 );
 
-DROP TABLE IF EXISTS test_cases;
-CREATE TABLE test_cases (
-    id                  INT NOT NULL AUTO_INCREMENT,
-    test_case_name      VARCHAR(128) NOT NULL,
-    test_case_owner     VARCHAR(128) NOT NULL,
-
-    PRIMARY KEY (id)
-);
