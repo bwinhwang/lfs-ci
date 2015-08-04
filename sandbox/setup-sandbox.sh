@@ -4,9 +4,6 @@
 # Create a copy of production Jenkins on local machine.
 #
 
-#TODO:
-# - Database
-
 ITSME=$(basename $0)
 
 # Defaults
@@ -24,47 +21,47 @@ LFS_CI_ROOT="${HOME}/lfs-ci"
 SANDBOX_USER=${USER}
 PURGE_SANDBOX="false"
 
-while getopts ":r:n:b:w:i:c:h:s:delp" OPT; do
-    case ${OPT} in
-        b)
-            BRANCH_VIEWS=$OPTARG
-        ;;
-        n)
-            NESTED_VIEWS=$OPTARG
-        ;;
-        r)
-            ROOT_VIEWS=$OPTARG
-        ;;
-        w)
-            LOCAL_WORK_DIR=$OPTARG
-        ;;
-        i)
-            CI_USER=$OPTARG
-        ;;
-        c)
-            LRC_CI_USER=$OPTARG
-        ;;
-        s)
-            LFS_CI_ROOT=$OPTARG
-        ;;
-        d)
-            PURGE_SANDBOX="true"
-        ;;
-        e)
-            DISABLE_BUILD_JOBS="false"
-        ;;
-        l)
-            LRC="false"
-        ;;
-        p)
-            KEEP_JENKINS_PLUGINS="true"
-        ;;
-        *)
-            echo "Use -h option to get help."
-            exit 0
-        ;;
-    esac
-done
+usage() {
+cat << EOF
+
+    Script in order to setup a LFS CI sandbox on local machine.
+
+    IMPORTANT: 
+        Flag -d is interactive!
+        Before or after running this script probably you might run setup-database.sh.
+
+    Jenkins will be installed into directory \${LOCAL_WORK_DIR}/$USER/${JENKINS_DIR}/home. This
+    can be overridden by using -w LOCAL_WORK_DIR.
+    CI scripting will be cloned to \${LFS_CI_ROOT} pointing to branch development in which
+    \${LFS_CI_ROOT} defaults to \${USER}/lfs-ci but can be overriden by -s LFS_CI_ROOT.
+    Job and view configuration are copied from Jenkins server ${PROD_JENKINS_SERVER}
+    or ${PROD_JENKINS_SERVER} respectively. Per default all .*_Build$ Jobs will be 
+    disabled in the sandbox. If you want them enabled use the -e flag. LRC trunk is 
+    copied per default except -l flag is present.
+
+    After the script has been finished check the system settings of the new sandbox Jenkins.
+
+    Example: $ITSME -r UBOOT -n DEV/Developer_Build -b trunk,FB1503 -l -p
+             --> Copy UBOOT, Developer_Build (within DEV view) and trunk. Skip creating LRC on sandbox (-l).
+                 Disable all .*_Build$ jobs (-e is missing) and keep already existing Jenkins plugins (-p).
+
+    Options and Flags:
+        -b Comma separated list of BRANCHES to be copied from LFS CI (not LRC branches). Defaults to ${BRANCH_VIEWS}.
+        -n Comma separated list of nested view that should be created in sandbox. Defaults to ${NESTED_VIEWS}.
+        -r Comma separated list of root views (top level tabs) that should be created in sandbox. Defaults to ${ROOT_VIEWS}.
+        -w Specify \$LOCAL_WORK_DIR directory for Jenkins installation. Defaults to ${LOCAL_WORK_DIR}.
+        -i LFS CI user. Defaults to ${CI_USER}.
+        -c LFS LRC CI user. Defaults to ${LRC_CI_USER}.
+        -s root directory of lfs ci scripting. Defaults to ${LFS_CI_ROOT}.
+        -d Delete local sandbox installation. Works for standard installation (default values) only.
+        -e (flag) Disable all .*_Build$ jobs in sandbox. Defaults to ${DISABLE_BUILD_JOBS}.
+        -l (flag) Create LRC trunk within sandbox. Defaults to ${LRC}.
+        -p (flag) Keep jenkins plugins from existing sandbox installation. Defaults to ${KEEP_JENKINS_PLUGINS}.
+        -h Get help
+
+EOF
+    exit 0
+}
 
 JENKINS_DIR="lfs-jenkins" # subdirectory within $WORK_DIR/$USER
 PROD_JENKINS_SERVER="lfs-ci.emea.nsn-net.net"
@@ -91,43 +88,6 @@ GIT_URL="ssh://git@psulm.nsn-net.net/projects/lfs-ci.git"
 SANDBOX_SCRIPT_DIR="${LFS_CI_ROOT}/sandbox"
 HOST=$(hostname)
 TMP="/tmp"
-
-usage() {
-cat << EOF
-
-    Script in order to setup a LFS CI sandbox on the local machine.
-
-    Jenkins will be installed into directory \${LOCAL_WORK_DIR}/$USER/${JENKINS_DIR}/home. This
-    can be overridden by using -w LOCAL_WORK_DIR.
-    CI scripting will be cloned to \${LFS_CI_ROOT} pointing to branch development in which
-    \${LFS_CI_ROOT} defaults to \${USER}/lfs-ci but can be overriden by -s LFS_CI_ROOT.
-    Job and view configuration are copied from Jenkins server ${PROD_JENKINS_SERVER}
-    or ${PROD_JENKINS_SERVER} respectively. Per default all .*_Build$ Jobs will be 
-    disabled in the sandbox. If you want them enabled use the -e flag. LRC trunk is 
-    copied per default except -l flag is present.
-
-    After the script has been finished check the system settings of the new sandbox Jenkins.
-
-    Example: $ITSME -r UBOOT -n DEV/Developer_Build -b trunk,FB1503 -l -p
-             --> Copy UBOOT, Developer_Build (within DEV view) and trunk. Skip creating LRC on sandbox (-l).
-                 Disable all .*_Build$ jobs (-e is missing) and keep already existing Jenkins plugins (-p).
-
-    Options and Flag:
-        -b Comma separated list of BRANCHES to be copied from LFS CI (not LRC branches). Defaluts to ${BRANCH_VIEWS}.
-        -n Comma separated list of nested view that should be created in sandbox. Defaluts to ${NESTED_VIEWS}.
-        -r Comma separated list of root views (top level tabs) that should be created in sandbox. Defaults to ${ROOT_VIEWS}.
-        -w Specify \$LOCAL_WORK_DIR directory for Jenkins installation. Defaults to ${LOCAL_WORK_DIR}.
-        -i lfs ci user. Defaults to ${CI_USER}.
-        -c lfs lrc ci user. Defaults to ${LRC_CI_USER}.
-        -s root dirctory of lfs ci scripting. Defaults to ${LFS_CI_ROOT}.
-        -d delete local sandbox installation. Works for standard installation only (-w and -s were not used for installation).
-        -e (flag) Disable all .*_Build$ jobs in sandbox. Defaults to ${DISABLE_BUILD_JOBS}.
-        -l (flag) Create LRC trunk within sandbox. Defaults to ${LRC}.
-        -p (flag) Keep jenkins plugins from existing sandbox installation. Defaults to ${KEEP_JENKINS_PLUGINS}.
-        -h get help
-
-EOF
-}
 
 ## @fn      pre_actions()
 #  @brief   check needed requirements
@@ -259,7 +219,7 @@ jenkins_plugins() {
 
     echo "Jenkins plugins"
     if [[ "${KEEP_JENKINS_PLUGINS}" == "false" && "${mode}" == "copy" ]]; then
-        echo "    Copy plugins from ${PROD_JENKINS_SERVER}"
+        echo "    Copy plugins from ${PROD_JENKINS_SERVER} to ${saveDir}"
         rsync -a ${PROD_JENKINS_SERVER}:${PROD_JENKINS_HOME}/plugins ${saveDir}/
     fi
 
@@ -267,7 +227,7 @@ jenkins_plugins() {
         echo "    Backup local plugins to ${saveDir}"
         cp -a ${JENKINS_PLUGINS} ${saveDir}
     elif [[ "${mode}" == "restore" ]]; then
-        echo "    Restore local plugins from ${saveDir}"
+        echo "    Copy plugins from ${saveDir} to ${JENKINS_HOME}"
         cp -a ${saveDir}/plugins ${JENKINS_HOME}
         rm -rf ${saveDir}
     fi
@@ -469,20 +429,64 @@ jenkins_stuff() {
 
 remove_sandbox() {
     local ans=""
-    read -p "Removing ${JENKINS_HOME} and $LFS_CI_ROOT} (y|N): " ans
+    read -p "Removing ${LOCAL_WORK_DIR}/${SANDBOX_USER}/${JENKINS_DIR} and $LFS_CI_ROOT} (y|N): " ans
     if [[ "${ans}" == "y" || "${ans}" == "Y" ]]; then
-        rm -rf ${JENKINS_HOME}
+        rm -rf ${LOCAL_WORK_DIR}/${SANDBOX_USER}/${JENKINS_DIR}
         rm -rf ${LFS_CI_ROOT}
     else
         echo "Nothing was deleted"
     fi
 }
 
+get_args() {
+    while getopts ":r:n:b:w:i:c:s:delph" OPT; do
+        case ${OPT} in
+            b)
+                BRANCH_VIEWS=$OPTARG
+            ;;
+            n)
+                NESTED_VIEWS=$OPTARG
+            ;;
+            r)
+                ROOT_VIEWS=$OPTARG
+            ;;
+            w)
+                LOCAL_WORK_DIR=$OPTARG
+            ;;
+            i)
+                CI_USER=$OPTARG
+            ;;
+            c)
+                LRC_CI_USER=$OPTARG
+            ;;
+            s)
+                LFS_CI_ROOT=$OPTARG
+            ;;
+            d)
+                PURGE_SANDBOX="true"
+            ;;
+            e)
+                DISABLE_BUILD_JOBS="false"
+            ;;
+            l)
+                LRC="false"
+            ;;
+            p)
+                KEEP_JENKINS_PLUGINS="true"
+            ;;
+            h)
+                usage
+            ;;
+            *)
+                echo "Use -h option to get help."
+                exit 0
+            ;;
+        esac
+    done
+}
+
 main() {
-    if [[ "$1" == "--help" || "$1" == "-h" ]]; then
-        usage
-        exit 0
-    fi
+    get_args $*
 
     if [[ "${PURGE_SANDBOX}" == "true" ]]; then
         remove_sandbox

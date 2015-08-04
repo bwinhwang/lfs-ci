@@ -1,6 +1,11 @@
 #!/bin/bash
 
+ITSME=$(basename $0)
+LFS_CI_ROOT_DB="${LFS_CI_ROOT}/database"
+TMP="/tmp"
+
 # Test database
+#DB_HOST="lfs-ci-metrics-database.dynamic.nsn-net.net"
 DB_HOST="lfs-ci-metrics-database.dynamic.nsn-net.net"
 DB_USER="test_lfspt"
 DB_NAME="test_lfspt"
@@ -13,37 +18,6 @@ DB_PROD_USER="lfspt"
 DB_PROD_NAME="lfspt"
 DB_PROD_PASS=""
 
-TMP="/tmp"
-ITSME=$(basename $0)
-
-while getopts ":s:t:p:q:" OPT; do
-    case ${OPT} in
-        s)
-            DB_PROD_HOST=$OPTARG
-        ;;
-        t)
-            DB_HOST=$OPTARG
-        ;;
-        p)
-            DB_PROD_PASS=$OPTARG
-        ;;
-        q)
-            DB_PASS=$OPTARG
-        ;;
-        u)
-            DB_PROD_USER=$OPTARG
-        ;;
-        v)
-            DB_USER=$OPTARG
-        ;;
-        *)
-            echo "Use -h option to get help"
-            exit 0
-        ;;
-    esac
-done
-
-
 usage() {
 cat << EOF
 
@@ -53,18 +27,23 @@ cat << EOF
     The tables "${TABLES_TO_COPY}" are taken over from production database ${DB_PROD_NAME}
     running on ${DB_PROD_HOST}.
 
-    Arguments (all of them are optional):
-        -s Host name of production database. Defaults to ${DB_PROD_HOST}.
-        -t Host name for test database. Defaults to ${DB_HOST}.
+    Arguments:
         -p Password of production database.
         -q Password for test database.
+        -s Host name of production database. Defaults to ${DB_PROD_HOST}.
+        -t Host name for test database. Defaults to ${DB_HOST}.
         -u User name of production database. Defaults to ${DB_PROD_USER}
         -v User name for test database. Defaults to ${DB_USER}
 
 EOF
+    exit 0
 }
 
 pre_checks() {
+    if [[ -z ${LFS_CI_ROOT} ]]; then
+        echo "ERROR: \$LFS_CI_ROOT must be set"
+        exit 1
+    fi
     if [[ -z ${DB_PASS} || -z ${DB_PROD_PASS} ]]; then
         echo "ERROR: Both mysql passwords are required"
         exit 1
@@ -76,33 +55,69 @@ pre_checks() {
 }
 
 create_db() {
-    echo "DROP DATABASE ${DB_NAME}" | mysql -u ${DB_USER} --password=${DB_PASS}
-    echo "CREATE DATABASE ${DB_NAME}" | mysql -u ${DB_USER} --password=${DB_PASS}
-    cat ${LFS_CI_ROOT}/database/tables.sql | mysql -u ${DB_USER} --password=${DB_PASS} ${DB_NAME}
-    cat ${LFS_CI_ROOT}/database/views.sql | mysql -u ${DB_USER} --password=${DB_PASS} ${DB_NAME}
-    cat ${LFS_CI_ROOT}/database/procedures.sql | mysql -u ${DB_USER} --password=${DB_PASS} ${DB_NAME}
-    cat ${LFS_CI_ROOT}/database/ysmv2.tables.sql | mysql -u ${DB_USER} --password=${DB_PASS} ${DB_NAME}
-    cat ${LFS_CI_ROOT}/database/ysmv2.sql | mysql -u ${DB_USER} --password=${DB_PASS} ${DB_NAME}
+    echo "Create database..."
+    echo "    Drop database ${DB_NAME} on ${DB_HOST}"
+    echo "DROP DATABASE ${DB_NAME}" | mysql -h ${DB_HOST} -u ${DB_USER} --password=${DB_PASS}
+    echo "    Create database ${DB_NAME} on ${DB_HOST}"
+    echo "CREATE DATABASE ${DB_NAME}" | mysql -h ${DB_HOST} -u ${DB_USER} --password=${DB_PASS}
+    echo "    Create tables in database ${DB_NAME} on host ${DB_HOST}"
+    cat ${LFS_CI_ROOT_DB}/tables.sql | mysql -h ${DB_HOST} -u ${DB_USER} --password=${DB_PASS} ${DB_NAME}
+    cat ${LFS_CI_ROOT_DB}/ysmv2.tables.sql | mysql -h ${DB_HOST} -u ${DB_USER} --password=${DB_PASS} ${DB_NAME}
+    echo "    Create views in database ${DB_NAME} on host ${DB_HOST}"
+    cat ${LFS_CI_ROOT_DB}/views.sql | mysql -h ${DB_HOST} -u ${DB_USER} --password=${DB_PASS} ${DB_NAME}
+    echo "    Create functions in database ${DB_NAME} on host ${DB_HOST}"
+    cat ${LFS_CI_ROOT_DB}/procedures.sql | mysql -h ${DB_HOST} -u ${DB_USER} --password=${DB_PASS} ${DB_NAME}
+    cat ${LFS_CI_ROOT_DB}/ysmv2.sql | mysql -h ${DB_HOST} -u ${DB_USER} --password=${DB_PASS} ${DB_NAME}
 }
 
-copy_db_tables() {
+import_tables_from_prod() {
+    echo "Export/import DB tables..."
     for DB_TABLE in ${TABLES_TO_COPY}; do
+        echo "    Dump table ${DB_TABLE} of database ${DB_PROD_NAME} running on host ${DB_PROD_HOST}"
         mysqldump --password=${DB_PROD_PASS} -h ${DB_PROD_HOST} -u ${DB_PROD_USER} ${DB_PROD_NAME} ${DB_TABLE} > ${TMP}/${DB_NAME}_${DB_TABLE}.sql
+        echo "    Import table ${DB_TABLE} into database ${DB_NAME} on host ${DB_HOST}"
         cat ${TMP}/${DB_NAME}_${DB_TABLE}.sql | mysql -u ${DB_USER} --password=${DB_PASS} ${DB_NAME}
         rm -f ${TMP}/${DB_NAME}_${DB_TABLE}.sql
     done
 }
 
+get_args() {
+    while getopts ":s:t:p:q:u:v:h" OPT; do
+        case ${OPT} in
+            s)
+                DB_PROD_HOST=$OPTARG
+            ;;
+            t)
+                DB_HOST=$OPTARG
+            ;;
+            p)
+                DB_PROD_PASS=$OPTARG
+            ;;
+            q)
+                DB_PASS=$OPTARG
+            ;;
+            u)
+                DB_PROD_USER=$OPTARG
+            ;;
+            v)
+                DB_USER=$OPTARG
+            ;;
+            h)
+                usage
+            ;;
+            *)
+                echo "Use -h option to get help"
+                exit 0
+            ;;
+        esac
+    done
+}
+
 main() {
-
-    if [[ "$1" == "--help" || "$1" == "-h" || -z $1 ]]; then
-        usage
-        exit 0
-    fi
-
+    get_args $*
     pre_checks
     create_db
-    copy_db_tables
+    import_tables_from_prod
 }
 
 main $*
