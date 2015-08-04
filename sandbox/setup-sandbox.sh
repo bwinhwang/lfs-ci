@@ -59,8 +59,8 @@ while getopts ":r:n:b:w:i:c:h:s:delp" OPT; do
         p)
             KEEP_JENKINS_PLUGINS="true"
         ;;
-        h)
-            help
+        *)
+            echo "Use -h option to get help."
             exit 0
         ;;
     esac
@@ -92,9 +92,7 @@ SANDBOX_SCRIPT_DIR="${LFS_CI_ROOT}/sandbox"
 HOST=$(hostname)
 TMP="/tmp"
 
-echo "---> $LOCAL_WORK_DIR"
-
-help() {
+usage() {
 cat << EOF
 
     Script in order to setup a LFS CI sandbox on the local machine.
@@ -482,7 +480,7 @@ remove_sandbox() {
 
 main() {
     if [[ "$1" == "--help" || "$1" == "-h" ]]; then
-        help
+        usage
         exit 0
     fi
 
