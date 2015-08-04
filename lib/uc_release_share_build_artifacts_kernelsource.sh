@@ -1,6 +1,6 @@
 #!/bin/bash
 
-## @fn      extractArtifactsOnReleaseShareKernelSources()
+## @fn      usecase_LFS_RELEASE_SHARE_BUILD_ARTIFACTS_KERNELSOURCES()
 #  @brief   extract the artifacts (linux kernel sources only!!) of build job on the 
 #           local workspace and copy the artifacts to the /build share.
 #  @details structure on the share is
@@ -8,7 +8,7 @@
 #  @param   {jobName}      name of the job
 #  @param   {buildNumber}  number of the build
 #  @return  <none>
-extractArtifactsOnReleaseShareKernelSources() {
+usecase_LFS_RELEASE_SHARE_BUILD_ARTIFACTS_KERNELSOURCES() {
     local testedJobName=$1
     local testedBuildNumber=$2
 

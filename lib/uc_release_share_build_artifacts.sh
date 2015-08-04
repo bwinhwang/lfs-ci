@@ -2,7 +2,7 @@
 
 [[ -z ${LFS_CI_SOURCE_release} ]] && source ${LFS_CI_ROOT}/lib/release.sh
 
-## @fn      extractArtifactsOnReleaseShare()
+## @fn      usecase_LFS_RELEASE_SHARE_BUILD_ARTIFACTS()
 #  @brief   extract the artifacts of build job on the local workspace and copy the artifacts to the
 #           /build share.
 #  @details structure on the share is
@@ -10,7 +10,7 @@
 #  @param   {jobName}      name of the job
 #  @param   {buildNumber}  number of the build
 #  @return  <none>
-extractArtifactsOnReleaseShare() {
+usecase_LFS_RELEASE_SHARE_BUILD_ARTIFACTS() {
 
     requiredParameters LFS_PROD_RELEASE_PREVIOUS_TAG_NAME LFS_PROD_RELEASE_CURRENT_TAG_NAME
 

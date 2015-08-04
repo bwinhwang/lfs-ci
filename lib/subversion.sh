@@ -285,6 +285,10 @@ mustExistBranchInSubversion() {
 
     info "checking for branch ${url} / ${branch}"
 
+    # TODO: demx2fk3 2015-08-04 enable this code
+    # local svnCommitMessagePrefix=$(getConfig LFS_PROD_uc_release_svn_message_prefix)
+    # mustHaveValue "${svnCommitMessagePrefix}" "svn commit message"
+
     echo "creating a new branch: ${branch}" > ${logMessage}
     if ! existsInSubversion ${url} ${branch} ; then
         echo "BTSPS-1657 IN rh: DESRIPTION: NOJCHK : create dir ${url}/${branch}" > ${logMessage}

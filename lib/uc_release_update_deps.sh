@@ -1,11 +1,11 @@
 #!/bin/bash
 
-## @fn      updateDependencyFiles()
+## @fn      usecase_LFS_RELEASE_UPDATE_DEPS()
 #  @brief   update the dependency files for all components of a build
 #  @param   {jobName}        name of the build job
 #  @param   {buildNumber}    numfer of the build job
 #  @return  <none>
-updateDependencyFiles() {
+usecase_LFS_RELEASE_UPDATE_DEPS() {
 
     # TODO: demx2fk3 2015-08-04 add to artifacts: externalComponents
     mustBePreparedForReleaseTask

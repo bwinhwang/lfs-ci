@@ -1,12 +1,12 @@
 #!/bin/bash
-## @fn      createTagOnSourceRepository()
+## @fn      usecase_LFS_RELEASE_CREATE_SOURCE_TAG()
 #  @brief   create a tag(s) on source repository 
 #  @details create tags in the source repository (os/tags) and subsystems (subsystems/tags)
 #  @param   {jobName}        a job name
 #  @param   {buildNumber}    a build number
 #  @param   <none>
 #  @return  <none>
-createTagOnSourceRepository() {
+usecase_LFS_RELEASE_CREATE_SOURCE_TAG() {
     local jobName=$1
     local buildNumber=$2
 

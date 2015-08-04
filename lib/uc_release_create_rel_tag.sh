@@ -1,48 +1,23 @@
 #!/bin/bash
 
-## @fn      createReleaseTag()
+## @fn      usecase_LFS_RELEASE_CREATE_RELEASE_TAG()
 #  @brief   create the release tag
 #  @details the release tag / branch just contains a svn:externals with two externals to sdk and lfs_os tag
 #  @param   <none>
 #  @return  <none>
-createReleaseTag() {
+usecase_LFS_RELEASE_CREATE_RELEASE_TAG() {
 
     mustBePreparedForReleaseTask
+
+    requiredParameters LFS_PROD_RELEASE_CURRENT_TAG_NAME \
+                       LFS_PROD_RELEASE_CURRENT_REL_TAG_NAME
 
     local workspace=$(getWorkspaceName)
     mustHaveWorkspaceName 
 
     # get os label
-    local osLabelName=${LFS_PROD_RELEASE_CURRENT_TAG_NAME}
-    local osReleaseLabelName=$(sed "s/_LFS_OS_/_LFS_REL_/" <<< ${osLabelName} )
-    mustHaveValue "${osLabelName}" "no os label name"
-
-    # check for branch
-    local svnUrl=$(getConfig LFS_PROD_svn_delivery_release_repos_url)
-    mustHaveValue "${svnUrl}" "svn url"
-
-    local svnRepoName=$(getConfig LFS_PROD_svn_delivery_repos_name -t tagName:${osLabelName})
-    mustHaveValue "${svnRepoName}" "svn url"
-
-    local svnCommitMessagePrefix=$(getConfig LFS_PROD_uc_release_svn_message_prefix)
-    mustHaveValue "${svnCommitMessagePrefix}" "svn commit message"
-
-    local branch=$(getBranchName)
-    mustHaveBranchName
-
-    # get sdk label
-    componentsFile=${workspace}/bld/bld-externalComponents-summary/externalComponents   
-    mustExistFile ${componentsFile}
-
-    local sdk2=$(getConfig sdk2 -f ${componentsFile})
-    local sdk3=$(getConfig sdk3 -f ${componentsFile})
-    local sdk=$(getConfig sdk -f ${componentsFile})
-
-    info "using sdk2 ${sdk2}"
-    info "using sdk3 ${sdk3}"
-    info "using sdk  ${sdk}"
-    info "using lfs os ${osLabelName}"
-    info "using lfs rel ${osReleaseLabelName}"
+    info "using build name: ${LFS_PROD_RELEASE_CURRENT_TAG_NAME}"
+    info "creating LFS REL: ${LFS_PROD_RELEASE_CURRENT_REL_TAG_NAME}"
 
     # check for the branch
     _mustHaveBranchInSubversion
@@ -57,45 +32,98 @@ createReleaseTag() {
     return
 }
 
+## @fn      _mustHaveBranchInSubversion()
+#  @brief   ensures, that the branch exists in subversion
+#  @param   <none>
+#  @return  <none>
 _mustHaveBranchInSubversion() {
-    info "svn repos url is ${svnUrl}/branches/${branch}"
+
+    # check for branch
+    local svnUrl=$(getConfig LFS_PROD_svn_delivery_release_repos_url \
+                              -t tagName:LFS_PROD_RELEASE_CURRENT_TAG_NAME)
+    mustHaveValue "${svnUrl}" "svn url"
+
+    local branchName=$(getBranchName)
+    mustHaveBranchName
+
+    info "svn repos url is ${svnUrl}/branches/${branchName}"
     mustExistBranchInSubversion ${svnUrl} tags 
     mustExistBranchInSubversion ${svnUrl} branches 
-    shouldNotExistsInSubversion ${svnUrl}/tags/ "${osReleaseLabelName}"
+    mustExistBranchInSubversion ${svnUrl}/branches/ ${branchName}
 
-    if ! existsInSubversion ${svnUrl}/branches ${branch} ; then
-        local logMessage=$(createTempFile)
-        echo "${svnCommitMessagePrefix} : creating a new branch ${branch}" > ${logMessage}
-        svnMkdir -F ${logMessage} ${svnUrl}/branches/${branch} 
-    fi
+    shouldNotExistsInSubversion ${svnUrl}/tags/ ${LFS_PROD_RELEASE_CURRENT_REL_TAG_NAME}
+
+    return
 }
-_createReleaseTag_setSvnExternals() {
-    local svnExternalsFile=$(createTempFile)
-    echo "/isource/svnroot/${svnRepoName}/os/tags/${osLabelName} os " >> ${svnExternalsFile}
 
+_createReleaseTag_setSvnExternals() {
+    requiredParameters LFS_PROD_RELEASE_CURRENT_TAG_NAME 
+
+    local workspace=$(getWorkspaceName)
+    mustHaveWorkspaceName
+
+    local branchName=$(getBranchName)
+    mustHaveBranchName
+
+    # get os label
+    local osLabelName=${LFS_PROD_RELEASE_CURRENT_TAG_NAME}
+    mustHaveValue "${osLabelName}" "no os label name"
+
+    local svnUrl=$(getConfig LFS_PROD_svn_delivery_release_repos_url \
+                              -t tagName:${osLabelName})
+    mustHaveValue "${svnUrl}" "svn url"
+
+    local svnRepoName=$(getConfig LFS_PROD_svn_delivery_repos_name \
+                                  -t tagName:${osLabelName})
+    mustHaveValue "${svnRepoName}" "svn url"
+
+    # get sdk label
+    componentsFile=${workspace}/bld/bld-externalComponents-summary/externalComponents   
+    mustExistFile ${componentsFile}
+
+    local sdk2=$(getConfig sdk2 -f ${componentsFile})
+    local sdk3=$(getConfig sdk3 -f ${componentsFile})
+    local sdk=$(getConfig  sdk  -f ${componentsFile})
     local sdkExternalLine=$(getConfig LFS_uc_release_create_release_tag_sdk_external_line -t sdk:${sdk} -t sdk2:${sdk2} -t sdk3:${sdk3})
     mustHaveValue "${sdkExternalLine}" "sdk external line"
-    echo "${sdkExternalLine}" >> ${svnExternalsFile}
-    info "updating svn:externals"
-    svnCheckout --ignore-externals ${svnUrl}/branches/${branch} ${workspace}/svn
 
-    cd ${workspace}/svn
-    svnPropSet svn:externals -F ${svnExternalsFile} .
-    local logMessage=$(createTempFile)
-    echo "${svnCommitMessagePrefix} : updating svn:externals for ${osReleaseLabelName}" > ${logMessage}
-    svnCommit -F ${logMessage} .
+    local svnExternalsFile=${workspace}/svnExternals
+    echo "/isource/svnroot/${svnRepoName}/os/tags/${osLabelName} os " >> ${svnExternalsFile}
+    echo "${sdkExternalLine}" >> ${svnExternalsFile}
+
+    info "updating svn:externals"
+    svnCheckout --ignore-externals ${svnUrl}/branches/${branchName} ${workspace}/svn
+
+    svnPropSet svn:externals -F ${svnExternalsFile} ${workspace}/svn/
+
+    info "commiting svn:externals"
+    local commitMessage=${workspace}/commitMessagge
+    local svnCommitMessagePrefix=$(getConfig LFS_PROD_uc_release_svn_message_prefix)
+    echo "${svnCommitMessagePrefix} : updating svn:externals for ${LFS_PROD_RELEASE_CURRENT_REL_TAG_NAME}" > ${commitMessage}
+    svnCommit -F ${commitMessage} ${workspace}/svn/
+
+    return
 }
 
 _createReleaseTag() {
+    local workspace=$(getWorkspaceName)
+    mustHaveWorkspaceName
+
+    local branchName=$(getBranchName)
+    mustHaveBranchName
+
+    local svnUrl=$(getConfig LFS_PROD_svn_delivery_release_repos_url \
+                              -t tagName:LFS_PROD_RELEASE_CURRENT_TAG_NAME)
+    mustHaveValue "${svnUrl}" "svn url"
 
     local canCreateReleaseTag=$(getConfig LFS_CI_uc_release_can_create_release_tag)
 
-    # make a tag
-    info "create tag ${osReleaseLabelName}"
+    info "creating tag ${LFS_PROD_RELEASE_CURRENT_REL_TAG_NAME}"
     if [[ ${canCreateReleaseTag} ]] ; then
-        local logMessage=$(createTempFile)
-        echo "${svnCommitMessagePrefix} : create new tag ${osReleaseLabelName}" > ${logMessage}
-        svnCopy -F ${logMessage} ${svnUrl}/branches/${branch} ${svnUrl}/tags/${osReleaseLabelName}
+        local commitMessage=${workspace}/commitMessagge
+        local svnCommitMessagePrefix=$(getConfig LFS_PROD_uc_release_svn_message_prefix)
+        echo "${svnCommitMessagePrefix} : create new tag ${LFS_PROD_RELEASE_CURRENT_REL_TAG_NAME}" > ${logMessage}
+        svnCopy -F ${commitMessage} ${svnUrl}/branches/${branchName} ${svnUrl}/tags/${LFS_PROD_RELEASE_CURRENT_REL_TAG_NAME}
     else
         warning "creating the release tag is disabled in config"
     fi

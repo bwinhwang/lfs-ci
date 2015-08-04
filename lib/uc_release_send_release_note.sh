@@ -1,10 +1,10 @@
 #!/bin/bash
 
-## @fn      sendReleaseNote()
+## @fn      usecase_LFS_RELEASE_SEND_RELEASE_NOTE()
 #  @brief   create a release note and send it to the community
 #  @param   <none>
 #  @return  <none>
-sendReleaseNote() {
+usecase_LFS_RELEASE_SEND_RELEASE_NOTE() {
     requiredParameters LFS_CI_CONFIG_FILE LFS_CI_ROOT
 
     local testedJobName=$1

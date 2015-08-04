@@ -11,7 +11,6 @@
 [[ -z ${LFS_CI_SOURCE_fingerprint}     ]] && source ${LFS_CI_ROOT}/lib/fingerprint.sh
 [[ -z ${LFS_CI_SOURCE_createWorkspace} ]] && source ${LFS_CI_ROOT}/lib/createWorkspace.sh
 
-
 ## @fn      ci_job_release()
 #  @brief   dispatcher for the release jobs
 #  @param   <none>
@@ -22,45 +21,22 @@ ci_job_release() {
 
     info "task is ${subJob}"
     case ${subJob} in
-        update_dependency_files)
-            updateDependencyFiles "${buildJobName}" "${buildBuildNumber}"
-        ;;
-        upload_to_subversion)
-            local branch=$(getConfig LFS_PROD_uc_release_upload_to_subversion_map_location_to_branch)
-            mustHaveValue "${branch}" "branch name"
-            # from subversion.sh
-            uploadToSubversion "${releaseDirectory}/os" "${branch}" "upload of build ${JOB_NAME} / ${BUILD_NUMBER}"
-        ;;
-        build_results_to_share)
-            extractArtifactsOnReleaseShare "${buildJobName}" "${buildBuildNumber}"
-        ;;
-        build_results_to_share_kernelsources)
-            extractArtifactsOnReleaseShareKernelSources "${buildJobName}" "${buildBuildNumber}"
-        ;;
-        create_release_tag)
-            createReleaseTag ${buildJobName} ${buildBuildNumber}
-        ;;
-        create_proxy_release_tag) 
-            # createProxyReleaseTag ${buildJobName} ${buildBuildNumber}
-            warning "disabled due to BI#293"
-        ;;
-        create_source_tag) 
-            createTagOnSourceRepository ${buildJobName} ${buildBuildNumber}
-        ;;
-        pre_release_checks)
+        create_proxy_release_tag)             warning "disabled due to BI#293"                        ;;
+        update_dependency_files)              usecase_LFS_RELEASE_UPDATE_DEPS                         ;;
+        upload_to_subversion)                 usecase_LFS_RELEASE_UPLOAD_TO_SUBVERSION                ;;
+        build_results_to_share)               usecase_LFS_RELEASE_SHARE_BUILD_ARTIFACTS               ;;
+        build_results_to_share_kernelsources) usecase_LFS_RELEASE_SHARE_BUILD_ARTIFACTS_KERNELSOURCES ;;
+        create_release_tag)                   usecase_LFS_RELEASE_CREATE_RELEASE_TAG                  ;;
+        create_source_tag)                    usecase_LFS_RELEASE_CREATE_SOURCE_TAG                   ;;
+        pre_release_checks) 
             databaseEventReleaseStarted
-            prereleaseChecks
-        ;;
-        summary)
-            sendReleaseNote "${TESTED_BUILD_JOBNAME}" "${TESTED_BUILD_NUMBER}" \
-                            "${buildJobName}"         "${buildBuildNumber}"
+            usecase_LFS_RELEASE_PRE_RELEASE_CHECKS ;;
+        summary) 
+            usecase_LFS_RELEASE_SEND_RELEASE_NOTE
             databaseEventReleaseFinished
             createArtifactArchive
         ;;
-        *)
-            error "subJob not known (${subJob})"
-            exit 1
-        ;;
+        *) fatal "subJob not known (${subJob})" ;;
     esac
 
     return
