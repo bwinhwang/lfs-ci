@@ -5,7 +5,6 @@ LFS_CI_ROOT_DB="${LFS_CI_ROOT}/database"
 TMP="/tmp"
 
 # Test database
-#DB_HOST="lfs-ci-metrics-database.dynamic.nsn-net.net"
 DB_HOST="lfs-ci-metrics-database.dynamic.nsn-net.net"
 DB_USER="test_lfspt"
 DB_NAME="test_lfspt"
