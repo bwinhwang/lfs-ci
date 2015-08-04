@@ -137,11 +137,14 @@ usecase_LFS_BUILD_CREATE_VERSION() {
     [[ ${branch} == "pronb-developer" ]] && branch="trunk"
 
     _set_db_credentials
-    local oldBuildName=$(_get_last_successful_build_name)
+    local oldBuildName=""
     local buildName=$(_get_new_build_name)
-
-    if [[ ${oldBuildName} == ${buildName} ]]; then
-        fatal "old and new build name are the same"
+    # In case of 1'st build there is not old build name
+    if [[ ! "$(echo $buildName | grep _0001$)" ]]; then
+        oldBuildName=$(_get_last_successful_build_name)
+        if [[ ${oldBuildName} == ${buildName} ]]; then
+            fatal "old and new build name are the same"
+        fi
     fi
 
     info "new build name is ${buildName}"
@@ -150,7 +153,9 @@ usecase_LFS_BUILD_CREATE_VERSION() {
     debug "writing new build name file in workspace ${workspace}"
     execute mkdir -p ${workspace}/bld/bld-fsmci-summary
     echo ${buildName}    > ${workspace}/bld/bld-fsmci-summary/label
-    echo ${oldBuildName} > ${workspace}/bld/bld-fsmci-summary/oldLabel
+    if [[ ${oldBuildName} ]]; then
+        echo ${oldBuildName} > ${workspace}/bld/bld-fsmci-summary/oldLabel
+    fi
     
     createFingerprintFile
 
