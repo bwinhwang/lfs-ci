@@ -139,12 +139,13 @@ usecase_LFS_BUILD_CREATE_VERSION() {
     _set_db_credentials
     local oldBuildName=""
     local buildName=$(_get_new_build_name)
-    # In case of 1'st build there is not old build name
     if [[ ! "$(echo $buildName | grep _0001$)" ]]; then
         oldBuildName=$(_get_last_successful_build_name)
         if [[ ${oldBuildName} == ${buildName} ]]; then
             fatal "old and new build name are the same"
         fi
+    else
+        echo "In case of 1'st build there is no old build name"
     fi
 
     info "new build name is ${buildName}"
