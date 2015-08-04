@@ -54,30 +54,36 @@ usecase_PKGPOOL_BUILD() {
     info "building pkgpool..."
     execute -l ${buildLogFile} ${gitWorkspace}/build ${buildParameters} 
 
-    # TODO: demx2fk3 2015-03-09 add logfiles to artifacts
+    # put build log for later analysis into the artifacts
+    execute mkdir -p ${workspace}/bld/bld-pkgpool-release/
+    execute cp ${buildLogFile} ${workspace}/bld/bld-pkgpool-release/build.log
 
-    local releaseTag="$(execute -n sed -ne 's,^\(\[[0-9 :-]*\] \)\?release \([^ ]*\) complete,\2,p' ${buildLogFile})"
-    mustHaveValue "${releaseTag}" "release tag"
+    # in case of build from scratch (own jenkins job), we do not have a release tag.
+    # => no release
+    local canCreateReleaseTag=$(getConfig PKGPOOL_CI_uc_build_can_create_tag_in_git)
+    if [[ ${canCreateReleaseTag} ]] ; then
+        local releaseTag="$(execute -n sed -ne 's,^\(\[[0-9 :-]*\] \)\?release \([^ ]*\) complete,\2,p' ${buildLogFile})"
+        mustHaveValue "${releaseTag}" "release tag"
 
-    info "new pkgpool release tag is ${releaseTag}"
+        info "new pkgpool release tag is ${releaseTag}"
 
-    cd ${gitWorkspace}
-    local oldReleaseTag=$(gitDescribe --abbrev=0)
-    gitTagAndPushToOrigin ${releaseTag}
+        cd ${gitWorkspace}
+        local oldReleaseTag=$(gitDescribe --abbrev=0)
+        gitTagAndPushToOrigin ${releaseTag}
 
-    local gitRevision=$(gitRevParse HEAD)
+        local gitRevision=$(gitRevParse HEAD)
 
-    setBuildDescription "${JOB_NAME}" "${BUILD_NUMBER}" "${releaseTag}"
+        setBuildDescription "${JOB_NAME}" "${BUILD_NUMBER}" "${releaseTag}"
 
-    mkdir -p ${workspace}/bld/bld-pkgpool-release/
-    echo ${oldReleaseTag}                   > ${workspace}/bld/bld-pkgpool-release/oldLabel
-    echo ${releaseTag}                      > ${workspace}/bld/bld-pkgpool-release/label
-    echo ${gitRevision}                     > ${workspace}/bld/bld-pkgpool-release/gitrevision
+        echo ${oldReleaseTag} > ${workspace}/bld/bld-pkgpool-release/oldLabel
+        echo ${releaseTag}    > ${workspace}/bld/bld-pkgpool-release/label
+        echo ${gitRevision}   > ${workspace}/bld/bld-pkgpool-release/gitrevision
 
-    execute -n sed -ne 's|^src [^ ]* \(.*\)$|PS_LFS_PKG = \1|p' ${workspace}/pool/*.meta |\
-        sort -u > ${workspace}/bld/bld-pkgpool-release/forReleaseNote.txt
+        execute -n sed -ne 's|^src [^ ]* \(.*\)$|PS_LFS_PKG = \1|p' ${workspace}/pool/*.meta |\
+            sort -u > ${workspace}/bld/bld-pkgpool-release/forReleaseNote.txt
 
-    rawDebug ${workspace}/bld/bld-pkgpool-release/forReleaseNote.txt
+        rawDebug ${workspace}/bld/bld-pkgpool-release/forReleaseNote.txt
+    fi
 
     createArtifactArchive
 
@@ -316,3 +322,25 @@ usecase_PKGPOOL_UPDATE_DEPS() {
     return
 }
 
+## @fn      usecase_PKGPOOL_CHECK_FOR_FAILED_VTC()
+#  @brief   checks the build.log of pkgpool for a string, which indicates, that vtc build failed.
+#  @details vtc is a addon from Transport, which is build within the pkgpool. Current state (2015-08-01) is,
+#           that this addon is experimantal and should not be blocking.
+#           This usecase was requested by "Sapalski, Samuel (Nokia - DE/Ulm)" <samuel.sapalski@nokia.com>.
+#           See also BI #462
+#  @param   <none>
+#  @return  <none>
+usecase_PKGPOOL_CHECK_FOR_FAILED_VTC() {
+    mustHavePreparedWorkspace --no-build-description
+
+    local workspace=$(getWorkspaceName)
+    mustHaveWorkspaceName
+
+    # grep returns 0, if the string was found in the file, otherwise 1
+    if execute -i grep --silent "LVTC FSMR4 BUILD FAILED" ${workspace}/bld/bld-pkgpool-release/build.log ; then
+        execute -i grep -A 100 -B 100 "LVTC FSMR4 BUILD FAILED" ${workspace}/bld/bld-pkgpool-release/build.log 
+        fatal "found LVTC FSMR4 BUILD FAILED in build.log of pkgpool"
+    fi
+
+    return
+}

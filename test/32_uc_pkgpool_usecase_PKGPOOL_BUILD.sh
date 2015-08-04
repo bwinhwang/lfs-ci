@@ -37,6 +37,7 @@ oneTimeSetUp() {
     }
     getConfig() {
         case $1 in 
+            PKGPOOL_CI_uc_build_can_create_tag_in_git) echo ${UT_CAN_RELEASE} ;;
             *) echo $1 ;;
         esac
     }
@@ -46,6 +47,10 @@ oneTimeSetUp() {
 
 setUp() {
     cp -f /dev/null ${UT_MOCKED_COMMANDS}
+    export WORKSPACE=$(createTempDirectory)
+    export JOB_NAME=PKGPOOL_CI_-_trunk_-_Build
+    export BUILD_NUMBER=123
+    mkdir ${WORKSPACE}/src/
 }
 
 tearDown() {
@@ -55,11 +60,7 @@ tearDown() {
 }
 
 test1() {
-    export WORKSPACE=$(createTempDirectory)
-    export JOB_NAME=PKGPOOL_CI_-_trunk_-_Build
-    export BUILD_NUMBER=123
-
-    mkdir ${WORKSPACE}/src/
+    export UT_CAN_RELEASE=1
 
     assertTrue "usecase_PKGPOOL_BUILD"
 
@@ -69,12 +70,34 @@ execute rm -rf ${WORKSPACE}/src/src
 gitReset --hard
 execute ./bootstrap
 execute -l TempFile ${WORKSPACE}/src/build PKGPOOL_additional_build_parameters
+execute mkdir -p ${WORKSPACE}/workspace/bld/bld-pkgpool-release/
+execute cp TempFile ${WORKSPACE}/workspace/bld/bld-pkgpool-release/build.log
 execute -n sed -ne s,^\(\[[0-9 :-]*\] \)\?release \([^ ]*\) complete,\2,p TempFile
 gitDescribe --abbrev=0
 gitTagAndPushToOrigin PKGPOOL_FOO
 execute -n git rev-parse HEAD
 setBuildDescription PKGPOOL_CI_-_trunk_-_Build 123 PKGPOOL_FOO
 execute -n sed -ne s|^src [^ ]* \(.*\)$|PS_LFS_PKG = \1|p ${WORKSPACE}/workspace/pool/*.meta
+createArtifactArchive 
+EOF
+    assertExecutedCommands ${expect}
+
+    return
+}
+
+test2() {
+    export UT_CAN_RELEASE=
+
+    assertTrue "usecase_PKGPOOL_BUILD"
+
+    local expect=$(createTempFile)
+    cat <<EOF > ${expect}
+execute rm -rf ${WORKSPACE}/src/src
+gitReset --hard
+execute ./bootstrap
+execute -l TempFile ${WORKSPACE}/src/build PKGPOOL_additional_build_parameters
+execute mkdir -p ${WORKSPACE}/workspace/bld/bld-pkgpool-release/
+execute cp TempFile ${WORKSPACE}/workspace/bld/bld-pkgpool-release/build.log
 createArtifactArchive 
 EOF
     assertExecutedCommands ${expect}
