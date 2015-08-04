@@ -49,7 +49,7 @@ test1() {
 
     local expect=$(createTempFile)
     cat <<EOF > ${expect}
-specialBuildCreateWorkspaceAndBuild 
+specialBuildCreateWorkspaceAndBuild DEV
 EOF
     assertExecutedCommands ${expect}
 
@@ -63,7 +63,7 @@ test2() {
 
     local expect=$(createTempFile)
     cat <<EOF > ${expect}
-specialBuildCreateWorkspaceAndBuild 
+specialBuildCreateWorkspaceAndBuild DEV
 EOF
     assertExecutedCommands ${expect}
 
