@@ -11,9 +11,9 @@
 #  @return  <none>
 #  @throws  raise an error, if there is a major problem with the release
 usecase_LFS_RELEASE_PRE_RELEASE_CHECKS() {
-    requiredParameters LFS_PROD_RELEASE_PREVIOUS_TAG_NAME LFS_PROD_RELEASE_PREVIOUS_TAG_NAME_REL
-
     mustBePreparedForReleaseTask
+
+    requiredParameters LFS_PROD_RELEASE_PREVIOUS_TAG_NAME LFS_PROD_RELEASE_PREVIOUS_TAG_NAME_REL
 
     local canCreateReleaseInWorkflowTool=$(getConfig LFS_CI_uc_release_can_create_release_in_wft)
 

@@ -5,79 +5,27 @@
 #  @param   <none>
 #  @return  <none>
 usecase_LFS_RELEASE_SEND_RELEASE_NOTE() {
-    requiredParameters LFS_CI_CONFIG_FILE LFS_CI_ROOT
+    # TODO: demx2fk3 2015-08-05 add externalComponents fsmpsl psl fsmci lrcpsl from to artifacts
+    mustBePreparedForReleaseTask
 
-    local testedJobName=$1
-    local testedBuildNumber=$2
-    local buildJobName=$3
-    local buildBuildNumber=$4
-    
-    # TODO: demx2fk3 2014-06-25 remove the export block and do it in a different way
-    # TODO: demx2fk3 2015-05-26 this is required for the perl skript at the moment. The script is using the internal function getConfig, but don't know the used environment variables from the scripting
-    export productName=$(getProductNameFromJobName)
-    export taskName=$(getTaskNameFromJobName)
-    export subTaskName=$(getSubTaskNameFromJobName)
-    export location=$(getLocationName)
-    export config=$(getTargetBoardName)
+    requiredParameters LFS_CI_CONFIG_FILE LFS_CI_ROOT       \
+                       LFS_PROD_RELEASE_CURRENT_TAG_NAME    \
+                       LFS_PROD_RELEASE_CURRENT_TAG_NAME_REL
 
-    local canSendReleaseNote=$(getConfig LFS_CI_uc_release_can_send_release_note)
+    _workflowToolCreateRelease
+    _sendReleaseNote
+    _storeArtifactsFromRelease
 
+    return
+}
+
+_storeArtifactsFromRelease() {
     local workspace=$(getWorkspaceName)
     mustHaveWorkspaceName
     mustHaveWritableWorkspace
 
-    local releaseTagName=${LFS_PROD_RELEASE_CURRENT_TAG_NAME_REL}
-    local oldReleaseTagName=${LFS_PROD_RELEASE_PREVIOUS_TAG_NAME}
     local osTagName=${LFS_PROD_RELEASE_CURRENT_TAG_NAME}
-    mustHaveValue "${releaseTagName}" "next release tag name"
     mustHaveValue "${osTagName}" "next os tag name"
-    mustHaveValue "${oldReleaseTagName}" "old release tag name"
-
-    # TODO FIME
-    copyArtifactsToWorkspace "${buildJobName}" "${buildBuildNumber}" "externalComponents fsmpsl psl fsmci lrcpsl"
-
-    info "collect revisions from all sub build jobs"
-    sort -u ${workspace}/bld/bld-externalComponents-*/usedRevisions.txt > ${workspace}/revisions.txt
-
-    copyImportantNoteFilesFromSubversionToWorkspace 
-
-    # create the os or uboot release note
-    info "new release label is ${releaseTagName} based on ${oldReleaseTagName}"
-    _createLfsOsReleaseNote ${buildJobName} ${buildBuildNumber}
-
-    createReleaseInWorkflowTool ${osTagName} ${workspace}/os/os_releasenote.xml
-    uploadToWorkflowTool        ${osTagName} ${workspace}/os/os_releasenote.xml
-    uploadToWorkflowTool        ${osTagName} ${workspace}/os/releasenote.txt
-    uploadToWorkflowTool        ${osTagName} ${workspace}/os/changelog.xml
-    uploadToWorkflowTool        ${osTagName} ${workspace}/revisions.txt
-
-    [[ -e ${workspace}/importantNote.txt ]] &&
-        uploadToWorkflowTool    ${osTagName} ${workspace}/importantNote.txt
-
-    execute cp -f ${workspace}/os/os_releasenote.xml                                 ${workspace}/bld/bld-lfs-release/lfs_os_releasenote.xml
-    execute cp -f ${workspace}/os/releasenote.txt                                    ${workspace}/bld/bld-lfs-release/lfs_os_releasenote.txt
-    execute cp -f ${workspace}/os/changelog.xml                                      ${workspace}/bld/bld-lfs-release/lfs_os_changelog.xml
-    execute cp -f ${workspace}/revisions.txt                                         ${workspace}/bld/bld-lfs-release/revisions.txt
-    execute cp -f ${workspace}/bld/bld-externalComponents-summary/externalComponents ${workspace}/bld/bld-lfs-release/externalComponents.txt
-    [[ -e ${workspace}/importantNote.txt ]] &&
-        execute cp -f ${workspace}/importantNote.txt                                 ${workspace}/bld/bld-lfs-release/importantNote.txt
-
-    if [[ ${productName} == "LFS" ]] ; then
-        _createLfsRelReleaseNoteXml ${releaseTagName} ${workspace}/rel/releasenote.xml
-        createReleaseInWorkflowTool ${releaseTagName} ${workspace}/rel/releasenote.xml
-        uploadToWorkflowTool        ${releaseTagName} ${workspace}/rel/releasenote.xml
-
-        execute cp -f ${workspace}/rel/releasenote.xml ${workspace}/bld/bld-lfs-release/lfs_rel_releasenote.xml
-    fi
-
-    if [[ ${canSendReleaseNote} ]] ; then
-        info "send release note"
-        execute ${LFS_CI_ROOT}/bin/sendReleaseNote  -r ${workspace}/os/releasenote.txt \
-                                                    -t ${releaseTagName}               \
-                                                    -f ${LFS_CI_CONFIG_FILE}
-    else
-        warning "sending the release note is disabled in config"
-    fi
 
     for file in ${workspace}/bld/bld-lfs-release/* ; do
         [[ -f ${file} ]] || continue
@@ -96,6 +44,91 @@ usecase_LFS_RELEASE_SEND_RELEASE_NOTE() {
     return
 }
 
+_sendReleaseNote() {
+    local workspace=$(getWorkspaceName)
+    mustHaveWorkspaceName
+    mustHaveWritableWorkspace
+    local releaseTagName=${LFS_PROD_RELEASE_CURRENT_TAG_NAME_REL}
+    mustHaveValue "${releaseTagName}" "next release tag name"
+    local canSendReleaseNote=$(getConfig LFS_CI_uc_release_can_send_release_note)
+    if [[ ${canSendReleaseNote} ]] ; then
+        info "send release note"
+        execute ${LFS_CI_ROOT}/bin/sendReleaseNote  -r ${workspace}/os/releasenote.txt \
+                                                    -t ${releaseTagName}               \
+                                                    -f ${LFS_CI_CONFIG_FILE}
+    else
+        warning "sending the release note is disabled in config"
+    fi
+}
+
+_workflowToolCreateRelease() {
+    requiredParameters LFS_PROD_RELEASE_CURRENT_TAG_NAME     \
+                       LFS_PROD_RELEASE_CURRENT_TAG_NAME_REL \
+                       LFS_PROD_RELEASE_PREVIOUS_TAG_NAME
+    local workspace=$(getWorkspaceName)
+    mustHaveWorkspaceName
+    mustHaveWritableWorkspace
+
+    local productName=$(getProductNameFromJobName)
+    mustHaveValue "${productName}" "product name from job name"
+
+    local osTagName=${LFS_PROD_RELEASE_CURRENT_TAG_NAME}
+    mustHaveValue "${osTagName}" "next os tag name"
+
+    local releaseTagName=${LFS_PROD_RELEASE_CURRENT_TAG_NAME_REL}
+    mustHaveValue "${releaseTagName}" "next release tag name"
+
+    info "collect revisions from all sub build jobs"
+    sort -u ${workspace}/bld/bld-externalComponents-*/usedRevisions.txt > ${workspace}/revisions.txt
+
+    copyImportantNoteFilesFromSubversionToWorkspace 
+
+    # create the os or uboot release note
+    info "new release label is ${releaseTagName} based on ${LFS_PROD_RELEASE_PREVIOUS_TAG_NAME}"
+    _createLfsOsReleaseNote 
+
+    createReleaseInWorkflowTool ${osTagName} ${workspace}/os/os_releasenote.xml
+    uploadToWorkflowTool        ${osTagName} ${workspace}/os/os_releasenote.xml
+    uploadToWorkflowTool        ${osTagName} ${workspace}/os/releasenote.txt
+    uploadToWorkflowTool        ${osTagName} ${workspace}/os/changelog.xml
+    uploadToWorkflowTool        ${osTagName} ${workspace}/revisions.txt
+
+    [[ -e ${workspace}/importantNote.txt ]] &&
+        uploadToWorkflowTool    ${osTagName} ${workspace}/importantNote.txt
+
+    _copyFileToBldDirectory ${workspace}/os/os_releasenote.xml \
+        ${workspace}/bld/bld-lfs-release/lfs_os_releasenote.xml
+    _copyFileToBldDirectory ${workspace}/os/releasenote.txt \
+        ${workspace}/bld/bld-lfs-release/lfs_os_releasenote.txt
+    _copyFileToBldDirectory ${workspace}/os/changelog.xml \
+        ${workspace}/bld/bld-lfs-release/lfs_os_changelog.xml
+    _copyFileToBldDirectory ${workspace}/revisions.txt \
+        ${workspace}/bld/bld-lfs-release/revisions.txt 
+    _copyFileToBldDirectory ${workspace}/bld/bld-externalComponents-summary/externalComponents \
+        ${workspace}/bld/bld-lfs-release/externalComponents.txt
+    _copyFileToBldDirectory ${workspace}/importantNote.txt \
+        ${workspace}/bld/bld-lfs-release/importantNote.txt
+
+    if [[ ${productName} == "LFS" ]] ; then
+        _createLfsRelReleaseNoteXml ${releaseTagName} ${workspace}/rel/releasenote.xml
+        createReleaseInWorkflowTool ${releaseTagName} ${workspace}/rel/releasenote.xml
+        uploadToWorkflowTool        ${releaseTagName} ${workspace}/rel/releasenote.xml
+
+        _copyFileToBldDirectory ${workspace}/rel/releasenote.xml ${workspace}/bld/bld-lfs-release/lfs_rel_releasenote.xml
+    fi
+
+    return
+}
+
+_copyFileToBldDirectory() {
+    local srcFile=${1}
+    local dstFile=${2}
+
+    mkdir -p $(dirname ${dstFile})
+    [[ -e ${srcFile} ]] && \
+        execute cp -f ${srcFile} ${dstFile}
+    return
+}
 
 ## @fn      copyImportantNoteFilesFromSubversionToWorkspace()
 #  @brief   copy the important note files from subversion into workspace if exists
@@ -125,12 +158,9 @@ copyImportantNoteFilesFromSubversionToWorkspace() {
 
 ## @fn      _createLfsOsReleaseNote()
 #  @brief   create an PS_LFS_OS release note 
-#  @param   {buildJobName}     project name of the build job
-#  @param   {buildBuildNumber} build number of the build job   
+#  @param   <none>
 #  @return  <none>
 _createLfsOsReleaseNote() {
-    local buildJobName=$1
-    local buildBuildNumber=$2
 
     requiredParameters LFS_PROD_RELEASE_CURRENT_TAG_NAME LFS_PROD_RELEASE_PREVIOUS_TAG_NAME \
                        LFS_CI_ROOT LFS_CI_CONFIG_FILE \
@@ -180,8 +210,7 @@ _createLfsOsReleaseNote() {
 
 ## @fn      _createLfsRelReleaseNoteXml()
 #  @brief   create an PSLFS_REL release note 
-#  @param   {buildJobName}     project name of the build job
-#  @param   {buildBuildNumber} build number of the build job   
+#  @param   <none>
 #  @return  <none>
 _createLfsRelReleaseNoteXml() {
     local workspace=$(getWorkspaceName)

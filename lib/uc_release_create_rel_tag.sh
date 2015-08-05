@@ -1,6 +1,6 @@
 #!/bin/bash
 
-source ${LFS_CI_ROOT}/lib/release.sh
+[[ -z ${LFS_CI_SOURCE_release} ]] && source ${LFS_CI_ROOT}/lib/release.sh
 
 ## @fn      usecase_LFS_RELEASE_CREATE_RELEASE_TAG()
 #  @brief   create the release tag
@@ -8,7 +8,6 @@ source ${LFS_CI_ROOT}/lib/release.sh
 #  @param   <none>
 #  @return  <none>
 usecase_LFS_RELEASE_CREATE_RELEASE_TAG() {
-
     mustBePreparedForReleaseTask
 
     requiredParameters LFS_PROD_RELEASE_CURRENT_TAG_NAME \
@@ -39,6 +38,7 @@ usecase_LFS_RELEASE_CREATE_RELEASE_TAG() {
 #  @param   <none>
 #  @return  <none>
 _mustHaveBranchInSubversion() {
+    requiredParameters LFS_PROD_RELEASE_CURRENT_TAG_NAME
 
     # check for branch
     local svnUrl=$(getConfig LFS_PROD_svn_delivery_release_repos_url \
@@ -58,8 +58,13 @@ _mustHaveBranchInSubversion() {
     return
 }
 
+## @fn      _createReleaseTag_setSvnExternals()
+#  @brief   create the svn:externals for LFS Release tag
+#  @param   <none>
+#  @return  <none>
 _createReleaseTag_setSvnExternals() {
-    requiredParameters LFS_PROD_RELEASE_CURRENT_TAG_NAME 
+    requiredParameters LFS_PROD_RELEASE_CURRENT_TAG_NAME    \
+                       LFS_PROD_RELEASE_CURRENT_TAG_NAME_REL
 
     local workspace=$(getWorkspaceName)
     mustHaveWorkspaceName
@@ -107,7 +112,14 @@ _createReleaseTag_setSvnExternals() {
     return
 }
 
+## @fn      _createReleaseTag()
+#  @brief   create the LFS Release tag
+#  @param   <none>
+#  @return  <none>
 _createReleaseTag() {
+    requiredParameters LFS_PROD_RELEASE_CURRENT_TAG_NAME    \
+                       LFS_PROD_RELEASE_CURRENT_TAG_NAME_REL
+
     local workspace=$(getWorkspaceName)
     mustHaveWorkspaceName
 
