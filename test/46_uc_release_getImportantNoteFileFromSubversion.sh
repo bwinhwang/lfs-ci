@@ -1,7 +1,7 @@
 #!/bin/bash
 
 source test/common.sh
-source lib/uc_release.sh
+source lib/uc_release_send_release_note.sh
 
 oneTimeSetUp() {
     mockedCommand() {

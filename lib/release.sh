@@ -1,5 +1,11 @@
 #!/bin/bash
 
+LFS_CI_SOURCE_release='$Id$'
+
+[[ -z ${LFS_CI_SOURCE_createWorkspace} ]] && source ${LFS_CI_ROOT}/lib/createWorkspace.sh
+[[ -z ${LFS_CI_SOURCE_jenkins} ]] && source ${LFS_CI_ROOT}/lib/jenkins.sh
+
+
 mustBePreparedForReleaseTask() {
     requiredParameters UPSTREAM_PROJECT UPSTREAM_BUILD \
                        JOB_NAME         BUILD_NUMBER

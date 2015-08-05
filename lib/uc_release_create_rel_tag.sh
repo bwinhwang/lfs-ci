@@ -1,5 +1,7 @@
 #!/bin/bash
 
+source ${LFS_CI_ROOT}/lib/release.sh
+
 ## @fn      usecase_LFS_RELEASE_CREATE_RELEASE_TAG()
 #  @brief   create the release tag
 #  @details the release tag / branch just contains a svn:externals with two externals to sdk and lfs_os tag
@@ -10,14 +12,14 @@ usecase_LFS_RELEASE_CREATE_RELEASE_TAG() {
     mustBePreparedForReleaseTask
 
     requiredParameters LFS_PROD_RELEASE_CURRENT_TAG_NAME \
-                       LFS_PROD_RELEASE_CURRENT_REL_TAG_NAME
+                       LFS_PROD_RELEASE_CURRENT_TAG_NAME_REL
 
     local workspace=$(getWorkspaceName)
     mustHaveWorkspaceName 
 
     # get os label
     info "using build name: ${LFS_PROD_RELEASE_CURRENT_TAG_NAME}"
-    info "creating LFS REL: ${LFS_PROD_RELEASE_CURRENT_REL_TAG_NAME}"
+    info "creating LFS REL: ${LFS_PROD_RELEASE_CURRENT_TAG_NAME_REL}"
 
     # check for the branch
     _mustHaveBranchInSubversion
@@ -51,7 +53,7 @@ _mustHaveBranchInSubversion() {
     mustExistBranchInSubversion ${svnUrl} branches 
     mustExistBranchInSubversion ${svnUrl}/branches/ ${branchName}
 
-    shouldNotExistsInSubversion ${svnUrl}/tags/ ${LFS_PROD_RELEASE_CURRENT_REL_TAG_NAME}
+    shouldNotExistsInSubversion ${svnUrl}/tags/ ${LFS_PROD_RELEASE_CURRENT_TAG_NAME}
 
     return
 }
@@ -99,7 +101,7 @@ _createReleaseTag_setSvnExternals() {
     info "commiting svn:externals"
     local commitMessage=${workspace}/commitMessagge
     local svnCommitMessagePrefix=$(getConfig LFS_PROD_uc_release_svn_message_prefix)
-    echo "${svnCommitMessagePrefix} : updating svn:externals for ${LFS_PROD_RELEASE_CURRENT_REL_TAG_NAME}" > ${commitMessage}
+    echo "${svnCommitMessagePrefix} : updating svn:externals for ${LFS_PROD_RELEASE_CURRENT_TAG_NAME_REL}" > ${commitMessage}
     svnCommit -F ${commitMessage} ${workspace}/svn/
 
     return
@@ -118,12 +120,12 @@ _createReleaseTag() {
 
     local canCreateReleaseTag=$(getConfig LFS_CI_uc_release_can_create_release_tag)
 
-    info "creating tag ${LFS_PROD_RELEASE_CURRENT_REL_TAG_NAME}"
+    info "creating tag ${LFS_PROD_RELEASE_CURRENT_TAG_NAME_REL}"
     if [[ ${canCreateReleaseTag} ]] ; then
-        local commitMessage=${workspace}/commitMessagge
+        local commitMessage=${workspace}/commitMessage
         local svnCommitMessagePrefix=$(getConfig LFS_PROD_uc_release_svn_message_prefix)
-        echo "${svnCommitMessagePrefix} : create new tag ${LFS_PROD_RELEASE_CURRENT_REL_TAG_NAME}" > ${logMessage}
-        svnCopy -F ${commitMessage} ${svnUrl}/branches/${branchName} ${svnUrl}/tags/${LFS_PROD_RELEASE_CURRENT_REL_TAG_NAME}
+        echo "${svnCommitMessagePrefix} : create new tag ${LFS_PROD_RELEASE_CURRENT_TAG_NAME_REL}" > ${commitMessage}
+        svnCopy -F ${commitMessage} ${svnUrl}/branches/${branchName} ${svnUrl}/tags/${LFS_PROD_RELEASE_CURRENT_TAG_NAME_REL}
     else
         warning "creating the release tag is disabled in config"
     fi

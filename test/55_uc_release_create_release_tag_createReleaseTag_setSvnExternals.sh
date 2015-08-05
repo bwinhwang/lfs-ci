@@ -48,12 +48,13 @@ test1() {
     local expect=$(createTempFile)
     cat <<EOF > ${expect}
 getBranchName 
+getConfig LFS_PROD_svn_delivery_release_repos_url -t tagName:PS_LFS_OS_BUILD_NAME
 getConfig LFS_PROD_svn_delivery_repos_name -t tagName:PS_LFS_OS_BUILD_NAME
 getConfig sdk2 -f ${WORKSPACE}/workspace/bld/bld-externalComponents-summary/externalComponents
 getConfig sdk3 -f ${WORKSPACE}/workspace/bld/bld-externalComponents-summary/externalComponents
 getConfig sdk -f ${WORKSPACE}/workspace/bld/bld-externalComponents-summary/externalComponents
 getConfig LFS_uc_release_create_release_tag_sdk_external_line -t sdk:sdk -t sdk2:sdk2 -t sdk3:sdk3
-svnCheckout --ignore-externals /branches/branch_name ${WORKSPACE}/workspace/svn
+svnCheckout --ignore-externals LFS_PROD_svn_delivery_release_repos_url/branches/branch_name ${WORKSPACE}/workspace/svn
 svnPropSet svn:externals -F ${WORKSPACE}/workspace/svnExternals ${WORKSPACE}/workspace/svn/
 getConfig LFS_PROD_uc_release_svn_message_prefix
 svnCommit -F ${WORKSPACE}/workspace/commitMessagge ${WORKSPACE}/workspace/svn/
