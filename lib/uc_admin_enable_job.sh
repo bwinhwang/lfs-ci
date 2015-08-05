@@ -11,7 +11,7 @@ usecase_ADMIN_ENABLE_JENKINS_JOB() {
 
     requiredParameters JENKINS_JOB_NAME
 
-    enableJobb ${JENKINS_JOB_NAME}
+    enableJob ${JENKINS_JOB_NAME}
     setBuildDescription ${JOB_NAME} ${BUILD_NUMBER} "${JENKINS_JOB_NAME}"
 
     return
