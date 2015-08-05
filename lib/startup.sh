@@ -7,6 +7,15 @@ source ${LFS_CI_ROOT}/lib/config.sh
 source ${LFS_CI_ROOT}/lib/jenkins.sh
 source ${LFS_CI_ROOT}/lib/subversion.sh
 
+## @fn      prepareStartup()
+#  @brief   prepare startup of a jenkins ci script run
+#  @details this function is setting up some requirements for the
+#           script run. 
+#           * set debug bash prompt
+#           * dump environment varables and settings
+#           * install common exit handlers
+#  @param   <none>
+#  @return  <none>
 prepareStartup() {
     export PATH=${LFS_CI_ROOT}/bin:${PATH}
 
