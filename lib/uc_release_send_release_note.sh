@@ -8,24 +8,22 @@ usecase_LFS_RELEASE_SEND_RELEASE_NOTE() {
     # TODO: demx2fk3 2015-08-05 add externalComponents fsmpsl psl fsmci lrcpsl from to artifacts
     mustBePreparedForReleaseTask
 
-    requiredParameters LFS_CI_CONFIG_FILE LFS_CI_ROOT       \
-                       LFS_PROD_RELEASE_CURRENT_TAG_NAME    \
-                       LFS_PROD_RELEASE_CURRENT_TAG_NAME_REL
-
     _workflowToolCreateRelease
     _sendReleaseNote
     _storeArtifactsFromRelease
 
+    info "release is done."
+
     return
 }
 
+## @fn      _storeArtifactsFromRelease()
+#  @brief   store the artifacts for the release process
+#  @param   <none>
+#  @return  <none>
 _storeArtifactsFromRelease() {
     local workspace=$(getWorkspaceName)
     mustHaveWorkspaceName
-    mustHaveWritableWorkspace
-
-    local osTagName=${LFS_PROD_RELEASE_CURRENT_TAG_NAME}
-    mustHaveValue "${osTagName}" "next os tag name"
 
     for file in ${workspace}/bld/bld-lfs-release/* ; do
         [[ -f ${file} ]] || continue
@@ -36,38 +34,52 @@ _storeArtifactsFromRelease() {
     local artifactsPathOnShare=$(getConfig artifactesShare)/${JOB_NAME}/${BUILD_NUMBER}
     linkFileToArtifactsDirectory ${artifactsPathOnShare}
 
-    local remoteDirectory=$(getConfig LFS_CI_UC_package_copy_to_share_real_location)/${osTagName}
+    # TODO: demx2fk3 2015-08-05 create a own function for this
+    local remoteDirectory=$(getConfig LFS_CI_UC_package_copy_to_share_real_location)/${LFS_PROD_RELEASE_CURRENT_TAG_NAME}
     local artifactsPathOnMaster=$(getBuildDirectoryOnMaster)/archive
     executeOnMaster ln -sf ${remoteDirectory} ${artifactsPathOnMaster}/release
 
-    info "release is done."
     return
 }
 
+## @fn      _sendReleaseNote()
+#  @brief   send the release note mail to the mailinglist
+#  @param   <none>
+#  @return  <none>
 _sendReleaseNote() {
+
+    requiredParameters LFS_PROD_RELEASE_CURRENT_TAG_NAME_REL
+
     local workspace=$(getWorkspaceName)
     mustHaveWorkspaceName
-    mustHaveWritableWorkspace
-    local releaseTagName=${LFS_PROD_RELEASE_CURRENT_TAG_NAME_REL}
-    mustHaveValue "${releaseTagName}" "next release tag name"
+
     local canSendReleaseNote=$(getConfig LFS_CI_uc_release_can_send_release_note)
+
     if [[ ${canSendReleaseNote} ]] ; then
         info "send release note"
-        execute ${LFS_CI_ROOT}/bin/sendReleaseNote  -r ${workspace}/os/releasenote.txt \
-                                                    -t ${releaseTagName}               \
-                                                    -f ${LFS_CI_CONFIG_FILE}
+
+        execute ${LFS_CI_ROOT}/bin/sendReleaseNote      \
+            -r ${workspace}/os/releasenote.txt          \
+            -t ${LFS_PROD_RELEASE_CURRENT_TAG_NAME_REL} \
+            -f ${LFS_CI_CONFIG_FILE}
     else
         warning "sending the release note is disabled in config"
     fi
+
+    return
 }
 
+## @fn      _workflowToolCreateRelease()
+#  @brief   create the LFS release and LFS os in the workflow tool, upload all required attachments
+#  @param   <none>
+#  @return  <none>
 _workflowToolCreateRelease() {
     requiredParameters LFS_PROD_RELEASE_CURRENT_TAG_NAME     \
                        LFS_PROD_RELEASE_CURRENT_TAG_NAME_REL \
                        LFS_PROD_RELEASE_PREVIOUS_TAG_NAME
+
     local workspace=$(getWorkspaceName)
     mustHaveWorkspaceName
-    mustHaveWritableWorkspace
 
     local productName=$(getProductNameFromJobName)
     mustHaveValue "${productName}" "product name from job name"
@@ -96,38 +108,44 @@ _workflowToolCreateRelease() {
     [[ -e ${workspace}/importantNote.txt ]] &&
         uploadToWorkflowTool    ${osTagName} ${workspace}/importantNote.txt
 
-    _copyFileToBldDirectory ${workspace}/os/os_releasenote.xml \
-        ${workspace}/bld/bld-lfs-release/lfs_os_releasenote.xml
-    _copyFileToBldDirectory ${workspace}/os/releasenote.txt \
-        ${workspace}/bld/bld-lfs-release/lfs_os_releasenote.txt
-    _copyFileToBldDirectory ${workspace}/os/changelog.xml \
-        ${workspace}/bld/bld-lfs-release/lfs_os_changelog.xml
-    _copyFileToBldDirectory ${workspace}/revisions.txt \
-        ${workspace}/bld/bld-lfs-release/revisions.txt 
-    _copyFileToBldDirectory ${workspace}/bld/bld-externalComponents-summary/externalComponents \
-        ${workspace}/bld/bld-lfs-release/externalComponents.txt
-    _copyFileToBldDirectory ${workspace}/importantNote.txt \
-        ${workspace}/bld/bld-lfs-release/importantNote.txt
+    _copyFileToBldDirectory ${workspace}/os/os_releasenote.xml lfs_os_releasenote.xml
+    _copyFileToBldDirectory ${workspace}/os/releasenote.txt    lfs_os_releasenote.txt
+    _copyFileToBldDirectory ${workspace}/os/changelog.xml      lfs_os_changelog.xml
+    _copyFileToBldDirectory ${workspace}/revisions.txt         revisions.txt 
+    _copyFileToBldDirectory ${workspace}/importantNote.txt     importantNote.txt
+    _copyFileToBldDirectory ${workspace}/bld/bld-externalComponents-summary/externalComponents externalComponents.txt
 
     if [[ ${productName} == "LFS" ]] ; then
         _createLfsRelReleaseNoteXml ${releaseTagName} ${workspace}/rel/releasenote.xml
         createReleaseInWorkflowTool ${releaseTagName} ${workspace}/rel/releasenote.xml
         uploadToWorkflowTool        ${releaseTagName} ${workspace}/rel/releasenote.xml
 
-        _copyFileToBldDirectory ${workspace}/rel/releasenote.xml ${workspace}/bld/bld-lfs-release/lfs_rel_releasenote.xml
+        _copyFileToBldDirectory ${workspace}/rel/releasenote.xml lfs_rel_releasenote.xml
     fi
 
     return
 }
 
+## @fn      _copyFileToBldDirectory()
+#  @brief   copy a file into the build directory bld/bld-lfs-release
+#  @param   {srcFile}    name / location of the source file
+#  @param   {dstFile}    name of the destination file
+#  @return  <none>
 _copyFileToBldDirectory() {
     local srcFile=${1}
     local dstFile=${2}
 
-    mkdir -p $(dirname ${dstFile})
+    local workspace=$(getWorkspaceName)
+    mustHaveWorkspaceName
+
+    local dstPath=${workspace}/bld/bld-lfs-release
+    execute mkdir -p ${dstPath}
+
     [[ -e ${srcFile} ]] && \
-        execute cp -f ${srcFile} ${dstFile}
-    return
+        execute cp -f ${srcFile} ${dstPath}/${dstFile}
+   
+    # return uses the exit code of the last command, if you just write "return"
+    return 0
 }
 
 ## @fn      copyImportantNoteFilesFromSubversionToWorkspace()
@@ -169,17 +187,11 @@ _createLfsOsReleaseNote() {
     local workspace=$(getWorkspaceName)
     mustHaveWorkspaceName 
 
-    # get the change log file from master
-    local buildDirectory=$(getBuildDirectoryOnMaster ${JOB_NAME} ${BUILD_NUMBER})
-    # TODO: demx2fk3 2015-03-09 FIXME SSH_LOAD replace this with other server
-    local serverName=$(getConfig jenkinsMasterServerHostName)
-
     info "creating release note for ${LFS_PROD_RELEASE_CURRENT_TAG_NAME}"
     
     execute mkdir -p ${workspace}/os
-    mustExistDirectory ${workspace}/os
-    # TODO: demx2fk3 2015-03-09 FIXME SSH_LOAD replace this with other server
-    execute -r 10 rsync -ae ssh ${serverName}:${buildDirectory}/changelog.xml ${workspace}/os/
+    copyFileFromBuildDirectoryToWorkspace ${JOB_NAME} ${BUILD_NUMBER} changelog.xml
+    execute mv ${WORKSPACE}/changelog.xml ${workspace}/os/changelog.xml
     mustExistFile ${workspace}/os/changelog.xml
 
     # convert the changelog xml to a release note
