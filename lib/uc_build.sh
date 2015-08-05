@@ -139,7 +139,7 @@ usecase_LFS_BUILD_CREATE_VERSION() {
     _set_db_credentials
     local oldBuildName=""
     local buildName=$(_get_new_build_name)
-    if [[ ${buildName} =~ _0001$ ]]; then
+    if [[ ! ${buildName} =~ _0001$ ]]; then
         oldBuildName=$(_get_last_successful_build_name)
         if [[ ${oldBuildName} == ${buildName} ]]; then
             fatal "old and new build name are the same"
