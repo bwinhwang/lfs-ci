@@ -28,13 +28,16 @@ sub prepare {
 
     # t: := tag name
     # r: := release note template file
-    getopts( "r:t:f:o:", \my %opts );
+    getopts( "r:t:f:o:T:", \my %opts );
     $self->{tagName}         = $opts{t} || die "no t";
     $self->{basedOn}         = $opts{o} || die "no o";
     $self->{configFileName}  = $opts{f} || die "no f";
+    $self->{type}            = $opts{T} || die "no T"; # type of rel: REL or OS
 
     my $config = Nokia::Singleton::config();
     $config->loadData( configFileName => $self->{configFileName} );
+    $config->addConfig( name  => "type", value => $self->{type} );
+
 
     $self->{releaseNote} = Nokia::Model::ReleaseNote->new( releaseName => $self->{tagName} );
 

@@ -104,7 +104,7 @@ _createReleaseTag_setSvnExternals() {
     svnPropSet svn:externals -F ${svnExternalsFile} ${workspace}/svn/
 
     info "commiting svn:externals"
-    local commitMessage=${workspace}/commitMessagge
+    local commitMessage=${workspace}/commitMessage
     local svnCommitMessagePrefix=$(getConfig LFS_PROD_uc_release_svn_message_prefix)
     echo "${svnCommitMessagePrefix} : updating svn:externals for ${LFS_PROD_RELEASE_CURRENT_TAG_NAME_REL}" > ${commitMessage}
     svnCommit -F ${commitMessage} ${workspace}/svn/

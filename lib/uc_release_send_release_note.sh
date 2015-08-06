@@ -180,7 +180,8 @@ copyImportantNoteFilesFromSubversionToWorkspace() {
 #  @return  <none>
 _createLfsOsReleaseNote() {
 
-    requiredParameters LFS_PROD_RELEASE_CURRENT_TAG_NAME LFS_PROD_RELEASE_PREVIOUS_TAG_NAME \
+    requiredParameters LFS_PROD_RELEASE_CURRENT_TAG_NAME \
+                       LFS_PROD_RELEASE_PREVIOUS_TAG_NAME \
                        LFS_CI_ROOT LFS_CI_CONFIG_FILE \
                        JOB_NAME BUILD_NUMBER \
 
@@ -195,27 +196,26 @@ _createLfsOsReleaseNote() {
     mustExistFile ${workspace}/os/changelog.xml
 
     # convert the changelog xml to a release note
-    cd ${workspace}/os/
+    execute cd ${workspace}/os/
     execute ln -sf ../bld .
     execute rm -f releasenote.txt releasenote.xml
 
-    export tagName=${LFS_PROD_RELEASE_CURRENT_TAG_NAME}
-
-    execute -n ${LFS_CI_ROOT}/bin/getReleaseNoteContent -t ${LFS_PROD_RELEASE_CURRENT_TAG_NAME} > releasenote.txt
+    execute -n ${LFS_CI_ROOT}/bin/getReleaseNoteContent \
+            -t ${LFS_PROD_RELEASE_CURRENT_TAG_NAME}     \
+            > releasenote.txt
     rawDebug ${workspace}/os/releasenote.txt
 
-    export type=OS
-
-    execute -n ${LFS_CI_ROOT}/bin/getReleaseNoteXML -t ${LFS_PROD_RELEASE_CURRENT_TAG_NAME}  \
-                                                    -o ${LFS_PROD_RELEASE_PREVIOUS_TAG_NAME} \
-                                                    -f ${LFS_CI_CONFIG_FILE} > releasenote.xml
+    execute -n ${LFS_CI_ROOT}/bin/getReleaseNoteXML          \
+                    -t ${LFS_PROD_RELEASE_CURRENT_TAG_NAME}  \
+                    -o ${LFS_PROD_RELEASE_PREVIOUS_TAG_NAME} \
+                    -f ${LFS_CI_CONFIG_FILE}                 \
+                    -T OS                                    \
+                    > releasenote.xml
     rawDebug ${workspace}/os/releasenote.xml
+
     execute mv -f ${workspace}/os/releasenote.xml ${workspace}/os/os_releasenote.xml
 
     mustBeValidXmlReleaseNote ${workspace}/os/os_releasenote.xml
-
-    unset type
-    export type
 
     return
 }
@@ -228,30 +228,30 @@ _createLfsRelReleaseNoteXml() {
     local workspace=$(getWorkspaceName)
     mustHaveWorkspaceName
 
-    requiredParameters LFS_PROD_RELEASE_PREVIOUS_TAG_NAME_REL LFS_PROD_RELEASE_CURRENT_TAG_NAME_REL \
-                       LFS_PROD_RELEASE_PREVIOUS_TAG_NAME LFS_CI_ROOT LFS_CI_CONFIG_FILE
+    requiredParameters LFS_PROD_RELEASE_PREVIOUS_TAG_NAME_REL \
+                       LFS_PROD_RELEASE_CURRENT_TAG_NAME_REL  \
+                       LFS_PROD_RELEASE_PREVIOUS_TAG_NAME     \
+                       LFS_CI_ROOT LFS_CI_CONFIG_FILE
 
     info "creating release note xml for ${LFS_PROD_RELEASE_CURRENT_TAG_NAME_REL}"
     execute mkdir -p ${workspace}/rel/bld/bld-externalComponents-summary
-    cd ${workspace}/rel/
-    execute -n grep sdk ${workspace}/bld/bld-externalComponents-summary/externalComponents \
-                      > ${workspace}/rel/bld/bld-externalComponents-summary/externalComponents
+
+    execute cd ${workspace}/rel/
+    execute grep sdk ${workspace}/bld/bld-externalComponents-summary/externalComponents > ${workspace}/rel/bld/bld-externalComponents-summary/externalComponents
 
     echo "PS_LFS_OS <> = ${LFS_PROD_RELEASE_CURRENT_TAG_NAME}" >> ${workspace}/rel/bld/bld-externalComponents-summary/externalComponents
 
     # no changes here, just a dummy changelog is required
     echo '<log />' > changelog.xml 
 
-    export tagName=${LFS_PROD_RELEASE_CURRENT_TAG_NAME}
-    export type=REL
-    execute -n ${LFS_CI_ROOT}/bin/getReleaseNoteXML -t ${LFS_PROD_RELEASE_CURRENT_TAG_NAME_REL}  \
-                                                    -o ${LFS_PROD_RELEASE_PREVIOUS_TAG_NAME_REL} \
-                                                    -f ${LFS_CI_CONFIG_FILE} > releasenote.xml
+    execute -n ${LFS_CI_ROOT}/bin/getReleaseNoteXML                      \
+                            -t ${LFS_PROD_RELEASE_CURRENT_TAG_NAME_REL}  \
+                            -o ${LFS_PROD_RELEASE_PREVIOUS_TAG_NAME_REL} \
+                            -T OS                                        \
+                            -f ${LFS_CI_CONFIG_FILE}                     \
+                            > releasenote.xml
     rawDebug ${workspace}/releasenote.xml
-    unset type
-    export type
 
     return
 }
-
 

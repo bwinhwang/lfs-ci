@@ -71,17 +71,18 @@ uploadToWorkflowTool PS_LFS_OS_BUILD_NAME ${WORKSPACE}/workspace/os/os_releaseno
 uploadToWorkflowTool PS_LFS_OS_BUILD_NAME ${WORKSPACE}/workspace/os/releasenote.txt
 uploadToWorkflowTool PS_LFS_OS_BUILD_NAME ${WORKSPACE}/workspace/os/changelog.xml
 uploadToWorkflowTool PS_LFS_OS_BUILD_NAME ${WORKSPACE}/workspace/revisions.txt
-_copyFileToBldDirectory ${WORKSPACE}/workspace/os/os_releasenote.xml ${WORKSPACE}/workspace/bld/bld-lfs-release/lfs_os_releasenote.xml
-_copyFileToBldDirectory ${WORKSPACE}/workspace/os/releasenote.txt ${WORKSPACE}/workspace/bld/bld-lfs-release/lfs_os_releasenote.txt
-_copyFileToBldDirectory ${WORKSPACE}/workspace/os/changelog.xml ${WORKSPACE}/workspace/bld/bld-lfs-release/lfs_os_changelog.xml
-_copyFileToBldDirectory ${WORKSPACE}/workspace/revisions.txt ${WORKSPACE}/workspace/bld/bld-lfs-release/revisions.txt
-_copyFileToBldDirectory ${WORKSPACE}/workspace/bld/bld-externalComponents-summary/externalComponents ${WORKSPACE}/workspace/bld/bld-lfs-release/externalComponents.txt
-_copyFileToBldDirectory ${WORKSPACE}/workspace/importantNote.txt ${WORKSPACE}/workspace/bld/bld-lfs-release/importantNote.txt
+_copyFileToBldDirectory ${WORKSPACE}/workspace/os/os_releasenote.xml lfs_os_releasenote.xml
+_copyFileToBldDirectory ${WORKSPACE}/workspace/os/releasenote.txt lfs_os_releasenote.txt
+_copyFileToBldDirectory ${WORKSPACE}/workspace/os/changelog.xml lfs_os_changelog.xml
+_copyFileToBldDirectory ${WORKSPACE}/workspace/revisions.txt revisions.txt
+_copyFileToBldDirectory ${WORKSPACE}/workspace/importantNote.txt importantNote.txt
+_copyFileToBldDirectory ${WORKSPACE}/workspace/bld/bld-externalComponents-summary/externalComponents externalComponents.txt
 execute mkdir -p ${WORKSPACE}/workspace/rel/bld/bld-externalComponents-summary
-execute -n ${LFS_CI_ROOT}/bin/getReleaseNoteXML -t PS_LFS_REL_BUILD_NAME -o PS_LFS_REL_OLD_BUILD_NAME -f ${LFS_CI_ROOT}/etc/lfs-ci.cfg
+execute cd ${WORKSPACE}/workspace/rel/
+execute -n ${LFS_CI_ROOT}/bin/getReleaseNoteXML -t PS_LFS_REL_BUILD_NAME -o PS_LFS_REL_OLD_BUILD_NAME -T OS -f ${LFS_CI_ROOT}/etc/lfs-ci.cfg
 createReleaseInWorkflowTool PS_LFS_REL_BUILD_NAME ${WORKSPACE}/workspace/rel/releasenote.xml
 uploadToWorkflowTool PS_LFS_REL_BUILD_NAME ${WORKSPACE}/workspace/rel/releasenote.xml
-_copyFileToBldDirectory ${WORKSPACE}/workspace/rel/releasenote.xml ${WORKSPACE}/workspace/bld/bld-lfs-release/lfs_rel_releasenote.xml
+_copyFileToBldDirectory ${WORKSPACE}/workspace/rel/releasenote.xml lfs_rel_releasenote.xml
 EOF
     assertExecutedCommands ${expect}
 

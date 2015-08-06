@@ -17,7 +17,7 @@ oneTimeSetUp() {
     mustBePreparedForReleaseTask() {
         mockedCommand "mustBePreparedForReleaseTask $@"
         export LFS_PROD_RELEASE_CURRENT_TAG_NAME=PS_LFS_OS_BUILD_NAME
-        export LFS_PROD_RELEASE_CURRENT_REL_TAG_NAME=PS_LFS_REL_BUILD_NAME
+        export LFS_PROD_RELEASE_CURRENT_TAG_NAME_REL=PS_LFS_REL_BUILD_NAME
     }
     getNextCiLabelName() {
         mockedCommand "getNextCiLabelName $@"

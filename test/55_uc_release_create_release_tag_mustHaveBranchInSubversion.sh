@@ -31,7 +31,7 @@ setUp() {
     cp -f /dev/null ${UT_MOCKED_COMMANDS}
     export WORKSPACE=$(createTempDirectory)
     export LFS_PROD_RELEASE_CURRENT_TAG_NAME=PS_LFS_OS_BUILD_NAME
-    export LFS_PROD_RELEASE_CURRENT_REL_TAG_NAME=PS_LFS_REL_BUILD_NAME
+    export LFS_PROD_RELEASE_CURRENT_TAG_NAME_REL=PS_LFS_REL_BUILD_NAME
     return
 }
 
@@ -50,7 +50,7 @@ getBranchName
 mustExistBranchInSubversion LFS_PROD_svn_delivery_release_repos_url tags
 mustExistBranchInSubversion LFS_PROD_svn_delivery_release_repos_url branches
 mustExistBranchInSubversion LFS_PROD_svn_delivery_release_repos_url/branches/ branch_name
-shouldNotExistsInSubversion LFS_PROD_svn_delivery_release_repos_url/tags/ PS_LFS_REL_BUILD_NAME
+shouldNotExistsInSubversion LFS_PROD_svn_delivery_release_repos_url/tags/ PS_LFS_OS_BUILD_NAME
 EOF
     assertExecutedCommands ${expect}
 

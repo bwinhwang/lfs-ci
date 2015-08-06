@@ -31,7 +31,7 @@ setUp() {
     cp -f /dev/null ${UT_MOCKED_COMMANDS}
     export WORKSPACE=$(createTempDirectory)
     export LFS_PROD_RELEASE_CURRENT_TAG_NAME=PS_LFS_OS_BUILD_NAME
-    export LFS_PROD_RELEASE_CURRENT_REL_TAG_NAME=PS_LFS_REL_BUILD_NAME
+    export LFS_PROD_RELEASE_CURRENT_TAG_NAME_REL=PS_LFS_REL_BUILD_NAME
     mkdir -p ${WORKSPACE}/workspace/bld/bld-externalComponents-summary
     touch ${WORKSPACE}/workspace/bld/bld-externalComponents-summary/externalComponents
     return
@@ -57,7 +57,7 @@ getConfig LFS_uc_release_create_release_tag_sdk_external_line -t sdk:sdk -t sdk2
 svnCheckout --ignore-externals LFS_PROD_svn_delivery_release_repos_url/branches/branch_name ${WORKSPACE}/workspace/svn
 svnPropSet svn:externals -F ${WORKSPACE}/workspace/svnExternals ${WORKSPACE}/workspace/svn/
 getConfig LFS_PROD_uc_release_svn_message_prefix
-svnCommit -F ${WORKSPACE}/workspace/commitMessagge ${WORKSPACE}/workspace/svn/
+svnCommit -F ${WORKSPACE}/workspace/commitMessage ${WORKSPACE}/workspace/svn/
 EOF
     assertExecutedCommands ${expect}
 

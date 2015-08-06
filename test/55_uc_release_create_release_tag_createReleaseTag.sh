@@ -28,7 +28,7 @@ setUp() {
     cp -f /dev/null ${UT_MOCKED_COMMANDS}
     export WORKSPACE=$(createTempDirectory)
     export LFS_PROD_RELEASE_CURRENT_TAG_NAME=PS_LFS_OS_BUILD_NAME
-    export LFS_PROD_RELEASE_CURRENT_REL_TAG_NAME=PS_LFS_REL_BUILD_NAME
+    export LFS_PROD_RELEASE_CURRENT_TAG_NAME_REL=PS_LFS_REL_BUILD_NAME
     return
 }
 
@@ -46,7 +46,7 @@ getBranchName
 getConfig LFS_PROD_svn_delivery_release_repos_url -t tagName:LFS_PROD_RELEASE_CURRENT_TAG_NAME
 getConfig LFS_CI_uc_release_can_create_release_tag
 getConfig LFS_PROD_uc_release_svn_message_prefix
-svnCopy -F ${WORKSPACE}/workspace/commitMessagge LFS_PROD_svn_delivery_release_repos_url/branches/branch_name LFS_PROD_svn_delivery_release_repos_url/tags/PS_LFS_REL_BUILD_NAME
+svnCopy -F ${WORKSPACE}/workspace/commitMessage LFS_PROD_svn_delivery_release_repos_url/branches/branch_name LFS_PROD_svn_delivery_release_repos_url/tags/PS_LFS_REL_BUILD_NAME
 EOF
     assertExecutedCommands ${expect}
 

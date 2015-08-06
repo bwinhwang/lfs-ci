@@ -20,6 +20,11 @@ sub prepare {
     getopts( "t:", \my %opts );
     $self->{tagName} = $opts{t} || die "no t";
 
+    Nokia::Singleton::config()->addConfig(
+        name  => "tagName",
+        value => $self->{tagName} );
+
+
     my $xml  = XMLin( "changelog.xml", ForceArray => 1 ) or die "can not open changelog.xml";
 
     $self->{releaseNote} = Nokia::Model::ReleaseNote->new( releaseName => $self->{tagName} );
