@@ -1,5 +1,7 @@
 #!/bin/bash
 
+[[ -z ${LFS_CI_SOURCE_release} ]] && source ${LFS_CI_ROOT}/lib/release.sh
+
 ## @fn      usecase_LFS_RELEASE_SHARE_BUILD_ARTIFACTS_KERNELSOURCES()
 #  @brief   extract the artifacts (linux kernel sources only!!) of build job on the 
 #           local workspace and copy the artifacts to the /build share.

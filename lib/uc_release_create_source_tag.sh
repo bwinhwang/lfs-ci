@@ -1,4 +1,7 @@
 #!/bin/bash
+
+[[ -z ${LFS_CI_SOURCE_release} ]] && source ${LFS_CI_ROOT}/lib/release.sh
+
 ## @fn      usecase_LFS_RELEASE_CREATE_SOURCE_TAG()
 #  @brief   create a tag(s) on source repository 
 #  @details create tags in the source repository (os/tags) and subsystems (subsystems/tags)

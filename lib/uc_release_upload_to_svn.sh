@@ -1,5 +1,7 @@
 #!/bin/bash
 
+[[ -z ${LFS_CI_SOURCE_release} ]] && source ${LFS_CI_ROOT}/lib/release.sh
+
 ## @fn      usecase_LFS_RELEASE_UPLOAD_TO_SUBVERSION()
 #  @brief   upload the release to subversion
 #  @param   <none>
