@@ -35,13 +35,17 @@ uploadToSubversion() {
     mustExistBranchInSubversion ${svnReposUrl}/os tags
     mustExistBranchInSubversion ${svnReposUrl}/os/branches "${branch}"
 
+    local ramDisk=$(getConfig OS_ramdisk)
+    mustExistDirectory "${ramDisk}" 
+
     local oldTemp=${TMPDIR:-/tmp}
-    export TMPDIR=/dev/shm/${JOB_NAME}.${USER}/tmp
+    export TMPDIR=${ramDisk}/${JOB_NAME}.${USER}/tmp
     debug "cleanup tmp directory"
     execute mkdir -p ${TMPDIR}
 
     # ensure, that there are 15 GB disk space
-    mustHaveFreeDiskSpace ${TMPDIR} 15000000 
+    local freeDiskSpace=$(getConfig LFS_PROD_uc_release_upload_to_subversion_free_space_on_ramdisk)
+    mustHaveFreeDiskSpace ${TMPDIR} ${freeDiskSpace} 
 
     # TMPDIR is not handled/created via createTempDirectory. So we have to
     # take care to clean up the temp directory after exit and failure
@@ -62,6 +66,8 @@ uploadToSubversion() {
         svnCheckout ${svnReposUrl}/os/branches/${branch} ${workspace}
     fi
 
+    local sleepTimeAfterCommit=$(getConfig LFS_PROD_uc_release_upload_to_subversion_sleep_time_after_commit)
+
     info "upload to svn and create copy (${tagName})"
 
     execute -r 3 \
@@ -72,7 +78,7 @@ uploadToSubversion() {
                                         -no_user_input                       \
                                         -no_diff_tag                         \
                                         -glob_ignores="#.#"                  \
-                                        -sleep 60                            \
+                                        -sleep ${sleepTimeAfterCommit:-60}   \
                                         ${svnReposUrl} os/branches/${branch} \
                                         ${uploadDirectoryOnLocalDisk} 
 
