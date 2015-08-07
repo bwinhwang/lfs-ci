@@ -11,36 +11,24 @@ LFS_CI_SOURCE_subversion='$Id$'
 #  @details this method upload a directory to subversion using the script svn_load_dirs.pl
 #           which is part of the subversion source package.
 #  @param   {pathToUpload}    path names, which contains the files to upload to svn
-#  @param   {branchToUpload}  svn location where the files should be uploaded
-#  @param   {commitMessage}   commit message
 #  @return  <none>
 uploadToSubversion() {
     requiredParameters LFS_CI_ROOT JOB_NAME USER
 
     local pathToUpload=$1
-    local branchToUpload=$2
-    local commitMessage="$3"
+    mustHaveValue "${pathToUpload}" "path to upload to svn"
 
     # fsmci artifact file is already copied to workspace by upper function
     mustHaveNextLabelName
-    export tagName=$(getNextReleaseLabel)
+    local tagName=$(getNextReleaseLabel)
 
-    local svnReposUrl=$(getConfig LFS_PROD_svn_delivery_release_repos_url)
-
-    info "upload local path ${pathToUpload} to ${branchToUpload} as ${tagName}"
+    local svnReposUrl=$(getConfig LFS_PROD_svn_delivery_release_repos_url -t tagName:${tagName})
+    mustHaveValue "${svnReposUrl}" "svn repos url"
 
     local branch=$(getConfig LFS_PROD_uc_release_upload_to_subversion_map_location_to_branch)
-    if [[ ! "${branch}" ]] ; then
-        debug "mapping for branchToUpload ${branchToUpload} not found"
-        branch=${branchToUpload}
-    fi
+    mustHaveValue "${branch}" "branch name"
 
-    info "upload to ${branch}"
-
-    local branchPath=os/branches
-    local tagPath=os/tags
-    mustHaveValue "${tagPath}" "tag path"
-    mustHaveValue "${branchPath}" "branch path"
+    info "upload local path ${pathToUpload} to ${branch} as ${tagName}"
 
     mustExistBranchInSubversion ${svnReposUrl} os
     mustExistBranchInSubversion ${svnReposUrl}/os branches
@@ -55,15 +43,12 @@ uploadToSubversion() {
     # ensure, that there are 15 GB disk space
     mustHaveFreeDiskSpace ${TMPDIR} 15000000 
 
-    # ensure, that there are 15 GB disk space
-    mustHaveFreeDiskSpace ${TMPDIR} 15000000 
-
     # TMPDIR is not handled/created via createTempDirectory. So we have to
     # take care to clean up the temp directory after exit and failure
     exit_add subversionUploadCleanupTempDirectory
 
-    rm -rf ${TMPDIR}
-    mkdir -p ${TMPDIR}
+    execute rm -rf ${TMPDIR}
+    execute mkdir -p ${TMPDIR}
     
     info "copy baseline to upload on local disk"
     local uploadDirectoryOnLocalDisk=${TMPDIR}/upload
@@ -74,22 +59,22 @@ uploadToSubversion() {
     if [[ ! -d ${workspace} ]] ; then
         info "checkout svn workspace for upload preparation"
         execute mkdir -p ${workspace}
-        svnCheckout ${svnReposUrl}/${branchPath}/${branch} ${workspace}
+        svnCheckout ${svnReposUrl}/os/branches/${branch} ${workspace}
     fi
 
     info "upload to svn and create copy (${tagName})"
 
     execute -r 3 \
-                ${LFS_CI_ROOT}/bin/svn_load_dirs.pl    \
-                -v                                     \
-                -t ${tagPath}/${tagName}               \
-                -wc ${workspace}                       \
-                -no_user_input                         \
-                -no_diff_tag                           \
-                -glob_ignores="#.#"                    \
-                -sleep 60                              \
-                ${svnReposUrl} ${branchPath}/${branch} \
-                ${uploadDirectoryOnLocalDisk} 
+                ${LFS_CI_ROOT}/lib/contrib/svn_load_dirs/svn_load_dirs.pl    \
+                                        -v                                   \
+                                        -t os/tags/${tagName}                \
+                                        -wc ${workspace}                     \
+                                        -no_user_input                       \
+                                        -no_diff_tag                         \
+                                        -glob_ignores="#.#"                  \
+                                        -sleep 60                            \
+                                        ${svnReposUrl} os/branches/${branch} \
+                                        ${uploadDirectoryOnLocalDisk} 
 
     export TMPDIR=${oldTemp}
     info "upload done";

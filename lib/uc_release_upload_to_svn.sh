@@ -1,12 +1,17 @@
 #!/bin/bash
 
+## @fn      usecase_LFS_RELEASE_UPLOAD_TO_SUBVERSION()
+#  @brief   upload the release to subversion
+#  @param   <none>
+#  @return  <none>
 usecase_LFS_RELEASE_UPLOAD_TO_SUBVERSION() {
 
-    local branch=$(getConfig LFS_PROD_uc_release_upload_to_subversion_map_location_to_branch)
-    mustHaveValue "${branch}" "branch name"
+    mustBePreparedForReleaseTask
 
-    # from subversion.sh
-    uploadToSubversion "${releaseDirectory}/os" "${branch}" "upload of build ${JOB_NAME} / ${BUILD_NUMBER}"
+    local releaseDirectory=$(getConfig LFS_CI_UC_package_copy_to_share_real_location)/${LFS_PROD_RELEASE_CURRENT_TAG_NAME}
+    mustExistDirectory ${releaseDirectory}
+
+    uploadToSubversion "${releaseDirectory}/os" 
 
     return
 }
