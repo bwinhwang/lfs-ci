@@ -11,10 +11,9 @@
 #  @param   {buildNumber}  number of the build
 #  @return  <none>
 usecase_LFS_RELEASE_SHARE_BUILD_ARTIFACTS() {
-
-    requiredParameters LFS_PROD_RELEASE_PREVIOUS_TAG_NAME LFS_PROD_RELEASE_CURRENT_TAG_NAME
-
     mustBePreparedForReleaseTask
+
+    requiredParameters LFS_PROD_RELEASE_CURRENT_TAG_NAME
 
     local jobName=$(getBuildJobNameFromFingerprint)
     mustHaveValue "${jobName}" "build - job name from fingerprint"
@@ -25,8 +24,8 @@ usecase_LFS_RELEASE_SHARE_BUILD_ARTIFACTS() {
     local workspace=$(getWorkspaceName)
     mustHaveWorkspaceName
 
-    local labelName=${LFS_PROD_RELEASE_CURRENT_TAG_NAME}
-    mustHaveValue "${labelName}"
+    local buildName=${LFS_PROD_RELEASE_CURRENT_TAG_NAME}
+    mustHaveValue "${buildName}"
 
     copyArtifactsToWorkspace "${jobName}" "${buildNumber}"
 
@@ -34,8 +33,8 @@ usecase_LFS_RELEASE_SHARE_BUILD_ARTIFACTS() {
     for dir in bld-*-* ; do
         [[ -d ${dir} ]] || continue
         local basename=$(basename ${dir})
-        info "copy ${basename} to buildresults share ${basename}/${labelName}"
-        _synchronizeBuildResultsToShare ${basename} ${basename/${labelName}
+        info "copy ${basename} to buildresults share ${basename}/${buildName}"
+        _synchronizeBuildResultsToShare ${basename} ${basename}/${buildName}
     done
 
     info "clean up workspace"
@@ -71,3 +70,4 @@ _synchronizeBuildResultsToShare() {
 
     return
 }
+

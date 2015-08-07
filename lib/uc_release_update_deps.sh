@@ -2,16 +2,15 @@
 
 ## @fn      usecase_LFS_RELEASE_UPDATE_DEPS()
 #  @brief   update the dependency files for all components of a build
-#  @param   {jobName}        name of the build job
-#  @param   {buildNumber}    numfer of the build job
+#  @param   <none>
 #  @return  <none>
 usecase_LFS_RELEASE_UPDATE_DEPS() {
 
     # TODO: demx2fk3 2015-08-04 add to artifacts: externalComponents
     mustBePreparedForReleaseTask
 
-    local jobName=$(getBuildJobNameFromFingerprint)
-    local buildNumber=$(getBuildBuildNumberFromFingerprint)
+    requiredParameters LFS_PROD_RELEASE_CURRENT_TAG_NAME \
+                       LFS_PROD_RELEASE_PREVIOUS_TAG_NAME
 
     local workspace=$(getWorkspaceName)
     mustHaveWorkspaceName
@@ -28,6 +27,7 @@ usecase_LFS_RELEASE_UPDATE_DEPS() {
 
     info "using values: old value: ${oldReleaseLabelName} new value: ${releaseLabelName}"
     while read name url rev ; do
+        local dependenciesFile=${workspace}/${name}/Dependencies
 
         case ${name} in
             src-*) :        ;; # ok
@@ -39,7 +39,6 @@ usecase_LFS_RELEASE_UPDATE_DEPS() {
 
         execute rm -rf ${workspace}/${name}
         svnCheckout --depth=immediates --ignore-externals ${url} ${workspace}/${name}
-        local dependenciesFile=${workspace}/${name}/Dependencies
 
         if [[ ! -e ${dependenciesFile} ]] ; then
             info "file ${dependenciesFile} does not exist"
@@ -47,23 +46,25 @@ usecase_LFS_RELEASE_UPDATE_DEPS() {
         fi
         
         info "update ${name}/Dependencies";
-        execute perl -p -i -e "s/\b${oldReleaseLabelName}\b/${releaseLabelName}/g" ${dependenciesFile}
+        execute perl -p -i -e "s/\b[A-Z0-9_]*PS_LFS_OS\S+\b/${releaseLabelName}/g" ${dependenciesFile}
         svnDiff ${dependenciesFile}
 
         if [[ ${canCommitDependencies} ]] ; then 
-            info "running svn commit"
-            local logMessage=$(createTempFile)
-            local svnCommitMessage=$(getConfig LFS_PROD_uc_release_svn_message_template -t releaseName:${releaseLabelName} -t oldReleaseName:${oldReleaseLabelName} -t revision:${rev} )
+            info "commiting ${name}/Dependencies"
+            local logMessage=${workspace}/commitMessage
+            local svnCommitMessage=$(getConfig LFS_PROD_uc_release_svn_message_template \
+                                        -t releaseName:${releaseLabelName}              \
+                                        -t oldReleaseName:${oldReleaseLabelName}        \
+                                        -t revision:${rev})
+
             echo ${svnCommitMessage} > ${logMessage}
             svnCommit -F ${logMessage} ${dependenciesFile}
         else
             warning "committing of dependencies is disabled in config"
         fi
-        
     done < ${componentsFile}
 
     info "update done."
-
     return
 }
 
