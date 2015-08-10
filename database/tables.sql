@@ -29,7 +29,7 @@ DROP TABLE IF EXISTS builds;
 CREATE TABLE builds (
     id          INT NOT NULL AUTO_INCREMENT,
     build_name  VARCHAR(128) NOT NULL,
-    branch_id   VARCHAR(128) NOT NULL,
+    branch_id   INT NOT NULL,
     revision    INT NOT NULL,
     comment     TEXT,
 
@@ -43,7 +43,7 @@ DROP TABLE IF EXISTS events;
 CREATE TABLE events (
     id INT       NOT NULL AUTO_INCREMENT,
     event_type   VARCHAR(128) NOT NULL DEFAULT 'build',
-    event_state  VARCHAR(128) NOT NULL DEFAULT 'started',,
+    event_state  VARCHAR(128) NOT NULL DEFAULT 'started',
     product_name VARCHAR(128),
     task_name    VARCHAR(128),
 
