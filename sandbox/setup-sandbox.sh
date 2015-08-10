@@ -1,8 +1,20 @@
 #!/bin/bash
 
-#
-# Create a copy of production Jenkins on local machine.
-#
+## @file setup-sandbox.sh
+## @brief setup Jenkins
+## @details Setup a LFS sandbox Jenkins on local machine by
+##          using most of the data from lfs production Jenkins.
+##          Use -h to geht help.
+##
+## Some notes:
+## If you use the -h option after another option, the value/flag of
+## the option specified before the -h flag is used in the help text.
+## setup-sandbox.sh -h gives the following output for -t HTTP_PORT.
+##     -t HTTP_PORT for Jenkins. Defaults to 8090.
+## setup-sandbox.sh -t 5050 -h gives the following output for -t HTTP_PORT.
+##     -t HTTP_PORT for Jenkins. Defaults to 5050.
+##
+## The script may not run on ulegcpmaxi and also not as user psulm.
 
 ITSME=$(basename $0)
 
@@ -20,6 +32,10 @@ LRC_CI_USER="ca_lrcci"
 LFS_CI_ROOT="${HOME}/lfs-ci"
 SANDBOX_USER=${USER}
 PURGE_SANDBOX="false"
+HTTP_PORT="8090"
+LFS_CI_CONFIG_FILE=""
+UPDATE_JENKINS="false"
+PROD_JENKINS_SERVER="lfs-ci.emea.nsn-net.net"
 
 usage() {
 cat << EOF
@@ -27,8 +43,10 @@ cat << EOF
     Script in order to setup a LFS CI sandbox on local machine.
 
     IMPORTANT: 
-        Flag -d is interactive!
-        Before or after running this script probably you might run setup-database.sh.
+
+        - This script is interactive!
+
+        - Before or after running this script you probably might run setup-database.sh.
 
     Jenkins will be installed into directory \${LOCAL_WORK_DIR}/$USER/${JENKINS_DIR}/home. This
     can be overridden by using -w LOCAL_WORK_DIR.
@@ -46,65 +64,67 @@ cat << EOF
                  Disable all .*_Build$ jobs (-e is missing) and keep already existing Jenkins plugins (-p).
 
     Options and Flags:
+        -f Complete path of CI scripting config file. This option is mandatory.
         -b Comma separated list of BRANCHES to be copied from LFS CI (not LRC branches). Defaults to ${BRANCH_VIEWS}.
         -n Comma separated list of nested view that should be created in sandbox. Defaults to ${NESTED_VIEWS}.
         -r Comma separated list of root views (top level tabs) that should be created in sandbox. Defaults to ${ROOT_VIEWS}.
         -w Specify \$LOCAL_WORK_DIR directory for Jenkins installation. Defaults to ${LOCAL_WORK_DIR}.
         -i LFS CI user. Defaults to ${CI_USER}.
         -c LFS LRC CI user. Defaults to ${LRC_CI_USER}.
-        -s root directory of lfs ci scripting. Defaults to ${LFS_CI_ROOT}.
-        -d Delete local sandbox installation. Works for standard installation (default values) only.
-        -e (flag) Disable all .*_Build$ jobs in sandbox. Defaults to ${DISABLE_BUILD_JOBS}.
-        -l (flag) Create LRC trunk within sandbox. Defaults to ${LRC}.
-        -p (flag) Keep jenkins plugins from existing sandbox installation. Defaults to ${KEEP_JENKINS_PLUGINS}.
+        -s Root directory of lfs CI scripting. Defaults to ${LFS_CI_ROOT}.
+        -d Delete local sandbox installation. You can use -w and -s if you want to delete a non standard installation.
+        -t HTTP_PORT for Jenkins. Defaults to ${HTTP_PORT}.
+        -e (flag) Disable all .*_Build$ jobs in sandbox. Default (missing -e) disables all .*_Build$ jobs).
+        -l (flag) Create LRC trunk within sandbox. Default (missing -l) creates LRC in sandbox.
+        -p (flag) Keep Jenkins plugins from an existing sandbox installation. Defaults to ${KEEP_JENKINS_PLUGINS}.
+        -j (flag) Update sandbox Jenkins in ${LOCAL_WORK_DIR}. Additionally use -w -b -n and -l if you want to
+                  update a non standard installation. Plugins and jobs will be updated from ${PROD_JENKINS_SERVER}.
         -h Get help
 
 EOF
     exit 0
 }
 
-JENKINS_DIR="lfs-jenkins" # subdirectory within $WORK_DIR/$USER
-PROD_JENKINS_SERVER="lfs-ci.emea.nsn-net.net"
-PROD_JENKINS_HOME="${WORK_DIR}/${CI_USER}/${JENKINS_DIR}/home"
-PROD_JENKINS_JOBS="${PROD_JENKINS_HOME}/jobs"
-
-LRC_PROD_JENKINS_SERVER="lfs-lrc-ci.int.net.nokia.com"
-LRC_PROD_JENKINS_HOME="${WORK_DIR}/${LRC_CI_USER}/${JENKINS_DIR}/home"
-LRC_PROD_JENKINS_JOBS="${LRC_PROD_JENKINS_HOME}/jobs"
-
-HTTP_ADDRESS="0.0.0.0"
-HTTP_PORT="8090"
-JENKNIS_VERSION="1.532.3"
-JENKINS_HOME="${LOCAL_WORK_DIR}/${SANDBOX_USER}/${JENKINS_DIR}/home"
-JENKINS_PLUGINS="${JENKINS_HOME}/plugins"
-JVM_OPTS="-Djava.io.tmpdir=/var/tmp"
-JENKINS_OPTS="--httpListenAddress=${HTTP_ADDRESS} --httpPort=${HTTP_PORT}"
-JENKINS_WAR="${LFS_CI_ROOT}/lib/java/jenkins/jenkins-${JENKNIS_VERSION}.war"
-JENKINS_CLI_JAR="${LFS_CI_ROOT}/lib/java/jenkins/jenkins-cli-${JENKNIS_VERSION}.jar"
-LFS_CI_CONFIG_FILE="${LFS_CI_ROOT}/etc/development.cfg"
-PID_FILE="${JENKINS_HOME}/jenkins.pid"
-LOG_FILE="${JENKINS_HOME}/jenkins.log"
-GIT_URL="ssh://git@psulm.nsn-net.net/projects/lfs-ci.git"
-SANDBOX_SCRIPT_DIR="${LFS_CI_ROOT}/sandbox"
-HOST=$(hostname)
-TMP="/tmp"
-
 ## @fn      pre_actions()
 #  @brief   check needed requirements
 #  @return  <none>
 pre_actions() {
+    if [[ $(hostname) =~ .*maxi.* ]]; then
+        echo "ERROR: This script may not run on $(hostname)."
+        exit 1
+    fi
+    
+    if [[ ${USER} == psulm ]]; then
+        echo "ERROR: This script may not run as user psulm."
+        exit 2
+    fi
+
     if [[ $(ps aux | grep java | grep jenkins) ]]; then
         echo "ERROR: Jenkins is sill running."
-        exit 1
+        exit 3
     fi
     if [[ -d ${LOCAL_WORK_DIR} && ! -w ${LOCAL_WORK_DIR} ]]; then
         echo "ERROR: Ensure that ${LOCAL_WORK_DIR} is writable for user ${SANDBOX_USER}."
-        exit 2
+        exit 4
     fi
     if [[ "${KEEP_JENKINS_PLUGINS}" == "true" && ! -d ${JENKINS_PLUGINS} ]]; then
         echo "ERROR: -p makes no sense because there is no ${JENKINS_PLUGINS}"
-        exit 3
+        exit 5
     fi
+    if [[ ! -r "${LFS_CI_CONFIG_FILE}" && ${PURGE_SANDBOX} == "false" ]]; then
+        echo "ERROR: Can not read config file ${LFS_CI_CONFIG_FILE}."
+        exit 6
+    fi
+}
+
+_git_clone() {
+    echo "    Clone git repo ${GIT_URL} into ${LFS_CI_ROOT}"
+    [[ -d ${LFS_CI_ROOT} ]] && rm -rf ${LFS_CI_ROOT}
+    cd ${HOME}
+    git clone ${GIT_URL}
+    cd ${LFS_CI_ROOT}
+    echo "    Checkout branch development"
+    git checkout development
 }
 
 ## @fn      git_stuff()
@@ -116,20 +136,29 @@ pre_actions() {
 git_stuff() {
     echo "Git stuff..."
     if [[ -d ${LFS_CI_ROOT} ]]; then
-        echo "    ${LFS_CI_ROOT} exists"
-        cd ${LFS_CI_ROOT}
-        echo "    Checkout branch development"
-        git checkout development
-        echo "    Pulling branch development"
-        git pull origin development
+        echo -e "    HELP ME:\n    ${LFS_CI_ROOT} already exists. What shall I do (type 1, 2 or 3)?:\n\
+        1 Don't toch existing ${LFS_CI_ROOT}.\n\
+        2 Change into ${LFS_CI_ROOT} and pull branch \"development\".
+        3 Remove existing ${LFS_CI_ROOT}, clone CI scripting into ${LFS_CI_ROOT} and checkout branch \"developement\"."
+        read ans
+        if [[ ${ans} -eq 1 ]]; then
+            echo "    Didn't touch ${LFS_CI_ROOT}."
+            return
+        elif [[ ${ans} -eq 2 ]]; then
+            echo "    Checkout branch development"
+            cd ${LFS_CI_ROOT}
+            git checkout development
+            echo "    Pulling branch development"
+            git pull origin development
+            cd - 
+        elif [[ ${ans} -eq 3 ]]; then
+            _git_clone
+        else
+            echo "    Invalid answer. Only 1, 2 or 3 is allowed."
+            exit 1
+        fi
     else
-        echo "    Git repo does not exist in ${LFS_CI_ROOT}."
-        cd ${HOME}
-        echo "    Clone git repo ${GIT_URL} into ${LFS_CI_ROOT}"
-        git clone ${GIT_URL}
-        cd ${LFS_CI_ROOT}
-        echo "    Checkout branch development"
-        git checkout development
+        _git_clone
     fi
 }
 
@@ -169,14 +198,14 @@ jenkins_copy_jobs() {
                     --exclude=htmlreports \
                     --exclude=workspace*"
 
-    echo "    Copy jobs from ${PROD_JENKINS_SERVER}"
-    for JOB_PREFIX in LFS_CI_-_trunk_-_ LFS_Prod_-_trunk_-_ PKGPOOL_-_trunk_-_ UBOOT_ Test- LFS_KNIFE_-_ LFS_BRANCHING_-_ LFS_DEV_-_developer_-_ Admin_-_reserveTarget Admin_-_deployCiScripting; do
+    echo "    Rsync jenkins jobs from ${PROD_JENKINS_SERVER}"
+    for JOB_PREFIX in LFS_CI_-_trunk_-_ LFS_Prod_-_trunk_-_ PKGPOOL_-_trunk_-_ UBOOT_ Test- LFS_KNIFE_-_ LFS_BRANCHING_-_ LFS_DEV_-_developer_-_ Admin_-_reserveTarget Admin_-_releaseTarget Admin_-_deployCiScripting; do
         rsync -a ${excludes} ${PROD_JENKINS_SERVER}:${PROD_JENKINS_JOBS}/${JOB_PREFIX}* ${JENKINS_HOME}/jobs/
     done
 
     for BRANCH_VIEW in $(echo ${BRANCH_VIEWS} | tr ',' ' '); do
         if [[ ${BRANCH_VIEW} != trunk ]]; then
-            echo "    Copy jobs for ${BRANCH_VIEW} from ${PROD_JENKINS_SERVER}"
+            echo "    Rsync jenkins jobs for ${BRANCH_VIEW} from ${PROD_JENKINS_SERVER}"
             for JOB_PREFIX in LFS_CI_-_ LFS_Prod_-_ PKGPOOL_-_; do
                 rsync -a ${excludes} ${PROD_JENKINS_SERVER}:${PROD_JENKINS_JOBS}/${JOB_PREFIX}${BRANCH_VIEW}_-_* ${JENKINS_HOME}/jobs
             done
@@ -184,7 +213,7 @@ jenkins_copy_jobs() {
     done
 
     if [[ "${LRC}" == "true" ]]; then
-        echo "    Copy jobs from ${LRC_PROD_JENKINS_SERVER}"
+        echo "    Rsync jenkins jobs from ${LRC_PROD_JENKINS_SERVER}"
         for JOB_PREFIX in LFS_CI_-_LRC_-_ LFS_Prod_-_LRC_-_ PKGPOOL_-_LRC_-_; do
             rsync -a ${excludes} ${LRC_PROD_JENKINS_SERVER}:${LRC_PROD_JENKINS_JOBS}/${JOB_PREFIX}* ${JENKINS_HOME}/jobs/
         done
@@ -200,7 +229,7 @@ jenkins_disable_deploy_ci_scripting_job() {
     sed -i -e "s,<disabled>false</disabled>,<disabled>true</disabled>," ${JENKINS_HOME}/jobs/Admin_-_deployCiScripting/config.xml
 }
 
-## @fn      jenkins_copy_plugins()
+## @fn      jenkins_plugins()
 #  @brief   copy over plugins from production jenkins.
 #  @details If KEEP_JENKINS_PLUGINS == "true" and $1 == "copy", the plugins
 #           are copied from $JENKINS_HOME to /tmp. If KEEP_JENKINS_PLUGINS == "false"
@@ -219,7 +248,7 @@ jenkins_plugins() {
 
     echo "Jenkins plugins"
     if [[ "${KEEP_JENKINS_PLUGINS}" == "false" && "${mode}" == "copy" ]]; then
-        echo "    Copy plugins from ${PROD_JENKINS_SERVER} to ${saveDir}"
+        echo "    Rsync plugins from ${PROD_JENKINS_SERVER} to ${saveDir}"
         rsync -a ${PROD_JENKINS_SERVER}:${PROD_JENKINS_HOME}/plugins ${saveDir}/
     fi
 
@@ -231,6 +260,11 @@ jenkins_plugins() {
         cp -a ${saveDir}/plugins ${JENKINS_HOME}
         rm -rf ${saveDir}
     fi
+}
+
+jenkins_update_plugins() {
+    echo "    Update local Jenkins plugins in ${JENKINS_HOME}/plugins"
+    rsync -a ${PROD_JENKINS_SERVER}:${PROD_JENKINS_HOME}/plugins ${JENKINS_HOME}/
 }
 
 ## @fn      jenkins_get_configs()
@@ -428,8 +462,8 @@ jenkins_stuff() {
 }
 
 remove_sandbox() {
-    local ans=""
-    read -p "Removing ${LOCAL_WORK_DIR}/${SANDBOX_USER}/${JENKINS_DIR} and $LFS_CI_ROOT} (y|N): " ans
+    local ans="N"
+    read -p "Removing ${LOCAL_WORK_DIR}/${SANDBOX_USER}/${JENKINS_DIR} and ${LFS_CI_ROOT} (y|N): " ans
     if [[ "${ans}" == "y" || "${ans}" == "Y" ]]; then
         rm -rf ${LOCAL_WORK_DIR}/${SANDBOX_USER}/${JENKINS_DIR}
         rm -rf ${LFS_CI_ROOT}
@@ -439,7 +473,7 @@ remove_sandbox() {
 }
 
 get_args() {
-    while getopts ":r:n:b:w:i:c:s:delph" OPT; do
+    while getopts ":r:n:b:w:i:c:s:t:f:delpjh" OPT; do
         case ${OPT} in
             b)
                 BRANCH_VIEWS=$OPTARG
@@ -462,6 +496,12 @@ get_args() {
             s)
                 LFS_CI_ROOT=$OPTARG
             ;;
+            t)
+                HTTP_PORT=$OPTARG
+            ;;
+            f)
+                LFS_CI_CONFIG_FILE=${OPTARG}
+            ;;
             d)
                 PURGE_SANDBOX="true"
             ;;
@@ -474,27 +514,60 @@ get_args() {
             p)
                 KEEP_JENKINS_PLUGINS="true"
             ;;
+            j)
+                UPDATE_JENKINS="true"
+            ;;
             h)
                 usage
             ;;
             *)
                 echo "Use -h option to get help."
-                exit 0
+                exit 1
             ;;
         esac
     done
+
+    JENKINS_DIR="lfs-jenkins" # subdirectory within $WORK_DIR/$USER
+    PROD_JENKINS_HOME="${WORK_DIR}/${CI_USER}/${JENKINS_DIR}/home"
+    PROD_JENKINS_JOBS="${PROD_JENKINS_HOME}/jobs"
+
+    LRC_PROD_JENKINS_SERVER="lfs-lrc-ci.int.net.nokia.com"
+    LRC_PROD_JENKINS_HOME="${WORK_DIR}/${LRC_CI_USER}/${JENKINS_DIR}/home"
+    LRC_PROD_JENKINS_JOBS="${LRC_PROD_JENKINS_HOME}/jobs"
+
+    HTTP_ADDRESS="0.0.0.0"
+    JENKNIS_VERSION="1.532.3"
+    JENKINS_HOME="${LOCAL_WORK_DIR}/${SANDBOX_USER}/${JENKINS_DIR}/home"
+    JENKINS_PLUGINS="${JENKINS_HOME}/plugins"
+    JVM_OPTS="-Djava.io.tmpdir=/var/tmp"
+    JENKINS_OPTS="--httpListenAddress=${HTTP_ADDRESS} --httpPort=${HTTP_PORT}"
+    JENKINS_WAR="${LFS_CI_ROOT}/lib/java/jenkins/jenkins-${JENKNIS_VERSION}.war"
+    JENKINS_CLI_JAR="${LFS_CI_ROOT}/lib/java/jenkins/jenkins-cli-${JENKNIS_VERSION}.jar"
+    PID_FILE="${JENKINS_HOME}/jenkins.pid"
+    LOG_FILE="${JENKINS_HOME}/jenkins.log"
+    GIT_URL="ssh://git@psulm.nsn-net.net/projects/lfs-ci.git"
+    SANDBOX_SCRIPT_DIR="${LFS_CI_ROOT}/sandbox"
+    HOST=$(hostname)
+    TMP="/tmp"
 }
 
 main() {
     get_args $*
+    pre_actions
 
     if [[ "${PURGE_SANDBOX}" == "true" ]]; then
         remove_sandbox
         exit $?
     fi
 
-    pre_actions
+    if [[ "${UPDATE_JENKINS}" == "true" ]]; then
+        jenkins_copy_jobs
+        jenkins_update_plugins
+        exit $?
+    fi
+
     git_stuff
+    cd ${HOME}
     jenkins_stuff
     post_actions
 }

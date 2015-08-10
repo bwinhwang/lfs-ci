@@ -1,5 +1,11 @@
 #!/bin/bash
 
+## @file setup-database.sh
+## @brief Create test database
+## @details Creates the test database on $DB_HOST and applys 
+##          the ${LFS_CI_ROOT_DB}/*.sql scripts. Also imports
+##          some tables from production DB into new test DB.
+
 ITSME=$(basename $0)
 LFS_CI_ROOT_DB="${LFS_CI_ROOT}/database"
 TMP="/tmp"
@@ -23,6 +29,7 @@ cat << EOF
     Usage: $ITSME [-s PROD_DB_HOST] [-t TEST_DB_HOST] [-p PROD_DB_PASS] [-q TEST_DB_PASS] [-u PROD_DB_USER] [-v TEST_DB_USER] 
 
     This script creates the ${DB_NAME} database on host ${DB_HOST} from scratch.
+    If -d is specified the name of the database is \${USER}_lfspt (${USER}_lfspt).
     The tables "${TABLES_TO_COPY}" are taken over from production database ${DB_PROD_NAME}
     running on ${DB_PROD_HOST}.
 
@@ -32,7 +39,8 @@ cat << EOF
         -s Host name of production database. Defaults to ${DB_PROD_HOST}.
         -t Host name for test database. Defaults to ${DB_HOST}.
         -u User name of production database. Defaults to ${DB_PROD_USER}
-        -v User name for test database. Defaults to ${DB_USER}
+        -v User name for test database. Defaults to ${DB_USER} except -d is given.
+        -d Use \${USER}_ (${USER}_) as prefix for the database name.
 
 EOF
     exit 0
@@ -53,6 +61,10 @@ pre_checks() {
     fi
 }
 
+## @fn create_db()
+## @brief Create test database
+## @details Creates the test database on $DB_HOST and applys 
+##          the ${LFS_CI_ROOT_DB}/*.sql scripts.
 create_db() {
     echo "Create database..."
     echo "    Drop database ${DB_NAME} on ${DB_HOST}"
@@ -69,6 +81,10 @@ create_db() {
     cat ${LFS_CI_ROOT_DB}/ysmv2.sql | mysql -h ${DB_HOST} -u ${DB_USER} --password=${DB_PASS} ${DB_NAME}
 }
 
+## @fn import_tables_from_prod()
+## @brief Import database tables
+## @details Import tables ${TABLES_TO_COPY} from production
+#           database into test database
 import_tables_from_prod() {
     echo "Export/import DB tables..."
     for DB_TABLE in ${TABLES_TO_COPY}; do
@@ -81,7 +97,7 @@ import_tables_from_prod() {
 }
 
 get_args() {
-    while getopts ":s:t:p:q:u:v:h" OPT; do
+    while getopts ":s:t:p:q:u:v:dh" OPT; do
         case ${OPT} in
             s)
                 DB_PROD_HOST=$OPTARG
@@ -100,6 +116,9 @@ get_args() {
             ;;
             v)
                 DB_USER=$OPTARG
+            ;;
+            d)
+                DB_NAME=${USER}_lfspt
             ;;
             h)
                 usage
