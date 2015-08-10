@@ -5,24 +5,21 @@
 ## @fn      usecase_LFS_RELEASE_CREATE_SOURCE_TAG()
 #  @brief   create a tag(s) on source repository 
 #  @details create tags in the source repository (os/tags) and subsystems (subsystems/tags)
-#  @param   {jobName}        a job name
-#  @param   {buildNumber}    a build number
 #  @param   <none>
 #  @return  <none>
 usecase_LFS_RELEASE_CREATE_SOURCE_TAG() {
-    local jobName=$1
-    local buildNumber=$2
+    mustBePreparedForReleaseTask
 
     requiredParameters LFS_PROD_RELEASE_CURRENT_TAG_NAME
 
     local workspace=$(getWorkspaceName)
-    local requiredArtifacts=$(getConfig LFS_CI_UC_release_required_artifacts)
-    # mustHaveWorkspaceWithArtefactsFromUpstreamProjects "${jobName}" "${buildNumber}" "externalComponents"
+    mustHaveWorkspaceName
 
+    # get os label
     local osLabelName=${LFS_PROD_RELEASE_CURRENT_TAG_NAME}
+    mustHaveValue "${osLabelName}" "no os label name"
 
-    export tagName=${osLabelName}
-    local svnUrl=$(getConfig lfsSourceRepos)
+    local svnUrl=$(getConfig lfsSourceRepos -t tagName:${tagName})
     local svnUrlOs=${svnUrl}/os
     local branch=pre_${osLabelName}
     local logMessage=$(createTempFile)
@@ -33,6 +30,7 @@ usecase_LFS_RELEASE_CREATE_SOURCE_TAG() {
     svnUrl=$(normalizeSvnUrl ${svnUrl})
     mustHaveValue "${svnUrl}" "svnUrl"
     mustHaveValue "${svnUrlOs}" "svnUrlOs"
+
 
     #                          _                                
     #                      ___| | ___  __ _ _ __    _   _ _ __  
@@ -49,10 +47,6 @@ usecase_LFS_RELEASE_CREATE_SOURCE_TAG() {
     info "using repos for new tag ${svnUrlOs}/tags/${osLabelName}"
     info "using repos for package ${svnUrl}/subsystems/"
 
-    # get os label
-    local osLabelName=${LFS_PROD_RELEASE_CURRENT_TAG_NAME}
-    mustHaveValue "${osLabelName}" "no os label name"
-
     execute mkdir -p ${workspace}/rev/
 
     for revisionFile in ${workspace}/bld/bld-externalComponents-*/usedRevisions.txt ; do
@@ -61,10 +55,9 @@ usecase_LFS_RELEASE_CREATE_SOURCE_TAG() {
         rawDebug "${revisionFile}"
 
         local dirName=$(basename $(dirname ${revisionFile}))
-        export cfg=$(cut -d- -f3 <<< ${dirName})
-        local tagDirectory=$(getConfig LFS_PROD_uc_release_source_tag_directory)
+        local cfg=$(cut -d- -f3 <<< ${dirName})
+        local tagDirectory=$(getConfig LFS_PROD_uc_release_source_tag_directory -t cfg:${cfg})
         info "using tag dir ${tagDirectory} for cfg ${cfg}"
-        unset cfg ; export cfg
 
         execute -n sort -u ${revisionFile} ${workspace}/rev/${tagDirectory} > ${workspace}/rev/${tagDirectory}
 
@@ -72,19 +65,15 @@ usecase_LFS_RELEASE_CREATE_SOURCE_TAG() {
     done
 
     # check for branch
-
     if existsInSubversion ${svnUrlOs}/tags ${osLabelName} ; then
         error "tag ${osLabelName} already exists"
         exit 1
     fi
-
     if existsInSubversion ${svnUrlOs}/branches ${branch} ; then
         info "removing branch ${branch}"
         svnRemove -m removing_branch_for_production ${svnUrlOs}/branches/${branch} 
     fi
-
     mustExistBranchInSubversion ${svnUrlOs}/branches ${branch}
-    # mustExistBranchInSubversion ${svnUrlOs}/tags ${branch}
 
     for revisionFile in ${workspace}/rev/* ; do
         [[ -e ${revisionFile} ]] || continue
@@ -98,10 +87,6 @@ usecase_LFS_RELEASE_CREATE_SOURCE_TAG() {
             mustHaveValue "${url}" "svn url"
             mustHaveValue "${rev}" "svn revision"
             mustHaveValue "${src}" "src"
-
-            info "src ${src}"
-            info "rev ${rev}"
-            info "url ${url}"
 
             local dirname=
             local normalizedUrl=$(normalizeSvnUrl ${url})
@@ -132,6 +117,13 @@ usecase_LFS_RELEASE_CREATE_SOURCE_TAG() {
     done
 
 
+    _createSourceTag
+    info "tagging done"
+
+    return
+}
+
+_createSourceTag() {
     # check for the branch
     info "svn repos url is ${svnUrl}/branches/${branch}"
 
@@ -146,10 +138,4 @@ usecase_LFS_RELEASE_CREATE_SOURCE_TAG() {
     else
         warning "creating a source tag is disabled in config"
     fi
-
-    info "tagging done"
-
-    return
 }
-
-
