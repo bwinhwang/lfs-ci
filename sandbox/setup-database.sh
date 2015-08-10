@@ -53,11 +53,15 @@ pre_checks() {
     fi
     if [[ -z ${DB_PASS} || -z ${DB_PROD_PASS} ]]; then
         echo "ERROR: Both mysql passwords are required"
-        exit 1
+        exit 2
     fi
     if [[ ${DB_NAME} == ${DB_PROD_NAME} ]]; then
         echo "ERROR: Name of test DB may not equal name of production DB."
-        exit 1
+        exit 3
+    fi
+    if [[ ${DB_NAME} == lfspt ]]; then
+        echo "ERROR: Database name can not be ${DB_NAME}."
+        exit 4
     fi
 }
 

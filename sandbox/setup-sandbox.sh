@@ -263,7 +263,7 @@ jenkins_plugins() {
 }
 
 jenkins_update_plugins() {
-    echo "    Update local Jenkins plugins in ${JENKINS_HOME}/plugins"
+    echo "    Update local Jenkins plugins within ${JENKINS_HOME}/plugins"
     rsync -a ${PROD_JENKINS_SERVER}:${PROD_JENKINS_HOME}/plugins ${JENKINS_HOME}/
 }
 
@@ -461,7 +461,7 @@ jenkins_stuff() {
     jenkins_reload_config
 }
 
-remove_sandbox() {
+purge_sandbox() {
     local ans="N"
     read -p "Removing ${LOCAL_WORK_DIR}/${SANDBOX_USER}/${JENKINS_DIR} and ${LFS_CI_ROOT} (y|N): " ans
     if [[ "${ans}" == "y" || "${ans}" == "Y" ]]; then
@@ -556,7 +556,7 @@ main() {
     pre_actions
 
     if [[ "${PURGE_SANDBOX}" == "true" ]]; then
-        remove_sandbox
+        purge_sandbox
         exit $?
     fi
 
