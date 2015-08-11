@@ -193,9 +193,8 @@ def deleteRootView() {
 
 def postChecks() {
     println("\n[INFO] run post checks.")
-
-    try {
-        for(jobName in deletedJobs) {
+    for(jobName in deletedJobs) {
+        try {
             println("[INFO] check whether job $jobName has been deleted.")
             job = j.getItem(jobName)
             if(job) {
@@ -208,9 +207,9 @@ def postChecks() {
                 println("[INFO] job dir ${jobDir} has not been deleted. Trying to delete.")
                 jobDir.deleteDir()
             }
+        } catch(Exception e) { 
+            println("[WARNING] " + e)
         }
-    } catch(Exception e) { 
-        println("[WARNING] " + e)
     }
 }
 
