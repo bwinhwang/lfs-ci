@@ -26,12 +26,15 @@ CREATE TABLE branches (
     INDEX(branch_name)
 );
 
-CREATE TABLE branches (
+CREATE TABLE ps_branches (
     id                 INT NOT NULL AUTO_INCREMENT,
     ps_branch_name     VARCHAR(128) NOT NULL
+    status             VARCHAR(16) NOT NULL,
+    ecl_url            VARCHAR(254) NOT NULL,
+    comment            TEXT,
 );
 
-CREATE TABLE branches_ps_branches (
+CREATE TABLE nm_branches_ps_branches (
     id               INT NOT NULL AUTO_INCREMENT,
     ps_branch_id     INT NOT NULL,
     branch_id        INT NOT NULL,
