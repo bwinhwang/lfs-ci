@@ -4,14 +4,15 @@ DROP TABLE IF EXISTS test_executions;
 DROP TABLE IF EXISTS build_events;
 DROP TABLE IF EXISTS events;
 DROP TABLE IF EXISTS builds;
+DROP TABLE IF EXISTS branches_ps_branches;
 DROP TABLE IF EXISTS branches;
+DROP TABLE IF EXISTS ps_branches;
 
 DROP TABLE IF EXISTS branches;
 CREATE TABLE branches (
     id                 INT NOT NULL AUTO_INCREMENT,
     branch_name        VARCHAR(128) NOT NULL,
     location_name      VARCHAR(128) NOT NULL,
-    ps_branch_name     VARCHAR(128) NOT NULL,
     status             VARCHAR(16) NOT NULL DEFAULT 'open',
     based_on_revision  INT NULL,
     based_on_release   VARCHAR(128) NULL,
@@ -23,6 +24,23 @@ CREATE TABLE branches (
 
     PRIMARY KEY (id),
     INDEX(branch_name)
+);
+
+CREATE TABLE branches (
+    id                 INT NOT NULL AUTO_INCREMENT,
+    ps_branch_name     VARCHAR(128) NOT NULL
+);
+
+CREATE TABLE branches_ps_branches (
+    id               INT NOT NULL AUTO_INCREMENT,
+    ps_branch_id     INT NOT NULL,
+    branch_id        INT NOT NULL,
+
+    PRIMARY KEY (id),
+    FOREIGN KEY (ps_branch_id)
+        REFERENCES ps_branches(id),
+    FOREIGN KEY (branch_id)
+        REFERENCES branches(id)
 );
 
 DROP TABLE IF EXISTS builds;
