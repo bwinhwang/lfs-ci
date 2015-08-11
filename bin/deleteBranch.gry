@@ -38,6 +38,8 @@ remaining_jobs = []
 
 dev_branch = false
 
+deletedJobs = []
+
 parameters.each {
     if(it.name == "BRANCH") {
         branch = it.value
@@ -213,7 +215,6 @@ def postChecks() {
 }
 
 // Delete none LRC jobs and collect LRC jobs in a list.
-deletedJobs = []
 def deleteJobs() {
     if(deleteJobs || LRC_deleteJobs) {
         for(p in j.getProjects()) {
