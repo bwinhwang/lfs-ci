@@ -195,20 +195,16 @@ def postChecks() {
     println("\n[INFO] run post checks.")
     for(jobName in deletedJobs) {
         try {
-            println("[INFO] check whether job $jobName has been deleted.")
             job = j.getItem(jobName)
             if(job) {
                 println("[INFO] job ${job.name} has not been deleted. Trying to delete again.")
                 job.delete()
             }
-            jobDir = new File("${jenkins_jobs_dir}/${jobName}")
-            println("[INFO] check whether job dir $jobDir has been deleted.")
-            if(jobDir.exists()) {
-                println("[INFO] job dir ${jobDir} has not been deleted. Trying to delete.")
-                jobDir.deleteDir()
-            }
-        } catch(Exception e) { 
-            println("[WARNING] " + e)
+        } catch(Exception e) { }
+        jobDir = new File("${jenkins_jobs_dir}/${jobName}")
+        if(jobDir.exists()) {
+            println("[INFO] job dir ${jobDir} has not been deleted. I delete it explicitly.")
+            jobDir.deleteDir()
         }
     }
 }
