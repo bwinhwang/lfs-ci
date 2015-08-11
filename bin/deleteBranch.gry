@@ -201,6 +201,8 @@ def postChecks() {
                 job.delete()
             }
         } catch(Exception e) { }
+        // It is possible that Jenkins is deleting a job but not the related directory
+        // on the filesystem.
         jobDir = new File("${jenkins_jobs_dir}/${jobName}")
         if(jobDir.exists()) {
             println("[INFO] job dir ${jobDir} has not been deleted. I delete it explicitly.")
