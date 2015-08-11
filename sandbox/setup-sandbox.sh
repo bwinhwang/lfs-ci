@@ -2,7 +2,7 @@
 
 ## @file setup-sandbox.sh
 ## @brief setup Jenkins
-## @details Setup a LFS sandbox Jenkins on local machine by
+## @details Setup a LFS Sandbox Jenkins on local machine by
 ##          using most of the data from lfs production Jenkins.
 ##          Use -h to geht help.
 ##
@@ -36,11 +36,15 @@ HTTP_PORT="8090"
 LFS_CI_CONFIG_FILE=""
 UPDATE_JENKINS="false"
 PROD_JENKINS_SERVER="lfs-ci.emea.nsn-net.net"
+START_OPTION=""
+JUST_START="false"
+JENKINS_DIR="lfs-jenkins" # subdirectory within $WORK_DIR/$USER
 
 usage() {
 cat << EOF
 
-    Script in order to setup a LFS CI sandbox on local machine.
+    Script in order to setup a LFS CI Jenkins on local machine. Such a installation  is
+    also known as LFS CI Sandbox.
 
     IMPORTANT: 
 
@@ -49,37 +53,66 @@ cat << EOF
         - Before or after running this script you probably might run setup-database.sh.
 
     Jenkins will be installed into directory \${LOCAL_WORK_DIR}/$USER/${JENKINS_DIR}/home. This
-    can be overridden by using -w LOCAL_WORK_DIR.
-    CI scripting will be cloned to \${LFS_CI_ROOT} pointing to branch development in which
-    \${LFS_CI_ROOT} defaults to \${USER}/lfs-ci but can be overriden by -s LFS_CI_ROOT.
-    Job and view configuration are copied from Jenkins server ${PROD_JENKINS_SERVER}
-    or ${PROD_JENKINS_SERVER} respectively. Per default all .*_Build$ Jobs will be 
-    disabled in the sandbox. If you want them enabled use the -e flag. LRC trunk is 
-    copied per default except -l flag is present.
+    can be overridden by using -w LOCAL_WORK_DIR. CI scripting will be cloned to \${LFS_CI_ROOT} 
+    pointing to branch development in which \${LFS_CI_ROOT} defaults to \${USER}/lfs-ci but can 
+    be overriden with the -s option.
 
-    After the script has been finished check the system settings of the new sandbox Jenkins.
+    Job and view configuration are copied from Jenkins server ${PROD_JENKINS_SERVER}. Per default 
+    all .*_Build$ Jobs will be disabled in the Sandbox. If you want them to be enabled in Sandbox
+    use the -e flag. LRC trunk is copied per default except the -l flag is present on the commandline.
+
+    After the script has been finished check the system settings of the new LFS CI Sandbox.
 
     Example: $ITSME -r UBOOT -n DEV/Developer_Build -b trunk,FB1503 -l -p
-             --> Copy UBOOT, Developer_Build (within DEV view) and trunk. Skip creating LRC on sandbox (-l).
-                 Disable all .*_Build$ jobs (-e is missing) and keep already existing Jenkins plugins (-p).
+
+             Copy UBOOT, Developer_Build (within DEV view) and trunk. Skip creating LRC on Sandbox (-l).
+             Disable all .*_Build$ jobs (-e is missing) and keep already existing Jenkins plugins (-p).
 
     Options and Flags:
         -f Complete path of CI scripting config file. This option is mandatory.
         -b Comma separated list of BRANCHES to be copied from LFS CI (not LRC branches). Defaults to ${BRANCH_VIEWS}.
-        -n Comma separated list of nested view that should be created in sandbox. Defaults to ${NESTED_VIEWS}.
-        -r Comma separated list of root views (top level tabs) that should be created in sandbox. Defaults to ${ROOT_VIEWS}.
+           If you specify -b on commandline and you want to create trunk as well, 'trunk' must be in the list of
+           branches to be copied (eg -b trunk,FB1506,MD11504).
+        -n Comma separated list of nested view that should be created in Sandbox. Defaults to ${NESTED_VIEWS}.
+        -r Comma separated list of root views (Jenkins top level tabs) that should be created in Sandbox. Defaults to ${ROOT_VIEWS}.
         -w Specify \$LOCAL_WORK_DIR directory for Jenkins installation. Defaults to ${LOCAL_WORK_DIR}.
         -i LFS CI user. Defaults to ${CI_USER}.
         -c LFS LRC CI user. Defaults to ${LRC_CI_USER}.
-        -s Root directory of lfs CI scripting. Defaults to ${LFS_CI_ROOT}.
-        -d Delete local sandbox installation. You can use -w and -s if you want to delete a non standard installation.
+        -s Root directory of LFS CI scripting. Defaults to ${LFS_CI_ROOT}.
+        -d Delete local Sandbox installation. You can use -w and -s if you want to delete a non standard installation.
         -t HTTP_PORT for Jenkins. Defaults to ${HTTP_PORT}.
-        -e (flag) Disable all .*_Build$ jobs in sandbox. Default (missing -e) disables all .*_Build$ jobs).
-        -l (flag) Create LRC trunk within sandbox. Default (missing -l) creates LRC in sandbox.
-        -p (flag) Keep Jenkins plugins from an existing sandbox installation. Defaults to ${KEEP_JENKINS_PLUGINS}.
-        -j (flag) Update sandbox Jenkins in ${LOCAL_WORK_DIR}. Additionally use -w -b -n and -l if you want to
-                  update a non standard installation. Plugins and jobs will be updated from ${PROD_JENKINS_SERVER}.
+        -g <sysv> If -g is omitted, Jenkins is started via nohup in the background.
+                  sysv: Start Jenkins via the script /etc/init.d/jenkins.
+        -e (flag) Disable all .*_Build$ jobs in Sandbox. Default is to disable all .*_Build$ jobs (missing -e).
+        -l (flag) Create LRC trunk within Sandbox. Default is to creates LRC in Sandbox (missing -l).
+        -p (flag) Keep Jenkins plugins from an existing Sandbox installation. Defaults to ${KEEP_JENKINS_PLUGINS} (missing -p).
+        -o (flag) Just start Jenkins (don't do anything else). Default is false (missing -o). Additionally you can also use -g.
+        -j (flag) Update Sandbox Jenkins in ${LOCAL_WORK_DIR}. Additionally use -w -b -n and -l if you want to
+                  update a non standard installation. Jenkins plugins and jobs will be updated from ${PROD_JENKINS_SERVER}.
         -h Get help
+
+    Examples:
+
+        Standard Sandbox installation:
+            ${ITSME} 
+
+        Skip LRC, use existing Jenkins plugins and start Sandbox on port 9090:
+            ${ITSME} -l -p -t 9090
+
+        Just start Sandbox in background:
+            ${ITSME} -o -f ~/lfs-ci/etc/development.cfg
+
+        Just start Sandbox by usging script /etc/init.d/jenkins
+            ${ITSME} -o -g sysv -f ~/lfs-ci/etc/development.cfg
+
+        Update Sandbox:
+            ${ITSME} -j
+
+        Remove standard Sandbox:
+            ${ITSME} -d
+
+        Remove non standard Sandbox:
+            ${ITSME} -d -w ... -s ...
 
 EOF
     exit 0
@@ -111,8 +144,8 @@ pre_actions() {
         echo "ERROR: -p makes no sense because there is no ${JENKINS_PLUGINS}"
         exit 5
     fi
-    if [[ ! -r "${LFS_CI_CONFIG_FILE}" && ${PURGE_SANDBOX} == "false" ]]; then
-        echo "ERROR: Can not read config file ${LFS_CI_CONFIG_FILE}."
+    if [[ ! -r ${LFS_CI_CONFIG_FILE} && ${PURGE_SANDBOX} == false && ${UPDATE_JENKINS} == false ]]; then
+        echo "ERROR: Can't read config file ${LFS_CI_CONFIG_FILE}."
         exit 6
     fi
 }
@@ -221,7 +254,7 @@ jenkins_copy_jobs() {
 }
 
 ## @fn      jenkins_disable_deploy_ci_scripting_job()
-#  @brief   disable job Admin_-_deployCiScripting in new sandbox Jenkins.
+#  @brief   disable job Admin_-_deployCiScripting in new Sandbox Jenkins.
 #  @return  <none>
 jenkins_disable_deploy_ci_scripting_job() {
     [[ ! -f ${JENKINS_HOME}/jobs/Admin_-_deployCiScripting/config.xml ]] && return
@@ -237,7 +270,7 @@ jenkins_disable_deploy_ci_scripting_job() {
 #           If KEEP_JENKINS_PLUGINS == "false" the plugins are copied from production
 #           server. KEEP_JENKINS_PLUGINS == "true" can be used if coping from production
 #           server would take a long time because of slow network connection. This implies
-#           that sandbox already exists on the local machine of course and you want to
+#           that Sandbox already exists on the local machine of course and you want to
 #           set it up from scratch.
 #  @param   the mode (copy|restore).
 #  @return  <none>
@@ -263,7 +296,7 @@ jenkins_plugins() {
 }
 
 jenkins_update_plugins() {
-    echo "    Update local Jenkins plugins within ${JENKINS_HOME}/plugins"
+    echo "    Update Jenkins plugins"
     rsync -a ${PROD_JENKINS_SERVER}:${PROD_JENKINS_HOME}/plugins ${JENKINS_HOME}/
 }
 
@@ -306,47 +339,57 @@ jenkins_get_configs() {
 }
 
 ## @fn      jenkins_start_sandbox()
-#  @brief   start new sandbox Jenkins on local machine in the background
-#           via nohup and redirect stdout and stderr to $LOG_FILE.
+#  @brief   start new Sandbox Jenkins on local machine in the background
+#           via nohup and redirect stdout and stderr to $LOG_FILE. Also
+#           see the global -g parameter.
 #  @return  <none>
 jenkins_start_sandbox() {
-    echo "Export vars and start Jenkins server..."
-    export LFS_CI_ROOT=${LFS_CI_ROOT}
-    export LFS_CI_CONFIG_FILE=${LFS_CI_CONFIG_FILE}
-    export JENKINS_HOME=${JENKINS_HOME}
-    nohup java ${JVM_OPTS} -jar ${JENKINS_WAR} ${JENKINS_OPTS} > ${LOG_FILE} 2>&1 &
-    PID=$!
-    echo ${PID} > ${PID_FILE}
-    echo "    java process ID: $(cat ${PID_FILE})"
-    echo "    waiting 30 sec for Jenkins"
-    sleep 30
+    if [[ ! ${START_OPTION} ]]; then
+        echo "Export vars and start Jenkins server..."
+        export LFS_CI_ROOT=${LFS_CI_ROOT}
+        export LFS_CI_CONFIG_FILE=${LFS_CI_CONFIG_FILE}
+        export JENKINS_HOME=${JENKINS_HOME}
+        nohup java ${JVM_OPTS} -jar ${JENKINS_WAR} ${JENKINS_OPTS} > ${LOG_FILE} 2>&1 &
+        PID=$!
+        echo ${PID} > ${PID_FILE}
+        echo "    java process ID: $(cat ${PID_FILE})"
+        echo "    waiting for Jenkins to be fully running"
+        while [[ ${RET} != 0 ]]; do
+            curl -s http://localhost:${HTTP_PORT} --noproxy localhost > /dev/null 2>&1
+            RET=$?
+            sleep 3
+        done
+    elif [[ ${START_OPTION} == "sysv" ]]; then
+        echo "Start Jenkins via /etc/init.d/jenkins"
+        /etc/init.d/jenknis start
+    fi
 }
 
 ## @fn      jenkins_configure_sandbox()
-#  @brief   configure new sandbox Jenkins.
+#  @brief   configure new Sandbox Jenkins.
 #  @details Take the views config.xml files from /tmp (see jenkins_get_configs()) and
-#           send them to local sandbox jenkins via the Jenkis HTTP API by using curl.
-#           Beforehand create the views (tabs) in sandbox by invoking setup-sandbox.gry
+#           send them to local Sandbox jenkins via the Jenkis HTTP API by using curl.
+#           Beforehand create the views (tabs) in Sandbox by invoking setup-sandbox.gry
 #           via jenkins CLI.
 #  @return  <none>
 jenkins_configure_sandbox() {
-    echo "Invoke groovy script on new sandbox..."
+    echo "Invoke groovy script on new Sandbox..."
     java -jar ${JENKINS_CLI_JAR} -s http://localhost:${HTTP_PORT}/ groovy \
         ${SANDBOX_SCRIPT_DIR}/setup-sandbox.gry create_views ${ROOT_VIEWS} ${NESTED_VIEWS} ${BRANCH_VIEWS} ${LRC}
 
-    echo "Configure Jenkins top branch views (tabs) in new sandbox"
+    echo "Configure Jenkins top branch views (tabs) in new Sandbox"
     for VIEW in $(echo ${BRANCH_VIEWS} | tr ',' ' '); do
         echo "    Configure $VIEW view"
         curl http://localhost:${HTTP_PORT}/view/${VIEW}/config.xml --noproxy localhost --data-binary @${TMP}/${VIEW}_view_config.xml
     done
 
-    echo "Configure Jenkins top level views (tabs) in new sandbox"
+    echo "Configure Jenkins top level views (tabs) in new Sandbox"
     for VIEW in $(echo ${ROOT_VIEWS} | tr ',' ' '); do
         echo "    Configure $VIEW view"
         curl http://localhost:${HTTP_PORT}/view/${VIEW}/config.xml --noproxy localhost --data-binary @${TMP}/${VIEW}_view_config.xml
     done
 
-    echo "Configure Jenkins nested views (nested tabs) in new sandbox"
+    echo "Configure Jenkins nested views (nested tabs) in new Sandbox"
     for VIEW in $(echo ${NESTED_VIEWS} | tr ',' ' '); do
         local parentTab=$(echo ${VIEW} | cut -d'/' -f1)
         local childTab=$(echo ${VIEW} | cut -d'/' -f2)
@@ -361,7 +404,7 @@ jenkins_configure_sandbox() {
 }
 
 ## @fn      jenkins_configure_primary_view()
-#  @brief   set trunk view as the primary view in sandbox.
+#  @brief   set trunk view as the primary view in Sandbox.
 #  @return  <none>
 jenkins_configure_primary_view() {
     echo "Set primary view to trunk"
@@ -369,7 +412,7 @@ jenkins_configure_primary_view() {
 }
 
 ## @fn      jenkins_configure_master_executors()
-#  @brief   set number of executors for master to 4 in sandbox.
+#  @brief   set number of executors for master to 4 in Sandbox.
 #  @return  <none>
 jenkins_configure_master_executors() {
     local numExecutors=4
@@ -378,7 +421,7 @@ jenkins_configure_master_executors() {
 }
 
 ## @fn      jenkins_configure_version()
-#  @brief   set version number of Jenkins in sandbox.
+#  @brief   set version number of Jenkins in Sandbox.
 #  @return  <none>
 jenkins_configure_version() {
     echo "Set version number of Jenkins to ${JENKNIS_VERSION}"
@@ -386,7 +429,7 @@ jenkins_configure_version() {
 }
 
 ## @fn      jenkins_configure_node_properties()
-#  @brief   set properties for jenkins master node in sandbox.
+#  @brief   set properties for jenkins master node in Sandbox.
 #  @return  <none>
 jenkins_configure_node_properties() {
     sed -i -e 's,<label></label>,<label>master ulm  singleThreads testDummyHost multiThreads</label>,' ${JENKINS_HOME}/config.xml
@@ -410,7 +453,7 @@ jenkins_configure_node_properties() {
 }
 
 ## @fn      jenkins_disable_build_jobs()
-#  @brief   disable all jobs ending matching .*_Build$ in sandbox.
+#  @brief   disable all jobs ending matching .*_Build$ in Sandbox.
 #  @return  <none>
 jenkins_disable_build_jobs() {
     if [[ "${DISABLE_BUILD_JOBS}" == "true" ]]; then
@@ -421,7 +464,7 @@ jenkins_disable_build_jobs() {
 }
 
 ## @fn      jenkins_reload_config()
-#  @brief   reload jenkins config from disk on sandbox.
+#  @brief   reload jenkins config from disk on Sandbox.
 #  @return  <none>
 jenkins_reload_config() {
     echo "Reload Jenkins configuration from disk"
@@ -438,7 +481,9 @@ post_actions() {
     echo "    - Open a browser and connect http://${HOST}:${HTTP_PORT}"
     echo "    - This jenkins is not secured."
     echo "    - If security is needed, activate \"Enable security\" via http://${HOST}:${HTTP_PORT}/configureSecurity."
-    echo "    - Java process ID is $(cat ${PID_FILE})"
+    if [[ ! ${START_OPTION} ]]; then
+        echo "    - Java process ID is $(cat ${PID_FILE})"
+    fi
 }
 
 ## @fn      jenkins_stuff()
@@ -473,7 +518,7 @@ purge_sandbox() {
 }
 
 get_args() {
-    while getopts ":r:n:b:w:i:c:s:t:f:delpjh" OPT; do
+    while getopts ":r:n:b:w:i:c:s:t:f:g:delpjoh" OPT; do
         case ${OPT} in
             b)
                 BRANCH_VIEWS=$OPTARG
@@ -502,6 +547,9 @@ get_args() {
             f)
                 LFS_CI_CONFIG_FILE=${OPTARG}
             ;;
+            g)
+                START_OPTION=${OPTARG}
+            ;;
             d)
                 PURGE_SANDBOX="true"
             ;;
@@ -517,6 +565,9 @@ get_args() {
             j)
                 UPDATE_JENKINS="true"
             ;;
+            o)
+                JUST_START="true"
+            ;;
             h)
                 usage
             ;;
@@ -527,7 +578,6 @@ get_args() {
         esac
     done
 
-    JENKINS_DIR="lfs-jenkins" # subdirectory within $WORK_DIR/$USER
     PROD_JENKINS_HOME="${WORK_DIR}/${CI_USER}/${JENKINS_DIR}/home"
     PROD_JENKINS_JOBS="${PROD_JENKINS_HOME}/jobs"
 
@@ -555,14 +605,19 @@ main() {
     get_args $*
     pre_actions
 
-    if [[ "${PURGE_SANDBOX}" == "true" ]]; then
+    if [[ ${PURGE_SANDBOX} == true ]]; then
         purge_sandbox
         exit $?
     fi
 
-    if [[ "${UPDATE_JENKINS}" == "true" ]]; then
+    if [[ ${UPDATE_JENKINS} == true ]]; then
         jenkins_copy_jobs
         jenkins_update_plugins
+        exit $?
+    fi
+
+    if [[ ${JUST_START} == true ]]; then
+        jenkins_start_sandbox
         exit $?
     fi
 

@@ -31,7 +31,8 @@ cat << EOF
     This script creates the ${DB_NAME} database on host ${DB_HOST} from scratch.
     If -d is specified the name of the database is \${USER}_lfspt (${USER}_lfspt).
     The tables "${TABLES_TO_COPY}" are taken over from production database ${DB_PROD_NAME}
-    running on ${DB_PROD_HOST}.
+    running on ${DB_PROD_HOST}. The user specified with -q must be able to drop and 
+    create databases.
 
     Arguments:
         -p Password of production database.
