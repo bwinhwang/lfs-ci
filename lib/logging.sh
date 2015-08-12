@@ -169,38 +169,25 @@ message() {
     shift
     local logMessage=$@
 
-    if [[ ${CI_LOGGING_ENABLE_COLORS} ]] ; then
-        YELLOW="\033[33m"
-        WHITE="\033[37m"
-        RED="\033[31m"
-        GREEN="\033[32m"
-        CYAN="\033[36m"
-    fi
-
-    local color=${CI_LOGGING_COLOR-${CI_LOGGING_COLOR_HASH["$logType"]}}
-
-
-    if [[ "${CI_LOGGING_ENABLE_COLORS}" && "${color}" ]] ; then
-        echo -en 1>&2 ${!color} 
-    fi
 
     startLogfile
 
-    logLine=$(_loggingLine ${logType} "${logMessage}")
+    local logLine=
 
     # ------------------------------------------------------------------------------------------
     # interal stuff
     # generate the logline
-    local config=${CI_LOGGING_CONFIG-"PREFIX DATE SPACE DURATION SPACE TYPE SPACE MESSAGE NEWLINE"}
+    local config=${CI_LOGGING_CONFIG-"PREFIX DATE SPACE DURATION SPACE TYPE CALLER NEWLINE TAB TAB MESSAGE"}
     local prefix=${CI_LOGGING_PREFIX-${CI_LOGGING_PREFIX_HASH["$logType"]}}
     local dateFormat=${CI_LOGGING_DATEFORMAT-"+%Y-%m-%d %H:%M:%S.%N %Z"}
 
     for template in ${config}
     do
+        # echo "${template} ${logLine} end"
         case "${template}" in 
             LINE)    logLine=$(printf "%s%s" "${logLine}" "-----------------------------------------------------------------") ;;
             SPACE)   logLine=$(printf "%s "  "${logLine}" ) ;;
-            NEWLINE) logLine=$(printf "%s\n" "${logLine}" ) ;;
+            NEWLINE) logLine=$(printf "%s%s" "${logLine}" "\n" ) ;;
             TAB)     logLine=$(printf "%s\t" "${logLine}" ) ;;
             PREFIX)  logLine=$(printf "%s%s" "${logLine}" "${prefix}" ) ;;
             DATE)    logLine=$(printf "%s%s" "${logLine}" "$(date "${dateFormat}")" ) ;;
@@ -216,10 +203,11 @@ message() {
                 logLine=$(printf "%s%s" "${logLine}" "${logMessage}")
             ;;
             CALLER)
-                logLine=$(printf "called from Method '%s' in File %s, Line %s" \
+                local sourceFile=${BASH_SOURCE[2]/${LFS_CI_ROOT}\//}
+                logLine=$(printf "%s %s %s %s" \
                     "${logLine}"                                               \
+                    "${sourceFile}"                                        \
                     "${FUNCNAME[2]}"                                           \
-                    "${BASH_SOURCE[2]}"                                        \
                     "${BASH_LINENO[1]}" )
             ;;
             STACKTRACE)
@@ -237,10 +225,6 @@ message() {
     esac
 
     echo -e 1>&2 "${logLine}" >> ${CI_LOGGING_LOGFILENAME}
-
-    if [[ "${CI_LOGGING_ENABLE_COLORS}" && "${color}" ]] ; then
-        echo -en 1>&2 ${WHITE}
-    fi
 }
 
 ## @fn      _loggingLine()
