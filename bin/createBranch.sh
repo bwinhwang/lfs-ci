@@ -373,7 +373,7 @@ dbInsert() {
     else
         info "insert into DB: $(__get_sql_string)"
         echo $(__get_sql_string) | mysql -u ${dbUser} --password=${dbPass} -h ${dbHost} -P ${dbPort} -D ${dbName}
-        [[ $? != 0 ]] && exit 1
+        [[ $? -ne 0 ]] && exit 1
     fi
 }
 
