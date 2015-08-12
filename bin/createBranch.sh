@@ -383,6 +383,7 @@ dbInsert() {
     else
         info "insert into DB: $(__get_sql_string)"
         echo $(__get_sql_string) | mysql -u ${dbUser} --password=${dbPass} -h ${dbHost} -P ${dbPort} -D ${dbName}
+        [[ $? != 0 ]] && fatal "Unable to create branch in DB."
     fi
 }
 
