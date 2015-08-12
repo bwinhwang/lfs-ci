@@ -344,7 +344,7 @@ svnDummyCommitLRC() {
 #  @return  <none>
 dbInsert() {
     info "--------------------------------------------------------"
-    info "DB: insert branch into lfspt database"
+    info "DB: insert branch into database"
     info "--------------------------------------------------------"
 
     if [[ "${DO_DB_INSERT}" == "false" ]]; then
@@ -381,6 +381,7 @@ dbInsert() {
     if [[ $DEBUG == true ]]; then
         echo "[DEBUG] $(__get_sql_string)"
     else
+        info "insert into DB: $(__get_sql_string)"
         echo $(__get_sql_string) | mysql -u ${dbUser} --password=${dbPass} -h ${dbHost} -P ${dbPort} -D ${dbName}
     fi
 }
