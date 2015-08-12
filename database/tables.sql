@@ -4,14 +4,15 @@ DROP TABLE IF EXISTS test_executions;
 DROP TABLE IF EXISTS build_events;
 DROP TABLE IF EXISTS events;
 DROP TABLE IF EXISTS builds;
+DROP TABLE IF EXISTS nm_branches_ps_branches;
 DROP TABLE IF EXISTS branches;
+DROP TABLE IF EXISTS ps_branches;
 
 DROP TABLE IF EXISTS branches;
 CREATE TABLE branches (
     id                 INT NOT NULL AUTO_INCREMENT,
     branch_name        VARCHAR(128) NOT NULL,
     location_name      VARCHAR(128) NOT NULL,
-    ps_branch_name     VARCHAR(128) NOT NULL,
     status             VARCHAR(16) NOT NULL DEFAULT 'open',
     based_on_revision  INT NULL,
     based_on_release   VARCHAR(128) NULL,
@@ -25,11 +26,31 @@ CREATE TABLE branches (
     INDEX(branch_name)
 );
 
+CREATE TABLE ps_branches (
+    id                 INT NOT NULL AUTO_INCREMENT,
+    ps_branch_name     VARCHAR(128) NOT NULL
+    status             VARCHAR(16) NOT NULL,
+    ecl_url            VARCHAR(254) NOT NULL,
+    comment            TEXT,
+);
+
+CREATE TABLE nm_branches_ps_branches (
+    id               INT NOT NULL AUTO_INCREMENT,
+    ps_branch_id     INT NOT NULL,
+    branch_id        INT NOT NULL,
+
+    PRIMARY KEY (id),
+    FOREIGN KEY (ps_branch_id)
+        REFERENCES ps_branches(id),
+    FOREIGN KEY (branch_id)
+        REFERENCES branches(id)
+);
+
 DROP TABLE IF EXISTS builds;
 CREATE TABLE builds (
     id          INT NOT NULL AUTO_INCREMENT,
     build_name  VARCHAR(128) NOT NULL,
-    branch_id   VARCHAR(128) NOT NULL,
+    branch_id   INT NOT NULL,
     revision    INT NOT NULL,
     comment     TEXT,
 
@@ -43,7 +64,7 @@ DROP TABLE IF EXISTS events;
 CREATE TABLE events (
     id INT       NOT NULL AUTO_INCREMENT,
     event_type   VARCHAR(128) NOT NULL DEFAULT 'build',
-    event_state  VARCHAR(128) NOT NULL DEFAULT 'started',,
+    event_state  VARCHAR(128) NOT NULL DEFAULT 'started',
     product_name VARCHAR(128),
     task_name    VARCHAR(128),
 

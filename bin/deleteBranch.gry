@@ -38,6 +38,8 @@ remaining_jobs = []
 
 dev_branch = false
 
+deletedJobs = []
+
 parameters.each {
     if(it.name == "BRANCH") {
         branch = it.value
@@ -191,29 +193,25 @@ def deleteRootView() {
 
 def postChecks() {
     println("\n[INFO] run post checks.")
-
-    try {
-        for(jobName in deletedJobs) {
-            println("[INFO] check whether job $jobName has been deleted.")
+    for(jobName in deletedJobs) {
+        try {
             job = j.getItem(jobName)
             if(job) {
                 println("[INFO] job ${job.name} has not been deleted. Trying to delete again.")
                 job.delete()
             }
-            jobDir = new File("${jenkins_jobs_dir}/${jobName}")
-            println("[INFO] check whether job dir $jobDir has been deleted.")
-            if(jobDir.exists()) {
-                println("[INFO] job dir ${jobDir} has not been deleted. Trying to delete.")
-                jobDir.deleteDir()
-            }
+        } catch(Exception e) { }
+        // It is possible that Jenkins is deleting a job but not the related directory
+        // on the filesystem.
+        jobDir = new File("${jenkins_jobs_dir}/${jobName}")
+        if(jobDir.exists()) {
+            println("[INFO] job dir ${jobDir} has not been deleted. I delete it explicitly.")
+            jobDir.deleteDir()
         }
-    } catch(Exception e) { 
-        println("[WARNING] " + e)
     }
 }
 
 // Delete none LRC jobs and collect LRC jobs in a list.
-deletedJobs = []
 def deleteJobs() {
     if(deleteJobs || LRC_deleteJobs) {
         for(p in j.getProjects()) {
