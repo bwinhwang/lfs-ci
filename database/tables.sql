@@ -5,8 +5,8 @@ DROP TABLE IF EXISTS build_events;
 DROP TABLE IF EXISTS events;
 DROP TABLE IF EXISTS builds;
 DROP TABLE IF EXISTS nm_branches_ps_branches;
-DROP TABLE IF EXISTS branches;
 DROP TABLE IF EXISTS ps_branches;
+DROP TABLE IF EXISTS branches;
 
 DROP TABLE IF EXISTS branches;
 CREATE TABLE branches (
@@ -28,10 +28,13 @@ CREATE TABLE branches (
 
 CREATE TABLE ps_branches (
     id                 INT NOT NULL AUTO_INCREMENT,
-    ps_branch_name     VARCHAR(128) NOT NULL
-    status             VARCHAR(16) NOT NULL,
+    ps_branch_name     VARCHAR(128) NOT NULL,
+    status             VARCHAR(16) NOT NULL DEFAULT 'open',
     ecl_url            VARCHAR(254) NOT NULL,
     comment            TEXT,
+
+    PRIMARY KEY (id),
+    UNIQUE(ps_branch_name)
 );
 
 CREATE TABLE nm_branches_ps_branches (
@@ -40,6 +43,8 @@ CREATE TABLE nm_branches_ps_branches (
     branch_id        INT NOT NULL,
 
     PRIMARY KEY (id),
+    UNIQUE(ps_branch_id, branch_id),
+
     FOREIGN KEY (ps_branch_id)
         REFERENCES ps_branches(id),
     FOREIGN KEY (branch_id)
