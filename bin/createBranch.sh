@@ -91,16 +91,6 @@ __preparation(){
 ## @fn     __get_sql_insert()
 #  @brief  Create the insert statement for branches table
 __get_sql_string() {
-    #local descrCol=""
-    #local descrVal=""
-    #if [[ ! -z ${DESCRIPTION} ]]; then
-    #    descrCol=", branch_description"
-    #    descrVal=", '$DESCRIPTION'"
-    #fi
-
-    #echo "insert into branches \
-    #(branch_name, location_name, ps_branch_name, based_on_revision, based_on_release, release_name_regex, date_created, comment${descrCol}) \
-    #VALUES ('$branch', '$branch', '${branch}', ${REVISION}, '${SOURCE_RELEASE}', '${regex}', now(), '$COMMENT'${descrVal})"
     echo "CALL new_branch('${branch}', '${branch}', ${REVISION}, '${SOURCE_RELEASE}', '${regex}', now(), '${COMMENT}', \
         '${DESCRIPTION}', '${PS_BRANCH}' ,'${PS_BRANCH_COMMENT}', '${ECL_URLS}')"
 }
@@ -383,7 +373,7 @@ dbInsert() {
     else
         info "insert into DB: $(__get_sql_string)"
         echo $(__get_sql_string) | mysql -u ${dbUser} --password=${dbPass} -h ${dbHost} -P ${dbPort} -D ${dbName}
-        [[ $? != 0 ]] && fatal "Unable to create branch in DB."
+        [[ $? != 0 ]] && { echo "Unable to create branch in DB."; exit 1; }
     fi
 }
 
