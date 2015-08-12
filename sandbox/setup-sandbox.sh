@@ -424,8 +424,8 @@ jenkins_configure_master_executors() {
 #  @brief   set version number of Jenkins in Sandbox.
 #  @return  <none>
 jenkins_configure_version() {
-    echo "Set version number of Jenkins to ${JENKNIS_VERSION}"
-    sed -i -e "s,<version>1.0</version>,<version>${JENKNIS_VERSION}</version>," ${JENKINS_HOME}/config.xml
+    echo "Set version number of Jenkins to ${JENKINS_VERSION}"
+    sed -i -e "s,<version>1.0</version>,<version>${JENKINS_VERSION}</version>," ${JENKINS_HOME}/config.xml
 }
 
 ## @fn      jenkins_configure_node_properties()
@@ -586,13 +586,13 @@ get_args() {
     LRC_PROD_JENKINS_JOBS="${LRC_PROD_JENKINS_HOME}/jobs"
 
     HTTP_ADDRESS="0.0.0.0"
-    JENKNIS_VERSION="1.532.3"
+    JENKINS_VERSION="1.532.3"
     JENKINS_HOME="${LOCAL_WORK_DIR}/${SANDBOX_USER}/${JENKINS_DIR}/home"
     JENKINS_PLUGINS="${JENKINS_HOME}/plugins"
     JVM_OPTS="-Djava.io.tmpdir=/var/tmp"
     JENKINS_OPTS="--httpListenAddress=${HTTP_ADDRESS} --httpPort=${HTTP_PORT}"
-    JENKINS_WAR="${LFS_CI_ROOT}/lib/java/jenkins/jenkins-${JENKNIS_VERSION}.war"
-    JENKINS_CLI_JAR="${LFS_CI_ROOT}/lib/java/jenkins/jenkins-cli-${JENKNIS_VERSION}.jar"
+    JENKINS_WAR="${LFS_CI_ROOT}/lib/java/jenkins/jenkins-${JENKINS_VERSION}.war"
+    JENKINS_CLI_JAR="${LFS_CI_ROOT}/lib/java/jenkins/jenkins-cli-${JENKINS_VERSION}.jar"
     PID_FILE="${JENKINS_HOME}/jenkins.pid"
     LOG_FILE="${JENKINS_HOME}/jenkins.log"
     GIT_URL="ssh://git@psulm.nsn-net.net/projects/lfs-ci.git"
