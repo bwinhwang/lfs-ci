@@ -59,7 +59,6 @@ __checkParams() {
     mustHaveValue "${SOURCE_RELEASE}" "SOURCE_RELEASE"
     mustHaveValue "${ECL_URLS}" "ECL_URLS"
     mustHaveValue "${COMMENT}" "COMMENT"
-    mustHaveValue "${PS_BRANCH_COMMENT}" "PS_BRANCH_COMMENT"
 
     if [[ ${LRC} == true ]]; then
         echo ${NEW_BRANCH} | grep -q -e "^LRC_" && { error "LRC: \"LRC_\" is automatically added as prefix to NEW_BRANCH"; exit 1; }
