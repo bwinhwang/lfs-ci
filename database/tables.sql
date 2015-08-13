@@ -30,7 +30,6 @@ CREATE TABLE ps_branches (
     id                 INT NOT NULL AUTO_INCREMENT,
     ps_branch_name     VARCHAR(128) NOT NULL,
     status             VARCHAR(16) NOT NULL DEFAULT 'open',
-    ecl_url            VARCHAR(254) NOT NULL,
     comment            TEXT,
 
     PRIMARY KEY (id),
@@ -49,6 +48,17 @@ CREATE TABLE nm_branches_ps_branches (
         REFERENCES ps_branches(id),
     FOREIGN KEY (branch_id)
         REFERENCES branches(id)
+);
+
+create table ecl_locations (
+    id INT NOT NULL AUTO_INCREMENT,
+    ps_branch_id INT NOT NULL,
+    ecl_url VARCHAR(512) NOT NULL,
+
+    PRIMARY KEY (id),
+    UNIQUE(ps_branch_id, ecl_url),
+    FOREIGN KEY (ps_branch_id)
+        REFERENCES ps_branches(id)
 );
 
 DROP TABLE IF EXISTS builds;
