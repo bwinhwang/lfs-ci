@@ -1018,3 +1018,59 @@ RETURN (var_branch_cnt);
 END //
 DELIMITER ;
 -- }}}
+
+-- {{{ new_branch
+DROP PROCEDURE IF EXISTS new_branch;
+DELIMITER //
+CREATE PROCEDURE new_branch( in_branch_name VARCHAR(128), 
+                             in_location_name VARCHAR(128), 
+                             in_based_on_revision INT, 
+                             in_based_on_release VARCHAR(128), 
+                             in_release_name_regex VARCHAR(128), 
+                             in_date_created DATETIME, 
+                             in_comment TEXT,
+                             in_branch_description TEXT,
+                             in_ps_branch_name VARCHAR(128),
+                             in_ps_branch_comment TEXT,
+                             in_ecl_url VARCHAR(254))
+BEGIN
+    DECLARE var_nm_id INT;
+
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        ROLLBACK;
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Could not create branch';
+    END;
+
+    IF in_comment = '' OR in_comment = ' ' THEN
+        SET in_comment:= NULL;
+    END IF;
+
+    IF in_branch_description = '' OR in_branch_description = ' ' THEN
+        SET in_branch_description:= NULL;
+    END IF;
+
+    IF in_ps_branch_comment = '' OR in_ps_branch_comment = ' ' THEN
+        SET in_ps_branch_comment:= NULL;
+    END IF;
+
+    START TRANSACTION;
+
+        INSERT INTO branches (branch_name, location_name, based_on_revision, based_on_release,
+                              release_name_regex, date_created, comment, branch_description)
+               VALUES (in_branch_name, in_location_name, in_based_on_revision, in_based_on_release,
+                       in_release_name_regex, in_date_created, in_comment, in_branch_description);
+
+        INSERT INTO ps_branches (ps_branch_name, ecl_url, comment)
+            VALUES (in_ps_branch_name, in_ecl_url, in_ps_branch_comment);
+
+        INSERT INTO nm_branches_ps_branches (ps_branch_id, branch_id)
+            VALUES ((SELECT id FROM ps_branches WHERE ps_branch_name=in_ps_branch_name),
+                   (SELECT id FROM branches WHERE branch_name=in_branch_name));
+
+        SELECT max(id) INTO var_nm_id FROM nm_branches_ps_branches;
+
+    COMMIT;
+END //
+DELIMITER ;
+-- }}}
