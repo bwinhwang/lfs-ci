@@ -11,24 +11,21 @@
 #  @param   {buildNumber}  number of the build
 #  @return  <none>
 usecase_LFS_RELEASE_SHARE_BUILD_ARTIFACTS_KERNELSOURCES() {
-    local testedJobName=$1
-    local testedBuildNumber=$2
+    mustBePreparedForReleaseTask
 
     requiredParameters LFS_PROD_RELEASE_CURRENT_TAG_NAME
 
+    local jobName=$(getBuildJobNameFromFingerprint)
+    mustHaveValue "${jobName}" "build - job name from fingerprint"
+
+    local buildNumber=$(getBuildBuildNumberFromFingerprint)
+    mustHaveValue "${buildNumber}" "build - build number from fingerprint"
+
     local workspace=$(getWorkspaceName)
     mustHaveCleanWorkspace
-    mustHaveWorkspaceName
-    mustHaveWritableWorkspace
 
-    # TODO: demx2fk3 2015-03-09 FIXME SSH_LOAD replace this with other server
-    local server=$(getConfig jenkinsMasterServerHostName)
-    mustHaveValue "${server}" "server name"
-
-    local canStoreArtifactsOnShare=$(getConfig LFS_CI_uc_release_can_store_build_results_on_share)
-
-    local labelName=${LFS_PROD_RELEASE_CURRENT_TAG_NAME}
-    mustHaveValue "${labelName}"
+    local buldName=${LFS_PROD_RELEASE_CURRENT_TAG_NAME}
+    mustHaveValue "${buldName}"
 
     info "getting down stream information for ${testedJobName} / ${testedBuildNumber}"
     local triggeredJobData=$(getDownStreamProjectsData ${testedJobName} ${testedBuildNumber})

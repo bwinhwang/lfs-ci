@@ -78,8 +78,8 @@ usecase_LFS_RELEASE_CREATE_SOURCE_TAG() {
     for revisionFile in ${workspace}/rev/* ; do
         [[ -e ${revisionFile} ]] || continue
 
-        export target=$(basename ${revisionFile})
-        local tagPrefix=$(getConfig LFS_PROD_uc_release_source_tag_prefix)
+        local target=$(basename ${revisionFile})
+        local tagPrefix=$(getConfig LFS_PROD_uc_release_source_tag_prefix -t target:${target})
 
         mustExistBranchInSubversion ${svnUrlOs}/branches/${branch} ${target}
 

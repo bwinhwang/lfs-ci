@@ -14,6 +14,9 @@ usecase_LFS_RELEASE_SEND_RELEASE_NOTE() {
     _sendReleaseNote
     _storeArtifactsFromRelease
 
+    databaseEventReleaseFinished
+    createArtifactArchive
+
     info "release is done."
 
     return

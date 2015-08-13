@@ -28,14 +28,8 @@ ci_job_release() {
         build_results_to_share_kernelsources) usecase_LFS_RELEASE_SHARE_BUILD_ARTIFACTS_KERNELSOURCES ;;
         create_release_tag)                   usecase_LFS_RELEASE_CREATE_RELEASE_TAG                  ;;
         create_source_tag)                    usecase_LFS_RELEASE_CREATE_SOURCE_TAG                   ;;
-        pre_release_checks) 
-            databaseEventReleaseStarted
-            usecase_LFS_RELEASE_PRE_RELEASE_CHECKS ;;
-        summary) 
-            usecase_LFS_RELEASE_SEND_RELEASE_NOTE
-            databaseEventReleaseFinished
-            createArtifactArchive
-        ;;
+        pre_release_checks)                   usecase_LFS_RELEASE_PRE_RELEASE_CHECKS                  ;;
+        summary)                              usecase_LFS_RELEASE_SEND_RELEASE_NOTE                   ;;
         *) fatal "subJob not known (${subJob})" ;;
     esac
 
