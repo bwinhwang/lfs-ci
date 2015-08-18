@@ -33,6 +33,11 @@ actionCompare() {
         exit 0
     fi
 
+    if [[ "${upstreamBuildNumber}" != "${oldUpstreamBuildNumber}" ]] ; then
+        info "upstream build number has changed, trigger build"
+        exit 0
+    fi
+
     local changelog=$(createTempFile)
     _createChangelog ${oldUpstreamBuildNumber} ${upstreamBuildNumber} ${changelog}
 
