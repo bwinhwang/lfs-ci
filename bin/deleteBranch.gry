@@ -38,6 +38,8 @@ remaining_jobs = []
 
 dev_branch = false
 
+deletedJobs = []
+
 parameters.each {
     if(it.name == "BRANCH") {
         branch = it.value
@@ -141,7 +143,8 @@ def deleteScmView() {
 }
 
 /**
- * Delete the "branch view" eg. 1405/FB1405.
+ * Delete the branch view eg. 1405/FB1405.
+ * Continue if branch view does not exist.
  */
 def deleteBranchView() {
     def root_view = getRootView()
@@ -155,25 +158,26 @@ def deleteBranchView() {
             rootViewObj.deleteView(branch_view_obj)
             println("[INFO] deleted branch view: $root_view/$branch_view")
         } catch(e) {
-            println("[ERROR] deleteBranchView(): " + e)
+            println("[WARNING] deleteBranchView() - a view does not exist: " + e)
         }
     }
 }
 
 /**
- * Delete the "root view" eg. 1405.
+ * Delete the root view eg. 1405.
+ * Continue if root view does not exist.
  */
 def deleteRootView() {
-    def root_view = getRootView()
-    root_view_obj = j.getView(root_view)
-    if(debug) {
-        if(!root_view_obj.getAllItems()) {
-            println("[DEBUG] delete root view: $root_view (dry run)")
+    try {
+        def root_view = getRootView()
+        root_view_obj = j.getView(root_view)
+        if(debug) {
+            if(!root_view_obj.getAllItems()) {
+                println("[DEBUG] delete root view: $root_view (dry run)")
+            } else {
+                println("[DEBUG] Not deleting root view $root_view. There are still related jobs.")
+            }
         } else {
-            println("[DEBUG] Not deleting root view $root_view. There are still related jobs.")
-        }
-    } else {
-        try {
             if(!root_view_obj.getAllItems()) {
                 vo = root_view_obj.getOwner()
                 vo.deleteView(root_view_obj)
@@ -181,37 +185,33 @@ def deleteRootView() {
             } else {
                 println("[INFO] Not deleting root view $root_view. There are still jobs from another branch.")
             }
-        } catch(e) {
-            println("[ERROR] deleteRootView(): " + e)
         }
+    } catch(e) {
+        println("[WARNING] deleteRootView() - root view does not exist: " + e)
     }
 }
 
 def postChecks() {
     println("\n[INFO] run post checks.")
-
-    try {
-        for(jobName in deletedJobs) {
-            println("[INFO] check whether job $jobName has been deleted.")
+    for(jobName in deletedJobs) {
+        try {
             job = j.getItem(jobName)
             if(job) {
                 println("[INFO] job ${job.name} has not been deleted. Trying to delete again.")
                 job.delete()
             }
-            jobDir = new File("${jenkins_jobs_dir}/${jobName}")
-            println("[INFO] check whether job dir $jobDir has been deleted.")
-            if(jobDir.exists()) {
-                println("[INFO] job dir ${jobDir} has not been deleted. Trying to delete.")
-                jobDir.deleteDir()
-            }
+        } catch(Exception e) { }
+        // It is possible that Jenkins is deleting a job but not the related directory
+        // on the filesystem.
+        jobDir = new File("${jenkins_jobs_dir}/${jobName}")
+        if(jobDir.exists()) {
+            println("[INFO] job dir ${jobDir} has not been deleted. I delete it explicitly.")
+            jobDir.deleteDir()
         }
-    } catch(Exception e) { 
-        println("[WARNING] " + e)
     }
 }
 
 // Delete none LRC jobs and collect LRC jobs in a list.
-deletedJobs = []
 def deleteJobs() {
     if(deleteJobs || LRC_deleteJobs) {
         for(p in j.getProjects()) {

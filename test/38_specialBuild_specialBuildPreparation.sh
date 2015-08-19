@@ -53,6 +53,11 @@ setUp() {
     export REQUESTOR_EMAIL="developer.name@nokia.com"
     export REQUESTOR_USERID="dname"
 
+    export LFS_BUILD_FSMR2=true
+    export LFS_BUILD_FSMR3=false
+    export LFS_BUILD_FSMR4=false
+    export LFS_BUILD_LRC=false
+
     return
 }
 

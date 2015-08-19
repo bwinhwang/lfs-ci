@@ -64,7 +64,7 @@ usecase_LFS_DEVELOPER_BUILD() {
 #  @return  <none>
 usecase_LFS_DEVELOPER_BUILD_PLATFORM() {
 
-    specialBuildCreateWorkspaceAndBuild
+    specialBuildCreateWorkspaceAndBuild DEV
 
     info "build job finished."
     return

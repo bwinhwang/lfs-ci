@@ -101,6 +101,10 @@ execute() {
     return ${exitCode}
 }
 
+## @fn      lastExecuteLogFile()
+#  @brief   return the logfile of the last executed command
+#  @param   <none>
+#  @return  log file name
 lastExecuteLogFile() {
     echo ${LFS_CI_LAST_EXECUTE_LOGFILE}
     return

@@ -265,7 +265,7 @@ makingTest_testLRC() {
                 TESTBUILD=${testBuildDirectory}                    \
                 TESTTARGET=${testTargetName}_shp
 
-    makingTest_powercycle
+    makingTest_poweron
     mustHaveMakingTestRunningTarget
 
     info "installing software"
@@ -408,10 +408,13 @@ makingTest_install() {
     # on LRC: currently install does show wrong (old) version after reboot and
     # SHP sometimes fails to be up when install is retried.
     # We try installation up to 4 times
-    for i in $(seq 1 4) ; do
+    local maxInstallTries=$(getConfig LFS_CI_uc_test_making_test_installation_tries -t "testTargetName:${targetName}")
+    mustHaveValue "${maxInstallTries}" "max installation tries"
+
+    for i in $(seq 1 ${maxInstallTries}) ; do
         trace "install loop ${i}"
 
-        local installOptions=$(getConfig LFS_CI_uc_test_making_test_install_options -t testTargetName:${targetName})
+        local installOptions=$(getConfig LFS_CI_uc_test_making_test_install_options -t "testTargetName:${targetName}")
         info "running install with options ${installOptions:-none}"
         execute -i ${make} install ${installOptions} FORCE=yes || { sleep 20 ; continue ; }
 
@@ -444,12 +447,12 @@ makingTest_install() {
         return
     done
 
-    fatal "installation failed after four attempts."
+    fatal "installation failed after ${maxInstallTries} attempts."
 
     return
 }
 
-## @fn      _reserveTarget
+## @fn      _reserveTarget()
 #  @brief   make a reserveration from TAToo/YSMv2 to get a target name
 #  @param   <none>
 #  @return  name of the target
@@ -534,6 +537,20 @@ mustHaveMakingTestRunningTarget() {
 
 ## @fn      makingTest_logConsole()
 #  @brief   start to log all console output into an artifacts file
+#  @details some of our serial console devices (moxa, s4d, ...) are not supporing
+#           multiple connection to the device. So we are changing this a little bit
+#           * start a tcp sharer, which starts a tcp connection on a port, and connects
+#             to the serial console device.
+#           * start a 2nd command "make console" 
+#           * screen is logging the output into a file of all started programms
+#           * start a tcp sharer and "make console" on each configured moxa in/on requested target (config) 
+#           * change all target config files (just in workspace) and replace the moxa ip / port with the
+#             ip (localhost) and port (random) from tcp sharer
+#           * install exit handler to stop screen and put logfiles into artifacts
+#           Why screen?
+#           - screen is able to log the output of a terminal into a logfile
+#           - screen can be stopped with a single command, which also terminates all running command
+#             within screen
 #  @param   <none>
 #  @return  <none>
 makingTest_logConsole() {
@@ -571,6 +588,11 @@ EOF
     local fctTarget=$(_reserveTarget)
     local fspTargets=$(execute -n ${make} testtarget-analyzer | grep ^setupfsps | cut -d= -f2 | tr "," " ")
     local testRoot=$(execute -n ${make} testroot)
+
+    if [[ -z "${testRoot}" || ! -d "${testRoot}" ]] ; then
+        warning "unable to start logging of the serial console(s) of the target. The TMF command 'make testroot' is not available, but this is required here."
+        return
+    fi
 
     for target in ${fctTarget,,} ${fspTargets,,} ; do
         debug "create moxa mock for ${target}"

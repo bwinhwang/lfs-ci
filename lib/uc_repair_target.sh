@@ -5,6 +5,12 @@
 [[ -z ${LFS_CI_SOURCE_common}          ]] && source ${LFS_CI_ROOT}/lib/common.sh
 [[ -z ${LFS_CI_SOURCE_createWorkspace} ]] && source ${LFS_CI_ROOT}/lib/createWorkspace.sh
 
+## @fn      usecase_LAB_REPAIR_TARGET()
+#  @brief   run usecase LAB REPAIR CENTER
+#  @warning 
+#  @details this is a very basic repair center which just switches the active partition of the target
+#  @param   <none>
+#  @return  <none>
 usecase_LAB_REPAIR_TARGET() {
     requiredParameters REPAIR_TARGET_NAME
 
