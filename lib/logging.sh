@@ -204,10 +204,10 @@ message() {
             ;;
             CALLER)
                 local sourceFile=${BASH_SOURCE[2]/${LFS_CI_ROOT}\//}
-                logLine=$(printf "%s %s %s %s" \
-                    "${logLine}"                                               \
-                    "${sourceFile}"                                        \
-                    "${FUNCNAME[2]}"                                           \
+                logLine=$(printf "%s%s - %s - %s" \
+                    "${logLine}"                   \
+                    "${sourceFile}"                \
+                    "${FUNCNAME[2]}"               \
                     "${BASH_LINENO[1]}" )
             ;;
             STACKTRACE)
