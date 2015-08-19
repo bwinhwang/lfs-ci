@@ -72,7 +72,7 @@ setUp() {
     export JOB_NAME=LFS_Prod_-_trunk_-_Releasing_-_createReleaseTag
     export BUILD_NUMBER=1234
 
-    cp -f /dev/null ${UT_MOCKED_COMMANDS}
+    cat /dev/null > ${UT_MOCKED_COMMANDS}
 
     export WORKSPACE=$(createTempDirectory)
     mkdir -p ${WORKSPACE}/workspace
