@@ -408,13 +408,13 @@ makingTest_install() {
     # on LRC: currently install does show wrong (old) version after reboot and
     # SHP sometimes fails to be up when install is retried.
     # We try installation up to 4 times
-    local maxInstallTries=$(getConfig LFS_CI_uc_test_making_test_installation_tries -t testTargetName:${targetName})
+    local maxInstallTries=$(getConfig LFS_CI_uc_test_making_test_installation_tries -t "testTargetName:${targetName}")
     mustHaveValue "${maxInstallTries}" "max installation tries"
 
     for i in $(seq 1 ${maxInstallTries}) ; do
         trace "install loop ${i}"
 
-        local installOptions=$(getConfig LFS_CI_uc_test_making_test_install_options -t testTargetName:${targetName})
+        local installOptions=$(getConfig LFS_CI_uc_test_making_test_install_options -t "testTargetName:${targetName}")
         info "running install with options ${installOptions:-none}"
         execute -i ${make} install ${installOptions} FORCE=yes || { sleep 20 ; continue ; }
 
@@ -452,7 +452,7 @@ makingTest_install() {
     return
 }
 
-## @fn      _reserveTarget
+## @fn      _reserveTarget()
 #  @brief   make a reserveration from TAToo/YSMv2 to get a target name
 #  @param   <none>
 #  @return  name of the target

@@ -5,6 +5,11 @@
 [[ -z ${LFS_CI_SOURCE_subversion} ]] && source ${LFS_CI_ROOT}/lib/subversion.sh
 
 # job name: LFS_CI_-_trunk_-_update_yaft_revision
+
+## @fn      usecase_YAFT_UPDATE_REVISION()
+#  @brief   run the usecase update yaft revision in src-project/Dependencies 
+#  @param   <none>
+#  @return  <none>
 usecase_YAFT_UPDATE_REVISION() {
 
     local workspace=$(getWorkspaceName)

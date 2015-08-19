@@ -255,8 +255,13 @@ _createChangelogXmlFileFromSubversion() {
         newUrl=$(grep -e "^${subSystem} " ${newRevisionsFile} | cut -d" " -f2)
         newRev=$(grep -e "^${subSystem} " ${newRevisionsFile} | cut -d" " -f3)
 
-        debug "old revision data: ${oldUrl} ${oldRev}"
-        debug "new revision data: ${newUrl} ${newRev}"
+        debug "old revision ${subSystem} data: ${oldUrl} ${oldRev}"
+        debug "new revision ${subSystem} data: ${newUrl} ${newRev}"
+
+
+        if [[ ${oldRev} -gt ${newRev} ]] ; then
+            fatal "something is fishy with subversion. The new revision ${newRev} is smaller than ${oldRev} for ${subversion}. This must be a problem with subversion. I reject this build. Please try again later."
+        fi
 
         if [[ "${oldUrl}" != "${newUrl}" ]] ; then
             # just get the latest revision
