@@ -33,13 +33,18 @@ actionCompare() {
         exit 0
     fi
 
+    if [[ "${upstreamBuildNumber}" != "${oldUpstreamBuildNumber}" ]] ; then
+        info "upstream build number has changed, trigger build"
+        exit 0
+    fi
+
     local changelog=$(createTempFile)
     _createChangelog ${oldUpstreamBuildNumber} ${upstreamBuildNumber} ${changelog}
 
-    if egrep -q -e '%FIN %PR=[0-9]+ESPE[09-]+' ${changelog} ; then
-        info "found in comments '%FIN %PR=<pronto>', trigger build"
-        exit 0
-    fi
+#    if egrep -q -e '%FIN %PR=[0-9]+ESPE[09-]+' ${changelog} ; then
+#        info "found in comments '%FIN %PR=<pronto>', trigger build"
+#        exit 0
+#    fi
 
     info "no pronto found between ${oldUpstreamProjectName}#${oldUpstreamBuildNumber} and ${upstreamProjectName}#${upstreamBuildNumber} => No build."
     exit 1
