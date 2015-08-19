@@ -1,13 +1,13 @@
 #!/bin/bash
 
-[[ -z ${LFS_CI_SOURCE_release} ]] && source ${LFS_CI_ROOT}/lib/release.sh
+[[ -z ${LFS_CI_SOURCE_release}      ]] && source ${LFS_CI_ROOT}/lib/release.sh
+[[ -z ${LFS_CI_SOURCE_workflowtool} ]] && source ${LFS_CI_ROOT}/lib/workflowtool.sh
 
 ## @fn      usecase_LFS_RELEASE_SEND_RELEASE_NOTE()
 #  @brief   create a release note and send it to the community
 #  @param   <none>
 #  @return  <none>
 usecase_LFS_RELEASE_SEND_RELEASE_NOTE() {
-    # TODO: demx2fk3 2015-08-05 add externalComponents fsmpsl psl fsmci lrcpsl from to artifacts
     mustBePreparedForReleaseTask
 
     _workflowToolCreateRelease
@@ -215,6 +215,7 @@ _createLfsOsReleaseNote() {
                     -o ${LFS_PROD_RELEASE_PREVIOUS_TAG_NAME} \
                     -f ${LFS_CI_CONFIG_FILE}                 \
                     -T OS                                    \
+                    -P $(getProductNameFromJobName)          \
                     > releasenote.xml
     rawDebug ${workspace}/os/releasenote.xml
 

@@ -36,3 +36,14 @@ ci_job_release() {
     return
 }
 
+## @fn      usecase_LFS_RELEASE_PREPARE()
+#  @brief   usecase LFS Release Prepare
+#  @details this usecase is just doing some preparations, so that the following
+#           subjobs can run without any problem
+#  @param   <none>
+#  @return  <none>
+usecase_LFS_RELEASE_PREPARE() {
+    mustBePreparedForReleaseTask
+    createArtifactArchive
+    return
+}

@@ -116,14 +116,6 @@ usecase_LFS_RELEASE_CREATE_SOURCE_TAG() {
         done < ${revisionFile}
     done
 
-
-    _createSourceTag
-    info "tagging done"
-
-    return
-}
-
-_createSourceTag() {
     # check for the branch
     info "svn repos url is ${svnUrl}/branches/${branch}"
 
@@ -138,4 +130,8 @@ _createSourceTag() {
     else
         warning "creating a source tag is disabled in config"
     fi
+    info "tagging done"
+
+    return
 }
+

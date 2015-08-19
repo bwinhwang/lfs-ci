@@ -8,7 +8,6 @@
 #  @return  <none>
 usecase_LFS_RELEASE_UPDATE_DEPS() {
 
-    # TODO: demx2fk3 2015-08-04 add to artifacts: externalComponents
     mustBePreparedForReleaseTask
 
     requiredParameters LFS_PROD_RELEASE_CURRENT_TAG_NAME \
