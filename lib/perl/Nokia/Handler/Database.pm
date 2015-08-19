@@ -155,6 +155,8 @@ sub branchInformation {
 
         my $pkgpoolPrefix = $row->{release_name_regex};
         $pkgpoolPrefix =~ s/_\(.*//;
+        $pkgpoolPrefix =~ s/_\$.*//;
+        $pkgpoolPrefix =~ s/PS_LFS_../PS_LFS_PKG/;
         push @{ $result }, { name  => "PKGPOOL_PROD_release_prefix",
                              tags  => sprintf( "location:%s", $row->{location_name} ), 
                              value => $pkgpoolPrefix };
