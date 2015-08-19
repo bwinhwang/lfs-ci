@@ -32,6 +32,7 @@ sub platformBranchInformation {
     );
     $sth->execute()
         or LOGDIE sprintf( "can not get ps branch information" );
+
     my $results;
     while ( my $row = $sth->fetchrow_hashref() ) {
          push @{ $results->{ $row->{branch_name} } }, $row;
