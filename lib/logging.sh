@@ -168,22 +168,60 @@ message() {
     local logType=$1
     shift
     local logMessage=$@
-
+    local logLine=
 
     startLogfile
 
+    shouldLogFile ${logType} || return
+
+    # create and write log message into logfile
+    local logLineFile=$(_loggingLine "${logType}"                                                                                  \
+                                 "${LFS_CI_LOGGING_CONFIG-"PREFIX DATE SPACE DURATION SPACE TYPE CALLER NEWLINE TAB TAB MESSAGE"}" \
+                                 "${logMessage}")
+    echo -e 1>&2 "${logLineFile}" >> ${CI_LOGGING_LOGFILENAME}
+
+    # don't show TRACE and DEBUG message in screen, 
+    # For screen, we create a different type of message.
+    case "${logType}" in
+        TRACE) : ;;
+        DEBUG) : ;;
+        *) local logLine=$(_loggingLine "${logType}"                                                                                      \
+                                        "${LFS_CI_LOGGING_CONFIG-"PREFIX DATE SPACE DURATION SPACE TYPE MESSAGE"}" \
+                                        "${logMessage}")
+           # We are redirecting log messages to stderr. 
+           # We don't want to have log messages in a local foobar=$(getFunction) call.
+           echo -e 1>&2 "${logLine}" 
+        ;;
+    esac
+
+    return 0
+}
+
+shouldLogFile() {
+    local logType=$1
+    local sourceFile=${BASH_SOURCE[2]/${LFS_CI_ROOT}\//}
+    local sourceFunction=${FUNCNAME[3]}
+
+    grep -e "^${logType}:${sourceFile}:${sourceFunction}$" ${LFS_CI_ROOT}/etc/logging.cfg
+}
+
+## @fn      _loggingLine()
+#  @brief   format a log line
+#  @param   {logType}    type of the message
+#  @param   {logConfig}  config of a log message line
+#  @param   {logMessage} a text message
+#  @return  log line
+_loggingLine() {
+    local logType=$1
+    local logConfig=$2
+    local logMessage=$3
     local logLine=
 
-    # ------------------------------------------------------------------------------------------
-    # interal stuff
-    # generate the logline
-    local config=${CI_LOGGING_CONFIG-"PREFIX DATE SPACE DURATION SPACE TYPE CALLER NEWLINE TAB TAB MESSAGE"}
     local prefix=${CI_LOGGING_PREFIX-${CI_LOGGING_PREFIX_HASH["$logType"]}}
     local dateFormat=${CI_LOGGING_DATEFORMAT-"+%Y-%m-%d %H:%M:%S.%N %Z"}
 
-    for template in ${config}
-    do
-        # echo "${template} ${logLine} end"
+    for template in ${logConfig} ; do
+
         case "${template}" in 
             LINE)    logLine=$(printf "%s%s" "${logLine}" "-----------------------------------------------------------------") ;;
             SPACE)   logLine=$(printf "%s "  "${logLine}" ) ;;
@@ -199,16 +237,14 @@ message() {
                      logLine=$(printf "%s[%9.3f]" "${logLine}" ${dur})
             ;;
             NONE)    : ;;
-            MESSAGE) 
-                logLine=$(printf "%s%s" "${logLine}" "${logMessage}")
-            ;;
+            MESSAGE) logLine=$(printf "%s%s" "${logLine}" "${logMessage}") ;;
             CALLER)
-                local sourceFile=${BASH_SOURCE[2]/${LFS_CI_ROOT}\//}
-                logLine=$(printf "%s%s - %s - %s" \
-                    "${logLine}"                   \
-                    "${sourceFile}"                \
-                    "${FUNCNAME[2]}"               \
-                    "${BASH_LINENO[1]}" )
+                     local sourceFile=${BASH_SOURCE[2]/${LFS_CI_ROOT}\//}
+                     logLine=$(printf "%s%s - %s - %s"  \
+                         "${logLine}"                   \
+                         "${sourceFile}"                \
+                         "${FUNCNAME[3]}"               \
+                         "${BASH_LINENO[2]}" )
             ;;
             STACKTRACE)
                 _stackTrace
@@ -216,26 +252,9 @@ message() {
         esac
 
     done
-    # -------------------------------------------------------------------------------------------
 
-    case "${logType}" in
-        TRACE) : ;;
-        DEBUG) : ;;
-        *) echo -e 1>&2 "${logLine}" ;;
-    esac
-
-    echo -e 1>&2 "${logLine}" >> ${CI_LOGGING_LOGFILENAME}
-}
-
-## @fn      _loggingLine()
-#  @brief   format a log line
-#  @param   {logType}    type of the message
-#  @param   {logMessage} a text message
-#  @return  <none>
-_loggingLine() {
-    local logType=$1
-    local logMessage=$2
-
+    echo ${logLine}
+    return
 }
 
 ## @fn      _stackTrace()
