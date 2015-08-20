@@ -44,7 +44,11 @@ specialBuildPreparation() {
                        REQUESTOR_FIRST_NAME \
                        REQUESTOR_LAST_NAME  \
                        REQUESTOR_USERID     \
-                       REQUESTOR_EMAIL
+                       REQUESTOR_EMAIL      \
+                       LFS_BUILD_FSMR2      \
+                       LFS_BUILD_FSMR3      \
+                       LFS_BUILD_FSMR4      \
+                       LFS_BUILD_LRC
 
     debug "input parameter: buildType ${buildType}"
     debug "input parameter: label ${label}"
@@ -72,6 +76,14 @@ specialBuildPreparation() {
     info "storing input as artifacts"
     execute mkdir -p ${workspace}/bld/bld-${buildType,,}-input/
     execute -i cp -a ${WORKSPACE}/lfs.patch ${workspace}/bld/bld-${buildType,,}-input/
+    cat > ${workspace}/bld/bld-${buildType,,}-input/lfs_build.txt <<EOF
+LFS_BUILD_FSMR2=${LFS_BUILD_FSMR2}
+LFS_BUILD_FSMR3=${LFS_BUILD_FSMR3}
+LFS_BUILD_FSMR4=${LFS_BUILD_FSMR4}
+LFS_BUILD_LRC=${LFS_BUILD_LRC}
+EOF
+    rawDebug ${workspace}/bld/bld-${buildType,,}-input/lfs_build.txt
+
     cat > ${workspace}/bld/bld-${buildType,,}-input/requestor.txt <<EOF
 REQUESTOR="${REQUESTOR}"
 REQUESTOR_FIRST_NAME="${REQUESTOR_FIRST_NAME}"
@@ -141,21 +153,68 @@ specialBuildisRequiredForLrc() {
 
     return 0
 }
+## @fn      specialBuildisRequiredSelectedByUser(  )
+#  @brief   checks, if the build is requested by the user (via jenkins input)
+#  @param   {buildType}    type of the build, values DEV or KNIFE
+#  @return  <none>
+specialBuildisRequiredSelectedByUser() {
+    local buildType=${1}
+    mustHaveValue "${buildType}" "build type"
+
+    local workspace=$(getWorkspaceName)
+    mustHaveWorkspaceName
+
+    local subTaskName=$(getSubTaskNameFromJobName)
+    mustHaveValue "${subTaskName}" "subTaskName"
+
+    mustExistFile ${workspace}/bld/bld-${buildType,,}-input/lfs_build.txt
+    rawDebug ${workspace}/bld/bld-${buildType,,}-input/lfs_build.txt
+    source ${workspace}/bld/bld-${buildType,,}-input/lfs_build.txt
+
+    if [[ ${LFS_BUILD_FSMR2} != true && ${subTaskName} = "FSM-r2" ]] ; then
+        warning "build FSM-r2 was not selected by user"
+        return 1
+    fi
+    if [[ ${LFS_BUILD_FSMR3} != true && ${subTaskName} = "FSM-r3" ]] ; then
+        warning "build FSM-r3 was not selected by user"
+        return 1
+    fi
+    if [[ ${LFS_BUILD_FSMR4} != true && ${subTaskName} = "FSM-r4" ]] ; then
+        warning "build FSM-r4 was not selected by user"
+        return 1
+    fi
+    if [[ ${LFS_BUILD_LRC} != true && ${subTaskName} = "LRC" ]] ; then
+        warning "build LRC was not selected by user"
+        return 1
+    fi
+
+    return 0
+}
 
 ## @fn      specialBuildCreateWorkspaceAndBuild()
 #  @brief   create the workspaces and build the special build (knife or developer build)
-#  @param   <none>
+#  @param   {buildType}    type of the build, values DEV or KNIFE
 #  @return  <none>
 specialBuildCreateWorkspaceAndBuild() {
     requiredParameters UPSTREAM_PROJECT UPSTREAM_BUILD
 
+    local buildType=$1
+    mustHaveValue "${buildType}" "build type"
+
     local workspaces=$(getWorkspaceName)
     mustHaveWorkspaceName
+    mustHaveCleanWorkspace
+
+    copyArtifactsToWorkspace "${UPSTREAM_PROJECT}" "${UPSTREAM_BUILD}"
 
     mustHaveLocationForSpecialBuild
     local location=${LFS_CI_GLOBAL_BRANCH_NAME}
 
     if ! specialBuildisRequiredForLrc ${location} ; then
+        warning "build is not required."
+        exit 0
+    fi
+    if ! specialBuildisRequiredSelectedByUser ${buildType} ; then
         warning "build is not required."
         exit 0
     fi
@@ -165,7 +224,7 @@ specialBuildCreateWorkspaceAndBuild() {
     # createWorkspace will copy the revision state file from the upstream job
     execute rm -rf ${WORKSPACE}/revisions.txt
     createWorkspace
-    copyArtifactsToWorkspace "${UPSTREAM_PROJECT}" "${UPSTREAM_BUILD}" "fsmci"
+    copyArtifactsToWorkspace "${UPSTREAM_PROJECT}" "${UPSTREAM_BUILD}"
 
     mustHaveNextCiLabelName
     local label=$(getNextCiLabelName)
@@ -184,7 +243,7 @@ specialBuildCreateWorkspaceAndBuild() {
 
 ## @fn      uploadKnifeToStorage()
 #  @brief   upload the knife results to the storage
-#  @param   <none>
+#  @param   {knifeFile} output file, which should be uploaded to storage
 #  @return  <none>
 uploadKnifeToStorage() {
     knifeFile=${1}
@@ -220,9 +279,11 @@ applyKnifePatches() {
 
             # apply patch only on files which exists in workspace
             for fileInPatch in $(execute -n lsdiff ${workspace}/bld/bld-${type}-input/lfs.patch) ; do
+                info "matching file ${fileInPatch}"
                 [[ -e ${workspace}/${fileInPatch} ]] || continue
                 local tmpPatchFile=$(createTempFile)
-                execute -n filterdiff -i ${fileInPatch} > ${tmpPatchFile}
+                execute -n filterdiff -i ${fileInPatch} ${workspace}/bld/bld-${type}-input/lfs.patch > ${tmpPatchFile}
+                rawDebug ${tmpPatchFile}
                 execute patch -p0 -d ${workspace} < ${tmpPatchFile}
             done                     
         fi

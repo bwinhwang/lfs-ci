@@ -27,7 +27,9 @@ usecase_VTC_PLUS_LFS_SYNC_PRODUCTION() {
 
     local listToSync=$(getConfig LFS_CI_uc_vtc_plus_lfs_files_to_sync)
     echo 'os/version_control.xml' >> ${workspace}/filelist_to_sync
-    echo ${listToSync} >> ${workspace}/filelist_to_sync
+    for file in ${listToSync} ; do
+        echo ${file} >> ${workspace}/filelist_to_sync
+    done
 
     rawDebug ${workspace}/filelist_to_sync
 

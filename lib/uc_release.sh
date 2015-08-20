@@ -489,7 +489,7 @@ _createLfsOsReleaseNote() {
     return
 }
 
-## @fn      _createLfsRelReleaseNote()
+## @fn      _createLfsRelReleaseNoteXml()
 #  @brief   create an PSLFS_REL release note 
 #  @param   {buildJobName}     project name of the build job
 #  @param   {buildBuildNumber} build number of the build job   
