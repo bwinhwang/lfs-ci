@@ -19,6 +19,12 @@ oneTimeSetUp() {
     _storeArtifactsFromRelease() {
         mockedCommand "_storeArtifactsFromRelease $@"
     }
+    databaseEventReleaseFinished() {
+        mockedCommand "databaseEventReleaseFinished $@"
+    }
+    createArtifactArchive() {
+        mockedCommand "createArtifactArchive $@"
+    }
     return
 }
 
@@ -41,6 +47,8 @@ mustBePreparedForReleaseTask
 _workflowToolCreateRelease 
 _sendReleaseNote 
 _storeArtifactsFromRelease 
+databaseEventReleaseFinished 
+createArtifactArchive 
 EOF
     assertExecutedCommands ${expect}
 

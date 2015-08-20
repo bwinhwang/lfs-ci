@@ -11,6 +11,7 @@ oneTimeSetUp() {
         mockedCommand "getConfig $@"
         case $1 in 
             LFS_CI_uc_release_can_commit_depencencies) echo ${UT_CAN_COMMIT} ;;
+            OS_ramdisk) echo ${UT_RAM_DISK} ;;
             *) echo $1 ;;
         esac
     }
@@ -33,6 +34,7 @@ oneTimeSetUp() {
 setUp() {
     cp -f /dev/null ${UT_MOCKED_COMMANDS}
     export WORKSPACE=$(createTempDirectory)
+    export UT_RAM_DISK=$(createTempDirectory)
 
     export UPLOAD_DIR=$(createTempDirectory)
     export JOB_NAME=job_name
@@ -58,15 +60,18 @@ mustExistBranchInSubversion LFS_PROD_svn_delivery_release_repos_url os
 mustExistBranchInSubversion LFS_PROD_svn_delivery_release_repos_url/os branches
 mustExistBranchInSubversion LFS_PROD_svn_delivery_release_repos_url/os tags
 mustExistBranchInSubversion LFS_PROD_svn_delivery_release_repos_url/os/branches LFS_PROD_uc_release_upload_to_subversion_map_location_to_branch
-execute mkdir -p /dev/shm/job_name.userName/tmp
-mustHaveFreeDiskSpace /dev/shm/job_name.userName/tmp 15000000
-execute rm -rf /dev/shm/job_name.userName/tmp
-execute mkdir -p /dev/shm/job_name.userName/tmp
-execute mkdir -p /dev/shm/job_name.userName/tmp/upload
-execute rsync --delete -av ${UPLOAD_DIR}/ /dev/shm/job_name.userName/tmp/upload/
-execute mkdir -p /dev/shm/job_name.userName/tmp/workspace
-execute -r 3 svn --non-interactive --trust-server-cert checkout LFS_PROD_svn_delivery_release_repos_url/os/branches/LFS_PROD_uc_release_upload_to_subversion_map_location_to_branch /dev/shm/job_name.userName/tmp/workspace
-execute -r 3 ${LFS_CI_ROOT}/lib/contrib/svn_load_dirs/svn_load_dirs.pl -v -t os/tags/BUILD_NAME -wc /dev/shm/job_name.userName/tmp/workspace -no_user_input -no_diff_tag -glob_ignores=#.# -sleep 60 LFS_PROD_svn_delivery_release_repos_url os/branches/LFS_PROD_uc_release_upload_to_subversion_map_location_to_branch /dev/shm/job_name.userName/tmp/upload
+getConfig OS_ramdisk
+execute mkdir -p ${UT_RAM_DISK}/job_name.userName/tmp
+getConfig LFS_PROD_uc_release_upload_to_subversion_free_space_on_ramdisk
+mustHaveFreeDiskSpace ${UT_RAM_DISK}/job_name.userName/tmp LFS_PROD_uc_release_upload_to_subversion_free_space_on_ramdisk
+execute rm -rf ${UT_RAM_DISK}/job_name.userName/tmp
+execute mkdir -p ${UT_RAM_DISK}/job_name.userName/tmp
+execute mkdir -p ${UT_RAM_DISK}/job_name.userName/tmp/upload
+execute rsync --delete -av ${UPLOAD_DIR}/ ${UT_RAM_DISK}/job_name.userName/tmp/upload/
+execute mkdir -p ${UT_RAM_DISK}/job_name.userName/tmp/workspace
+execute -r 3 svn --non-interactive --trust-server-cert checkout LFS_PROD_svn_delivery_release_repos_url/os/branches/LFS_PROD_uc_release_upload_to_subversion_map_location_to_branch ${UT_RAM_DISK}/job_name.userName/tmp/workspace
+getConfig LFS_PROD_uc_release_upload_to_subversion_sleep_time_after_commit
+execute -r 3 ${LFS_CI_ROOT}/lib/contrib/svn_load_dirs/svn_load_dirs.pl -v -t os/tags/BUILD_NAME -wc ${UT_RAM_DISK}/job_name.userName/tmp/workspace -no_user_input -no_diff_tag -glob_ignores=#.# -sleep LFS_PROD_uc_release_upload_to_subversion_sleep_time_after_commit LFS_PROD_svn_delivery_release_repos_url os/branches/LFS_PROD_uc_release_upload_to_subversion_map_location_to_branch ${UT_RAM_DISK}/job_name.userName/tmp/upload
 EOF
     assertExecutedCommands ${expect}
 
