@@ -57,9 +57,11 @@ startLogfile() {
                  -e ${CI_LOGGING_LOGFILENAME}.gz ]] ; do
             counter=$(( counter + 1 ))
             CI_LOGGING_LOGFILENAME=${LFS_CI_ROOT}/log/${datePath}/ci.${dateString}.${hostName}.${userName}.${jobName}.${counter}.log
+            CI_LOGGING_LOGFILENAME_COMPLETE=${LFS_CI_ROOT}/log/${datePath}/ci.${dateString}.${hostName}.${userName}.${jobName}.${counter}.complete.log
         done
 
         export CI_LOGGING_LOGFILENAME
+        export CI_LOGGING_LOGFILENAME_COMPLETE
         export CI_LOGGING_DURATION_START_DATE=$(date +%s.%N)
 
         echo 1>&2 "logfile is ${CI_LOGGING_LOGFILENAME}"
@@ -172,12 +174,15 @@ message() {
 
     startLogfile
 
-    shouldLogFile ${logType} || return
 
     # create and write log message into logfile
     local logLineFile=$(_loggingLine "${logType}"                                                                                  \
                                  "${LFS_CI_LOGGING_CONFIG-"PREFIX DATE SPACE DURATION SPACE TYPE CALLER NEWLINE TAB TAB MESSAGE"}" \
                                  "${logMessage}")
+    echo -e 1>&2 "${logLineFile}" >> ${CI_LOGGING_LOGFILENAME_COMPLETE}
+
+    shouldLogFile ${logType} || return
+
     echo -e 1>&2 "${logLineFile}" >> ${CI_LOGGING_LOGFILENAME}
 
     # don't show TRACE and DEBUG message in screen, 
