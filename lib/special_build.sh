@@ -282,7 +282,7 @@ applyKnifePatches() {
                 info "matching file ${fileInPatch}"
                 [[ -e ${workspace}/${fileInPatch} ]] || continue
                 local tmpPatchFile=$(createTempFile)
-                execute -n filterdiff -i ${fileInPatch} > ${tmpPatchFile}
+                execute -n filterdiff -i ${fileInPatch} < ${workspace}/bld/bld-${type}-input/lfs.patch > ${tmpPatchFile}
                 rawDebug ${tmpPatchFile}
                 execute patch -p0 -d ${workspace} < ${tmpPatchFile}
             done                     
