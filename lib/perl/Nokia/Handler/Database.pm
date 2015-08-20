@@ -128,8 +128,11 @@ sub branchInformation {
                              tags  => $locationTagString,
                              value => $row->{release_name_regex} };
 
+        my $regex = $row->{release_name_regex} || "";
+        $regex =~ s/\$\{date_%Y\}/(\\d\\d\\d\\d\)/g;
+        $regex =~ s/\$\{date_%m\}/(\\d\\d\)/g;
         push @{ $result }, { name  => "LFS_PROD_tag_to_branch",
-                             tags  => sprintf( 'productName:LFS, tagName~^%s$', $row->{release_name_regex} ),
+                             tags  => sprintf( 'productName:LFS, tagName~^%s$', $regex ),
                              value => $row->{location_name} };
 
         push @{ $result }, { name  => "LFS_CI_uc_update_ecl_url",
