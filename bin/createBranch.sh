@@ -10,22 +10,24 @@ setBuildDescription "${JOB_NAME}" "${BUILD_NUMBER}" "${NEW_BRANCH} DEBUG=${DEBUG
 info "###############################################################"
 info "# Variables from Jenkins"
 info "# ----------------------"
-info "# SRC_BRANCH:           $SRC_BRANCH"
-info "# NEW_BRANCH:           $NEW_BRANCH"
-info "# REVISION:             $REVISION"
-info "# SOURCE_RELEASE:       $SOURCE_RELEASE"
-info "# ECL_URLS:             $ECL_URLS"
-info "# DESCRIPTION:          $DESCRIPTION"
-info "# COMMENT:              $COMMENT"
-info "# FSMR4:                $FSMR4"
-info "# DO_SVN:               $DO_SVN"
-info "# DO_JENKINS:           $DO_JENKINS"
-info "# DUMMY_COMMIT:         $DUMMY_COMMIT"
-info "# DO_DB_INSERT:         $DO_DB_INSERT"
-info "# DO_GIT:               $DO_GIT"
-info "# ACTIVATE_ROOT_JOBS:   $ACTIVATE_ROOT_JOBS"
-info "# DEVELOPER_BRANCH:     $DEVELOPER_BRANCH"
-info "# DEBUG:                $DEBUG"
+info "# SRC_BRANCH:           ${SRC_BRANCH}"
+info "# NEW_BRANCH:           ${NEW_BRANCH}"
+info "# PS_BRANCH:            ${PS_BRANCH}"
+info "# REVISION:             ${REVISION}"
+info "# SOURCE_RELEASE:       ${SOURCE_RELEASE}"
+info "# ECL_URLS:             ${ECL_URLS}"
+info "# DESCRIPTION:          ${DESCRIPTION}"
+info "# COMMENT:              ${COMMENT}"
+info "# PS_BRANCH_COMMENT:    ${PS_BRANCH_COMMENT}"
+info "# FSMR4:                ${FSMR4}"
+info "# DO_SVN:               ${DO_SVN}"
+info "# DO_JENKINS:           ${DO_JENKINS}"
+info "# DUMMY_COMMIT:         ${DUMMY_COMMIT}"
+info "# DO_DB_INSERT:         ${DO_DB_INSERT}"
+info "# DO_GIT:               ${DO_GIT}"
+info "# ACTIVATE_ROOT_JOBS:   ${ACTIVATE_ROOT_JOBS}"
+info "# DEVELOPER_BRANCH:     ${DEVELOPER_BRANCH}"
+info "# DEBUG:                ${DEBUG}"
 info "###############################################################"
 
 
@@ -52,6 +54,7 @@ fi
 __checkParams() {
     mustHaveValue "${SRC_BRANCH}" "SRC_BRANCH"
     mustHaveValue "${NEW_BRANCH}" "NEW_BRANCH"
+    mustHaveValue "${PS_BRANCH}" "PS_BRANCH"
     mustHaveValue "${REVISION}" "REVISION"
     mustHaveValue "${SOURCE_RELEASE}" "SOURCE_RELEASE"
     mustHaveValue "${ECL_URLS}" "ECL_URLS"
@@ -87,16 +90,8 @@ __preparation(){
 ## @fn     __get_sql_insert()
 #  @brief  Create the insert statement for branches table
 __get_sql_string() {
-    local descrCol=""
-    local descrVal=""
-    if [[ ! -z ${DESCRIPTION} ]]; then
-        descrCol=", branch_description"
-        descrVal=", '$DESCRIPTION'"
-    fi
-
-    echo "insert into branches \
-    (branch_name, location_name, ps_branch_name, based_on_revision, based_on_release, release_name_regex, date_created, comment${descrCol}) \
-    VALUES ('$branch', '$branch', '${branch}', ${REVISION}, '${SOURCE_RELEASE}', '${regex}', now(), '$COMMENT'${descrVal})"
+    echo "CALL new_branch('${branch}', '${branch}', ${REVISION}, '${SOURCE_RELEASE}', '${regex}', now(), '${COMMENT}', \
+        '${DESCRIPTION}', '${PS_BRANCH}' ,'${PS_BRANCH_COMMENT}', '${ECL_URLS}')"
 }
 
 __cmd() {
@@ -338,7 +333,7 @@ svnDummyCommitLRC() {
 #  @return  <none>
 dbInsert() {
     info "--------------------------------------------------------"
-    info "DB: insert branch into lfspt database"
+    info "DB: insert branch into database"
     info "--------------------------------------------------------"
 
     if [[ "${DO_DB_INSERT}" == "false" ]]; then
@@ -375,7 +370,11 @@ dbInsert() {
     if [[ $DEBUG == true ]]; then
         echo "[DEBUG] $(__get_sql_string)"
     else
+        info "insert into DB: $(__get_sql_string)"
         echo $(__get_sql_string) | mysql -u ${dbUser} --password=${dbPass} -h ${dbHost} -P ${dbPort} -D ${dbName}
+        if [[ $? -ne 0 ]]; then
+            exit 1
+        fi
     fi
 }
 

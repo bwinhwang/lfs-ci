@@ -19,7 +19,6 @@ echo "lfsSourceRepos = ${reposUrl}"                                             
 echo "LFS_CI_global_mapping_location < job_location:trunk > = pronb-developer" >> ${LFS_CI_CONFIG_FILE}
 
 oneTimeSetUp() {
-
     local workspace=$(createTempDirectory)
 
     svnadmin create ${repos}
@@ -102,12 +101,21 @@ testNoRevisionStateFile() {
     assertFalse "${LFS_CI_ROOT}/bin/customSCM.svn.sh compare"
 }
 
+testSubversionErrorOldRevision() {
+    echo "location ${reposUrl}/os/trunk/bldtools/locations-pronb-developer/Dependencies 4" >> ${REVISION_STATE_FILE}
+    echo "src-foo ${reposUrl}/os/trunk/main/src-foo 9999999"                                     >> ${REVISION_STATE_FILE}
+    printf "bld-buildtools ${reposUrl}/os/trunk/bldtools/bld-buildtools-common 3"          >> ${REVISION_STATE_FILE}
+
+    assertFalse "${LFS_CI_ROOT}/bin/customSCM.svn.sh compare"
+}
+
 testNoRevisionStateFileVariableBuild() {
     unset REVISION_STATE_FILE
     export REVISION_STATE_FILE
 
     assertTrue "${LFS_CI_ROOT}/bin/customSCM.svn.sh compare"
 }
+
 
 testTwoLocationsBuild() {
     # the feature does not work, so we do not need any test
