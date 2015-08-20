@@ -14,6 +14,7 @@
 #  @param   <none>
 #  @return  <none>
 usecase_ADMIN_MYSQL_BACKUP() {
+    requiredParameters HOME
 
     mustHaveDatabaseCredentials
 
@@ -29,5 +30,24 @@ usecase_ADMIN_MYSQL_BACKUP() {
     execute git commit -q -m "backup $@"
     execute git gc -q
 
+    return 0
+}
+
+
+## @fn      usecase_ADMIN_MYSQL_RESTORE()
+#  @brief   usecase restore mysql database from backup
+#  @param   <none>
+#  @return  <none>
+usecase_ADMIN_MYSQL_RESTORE() {
+    requiredParameters HOME
+
+    mustHaveDatabaseCredentials
+
+    # there is a problem between the version of mysqldump on the database server and the client (here master).
+    # see https://bugs.mysql.com/bug.php?id=66765
+    # workaround: run mysqldump on the database host
+
+    execute ssh ${dbHost} mysql -h ${dbHost} -u ${dbUser} -p${dbPass} ${dbName} < ${LFS_CI_ROOT}/database/drop.sql 
+    execute ssh ${dbHost} mysql -h ${dbHost} -u ${dbUser} -p${dbPass} ${dbName} < ${HOME}/mysql_backup/dump.sql 
     return 0
 }

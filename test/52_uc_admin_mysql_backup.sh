@@ -50,7 +50,7 @@ mustHaveDatabaseCredentials
 execute mkdir -p ${HOME}/mysql_backup
 execute cd ${HOME}/mysql_backup
 execute git init
-execute mysqldump -h dbHost -u dbUser -pdbPass --routines dbName --result-file=dump.sql
+execute ssh dbHost mysqldump -h dbHost -u dbUser -pdbPass --routines dbName --result-file=${HOME}/mysql_backup/dump.sql
 execute git add dump.sql
 execute git commit -q -m backup 
 execute git gc -q
@@ -70,7 +70,7 @@ test2() {
 mustHaveDatabaseCredentials 
 execute mkdir -p ${HOME}/mysql_backup
 execute cd ${HOME}/mysql_backup
-execute mysqldump -h dbHost -u dbUser -pdbPass --routines dbName --result-file=dump.sql
+execute ssh dbHost mysqldump -h dbHost -u dbUser -pdbPass --routines dbName --result-file=${HOME}/mysql_backup/dump.sql
 execute git add dump.sql
 execute git commit -q -m backup 
 execute git gc -q
