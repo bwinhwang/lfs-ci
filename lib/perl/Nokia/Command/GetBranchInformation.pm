@@ -6,10 +6,6 @@ use parent qw( Nokia::Command );
 use Nokia::Handler::Database;
 use Data::Dumper;
 
-sub prepare() {
-    return;
-}
-
 sub execute {
     my $self = shift;
     my $result = Nokia::Handler::Database->new()->branchInformation();

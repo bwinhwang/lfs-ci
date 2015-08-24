@@ -137,7 +137,7 @@ sub branchInformation {
 
         push @{ $result }, { name  => "LFS_CI_uc_update_ecl_url",
                              tags  => $locationTagString,
-                             value => join (" ", map  { sprintf( 'https://${svnMasterServerHostName}/isource/svnroot/BTS_SCM_PS/ECL/%s/ECL_BASE', $_->{ps_branch_name} ) } 
+                             value => join (" ", map  { sprintf( '${BTS_SCM_PS_url}/ECL/%s/ECL_BASE', $_->{ps_branch_name} ) } 
                                                  grep { $_->{status} ne "closed" } 
                                                  @{ $psBranches->{ $row->{branch_name} } || [] } ) || "" };
         push @{ $result }, { name  => "LFS_PROD_uc_release_based_on",
@@ -154,7 +154,7 @@ sub branchInformation {
                              value => $row->{status} };
         push @{ $result }, { name  => "CUSTOM_SCM_svn_trigger_svn_is_maintenance",
                              tags  => $locationTagString,
-                             value => 1 };
+                             value => $row->{status} ne "open" ? 1 : "" };
 
         my $pkgpoolPrefix = $row->{release_name_regex};
         $pkgpoolPrefix =~ s/_\(.*//;
