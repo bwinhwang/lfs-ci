@@ -39,7 +39,7 @@ usecase_ADMIN_MYSQL_BACKUP() {
 #  @param   <none>
 #  @return  <none>
 usecase_ADMIN_MYSQL_RESTORE() {
-    requiredParameters HOME
+    requiredParameters HOME LFS_CI_ROOT
 
     mustHaveDatabaseCredentials
 
@@ -47,7 +47,10 @@ usecase_ADMIN_MYSQL_RESTORE() {
     # see https://bugs.mysql.com/bug.php?id=66765
     # workaround: run mysqldump on the database host
 
+    set -x
     execute ssh ${dbHost} mysql -h ${dbHost} -u ${dbUser} -p${dbPass} ${dbName} < ${LFS_CI_ROOT}/database/drop.sql 
     execute ssh ${dbHost} mysql -h ${dbHost} -u ${dbUser} -p${dbPass} ${dbName} < ${HOME}/mysql_backup/dump.sql 
+    set +x
+
     return 0
 }
