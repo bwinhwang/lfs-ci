@@ -25,6 +25,7 @@ testGetReleaseNoteContent() {
     assertEquals "value from getConfig" \
         "$(cat ${LFS_CI_ROOT}/test/data/12_getReleaseNoteContent.txt)" \
         "$(cat ${rn_txt})"
+    diff -rub ${LFS_CI_ROOT}/test/data/12_getReleaseNoteContent.txt ${rn_txt}
 }
 
 source lib/shunit2

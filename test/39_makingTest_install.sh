@@ -145,7 +145,7 @@ execute make -C ${WORKSPACE}/workspace/path/to/test/suite setup
 execute -i make -C ${WORKSPACE}/workspace/path/to/test/suite install FORCE=yes
 execute -i make -C ${WORKSPACE}/workspace/path/to/test/suite install FORCE=yes
 execute -i make -C ${WORKSPACE}/workspace/path/to/test/suite install FORCE=yes
-execute -i make -C ${WORKSPACE}/workspace/path/to/test/suite install FORCE=yes
+execute make -C ${WORKSPACE}/workspace/path/to/test/suite install FORCE=yes
 EOF
     assertExecutedCommands ${expect}
 
@@ -267,11 +267,11 @@ makingTest_powercycle
 mustHaveMakingTestRunningTarget 
 execute -i make -C ${WORKSPACE}/workspace/path/to/test/suite setup
 execute -i make -C ${WORKSPACE}/workspace/path/to/test/suite check
-execute -i make -C ${WORKSPACE}/workspace/path/to/test/suite install FORCE=yes
+execute make -C ${WORKSPACE}/workspace/path/to/test/suite install FORCE=yes
 makingTest_powercycle 
 mustHaveMakingTestRunningTarget 
-execute -i make -C ${WORKSPACE}/workspace/path/to/test/suite setup
-execute -i make -C ${WORKSPACE}/workspace/path/to/test/suite check
+execute make -C ${WORKSPACE}/workspace/path/to/test/suite setup
+execute make -C ${WORKSPACE}/workspace/path/to/test/suite check
 EOF
     assertExecutedCommands ${expect}
 
@@ -376,7 +376,7 @@ makingTest_testSuiteDirectory
 _reserveTarget 
 mustHaveMakingTestRunningTarget 
 execute make -C ${WORKSPACE}/workspace/path/to/test/suite setup
-execute -i make -C ${WORKSPACE}/workspace/path/to/test/suite install FORCE=yes
+execute make -C ${WORKSPACE}/workspace/path/to/test/suite install FORCE=yes
 EOF
     assertExecutedCommands ${expect}
 

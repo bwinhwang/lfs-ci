@@ -414,9 +414,13 @@ makingTest_install() {
     for i in $(seq 1 ${maxInstallTries}) ; do
         trace "install loop ${i}"
 
+        # we try to install several times, but in the last loop, we want to see the error in the console.
+        local ignoreError=-i
+        [[ ${i} == ${maxInstallTries} ]] && ignoreError=
+
         local installOptions=$(getConfig LFS_CI_uc_test_making_test_install_options -t "testTargetName:${targetName}")
         info "running install with options ${installOptions:-none}"
-        execute -i ${make} install ${installOptions} FORCE=yes || { sleep 20 ; continue ; }
+        execute ${ignoreError}  ${make} install ${installOptions} FORCE=yes || { sleep 20 ; continue ; }
 
         local shouldSkipNextSteps=$(getConfig LFS_CI_uc_test_making_test_skip_steps_after_make_install)
         if [[ ${shouldSkipNextSteps} ]] ; then
@@ -428,7 +432,7 @@ makingTest_install() {
         local doFirmwareupgrade="$(getConfig LFS_CI_uc_test_making_test_do_firmwareupgrade)"
         if [[ ${doFirmwareupgrade} ]] ; then
             info "perform firmware upgrade an all boards of $testTargetName."
-            execute -i ${make} firmwareupgrade FORCED_UPGRADE=true
+            execute ${ignoreError} ${make} firmwareupgrade FORCED_UPGRADE=true
         fi
 
         info "rebooting target..."
@@ -437,10 +441,10 @@ makingTest_install() {
         mustHaveMakingTestRunningTarget
 
         info "running setup..."
-        execute -i ${make} setup || continue
+        execute ${ignoreError} ${make} setup || continue
 
         info "running check..."
-        execute -i ${make} check || continue
+        execute ${ignoreError} ${make} check || continue
 
         info "install was successful."
 
