@@ -3,10 +3,10 @@
 source lib/logging.sh
 
 oneTimeSetUp() {
-    return
     bc() {
-        echo "0.0002"
+        echo "0.002"
     }
+    return
 }
 
 setUp() {
