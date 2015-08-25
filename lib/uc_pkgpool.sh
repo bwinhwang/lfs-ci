@@ -324,7 +324,7 @@ usecase_PKGPOOL_UPDATE_DEPS() {
 }
 
 ## @fn      usecase_PKGPOOL_CHECK_FOR_FAILED_VTC()
-#  @brief   checks the build.log of pkgpool for a string, which indicates, that vtc build failed.
+#  @brief   check, if there are files in the addon arm-cortexa15-linux-gnueabihf-vtc.tar.gz in pkgpool
 #  @details vtc is a addon from Transport, which is build within the pkgpool. Current state (2015-08-01) is,
 #           that this addon is experimantal and should not be blocking.
 #           This usecase was requested by "Sapalski, Samuel (Nokia - DE/Ulm)" <samuel.sapalski@nokia.com>.

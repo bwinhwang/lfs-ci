@@ -15,7 +15,7 @@ oneTimeSetUp() {
     execute() {
         mockedCommand "execute $@"
         if [[ ${UT_COUNTER} == 1 ]] ; then
-            echo line
+            echo output line from tar tvf vtc.tar.gz
         fi
     }
     mustHavePreparedWorkspace() {
