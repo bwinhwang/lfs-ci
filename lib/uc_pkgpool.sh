@@ -57,7 +57,8 @@ usecase_PKGPOOL_BUILD() {
 
     # put build log for later analysis into the artifacts
     execute mkdir -p ${workspace}/bld/bld-pkgpool-release/
-    execute cp ${buildLogFile} ${workspace}/bld/bld-pkgpool-release/build.log
+    execute cp ${buildLogFile}      ${workspace}/bld/bld-pkgpool-release/build.log
+    execute cp -a ${workspace}/logs ${workspace}/bld/bld-pkgpool-release/
 
     # in case of build from scratch (own jenkins job), we do not have a release tag.
     # => no release
