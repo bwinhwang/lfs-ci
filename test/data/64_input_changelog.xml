@@ -1,0 +1,37 @@
+<?xml version="1.0"?>
+<log>
+  <logentry revision="293708">
+<author>wro01823</author>
+<date>2015-08-24T12:54:24.558338Z</date>
+<paths>
+<path kind="file" action="M">/os/FB1503/trunk/fsmr3/src-ddal/src/ddal/tools/gpsd/gpsd-3.10-lfs/driver_tsip.c</path>
+<path kind="file" action="M">/os/FB1503/trunk/fsmr3/src-ddal/src/ddal/tools/gpsd/gpsd-3.10-lfs/libgpsd_core.c</path>
+<path kind="dir" action="M">/os/FB1503/trunk/fsmr3/src-ddal/src/ddal/tools/gpsd/gpsd-3.10-lfs</path>
+</paths>
+<msg>Merge from fsmr3.
+
+%FIN %PR=PR071990
+</msg>
+</logentry>
+  <logentry revision="293707">
+<author>wro01823</author>
+<date>2015-08-24T12:53:58.662828Z</date>
+<paths>
+<path kind="file" action="M">/os/FB1503/trunk/fsmr3/src-fsmddal/src/tools/gpsd/gpsd-3.10-lfs/driver_tsip.c</path>
+<path kind="file" action="M">/os/FB1503/trunk/fsmr3/src-fsmddal/src/tools/gpsd/gpsd-3.10-lfs/libgpsd_core.c</path>
+</paths>
+<msg>Merge correction from trunk
+
+%FIN %PR=PR071990
+
+From: Zbigniew Chyla &lt;zbigniew.chyla@nokia.com&gt;</msg>
+</logentry>
+  <logentry revision="293520">
+<author>gomonovy</author>
+<date>2015-08-24T11:06:20.973783Z</date>
+<paths>
+<path kind="file" action="M">/os/FB1503/trunk/fsmr3/src-fsmddal/src/mdio/ddal_mdio.c</path>
+</paths>
+<msg>%FIN %PR=PR055917 DDAL API “ddal_lx2_802_1q_set_config” taking long time in FL15A move back to IOCTL from SYSFS</msg>
+</logentry>
+</log>

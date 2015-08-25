@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<releasenote version="10">
+  <name>TAG_NAME</name>
+  <system>PS_LFS</system>
+  <releaseDate>yyyy-mm-dd</releaseDate>
+  <releaseTime>hh:mm:ssZ</releaseTime>
+  <authorEmail>psulm-admin@mlist.emea.nsn-intra.net</authorEmail>
+  <basedOn>OLD_TAG_NAME</basedOn>
+  <importantNotes>
+    <note name="TAG_NAME"></note>
+  </importantNotes>
+  <repositoryUrl>https://ulscmi.inside.nsn.com/isource/svnroot/${LFS_PROD_svn_delivery_repos_name}/os</repositoryUrl>
+  <repositoryBranch>tags/TAG_NAME</repositoryBranch>
+  <repositoryRevision></repositoryRevision>
+  <correctedFaults>
+    <module name="PS_LFS_OS">
+        <fault id="PR071990">PR PR071990</fault>
+        <fault id="PR055917">PR PR055917 DDAL API ?ddal_lx2_802_1q_set_config? taking long time in FL15A move back to IOCTL from SYSFS</fault>
+    </module>
+    <module name="PS_LFS_SDK3">
+    </module>
+  </correctedFaults>
+  <revertedCorrectedFaults>
+    <module name="PS_LFS_OS">
+    </module>
+  </revertedCorrectedFaults>
+  <features>
+    <module name="PS_LFS_OS">
+        
+    </module>
+  </features>
+  <baselines>
+    
+  </baselines>
+  <notes>
+  </notes>
+  <changenotes>
+    <module name="PS_LFS_OS">
+        
+    </module>
+  </changenotes>
+  <unsupportedFeatures>
+    <module name="PS_LFS_OS">
+    </module>
+  </unsupportedFeatures>
+  <restrictions>
+    <module name="PS_LFS_OS">
+    </module>
+  </restrictions>
+  <download>
+    <downloadItem storage="SVN"               name="PS_LFS_OS">https://ulscmi.inside.nsn.com/isource/svnroot/${LFS_PROD_svn_delivery_repos_name}/os/tags/TAG_NAME</downloadItem>
+    <downloadItem storage="FILE CI_LFS"       name="PS_LFS_OS">/build/home/CI_LFS/Release/</downloadItem>
+    <downloadItem storage="FILE ltesdkroot"   name="PS_LFS_OS">/ltesdkroot/ltesdkroot/Platforms/PS_LFS_REL/-LTE/</downloadItem>
+    <downloadItem storage="SVN source"        name="PS_LFS_OS">https://ulscmi.inside.nsn.com/isource/svnroot/BTS_SC_LFS/os/tags/TAG_NAME</downloadItem>
+  </download>
+  <additional> </additional>
+</releasenote>
