@@ -136,7 +136,7 @@ usecase_LFS_BUILD_CREATE_VERSION() {
     # TODO remove as soon as branchName and locationName are separated
     [[ ${branch} == "pronb-developer" ]] && branch="trunk"
 
-    _set_db_credentials
+    mustHaveDatabaseCredentials
     local oldBuildName=""
     local buildName=$(_get_new_build_name)
     if [[ ! ${buildName} =~ _0001$ ]]; then
@@ -267,18 +267,6 @@ _recordBuildEndEvent() {
     return
 }
 
-_set_db_credentials() {
-    dbName=$(getConfig MYSQL_db_name)
-    mustHaveValue "${dbName}" "dbName"
-    dbPort=$(getConfig MYSQL_db_port)
-    mustHaveValue "${dbName}" "dbPort"
-    dbUser=$(getConfig MYSQL_db_username)
-    mustHaveValue "${dbName}" "dbUser"
-    dbPass=$(getConfig MYSQL_db_password)
-    mustHaveValue "${dbName}" "dbPass"
-    dbHost=$(getConfig MYSQL_db_hostname)
-    mustHaveValue "${dbName}" "dbHost"
-}
 
 _get_new_build_name() {
     info "get new build name for ${branch} and product name ${productName} from database"

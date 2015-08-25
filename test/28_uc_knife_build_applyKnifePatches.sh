@@ -72,13 +72,13 @@ test2() {
     local expect=$(createTempFile)
 cat <<EOF > ${expect}
 execute -n lsdiff ${WORKSPACE}/workspace/bld/bld-knife-input/lfs.patch
-execute -n filterdiff -i src-fsmpsl/Buildfile
+execute -n filterdiff -i src-fsmpsl/Buildfile ${WORKSPACE}/workspace/bld/bld-knife-input/lfs.patch
 execute patch -p0 -d ${WORKSPACE}/workspace
-execute -n filterdiff -i src-fsmpsl/Dependencies
+execute -n filterdiff -i src-fsmpsl/Dependencies ${WORKSPACE}/workspace/bld/bld-knife-input/lfs.patch
 execute patch -p0 -d ${WORKSPACE}/workspace
-execute -n filterdiff -i src-rfs/Buildfile
+execute -n filterdiff -i src-rfs/Buildfile ${WORKSPACE}/workspace/bld/bld-knife-input/lfs.patch
 execute patch -p0 -d ${WORKSPACE}/workspace
-execute -n filterdiff -i src-rfs/Dependencies
+execute -n filterdiff -i src-rfs/Dependencies ${WORKSPACE}/workspace/bld/bld-knife-input/lfs.patch
 execute patch -p0 -d ${WORKSPACE}/workspace
 EOF
     assertExecutedCommands ${expect}
