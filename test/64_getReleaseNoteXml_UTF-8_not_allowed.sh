@@ -22,7 +22,7 @@ test1() {
     sed -i "s^<releaseDate>.*</releaseDate>^<releaseDate>yyyy-mm-dd</releaseDate>^g" ${releaseNoteXML}
     sed -i "s^<releaseTime>.*</releaseTime>^<releaseTime>hh:mm:ssZ</releaseTime>^g" ${releaseNoteXML}
 
-    assertEquals "changelog is ok" "$(cat ${releaseNoteXML})" "$(cat ${LFS_CI_ROOT}/test/data/64_output_changelog.xml)"
+    assertEquals "changelog is not ok" "$(cat ${releaseNoteXML})" "$(cat ${LFS_CI_ROOT}/test/data/64_output_changelog.xml)"
     diff -rub ${releaseNoteXML} ${LFS_CI_ROOT}/test/data/64_output_changelog.xml
 
     return
@@ -34,7 +34,7 @@ test2() {
     cd ${WORKSPACE}
     ${LFS_CI_ROOT}/bin/getReleaseNoteContent -t TAG_NAME > ${releaseNoteTXT}
 
-    assertEquals "changelog is ok" "$(cat ${releaseNoteTXT})" "$(cat ${LFS_CI_ROOT}/test/data/64_output_changelog.txt)"
+    assertEquals "changelog is not ok" "$(cat ${releaseNoteTXT})" "$(cat ${LFS_CI_ROOT}/test/data/64_output_changelog.txt)"
     diff -rub ${releaseNoteTXT} ${LFS_CI_ROOT}/test/data/64_output_changelog.txt
 
     return
