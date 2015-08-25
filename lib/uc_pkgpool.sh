@@ -340,7 +340,7 @@ usecase_PKGPOOL_CHECK_FOR_FAILED_VTC() {
     local buildName=$(cat ${workspace}/bld/bld-pkgpool-release/label)
     mustHaveValue "${buildName}" "build name of pkgpool"
 
-    local vtcAddon=/build/home/SC_LFS/pkgpool/${buildName}/arm-cortexa15-linux-gnueabihf-vtc.tar.gz
+    local vtcAddon=$(getConfig PKGPOOL_location_on_share)/${buildName}/arm-cortexa15-linux-gnueabihf-vtc.tar.gz
     mustExistFile ${vtcAddon}
 
     local filesInTar=$(execute -n tar tvf ${vtcAddon} | wc -l)

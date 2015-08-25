@@ -8,6 +8,10 @@ oneTimeSetUp() {
     mockedCommand() {
         echo "$@" >> ${UT_MOCKED_COMMANDS}
     }
+    getConfig() {
+        mockedCommand "getConfig $@"
+        echo $1
+    }
     execute() {
         mockedCommand "execute $@"
         if [[ ${UT_COUNTER} == 1 ]] ; then
@@ -49,8 +53,9 @@ test1() {
     local expect=$(createTempFile)
     cat <<EOF > ${expect}
 mustHavePreparedWorkspace --no-build-description
-mustExistFile /build/home/SC_LFS/pkgpool/buildName/arm-cortexa15-linux-gnueabihf-vtc.tar.gz
-execute -n tar tvf /build/home/SC_LFS/pkgpool/buildName/arm-cortexa15-linux-gnueabihf-vtc.tar.gz
+getConfig PKGPOOL_location_on_share
+mustExistFile PKGPOOL_location_on_share/buildName/arm-cortexa15-linux-gnueabihf-vtc.tar.gz
+execute -n tar tvf PKGPOOL_location_on_share/buildName/arm-cortexa15-linux-gnueabihf-vtc.tar.gz
 EOF
     assertExecutedCommands ${expect}
 
@@ -66,8 +71,9 @@ test2() {
     local expect=$(createTempFile)
     cat <<EOF > ${expect}
 mustHavePreparedWorkspace --no-build-description
-mustExistFile /build/home/SC_LFS/pkgpool/buildName/arm-cortexa15-linux-gnueabihf-vtc.tar.gz
-execute -n tar tvf /build/home/SC_LFS/pkgpool/buildName/arm-cortexa15-linux-gnueabihf-vtc.tar.gz
+getConfig PKGPOOL_location_on_share
+mustExistFile PKGPOOL_location_on_share/buildName/arm-cortexa15-linux-gnueabihf-vtc.tar.gz
+execute -n tar tvf PKGPOOL_location_on_share/buildName/arm-cortexa15-linux-gnueabihf-vtc.tar.gz
 EOF
     assertExecutedCommands ${expect}
 
