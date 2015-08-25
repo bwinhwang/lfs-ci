@@ -28,6 +28,18 @@ test1() {
     return
 }
 
+test2() {
+    local releaseNoteTXT=$(createTempFile)
+
+    cd ${WORKSPACE}
+    ${LFS_CI_ROOT}/bin/getReleaseNoteContent -t TAG_NAME > ${releaseNoteTXT}
+
+    assertEquals "changelog is ok" "$(cat ${releaseNoteTXT})" "$(cat ${LFS_CI_ROOT}/test/data/64_output_changelog.txt)"
+    diff -rub ${releaseNoteTXT} ${LFS_CI_ROOT}/test/data/64_output_changelog.txt
+
+    return
+}
+
 source lib/shunit2
 
 exit 0
