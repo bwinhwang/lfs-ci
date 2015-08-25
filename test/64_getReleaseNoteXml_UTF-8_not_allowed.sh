@@ -7,6 +7,7 @@ setUp() {
     export WORKSPACE=$(createTempDirectory)
     export LFS_CI_CONFIG_FILE=${LFS_CI_ROOT}/etc/lfs-ci.cfg
     export type=OS
+    export productName=LFS
     cp ${LFS_CI_ROOT}/test/data/64_input_changelog.xml ${WORKSPACE}/changelog.xml
 
     return
