@@ -199,6 +199,7 @@ message() {
                                  "${logMessage}")
     echo -e 1>&2 "${logLineFile}" >> ${CI_LOGGING_LOGFILENAME_COMPLETE}
 
+    # this is a blacklisting. 
     shouldWriteLogMessageToFile ${logType} || return 0
 
     echo -e 1>&2 "${logLineFile}" >> ${CI_LOGGING_LOGFILENAME}
@@ -229,7 +230,11 @@ shouldWriteLogMessageToFile() {
     local sourceFile=${BASH_SOURCE[2]/${LFS_CI_ROOT}\//}
     local sourceFunction=${FUNCNAME[3]}
 
-    grep -e "^${logType}:${sourceFile}:${sourceFunction}$" ${LFS_CI_ROOT}/etc/logging.cfg
+    if grep --silent -e "^${logType}:${sourceFile}:${sourceFunction}$" ${LFS_CI_ROOT}/etc/logging.cfg
+    then
+        return 1
+    fi
+    return 0
 }
 
 ## @fn      _loggingLine()
