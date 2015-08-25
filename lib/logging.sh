@@ -51,6 +51,7 @@ startLogfile() {
         fi
 
         CI_LOGGING_LOGFILENAME=${LFS_CI_ROOT}/log/${datePath}/ci.${dateString}.${hostName}.${userName}.${jobName}.${prefix}${counter}.log
+        CI_LOGGING_LOGFILENAME_COMPLETE=${LFS_CI_ROOT}/log/${datePath}/ci.${dateString}.${hostName}.${userName}.${jobName}.${prefix}${counter}.complete.log
         mkdir -p ${LFS_CI_ROOT}/log/${datePath}/ 
 
         while [[ -e ${CI_LOGGING_LOGFILENAME}    ||

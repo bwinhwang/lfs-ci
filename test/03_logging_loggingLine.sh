@@ -4,6 +4,9 @@ source lib/logging.sh
 
 oneTimeSetUp() {
     return
+    bc() {
+        echo "0.0002"
+    }
 }
 
 setUp() {
