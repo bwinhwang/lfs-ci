@@ -230,6 +230,8 @@ shouldWriteLogMessageToFile() {
     local sourceFile=${BASH_SOURCE[2]/${LFS_CI_ROOT}\//}
     local sourceFunction=${FUNCNAME[3]}
 
+    # grep returns with 0 if grep finds the string.
+    # => if is true and returns 1
     if grep --silent -e "^${logType}:${sourceFile}:${sourceFunction}$" ${LFS_CI_ROOT}/etc/logging.cfg
     then
         return 1
