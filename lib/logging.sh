@@ -74,7 +74,8 @@ startLogfile() {
             ca_lrcci) url=https://lfs-lrc-ci.int.net.nokia.com/logs/ ;;
         esac
         if [[ ${url} ]] ; then
-            echo 1>&2 "${url}/${datePath}/$(basename ${CI_LOGGING_LOGFILENAME})"
+            echo 1>&2 "short log    : ${url}/${datePath}/$(basename ${CI_LOGGING_LOGFILENAME})"
+            echo 1>&2 "complete log : ${url}/${datePath}/$(basename ${CI_LOGGING_LOGFILENAME_COMPLETE})"
         fi
 
         printf -- "------------------------------------------------------------------\n" >  ${CI_LOGGING_LOGFILENAME}
@@ -87,6 +88,17 @@ startLogfile() {
         printf -- "-- Please note, all timestamps are in UTC                       --\n" >> ${CI_LOGGING_LOGFILENAME}
         printf -- "------------------------------------------------------------------\n" >> ${CI_LOGGING_LOGFILENAME}
         printf -- "{{{\n"                                                                >> ${CI_LOGGING_LOGFILENAME}
+
+        printf -- "------------------------------------------------------------------\n" >  ${CI_LOGGING_LOGFILENAME_COMPLETE}
+        printf -- "starting logfile\n"                                                   >> ${CI_LOGGING_LOGFILENAME_COMPLETE}
+        printf -- "  script: $0\n"                                                       >> ${CI_LOGGING_LOGFILENAME_COMPLETE}
+        printf -- "  jobName:  $jobName\n"                                               >> ${CI_LOGGING_LOGFILENAME_COMPLETE}
+        printf -- "  hostname: $hostName\n"                                              >> ${CI_LOGGING_LOGFILENAME_COMPLETE}
+        printf -- "  username: $userName\n"                                              >> ${CI_LOGGING_LOGFILENAME_COMPLETE}
+        printf -- "------------------------------------------------------------------\n" >> ${CI_LOGGING_LOGFILENAME_COMPLETE}
+        printf -- "-- Please note, all timestamps are in UTC                       --\n" >> ${CI_LOGGING_LOGFILENAME_COMPLETE}
+        printf -- "------------------------------------------------------------------\n" >> ${CI_LOGGING_LOGFILENAME_COMPLETE}
+        printf -- "{{{\n"                                                                >> ${CI_LOGGING_LOGFILENAME_COMPLETE}
     fi
 }
 
@@ -102,6 +114,12 @@ stopLogfile() {
         printf -- "script: $0\n"                                                          >> ${CI_LOGGING_LOGFILENAME}
         printf -- "ending logfile\n"                                                      >> ${CI_LOGGING_LOGFILENAME}
         printf -- "-------------------------------------------------------------------\n" >> ${CI_LOGGING_LOGFILENAME}
+
+        printf -- "}}}\n"                                                                 >> ${CI_LOGGING_LOGFILENAME_COMPLETE}
+        printf -- "-------------------------------------------------------------------\n" >> ${CI_LOGGING_LOGFILENAME_COMPLETE}
+        printf -- "script: $0\n"                                                          >> ${CI_LOGGING_LOGFILENAME_COMPLETE}
+        printf -- "ending logfile\n"                                                      >> ${CI_LOGGING_LOGFILENAME_COMPLETE}
+        printf -- "-------------------------------------------------------------------\n" >> ${CI_LOGGING_LOGFILENAME_COMPLETE}
 
         # disabled gzipping..
         # gzip ${CI_LOGGING_LOGFILENAME}
@@ -174,14 +192,13 @@ message() {
 
     startLogfile
 
-
     # create and write log message into logfile
     local logLineFile=$(_loggingLine "${logType}"                                                                                  \
                                  "${LFS_CI_LOGGING_CONFIG-"PREFIX DATE SPACE DURATION SPACE TYPE CALLER NEWLINE TAB TAB MESSAGE"}" \
                                  "${logMessage}")
     echo -e 1>&2 "${logLineFile}" >> ${CI_LOGGING_LOGFILENAME_COMPLETE}
 
-    shouldLogFile ${logType} || return
+    shouldWriteLogMessageToFile ${logType} || return 0
 
     echo -e 1>&2 "${logLineFile}" >> ${CI_LOGGING_LOGFILENAME}
 
@@ -202,7 +219,11 @@ message() {
     return 0
 }
 
-shouldLogFile() {
+## @fn      shouldWriteLogMessageToFile()
+#  @brief   checks, if a log message should be written into the logfile or not.
+#  @param   {logType}    type of the log message (INFO, WARNING, ERROR, DEBUG, TRACE)
+#  @return  1 if message should be logged, 0 otherwise
+shouldWriteLogMessageToFile() {
     local logType=$1
     local sourceFile=${BASH_SOURCE[2]/${LFS_CI_ROOT}\//}
     local sourceFunction=${FUNCNAME[3]}
@@ -258,7 +279,7 @@ _loggingLine() {
 
     done
 
-    echo ${logLine}
+    echo "${logLine}"
     return
 }
 
