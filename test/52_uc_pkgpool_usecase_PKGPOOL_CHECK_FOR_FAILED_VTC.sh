@@ -20,13 +20,15 @@ oneTimeSetUp() {
     }
     mustHavePreparedWorkspace() {
         mockedCommand "mustHavePreparedWorkspace $@"
+    }
+    copyAndExtractBuildArtifactsFromProject() {
+        mockedCommand "copyAndExtractBuildArtifactsFromProject $@"
         mkdir -p ${WORKSPACE}/workspace/bld/bld-pkgpool-release
         echo buildName > ${WORKSPACE}/workspace/bld/bld-pkgpool-release/label
     }
     mustExistFile() {
         mockedCommand "mustExistFile $@"
     }
-        
 
     return
 }
@@ -34,8 +36,10 @@ oneTimeSetUp() {
 setUp() {
     cp -f /dev/null ${UT_MOCKED_COMMANDS}
     export WORKSPACE=$(createTempDirectory)
-    export JOB_NAME=PKGPOOL_CI_-_trunk_-_Build
+    export JOB_NAME=PKGPOOL_CI_-_trunk_-_Build_vtc_check
     export BUILD_NUMBER=123
+    export UPSTREAM_PROJECT=PKGPOOL_CI_-_trunk_-_Build
+    export UPSTREAM_BUILD=123
     mkdir ${WORKSPACE}/src/
 }
 
@@ -53,6 +57,7 @@ test1() {
     local expect=$(createTempFile)
     cat <<EOF > ${expect}
 mustHavePreparedWorkspace --no-build-description
+copyAndExtractBuildArtifactsFromProject PKGPOOL_CI_-_trunk_-_Build 123 pkgpool
 getConfig PKGPOOL_location_on_share
 mustExistFile PKGPOOL_location_on_share/buildName/arm-cortexa15-linux-gnueabihf-vtc.tar.gz
 execute -n tar tvf PKGPOOL_location_on_share/buildName/arm-cortexa15-linux-gnueabihf-vtc.tar.gz
@@ -71,6 +76,7 @@ test2() {
     local expect=$(createTempFile)
     cat <<EOF > ${expect}
 mustHavePreparedWorkspace --no-build-description
+copyAndExtractBuildArtifactsFromProject PKGPOOL_CI_-_trunk_-_Build 123 pkgpool
 getConfig PKGPOOL_location_on_share
 mustExistFile PKGPOOL_location_on_share/buildName/arm-cortexa15-linux-gnueabihf-vtc.tar.gz
 execute -n tar tvf PKGPOOL_location_on_share/buildName/arm-cortexa15-linux-gnueabihf-vtc.tar.gz

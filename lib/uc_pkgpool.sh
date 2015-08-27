@@ -333,7 +333,12 @@ usecase_PKGPOOL_UPDATE_DEPS() {
 #  @param   <none>
 #  @return  <none>
 usecase_PKGPOOL_CHECK_FOR_FAILED_VTC() {
+    requiredParameters UPSTREAM_PROJECT UPSTREAM_BUILD
+
+    # --no-build-description will not copy artifacts from the upstream build...
     mustHavePreparedWorkspace --no-build-description
+    # so we have to do this by our own...
+    copyAndExtractBuildArtifactsFromProject "${UPSTREAM_PROJECT}" "${UPSTREAM_BUILD}" "pkgpool"
 
     local workspace=$(getWorkspaceName)
     mustHaveWorkspaceName
