@@ -13,9 +13,10 @@ oneTimeSetUp() {
     execute() {
         mockedCommand "execute $@"
         rc=0
-        if [[ $5 = ${UT_FAIL_CAUSE} ]] ; then
+        if [[ $5 = ${UT_FAIL_CAUSE} || $4 = ${UT_FAIL_CAUSE} ]] ; then
             UT_EXECUTE_INSTALL=$(( UT_EXECUTE_INSTALL - 1))
             rc=${UT_EXECUTE_INSTALL}
+            info "rc for $@ is ${rc}"
         fi
         return ${rc}
                 
@@ -153,8 +154,8 @@ EOF
 }
 
 test4() {
-    # install is ok, but setup fails
-    export UT_EXECUTE_INSTALL=2
+    # install is ok, but setup fails one time
+    export UT_EXECUTE_INSTALL=3
     export UT_FAIL_CAUSE=setup
     assertTrue "makingTest_install"
 
@@ -180,7 +181,7 @@ EOF
 }
 test5() {
     # install is ok, but setup fails all the time
-    export UT_EXECUTE_INSTALL=5
+    export UT_EXECUTE_INSTALL=6
     export UT_FAIL_CAUSE=setup
     assertFalse "makingTest_install"
 
@@ -202,10 +203,10 @@ execute -i make -C ${WORKSPACE}/workspace/path/to/test/suite install FORCE=yes
 makingTest_powercycle 
 mustHaveMakingTestRunningTarget 
 execute -i make -C ${WORKSPACE}/workspace/path/to/test/suite setup
-execute -i make -C ${WORKSPACE}/workspace/path/to/test/suite install FORCE=yes
+execute make -C ${WORKSPACE}/workspace/path/to/test/suite install FORCE=yes
 makingTest_powercycle 
 mustHaveMakingTestRunningTarget 
-execute -i make -C ${WORKSPACE}/workspace/path/to/test/suite setup
+execute make -C ${WORKSPACE}/workspace/path/to/test/suite setup
 EOF
     assertExecutedCommands ${expect}
 

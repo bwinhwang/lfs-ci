@@ -420,7 +420,7 @@ makingTest_install() {
 
         local installOptions=$(getConfig LFS_CI_uc_test_making_test_install_options -t "testTargetName:${targetName}")
         info "running install with options ${installOptions:-none}"
-        execute ${ignoreError}  ${make} install ${installOptions} FORCE=yes || { sleep 20 ; continue ; }
+        execute ${ignoreError} ${make} install ${installOptions} FORCE=yes || { sleep 20 ; continue ; }
 
         local shouldSkipNextSteps=$(getConfig LFS_CI_uc_test_making_test_skip_steps_after_make_install)
         if [[ ${shouldSkipNextSteps} ]] ; then
