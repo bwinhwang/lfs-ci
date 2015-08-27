@@ -1,6 +1,3 @@
-CREATE OR REPLACE VIEW v_builds as
-    SELECT b.id, b.build_name, br.branch_name, b.revision, b.comment FROM builds b, branches br WHERE b.branch_id = br.id;
-
 CREATE OR REPLACE VIEW v_build_events AS
     SELECT be.id, b.id build_id, b.build_name, be.timestamp, be.comment, be.job_name, be.build_number, e.event_type, e.event_state, e.product_name, e.task_name FROM builds b, build_events be, events e where b.id = be.build_id and e.id = be.event_id;
 
