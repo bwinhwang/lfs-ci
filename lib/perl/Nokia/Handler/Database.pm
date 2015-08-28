@@ -102,7 +102,7 @@ sub branchInformation {
     my $result;
 
     # in case, we are lfs-sandbox, we add the prefix
-    my $prefix     = Nokia::Singleton::config()->getConfig( name => "LFS_PROD_label_prefix" );
+    my $prefix     = uc Nokia::Singleton::config()->getConfig( name => "LFS_PROD_label_prefix" );
 
     foreach my $row ( @branchData ) {
         my $locationTagString = sprintf( "productName:LFS, location:%s", $row->{location_name} );
