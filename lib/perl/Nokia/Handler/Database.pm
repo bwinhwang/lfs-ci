@@ -7,6 +7,7 @@ use parent qw( Nokia::Object );
 
 use Nokia::Store::Database::Events;
 use Nokia::Store::Database::Branches;
+use Nokia::Singleton;
 
 sub newTestResult {
     my $self  = shift;
@@ -100,6 +101,9 @@ sub branchInformation {
     my $psBranches = $self->{store}->platformBranchInformation();
     my $result;
 
+    # in case, we are lfs-sandbox, we add the prefix
+    my $prefix     = Nokia::Singleton::config()->getConfig( name => "LFS_PROD_label_prefix" );
+
     foreach my $row ( @branchData ) {
         my $locationTagString = sprintf( "productName:LFS, location:%s", $row->{location_name} );
 
@@ -132,7 +136,7 @@ sub branchInformation {
         $regex =~ s/\$\{date_%Y\}/(\\d\\d\\d\\d\)/g;
         $regex =~ s/\$\{date_%m\}/(\\d\\d\)/g;
         push @{ $result }, { name  => "LFS_PROD_tag_to_branch",
-                             tags  => sprintf( 'productName:LFS, tagName~^%s$', $regex ),
+                             tags  => sprintf( 'productName:LFS, tagName~^%s%s$', $prefix, $regex ),
                              value => $row->{location_name} };
 
         push @{ $result }, { name  => "LFS_CI_uc_update_ecl_url",
