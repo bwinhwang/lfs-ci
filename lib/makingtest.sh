@@ -375,8 +375,7 @@ makingTest_testLRC_check() {
 
 ## @fn      makingTest_install()
 #  @brief   install a software load via making test on the target
-#  @warning this is only used by LRC at the moment, but should also work for FSM
-#  @param   {testSuiteDirectory}    directory of a test suite
+#  @param   <none>
 #  @return  <none>
 makingTest_install() {
     local testSuiteDirectory=$(makingTest_testSuiteDirectory)
@@ -408,6 +407,7 @@ makingTest_install() {
     # on LRC: currently install does show wrong (old) version after reboot and
     # SHP sometimes fails to be up when install is retried.
     # We try installation up to 4 times
+    # on FSM: the install counter can be used, but currently it's set to 1
     local maxInstallTries=$(getConfig LFS_CI_uc_test_making_test_installation_tries -t "testTargetName:${targetName}")
     mustHaveValue "${maxInstallTries}" "max installation tries"
 
