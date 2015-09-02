@@ -17,7 +17,7 @@ test1() {
     local releaseNoteXML=$(createTempFile)
 
     cd ${WORKSPACE}
-    ${LFS_CI_ROOT}/bin/getReleaseNoteXML -t TAG_NAME -o OLD_TAG_NAME -f ${LFS_CI_CONFIG_FILE} > ${releaseNoteXML}
+    ${LFS_CI_ROOT}/bin/getReleaseNoteXML -t TAG_NAME -o OLD_TAG_NAME -f ${LFS_CI_CONFIG_FILE} -P LFS -T OS > ${releaseNoteXML}
 
     # cleanup date and time
     sed -i "s^<releaseDate>.*</releaseDate>^<releaseDate>yyyy-mm-dd</releaseDate>^g" ${releaseNoteXML}
