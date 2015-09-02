@@ -24,13 +24,13 @@ usecase_LFS_RELEASE_SHARE_BUILD_ARTIFACTS_KERNELSOURCES() {
     local workspace=$(getWorkspaceName)
     mustHaveCleanWorkspace
 
-    local buldName=${LFS_PROD_RELEASE_CURRENT_TAG_NAME}
-    mustHaveValue "${buldName}"
+    local buildName=${LFS_PROD_RELEASE_CURRENT_TAG_NAME}
+    mustHaveValue "${buildName}"
 
-    info "getting down stream information for ${testedJobName} / ${testedBuildNumber}"
     local triggeredJobData=$(getDownStreamProjectsData ${testedJobName} ${testedBuildNumber})
     mustHaveValue "${triggeredJobData}" "triggered job data"
 
+    local jobData=
     for jobData in ${triggeredJobData} ; do
         local buildNumber=$(echo ${jobData} | cut -d: -f 1)
         local jobName=$(    echo ${jobData} | cut -d: -f 3-)

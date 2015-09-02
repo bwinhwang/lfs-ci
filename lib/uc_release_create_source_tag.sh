@@ -10,45 +10,114 @@
 usecase_LFS_RELEASE_CREATE_SOURCE_TAG() {
     mustBePreparedForReleaseTask
 
-    requiredParameters LFS_PROD_RELEASE_CURRENT_TAG_NAME
-
     local workspace=$(getWorkspaceName)
     mustHaveWorkspaceName
 
-    # get os label
-    local osLabelName=${LFS_PROD_RELEASE_CURRENT_TAG_NAME}
-    mustHaveValue "${osLabelName}" "no os label name"
+    _mustHaveLfsSourceSubversionUrl
+    _createUsedRevisionsFile
+    _prepareSubversion
 
-    local svnUrl=$(getConfig lfsSourceRepos -t tagName:${tagName})
-    local svnUrlOs=${svnUrl}/os
-    local branch=pre_${osLabelName}
-    local logMessage=$(createTempFile)
+    local revisionFile=
+    for revisionFile in ${workspace}/rev/* ; do
+        [[ -e ${revisionFile} ]] || continue
+        local target=$(basename ${revisionFile})
+
+        mustExistBranchInSubversion ${svnUrlOs}/branches/${branchName} ${target}
+
+        while read src url rev ; do
+            _copySourceDirectoryToBranch ${target} ${src} ${url} ${rev}
+        done < ${revisionFile}
+    done 
+
+    _createSourceTag
+    info "tagging done."
+    return
+}
+
+## @fn      _copySourceDirectoryToBranch()
+#  @brief   copy the source directory to the branch and to the subsystem in svn
+#  @param   {target}    name of the target directory (fsmr2,r3,r4)
+#  @param   {source}    name of the source directory (src-bos)
+#  @param   {url}       url of the source directory in svn
+#  @param   {rev}       revision in svn
+#  @return  <none>
+_copySourceDirectoryToBranch() {
+    local target=$1
+    mustHaveValue "${target}" "target"
+
+    local src=$2
+    mustHaveValue "${src}" "src"
+
+    local url=$3
+    mustHaveValue "${url}" "svn url"
+
+    local rev=$4
+    mustHaveValue "${rev}" "svn revision"
+
+    local dirname=
+    local canCreateSourceTag=$(getConfig LFS_CI_uc_release_can_create_source_tag)
+    local normalizedUrl=$(normalizeSvnUrl ${url})
+    local tagPrefix=$(getConfig LFS_PROD_uc_release_source_tag_prefix -t target:${target})
+
+    _mustHaveLfsSourceSubversionUrl
+
+    case ${src} in 
+        src-*) dirname=${src} ;;
+        *)     dirname=$(dirname ${src})
+               mustExistBranchInSubversion ${svnUrlOs}/branches/${branchName}/${target} ${dirname} ;;
+    esac
+
+    if [[ ${canCreateSourceTag} ]] ; then
+        info "copy ${src} to ${branchName}/${target}/${dirname}"
+        svnCopy -r ${rev} -F ${commitMessageFile} ${normalizedUrl} \
+            ${svnUrlOs}/branches/${branchName}/${target}/${dirname}
+
+        # we have two conditions here: first one: ${src} must start with src-*
+        # 2nd condition: it should not exist in subversion.
+        # the if looks a little bit strange, but it's legal bash!
+        if [[ ${src} =~ src-* ]] && \
+           ! existsInSubversion ${svnUrl}/subsystems/${src}/ ${tagPrefix}${osLabelName} ; then
+
+            svnCopy -m ${commitMessageFile} \
+                ${svnUrlOs}/branches/${branchName}/${target}/${src} \
+                ${svnUrl}/subsystems/${src}/${tagPrefix}${osLabelName}
+            trace "CLEANUP svn rm -m cleanup ${svnUrl}/subsystems/${src}/${tagPrefix}${osLabelName}"
+        fi
+    else
+        warning "creating a source tag is disabled in config"
+    fi
+
+    return
+}
+
+## @fn      _createSourceTag()
+#  @brief   create the source tag in BTS_SC_LFS/os/tags/
+#  @param   <none>
+#  @return  <none>
+_createSourceTag() {
+    _mustHaveLfsSourceSubversionUrl
 
     local canCreateSourceTag=$(getConfig LFS_CI_uc_release_can_create_source_tag)
+    local branch=pre_${osLabelName}
 
-    svnUrlOs=$(normalizeSvnUrl ${svnUrlOs})
-    svnUrl=$(normalizeSvnUrl ${svnUrl})
-    mustHaveValue "${svnUrl}" "svnUrl"
-    mustHaveValue "${svnUrlOs}" "svnUrlOs"
+    if [[ ${canCreateSourceTag} ]] ; then
+        svnCopy -m ${commitMessageFile}         \
+            ${svnUrl}/os/branches/${branchName} \
+            ${svnUrl}/os/tags/${osLabelName}
 
+        info "branch ${branchName} no longer required, removing branch"
+        svnRemove -F ${commitMessageFile} ${svnUrlOs}/branches/${branchName} 
+    else
+        warning "creating a source tag is disabled in config"
+    fi
+}
 
-    #                          _                                
-    #                      ___| | ___  __ _ _ __    _   _ _ __  
-    #                     / __| |/ _ \/ _` | '_ \  | | | | '_ \ 
-    #                    | (__| |  __/ (_| | | | | | |_| | |_) |
-    #                     \___|_|\___|\__,_|_| |_|  \__,_| .__/ 
-    #                                                    |_|    
-    # TODO cleanup this part of the code
-    # * it's do long
-    # * it is not clean
-
-    info "using lfs os ${osLabelName}"
-    info "using repos ${svnUrlOs}/branches/${branch}"
-    info "using repos for new tag ${svnUrlOs}/tags/${osLabelName}"
-    info "using repos for package ${svnUrl}/subsystems/"
-
+_createUsedRevisionsFile() {
+    local workspace=$(getWorkspaceName)
+    mustHaveWorkspaceName
     execute mkdir -p ${workspace}/rev/
 
+    local revisionFile=
     for revisionFile in ${workspace}/bld/bld-externalComponents-*/usedRevisions.txt ; do
         [[ -e ${revisionFile} ]] || continue
 
@@ -59,79 +128,45 @@ usecase_LFS_RELEASE_CREATE_SOURCE_TAG() {
         local tagDirectory=$(getConfig LFS_PROD_uc_release_source_tag_directory -t cfg:${cfg})
         info "using tag dir ${tagDirectory} for cfg ${cfg}"
 
-        execute -n sort -u ${revisionFile} ${workspace}/rev/${tagDirectory} > ${workspace}/rev/${tagDirectory}
-
+        execute -l ${workspace}/rev/${tagDirectory} sort -u ${revisionFile} ${workspace}/rev/${tagDirectory} 
         rawDebug ${workspace}/rev/${tagDirectory}
     done
-
-    # check for branch
-    if existsInSubversion ${svnUrlOs}/tags ${osLabelName} ; then
-        error "tag ${osLabelName} already exists"
-        exit 1
-    fi
-    if existsInSubversion ${svnUrlOs}/branches ${branch} ; then
-        info "removing branch ${branch}"
-        svnRemove -m removing_branch_for_production ${svnUrlOs}/branches/${branch} 
-    fi
-    mustExistBranchInSubversion ${svnUrlOs}/branches ${branch}
-
-    for revisionFile in ${workspace}/rev/* ; do
-        [[ -e ${revisionFile} ]] || continue
-
-        local target=$(basename ${revisionFile})
-        local tagPrefix=$(getConfig LFS_PROD_uc_release_source_tag_prefix -t target:${target})
-
-        mustExistBranchInSubversion ${svnUrlOs}/branches/${branch} ${target}
-
-        while read src url rev ; do
-            mustHaveValue "${url}" "svn url"
-            mustHaveValue "${rev}" "svn revision"
-            mustHaveValue "${src}" "src"
-
-            local dirname=
-            local normalizedUrl=$(normalizeSvnUrl ${url})
-
-            case ${src} in 
-                src-*) dirname=${src} ;;
-                *)     dirname=$(dirname ${src})
-                       mustExistBranchInSubversion ${svnUrlOs}/branches/${branch}/${target} ${dirname}
-                ;;
-            esac
-
-            info "copy ${src} to ${branch}/${target}/${dirname}"
-            svnCopy -r ${rev} -m branching_src_${src}_to_${branch} \
-                ${normalizedUrl}                                   \
-                ${svnUrlOs}/branches/${branch}/${target}/${dirname}
-
-            case ${src} in
-                src-*)
-                    if ! existsInSubversion ${svnUrl}/subsystems/${src}/ ${tagPrefix}${osLabelName} ; then
-                        svnCopy -m tag_for_package_src_${src} ${svnUrlOs}/branches/${branch}/${target}/${src} \
-                            ${svnUrl}/subsystems/${src}/${tagPrefix}${osLabelName}
-                        trace "CLEANUP svn rm -m cleanup ${svnUrl}/subsystems/${src}/${tagPrefix}${osLabelName}"
-                    fi
-                ;;
-            esac
-
-        done < ${revisionFile}
-    done
-
-    # check for the branch
-    info "svn repos url is ${svnUrl}/branches/${branch}"
-
-    if [[ ${canCreateSourceTag} ]] ; then
-
-        svnCopy -m create_new_tag_${osLabelName} \
-            ${svnUrl}/os/branches/${branch}      \
-            ${svnUrl}/os/tags/${osLabelName}
-
-        info "branch ${branch} no longer required, removing branch"
-        svnRemove -m removing_branch_for_production ${svnUrlOs}/branches/${branch} 
-    else
-        warning "creating a source tag is disabled in config"
-    fi
-    info "tagging done"
 
     return
 }
 
+_prepareSubversion() {
+    _mustHaveLfsSourceSubversionUrl
+
+    # check for branch
+    if existsInSubversion ${svnUrlOs}/tags ${osLabelName} ; then
+        fatal "tag ${osLabelName} already exists"
+    fi
+
+    if existsInSubversion ${svnUrlOs}/branches ${branchName} ; then
+        info "removing branch ${branchName}"
+        svnRemove -F ${commitMessageFile} ${svnUrlOs}/branches/${branchName} 
+    fi
+    mustExistBranchInSubversion ${svnUrlOs}/branches ${branchName}
+
+    return 0
+}
+
+_mustHaveLfsSourceSubversionUrl() {
+    requiredParameters LFS_PROD_RELEASE_CURRENT_TAG_NAME
+
+    svnUrl=$(getConfig lfsSourceRepos)
+    svnUrl=$(normalizeSvnUrl ${svnUrl})
+    svnUrlOs=${svnUrl}/os
+    mustHaveValue "${svnUrl}" "svnUrl"
+    mustHaveValue "${svnUrlOs}" "svnUrlOs"
+
+    # get os label
+    osLabelName=${LFS_PROD_RELEASE_CURRENT_TAG_NAME}
+    mustHaveValue "${osLabelName}" "no os label name"
+
+    commitMessageFile=$(createTempFile)
+    echo "creating source tag of LFS production ${osLabelName}" > ${commitMessageFile}
+
+    return
+}

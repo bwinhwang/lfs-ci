@@ -43,6 +43,11 @@ usecase_LFS_RELEASE_SHARE_BUILD_ARTIFACTS() {
     return
 }
 
+## @fn      _synchronizeBuildResultsToShare()
+#  @brief   synchronize the build results to /build share
+#  @param   {basename}    base name
+#  @param   {destination} location of the destination
+#  @return  <none>
 _synchronizeBuildResultsToShare() {
     local basename=$1
     mustHaveValue "${basename}" "base name"
@@ -70,4 +75,3 @@ _synchronizeBuildResultsToShare() {
 
     return
 }
-
