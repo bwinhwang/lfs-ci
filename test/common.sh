@@ -11,9 +11,10 @@ export UT_MOCKED_COMMANDS=$(createTempFile)
 #  @return  <none>
 assertExecutedCommands() {
     local expect=$1
+    local got=${2:-${UT_MOCKED_COMMANDS}}
 
-    diff -u ${expect} ${UT_MOCKED_COMMANDS}
-    assertEquals "$(cat ${expect})" "$(cat ${UT_MOCKED_COMMANDS})"
+    diff -u ${expect} ${got}
+    assertEquals "$(cat ${expect})" "$(cat ${got})"
 
     return
 }

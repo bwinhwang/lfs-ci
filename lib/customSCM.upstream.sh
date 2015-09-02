@@ -1,7 +1,6 @@
 #!/bin/bash
 
 
-
 ## @fn      actionCompare()
 #  @brief   this command is called by jenkins custom scm plugin via a
 #           polling trigger. It should decide, if a build is required
@@ -79,12 +78,21 @@ actionCheckout() {
     local upstreamBuildNumber=${UPSTREAM_BUILD:-${TESTED_BUILD_NUMBER}}
 
     if [[ -z ${upstreamProjectName} || -z ${upstreamBuildNumber} ]] ; then
+        info "try to find upstream build..."
         upstreamProjectName=$(getUpstreamProjectName)
         local buildPath=$(getBuildDirectoryOnMaster ${upstreamProjectName} lastSuccessfulBuild)
         upstreamBuildNumber=$(runOnMaster readlink ${buildPath}) 
-        warning "didn't find the upstream build, using ${upstreamProjectName} / ${upstreamBuildNumber}"
-        echo -n "<log/>" >"$CHANGELOG"
-        return            
+        warning "did not get upstream information from environment, using ${upstreamProjectName} / ${upstreamBuildNumber}"
+    fi
+
+    # failsafe: something is wrong. we do not continue with work
+    if [[ -z ${oldUpstreamProjectName} || -z ${oldUpstreamBuildNumber} ]] ; then
+        fatal "did not get upstream information from environment and could not find it out by myself... :("
+    fi
+
+    # failsafe: something is wrong: the upstream jobs names are different.
+    if [[ ${upstreamProjectName} != ${oldUpstreamProjectName} ]] ; then
+        fatal "there is something wrong. The upstream project and the upstream project name from old job is different."
     fi
 
     build=${upstreamBuildNumber}
@@ -93,14 +101,14 @@ actionCheckout() {
         local buildDirectory=$(getBuildDirectoryOnMaster ${upstreamProjectName} ${build})
         # we must only concatenate non-empty logs; empty logs with a
         # single "<log/>" entry will break the concatenation:
-        debug "checking ${upstreamProjectName} / ${build} "
+        info "getting changelog from ${upstreamProjectName} / ${build} "
 
         # TODO: demx2fk3 2014-04-07 use configuration for this
         local tmpChangeLogFile=$(createTempFile)
-        debug "changelog ${buildDirectory}/changelog.xml"
+        trace "changelog ${buildDirectory}/changelog.xml"
         ssh ${server} "test -f ${buildDirectory}/changelog.xml && grep -q logentry ${buildDirectory}/changelog.xml && cat ${buildDirectory}/changelog.xml" > ${tmpChangeLogFile}
         if [[ ! -s ${CHANGELOG} ]] ; then
-            debug "copy ${tmpChangeLogFile} to ${CHANGELOG}"
+            info "copy ${tmpChangeLogFile} to ${CHANGELOG}"
             execute cp -f ${tmpChangeLogFile} ${CHANGELOG}
         else
             debug "using xsltproc to create new ${CHANGELOG}"
@@ -116,8 +124,8 @@ actionCheckout() {
     done
 
     # Fix empty changelogs:
-    if [ ! -s "$CHANGELOG" ] ; then
-        echo -n "<log/>" >"$CHANGELOG"
+    if [ ! -s "${CHANGELOG}" ] ; then
+        echo -n "<log/>" >"${CHANGELOG}"
     fi
 
     return
