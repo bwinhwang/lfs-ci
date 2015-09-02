@@ -62,7 +62,6 @@ mustBePreparedForReleaseTask
 _mustHaveLfsSourceSubversionUrl 
 _createUsedRevisionsFile 
 _prepareSubversion 
-getConfig LFS_PROD_uc_release_source_tag_prefix -t target:fsmr2
 mustExistBranchInSubversion http://svn1/os/branches/ fsmr2
 _copySourceDirectoryToBranch fsmr2 src-bos http://svn/src-bos 1234
 _createSourceTag 
