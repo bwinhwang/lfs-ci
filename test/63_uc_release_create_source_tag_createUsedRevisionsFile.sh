@@ -23,11 +23,8 @@ oneTimeSetUp() {
         export branchName=pre_${osLabelName}
         export commitMessageFile=${WORKSPACE}/commitMessage
     }
-    svnCopy() {
-        mockedCommand "svnCopy $@"
-    }
-    svnRemove() {
-        mockedCommand "svnRemove $@"
+    execute() {
+        mockedCommand "execute $@"
     }
 
     return
@@ -49,6 +46,7 @@ test1() {
 
     local expect=$(createTempFile)
     cat <<EOF > ${expect}
+execute mkdir -p ${WORKSPACE}/workspace/rev/
 EOF
     assertExecutedCommands ${expect}
 
@@ -59,11 +57,13 @@ test2() {
     mkdir -p ${WORKSPACE}/workspace/bld/bld-externalComponents-fcmd
     echo "src-bos http://svne1/os/src-bos 12345" > ${WORKSPACE}/workspace/bld/bld-externalComponents-fcmd/usedRevisions.txt
 
-    # assertTrue "_createUsedRevisionsFile"
-    _createUsedRevisionsFile
+    assertTrue "_createUsedRevisionsFile"
 
     local expect=$(createTempFile)
     cat <<EOF > ${expect}
+execute mkdir -p ${WORKSPACE}/workspace/rev/
+getConfig LFS_PROD_uc_release_source_tag_directory -t cfg:fcmd
+execute -l ${WORKSPACE}/workspace/rev/LFS_PROD_uc_release_source_tag_directory sort -u ${WORKSPACE}/workspace/bld/bld-externalComponents-fcmd/usedRevisions.txt ${WORKSPACE}/workspace/rev/LFS_PROD_uc_release_source_tag_directory
 EOF
     assertExecutedCommands ${expect}
 

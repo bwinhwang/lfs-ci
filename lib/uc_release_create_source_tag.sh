@@ -112,6 +112,10 @@ _createSourceTag() {
     fi
 }
 
+## @fn      _createUsedRevisionsFile()
+#  @brief   create a file of all used revisions from all sub builds
+#  @param   <none>
+#  @return  <none>
 _createUsedRevisionsFile() {
     local workspace=$(getWorkspaceName)
     mustHaveWorkspaceName
@@ -135,6 +139,10 @@ _createUsedRevisionsFile() {
     return
 }
 
+## @fn      _prepareSubversion()
+#  @brief   prepare branches and checks, if everything is ready in svn
+#  @param   <none>
+#  @return  <none>
 _prepareSubversion() {
     _mustHaveLfsSourceSubversionUrl
 
@@ -152,6 +160,10 @@ _prepareSubversion() {
     return 0
 }
 
+## @fn      _mustHaveLfsSourceSubversionUrl()
+#  @brief   ensures, that all required variables are set for the usecase
+#  @param   <none>
+#  @return  <none>
 _mustHaveLfsSourceSubversionUrl() {
     requiredParameters LFS_PROD_RELEASE_CURRENT_TAG_NAME
 
