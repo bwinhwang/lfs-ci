@@ -933,9 +933,9 @@ DELIMITER ;
 -- }}}
 
 -- {{{ get new build name
-DROP FUNCTION IF EXISTS get_new_build_name_ea;
+DROP FUNCTION IF EXISTS get_new_build_name;
 DELIMITER //
-CREATE FUNCTION get_new_build_name_ea(in_branch VARCHAR(32), in_product_name VARCHAR(32), in_label_prefix VARCHAR(32)) RETURNS VARCHAR(64)
+CREATE FUNCTION get_new_build_name(in_branch VARCHAR(32), in_product_name VARCHAR(32), in_label_prefix VARCHAR(32)) RETURNS VARCHAR(64)
 BEGIN
     DECLARE var_suffix VARCHAR(4);
     DECLARE var_prefix VARCHAR(64);
@@ -973,9 +973,9 @@ DELIMITER ;
 -- }}}
 
 -- {{{ get last successful build name
-DROP FUNCTION IF EXISTS get_last_successful_build_name_ea;
+DROP FUNCTION IF EXISTS get_last_successful_build_name;
 DELIMITER //
-CREATE FUNCTION get_last_successful_build_name_ea(in_branch VARCHAR(32), in_product_name VARCHAR(32), in_label_prefix VARCHAR(32)) RETURNS VARCHAR(64)
+CREATE FUNCTION get_last_successful_build_name(in_branch VARCHAR(32), in_product_name VARCHAR(32), in_label_prefix VARCHAR(32)) RETURNS VARCHAR(64)
 BEGIN
     DECLARE var_value VARCHAR(64);
     DECLARE var_regex VARCHAR(64);
@@ -1000,7 +1000,7 @@ BEGIN
     SELECT build_name INTO var_value FROM v_build_events 
         WHERE build_name REGEXP var_regex AND event_state='finished' AND product_name=in_product_name
         AND event_type='subbuild' AND task_name='build' AND build_name NOT REGEXP '_99[0-9][0-9]$'
-        ORDER BY  timestamp DESC LIMIT 1;
+        ORDER BY timestamp DESC LIMIT 1;
 RETURN (var_value);
 END //
 DELIMITER ;
