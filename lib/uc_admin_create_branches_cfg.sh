@@ -11,7 +11,7 @@ usecase_ADMIN_CREATE_BRANCHES_CFG() {
     requiredParameters LFS_CI_ROOT WORKSPACE 
 
     local cfgFile=${WORKSPACE}/branches.cfg
-    execute -n ${LFS_CI_ROOT}/bin/getBranchesInformation > ${cfgFile}
+    execute -n ${LFS_CI_ROOT}/bin/getBranchInformation > ${cfgFile}
     mustExistFile ${cfgFile}
     rawDebug ${cfgFile}
 
