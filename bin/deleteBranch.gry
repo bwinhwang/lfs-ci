@@ -207,13 +207,12 @@ def postChecks() {
     println("\n[INFO] run post checks.")
     for(jobName in deletedJobs) {
         try {
+            remove_job_dir(jobName)
             job = j.getItem(jobName)
             if(job) {
                 println("[INFO] job ${job.name} has not been deleted. Trying to delete again.")
                 job.delete()
             }
-            // It is possible that Jenkins is deleting a job but not the related directory on the filesystem.
-            remove_job_dir(jobName)
         } catch(Exception e) { }
     }
 }
@@ -224,6 +223,7 @@ def deleteJobs() {
         for(p in j.getProjects()) {
             def job_name = p.getName()
             if(deleteJobs && job_name.find("_"+branch+"_") && !job_name.find("LFS_CI_-_LRC_") && !job_name.find("LFS_Prod_-_LRC_") && !job_name.find("PKGPOOL_-_LRC_")) {
+                remove_job_dir(job_name)
                 if(debug) {
                     println("[DEBUG] delete job: $job_name (dry run)")
                 } else {
@@ -235,8 +235,6 @@ def deleteJobs() {
                         println("[WARNING] failed deleting job $job_name.")
                     }
                 }
-                // It is possible that Jenkins is deleting a job but not the related directory on the filesystem.
-                remove_job_dir(job_name)
             } else if(job_name.find("LFS_CI_-_LRC_"+branch+"_-") || job_name.find("LFS_Prod_-_LRC_"+branch+"_-") || job_name.find("PKGPOOL_-_LRC_"+branch+"_-")) {
                 lrc_jobs.add(p)
                 println("[DEBUG] added job $job_name to lrc_jobs list")
@@ -249,6 +247,7 @@ def deleteJobs() {
 def deleteLRCJobs() {
     if(LRC_deleteJobs && lrc_jobs) {
         for(p in lrc_jobs) {
+            remove_job_dir(p.getName())
             if(debug) {
                 println("[DEBUG] delete LRC job: $p.name (dry run)")
             } else {
@@ -260,8 +259,6 @@ def deleteLRCJobs() {
                     println("[WARNING] failed deleting job ${p.name}.")
                 }
             }
-            // It is possible that Jenkins is deleting a job but not the related directory on the filesystem.
-            remove_job_dir(p.getName())
         }
     }
 }
