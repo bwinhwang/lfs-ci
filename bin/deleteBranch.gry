@@ -191,6 +191,18 @@ def deleteRootView() {
     }
 }
 
+def remove_job_dir(jobName) {
+    jobPath = new File("${jenkins_jobs_dir}/${jobName}")
+    if(jobPath.exists()) {
+        if(debug) {
+            println("[DEBUG] removed job dir ${jenkins_jobs_dir}/${jobName} (dry run)")
+        } else {
+            jobPath.deleteDir()
+            println("[INFO] removed job dir ${jenkins_jobs_dir}/${jobName}")
+        }
+    }
+}
+
 def postChecks() {
     println("\n[INFO] run post checks.")
     for(jobName in deletedJobs) {
@@ -200,14 +212,9 @@ def postChecks() {
                 println("[INFO] job ${job.name} has not been deleted. Trying to delete again.")
                 job.delete()
             }
+            // It is possible that Jenkins is deleting a job but not the related directory on the filesystem.
+            remove_job_dir(jobName)
         } catch(Exception e) { }
-        // It is possible that Jenkins is deleting a job but not the related directory
-        // on the filesystem.
-        jobDir = new File("${jenkins_jobs_dir}/${jobName}")
-        if(jobDir.exists()) {
-            println("[INFO] job dir ${jobDir} has not been deleted. I delete it explicitly.")
-            jobDir.deleteDir()
-        }
     }
 }
 
@@ -228,6 +235,8 @@ def deleteJobs() {
                         println("[WARNING] failed deleting job $job_name.")
                     }
                 }
+                // It is possible that Jenkins is deleting a job but not the related directory on the filesystem.
+                remove_job_dir(job_name)
             } else if(job_name.find("LFS_CI_-_LRC_"+branch+"_-") || job_name.find("LFS_Prod_-_LRC_"+branch+"_-") || job_name.find("PKGPOOL_-_LRC_"+branch+"_-")) {
                 lrc_jobs.add(p)
                 println("[DEBUG] added job $job_name to lrc_jobs list")
@@ -251,6 +260,8 @@ def deleteLRCJobs() {
                     println("[WARNING] failed deleting job ${p.name}.")
                 }
             }
+            // It is possible that Jenkins is deleting a job but not the related directory on the filesystem.
+            remove_job_dir(p.getName())
         }
     }
 }
