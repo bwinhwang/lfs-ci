@@ -954,10 +954,10 @@ BEGIN
     SET var_regex = CONCAT('^', CONCAT(var_regex, '$'));
 
     -- 03.09.2015:
-    -- "ORDER BY timestamp" should work know now. An issue was fixed in CI scripting.
+    -- "ORDER BY timestamp" should work now. An issue was fixed in CI scripting.
     SELECT build_name INTO var_build_name FROM v_build_events 
         WHERE build_name REGEXP var_regex AND event_state='finished' AND product_name=in_product_name
-        AND event_type='subbuild' AND task_name='build' AND build_name NOT REGEXP '_99[0-9][0-9]$'
+        AND event_type='build' AND task_name='build' AND build_name NOT REGEXP '_99[0-9][0-9]$'
         ORDER BY timestamp DESC LIMIT 1;
 
     SELECT LPAD(CONVERT(SUBSTRING(var_build_name, -4)+1, CHAR), 4, '0') INTO var_suffix;
@@ -999,7 +999,7 @@ BEGIN
 
     SELECT build_name INTO var_value FROM v_build_events 
         WHERE build_name REGEXP var_regex AND event_state='finished' AND product_name=in_product_name
-        AND event_type='subbuild' AND task_name='build' AND build_name NOT REGEXP '_99[0-9][0-9]$'
+        AND event_type='build' AND task_name='build' AND build_name NOT REGEXP '_99[0-9][0-9]$'
         ORDER BY timestamp DESC LIMIT 1;
 RETURN (var_value);
 END //
