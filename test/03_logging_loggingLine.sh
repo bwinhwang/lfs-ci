@@ -7,6 +7,9 @@ oneTimeSetUp() {
     bc() {
         echo "0.0002"
     }
+    date() {
+        echo $1
+    }
 }
 
 setUp() {
@@ -55,7 +58,6 @@ test5_PREFIX() {
 }
 
 test6_DATE() {
-    export CI_LOGGING_DATEFORMAT="+%Y-%m-%d"
     local expected="$(date +%Y-%m-%d)"
 
     local line="$(_loggingLine INFO DATE 'mes sage')"
@@ -100,6 +102,11 @@ test11_CALLER() {
 #     return
 # }
 
+test13_OTHER() {
+    local line="$(_loggingLine INFO foobar 'mes sage')"
+    assertEquals "foobar" "${line}"
+    return
+}
 source lib/shunit2
 
 exit 0

@@ -192,6 +192,12 @@ message() {
     local logLine=
 
     startLogfile
+    
+    # current defined log formats:
+    # console output:
+    # PREFIX DATE_SHORT SPACE DURATION SPACE TYPE SPACE MESSAGE
+    # short log file:
+    # PREFIX DATE_SHORT SPACE TYPE SPACE MESSAGE --- 
 
     # create and write log message into logfile
     local logLineFile=$(_loggingLine "${logType}"                                                                                  \
@@ -252,37 +258,36 @@ _loggingLine() {
     local logLine=
 
     local prefix=${CI_LOGGING_PREFIX-${CI_LOGGING_PREFIX_HASH["$logType"]}}
-    local dateFormat=${CI_LOGGING_DATEFORMAT-"+%Y-%m-%d %H:%M:%S.%N %Z"}
 
     for template in ${logConfig} ; do
 
         case "${template}" in 
-            LINE)    logLine=$(printf "%s%s" "${logLine}" "-----------------------------------------------------------------") ;;
-            SPACE)   logLine=$(printf "%s "  "${logLine}" ) ;;
-            NEWLINE) logLine=$(printf "%s%s" "${logLine}" "\n" ) ;;
-            TAB)     logLine=$(printf "%s\t" "${logLine}" ) ;;
-            PREFIX)  logLine=$(printf "%s%s" "${logLine}" "${prefix}" ) ;;
-            DATE)    logLine=$(printf "%s%s" "${logLine}" "$(date "${dateFormat}")" ) ;;
-            TYPE)    logLine=$(printf "%s%-10s" "${logLine}" "[${logType}]" );;
+            LINE)       logLine=$(printf "%s%s" "${logLine}" "-----------------------------------------------------------------") ;;
+            SPACE)      logLine=$(printf "%s "  "${logLine}" ) ;;
+            NEWLINE)    logLine=$(printf "%s%s" "${logLine}" "\n" ) ;;
+            TAB)        logLine=$(printf "%s\t" "${logLine}" ) ;;
+            PREFIX)     logLine=$(printf "%s%s" "${logLine}" "${prefix}" ) ;;
+            DATE)       logLine=$(printf "%s%s" "${logLine}" "$(date "+%Y-%m-%d %H:%M:%S")" ) ;;
+            DATE_SHORT) logLine=$(printf "%s%s" "${logLine}" "$(date "+%Y-%m-%d %H:%M:%S.%N %Z")" ) ;;
+            TYPE)       logLine=$(printf "%s%-10s" "${logLine}" "[${logType}]" );;
             DURATION) 
-                     local cur=$(date +%s.%N)
-                     local old=${CI_LOGGING_DURATION_START_DATE}
-                     local dur=$(echo ${cur} - ${old} | bc)
-                     logLine=$(printf "%s[%9.3f]" "${logLine}" ${dur})
+                        local cur=$(date +%s.%N)
+                        local old=${CI_LOGGING_DURATION_START_DATE}
+                        local dur=$(echo ${cur} - ${old} | bc)
+                        logLine=$(printf "%s[%9.3f]" "${logLine}" ${dur})
             ;;
-            NONE)    : ;;
-            MESSAGE) logLine=$(printf "%s%s" "${logLine}" "${logMessage}") ;;
-            CALLER)
-                     local sourceFile=${BASH_SOURCE[2]/${LFS_CI_ROOT}\//}
-                     logLine=$(printf "%s%s - %s - %s"  \
-                         "${logLine}"                   \
-                         "${sourceFile}"                \
-                         "${FUNCNAME[3]}"               \
-                         "${BASH_LINENO[2]}" )
+            NONE)       : ;;
+            MESSAGE)    logLine=$(printf "%s%s" "${logLine}" "${logMessage}") ;;
+            CALLER)     local sourceFile=${BASH_SOURCE[2]/${LFS_CI_ROOT}\//}
+                        logLine=$(printf "%s%s - %s - %s"  \
+                            "${logLine}"                   \
+                            "${sourceFile}"                \
+                            "${FUNCNAME[3]}"               \
+                            "${BASH_LINENO[2]}" )
             ;;
-            STACKTRACE)
-                _stackTrace
-            ;;
+            STACKTRACE) _stackTrace ;;
+            *)          logLine=$(printf "%s%s" "${logLine}" "${template}") ;;
+
         esac
 
     done
