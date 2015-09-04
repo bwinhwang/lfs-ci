@@ -273,3 +273,8 @@ Host maxi-test
     LogLevel                        quiet
     ControlMaster                   auto
     ControlPath                     /tmp/.ssh_control.%h.%p.%r
+
+Host localhost
+    Hostname localhost
+    NoHostAuthenticationForLocalhost yes
+
