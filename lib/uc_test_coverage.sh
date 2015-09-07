@@ -18,7 +18,7 @@ usecase_LFS_TEST_COVERAGE_COLLECT() {
     local branchName=$(getBranchName)
     mustHaveBranchName
 
-    createBasicWorkspace -l ${branchName} src-test src-fsmddal
+    createBasicWorkspace -l ${branchName} src-test
 
     mustHavePreparedWorkspace --no-clean-workspace
     _copyCodecoverageArtifactsToWorkspace
