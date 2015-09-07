@@ -424,7 +424,7 @@ specialBuildPkgpool() {
                    execute patch -p0 -d ${workspace} < ${tmpPatchFile}
             ;;
         esac
-    do
+    done
 
     local buildLogFile=$(createTempFile)
     local gitWorkspace=${WORKSPACE}/src
