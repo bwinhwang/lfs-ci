@@ -4,25 +4,7 @@ source ${LFS_CI_ROOT}/lib/common.sh
 source ${LFS_CI_ROOT}/lib/logging.sh
 source ${LFS_CI_ROOT}/lib/jenkins.sh
 
-info "###############################################################"
-info "# Variables from Jenkins"
-info "# ----------------------"
-info "# BRANCH:              $BRANCH"
-info "# MOVE_SVN:            $MOVE_SVN"
-info "# MOVE_SVN_OS_BRANCH:  $MOVE_SVN_OS_BRANCH"
-info "# DELETE_JOBS:         $DELETE_JOBS"
-info "# DELETE_TEST_RESULTS: $DELETE_TEST_RESULTS"
-info "# MOVE_SHARE:          $MOVE_SHARE"
-info "# LRC_MOVE_SVN:        $LRC_MOVE_SVN"
-info "# LRC_DELETE_JOBS:     $LRC_DELETE_JOBS"
-info "# LRC_MOVE_SHARE:      $LRC_MOVE_SHARE"
-info "# DB_UPDATE:           $DB_UPDATE"
-info "# DEBUG:               $DEBUG"
-info "# COMMENT:             $COMMENT"
-info "###############################################################"
-
 initTempDirectory
-setBuildDescription "${JOB_NAME}" "${BUILD_NUMBER}" "${BRANCH} DEBUG=${DEBUG}"
 
 SVN_REPO="https://svne1.access.nsn.com/isource/svnroot/BTS_SC_LFS"
 SVN_DIR="os"
@@ -32,16 +14,34 @@ BLD_SHARE="/build/home/SC_LFS/releases/bld"
 PKG_SHARE="/build/home/SC_LFS/pkgpool"
 SVN_OPTS="--non-interactive --trust-server-cert"
 ARCHIVE_BASE=$(getConfig ADMIN_archive_share)
-TEST_SERVER="ulegcpmoritz.emea.nsn-net.net"
+VARS_FILE="VARIABLES.TXT"
 DIR_PATTERN=""
+ARCHIVE_RESULT=0
+SVN_RESULT_MOVE_BRANCH_LOCATION=0
+SVN_RESULT_MOVE_BRANCH_LOCATION_FSMR4=0
+SVN_RESULT_MOVE_BRANCH=0
+LRC_SVN_RESULT_MOVE_BRANCH_LOCATION=0
+LRC_SVN_RESULT_MOVE_BRANCH=0
+DB_UPDATE_RESULT=0
 
-
-#######################################################################
-#
-# HELPER FUNCTIONS - maybe move them to common.sh
-#
-#######################################################################
-
+__printParams() {
+    info "###############################################################"
+    info "# Variables from Jenkins"
+    info "# ----------------------"
+    info "# BRANCH:              $BRANCH"
+    info "# MOVE_SVN:            $MOVE_SVN"
+    info "# DELETE_JOBS:         $DELETE_JOBS"
+    info "# DELETE_TEST_RESULTS: $DELETE_TEST_RESULTS"
+    info "# MOVE_SHARE:          $MOVE_SHARE"
+    info "# LRC_MOVE_SVN:        $LRC_MOVE_SVN"
+    info "# LRC_DELETE_JOBS:     $LRC_DELETE_JOBS"
+    info "# LRC_MOVE_SHARE:      $LRC_MOVE_SHARE"
+    info "# DB_UPDATE:           $DB_UPDATE"
+    info "# DEVELOPER_BRANCH:    $DEVELOPER_BRANCH"
+    info "# DEBUG:               $DEBUG"
+    info "# COMMENT:             $COMMENT"
+    info "###############################################################"
+}
 
 ## @fn      getValueFromEclFile()
 #  @brief   get value from ecl for key
@@ -57,7 +57,7 @@ getValueFromEclFile() {
     if [[ $? -eq 0 ]]; then
         local value=$(svn cat ${SVN_OPTS} ${svnEclRepo}/isource/svnroot/BTS_SCM_PS/ECL/${branch}/ECL_BASE/ECL | grep ${key} | cut -d'=' -f2)
     else
-        info using ECL from obsolete
+        info "using ECL from obsolete"
         local value=$(svn cat ${SVN_OPTS} ${svnEclRepo}/isource/svnroot/BTS_SCM_PS/ECL/obsolete/${branch}/ECL_BASE/ECL | grep ${key} | cut -d'=' -f2)
     fi
 
@@ -74,14 +74,21 @@ getValueFromEclFile() {
 
 __checkParams() {
     [[ ! "${BRANCH}" ]] && { error "BRANCH must be specified"; return 1; }
-    echo ${BRANCH} | grep -q -e "^FB[0-9]\{4\}\|^MD[0-9]\{5\}\|^LRC_FB[0-9]\{4\}\|^TST_\|TEST_ERWIN\|TESTERWIN" || { error "$BRANCH is not valid."; return 1; }
+
+    if [[ $DEVELOPMENT_BRANCH == false ]]; then
+        echo ${BRANCH} | grep -q -e "^FB[0-9]\{4\}\|^MD[0-9]\{5\}\|^LRC_FB[0-9]\{4\}\|^TST_\|TEST_ERWIN\|TESTERWIN" || { error "$BRANCH is not valid."; return 1; }
+    fi
+
     if [[ $LRC == true ]]; then
         echo ${BRANCH} | grep -q -e "^LRC_" || { error "LRC: Branch name is not correct."; return 1; }
+    else
+        echo ${BRANCH} | grep -q -e "^LRC_" && { error "FSM: Branch name is not correct."; return 1; }
     fi
+
+    return 0
 }
 
 __checkOthers() {
-    [[ -d ${ARCHIVE_BASE} ]] || { error "archive dir ${ARCHIVE_BASE} does not exist."; return 1; }
     which mysql > /dev/null 2>&1 || { error "mysql not available."; return 1; }
 }
 
@@ -92,6 +99,21 @@ __cmd() {
     else
         info runnig command: $@
         eval $@
+    fi
+    return $?
+}
+
+## @fn     __preparation()
+#  @brief  Create key=value pairs file which is sourced by Jenkins.
+__preparation(){
+    JENKINS_JOBS_DIR=$(getConfig jenkinsMasterServerJobsPath)
+    mustHaveValue "${JENKINS_JOBS_DIR}" "JENKINS_JOBS_DIR"
+    echo JENKINS_JOBS_DIR=${JENKINS_JOBS_DIR} >> ${WORKSPACE}/${VARS_FILE}
+    
+    mustHaveValue "${ARCHIVE_BASE}" "ARCHIVE_BASE"
+    if [[ ! -d ${ARCHIVE_BASE} ]]; then
+        info "create archive share ${ARCHIVE_BASE}"
+        __cmd mkdir -p ${ARCHIVE_BASE}
     fi
 }
 
@@ -112,11 +134,11 @@ __getSubBranch() {
 #
 #######################################################################
 
-## @fn      moveBranchSvn()
-#  @brief   move $BRANCH in svn
+## @fn      moveBranchLocationSvn()
+#  @brief   move locations for $BRANCH in svn
 #  @param   <none>
 #  @return  <none>
-moveBranchSvn() {
+moveBranchLocationSvn() {
     info "--------------------------------------------------------"
     info "SVN: move locations and FSMr4 in SVN"
     info "--------------------------------------------------------"
@@ -124,19 +146,21 @@ moveBranchSvn() {
     svn ls ${SVN_OPTS} ${SVN_REPO}/${SVN_DIR}/${SVN_BLD_DIR}/locations-${BRANCH} 2> /dev/null && {
         __cmd svn ${SVN_OPTS} move -m \"moved locations-${BRANCH} to obsolete\" \
             ${SVN_REPO}/${SVN_DIR}/${SVN_BLD_DIR}/locations-${BRANCH} ${SVN_REPO}/${SVN_DIR}/${SVN_BLD_DIR}/obsolete;
+        SVN_RESULT_MOVE_BRANCH_LOCATION=$?;
     }
 
     svn ls ${SVN_OPTS} ${SVN_REPO}/${SVN_DIR}/${SVN_BLD_DIR}/locations-${BRANCH}_FSMR4 2> /dev/null && {
         __cmd svn ${SVN_OPTS} move -m \"moved locations-${BRANCH} FSMR4 to obsolete\" \
             ${SVN_REPO}/${SVN_DIR}/${SVN_BLD_DIR}/locations-${BRANCH}_FSMR4 ${SVN_REPO}/${SVN_DIR}/${SVN_BLD_DIR}/obsolete;
+        SVN_RESULT_MOVE_BRANCH_LOCATION_FSMR4=$?;
     }
 }
 
-## @fn      moveBranchSvnOS()
-#  @brief   move os/$BRANCH in svn
+## @fn      moveBranchSvn()
+#  @brief   move the $BRANCH in svn
 #  @param   <none>
 #  @return  <none>
-moveBranchSvnOS() {
+moveBranchSvn() {
     info "--------------------------------------------------------"
     info "SVN: move os/${BRANCH} in SVN"
     info "--------------------------------------------------------"
@@ -144,6 +168,7 @@ moveBranchSvnOS() {
     svn ls ${SVN_OPTS} ${SVN_REPO}/${SVN_DIR}/${BRANCH} 2> /dev/null && {
         __cmd svn ${SVN_OPTS} move -m \"moved ${BRANCH} to obsolete\" \
             ${SVN_REPO}/${SVN_DIR}/${BRANCH} ${SVN_REPO}/${SVN_DIR}/obsolete;
+        SVN_RESULT_MOVE_BRANCH=$?;
     }
 }
 
@@ -160,17 +185,19 @@ LRC_moveBranchSvn() {
     svn ${SVN_OPTS} ls ${SVN_REPO}/${SVN_DIR}/${SVN_BLD_DIR}/locations-${branch} 2> /dev/null && {
         __cmd svn ${SVN_OPTS} move -m \"moved locations-${branch} to obsolete\" \
             ${SVN_REPO}/${SVN_DIR}/${SVN_BLD_DIR}/locations-${branch} ${SVN_REPO}/${SVN_DIR}/${SVN_BLD_DIR}/obsolete;
+        LRC_SVN_RESULT_MOVE_BRANCH_LOCATION=$?;
     }
 
     svn ls ${SVN_OPTS} ${SVN_REPO}/${SVN_DIR}/${branch} 2> /dev/null && {
         __cmd svn ${SVN_OPTS} move -m \"moved ${branch} to obsolete\" \
             ${SVN_REPO}/${SVN_DIR}/${branch} ${SVN_REPO}/${SVN_DIR}/obsolete;
+        LRC_SVN_RESULT_MOVE_BRANCH=$?;
     }
 
     return 0
 }
 
-getDirPattern() {
+_getDirPattern() {
     local branch=$1
     local dbName=$(getConfig MYSQL_db_name)
     local dbUser=$(getConfig MYSQL_db_username)
@@ -178,12 +205,8 @@ getDirPattern() {
     local dbHost=$(getConfig MYSQL_db_hostname)
     local dbPort=$(getConfig MYSQL_db_port)
     local sqlString="SELECT release_name_regex FROM branches WHERE branch_name='${branch}'"
-    local dirPattern=$(echo "${sqlString}" | mysql -N -u ${dbUser} --password=${dbPass} -h ${dbHost} -P ${dbPort} -D ${dbName})
-
-    if [[ $? -ne 0 || ! ${dirPattern} ]]; then
-        error "mysql command failed: ${sqlString}"
-        exit 1
-    fi
+    local dirPattern=$(echo "${sqlString}" | mysql -N -u ${dbUser} --password=${dbPass} -h ${dbHost} -P ${dbPort} -D ${dbName} 2> /dev/null)
+    mustHaveValue "${dirPattern}" "dirPattern"
 
     dirPattern=$(echo ${dirPattern} | cut -d'(' -f1)
     DIR_PATTERN="${dirPattern}*"
@@ -194,27 +217,46 @@ getDirPattern() {
     fi 
 }
 
-## @fn      archiveBranchShare()
-#  @brief   archive data for BRANCH on share
-#  @param   <none>
+## @fn      archiveShare()
+#  @brief   archive (move) data on share
+#  @param   {share}    the share directory to be archived
+#  @param   {findDepth}    value for -maxdepth parameter of find. Possible values are 1 or 2. Defaults to 2
 #  @return  <none>
-archiveBranchShare() {
+archiveShare() {
     info "--------------------------------------------------------"
-    info "SHARE: archiveBranchShare()"
+    info "ARCHIVE: archiving share ${1}"
     info "--------------------------------------------------------"
 
-    getDirPattern ${BRANCH}
+    _getDirPattern ${BRANCH}
 
+    local shareToArchive=$1
+    local findDepth=2
+    if [[ ! -z $2 ]]; then
+        local re='^[12]$'
+        [[ ! $2 =~ $re ]] && { error "\$2 must be 1 or 2"; exit 1; }
+        findDepth=${2}
+    fi
     local dirPattern=$DIR_PATTERN
-    local dirsToDelete=$(find ${SHARE} -maxdepth 2 -type d -name "${dirPattern}")
 
-    info "archive ${SHARE}"
+    if [[ ! -d ${shareToArchive} ]]; then
+        ARCHIVE_RESULT=1
+        return 0
+    fi
+
+    local dirsToDelete=$(find ${shareToArchive} -maxdepth ${findDepth} -type d -name "${dirPattern}")
+    info "archive ${shareToArchive}"
     info "directory pattern: ${dirPattern}"
-    for DIR in $dirsToDelete
+    for DIR in ${dirsToDelete}
     do
         local archiveDir=$(echo $DIR | sed 's/\//_/g')
         __cmd mv ${DIR} ${ARCHIVE_BASE}/${archiveDir}
+        local retVal=$?
+        [[ ${retVal} -ne 0 && ${ARCHIVE_RESULT} -eq 0 ]] && ARCHIVE_RESULT=${retVal}
     done
+}
+
+archiveBranchShare() {
+    archiveShare ${SHARE}
 }
 
 ## @fn      archiveBranchBldShare()
@@ -222,22 +264,7 @@ archiveBranchShare() {
 #  @param   <none>
 #  @return  <none>
 archiveBranchBldShare() {
-    info "--------------------------------------------------------"
-    info "SHARE: archiveBranchBldShare()"
-    info "--------------------------------------------------------"
-
-    getDirPattern ${BRANCH}
-
-    local dirPattern=$DIR_PATTERN
-    local dirsToDelete=$(find ${BLD_SHARE} -maxdepth 2 -type d -name "${dirPattern}")
-
-    info "archive ${BLD_SHARE}"
-    info "directory pattern: ${dirPattern}"
-    for DIR in $dirsToDelete
-    do
-        local archiveDir=$(echo $DIR | sed 's/\//_/g')
-        __cmd mv ${DIR} ${ARCHIVE_BASE}/${archiveDir}
-    done
+    archiveShare ${BLD_SHARE}
 }
 
 ## @fn      archiveBranchPkgShare()
@@ -245,22 +272,10 @@ archiveBranchBldShare() {
 #  @param   <none>
 #  @return  <none>
 archiveBranchPkgShare() {
-    info "--------------------------------------------------------"
-    info "SHARE: archiveBranchPkgShare()"
-    info "--------------------------------------------------------"
 
-    getDirPattern ${BRANCH}
+    # Not yet used.
 
-    local dirPattern=$DIR_PATTERN
-    local dirsToDelete=$(find ${PKG_SHARE} -maxdepth 1 -type d -name "${dirPattern}")
-
-    info "archive ${PKG_SHARE}"
-    info "directory pattern: ${dirPattern}"
-    for DIR in $dirsToDelete
-    do
-        local archiveDir=$(echo $DIR | sed 's/\//_/g')
-        __cmd mv ${DIR} ${ARCHIVE_BASE}/${archiveDir}
-    done
+    archiveShare ${PKG_SHARE} 1
 }
 
 ## @fn      LRC_archiveBranchShare()
@@ -268,22 +283,7 @@ archiveBranchPkgShare() {
 #  @param   <none>
 #  @return  <none>
 LRC_archiveBranchShare() {
-    info "--------------------------------------------------------"
-    info "SHARE: LRC_archiveBranchShare()"
-    info "--------------------------------------------------------"
-
-    getDirPattern ${BRANCH}
-
-    local dirPattern=$DIR_PATTERN
-    local dirsToDelete=$(find ${SHARE} -maxdepth 2 -type d -name "${dirPattern}")
-
-    info "archive ${SHARE} LRC"
-    info "directory pattern: ${dirPattern}"
-    for DIR in $dirsToDelete
-    do
-        local archiveDir=$(echo $DIR | sed 's/\//_/g')
-        __cmd mv ${DIR} ${ARCHIVE_BASE}/${archiveDir}
-    done
+    archiveShare ${SHARE}
 }
 
 ## @fn      LRC_archiveBranchBldShare()
@@ -291,22 +291,7 @@ LRC_archiveBranchShare() {
 #  @param   <none>
 #  @return  <none>
 LRC_archiveBranchBldShare() {
-    info "--------------------------------------------------------"
-    info "SHARE: LRC_archiveBranchBldShare()"
-    info "--------------------------------------------------------"
-
-    getDirPattern ${BRANCH}
-
-    local dirPattern=$DIR_PATTERN
-    local dirsToDelete=$(find ${BLD_SHARE} -maxdepth 2 -type d -name "${dirPattern}")
-
-    info "archive ${BLD_SHARE} LRC"
-    info "directory pattern: ${dirPattern}"
-    for DIR in $dirsToDelete
-    do
-        local archiveDir=$(echo $DIR | sed 's/\//_/g')
-        __cmd mv ${DIR} ${ARCHIVE_BASE}/${archiveDir}
-    done
+    archiveShare ${BLD_SHARE}
 }
 
 deleteTestResults() {
@@ -314,7 +299,7 @@ deleteTestResults() {
     info "TESTS: deleteTestResults()"
     info "--------------------------------------------------------"
 
-    getDirPattern ${BRANCH}
+    _getDirPattern ${BRANCH}
 
     local subBranch=$(__getSubBranch ${BRANCH})
     local dirPattern=$DIR_PATTERN
@@ -326,7 +311,18 @@ deleteTestResults() {
         branchType=$(getBranchPart ${BRANCH} TYPE)
         echo ${dirPattern} | grep -q ${branchType}_PS_LFS_OS_${yyyy}_${mm} || { echo ${branchType}_PS_LFS_OS_${yyyy}_${mm} is not in directory pattern ${dirPattern}; exit 1; }
     fi
-    __cmd ssh ${TEST_SERVER} rm -rf /lvol2/production_jenkins/test-repos/src-fsmtest/${dirPattern}
+
+    local testServer=$(getConfig LFS_CI_testresults_host)
+    local testResultsDir=$(getConfig LFS_CI_testresults_dir)
+
+    mustHaveValue "${testServer}" "testServer"
+    mustHaveValue "${testResultsDir}" "testResultsDir"
+
+    if [[ ! ${testResultsDir} == */ ]]; then
+        testResultsDir=${testResultsDir}/
+    fi
+
+    __cmd ssh ${testServer} rm -rf ${testResultsDir}${dirPattern}
 }
 
 ## @fn      dbUpdate()
@@ -352,7 +348,8 @@ dbUpdate() {
         echo [DEBUG] $sqlString
     else
         info "updating DB: $sqlString"
-        echo $sqlString | mysql -u ${dbUser} --password=${dbPass} -h ${dbHost} -P ${dbPort} -D ${dbName}
+        echo $sqlString | mysql -u ${dbUser} --password=${dbPass} -h ${dbHost} -P ${dbPort} -D ${dbName} 2> /dev/null
+        DB_UPDATE_RESULT=$?
     fi
 }
 
@@ -363,20 +360,50 @@ dbUpdate() {
 
 main() {
 
+    setBuildDescription "${JOB_NAME}" "${BUILD_NUMBER}" "${BRANCH} DEBUG=${DEBUG}"
+
+    __printParams
     __checkParams || { error "Params check failed."; exit 1; }
     __checkOthers || { error "Checking some stuff failed."; exit 1; }
+    __preparation
 
-    [[ ${MOVE_SVN_OS_BRANCH} == true ]] && moveBranchSvnOS || info "Not moving os/$BRANCH in repo"
     [[ ${DB_UPDATE} == true ]] && dbUpdate || info "Not updating DB."
 
     if [[ $LRC == true ]]; then
         [[ ${LRC_MOVE_SVN} == true ]] && LRC_moveBranchSvn
         [[ ${LRC_MOVE_SHARE} == true ]] && { LRC_archiveBranchShare; LRC_archiveBranchBldShare; }
     else
-        [[ ${MOVE_SVN} == true ]] && moveBranchSvn
+        [[ ${MOVE_SVN} == true ]] && { moveBranchLocationSvn; moveBranchSvn; }
         [[ ${MOVE_SHARE} == true ]] && { archiveBranchShare; archiveBranchBldShare; }
         [[ ${DELETE_TEST_RESULTS} == true ]] && deleteTestResults
     fi
+
+    local result=$((${ARCHIVE_RESULT}+\
+                    ${SVN_RESULT_MOVE_BRANCH_LOCATION}+\
+                    ${SVN_RESULT_MOVE_BRANCH_LOCATION_FSMR4}+\
+                    ${SVN_RESULT_MOVE_BRANCH}+\
+                    ${LRC_SVN_RESULT_MOVE_BRANCH_LOCATION}+\
+                    ${LRC_SVN_RESULT_MOVE_BRANCH}+\
+                    ${DB_UPDATE_RESULT}))
+
+    if [[ ${result} -ne 0 ]]; then
+        echo ""
+        error "One of the following failed:"
+        info "ARCHIVE_RESULT: ${ARCHIVE_RESULT}"
+        info "SVN_RESULT_MOVE_BRANCH_LOCATION: ${SVN_RESULT_MOVE_BRANCH_LOCATION}"
+        info "SVN_RESULT_MOVE_BRANCH_LOCATION_FSMR4: ${SVN_RESULT_MOVE_BRANCH_LOCATION_FSMR4}"
+        info "SVN_RESULT_MOVE_BRANCH: ${SVN_RESULT_MOVE_BRANCH}"
+        info "LRC_SVN_RESULT_MOVE_BRANCH_LOCATION: ${LRC_SVN_RESULT_MOVE_BRANCH_LOCATION}"
+        info "LRC_SVN_RESULT_MOVE_BRANCH: ${LRC_SVN_RESULT_MOVE_BRANCH}"
+        info "DB_UPDATE_RESULT: ${DB_UPDATE_RESULT}"
+        echo ""
+        setBuildResultUnstable
+    fi
+
+    return 0
 }
 
-main
+if [[ ! $TESTING ]]; then
+    main
+fi
+

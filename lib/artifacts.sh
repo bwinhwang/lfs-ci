@@ -12,6 +12,10 @@
 
 LFS_CI_SOURCE_artifacts='$Id$'
 
+[[ -z ${LFS_CI_SOURCE_config}   ]] && source ${LFS_CI_ROOT}/lib/config.sh
+[[ -z ${LFS_CI_SOURCE_logging}  ]] && source ${LFS_CI_ROOT}/lib/logging.sh
+[[ -z ${LFS_CI_SOURCE_commands} ]] && source ${LFS_CI_ROOT}/lib/commands.sh
+
 ## @fn      createArtifactArchive()
 #  @brief   create the build artifacts archives and copy them to the share on the master server
 #  @details the build artifacts are not handled by jenkins. we are doing it by ourself, because
@@ -110,6 +114,7 @@ copyAndExtractBuildArtifactsFromProject() {
 
     execute mkdir -p ${workspace}/bld/
 
+    local file=
     for file in ${files}
     do
         local base=$(basename ${file} .tar.gz)
@@ -122,7 +127,8 @@ copyAndExtractBuildArtifactsFromProject() {
             fi
         fi
 
-        if [[ -d ${workspace}/bld/${base} ]] ; then
+        local canOverwrite=$(getConfig LFS_CI_artifacts_can_overwrite_artifacts_from_other_project)
+        if [[ -z ${canOverwrite} && -d ${workspace}/bld/${base} ]] ; then
             trace "skipping ${file}, 'cause it's already transfered from another project"
             continue
         fi
@@ -169,7 +175,7 @@ copyArtifactsToWorkspace() {
     mustHaveWorkspaceName
 
     execute -n -r 10 ssh ${server} \
-            /ps/lfs/ci/bin/getDownStreamProjects -j ${jobName}     \
+            ${LFS_CI_ROOT}/bin/getDownStreamProjects -j ${jobName}     \
                                                  -b ${buildNumber} \
                                                  -h ${serverPath} > ${downStreamprojectsFile}
 
@@ -225,6 +231,31 @@ copyFileToArtifactDirectory() {
     execute -r 10 rsync --archive --verbose --rsh=ssh -P  \
         ${fileName}                                 \
         ${serverName}:${artifactsPathOnShare}/save
+
+    return
+}
+
+## @fn      copyFileToUserContentDirectory()
+#  @brief   copy a file to the sonar subdir in userContent directory
+#  @param   {srcFilePathAndName}   path and name of the file
+#  @param   {destFilePath}         sub-path of file under userContent
+#  @return  <none>
+copyFileToUserContentDirectory() {
+    local srcFilePathAndName=$1
+    local destFilePath=$2
+
+    local serverName=$(getConfig jenkinsMasterServerHostName)
+    mustHaveValue ${serverName} "server name"
+
+    local jenkinsMasterServerPath=$(getConfig jenkinsMasterServerPath)
+    mustHaveValue ${jenkinsMasterServerPath} "jenkins master serverpath"
+    local pathOnServer=${jenkinsMasterServerPath}/userContent/${destFilePath}
+    local fileName=$(basename ${srcFilePathAndName})
+
+    execute -r 10 ssh ${serverName} mkdir -p ${pathOnServer}
+
+    # sometimes, the remote host closes connection, so we try to retry...
+    execute -r 10 rsync --archive --verbose --rsh=ssh -P ${srcFilePathAndName} ${serverName}:${pathOnServer}/${fileName}
 
     return
 }

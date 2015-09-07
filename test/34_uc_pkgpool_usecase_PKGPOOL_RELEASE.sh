@@ -56,12 +56,24 @@ oneTimeSetUp() {
         mockedCommand "copyFileFromBuildDirectoryToWorkspace $@"
         echo abc >  ${WORKSPACE}/$3
     }
+    getBuildDirectoryOnMaster() {
+        mockedCommand "getBuildDirectoryOnMaster $@"
+        echo /path/to/jenkins/jobname/buildnumber
+    }
+    getConfig() {
+        case $1 in 
+            LFS_CI_uc_release_can_create_release_in_wft) echo 1 ;;
+            *) echo $1 ;;
+        esac
+            
+    }
 
     return
 }
 
 setUp() {
     cp -f /dev/null ${UT_MOCKED_COMMANDS}
+    export LFS_CI_CONFIG_FILE=${LFS_CI_ROOT}/etc/lfs-ci.cfg
     return
 }
 
@@ -82,17 +94,18 @@ test1() {
     local expect=$(createTempFile)
 # createReleaseInWorkflowTool LABEL ${WORKSPACE}/workspace/releasenote.xml
 # uploadToWorkflowTool LABEL ${WORKSPACE}/workspace/releasenote.xml
-# execute ${LFS_CI_ROOT}/bin/sendReleaseNote -r ${WORKSPACE}/workspace/releasenote.txt -t LABEL -f ${LFS_CI_ROOT}/etc/file.cfg
+# execute ${LFS_CI_ROOT}/bin/sendReleaseNote -r ${WORKSPACE}/workspace/releasenote.txt -t LABEL -f ${LFS_CI_ROOT}/etc/lfs-ci.cfg
     cat <<EOF > ${expect}
 mustHaveCleanWorkspace
 copyArtifactsToWorkspace PKGPOOL_CI_-_trunk_-_Test 1234 pkgpool
-runOnMaster test -e /var/fpwork/psulm/lfs-jenkins/home/jobs/PKGPOOL_PROD_-_trunk_-_Release/builds/lastSuccessfulBuild/forReleaseNote.txt
+getBuildDirectoryOnMaster PKGPOOL_PROD_-_trunk_-_Release lastSuccessfulBuild
+runOnMaster test -e /path/to/jenkins/jobname/buildnumber/forReleaseNote.txt
 copyFileFromBuildDirectoryToWorkspace PKGPOOL_PROD_-_trunk_-_Release lastSuccessfulBuild forReleaseNote.txt
 execute mv ${WORKSPACE}/forReleaseNote.txt ${WORKSPACE}/workspace/forReleaseNote.txt.old
 copyFileFromBuildDirectoryToWorkspace PKGPOOL_PROD_-_trunk_-_Release lastSuccessfulBuild gitrevision
 execute mv ${WORKSPACE}/gitrevision ${WORKSPACE}/workspace/gitrevision.old
 setBuildDescription PKGPOOL_PROD_-_trunk_-_Release 1234 LABEL
-execute -n ${LFS_CI_ROOT}/bin/getReleaseNoteXML -t LABEL -o OLD_LABEL -f ${LFS_CI_ROOT}/etc/file.cfg
+execute -n ${LFS_CI_ROOT}/bin/getReleaseNoteXML -t LABEL -o OLD_LABEL -f ${LFS_CI_ROOT}/etc/lfs-ci.cfg
 mustBeValidXmlReleaseNote ${WORKSPACE}/workspace/releasenote.xml
 execute touch ${WORKSPACE}/workspace/releasenote.txt
 execute sed -i -e s/PS_LFS_PKG = //g ${WORKSPACE}/workspace/forReleaseNote.txt.old
@@ -104,7 +117,7 @@ copyFileToArtifactDirectory ${WORKSPACE}/workspace/releasenote.xml
 copyFileToArtifactDirectory ${WORKSPACE}/workspace/releasenote.txt
 copyFileFromWorkspaceToBuildDirectory ${JOB_NAME} ${BUILD_NUMBER} ${WORKSPACE}/workspace/bld/bld-pkgpool-release/forReleaseNote.txt
 copyFileFromWorkspaceToBuildDirectory ${JOB_NAME} ${BUILD_NUMBER} ${WORKSPACE}/workspace/gitrevision
-linkFileToArtifactsDirectory /build/home/psulm/LFS_internal/artifacts/PKGPOOL_PROD_-_trunk_-_Release/1234
+linkFileToArtifactsDirectory artifactesShare/PKGPOOL_PROD_-_trunk_-_Release/1234
 EOF
     assertExecutedCommands ${expect}
 

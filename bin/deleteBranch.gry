@@ -4,8 +4,11 @@
  *
  * 1. Take the parameters from the Jenkins job.
  * 2. Check which jobs shall be deleted.
- * 3. If no jobs left also delete the view of the branch.
+ * 3. Delete the jobs.
+ * 4. If no branch left also delete the YYMM root-view.
  */
+
+// TODO: Delete branches in view "DEV"
 
 println("\n\nRunning script deleteBranch.gry\n")
 
@@ -33,6 +36,9 @@ lrc_jobs = []
 
 remaining_jobs = []
 
+dev_branch = false
+
+deletedJobs = []
 
 parameters.each {
     if(it.name == "BRANCH") {
@@ -54,6 +60,10 @@ parameters.each {
         LRC_deleteJobs = it.value
         println("[INFO] got parameter LRC_DELETE_JOBS: $LRC_deleteJobs")
     }
+    if(it.name == "DEVELOPER_BRANCH") {
+        dev_branch = it.value
+        println("[INFO] got parameter DEVELOPER_BRANCH: $dev_branch")
+    }
     if(it.name == "DEBUG") {
         debug = it.value
         println("[INFO] got parameter DEBUG: $debug")
@@ -65,20 +75,60 @@ if(!deleteJobs && !LRC_deleteJobs) {
     return 0
 }
 
+jenkins_jobs_dir = build.getEnvironment(listener).get("JENKINS_JOBS_DIR")
+
 ///////////////////////////////////////////////////////////////////////
-// Delete
+//
+// Here we go
+//
 ///////////////////////////////////////////////////////////////////////
 
-// Delete the branchs view within the SCM view.
+/**
+ * Return name of the root view (eg 1405).
+ */
+def getRootView() {
+    def root_view = branch[2..-1]
+
+    if(branch[0..1] == "MD") {
+        root_view = branch[3..-1]
+    }
+
+    if(dev_branch) {
+        root_view = "DEV"
+    }
+
+    if(root_view.find("_")) {
+        root_view = root_view.split("_")[0]
+    }
+
+    return root_view
+}
+
+/**
+ * Return the name of the branch view (eg FB1405).
+ */
+def getBranchView() {
+    def branch_view = branch
+    if(LRC_deleteJobs) {
+        branch_view = "LRC_" + branch
+    }
+    return branch_view
+}
+
+/**
+ * Delete the branch view within the SCM view.
+ * LRC only.
+ */
 def deleteScmView() {
     def scm_view = "SCM"
-    def branch_view = branch
+    def branch_view = getBranchView()
     def scm_view_obj = null
     def branch_view_obj = null
 
     if(LRC_deleteJobs) {
         scm_view = "SCM_LRC"
-        branch_view = "LRC_" + branch
+    } else {
+        return
     }
 
     scm_view_obj = j.getView(scm_view)
@@ -92,73 +142,123 @@ def deleteScmView() {
     }
 }
 
-def deleteView() {
-    def branch_view = branch[2..-1]
-
-    if(branch[0..1] == "MD") {
-        branch_view = branch[3..-1]
-    }
-
+/**
+ * Delete the branch view eg. 1405/FB1405.
+ * Continue if branch view does not exist.
+ */
+def deleteBranchView() {
+    def root_view = getRootView()
+    def branch_view = getBranchView()
     if(debug) {
-        println("[DEBUG] delete view: $branch_view (dry run)")
+        println("[DEBUG] delete branch view: $root_view/$branch_view (dry run)")
     } else {
         try {
-            vo = j.getView(branch_view).getOwner()
-            vo.deleteView(vo.getView(branch_view))
-            println("[INFO] deleted view: $branch_view")
-        } catch(e) {}
+            rootViewObj = j.getView(root_view)
+            branch_view_obj = rootViewObj.getView(branch_view)
+            rootViewObj.deleteView(branch_view_obj)
+            println("[INFO] deleted branch view: $root_view/$branch_view")
+        } catch(e) {
+            println("[WARNING] deleteBranchView() - a view does not exist: " + e)
+        }
+    }
+}
+
+/**
+ * Delete the root view eg. 1405.
+ * Continue if root view does not exist.
+ */
+def deleteRootView() {
+    try {
+        def root_view = getRootView()
+        root_view_obj = j.getView(root_view)
+        if(debug) {
+            if(!root_view_obj.getAllItems()) {
+                println("[DEBUG] delete root view: $root_view (dry run)")
+            } else {
+                println("[DEBUG] Not deleting root view $root_view. There are still related jobs.")
+            }
+        } else {
+            if(!root_view_obj.getAllItems()) {
+                vo = root_view_obj.getOwner()
+                vo.deleteView(root_view_obj)
+                println("[INFO] deleted root view: $root_view")
+            } else {
+                println("[INFO] Not deleting root view $root_view. There are still jobs from another branch.")
+            }
+        }
+    } catch(e) {
+        println("[WARNING] deleteRootView() - root view does not exist: " + e)
+    }
+}
+
+def postChecks() {
+    println("\n[INFO] run post checks.")
+    for(jobName in deletedJobs) {
+        try {
+            job = j.getItem(jobName)
+            if(job) {
+                println("[INFO] job ${job.name} has not been deleted. Trying to delete again.")
+                job.delete()
+            }
+        } catch(Exception e) { }
+        // It is possible that Jenkins is deleting a job but not the related directory
+        // on the filesystem.
+        jobDir = new File("${jenkins_jobs_dir}/${jobName}")
+        if(jobDir.exists()) {
+            println("[INFO] job dir ${jobDir} has not been deleted. I delete it explicitly.")
+            jobDir.deleteDir()
+        }
     }
 }
 
 // Delete none LRC jobs and collect LRC jobs in a list.
-if(deleteJobs || LRC_deleteJobs) {
-    def other_job_names = null
-    if(branch[0..1] == "FB") {
-        other_job_names = branch.replaceFirst("FB", "MD1")
-    } else if(branch[0..2] == "MD1") {
-        other_job_names = branch.replaceFirst("MD1", "FB")
-    }
-
-    for(p in jenkins.model.Jenkins.theInstance.getProjects()) {
-        job_name = p.getName()
-        if(deleteJobs && job_name.find("_"+branch+"_") && !job_name.find("LFS_CI_-_LRC_") && !job_name.find("LFS_Prod_-_LRC_") && !job_name.find("PKGPOOL_-_LRC_")) {
-            if(debug) {
-                println("[DEBUG] delete job: $p.name (dry run)")
-            } else {
-                p.delete()
-                println("[INFO] deleted job: $p.name")
+def deleteJobs() {
+    if(deleteJobs || LRC_deleteJobs) {
+        for(p in j.getProjects()) {
+            def job_name = p.getName()
+            if(deleteJobs && job_name.find("_"+branch+"_") && !job_name.find("LFS_CI_-_LRC_") && !job_name.find("LFS_Prod_-_LRC_") && !job_name.find("PKGPOOL_-_LRC_")) {
+                if(debug) {
+                    println("[DEBUG] delete job: $job_name (dry run)")
+                } else {
+                    deletedJobs.add(job_name)
+                    try {
+                        p.delete()
+                        println("[INFO] deleted job: $job_name")
+                    } catch(e) {
+                        println("[WARNING] failed deleting job $job_name.")
+                    }
+                }
+            } else if(job_name.find("LFS_CI_-_LRC_"+branch+"_-") || job_name.find("LFS_Prod_-_LRC_"+branch+"_-") || job_name.find("PKGPOOL_-_LRC_"+branch+"_-")) {
+                lrc_jobs.add(p)
+                println("[DEBUG] added job $job_name to lrc_jobs list")
             }
-        } else if(job_name.find("LFS_CI_-_LRC_"+branch+"_-") || job_name.find("LFS_Prod_-_LRC_"+branch+"_-") || job_name.find("PKGPOOL_-_LRC_"+branch+"_-")) {
-            lrc_jobs.add(p)
-            println("[DEBUG] added job $p.name to lrc_jobs list")
-        } else if(other_job_names && job_name.find(other_job_names)) {
-            remaining_jobs.add(p)
-            println("[DEBUG] added job $p.name to remaining list")
         }
     }
-
-    deleteScmView()
 }
 
 // Delete LRC jobs.
-if(LRC_deleteJobs && lrc_jobs) {
-    for(p in lrc_jobs) {
-        if(debug) {
-            println("[DEBUG] delete LRC job: $p.name (dry run)")
-        } else {
-            p.delete()
-            println("[INFO] deleted LRC job: $p.name")
+def deleteLRCJobs() {
+    if(LRC_deleteJobs && lrc_jobs) {
+        for(p in lrc_jobs) {
+            if(debug) {
+                println("[DEBUG] delete LRC job: $p.name (dry run)")
+            } else {
+                deletedJobs.add(p.getName())
+                try {
+                    p.delete()
+                    println("[INFO] deleted LRC job: $p.name")
+                } catch(e) {
+                    println("[WARNING] failed deleting job ${p.name}.")
+                }
+            }
         }
     }
-    deleteScmView()
 }
 
-println("[DEBUG] lrc jobs: " + lrc_jobs)
-println("[DEBUG] remaining jobs: " + remaining_jobs)
-if(!lrc_jobs && !remaining_jobs) {
-    deleteView()
-} else if(LRC_deleteJobs && !remaining_jobs) {
-    deleteView()
-} else {
-    println("[INFO] Not deleting list view sections. There are still jobs from another branch.")
-}
+deleteJobs()
+deleteLRCJobs()
+deleteScmView()
+deleteBranchView()
+deleteRootView()
+println("\n[INFO] finished deleting branch. Starting post checks.")
+postChecks()

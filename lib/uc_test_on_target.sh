@@ -2,13 +2,17 @@
 ## @file  uc_test_on_target.sh
 #  @brief the test on target usecase
 
-[[ -z ${LFS_CI_SOURCE_artifacts}  ]] && source ${LFS_CI_ROOT}/lib/artifacts.sh
-[[ -z ${LFS_CI_SOURCE_jenkins}    ]] && source ${LFS_CI_ROOT}/lib/jenkins.sh
-[[ -z ${LFS_CI_SOURCE_makingtest} ]] && source ${LFS_CI_ROOT}/lib/makingtest.sh
-[[ -z ${LFS_CI_SOURCE_database}   ]] && source ${LFS_CI_ROOT}/lib/database.sh
-[[ -z ${LFS_CI_SOURCE_booking}    ]] && source ${LFS_CI_ROOT}/lib/booking.sh
+[[ -z ${LFS_CI_SOURCE_artifacts}       ]] && source ${LFS_CI_ROOT}/lib/artifacts.sh
+[[ -z ${LFS_CI_SOURCE_jenkins}         ]] && source ${LFS_CI_ROOT}/lib/jenkins.sh
+[[ -z ${LFS_CI_SOURCE_makingtest}      ]] && source ${LFS_CI_ROOT}/lib/makingtest.sh
+[[ -z ${LFS_CI_SOURCE_database}        ]] && source ${LFS_CI_ROOT}/lib/database.sh
+[[ -z ${LFS_CI_SOURCE_booking}         ]] && source ${LFS_CI_ROOT}/lib/booking.sh
 [[ -z ${LFS_CI_SOURCE_createWorkspace} ]] && source ${LFS_CI_ROOT}/lib/createWorkspace.sh
 
+## @fn      usecase_LFS_CI_TESTING_TMF_ON_TARGET()
+#  @brief   runs the usecase LFS_CI_TESTING_TMF_ON_TARGET (wrapper only)
+#  @param   <none>
+#  @return  <none>
 usecase_LFS_CI_TESTING_TMF_ON_TARGET() {
     ci_job_test_on_target
 }
@@ -27,14 +31,15 @@ ci_job_test_on_target() {
     mustHaveWorkspaceName
     mustHaveCleanWorkspace
 
-    local branchName=$(getBranchName ${UPSTREAM_PROJECT})
+    local locationName=$(getLocationName ${UPSTREAM_PROJECT})
+    mustHaveLocationName
 
     if [[ ${JOB_NAME} =~ ^Test- ]] ; then
         # legacy: using the Test-<targetName> job. No detailed information about
         # the workspace is available at the moment.
         # TODO: demx2fk3 2015-02-13 we are using the wrong revision to checkout src-test
-        info "create workspace for testing on ${branchName}"
-        createBasicWorkspace -l ${branchName} src-test
+        info "create workspace for testing on ${locationName}"
+        createBasicWorkspace -l ${locationName} src-test
     else
         local requireCompleteWorkspace=$(getConfig LFS_CI_uc_test_require_complete_workspace)
         if [[ ${requireCompleteWorkspace} ]] ; then
@@ -42,8 +47,8 @@ ci_job_test_on_target() {
             mv ${WORKSPACE}/fingerprint.txt ${WORKSPACE}/revisions.txt
             createWorkspace
         else
-        # TODO: demx2fk3 2015-02-13 we are using the wrong revision to checkout src-test
-            createBasicWorkspace -l ${branchName} src-test
+            # TODO: demx2fk3 2015-02-13 we are using the wrong revision to checkout src-test
+            createBasicWorkspace -l ${locationName} src-test
         fi
     fi
 
@@ -62,7 +67,7 @@ ci_job_test_on_target() {
     databaseEventSubTestStarted 
     exit_add _exitHandlerDatabaseEventsSubTestFailed
 
-    for type in $(getConfig LFS_CI_uc_test_making_test_type) ; do
+    for type in ${testType} ; do
         info "running test type ${type} on target ${targetName}"
         case ${testType} in
             checkUname)        makingTest_checkUname ;;
@@ -77,7 +82,10 @@ ci_job_test_on_target() {
     info "testing done."
     return
 }
-
+## @fn      _exitHandlerDatabaseEventsSubTestFailed()
+#  @brief   exit handler for a sub test job to store the event into the database
+#  @param   {rc}    exit code
+#  @return  <none>
 _exitHandlerDatabaseEventsSubTestFailed() {
     [[ ${1} -gt 0 ]] && databaseEventSubTestFailed 
 }
@@ -96,8 +104,8 @@ uc_job_test_on_target_archive_logs() {
     # set the correct jobName
     export JOB_NAME=${jobName}
 
-    local branchName=$(getLocationName ${UPSTREAM_PROJECT})
-    mustHaveValue "${branchName}" "branch name"
+    local branchName=$(getBranchName ${UPSTREAM_PROJECT})
+    mustHaveBranchName
 
     local testReposPathOnMoritz=$(getConfig LFS_CI_uc_test_on_target_test_repos_on_moritz -t location:${branchName})
     mustHaveValue "${testReposPathOnMoritz}" "test-repos path on moritz"

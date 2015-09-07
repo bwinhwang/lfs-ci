@@ -4,13 +4,16 @@
 #
 # conzept for events;
 # all jobs are creating events for a build into the build_events table
+# <pre>
 # id | build_id | event_id | timestamp | job_name | build_number 
 # --------------------------------------------------------------
 # 0  |   1      |     1    |  now      | ABC      | 1
 # ....
 # --------------------------------------------------------------
+# </pre>
 # 
 # the event_id is a reference to the event table
+# <pre>
 # id | product_name | task_name  | event_type | event_state 
 # ---------------------------------------------------------- 
 # 0  | LFS          | build      | build      | started     
@@ -29,6 +32,21 @@
 # 0  | LFS          | targettest | subtest    | failed      
 # 0  | LFS          | targettest | test       | failed      
 # ----------------------------------------------------------
+# </pre>
+
+# difference between event_type and task_name:
+
+# event_type can be
+# * build or subbuild for a build job, which is compiling software
+# * test or subtest for a test job, which is testing software
+# * package for the package job
+# * release for the release job
+# * other for other jobs, which are not listed above
+
+# task_name can be more. In most of the cases, task_name is the same as event_type,
+# but for test, it is different. There are several tests jobs, with different 
+# task_names: smoketest regulartest test testnonblocking stabilitytest ...
+# 
 
 LFS_CI_SOURCE_database='$Id$'
 
@@ -39,8 +57,8 @@ LFS_CI_SOURCE_database='$Id$'
 databaseEventBuildStarted() {
     requiredParameters LFS_CI_ROOT JOB_NAME BUILD_NUMBER
 
-    local branchName=$(getLocationName)
-    mustHaveLocationName
+    local branchName=$(getBranchName)
+    mustHaveBranchName
 
     local buildDirectory=$(getBuildDirectoryOnMaster ${JOB_NAME} ${BUILD_NUMBER})
     local revision=$(runOnMaster cat ${buildDirectory}/revisionstate.xml | cut -d" " -f 3 | sort -n -u | tail -n 1)
@@ -51,7 +69,7 @@ databaseEventBuildStarted() {
 }
 
 ## @fn      databaseEventBuildFailed()
-#  @brief   create an entry in the database table build events for a failed build
+#  @brief   create an entry in the database table build_events for a failed build
 #  @param   <none>
 #  @return  <none>
 databaseEventBuildFailed() {
@@ -59,23 +77,46 @@ databaseEventBuildFailed() {
     return
 }
 
+## @fn      databaseEventBuildFinished()
+#  @brief   create an entry in the database table build_events for a finished build
+#  @param   <none>
+#  @return  <none>
 databaseEventBuildFinished() {
     _storeEvent build_finished
     return
 }
 
+## @fn      databaseEventOtherStarted()
+#  @brief   create an entry in the database table build_events for a started "other" event
+#  @param   <none>
+#  @return  <none>
 databaseEventOtherStarted() {
     _storeEvent other_started $1
     return
 }
+
+## @fn      databaseEventOtherFinished()
+#  @brief   create an entry in the database table build_events for a finished "other" event
+#  @param   <none>
+#  @return  <none>
 databaseEventOtherFinished() {
     _storeEvent other_finished $1
     return
 }
+
+## @fn      databaseEventOtherFailed()
+#  @brief   create an entry in the database table build_events for a failed "other" event
+#  @param   <none>
+#  @return  <none>
 databaseEventOtherFailed() {
     _storeEvent other_failed $1
     return
 }
+
+## @fn      databaseEventOtherUnstable()
+#  @brief   create an entry in the database table build_events for a unstable "other" event
+#  @param   <none>
+#  @return  <none>
 databaseEventOtherUnstable() {
     _storeEvent other_unstable $1
     return
@@ -86,7 +127,7 @@ databaseEventOtherUnstable() {
 #     return
 # }
 
-## @fn      databaseEventSubBuildFinished()
+## @fn      databaseEventSubBuildStarted()
 #  @brief   create an entry in the database table build_events for a started build
 #  @param   <none>
 #  @return  <none>
@@ -95,7 +136,7 @@ databaseEventSubBuildStarted() {
     return
 }
 
-## @fn      databaseEventBuildFinished()
+## @fn      databaseEventSubBuildFinished()
 #  @brief   create an entry in the database table build_events for a finished build
 #  @param   <none>
 #  @return  <none>
@@ -174,7 +215,7 @@ databaseEventPackageFailed() {
     return
 }
 
-## @fn      databaseEventSubBuildStarted()
+## @fn      databaseEventSubTestStarted()
 #  @brief   create an entry in the database table build_events for a started subtest process
 #  @param   <none>
 #  @return  <none>
@@ -187,7 +228,7 @@ databaseEventSubTestStarted() {
     return
 }
 
-## @fn      databaseEventSubBuildFinished()
+## @fn      databaseEventSubTestFinished()
 #  @brief   create an entry in the database table build_events for a finished subtest process
 #  @param   <none>
 #  @return  <none>
@@ -200,7 +241,7 @@ databaseEventSubTestFinished() {
     return
 }
 
-## @fn      databaseEventSubBuildFailed()
+## @fn      databaseEventSubTestFailed()
 #  @brief   create an entry in the database table build_events for a failed subtest process
 #  @param   <none>
 #  @return  <none>
@@ -328,5 +369,24 @@ addTestResultsToMetricDatabase() {
                         ${targetName}   \
                         ${targetType}   \
                         ${resultFile}
+    return
+}
+
+## @fn      mustHaveDatabaseCredentials()
+#  @brief   ensures, that the database credentials are set
+#  @param   <none>
+#  @return  <none>
+mustHaveDatabaseCredentials() {
+    [[ -z ${dbName} ]] && dbName=$(getConfig MYSQL_db_name)
+    mustHaveValue "${dbName}" "dbName"
+    [[ -z ${dbPort} ]] && dbPort=$(getConfig MYSQL_db_port)
+    mustHaveValue "${dbName}" "dbPort"
+    [[ -z ${dbUser} ]] && dbUser=$(getConfig MYSQL_db_username)
+    mustHaveValue "${dbName}" "dbUser"
+    [[ -z ${dbPass} ]] && dbPass=$(getConfig MYSQL_db_password)
+    mustHaveValue "${dbName}" "dbPass"
+    [[ -z ${dbHost} ]] && dbHost=$(getConfig MYSQL_db_hostname)
+    mustHaveValue "${dbName}" "dbHost"
+
     return
 }

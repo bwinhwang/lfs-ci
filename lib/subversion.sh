@@ -60,7 +60,7 @@ uploadToSubversion() {
 
     # TMPDIR is not handled/created via createTempDirectory. So we have to
     # take care to clean up the temp directory after exit and failure
-    # exit_add subversionUploadCleanupTempDirectory
+    exit_add subversionUploadCleanupTempDirectory
 
     rm -rf ${TMPDIR}
     mkdir -p ${TMPDIR}
@@ -79,7 +79,8 @@ uploadToSubversion() {
 
     info "upload to svn and create copy (${tagName})"
 
-    execute ${LFS_CI_ROOT}/bin/svn_load_dirs.pl        \
+    execute -r 3 \
+                ${LFS_CI_ROOT}/bin/svn_load_dirs.pl    \
                 -v                                     \
                 -t ${tagPath}/${tagName}               \
                 -wc ${workspace}                       \
@@ -90,14 +91,13 @@ uploadToSubversion() {
                 ${svnReposUrl} ${branchPath}/${branch} \
                 ${uploadDirectoryOnLocalDisk} 
 
-    execute rm -rf /dev/shm/${JOB_NAME}.${USER}
     export TMPDIR=${oldTemp}
     info "upload done";
 
     return
 }
 
-## @fn      subversion()
+## @fn      subversionUploadCleanupTempDirectory()
 #  @brief   cleanup the created temp directory in svn upload function
 #  @param   <none>
 #  @return  <none>

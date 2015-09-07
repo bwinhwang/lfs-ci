@@ -69,6 +69,7 @@ startLogfile() {
         case ${USER} in
             psulm)    url=http://ullinn11.emea.nsn-net.net/lfs/ci/log/ ;;
             lfscidev) url=https://lfs-sandbox.emea.nsn-net.net/logs/ ;;
+            ca_lrcci) url=https://lfs-lrc-ci.int.net.nokia.com/logs/ ;;
         esac
         if [[ ${url} ]] ; then
             echo 1>&2 "${url}/${datePath}/$(basename ${CI_LOGGING_LOGFILENAME})"
@@ -264,48 +265,19 @@ _loggingLine() {
 _stackTrace() {
     local i=0
     local FRAMES=${#BASH_LINENO[@]}
-    printf "Stack Trace: \n"
+    printf 1>&2 "Stack Trace: \n"
     # FRAMES-2 skips main, the last one in arrays
     for ((i=FRAMES-2; i>=0; i--)); do
         # Grab the source code of the line
         local code=$(sed -n "${BASH_LINENO[i]}{s/^\s*//;p}" "${BASH_SOURCE[i+1]}")
         local file=${BASH_SOURCE[i+1]}
-        printf "File %-30s Line %5d %-30s: %-100s\n"   \
-                ${file//${LFS_CI_ROOT}\//}              \
-                ${BASH_LINENO[i]}                \
-                ${FUNCNAME[i+1]}                 \
+        local fileString="$(printf "%s(%s:%s)" ${FUNCNAME[i+1]}           \
+                                               ${file//${LFS_CI_ROOT}\//} \
+                                               ${BASH_LINENO[i]}          )"
+        printf 1>&2 "at %-30s\n\t%-100s\n" \
+                "${fileString}"            \
                 "${code}"
     done 
-}
-
-## @fn      runAndLog()
-#  @brief   execute a command and put the output into the logfile
-#  @todo    replace this with execute -i
-#  @param   <command>    command, which should be logged
-#  @return  <none>
-runAndLog() {
-    local command=$@
-    local outputFile=$(createTempFile)
-
-    debug "DEPRECATED, use execute -i"
-    debug "execute command ${command}"
-
-    ${command} 1>${outputFile} 2>&1 
-    rc=$?
-
-    debug "logging output of command \"${command}\""
-
-    CI_LOGGING_CONFIG="MESSAGE"
-
-    while read LINE
-    do
-        debug "${LINE}"
-    done <${outputFile}
-
-    unset CI_LOGGING_CONFIG
-    debug "end of output"
-
-    return ${rc}
 }
 
 ## @fn      rawDebug()

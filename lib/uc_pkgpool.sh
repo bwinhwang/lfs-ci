@@ -15,12 +15,13 @@
 # Fingerprint file: workspace/bld/bld-pkgpool-release/label
 #
 
-[[ -z ${LFS_CI_SOURCE_artifacts}    ]] && source ${LFS_CI_ROOT}/lib/artifacts.sh
-[[ -z ${LFS_CI_SOURCE_workflowtool} ]] && source ${LFS_CI_ROOT}/lib/workflowtool.sh
-[[ -z ${LFS_CI_SOURCE_jenkins}      ]] && source ${LFS_CI_ROOT}/lib/jenkins.sh
-[[ -z ${LFS_CI_SOURCE_subversion}   ]] && source ${LFS_CI_ROOT}/lib/subversion.sh
-[[ -z ${LFS_CI_SOURCE_git}          ]] && source ${LFS_CI_ROOT}/lib/git.sh
-[[ -z ${LFS_CI_SOURCE_try}          ]] && source ${LFS_CI_ROOT}/lib/try.sh
+[[ -z ${LFS_CI_SOURCE_artifacts}       ]] && source ${LFS_CI_ROOT}/lib/artifacts.sh
+[[ -z ${LFS_CI_SOURCE_workflowtool}    ]] && source ${LFS_CI_ROOT}/lib/workflowtool.sh
+[[ -z ${LFS_CI_SOURCE_jenkins}         ]] && source ${LFS_CI_ROOT}/lib/jenkins.sh
+[[ -z ${LFS_CI_SOURCE_subversion}      ]] && source ${LFS_CI_ROOT}/lib/subversion.sh
+[[ -z ${LFS_CI_SOURCE_git}             ]] && source ${LFS_CI_ROOT}/lib/git.sh
+[[ -z ${LFS_CI_SOURCE_try}             ]] && source ${LFS_CI_ROOT}/lib/try.sh
+[[ -z ${LFS_CI_SOURCE_createWorkspace} ]] && source ${LFS_CI_ROOT}/lib/createWorkspace.sh
 
 ## @fn      usecase_PKGPOOL_BUILD()
 #  @brief   run the usecase PKGPOOL_BUILD
@@ -32,10 +33,9 @@ usecase_PKGPOOL_BUILD() {
     local workspace=$(getWorkspaceName)
     mustHaveCleanWorkspace
 
-    local releasePrefix=$(getConfig PKGPOOL_PROD_release_prefix)
-    mustHaveValue "${releasePrefix}" "pkgpool release prefix"
-
-    info "pkgpool release name prefix is ${releasePrefix}"
+    local buildParameters="$(getConfig PKGPOOL_additional_build_parameters)"
+    # build parameters could be empty => no mustHaveValue
+    # mustHaveValue "${buildParameters}" "additional build parameters"
 
     local buildLogFile=$(createTempFile)
     local gitWorkspace=${WORKSPACE}/src
@@ -53,36 +53,39 @@ usecase_PKGPOOL_BUILD() {
     cd ${workspace}
 
     info "building pkgpool..."
-    execute -l ${buildLogFile} ${gitWorkspace}/build -j100 --prepopulate --release="${releasePrefix}" 
+    execute -l ${buildLogFile} ${gitWorkspace}/build ${buildParameters} 
 
-    # TODO: demx2fk3 2015-03-09 add logfiles to artifacts
+    # put build log for later analysis into the artifacts
+    execute mkdir -p ${workspace}/bld/bld-pkgpool-release/
+    execute cp ${buildLogFile}      ${workspace}/bld/bld-pkgpool-release/build.log
+    execute cp -a ${workspace}/logs ${workspace}/bld/bld-pkgpool-release/
 
-    local releaseTag="$(execute -n sed -ne 's,^release \([^ ]*\) complete,\1,p' ${buildLogFile})"
-    mustHaveValue "${releaseTag}" "release tag"
+    # in case of build from scratch (own jenkins job), we do not have a release tag.
+    # => no release
+    local canCreateReleaseTag=$(getConfig PKGPOOL_CI_uc_build_can_create_tag_in_git)
+    if [[ ${canCreateReleaseTag} ]] ; then
+        local releaseTag="$(execute -n sed -ne 's,^\(\[[0-9 :-]*\] \)\?release \([^ ]*\) complete,\2,p' ${buildLogFile})"
+        mustHaveValue "${releaseTag}" "release tag"
 
-    info "new pkgpool release tag is ${releaseTag}"
+        info "new pkgpool release tag is ${releaseTag}"
 
-    cd ${gitWorkspace}
-    local oldReleaseTag=$(gitDescribe --abbrev=0)
-    gitTagAndPushToOrigin ${releaseTag}
+        cd ${gitWorkspace}
+        local oldReleaseTag=$(gitDescribe --abbrev=0)
+        gitTagAndPushToOrigin ${releaseTag}
 
-    local gitRevision=$(gitRevParse HEAD)
+        local gitRevision=$(gitRevParse HEAD)
 
-    setBuildDescription "${JOB_NAME}" "${BUILD_NUMBER}" "${releaseTag}"
+        setBuildDescription "${JOB_NAME}" "${BUILD_NUMBER}" "${releaseTag}"
 
-    # TODO: demx2fk3 2015-02-25 FIXME hardcoded path
-    # required to start the sync 
-    execute touch /build/home/psulm/SC_LFS/pkgpool/.hashpool
+        echo ${oldReleaseTag} > ${workspace}/bld/bld-pkgpool-release/oldLabel
+        echo ${releaseTag}    > ${workspace}/bld/bld-pkgpool-release/label
+        echo ${gitRevision}   > ${workspace}/bld/bld-pkgpool-release/gitrevision
 
-    mkdir -p ${workspace}/bld/bld-pkgpool-release/
-    echo ${oldReleaseTag}                   > ${workspace}/bld/bld-pkgpool-release/oldLabel
-    echo ${releaseTag}                      > ${workspace}/bld/bld-pkgpool-release/label
-    echo ${gitRevision}                     > ${workspace}/bld/bld-pkgpool-release/gitrevision
+        execute -n sed -ne 's|^src [^ ]* \(.*\)$|PS_LFS_PKG = \1|p' ${workspace}/pool/*.meta |\
+            sort -u > ${workspace}/bld/bld-pkgpool-release/forReleaseNote.txt
 
-    execute -n sed -ne 's|^src [^ ]* \(.*\)$|PS_LFS_PKG = \1|p' ${workspace}/pool/*.meta |\
-        sort -u > ${workspace}/bld/bld-pkgpool-release/forReleaseNote.txt
-
-    rawDebug ${workspace}/bld/bld-pkgpool-release/forReleaseNote.txt
+        rawDebug ${workspace}/bld/bld-pkgpool-release/forReleaseNote.txt
+    fi
 
     createArtifactArchive
 
@@ -109,7 +112,8 @@ usecase_PKGPOOL_TEST() {
 #  @return  <none>
 usecase_PKGPOOL_RELEASE() {
     requiredParameters LFS_CI_ROOT UPSTREAM_PROJECT UPSTREAM_BUILD \
-                       JOB_NAME BUILD_NUMBER
+                       JOB_NAME BUILD_NUMBER \
+                       LFS_CI_CONFIG_FILE
 
     local workspace=$(getWorkspaceName)
     mustHaveCleanWorkspace
@@ -152,7 +156,7 @@ usecase_PKGPOOL_RELEASE() {
     execute -n ${LFS_CI_ROOT}/bin/getReleaseNoteXML \
                 -t ${label}                         \
                 -o ${oldLabel}                      \
-                -f ${LFS_CI_ROOT}/etc/file.cfg > ${workspace}/releasenote.xml
+                -f ${LFS_CI_CONFIG_FILE} > ${workspace}/releasenote.xml
     
     rawDebug ${workspace}/releasenote.xml
 
@@ -182,7 +186,7 @@ usecase_PKGPOOL_RELEASE() {
         if [[ -s ${releaseNoteTxt} ]] ; then
             execute ${LFS_CI_ROOT}/bin/sendReleaseNote  -r ${releaseNoteTxt}          \
                                                         -t ${label}                   \
-                                                        -f ${LFS_CI_ROOT}/etc/file.cfg
+                                                        -f ${LFS_CI_CONFIG_FILE}
         fi                                                            
     else
         warning "sending release note is disabled via config"
@@ -320,3 +324,36 @@ usecase_PKGPOOL_UPDATE_DEPS() {
     return
 }
 
+## @fn      usecase_PKGPOOL_CHECK_FOR_FAILED_VTC()
+#  @brief   check, if there are files in the addon arm-cortexa15-linux-gnueabihf-vtc.tar.gz in pkgpool
+#  @details vtc is a addon from Transport, which is build within the pkgpool. Current state (2015-08-01) is,
+#           that this addon is experimantal and should not be blocking.
+#           This usecase was requested by "Sapalski, Samuel (Nokia - DE/Ulm)" <samuel.sapalski@nokia.com>.
+#           See also BI #462
+#  @param   <none>
+#  @return  <none>
+usecase_PKGPOOL_CHECK_FOR_FAILED_VTC() {
+    requiredParameters UPSTREAM_PROJECT UPSTREAM_BUILD
+
+    # --no-build-description will not copy artifacts from the upstream build...
+    mustHavePreparedWorkspace --no-build-description
+    # so we have to do this by our own...
+    copyAndExtractBuildArtifactsFromProject "${UPSTREAM_PROJECT}" "${UPSTREAM_BUILD}" "pkgpool"
+
+    local workspace=$(getWorkspaceName)
+    mustHaveWorkspaceName
+
+    local buildName=$(cat ${workspace}/bld/bld-pkgpool-release/label)
+    mustHaveValue "${buildName}" "build name of pkgpool"
+
+    local vtcAddon=$(getConfig PKGPOOL_location_on_share)/${buildName}/arm-cortexa15-linux-gnueabihf-vtc.tar.gz
+    mustExistFile ${vtcAddon}
+
+    local filesInTar=$(execute -n tar tvf ${vtcAddon} | wc -l)
+
+    if [[ ${filesInTar} == 0 ]] ; then
+        fatal "the vtc addon ${vtcAddon} is empty. please check build logs for compile error"
+    fi
+
+    return 0
+}

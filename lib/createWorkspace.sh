@@ -4,7 +4,8 @@
 
 LFS_CI_SOURCE_createWorkspace='$Id$'
 
-[[ -z ${LFS_CI_SOURCE_artifacts} ]] && source ${LFS_CI_ROOT}/lib/artifacts.sh
+[[ -z ${LFS_CI_SOURCE_artifacts}   ]] && source ${LFS_CI_ROOT}/lib/artifacts.sh
+[[ -z ${LFS_CI_SOURCE_fingerprint} ]] && source ${LFS_CI_ROOT}/lib/fingerprint.sh
 
 ## @fn      createOrUpdateWorkspace()
 #  @brief   create a new or update an existing workspace
@@ -201,15 +202,33 @@ latestRevisionFromRevisionStateFile() {
     if [[ ! -f ${WORKSPACE}/revisions.txt ]] ; then
         requiredParameters UPSTREAM_PROJECT UPSTREAM_BUILD 
 
-        local jobName=$(getBuildJobNameFromUpstreamProject ${UPSTREAM_PROJECT} ${UPSTREAM_BUILD})
-        local buildNumber=$(getBuildBuildNumberFromUpstreamProject ${UPSTREAM_PROJECT} ${UPSTREAM_BUILD})
+        local taskName=$(getTaskNameFromJobName)
+        local jobName=
+        local buildNumber=
 
+        # In case of the build job, the fingerprint file is not available yet.
+        # For this case, we take the upstream informations.
+        if [[ ${taskName} =~ Build ]] ; then
+            debug "using upstream ${UPSTREAM_BUILD} / ${UPSTREAM_PROJECT}"
+        else
+            jobName=$(getBuildJobNameFromFingerprint)  
+            buildNumber=$(getBuildBuildNumberFromFingerprint)
+        fi  
+        
         if [[ -z ${jobName} ]] ; then
             jobName=${UPSTREAM_PROJECT}
-        fi
+        fi  
         if [[ -z ${buildNumber} ]] ; then
             buildNumber=${UPSTREAM_BUILD}
-        fi
+        fi  
+        
+        # last check...
+        if [[ -z ${jobName} ]] ; then
+            fatal "this should not happen: jobName empty after fingerprint or from upstream"
+        fi  
+        if [[ -z ${buildNumber} ]] ; then
+            fatal "this should not happen: buildNumber empty after fingerprint or from upstream"
+        fi  
 
         info "using revision state file from ${jobName} / ${buildNumber} based on ${UPSTREAM_PROJECT} / ${UPSTREAM_BUILD}"
         copyRevisionStateFileToWorkspace ${jobName} ${buildNumber} 
@@ -345,10 +364,6 @@ synchroniceToLocalPath() {
     if [[ ! -e ${localCacheDir}/${tag} ]] ; then
         progressFile=${localCacheDir}/data/${tag}.in_progress
 
-        local sleep=$(( RANDOM % 60 ))
-        debug "sleeping ${sleep} s for sync based on ${progressFile}"
-        sleep ${sleep}
-
         # mkdir is an atomic operation. if it exists, mkdir fails
         if mkdir ${progressFile} 2> /dev/null ; then
 
@@ -370,6 +385,65 @@ synchroniceToLocalPath() {
             sleep 60
             synchroniceToLocalPath ${localPath}
         fi
+    fi
+
+    return
+}
+
+## @fn      mustHavePreparedWorkspace()
+#  @brief   prepare the workspace with required artifacts and other stuff
+#  @param   {upstreamProject}    name of the upstream project
+#  @param   {upstreamBuild}      build number of the upstream project
+#  @todo    TODO: demx2fk3 2015-06-08 move into a different file (maybe common.sh)
+#  @return  <none>
+mustHavePreparedWorkspace() {
+
+    requiredParameters JOB_NAME BUILD_NUMBER
+    
+    local opt_noCleanWorkspace=
+    local opt_noBuildDescription=
+
+    local opts=$(getopt -o BC -l no-build-description,no-clean-workspace -- "$@")
+    if [[ $? != 0 ]] ; then
+         fatal "getopt parsing error in mustHavePreparedWorkspace"
+    fi
+
+    eval set -- "${opts}"
+
+    while true ; do
+        case "$1" in
+            -B | --no-build-description) opt_noBuildDescription=1 ; shift ;;
+            -C | --no-clean-workspace) opt_noCleanWorkspace=1 ; shift ;;
+            --) shift; break;;
+        esac
+    done
+
+    local upstreamProject=${1}
+    local upstreamBuild=${2}
+
+    if [[ -z ${upstreamProject} ]] ; then
+        requiredParameters UPSTREAM_PROJECT
+        upstreamProject=${UPSTREAM_PROJECT}
+    fi
+    if [[ -z ${upstreamBuild} ]] ; then
+        requiredParameters UPSTREAM_BUILD
+        upstreamBuild=${UPSTREAM_BUILD}
+    fi
+
+    mustHaveValue "${upstreamProject}" "upstream project"
+    mustHaveValue "${upstreamBuild}"   "upstream build"
+
+    local workspace=$(getWorkspaceName)
+    [[ -z ${opt_noCleanWorkspace} ]] && mustHaveCleanWorkspace
+
+    if [[ -z ${opt_noBuildDescription} ]] ; then
+        local requiredArtifacts=$(getConfig LFS_CI_prepare_workspace_required_artifacts)
+        copyAndExtractBuildArtifactsFromProject "${upstreamProject}" "${upstreamBuild}" "${requiredArtifacts}"
+
+        mustHaveNextLabelName
+        local labelName=$(getNextReleaseLabel)
+
+        setBuildDescription ${JOB_NAME} ${BUILD_NUMBER} ${labelName}
     fi
 
     return

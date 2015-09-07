@@ -15,12 +15,8 @@ LFS_CI_SOURCE_common='$Id$'
 #  @return  <none>
 #  @throws  raise an error, if there is no target board name
 mustHaveTargetBoardName() {
-    local location=$(getTargetBoardName) 
-    if [[ ! ${location} ]] ; then
-        error "can not get the correction target board name from JOB_NAME \"${JOB_NAME}\""
-        exit 1
-    fi
-
+    local targetName=$(getTargetBoardName) 
+    mustHaveValue "${targetName}" "correct target board name from JOB_NAME ${JOB_NAME}"
     return
 }
 
@@ -39,11 +35,7 @@ getBranchName() {
 #  @throws  raises an error, if there is no location name
 mustHaveLocationName() {
     local location=$(getLocationName) 
-    if [[ ! ${location} ]] ; then
-        error "can not get the correction location name from JOB_NAME \"${JOB_NAME}\""
-        exit 1
-    fi
-
+    mustHaveValue "${location}" "correct location name from JOB_NAME ${JOB_NAME}"
     return
 }
 
@@ -70,16 +62,8 @@ getWorkspaceName() {
 #  @return  <none>
 #  @throws  raise an error, if there is no workspace name avaibale
 mustHaveWorkspaceName() {
-
-    requiredParameters WORKSPACE
-
     local workspace=$(getWorkspaceName) 
-
-    if [[ ! "${workspace}" ]] ; then
-        error "can not get the correction workspace name from JOB_NAME \"${JOB_NAME}\""
-        exit 1
-    fi
-
+    mustHaveValue "${workspace}" "workspace location on disk"
     return
 }
 
@@ -93,8 +77,7 @@ mustHaveWritableWorkspace() {
     mustHaveWorkspaceName
 
     if [[ ! -w "${workspace}" ]] ; then
-        error "workspace ${workspace} is not writable"
-        exit 1
+        fatal "workspace ${workspace} is not writable"
     fi
 
     return
@@ -145,8 +128,7 @@ switchToNewLocation() {
     # TODO: demx2fk3 2014-03-28 fixme
     # trace "check, if user can use this location"
     # if id -ng ${USER} | grep pronb ; then
-    #     error "${USER} has wrong group id. correct is pronb"
-    #     exit 1
+    #     fatal "${USER} has wrong group id. correct is pronb"
     # fi
 
     info "switching to new location \"${location}\""
@@ -162,6 +144,8 @@ switchToNewLocation() {
 #  @return  <none>
 setupNewWorkspace() {
     local workspace=$(getWorkspaceName) 
+    mustHaveWorkspaceName
+    mustHaveCleanWorkspace
 
     debug "creating a new workspace in \"${workspace}\""
 
@@ -316,14 +300,29 @@ initTempDirectory() {
 #  @throws  raise an error, if there is a variable is not set or has no value
 requiredParameters() {
     local parameterNames=$@
+    if [[ -z ${LFS_CI_INTERNAL_RERUN_ENVIRONMENT_FILE} ]] ; then
+        export LFS_CI_INTERNAL_RERUN_ENVIRONMENT_FILE=$(createTempFile)
+    fi
     for name in ${parameterNames} ; do
         if [[ ! ${!name} ]] ; then
-            error "required parameter ${name} is missing"
-            exit 1
+            fatal "required parameter ${name} is missing"
         fi
-        # echo "${name}=${!name}" >> ${workspace}/../.env
+        echo "export ${name}=\"${!name}\"" >> ${LFS_CI_INTERNAL_RERUN_ENVIRONMENT_FILE}
     done
 
+    return
+}
+
+## @fn      logRerunCommand()
+#  @brief   record the command incl. environment variables, which are needed to rerun the jenkins job
+#  @param   <none>
+#  @return  <none>
+logRerunCommand() {
+    rerun=$(createTempFile)
+    echo "#!/bin/bash" > ${rerun}
+    execute -n sort -u ${LFS_CI_INTERNAL_RERUN_ENVIRONMENT_FILE} >> ${rerun}
+    echo $0 ${JOB_NAME} >> ${rerun}
+    rawDebug ${rerun}
     return
 }
 
@@ -355,8 +354,7 @@ mustHavePreviousLabelName() {
     mustHaveWorkspaceName
 
     if [[ ! -e ${workspace}/bld/bld-fsmci-summary/oldLabel ]] ; then
-        error "label artifacts file does not exist"
-        exit 1
+        fatal "label artifacts file does not exist"
     fi            
 
     if [[ -z "${LFS_CI_PREV_CI_LABEL_NAME}" ]] ; then
@@ -380,8 +378,7 @@ mustHaveNextLabelName() {
     mustHaveWorkspaceName
 
     if [[ ! -e ${workspace}/bld/bld-fsmci-summary/label ]] ; then
-        error "label artifacts file does not exist"
-        exit 1
+        fatal "label artifacts file does not exist"
     fi            
 
     if [[ -z "${LFS_CI_NEXT_CI_LABEL_NAME}" ]] ; then
@@ -418,7 +415,7 @@ getJenkinsJobBuildDirectory() {
 
 ## @fn      mustHaveValue()
 #  @brief   ensure, that the value is a not empty string
-#  @param   {value}    just a value
+#  @param   {value}    just a value. Always use double quotes eg "$var1"
 #  @return  <none>
 #  @throws  raise an error, if the value is empty
 mustHaveValue() {
@@ -426,8 +423,7 @@ mustHaveValue() {
     local message="${2:-unkown variable name}"
 
     if [[ -z "${value}" ]] ; then
-        error "excpect a value for ${message}, but didn't got one..."
-        exit 1
+        fatal "excpect a value for ${message}, but didn't got one..."
     fi
 
     return
@@ -443,13 +439,11 @@ mustHaveWritableFile() {
     mustHaveValue "${file}"
 
     if [[ ! -e ${file} ]] ; then
-        error "the file ${file} does not exist"
-        exit 1
+        fatal "the file ${file} does not exist"
     fi
 
     if [[ ! -w ${file} ]] ; then
-        error "the file ${file} is not writable"
-        exit 1
+        fatal "the file ${file} is not writable"
     fi
 
     return
@@ -464,8 +458,7 @@ mustExistDirectory() {
     local directory=$1
 
     if [[ ! -d ${directory} ]] ; then
-        error "${directory} is not a directory"
-        exit 1
+        fatal "${directory} is not a directory"
     fi
     return
 }
@@ -479,8 +472,7 @@ mustExistSymlink() {
     local file=$1
 
     if [[ ! -L ${file} ]] ; then
-        error "${file} is not a symlink"
-        exit 1
+        fatal "${file} is not a symlink"
     fi
     return
 }
@@ -494,8 +486,7 @@ mustExistFile() {
     local file=$1
 
     if [[ ! -f ${file} ]] ; then
-        error "${file} is not a file"
-        exit 1
+        fatal "${file} is not a file"
     fi
     return
 }
@@ -510,8 +501,7 @@ mustBeSuccessfull() {
     local msg="${2:-unkown message}"
 
     if [[ ${rc} != 0 ]] ; then
-        error "error: ${msg} failed"
-        exit 1
+        fatal "error: ${msg} failed"
     fi
     return
 }
@@ -660,7 +650,7 @@ _getUpstreamProjects() {
     local server=$(getConfig jenkinsMasterServerHostName)
     mustHaveValue "${server}" "server name"
     execute -n -r 10 ssh ${server}                    \
-            /ps/lfs/ci/bin/getUpStreamProject         \
+            ${LFS_CI_ROOT}/bin/getUpStreamProject     \
                     -j ${jobName}                     \
                     -b ${buildNumber}                 \
                     -h ${serverPath} > ${upstreamsFile}
@@ -692,7 +682,7 @@ _getDownstreamProjects() {
     local server=$(getConfig jenkinsMasterServerHostName)
     mustHaveValue "${server}" "server name"
     execute -n -r 10 ssh ${server}                      \
-            /ps/lfs/ci/bin/getDownStreamProjects        \
+            ${LFS_CI_ROOT}/bin/getDownStreamProjects    \
                     -j ${jobName}                       \
                     -b ${buildNumber}                   \
                     -h ${serverPath}  > ${downstreamFile}
@@ -859,6 +849,11 @@ getBranchPart() {
     [[ ${what} == NR ]] && echo ${nr}
 }
 
+## @fn      mustHaveFreeDiskSpace()
+#  @brief   ensure, that there is enough free diskspace on given filesystem
+#  @param   {filesystem}    path of the filesystem (e.g. /var/fpwork)
+#  @param   {requiredSpace}    required free diskspace on the filesystem in kilobytes
+#  @return  <none>
 mustHaveFreeDiskSpace() {
     local filesystem=$1
     mustExistDirectory ${filesystem}
@@ -890,12 +885,22 @@ sanityCheck() {
 
     local LFS_CI_git_version=$(cd ${LFS_CI_ROOT} ; git describe)
     debug "used lfs ci git version ${LFS_CI_git_version}"
+    local runSanityCheck=$(getConfig LFS_CI_GLOBAL_should_run_sanity_checks)
 
-    # we do not want to have modifications in ${LFS_CI_ROOT}
-    local LFS_CI_git_local_modifications=$(cd ${LFS_CI_ROOT} ; git status --short | wc -l)
-    if [[ ${LFS_CI_git_local_modifications} -gt 0 && ${USER} = psulm ]] ; then
-        fatal "the are local modifications in ${LFS_CI_ROOT}, which are not commited. "\
-              "CI is rejecting such kind of working mode and refused to work until the modifications are commited."
+    if [[ ${runSanityCheck} -eq 1 ]]; then
+        # we do not want to have modifications in ${LFS_CI_ROOT}
+        local waitForGit=$(getConfig LFS_CI_waitForGit)
+        local LFS_CI_git_local_modifications=$(cd ${LFS_CI_ROOT} ; git status --short | wc -l)
+        if [[ ${LFS_CI_git_local_modifications} -gt 0 ]] ; then
+            info "there are local modifications which are not commited - waiting for ${waitForGit} sec."
+            sleep ${waitForGit}
+            LFS_CI_git_local_modifications=$(cd ${LFS_CI_ROOT} ; git status --short | wc -l)
+            if [[ ${LFS_CI_git_local_modifications} -gt 0 ]] ; then
+                fatal "the are local modifications in ${LFS_CI_ROOT}, which are not commited. "\
+                  "CI is rejecting such kind of working mode and refused to work until the modifications are commited. "\
+                  "Increase config. parameter LFS_CI_waitForGit."
+            fi
+        fi
     fi
 
     # check job name convetions
@@ -927,6 +932,10 @@ sanityCheck() {
 }
 
 
+## @fn      createFingerprintFile()
+#  @brief   create a file which can be used for fingerprinting
+#  @param   <none>
+#  @return  <none>
 createFingerprintFile() {
     requiredParameters JOB_NAME BUILD_NUMBER WORKSPACE 
 
@@ -952,5 +961,3 @@ createFingerprintFile() {
 
     return
 }
-
-

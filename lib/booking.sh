@@ -21,6 +21,10 @@
 
 LFS_CI_SOURCE_booking='$Id$'
 
+[[ -z ${LFS_CI_SOURCE_config}   ]] && source ${LFS_CI_ROOT}/lib/config.sh
+[[ -z ${LFS_CI_SOURCE_logging}  ]] && source ${LFS_CI_ROOT}/lib/logging.sh
+[[ -z ${LFS_CI_SOURCE_commands} ]] && source ${LFS_CI_ROOT}/lib/commands.sh
+
 ## @fn      reserveTargetByName()
 #  @brief   reserve target by a given name
 #  @details the function will try to reserve the given target. If it does not work, the function will retry
@@ -122,7 +126,21 @@ unreserveTarget() {
     local targetName=${LFS_CI_BOOKING_RESERVED_TARGET}
     mustHaveValue "${targetName}" "targetName"
 
+    # the return code from the exit handler is $1
+    local rc=$1
+    local shouldMoveToRepairCenter=$(getConfig LFS_CI_uc_test_booking_move_target_to_repair_center)
+
     execute ${LFS_CI_ROOT}/bin/unreserveTarget --targetName=${targetName}
+    if [[ ${shouldMoveToRepairCenter} && ${rc} -gt 0 ]] ; then
+        # TODO: demx2fk3 2015-05-26 refactor this into a stored procedure to have a quick and fast
+        # atomic operation. In this way, it can happen, that someone will reserve the broken target 
+        # within the micro second, where we try to reserve the target for the lab.
+        execute ${LFS_CI_ROOT}/bin/reserveTarget  \
+            --targetName=${targetName}            \
+            --userName=doRepair                   \
+            --comment="red target by ${JOB_NAME:-no job name} / ${BUILD_NUMBER:-no build number}"
+    fi
+
     return
 }
 

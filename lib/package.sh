@@ -113,8 +113,11 @@ copyReleaseCandidateToShare() {
 
     # PS SCM - which are responsible for syncing this share to the world wants the group writable
     execute chmod -R g+w ${localDirectory}
+    local groupName=$(getConfig LFS_CI_GLOBAL_groupname)
+    execute chgrp -R ${groupName} ${localDirectory}
 
     execute mkdir -p ${remoteDirectory}/os/
+    execute chmod -R g+w ${remoteDirectory}
     execute rsync -av --delete ${hardlink} ${localDirectory}/ ${remoteDirectory}/os/
     execute cd ${remoteDirectory}
 

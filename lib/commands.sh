@@ -5,10 +5,10 @@
 #           help the developer to execute a command in the correct way including
 #           logging of the command and the proper error handling.
 
-[[ -z ${LFS_CI_SOURCE_common}  ]] && source ${LFS_CI_ROOT}/lib/common.sh
-[[ -z ${LFS_CI_SOURCE_logging} ]] && source ${LFS_CI_ROOT}/lib/logging.sh
-
 LFS_CI_SOURCE_commands='$Id$'
+
+[[ -z ${LFS_CI_SOURCE_config}   ]] && source ${LFS_CI_ROOT}/lib/config.sh
+[[ -z ${LFS_CI_SOURCE_logging}  ]] && source ${LFS_CI_ROOT}/lib/logging.sh
 
 ## @fn      execute()
 #  @brief   executes the given command in a shell
@@ -101,6 +101,10 @@ execute() {
     return ${exitCode}
 }
 
+## @fn      lastExecuteLogFile()
+#  @brief   return the logfile of the last executed command
+#  @param   <none>
+#  @return  log file name
 lastExecuteLogFile() {
     echo ${LFS_CI_LAST_EXECUTE_LOGFILE}
     return
@@ -140,6 +144,9 @@ runOnMaster() {
 #  @param   <none>
 #  @return  <none>
 showAllEnvironmentVariables() {
+    requiredParameters LFS_CI_ROOT
+
     execute printenv        
+    execute -i ${LFS_CI_ROOT}/bin/dumpConfig -f ${LFS_CI_CONFIG_FILE:-${LFS_CI_ROOT}/etc/global.cfg}
     return
 }

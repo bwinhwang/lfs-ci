@@ -33,13 +33,18 @@ actionCompare() {
         exit 0
     fi
 
+    if [[ "${upstreamBuildNumber}" != "${oldUpstreamBuildNumber}" ]] ; then
+        info "upstream build number has changed, trigger build"
+        exit 0
+    fi
+
     local changelog=$(createTempFile)
     _createChangelog ${oldUpstreamBuildNumber} ${upstreamBuildNumber} ${changelog}
 
-    if egrep -q -e '%FIN %PR=[0-9]+ESPE[09-]+' ${changelog} ; then
-        info "found in comments '%FIN %PR=<pronto>', trigger build"
-        exit 0
-    fi
+#    if egrep -q -e '%FIN %PR=[0-9]+ESPE[09-]+' ${changelog} ; then
+#        info "found in comments '%FIN %PR=<pronto>', trigger build"
+#        exit 0
+#    fi
 
     info "no pronto found between ${oldUpstreamProjectName}#${oldUpstreamBuildNumber} and ${upstreamProjectName}#${upstreamBuildNumber} => No build."
     exit 1
@@ -84,8 +89,7 @@ actionCheckout() {
 }
 
 ## @fn      actionCalculate()
-#  @brief   action ...
-#  @details 
+#  @brief   calculate action of custom SCM
 #  @param   <none>
 #  @return  <none>
 actionCalculate() {
@@ -101,11 +105,19 @@ actionCalculate() {
     debug "storing upstream info in .properties"
     echo TESTED_BUILD_JOBNAME=${upstreamProjectName} >  ${WORKSPACE}/.properties
     echo TESTED_BUILD_NUMBER=${upstreamBuildNumber}  >> ${WORKSPACE}/.properties
+    echo UPSTREAM_PROJECT=${upstreamProjectName}     >> ${WORKSPACE}/.properties
+    echo UPSTREAM_BUILD=${upstreamBuildNumber}       >> ${WORKSPACE}/.properties
 
     return 0
 }
 
 
+## @fn      _createChangelog()
+#  @brief   create the changelog
+#  @param   {oldUpstreamBuildNumber}    old upstream build number
+#  @param   {upstreamBuildNumber}       upstream build number
+#  @param   {changeLog}                 name of the changelog
+#  @return  <none>
 _createChangelog() {
     local oldUpstreamBuildNumber=$1
     local upstreamBuildNumber=$2
@@ -146,6 +158,10 @@ _createChangelog() {
     return
 }
 
+## @fn      _getUpstream()
+#  @brief   get the name of the upstream job 
+#  @param   <none>
+#  @return  <none>
 _getUpstream() {
 
     requiredParameters JOB_NAME LFS_CI_ROOT
@@ -154,14 +170,7 @@ _getUpstream() {
     upstreamBuildNumber=${UPSTREAM_BUILD}
 
     debug "build was triggered manually, get last promoted upstream"
-    # workaround
-    local backlogItemTwentyFiveMigration=$(getConfig backlogItemTwentyFiveMigration)
-
-    if [[ ${backlogItemTwentyFiveMigration} ]] ; then
-        upstreamProjectName=$(sed 's/\(.*\)_Prod_-_\(.*\)_-_Releasing_-_summary/\1_CI_-_\2_-_Wait_for_release/' <<< ${JOB_NAME} )
-    else
-        upstreamProjectName=$(sed 's/\(.*\)_Prod_-_\(.*\)_-_Releasing_-_summary/\1_CI_-_\2_-_Test/' <<< ${JOB_NAME} )
-    fi
+    upstreamProjectName=$(sed 's/\(.*\)_Prod_-_\(.*\)_-_Releasing_-_summary/\1_CI_-_\2_-_Wait_for_release/' <<< ${JOB_NAME} )
 
     copyFileFromBuildDirectoryToWorkspace "${upstreamProjectName}/promotions/Test_ok" "lastStableBuild" build.xml
     mustExistFile ${WORKSPACE}/build.xml

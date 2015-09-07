@@ -56,10 +56,12 @@ makingTest_testXmloutput() {
     local testOptions=$(getConfig LFS_CI_uc_test_making_test_test_options)
 
     mustHaveMakingTestTestConfig
+    local timeoutInSeconds=$(getConfig LFS_CI_uc_test_making_test_timeout_in_seconds_for_make_test)
+    mustHaveValue "${timeoutInSeconds}" "timeoutInSeconds"
 
     info "running test suite"
-    execute -i make -C ${testSuiteDirectory}      \
-                    --ignore-errors ${testOptions}\
+    execute timeout -s 9 ${timeoutInSeconds} make -C ${testSuiteDirectory} \
+                    --ignore-errors ${testOptions}                         \
                     test-xmloutput
 
     return
@@ -83,12 +85,15 @@ makingTest_testconfig() {
     local workspace=$(getWorkspaceName)
     mustHaveWorkspaceName
 
+    local testOptions=$(getConfig LFS_CI_uc_test_making_test_testconfig_options)
+
     info "create testconfig for ${testSuiteDirectory}"
     execute make -C ${testSuiteDirectory}       \
                 testconfig-overwrite            \
                 TESTBUILD=${deliveryDirectory}  \
                 TESTTARGET="${targetName,,}"    \
-                TESTBUILD_SRC=${workspace}
+                TESTBUILD_SRC=${workspace}      \
+                ${testOptions}
     return
 }
 
@@ -108,8 +113,8 @@ makingTest_testSuiteDirectory() {
     # we can not use location here, because the job name is "Test-ABC".
     # there is no location in the job name. So we have to use the
     # location of the upstream job.
-    local  branchName=$(getLocationName ${UPSTREAM_PROJECT})
-    mustHaveValue "${branchName}" "branch name"
+    local  branchName=$(getBranchName ${UPSTREAM_PROJECT})
+    mustHaveBranchName
 
     local relativeTestSuiteDirectory=
     if [[ -e ${workspace}/src-project/src/TMF/testsuites.cfg ]] ; then
@@ -260,7 +265,7 @@ makingTest_testLRC() {
                 TESTBUILD=${testBuildDirectory}                    \
                 TESTTARGET=${testTargetName}_shp
 
-    makingTest_powercycle
+    makingTest_poweron
     mustHaveMakingTestRunningTarget
 
     info "installing software"
@@ -370,8 +375,7 @@ makingTest_testLRC_check() {
 
 ## @fn      makingTest_install()
 #  @brief   install a software load via making test on the target
-#  @warning this is only used by LRC at the moment, but should also work for FSM
-#  @param   {testSuiteDirectory}    directory of a test suite
+#  @param   <none>
 #  @return  <none>
 makingTest_install() {
     local testSuiteDirectory=$(makingTest_testSuiteDirectory)
@@ -403,17 +407,32 @@ makingTest_install() {
     # on LRC: currently install does show wrong (old) version after reboot and
     # SHP sometimes fails to be up when install is retried.
     # We try installation up to 4 times
-    for i in $(seq 1 4) ; do
+    # on FSM: the install counter can be used, but currently it's set to 1
+    local maxInstallTries=$(getConfig LFS_CI_uc_test_making_test_installation_tries -t "testTargetName:${targetName}")
+    mustHaveValue "${maxInstallTries}" "max installation tries"
+
+    for i in $(seq 1 ${maxInstallTries}) ; do
         trace "install loop ${i}"
 
-        local installOptions=$(getConfig LFS_CI_uc_test_making_test_install_options -t testTargetName:${targetName})
+        # we try to install several times, but in the last loop, we want to see the error in the console.
+        local ignoreError=-i
+        [[ ${i} == ${maxInstallTries} ]] && ignoreError=
+
+        local installOptions=$(getConfig LFS_CI_uc_test_making_test_install_options -t "testTargetName:${targetName}")
         info "running install with options ${installOptions:-none}"
-        execute -i ${make} install ${installOptions} FORCE=yes || { sleep 20 ; continue ; }
+        execute ${ignoreError} ${make} install ${installOptions} FORCE=yes || { sleep 20 ; continue ; }
+
+        local shouldSkipNextSteps=$(getConfig LFS_CI_uc_test_making_test_skip_steps_after_make_install)
+        if [[ ${shouldSkipNextSteps} ]] ; then
+            info "the steps make powercycle waitssh setup and check are skipped due to configuration."
+            warning "The new installed software is not running after this step. Please take care by yourself, that the software will be started (reboot the target!)"
+            return
+        fi
 
         local doFirmwareupgrade="$(getConfig LFS_CI_uc_test_making_test_do_firmwareupgrade)"
         if [[ ${doFirmwareupgrade} ]] ; then
             info "perform firmware upgrade an all boards of $testTargetName."
-            execute -i ${make} firmwareupgrade FORCED_UPGRADE=true
+            execute ${ignoreError} ${make} firmwareupgrade FORCED_UPGRADE=true
         fi
 
         info "rebooting target..."
@@ -422,22 +441,22 @@ makingTest_install() {
         mustHaveMakingTestRunningTarget
 
         info "running setup..."
-        execute -i ${make} setup || continue
+        execute ${ignoreError} ${make} setup || continue
 
         info "running check..."
-        execute -i ${make} check || continue
+        execute ${ignoreError} ${make} check || continue
 
         info "install was successful."
 
         return
     done
 
-    fatal "installation failed after four attempts."
+    fatal "installation failed after ${maxInstallTries} attempts."
 
     return
 }
 
-## @fn      _reserveTarget
+## @fn      _reserveTarget()
 #  @brief   make a reserveration from TAToo/YSMv2 to get a target name
 #  @param   <none>
 #  @return  name of the target
@@ -493,23 +512,50 @@ mustHaveMakingTestRunningTarget() {
 	mustExistFile ${testSuiteDirectory}/testsuite.mk
 
     info "checking, if target is up and running (with ssh)..."
-    local canDoWaitPrompt=$(getConfig LFS_CI_uc_test_TMF_can_run_waitprompt)
-    if [[ ${canDoWaitPrompt} ]] ; then
-        execute make -C ${testSuiteDirectory} waitprompt
-    fi
-    execute make -C ${testSuiteDirectory} waitssh
-    debug "sleeping for 60 seconds..."
-    local sleepInSecond=$(getConfig LFS_CI_uc_test_sleep_in_seconds_after_waitssh)
-    execute sleep ${sleepInSecond}
+    local rebootRetry=$(getConfig LFS_CI_uc_test_TMF_retry_count_until_target_should_be_up)
+    while [[ ${rebootRetry} -gt 0 ]] ; do
 
-    info "target is up."
-
+        # idea: wait on ssh first with -i == ignore error.
+        # if the target is up, everything is fine and dandy.
+        # if not, retry until rebootRetry is 0
+        # in this case (rebootRetry == 0), we execute "make waitssh" without 
+        # -i option. So it wil raise an error, if make waitssh fail.
+        # this will raise an error and everything exists.
+        local opt=-i
+        rebootRetry=$((rebootRetry - 1))
+        [[ ${rebootRetry} -eq 0 ]] && opt=
+        if execute ${opt} make -C ${testSuiteDirectory} waitssh ; then
+            # target is up and running 
+            local sleepInSecond=$(getConfig LFS_CI_uc_test_sleep_in_seconds_after_waitssh)
+            debug "sleeping for ${sleepInSecond} seconds..."
+            execute sleep ${sleepInSecond}
+            info "target is up."
+            return
+        fi
+        info "TMF waitssh timeout, rebooting the target and trying it again..."
+        execute make -C ${testSuiteDirectory} powercycle
+    done
+    fatal "this code should not be reached."
     return
 }
 
 
 ## @fn      makingTest_logConsole()
 #  @brief   start to log all console output into an artifacts file
+#  @details some of our serial console devices (moxa, s4d, ...) are not supporing
+#           multiple connection to the device. So we are changing this a little bit
+#           * start a tcp sharer, which starts a tcp connection on a port, and connects
+#             to the serial console device.
+#           * start a 2nd command "make console" 
+#           * screen is logging the output into a file of all started programms
+#           * start a tcp sharer and "make console" on each configured moxa in/on requested target (config) 
+#           * change all target config files (just in workspace) and replace the moxa ip / port with the
+#             ip (localhost) and port (random) from tcp sharer
+#           * install exit handler to stop screen and put logfiles into artifacts
+#           Why screen?
+#           - screen is able to log the output of a terminal into a logfile
+#           - screen can be stopped with a single command, which also terminates all running command
+#             within screen
 #  @param   <none>
 #  @return  <none>
 makingTest_logConsole() {
@@ -548,9 +594,14 @@ EOF
     local fspTargets=$(execute -n ${make} testtarget-analyzer | grep ^setupfsps | cut -d= -f2 | tr "," " ")
     local testRoot=$(execute -n ${make} testroot)
 
+    if [[ -z "${testRoot}" || ! -d "${testRoot}" ]] ; then
+        warning "unable to start logging of the serial console(s) of the target. The TMF command 'make testroot' is not available, but this is required here."
+        return
+    fi
+
     for target in ${fctTarget,,} ${fspTargets,,} ; do
         debug "create moxa mock for ${target}"
-        local moxa=$(execute -n ${make} testtarget-analyzer TESTTARGET=${target} | grep ^moxa | cut -d= -f2)
+        local moxa=$(execute -n ${make} testtarget-analyzer TESTTARGET=${target} | grep ^moxa= | cut -d= -f2)
         debug "moxa is ${moxa}"
         if [[ ${moxa} ]] ; then
             local localPort=$(sed "s/[\.:\]//g" <<< ${moxa}  )
@@ -586,6 +637,13 @@ makingTest_closeConsole() {
     return
 }
 
+## @fn      makingTest_collectArtifactsOnFailure()
+#  @brief   collect the artifacts of a failed test job
+#  @defails in case of a failed testcase, we try to collect the
+#           helpful artifacts from the target (logfile, console, ...)
+#           which is useful for the developer to find and fix the problem.
+#  @param   {returnCode}    return code
+#  @return  <none>
 makingTest_collectArtifactsOnFailure() {
     local rc=${1}
 
@@ -598,7 +656,6 @@ makingTest_collectArtifactsOnFailure() {
 
 	local testSuiteDirectory=$(makingTest_testSuiteDirectory)
 
-
     execute -i mkdir -p ${workspace}/bld/bld-test-failure/results/
     execute -i mkdir -p ${testSuiteDirectory}/__artifacts
     execute -i rsync -av ${testSuiteDirectory}/__artifacts ${workspace}/bld/bld-test-failure/results/
@@ -608,7 +665,6 @@ makingTest_collectArtifactsOnFailure() {
     execute -i cp ${testSuiteDirectory}/testconfig.mk .
     execute -i make test
     execute -i rsync -av __artifacts ${workspace}/bld/bld-test-failure/results/
-
 
     createArtifactArchive
 

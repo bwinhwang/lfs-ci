@@ -7,6 +7,7 @@ use XML::Simple;
 use Data::Dumper;
 use Getopt::Std;
 use Log::Log4perl qw( :easy );
+use Encode;
 
 use Nokia::Command;
 use Nokia::Model::ReleaseNote;
@@ -37,6 +38,9 @@ sub prepare {
                                         $entry->{author}->[0], 
                                         $entry->{date}->[0],   ) 
                         : $entry->{msg}->[0];
+
+        # convert all non-ISO-8859-1 chars (like UTF-8) to ISO-8859-1
+        $msg = Encode::encode( "ISO-8859-1", $msg );
         
         if( $msg =~ m/set Dependencies, Revisions for Release/i or
             $msg =~ m/set Dependencies for Release/i or
@@ -121,6 +125,8 @@ sub prepare {
 
 sub execute {
     my $self = shift;
+
+    binmode STDOUT, ":utf8";
 
     my $importantNote = $self->{releaseNote}->importantNote();
     if( $importantNote ) {

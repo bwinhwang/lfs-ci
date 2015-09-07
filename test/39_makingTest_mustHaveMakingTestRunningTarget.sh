@@ -12,6 +12,8 @@ oneTimeSetUp() {
     }
     execute() {
         mockedCommand "execute $@"
+        UT_MAKE_FAILS_COUNT=$((UT_MAKE_FAILS_COUNT - 1))
+        return ${UT_MAKE_FAILS_COUNT}
     }
     mustHaveMakingTestTestConfig(){
         mockedCommand "mustHaveMakingTestTestConfig $@"
@@ -19,6 +21,9 @@ oneTimeSetUp() {
     makingTest_testSuiteDirectory() {
         mockedCommand "makingTest_testSuiteDirectory $@"
         echo ${WORKSPACE}/workspace/path/to/test/suite
+    }
+    getConfig() {
+        echo ${UT_REBOOT_TRY}
     }
 
     return
@@ -38,6 +43,8 @@ tearDown() {
 }
 
 test1() {
+    export UT_REBOOT_TRY=1
+    export UT_MAKE_FAILS_COUNT=1 # means return 0
     assertTrue "mustHaveMakingTestRunningTarget"
 
     local expect=$(createTempFile)
@@ -46,6 +53,26 @@ mustHaveMakingTestTestConfig
 makingTest_testSuiteDirectory 
 execute make -C ${WORKSPACE}/workspace/path/to/test/suite waitssh
 execute sleep 0.0
+EOF
+    assertExecutedCommands ${expect}
+
+    return
+}
+
+test2() {
+    # will reboot one additional time
+    export UT_REBOOT_TRY=4
+    export UT_MAKE_FAILS_COUNT=3  
+    assertTrue "mustHaveMakingTestRunningTarget"
+
+    local expect=$(createTempFile)
+    cat <<EOF > ${expect}
+mustHaveMakingTestTestConfig 
+makingTest_testSuiteDirectory 
+execute -i make -C ${WORKSPACE}/workspace/path/to/test/suite waitssh
+execute make -C ${WORKSPACE}/workspace/path/to/test/suite powercycle
+execute -i make -C ${WORKSPACE}/workspace/path/to/test/suite waitssh
+execute sleep 60
 EOF
     assertExecutedCommands ${expect}
 

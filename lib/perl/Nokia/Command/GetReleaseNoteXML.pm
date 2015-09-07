@@ -7,6 +7,7 @@ use XML::Simple;
 use Data::Dumper;
 use POSIX qw(strftime);
 use Getopt::Std;
+use Encode;
 
 use Nokia::Singleton;
 use Nokia::Model::ReleaseNote;
@@ -19,6 +20,7 @@ sub quote {
     $data =~ s/&/&amp;/g;
     $data =~ s/</&lt;/g;
     $data =~ s/>/&gt;/g;
+    $data = Encode::encode( "ISO-8859-1", $data );
     return $data;
 }
 
@@ -47,43 +49,46 @@ sub prepare {
 
         my $overrideMessage= $self->{releaseNote}->commentForRevision( $entry->{revision} );
 
-        my $msg = $overrideMessage 
+
+
+        my $completeMessage = $overrideMessage 
                     ?  $overrideMessage
                     :  ref( $entry->{msg}->[0] ) eq "HASH" 
                         ? sprintf( "empty commit message (r%s) from %s at %s", $entry->{revision}, $entry->{author}->[0], $entry->{date}->[0] ) 
                         : $entry->{msg}->[0] ;
 
-        if( $msg =~ m/[\%\#]REM (.*)/) {
-            $self->{releaseNote}->addImportantNoteMessage( $self->quote( $1 ) );
+        foreach my $msg ( split( /\n/, $completeMessage ) ) {
+            if( $msg =~ m/[\%\#]REM (.*)/) {
+                $self->{releaseNote}->addImportantNoteMessage( $self->quote( $1 ) );
+            }
+            # jira stuff
+            if( $msg =~ m/^.*(BTS[A-Z]*-[0-9]*)\s*PR\s*([^ :]*)(.*$)/  ) {
+                push @{ $self->{PR} }, { jira => $1,
+                                         nr   => $2,
+                                         text => $self->quote( $3 ), };
+            }
+            # change note
+            elsif( $msg =~ m/^.*(BTS[A-Z]-[0-9]*)\s*CN\s*([^ :]*)(.*$)/ ) {
+                push @{ $self->{CN}}, { jira => $1,
+                                        nr   => $2,
+                                        text => $self->quote( $3 ), };
+            }
+            # new feature
+            if( $msg =~ m/^.*(BTS[A-Z]-[0-9]*)\s*NF\s*([^ :]*)(.*$)/ ) {
+                push @{ $self->{NF}}, { jira => $1,
+                                        nr   => $2,
+                                        text => $self->quote( $3 ), };
+            }
+            # %FIN PR=PR123456 foobar
+            elsif( $msg =~ m/\s*[#%]FIN\s+[%@](PR|NF|CN)=(\w+)(.*)/ ) {
+                push @{ $self->{ $1 } }, { nr   => $2,
+                                           text => $self->quote( $2 . $3 ) , };
+            }
+            # notes
+            if( $msg =~ m/Transport Drivers/ ) {
+                push @{ $self->{notes} }, { notes => "Change in Transport Drivers. Please update transport software also when testing this release." };
+            }
         }
-        # jira stuff
-        if( $msg =~ m/^.*(BTS[A-Z]*-[0-9]*)\s*PR\s*([^ :]*)(.*$)/  ) {
-            push @{ $self->{PR} }, { jira => $1,
-                                     nr   => $2,
-                                     text => $self->quote( $3 ), };
-        }
-        # change note
-        elsif( $msg =~ m/^.*(BTS[A-Z]-[0-9]*)\s*CN\s*([^ :]*)(.*$)/ ) {
-            push @{ $self->{CN}}, { jira => $1,
-                                    nr   => $2,
-                                    text => $self->quote( $3 ), };
-        }
-        # new feature
-        if( $msg =~ m/^.*(BTS[A-Z]-[0-9]*)\s*NF\s*([^ :]*)(.*$)/ ) {
-            push @{ $self->{NF}}, { jira => $1,
-                                    nr   => $2,
-                                    text => $self->quote( $3 ), };
-        }
-        # %FIN PR=PR123456 foobar
-        elsif( $msg =~ m/\s*[#%]FIN\s+[%@](PR|NF|CN)=(\w+)(.*)/ ) {
-            push @{ $self->{ $1 } }, { nr   => $2,
-                                       text => $self->quote( $2 . $3 ) , };
-        }
-        # notes
-        if( $msg =~ m/Transport Drivers/ ) {
-            push @{ $self->{notes} }, { notes => "Change in Transport Drivers. Please update transport software also when testing this release." };
-        }
-
     }
 
     $self->{templateFileName} = $config->getConfig( name => "LFS_PROD_ReleaseNote_TemplateFileXml" );

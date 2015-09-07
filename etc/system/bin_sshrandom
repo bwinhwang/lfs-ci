@@ -13,6 +13,11 @@ case $1 in
                            ciorange.emea.nsn-net.net \
                            cibrown.emea.nsn-net.net )
     ;;
+    linsee_server_ulm_lrc)
+       declare -a hosts=( ullteb03.emea.nsn-net.net \
+                          ullteb07.emea.nsn-net.net \
+                          civiolet.emea.nsn-net.net )
+    ;;
 esac
 hostCount=${#hosts[@]}
 index=$(( RANDOM % ${hostCount} ))

@@ -1,5 +1,12 @@
 #!/bin/bash
 
+## @file    customSCM.cleanup.sh 
+#  @brief   customSCM actions / functions for cleaning up the shares
+#  @details see https://bts.inside.nokiasiemensnetworks.com/twiki/bin/view/MacPsWmp/CiInternals#The_CustomSCM_Plugin
+#           In LFS, we have several shares, which must be cleaned up regularly. 
+#           For this task, we have several admin cleanup jobs in Jenkins.
+#           Every job is cleaning up a share on a site.
+
 ## @fn      actionCompare()
 #  @brief   
 #  @details INPUT: REVISION_STATE_FILE revision state file from the old build
@@ -9,7 +16,6 @@ actionCompare() {
     info "no change in ${directoryNameToSynchronize} / ${checksum}"
     exit 1
 }
-
 
 ## @fn      actionCheckout()
 #  @brief   action which is called by custom scm jenkins plugin to create or update a workspace and create the changelog
@@ -41,10 +47,6 @@ actionCheckout() {
         phase_3_CI_LFS_in_Ulm)
             fatal "not implemented"
         ;;
-        phase_2_SC_LFS_linuxKernel_in_Ulm)
-            _scLfsLinuxKernelOldReleasesOnBranches ${tmpFileA}
-            execute touch ${tmpFileB}
-        ;;
         phase_2_SC_LFS_in_Ulm)
             _scLfsOldReleasesOnBranches ${tmpFileA}
             execute touch ${tmpFileB}
@@ -74,6 +76,8 @@ actionCheckout() {
                 *_in_wr) _scLfsRemoteSites wr ${tmpFileA} ;;
                 *_in_bh) _scLfsRemoteSites bh ${tmpFileA} ;;
                 *_in_hz) _scLfsRemoteSites hz ${tmpFileA} ;;
+                *_in_cloud) 
+                        _scLfsRemoteSites cloud ${tmpFileA} ;;
                 *_in_du) 
                     execute sed -i "s:/build/home/SC_LFS/releases/bld:/usrd9/build/home/SC_LFS/releases/bld:g" ${tmpFileB}
                     _scLfsRemoteSites du ${tmpFileA} 
@@ -117,6 +121,10 @@ actionCheckout() {
     return
 }
 
+## @fn      _ciLfsNotReleasedBuilds()
+#  @brief   create a list of all not released builds on CI_LFS share
+#  @param   {resultFile}    name of the result file
+#  @return  <none>
 _ciLfsNotReleasedBuilds() {
 
     # format of the result file is
@@ -125,12 +133,17 @@ _ciLfsNotReleasedBuilds() {
 
     # TODO: demx2fk3 2014-07-28 cleanup
 
+    # TODO: demx2fk3 2015-07-30 replace with getconfig
     local directoryToCleanup=/build/home/CI_LFS/Release_Candidates
+    # TODO: demx2fk3 2015-07-30 replace with getconfig
     local rcVersions=/build/home/CI_LFS/RCversion/os
 
     local tmpFileA=$(createTempFile)
     local tmpFileB=$(createTempFile)
     local tmpFile=$(createTempFile)
+
+    # TODO: demx2fk3 2015-07-30 replace with getconfig
+    local retentionTime=4
 
     for link in ${rcVersions}/* ; do
         echo test ${link}
@@ -142,7 +155,7 @@ _ciLfsNotReleasedBuilds() {
     done
 
     sort -u ${tmpFile} > ${tmpFileA}
-    find ${directoryToCleanup} -mindepth 2 -maxdepth 2 -mtime +4 -type d -printf "%p\n" | sort -u > ${tmpFileB}
+    find ${directoryToCleanup} -mindepth 2 -maxdepth 2 -mtime +${retentionTime} -type d -printf "%p\n" | sort -u > ${tmpFileB}
 
     debug "list from find"
     rawDebug ${tmpFileB}
@@ -157,11 +170,17 @@ _ciLfsNotReleasedBuilds() {
     return
 }
 
+## @fn      _scLfsOldReleasesOnBranches()
+#  @brief   create a list of all old releases on all branches from SC_LFS share (> 60 days)
+#  @param   {resultFile}    file which contains the results
+#  @return  <none>
 _scLfsOldReleasesOnBranches() {
     local resultFile=$1
     local tmpFileA=$(createTempFile)
     local tmpFileB=$(createTempFile)
+    # TODO: demx2fk3 2015-07-30 replace with getconfig
     local directoryToCleanup=/build/home/SC_LFS/releases/bld/
+    # TODO: demx2fk3 2015-07-30 replace with getconfig
     local days=60
 
     info "check for baselines older than ${days} days in ${directoryToCleanup}"
@@ -175,28 +194,17 @@ _scLfsOldReleasesOnBranches() {
     return
 }
 
-_scLfsLinuxKernelOldReleasesOnBranches() {
-    local resultFile=$1
-    local tmpFileA=$(createTempFile)
-    local tmpFileB=$(createTempFile)
-    local directoryToCleanup=/build/home/SC_LFS/linuxkernels
-    local days=1500
-
-    info "check for baselines older than ${days} days in ${directoryToCleanup}"
-    find ${directoryToCleanup} -mindepth 1 -maxdepth 1 -mtime +${days} -type d -printf "%p\n" \
-        | sort -u > ${tmpFileA}
-
-    ${LFS_CI_ROOT}/bin/removalCandidates.pl  < ${tmpFileA} > ${tmpFileB}
-
-    grep -w -f ${tmpFileB} ${tmpFileA} | sed "s/^/1 /g" > ${resultFile}
-
-    return
-}
+## @fn      _ciLfsRemoteSites()
+#  @brief   create a list of all releases in CI_LFS on a remove site
+#  @param   {siteName}    name of the site (two letters)
+#  @param   {resultFile}  file which contains the results  
+#  @return  <none>
 _ciLfsRemoteSites() {
     local siteName=$1
     local resultFile=$2
 
     export siteName
+    # TODO: demx2fk3 2015-07-30 replace with getconfig
     local directoryToCleanup=/build/home/CI_LFS/Release_Candidates/
     local find=$(getConfig ADMIN_sync_share_find_command)
 
@@ -207,6 +215,12 @@ _ciLfsRemoteSites() {
 
     return
 }
+
+## @fn      _scLfsRemoteSites()
+#  @brief   create a list of all releases in SC_LFS on a remove site
+#  @param   {siteName}    name of the site (two letters)
+#  @param   {resultFile}  file which contains the results  
+#  @return  <none>
 _scLfsRemoteSites() {
     local siteName=$1
     local resultFile=$2
@@ -224,14 +238,22 @@ _scLfsRemoteSites() {
     return
 }
 
+## @fn      _ciLfsOldReleasesOnBranches()
+#  @brief   create a list of all old releases on all branches in CI_LFS share (> 60 days)
+#  @param   {resultFile}    file which contains the results
+#  @param   {«parameter name»}    «parameter description»
+#  @return  <none>
 _ciLfsOldReleasesOnBranches() {
     local resultFile=$1
 
     local tmpFileA=$(createTempFile)
     local tmpFileB=$(createTempFile)
+    # TODO: demx2fk3 2015-07-30 replace this with getConfig
     local directoryToCleanup=/build/home/CI_LFS/Release_Candidates/
+    # TODO: demx2fk3 2015-07-30 replace this with getConfig
+    local retentionTime=60
 
-    find ${directoryToCleanup} -mindepth 2 -maxdepth 2 -mtime +60 -type d -printf "%p\n" \
+    find ${directoryToCleanup} -mindepth 2 -maxdepth 2 -mtime +${retentionTime} -type d -printf "%p\n" \
         | sort -u > ${tmpFileA}
 
     ${LFS_CI_ROOT}/bin/removalCandidates.pl  < ${tmpFileA} > ${tmpFileB}
@@ -240,16 +262,23 @@ _ciLfsOldReleasesOnBranches() {
     return
 }
 
+
+## @fn      _lfsArtifactsRemoveOldArtifacts()
+#  @brief   create a list of all old artifacts on the artifacts share (> 5 days)
+#  @param   {resultFile}    file which contains the results
+#  @return  <none>
 _lfsArtifactsRemoveOldArtifacts() {
     local resultFile=$1
 
-    local directoryToCleanup=/build/home/psulm/LFS_internal/artifacts
+    local directoryToCleanup=$(getConfig artifactesShare)
+    # TODO: demx2fk3 2015-07-30 replace this with getConfig
+    local retentionTime=5
 
     for jobName in ${directoryToCleanup}/* 
     do 
         [[ -d ${jobName} ]] || continue
         info "checking for artifacts for ${jobName}"
-        find ${jobName} -mindepth 1 -maxdepth 1 -ctime +5 -type d -printf "%C@ %p\n" \
+        find ${jobName} -mindepth 1 -maxdepth 1 -ctime +${retentionTime} -type d -printf "%C@ %p\n" \
             | sort -n     \
             | tac         \
             | tail -n +10 \
@@ -258,15 +287,9 @@ _lfsArtifactsRemoveOldArtifacts() {
 
     return
 }
-_lfsCiLogfiles() {
-    local resultFile=$1
-    find /ps/lfs/ci/log/ -type f -ctime +60 | sed "s:^:1 :" > ${resultFile}
-    return
-}
 
 ## @fn      actionCalculate()
-#  @brief   action ...
-#  @details 
+#  @brief   calculate command for custom SCM
 #  @param   <none>
 #  @return  <none>
 actionCalculate() {

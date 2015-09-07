@@ -13,9 +13,10 @@ oneTimeSetUp() {
     execute() {
         mockedCommand "execute $@"
         rc=0
-        if [[ $5 = ${UT_FAIL_CAUSE} ]] ; then
+        if [[ $5 = ${UT_FAIL_CAUSE} || $4 = ${UT_FAIL_CAUSE} ]] ; then
             UT_EXECUTE_INSTALL=$(( UT_EXECUTE_INSTALL - 1))
             rc=${UT_EXECUTE_INSTALL}
+            info "rc for $@ is ${rc}"
         fi
         return ${rc}
                 
@@ -48,6 +49,12 @@ oneTimeSetUp() {
             LFS_CI_uc_test_should_target_be_running_before_make_install)
                 echo ${UC_CONFIG_SHOULD_TARGET_RUN}
             ;;
+            LFS_CI_uc_test_making_test_skip_steps_after_make_install)
+                echo ${UT_CONFIG_SKIP_NEXT_STEPS}
+            ;;
+            LFS_CI_uc_test_making_test_installation_tries)
+                echo ${UT_INSTALL_TRIED}
+            ;;
         esac
     }
     sleep() {
@@ -68,6 +75,7 @@ setUp() {
     export UT_CONFIG_FORCE_REINSTALL=1
     export UT_CONFIG_FIRMWARE=
     export UC_CONFIG_SHOULD_TARGET_RUN=1
+    export UT_INSTALL_TRIED=4
     return
 }
 
@@ -138,7 +146,7 @@ execute make -C ${WORKSPACE}/workspace/path/to/test/suite setup
 execute -i make -C ${WORKSPACE}/workspace/path/to/test/suite install FORCE=yes
 execute -i make -C ${WORKSPACE}/workspace/path/to/test/suite install FORCE=yes
 execute -i make -C ${WORKSPACE}/workspace/path/to/test/suite install FORCE=yes
-execute -i make -C ${WORKSPACE}/workspace/path/to/test/suite install FORCE=yes
+execute make -C ${WORKSPACE}/workspace/path/to/test/suite install FORCE=yes
 EOF
     assertExecutedCommands ${expect}
 
@@ -146,8 +154,8 @@ EOF
 }
 
 test4() {
-    # install is ok, but setup fails
-    export UT_EXECUTE_INSTALL=2
+    # install is ok, but setup fails one time
+    export UT_EXECUTE_INSTALL=3
     export UT_FAIL_CAUSE=setup
     assertTrue "makingTest_install"
 
@@ -173,7 +181,7 @@ EOF
 }
 test5() {
     # install is ok, but setup fails all the time
-    export UT_EXECUTE_INSTALL=5
+    export UT_EXECUTE_INSTALL=6
     export UT_FAIL_CAUSE=setup
     assertFalse "makingTest_install"
 
@@ -195,10 +203,10 @@ execute -i make -C ${WORKSPACE}/workspace/path/to/test/suite install FORCE=yes
 makingTest_powercycle 
 mustHaveMakingTestRunningTarget 
 execute -i make -C ${WORKSPACE}/workspace/path/to/test/suite setup
-execute -i make -C ${WORKSPACE}/workspace/path/to/test/suite install FORCE=yes
+execute make -C ${WORKSPACE}/workspace/path/to/test/suite install FORCE=yes
 makingTest_powercycle 
 mustHaveMakingTestRunningTarget 
-execute -i make -C ${WORKSPACE}/workspace/path/to/test/suite setup
+execute make -C ${WORKSPACE}/workspace/path/to/test/suite setup
 EOF
     assertExecutedCommands ${expect}
 
@@ -260,11 +268,11 @@ makingTest_powercycle
 mustHaveMakingTestRunningTarget 
 execute -i make -C ${WORKSPACE}/workspace/path/to/test/suite setup
 execute -i make -C ${WORKSPACE}/workspace/path/to/test/suite check
-execute -i make -C ${WORKSPACE}/workspace/path/to/test/suite install FORCE=yes
+execute make -C ${WORKSPACE}/workspace/path/to/test/suite install FORCE=yes
 makingTest_powercycle 
 mustHaveMakingTestRunningTarget 
-execute -i make -C ${WORKSPACE}/workspace/path/to/test/suite setup
-execute -i make -C ${WORKSPACE}/workspace/path/to/test/suite check
+execute make -C ${WORKSPACE}/workspace/path/to/test/suite setup
+execute make -C ${WORKSPACE}/workspace/path/to/test/suite check
 EOF
     assertExecutedCommands ${expect}
 
@@ -332,6 +340,44 @@ makingTest_powercycle
 mustHaveMakingTestRunningTarget 
 execute -i make -C ${WORKSPACE}/workspace/path/to/test/suite setup
 execute -i make -C ${WORKSPACE}/workspace/path/to/test/suite check
+EOF
+    assertExecutedCommands ${expect}
+
+    return
+}
+
+test11() {
+    # skip the next steps after make install
+    export UT_CONFIG_SKIP_NEXT_STEPS=1
+    assertTrue "makingTest_install"
+
+    local expect=$(createTempFile)
+    cat <<EOF > ${expect}
+makingTest_testSuiteDirectory 
+_reserveTarget 
+mustHaveMakingTestRunningTarget 
+execute make -C ${WORKSPACE}/workspace/path/to/test/suite setup
+execute -i make -C ${WORKSPACE}/workspace/path/to/test/suite install FORCE=yes
+EOF
+    assertExecutedCommands ${expect}
+
+    return
+}
+
+test12() {
+    # install failed all the time
+    export UT_EXECUTE_INSTALL=5
+    export UT_INSTALL_TRIED=1
+    export UT_FAIL_CAUSE=install
+    assertFalse "makingTest_install"
+
+    local expect=$(createTempFile)
+    cat <<EOF > ${expect}
+makingTest_testSuiteDirectory 
+_reserveTarget 
+mustHaveMakingTestRunningTarget 
+execute make -C ${WORKSPACE}/workspace/path/to/test/suite setup
+execute make -C ${WORKSPACE}/workspace/path/to/test/suite install FORCE=yes
 EOF
     assertExecutedCommands ${expect}
 
