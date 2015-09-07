@@ -95,6 +95,5 @@ usecase_LFS_DEVELOPER_PACKAGE() {
 
 usecase_PKGPOOL_DEVELOPER_BUILD() {
     specialBuildPkgpool
-    usecase_PKGPOOL_BUILD
     return 0
 }

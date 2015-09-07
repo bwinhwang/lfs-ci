@@ -426,5 +426,20 @@ specialBuildPkgpool() {
         esac
     do
 
+    local buildLogFile=$(createTempFile)
+    local gitWorkspace=${WORKSPACE}/src
+
+    cd ${gitWorkspace}
+    info "bootstrap build environment..."
+    execute ./bootstrap
+    cd ${workspace}
+
+    info "building pkgpool..."
+    execute -l ${buildLogFile} ${gitWorkspace}/build ${buildParameters} 
+
+    info "creating artifacts of pkgpool"
+    tar cv --use-compress-program ${LFS_CI_ROOT}/bin/pigz --file ${workspace}/bld-pkgpool-artifacts.tar.gz --transform='s:^\pool/:pkgpool/:' pool/
+    copyFileToArtifactDirectory ${workspace}/bld-pkgpool-artifacts.tar.gz ${UPSTREAM_PROJECT} ${UPSTREAM_BUILD}
+
     return
 }

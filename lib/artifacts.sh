@@ -219,11 +219,12 @@ copyArtifactsToWorkspace() {
 #  @detail  see also linkFileToArtifactsDirectory
 #  @return  <none>
 copyFileToArtifactDirectory() {
-    requiredParameters JOB_NAME BUILD_NUMBER
     local fileName=$1
+    local jobName=${2:-${JOB_NAME}}
+    local buildNumber=${3:-${BUILD_NUMBER}}
 
     local serverName=$(getConfig LFS_CI_artifacts_storage_host)
-    local artifactsPathOnShare=$(getConfig artifactesShare)/${JOB_NAME}/${BUILD_NUMBER}
+    local artifactsPathOnShare=$(getConfig artifactesShare)/${jobName}/${buildNumber}
     # executeOnMaster mkdir -p ${artifactsPathOnShare}/save
     execute -r 10 ssh ${serverName} mkdir -p ${artifactsPathOnShare}/save
 
