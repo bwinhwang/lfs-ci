@@ -20,8 +20,8 @@ ITSME=$(basename $0)
 
 # Defaults
 BRANCH_VIEWS="trunk"
-NESTED_VIEWS="DEV/Developer_Build,DEV/Knife_alpha"
-ROOT_VIEWS="ADMIN,UBOOT"
+NESTED_VIEWS=""
+ROOT_VIEWS=""
 DISABLE_BUILD_JOBS="true"
 LRC="true"
 KEEP_JENKINS_PLUGINS="false"
@@ -69,12 +69,12 @@ cat << EOF
              Disable all .*_Build$ jobs (-e is missing) and keep already existing Jenkins plugins (-p).
 
     Options and Flags:
-        -f Complete path of CI scripting config file. This option is mandatory.
+        -f Complete path of CI scripting config file.
         -b Comma separated list of BRANCHES to be copied from LFS CI (not LRC branches). Defaults to ${BRANCH_VIEWS}.
            If you specify -b on commandline and you want to create trunk as well, 'trunk' must be in the list of
            branches to be copied (eg -b trunk,FB1506,MD11504).
-        -n Comma separated list of nested view that should be created in Sandbox. Defaults to ${NESTED_VIEWS}.
-        -r Comma separated list of root views (Jenkins top level tabs) that should be created in Sandbox. Defaults to ${ROOT_VIEWS}.
+        -n Comma separated list of nested view that should be created in Sandbox. Eg. DEV/Developer_Build,DEV/Knife_alpha.
+        -r Comma separated list of root views (Jenkins top level tabs) that should be created within Sandbox. Eg. ADMIN,UBOOT.
         -w Specify \$LOCAL_WORK_DIR directory for Jenkins installation. Defaults to ${LOCAL_WORK_DIR}.
         -i LFS CI user. Defaults to ${CI_USER}.
         -c LFS LRC CI user. Defaults to ${LRC_CI_USER}.
@@ -94,16 +94,16 @@ cat << EOF
     Examples:
 
         Standard Sandbox installation:
-            ${ITSME} 
+            ${ITSME} -f <path-to-development.cfg>
 
-        Skip LRC, use existing Jenkins plugins and start Sandbox on port 9090:
-            ${ITSME} -l -p -t 9090
+        Skip LRC (-l), use existing Jenkins plugins (-p) and start Sandbox on port 9090 (-t):
+            ${ITSME} -l -p -t 9090 -f <path-to-development.cfg>
 
-        Just start Sandbox in background:
+        Just start Jenkins(-o):
             ${ITSME} -o -f ~/lfs-ci/etc/development.cfg
 
-        Just start Sandbox by usging script /etc/init.d/jenkins
-            ${ITSME} -o -g sysv -f ~/lfs-ci/etc/development.cfg
+        Just start Sandbox by usging script /etc/init.d/jenkins (-g)
+            ${ITSME} -o -g sysv -f <path-to-development.cfg>
 
         Update Sandbox:
             ${ITSME} -j
