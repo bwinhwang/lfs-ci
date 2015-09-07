@@ -48,7 +48,7 @@ test1() {
 
     local expect=$(createTempFile)
     cat <<EOF > ${expect}
-createBasicWorkspace -l branchName src-test
+createBasicWorkspace -l branchName src-test src-fsmddal
 mustHavePreparedWorkspace --no-clean-workspace
 _copyCodecoverageArtifactsToWorkspace 
 makingTest_testsWithoutTarget 
