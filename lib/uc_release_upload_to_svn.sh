@@ -15,5 +15,7 @@ usecase_LFS_RELEASE_UPLOAD_TO_SUBVERSION() {
 
     uploadToSubversion "${releaseDirectory}/os" 
 
+    createArtifactArchive
+
     return
 }
