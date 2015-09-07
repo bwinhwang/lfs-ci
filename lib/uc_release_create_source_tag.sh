@@ -101,7 +101,7 @@ _createSourceTag() {
     local branch=pre_${osLabelName}
 
     if [[ ${canCreateSourceTag} ]] ; then
-        svnCopy -m ${commitMessageFile}         \
+        svnCopy -F ${commitMessageFile}         \
             ${svnUrl}/os/branches/${branchName} \
             ${svnUrl}/os/tags/${osLabelName}
 
