@@ -180,5 +180,7 @@ _mustHaveLfsSourceSubversionUrl() {
     commitMessageFile=$(createTempFile)
     echo "creating source tag of LFS production ${osLabelName}" > ${commitMessageFile}
 
+    branchName=pre_${osLabelName}
+
     return
 }
