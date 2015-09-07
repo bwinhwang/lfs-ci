@@ -68,7 +68,7 @@ _synchronizeBuildResultsToShare() {
         execute -r 3 ssh ${server} chmod u+w ${resultBuildShare}/${basename}/
         execute -r 3 ssh ${server} mkdir -p ${resultBuildShare}/${basename}/${destination}
         execute -r 3 rsync -av --exclude=.svn ${workspace}/bld/${basename}/. ${server}:${resultBuildShare}/${basename}/${destination}
-        execute -r 3 ssh ${server} touch ${destination}
+        execute -r 3 ssh ${server} touch ${resultBuildShare}/${basename}/${destination}
     else
         warning "storing artifacts on share is disabled in config"
     fi
