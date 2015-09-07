@@ -92,7 +92,7 @@ test10_MESSAGE() {
 
 test11_CALLER() {
     local line="$(_loggingLine INFO CALLER 'mes sage')"
-    assertEquals "lib/shunit2:source#1038" "${line}"
+    assertEquals "lib/shunit2:source#110" "${line}"
     return
 }
 

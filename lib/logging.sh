@@ -285,12 +285,12 @@ _loggingLine() {
             ;;
             NONE)       : ;;
             MESSAGE)    logLine=$(printf "%s%s" "${logLine}" "${logMessage}") ;;
-            CALLER)     local sourceFile=${BASH_SOURCE[2]/${LFS_CI_ROOT}\//}
+            CALLER)     local sourceFile=${BASH_SOURCE[3]/${LFS_CI_ROOT}\//}
                         logLine=$(printf "%s%s:%s#%s"        \
                                          "${logLine}"        \
                                          "${sourceFile}"     \
                                          "${FUNCNAME[3]}"    \
-                                         "${BASH_LINENO[2]}" )
+                                         "${BASH_LINENO[3]}" )
             ;;
             STACKTRACE) _stackTrace ;;
             *)          logLine=$(printf "%s%s" "${logLine}" "${template}") ;;
