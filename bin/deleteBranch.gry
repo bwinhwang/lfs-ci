@@ -191,23 +191,29 @@ def deleteRootView() {
     }
 }
 
+def remove_job_dir(jobName) {
+    jobPath = new File("${jenkins_jobs_dir}/${jobName}")
+    if(jobPath.exists()) {
+        if(debug) {
+            println("[DEBUG] removed job dir ${jenkins_jobs_dir}/${jobName} (dry run)")
+        } else {
+            jobPath.deleteDir()
+            println("[INFO] removed job dir ${jenkins_jobs_dir}/${jobName}")
+        }
+    }
+}
+
 def postChecks() {
     println("\n[INFO] run post checks.")
     for(jobName in deletedJobs) {
         try {
+            remove_job_dir(jobName)
             job = j.getItem(jobName)
             if(job) {
                 println("[INFO] job ${job.name} has not been deleted. Trying to delete again.")
                 job.delete()
             }
         } catch(Exception e) { }
-        // It is possible that Jenkins is deleting a job but not the related directory
-        // on the filesystem.
-        jobDir = new File("${jenkins_jobs_dir}/${jobName}")
-        if(jobDir.exists()) {
-            println("[INFO] job dir ${jobDir} has not been deleted. I delete it explicitly.")
-            jobDir.deleteDir()
-        }
     }
 }
 
@@ -217,6 +223,7 @@ def deleteJobs() {
         for(p in j.getProjects()) {
             def job_name = p.getName()
             if(deleteJobs && job_name.find("_"+branch+"_") && !job_name.find("LFS_CI_-_LRC_") && !job_name.find("LFS_Prod_-_LRC_") && !job_name.find("PKGPOOL_-_LRC_")) {
+                remove_job_dir(job_name)
                 if(debug) {
                     println("[DEBUG] delete job: $job_name (dry run)")
                 } else {
@@ -240,6 +247,7 @@ def deleteJobs() {
 def deleteLRCJobs() {
     if(LRC_deleteJobs && lrc_jobs) {
         for(p in lrc_jobs) {
+            remove_job_dir(p.getName())
             if(debug) {
                 println("[DEBUG] delete LRC job: $p.name (dry run)")
             } else {

@@ -71,6 +71,7 @@ test1() {
 
     local expect=$(createTempFile)
     cat <<EOF > ${expect}
+mustHaveCleanWorkspace 
 copyAndExtractBuildArtifactsFromProject LFS_CI_-_trunk_-_Build 1234 fsmci
 mustHaveNextCiLabelName 
 databaseEventSubBuildStarted 
@@ -96,6 +97,7 @@ test2() {
 
     local expect=$(createTempFile)
     cat <<EOF > ${expect}
+mustHaveCleanWorkspace 
 copyAndExtractBuildArtifactsFromProject LFS_CI_-_trunk_-_Build 1234 fsmci
 mustHaveNextCiLabelName 
 databaseEventSubBuildStarted 
