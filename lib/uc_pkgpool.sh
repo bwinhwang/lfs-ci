@@ -45,8 +45,11 @@ usecase_PKGPOOL_BUILD() {
 
     info "preparing git workspace..."
     cd ${gitWorkspace}
-    execute rm -rf ${gitWorkspace}/src
-    gitReset --hard
+
+    if [[ ${cleanWorkspace} ]] ; then
+        execute rm -rf ${gitWorkspace}/src
+        gitReset --hard
+    fi
 
     info "bootstrap build environment..."
     execute ./bootstrap

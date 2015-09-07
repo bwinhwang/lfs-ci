@@ -64,3 +64,8 @@ gitCheckout() {
     execute git checkout $@
     return
 }
+
+gitSubmodule() {
+    execute git submodule $@
+    return
+}

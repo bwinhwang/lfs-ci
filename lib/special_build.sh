@@ -366,8 +366,6 @@ specialBuildUploadAndNotifyUser() {
 #  @param   <none>
 #  @return  <none>
 mustHaveLocationForSpecialBuild() {
-    requiredParameters UPSTREAM_PROJECT UPSTREAM_BUILD
-
     local workspace=$(getWorkspaceName)
     mustHaveWorkspaceName
 
@@ -385,17 +383,29 @@ mustHaveLocationForSpecialBuild() {
     return
 }
 
-specialBuildPkgpool() {
+## @fn      specialPkgpoolPrepareBuild()
+#  @brief   prepare the workspace for a git pkgpool build
+#  @param   {buildType}    type of the build (e.g. DEV, KNIFE)
+#  @return  <none>
+specialPkgpoolPrepareBuild() {
     requiredParameters WORKSPACE UPSTREAM_PROJECT UPSTREAM_BUILD
+
+    local buildType=$1
+    mustHaveValue "${buildType}" "build type"
 
     local workspace=$(getWorkspaceName)
     mustHaveCleanWorkspace
+
     local locationName=$(getLocationName)
     mustHaveLocationName
+
     local gitUpstreamRepos=$(getConfig PKGPOOL_git_repos_url)
     mustHaveValue "${gitUpstreamRepos}" "git upstream repos url"
+
     local gitBranchName=$(getConfig PKGPOOL_branch_name)
     mustHaveValue "${gitBranchName}" "git branch name"
+
+    local gitWorkspace=${WORKSPACE}/src
 
     copyArtifactsToWorkspace "${UPSTREAM_PROJECT}" "${UPSTREAM_BUILD}"
 
@@ -410,36 +420,34 @@ specialBuildPkgpool() {
     gitCheckout ${gitCheckout}
     gitReset --hard
 
-    for fileInPatch in $(execute -n lsdiff ${workspace}/bld/bld-${type}-input/lfs.patch) ; do
+    for fileInPatch in $(execute -n lsdiff ${workspace}/bld/bld-${buildType}-input/lfs.patch) ; do
         local pathName=$(cut -d/ -f1,2 <<< ${fileInPatch})
         case ${pathName} in
             src-*) : ;;
             src/*) 
                    info "updating submodule ${pathName}"
-                   git submodules update ${pathName}
+                   gitSubmodule update ${pathName}
 
                    info "applying patch ${fileInPatch}"
                    local tmpPatchFile=$(createTempFile)
-                   execute -n filterdiff -i ${fileInPatch} ${workspace}/bld/bld-${type}-input/lfs.patch > ${tmpPatchFile}
+                   execute -n filterdiff -i ${fileInPatch} ${workspace}/bld/bld-${buildType}-input/lfs.patch > ${tmpPatchFile}
                    rawDebug ${tmpPatchFile}
                    execute patch -p0 -d ${workspace} < ${tmpPatchFile}
             ;;
         esac
     done
 
-    local buildLogFile=$(createTempFile)
-    local gitWorkspace=${WORKSPACE}/src
+    return
+}
 
-    cd ${gitWorkspace}
-    info "bootstrap build environment..."
-    execute ./bootstrap
-    cd ${workspace}
+specialPkgpoolCollectArtifacts() {
+    requiredParameters LFS_CI_ROOT UPSTREAM_PROJECT UPSTREAM_BUILD
 
-    info "building pkgpool..."
-    execute -l ${buildLogFile} ${gitWorkspace}/build ${buildParameters} 
+    local workspace=$(getWorkspaceName)
+    mustHaveWorkspaceName
 
     info "creating artifacts of pkgpool"
-    tar cv --use-compress-program ${LFS_CI_ROOT}/bin/pigz --file ${workspace}/bld-pkgpool-artifacts.tar.gz --transform='s:^\pool/:pkgpool/:' pool/
+    execute tar cv --use-compress-program ${LFS_CI_ROOT}/bin/pigz --file ${workspace}/bld-pkgpool-artifacts.tar.gz --transform='s:^\pool/:pkgpool/:' pool/
     copyFileToArtifactDirectory ${workspace}/bld-pkgpool-artifacts.tar.gz ${UPSTREAM_PROJECT} ${UPSTREAM_BUILD}
 
     return
