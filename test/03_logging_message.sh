@@ -54,8 +54,9 @@ test1_info() {
     local expect=$(mktemp)
     cat <<EOF > ${expect}
 startLogfile 
-_loggingLine INFO PREFIX DATE SPACE DURATION SPACE TYPE CALLER NEWLINE TAB TAB MESSAGE test
+_loggingLine INFO PREFIX DATE SPACE DURATION SPACE TYPE SPACE MESSAGE SPACE -- SPACE CALLER test
 shouldWriteLogMessageToFile INFO
+_loggingLine INFO PREFIX DATE_SHORT SPACE TYPE SPACE MESSAGE SPACE -- SPACE CALLER test
 _loggingLine INFO PREFIX DATE SPACE DURATION SPACE TYPE MESSAGE test
 EOF
     assertExecutedCommands ${expect}
@@ -63,10 +64,10 @@ EOF
 
     assertEquals "complete logfile not ok" \
         "$(cat ${CI_LOGGING_LOGFILENAME_COMPLETE})" \
-        "LOG LINE: INFO PREFIX DATE SPACE DURATION SPACE TYPE CALLER NEWLINE TAB TAB MESSAGE test" 
+        "LOG LINE: INFO PREFIX DATE SPACE DURATION SPACE TYPE SPACE MESSAGE SPACE -- SPACE CALLER test" 
     assertEquals "short logfile not ok" \
         "$(cat ${CI_LOGGING_LOGFILENAME})" \
-        "LOG LINE: INFO PREFIX DATE SPACE DURATION SPACE TYPE CALLER NEWLINE TAB TAB MESSAGE test" 
+        "LOG LINE: INFO PREFIX DATE_SHORT SPACE TYPE SPACE MESSAGE SPACE -- SPACE CALLER test" 
 
     return
 }
@@ -79,7 +80,7 @@ test2_info() {
     local expect=$(mktemp)
     cat <<EOF > ${expect}
 startLogfile 
-_loggingLine INFO PREFIX DATE SPACE DURATION SPACE TYPE CALLER NEWLINE TAB TAB MESSAGE test
+_loggingLine INFO PREFIX DATE SPACE DURATION SPACE TYPE SPACE MESSAGE SPACE -- SPACE CALLER test
 shouldWriteLogMessageToFile INFO
 EOF
     assertExecutedCommands ${expect}
@@ -87,7 +88,7 @@ EOF
 
     assertEquals "complete logfile not ok" \
         "$(cat ${CI_LOGGING_LOGFILENAME_COMPLETE})" \
-        "LOG LINE: INFO PREFIX DATE SPACE DURATION SPACE TYPE CALLER NEWLINE TAB TAB MESSAGE test" 
+        "LOG LINE: INFO PREFIX DATE SPACE DURATION SPACE TYPE SPACE MESSAGE SPACE -- SPACE CALLER test" 
     assertEquals "short logfile not ok" \
         "$(cat ${CI_LOGGING_LOGFILENAME})" \
         "" 
@@ -103,18 +104,19 @@ test3_trace() {
     local expect=$(mktemp)
     cat <<EOF > ${expect}
 startLogfile 
-_loggingLine TRACE PREFIX DATE SPACE DURATION SPACE TYPE CALLER NEWLINE TAB TAB MESSAGE test
+_loggingLine TRACE PREFIX DATE SPACE DURATION SPACE TYPE SPACE MESSAGE SPACE -- SPACE CALLER test
 shouldWriteLogMessageToFile TRACE
+_loggingLine TRACE PREFIX DATE_SHORT SPACE TYPE SPACE MESSAGE SPACE -- SPACE CALLER test
 EOF
     assertExecutedCommands ${expect}
     rm -rf ${expect}
 
     assertEquals "complete logfile not ok" \
         "$(cat ${CI_LOGGING_LOGFILENAME_COMPLETE})" \
-        "LOG LINE: TRACE PREFIX DATE SPACE DURATION SPACE TYPE CALLER NEWLINE TAB TAB MESSAGE test" 
+        "LOG LINE: TRACE PREFIX DATE SPACE DURATION SPACE TYPE SPACE MESSAGE SPACE -- SPACE CALLER test" 
     assertEquals "short logfile not ok" \
         "$(cat ${CI_LOGGING_LOGFILENAME})" \
-        "LOG LINE: TRACE PREFIX DATE SPACE DURATION SPACE TYPE CALLER NEWLINE TAB TAB MESSAGE test" 
+        "LOG LINE: TRACE PREFIX DATE_SHORT SPACE TYPE SPACE MESSAGE SPACE -- SPACE CALLER test" 
 
     return
 }
@@ -127,18 +129,19 @@ test4_debug() {
     local expect=$(mktemp)
     cat <<EOF > ${expect}
 startLogfile 
-_loggingLine DEBUG PREFIX DATE SPACE DURATION SPACE TYPE CALLER NEWLINE TAB TAB MESSAGE test
+_loggingLine DEBUG PREFIX DATE SPACE DURATION SPACE TYPE SPACE MESSAGE SPACE -- SPACE CALLER test
 shouldWriteLogMessageToFile DEBUG
+_loggingLine DEBUG PREFIX DATE_SHORT SPACE TYPE SPACE MESSAGE SPACE -- SPACE CALLER test
 EOF
     assertExecutedCommands ${expect}
     rm -rf ${expect}
 
     assertEquals "complete logfile not ok" \
         "$(cat ${CI_LOGGING_LOGFILENAME_COMPLETE})" \
-        "LOG LINE: DEBUG PREFIX DATE SPACE DURATION SPACE TYPE CALLER NEWLINE TAB TAB MESSAGE test" 
+        "LOG LINE: DEBUG PREFIX DATE SPACE DURATION SPACE TYPE SPACE MESSAGE SPACE -- SPACE CALLER test" 
     assertEquals "short logfile not ok" \
         "$(cat ${CI_LOGGING_LOGFILENAME})" \
-        "LOG LINE: DEBUG PREFIX DATE SPACE DURATION SPACE TYPE CALLER NEWLINE TAB TAB MESSAGE test" 
+        "LOG LINE: DEBUG PREFIX DATE_SHORT SPACE TYPE SPACE MESSAGE SPACE -- SPACE CALLER test" 
 
     return
 }

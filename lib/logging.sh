@@ -197,33 +197,40 @@ message() {
     # console output:
     # PREFIX DATE_SHORT SPACE DURATION SPACE TYPE SPACE MESSAGE
     # short log file:
-    # PREFIX DATE_SHORT SPACE TYPE SPACE MESSAGE --- 
+    # PREFIX DATE_SHORT SPACE TYPE SPACE MESSAGE -- CALLER
+    # complete log file:
+    # PREFIX DATE SPACE DURATION SPACE TYPE SPACE MESSAGE SPACE -- SPACE CALLER
 
-    # create and write log message into logfile
+    # create and write log message into complete logfile
     local logLineFile=$(_loggingLine "${logType}"                                                                                  \
-                                 "${LFS_CI_LOGGING_CONFIG-"PREFIX DATE SPACE DURATION SPACE TYPE CALLER NEWLINE TAB TAB MESSAGE"}" \
-                                 "${logMessage}")
+                                     "${LFS_CI_LOGGING_CONFIG-"PREFIX DATE SPACE DURATION SPACE TYPE SPACE MESSAGE SPACE -- SPACE CALLER"}" \
+                                     "${logMessage}")
     echo -e 1>&2 "${logLineFile}" >> ${CI_LOGGING_LOGFILENAME_COMPLETE}
 
     # this is a blacklisting. 
+    # filter out the messages which should not be in the shorten log file
     shouldWriteLogMessageToFile ${logType} || return 0
 
+    # create and write log message into shorten logfile
+    logLineFile=$(_loggingLine "${logType}"                                                                                  \
+                               "${LFS_CI_LOGGING_CONFIG-"PREFIX DATE_SHORT SPACE TYPE SPACE MESSAGE SPACE -- SPACE CALLER"}" \
+                               "${logMessage}")
     echo -e 1>&2 "${logLineFile}" >> ${CI_LOGGING_LOGFILENAME}
 
     # don't show TRACE and DEBUG message in screen, 
     # For screen, we create a different type of message.
     case "${logType}" in
-        TRACE) : ;;
-        DEBUG) : ;;
-        *) local logLine=$(_loggingLine "${logType}"                                                                                      \
-                                        "${LFS_CI_LOGGING_CONFIG-"PREFIX DATE SPACE DURATION SPACE TYPE MESSAGE"}" \
-                                        "${logMessage}")
-           # We are redirecting log messages to stderr. 
-           # We don't want to have log messages in a local foobar=$(getFunction) call.
-           echo -e 1>&2 "${logLine}" 
-        ;;
+        TRACE) return ;;
+        DEBUG) return ;;
     esac
 
+    # create and show the log message to the console
+    local logLine=$(_loggingLine "${logType}"                                                                                      \
+                                 "${LFS_CI_LOGGING_CONFIG-"PREFIX DATE SPACE DURATION SPACE TYPE MESSAGE"}" \
+                                 "${logMessage}")
+    # We are redirecting log messages to stderr. 
+    # We don't want to have log messages in a local foobar=$(getFunction) call.
+    echo -e 1>&2 "${logLine}" 
     return 0
 }
 
@@ -267,8 +274,8 @@ _loggingLine() {
             NEWLINE)    logLine=$(printf "%s%s" "${logLine}" "\n" ) ;;
             TAB)        logLine=$(printf "%s\t" "${logLine}" ) ;;
             PREFIX)     logLine=$(printf "%s%s" "${logLine}" "${prefix}" ) ;;
-            DATE)       logLine=$(printf "%s%s" "${logLine}" "$(date "+%Y-%m-%d %H:%M:%S")" ) ;;
-            DATE_SHORT) logLine=$(printf "%s%s" "${logLine}" "$(date "+%Y-%m-%d %H:%M:%S.%N %Z")" ) ;;
+            DATE_SHORT) logLine=$(printf "%s%s" "${logLine}" "$(date "+%Y-%m-%d %H:%M:%S")" ) ;;
+            DATE)       logLine=$(printf "%s%s" "${logLine}" "$(date "+%Y-%m-%d %H:%M:%S.%N %Z")" ) ;;
             TYPE)       logLine=$(printf "%s%-10s" "${logLine}" "[${logType}]" );;
             DURATION) 
                         local cur=$(date +%s.%N)
@@ -279,15 +286,14 @@ _loggingLine() {
             NONE)       : ;;
             MESSAGE)    logLine=$(printf "%s%s" "${logLine}" "${logMessage}") ;;
             CALLER)     local sourceFile=${BASH_SOURCE[2]/${LFS_CI_ROOT}\//}
-                        logLine=$(printf "%s%s - %s - %s"  \
-                            "${logLine}"                   \
-                            "${sourceFile}"                \
-                            "${FUNCNAME[3]}"               \
-                            "${BASH_LINENO[2]}" )
+                        logLine=$(printf "%s%s:%s#%s"        \
+                                         "${logLine}"        \
+                                         "${sourceFile}"     \
+                                         "${FUNCNAME[3]}"    \
+                                         "${BASH_LINENO[2]}" )
             ;;
             STACKTRACE) _stackTrace ;;
             *)          logLine=$(printf "%s%s" "${logLine}" "${template}") ;;
-
         esac
 
     done
