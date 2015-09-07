@@ -80,7 +80,7 @@ startLogfile() {
         fi
 
         printf -- "------------------------------------------------------------------\n" >  ${CI_LOGGING_LOGFILENAME}
-        printf -- "starting logfile\n"                                                   >> ${CI_LOGGING_LOGFILENAME}
+        printf -- "starting short logfile\n"                                             >> ${CI_LOGGING_LOGFILENAME}
         printf -- "  script: $0\n"                                                       >> ${CI_LOGGING_LOGFILENAME}
         printf -- "  jobName:  $jobName\n"                                               >> ${CI_LOGGING_LOGFILENAME}
         printf -- "  hostname: $hostName\n"                                              >> ${CI_LOGGING_LOGFILENAME}
@@ -91,7 +91,7 @@ startLogfile() {
         printf -- "{{{\n"                                                                >> ${CI_LOGGING_LOGFILENAME}
 
         printf -- "------------------------------------------------------------------\n" >  ${CI_LOGGING_LOGFILENAME_COMPLETE}
-        printf -- "starting logfile\n"                                                   >> ${CI_LOGGING_LOGFILENAME_COMPLETE}
+        printf -- "starting complete logfile\n"                                          >> ${CI_LOGGING_LOGFILENAME_COMPLETE}
         printf -- "  script: $0\n"                                                       >> ${CI_LOGGING_LOGFILENAME_COMPLETE}
         printf -- "  jobName:  $jobName\n"                                               >> ${CI_LOGGING_LOGFILENAME_COMPLETE}
         printf -- "  hostname: $hostName\n"                                              >> ${CI_LOGGING_LOGFILENAME_COMPLETE}
@@ -113,13 +113,13 @@ stopLogfile() {
         printf -- "}}}\n"                                                                 >> ${CI_LOGGING_LOGFILENAME}
         printf -- "-------------------------------------------------------------------\n" >> ${CI_LOGGING_LOGFILENAME}
         printf -- "script: $0\n"                                                          >> ${CI_LOGGING_LOGFILENAME}
-        printf -- "ending logfile\n"                                                      >> ${CI_LOGGING_LOGFILENAME}
+        printf -- "ending short logfile\n"                                                >> ${CI_LOGGING_LOGFILENAME}
         printf -- "-------------------------------------------------------------------\n" >> ${CI_LOGGING_LOGFILENAME}
 
         printf -- "}}}\n"                                                                 >> ${CI_LOGGING_LOGFILENAME_COMPLETE}
         printf -- "-------------------------------------------------------------------\n" >> ${CI_LOGGING_LOGFILENAME_COMPLETE}
         printf -- "script: $0\n"                                                          >> ${CI_LOGGING_LOGFILENAME_COMPLETE}
-        printf -- "ending logfile\n"                                                      >> ${CI_LOGGING_LOGFILENAME_COMPLETE}
+        printf -- "ending complete logfile\n"                                             >> ${CI_LOGGING_LOGFILENAME_COMPLETE}
         printf -- "-------------------------------------------------------------------\n" >> ${CI_LOGGING_LOGFILENAME_COMPLETE}
 
         # disabled gzipping..
@@ -345,6 +345,7 @@ rawDebug() {
     trace "{{{ adding content of file ${fileToLog} to logfile"
     trace     "----------------------------------------------"
     cat ${fileToLog} >> ${CI_LOGGING_LOGFILENAME}
+    cat ${fileToLog} >> ${CI_LOGGING_LOGFILENAME_COMPLETE}
     trace "}}} ----------------------------------------------"
 
     return
