@@ -231,7 +231,9 @@ usecase_PKGPOOL_UPDATE_DEPS() {
     info "new label is ${label}/${newGitRevision} based on ${oldLabel}"
 
     execute rm -rfv ${WORKSPACE}/src
-    gitClone ssh://git@psulm.nsn-net.net/build/build ${WORKSPACE}/src
+    local gitUpstreamRepos=$(getConfig PKGPOOL_git_repos_url)
+    mustHaveValue "${gitUpstreamRepos}" "git upstream repos url"
+    gitClone ${gitUpstreamRepos} ${WORKSPACE}/src
 
     local svnUrlsToUpdate=$(getConfig PKGPOOL_PROD_update_dependencies_svn_url)
     mustHaveValue "${svnUrlsToUpdate}" "svn urls for pkgpool"

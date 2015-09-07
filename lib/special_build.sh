@@ -153,6 +153,7 @@ specialBuildisRequiredForLrc() {
 
     return 0
 }
+
 ## @fn      specialBuildisRequiredSelectedByUser(  )
 #  @brief   checks, if the build is requested by the user (via jenkins input)
 #  @param   {buildType}    type of the build, values DEV or KNIFE
@@ -383,3 +384,47 @@ mustHaveLocationForSpecialBuild() {
     return
 }
 
+specialBuildPkgpool() {
+    requiredParameters WORKSPACE UPSTREAM_PROJECT UPSTREAM_BUILD
+
+    local workspace=$(getWorkspaceName)
+    mustHaveCleanWorkspace
+    local locationName=$(getLocationName)
+    mustHaveLocationName
+    local gitUpstreamRepos=$(getConfig PKGPOOL_git_repos_url)
+    mustHaveValue "${gitUpstreamRepos}" "git upstream repos url"
+    local gitBranchName=$(getConfig PKGPOOL_branch_name)
+    mustHaveValue "${gitBranchName}" "git branch name"
+
+    copyArtifactsToWorkspace "${UPSTREAM_PROJECT}" "${UPSTREAM_BUILD}"
+
+    # cleanup old workspace from git
+    execute rm -rf ${WORKSPACE}/src
+
+    # clone git repos
+    gitClone ${gitUpstreamRepos} ${WORKSPACE}/src
+
+    # switch branch
+    cd ${WORKSPACE}/src
+    gitCheckout ${gitCheckout}
+    gitReset --hard
+
+    for fileInPatch in $(execute -n lsdiff ${workspace}/bld/bld-${type}-input/lfs.patch) ; do
+        local pathName=$(cut -d/ -f1,2 <<< ${fileInPatch})
+        case ${pathName} in
+            src-*) : ;;
+            src/*) 
+                   info "updating submodule ${pathName}"
+                   git submodules update ${pathName}
+
+                   info "applying patch ${fileInPatch}"
+                   local tmpPatchFile=$(createTempFile)
+                   execute -n filterdiff -i ${fileInPatch} ${workspace}/bld/bld-${type}-input/lfs.patch > ${tmpPatchFile}
+                   rawDebug ${tmpPatchFile}
+                   execute patch -p0 -d ${workspace} < ${tmpPatchFile}
+            ;;
+        esac
+    do
+
+    return
+}

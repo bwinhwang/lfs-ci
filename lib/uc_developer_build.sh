@@ -92,3 +92,9 @@ usecase_LFS_DEVELOPER_PACKAGE() {
     return
 }
 
+
+usecase_PKGPOOL_DEVELOPER_BUILD() {
+    specialBuildPkgpool
+    usecase_PKGPOOL_BUILD
+    return 0
+}
