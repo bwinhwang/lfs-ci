@@ -13,6 +13,7 @@
 [[ -z ${LFS_CI_SOURCE_artifacts}       ]] && source ${LFS_CI_ROOT}/lib/artifacts.sh
 [[ -z ${LFS_CI_SOURCE_common}          ]] && source ${LFS_CI_ROOT}/lib/common.sh
 [[ -z ${LFS_CI_SOURCE_amazons3}        ]] && source ${LFS_CI_ROOT}/lib/amazons3.sh
+[[ -z ${LFS_CI_SOURCE_git}             ]] && source ${LFS_CI_ROOT}/lib/git.sh
 
 LFS_CI_SOURCE_special_build='$Id$'
 
