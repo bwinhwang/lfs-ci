@@ -25,7 +25,6 @@ LFS_CI_SOURCE_commands='$Id$'
 #  @return  <none>
 #  @throws  raise an error, if the command exits with an exit code != 0
 execute() {
-    debug "execute $@"
     local noRedirect=
     local retryCount=1
     local ignoreError=
@@ -56,7 +55,7 @@ execute() {
     # the retryCount can be choosen by the user
     while [[ ${retryCount} -gt 0 && ${exitCode} -ne 0 ]] ; do
         retryCount=$((retryCount - 1))
-        trace "execute command: \"${@}\""
+        debug "execute command: \"${@}\""
         if [[ ${noRedirect} ]] ; then
             # in case that the user forgot to redirect stderr to stdout, we are doing it for him...
             # this is called real service!!
@@ -69,7 +68,7 @@ execute() {
             rawDebug ${output}
         fi
 
-        trace "exit code of \"${command}\" was ${exitCode}"
+        debug "exit code of \"${command}\" was ${exitCode}"
 
         # fucking stupid workaround to get the logfile for the command outside
         # of the function.....
@@ -81,7 +80,7 @@ execute() {
         # in the last loop, don't wait, just exist
         if [[ ${retryCount} -gt 0 && ${exitCode} -gt 0 ]] ; then
             local randomSeconds=$((RANDOM % 20))
-            trace "waiting ${randomSeconds} seconds for retry execution (try ${retryCount}"
+            trace "waiting ${randomSeconds} seconds for retry execution (try ${retryCount})"
             sleep ${randomSeconds}
         fi
     done
