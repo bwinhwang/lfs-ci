@@ -354,10 +354,11 @@ jenkins_start_sandbox() {
         echo ${PID} > ${PID_FILE}
         echo "    java process ID: $(cat ${PID_FILE})"
         echo "    waiting for Jenkins to be fully running"
-        while [[ ${RET} != 0 ]]; do
+        RET=1
+        while [[ ${RET} -ne 0 ]]; do
             curl -s http://localhost:${HTTP_PORT} --noproxy localhost > /dev/null 2>&1
             RET=$?
-            sleep 3
+            sleep 15
         done
     elif [[ ${START_OPTION} == "sysv" ]]; then
         echo "Start Jenkins via /etc/init.d/jenkins"
@@ -373,29 +374,39 @@ jenkins_start_sandbox() {
 #           via jenkins CLI.
 #  @return  <none>
 jenkins_configure_sandbox() {
-    echo "Invoke groovy script on new Sandbox..."
+    local rootViews=$ROOT_VIEWS
+    local nestedViews=$NESTED_VIEWS
+    [[ -z ${rootViews} ]] && rootViews="None"
+    [[ -z ${nestedViews} ]] && nestedViews="None"
+    echo "Invoke groovy script on new Sandbox... ${SANDBOX_SCRIPT_DIR}/setup-sandbox.gry create_views ${rootViews} ${nestedViews} ${BRANCH_VIEWS} ${LRC}"
     java -jar ${JENKINS_CLI_JAR} -s http://localhost:${HTTP_PORT}/ groovy \
-        ${SANDBOX_SCRIPT_DIR}/setup-sandbox.gry create_views ${ROOT_VIEWS} ${NESTED_VIEWS} ${BRANCH_VIEWS} ${LRC}
+        ${SANDBOX_SCRIPT_DIR}/setup-sandbox.gry create_views ${rootViews} ${nestedViews} ${BRANCH_VIEWS} ${LRC}
 
-    echo "Configure Jenkins top branch views (tabs) in new Sandbox"
-    for VIEW in $(echo ${BRANCH_VIEWS} | tr ',' ' '); do
-        echo "    Configure $VIEW view"
-        curl http://localhost:${HTTP_PORT}/view/${VIEW}/config.xml --noproxy localhost --data-binary @${TMP}/${VIEW}_view_config.xml
-    done
+    if [[ ! -z ${BRANCH_VIEWS} ]]; then
+        echo "Configure Jenkins top branch views (tabs) in new Sandbox"
+        for VIEW in $(echo ${BRANCH_VIEWS} | tr ',' ' '); do
+            echo "    Configure $VIEW view"
+            curl http://localhost:${HTTP_PORT}/view/${VIEW}/config.xml --noproxy localhost --data-binary @${TMP}/${VIEW}_view_config.xml
+        done
+    fi
 
-    echo "Configure Jenkins top level views (tabs) in new Sandbox"
-    for VIEW in $(echo ${ROOT_VIEWS} | tr ',' ' '); do
-        echo "    Configure $VIEW view"
-        curl http://localhost:${HTTP_PORT}/view/${VIEW}/config.xml --noproxy localhost --data-binary @${TMP}/${VIEW}_view_config.xml
-    done
+    if [[ ! -z ${ROOT_VIEWS} ]]; then
+        echo "Configure Jenkins top level views (tabs) in new Sandbox"
+        for VIEW in $(echo ${ROOT_VIEWS} | tr ',' ' '); do
+            echo "    Configure $VIEW view"
+            curl http://localhost:${HTTP_PORT}/view/${VIEW}/config.xml --noproxy localhost --data-binary @${TMP}/${VIEW}_view_config.xml
+        done
+    fi
 
-    echo "Configure Jenkins nested views (nested tabs) in new Sandbox"
-    for VIEW in $(echo ${NESTED_VIEWS} | tr ',' ' '); do
-        local parentTab=$(echo ${VIEW} | cut -d'/' -f1)
-        local childTab=$(echo ${VIEW} | cut -d'/' -f2)
-        echo "    Configure ${parentTab}/view/${childTab} view"
-        curl http://localhost:${HTTP_PORT}/view/${parentTab}/view/${childTab}/config.xml --noproxy localhost --data-binary @${TMP}/${parentTab}_${childTab}_view_config.xml
-    done
+    if [[ ! -z ${NESTED_VIEWS} ]]; then
+        echo "Configure Jenkins nested views (nested tabs) in new Sandbox"
+        for VIEW in $(echo ${NESTED_VIEWS} | tr ',' ' '); do
+            local parentTab=$(echo ${VIEW} | cut -d'/' -f1)
+            local childTab=$(echo ${VIEW} | cut -d'/' -f2)
+            echo "    Configure ${parentTab}/view/${childTab} view"
+            curl http://localhost:${HTTP_PORT}/view/${parentTab}/view/${childTab}/config.xml --noproxy localhost --data-binary @${TMP}/${parentTab}_${childTab}_view_config.xml
+        done
+    fi
 
     if [[ "${LRC}" == "true" ]]; then
         echo "    Configure LRC view"
