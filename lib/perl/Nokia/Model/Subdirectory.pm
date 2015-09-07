@@ -23,6 +23,7 @@ sub isSubversion {
     return 1 if $self->{repos} =~ m|^https://|;
     return 1 if $self->{repos} =~ m|^http://|;
     return 1 if $self->{repos} =~ m|^file://|;
+    return 1 if $self->{repos} =~ m|^svn\+ssh://|;
     return 0;
 }
 
