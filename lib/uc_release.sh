@@ -5,6 +5,7 @@
 [[ -z ${LFS_CI_SOURCE_artifacts}       ]] && source ${LFS_CI_ROOT}/lib/artifacts.sh
 [[ -z ${LFS_CI_SOURCE_createWorkspace} ]] && source ${LFS_CI_ROOT}/lib/createWorkspace.sh
 [[ -z ${LFS_CI_SOURCE_release}         ]] && source ${LFS_CI_ROOT}/lib/release.sh
+[[ -z ${LFS_CI_SOURCE_database}        ]] && source ${LFS_CI_ROOT}/lib/database.sh
 
 source ${LFS_CI_ROOT}/lib/uc_release_create_rel_tag.sh
 source ${LFS_CI_ROOT}/lib/uc_release_create_source_tag.sh
@@ -50,6 +51,7 @@ ci_job_release() {
 #  @return  <none>
 usecase_LFS_RELEASE_PREPARE() {
     mustBePreparedForReleaseTask
+    databaseEventReleaseStarted
     createArtifactArchive
     return
 }
