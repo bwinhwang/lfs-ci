@@ -447,6 +447,7 @@ specialPkgpoolCollectArtifacts() {
     mustHaveWorkspaceName
 
     info "creating artifacts of pkgpool"
+    cd ${workspace}
     execute tar cv --use-compress-program ${LFS_CI_ROOT}/bin/pigz --file ${workspace}/bld-pkgpool-artifacts.tar.gz --transform='s:^\pool/:pkgpool/:' pool/
     copyFileToArtifactDirectory ${workspace}/bld-pkgpool-artifacts.tar.gz ${UPSTREAM_PROJECT} ${UPSTREAM_BUILD}
 
