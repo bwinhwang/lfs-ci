@@ -4,6 +4,7 @@
 
 [[ -z ${LFS_CI_SOURCE_artifacts}       ]] && source ${LFS_CI_ROOT}/lib/artifacts.sh
 [[ -z ${LFS_CI_SOURCE_createWorkspace} ]] && source ${LFS_CI_ROOT}/lib/createWorkspace.sh
+[[ -z ${LFS_CI_SOURCE_release}         ]] && source ${LFS_CI_ROOT}/lib/release.sh
 
 ## @fn      ci_job_release()
 #  @brief   dispatcher for the release jobs
