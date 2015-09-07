@@ -6,6 +6,15 @@
 [[ -z ${LFS_CI_SOURCE_createWorkspace} ]] && source ${LFS_CI_ROOT}/lib/createWorkspace.sh
 [[ -z ${LFS_CI_SOURCE_release}         ]] && source ${LFS_CI_ROOT}/lib/release.sh
 
+source ${LFS_CI_ROOT}/lib/uc_release_create_rel_tag.sh
+source ${LFS_CI_ROOT}/lib/uc_release_create_source_tag.sh
+source ${LFS_CI_ROOT}/lib/uc_release_prechecks.sh
+source ${LFS_CI_ROOT}/lib/uc_release_send_release_note.sh
+source ${LFS_CI_ROOT}/lib/uc_release_share_build_artifacts.sh
+source ${LFS_CI_ROOT}/lib/uc_release_share_build_artifacts_kernelsource.sh
+source ${LFS_CI_ROOT}/lib/uc_release_update_deps.sh
+source ${LFS_CI_ROOT}/lib/uc_release_upload_to_svn.sh
+
 ## @fn      ci_job_release()
 #  @brief   dispatcher for the release jobs
 #  @detail  This is a dispatcher for the jobs in old style.
