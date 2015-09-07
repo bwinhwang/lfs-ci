@@ -35,6 +35,7 @@
 [[ -z ${LFS_CI_SOURCE_artifacts}       ]] && source ${LFS_CI_ROOT}/lib/artifacts.sh
 [[ -z ${LFS_CI_SOURCE_special_build}   ]] && source ${LFS_CI_ROOT}/lib/special_build.sh
 [[ -z ${LFS_CI_SOURCE_uc_lfs_package}  ]] && source ${LFS_CI_ROOT}/lib/uc_lfs_package.sh
+[[ -z ${LFS_CI_SOURCE_uc_pkgpool}      ]] && source ${LFS_CI_ROOT}/lib/uc_pkgpool.sh
 
 ## @fn      usecase_LFS_DEVELOPER_BUILD()
 #  @brief   run the usecase developer build
