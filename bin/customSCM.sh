@@ -16,6 +16,10 @@
 
 action=$1
 
+# for better debugging
+PS4='+(${BASH_SOURCE}:${LINENO}): ${FUNCNAME[0]:+${FUNCNAME[0]}(): }'
+export PS4
+
 export LFS_CI_LOGGING_PREFIX=$(basename $0).${action}
 
 export PATH=${LFS_CI_ROOT}/bin:${PATH}

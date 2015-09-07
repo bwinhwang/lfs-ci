@@ -232,11 +232,13 @@ existsInSubversion() {
     local url=$1
     local tag=$2
     local tmp=$(createTempFile)
+    local tmp2=$(createTempFile)
 
-    execute -n svn ls --xml ${url} \
-        | execute -n ${LFS_CI_ROOT}/bin/xpath -q -e /lists/list/entry/name > ${tmp}
+    debug "checking in subversion for ${tag} in ${url}"
+    execute -l ${tmp}  svn ls --xml ${url} 
+    execute -l ${tmp2} ${LFS_CI_ROOT}/bin/xpath -q -e /lists/list/entry/name ${tmp}
 
-    if grep -q "<name>${tag}</name>" ${tmp} ; then
+    if grep -q "<name>${tag}</name>" ${tmp2} ; then
         return 0
     fi
 
