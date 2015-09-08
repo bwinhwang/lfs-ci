@@ -133,6 +133,15 @@ copyAndExtractBuildArtifactsFromProject() {
             continue
         fi
 
+        local canRemove=$(getConfig LFS_CI_artifacts_can_remove_artifacts_from_other_project -t base:${base})
+        if [[ -z ${canRemove} ]] ; then
+            # this is a special handling for pkgpool. Problem is, that pkgpool directory is called 
+            # pkgpool and not bld-pkgpool-all.
+            local directoryMap=$(getConfig LFS_CI_artifacts_map -t base:${base})
+            trace "removing directory ${base} (aka ${directoryMap}) for bld directory"
+            execute rm -rf ${workspace}/bld/${directoryMap}
+        fi
+
         info "copy artifact ${file} from job ${jobName}#${buildNumber} to workspace and untar it"
 
         execute -r 10 rsync --archive --verbose --rsh=ssh -P          \
