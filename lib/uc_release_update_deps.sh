@@ -16,6 +16,13 @@ usecase_LFS_RELEASE_UPDATE_DEPS() {
     local workspace=$(getWorkspaceName)
     mustHaveWorkspaceName
 
+    local buildJobName=$(getBuildJobNameFromFingerprint)
+    mustHaveValue "${buildJobName}" "build job name from fingerprint"
+    local buildBuildNumber=$(getBuildBuildNumberFromFingerprint)
+    mustHaveValue "${buildBuildNumber}" "build build name from fingerprint"
+
+    copyAndExtractBuildArtifactsFromProject ${buildJobName} ${buildBuildNumber} "externalComponents"
+
     local componentsFile=$(createTempFile)
     execute -n sort -u ${workspace}/bld/bld-externalComponents-*/usedRevisions.txt > ${componentsFile}
 

@@ -16,6 +16,13 @@ usecase_LFS_RELEASE_CREATE_RELEASE_TAG() {
     local workspace=$(getWorkspaceName)
     mustHaveWorkspaceName 
 
+    local buildJobName=$(getBuildJobNameFromFingerprint)
+    mustHaveValue "${buildJobName}" "build job name from fingerprint"
+    local buildBuildNumber=$(getBuildBuildNumberFromFingerprint)
+    mustHaveValue "${buildBuildNumber}" "build build name from fingerprint"
+
+    copyAndExtractBuildArtifactsFromProject ${buildJobName} ${buildBuildNumber} "externalComponents"
+
     # get os label
     info "using build name: ${LFS_PROD_RELEASE_CURRENT_TAG_NAME}"
     info "creating LFS REL: ${LFS_PROD_RELEASE_CURRENT_TAG_NAME_REL}"
