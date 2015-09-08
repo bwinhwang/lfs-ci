@@ -399,11 +399,13 @@ specialPkgpoolPrepareBuild() {
     local locationName=$(getLocationName)
     mustHaveLocationName
 
+    local svnUrlsToUpdate=$(getConfig PKGPOOL_PROD_update_dependencies_svn_url)
+    mustHaveValue "${svnUrlsToUpdate}" "svn urls for pkgpool"
+    local revisionFileInSvn=$(basename ${svnUrlsToUpdate}/src/gitrevision)
+    local gitRevision=$(svnCat ${revisionFileInSvn})
+
     local gitUpstreamRepos=$(getConfig PKGPOOL_git_repos_url)
     mustHaveValue "${gitUpstreamRepos}" "git upstream repos url"
-
-    local gitBranchName=$(getConfig PKGPOOL_branch_name)
-    mustHaveValue "${gitBranchName}" "git branch name"
 
     local gitWorkspace=${WORKSPACE}/src
 
@@ -417,7 +419,7 @@ specialPkgpoolPrepareBuild() {
 
     # switch branch
     cd ${WORKSPACE}/src
-    gitCheckout ${gitCheckout}
+    gitCheckout ${gitRevision}
     gitReset --hard
 
     for fileInPatch in $(execute -n lsdiff ${workspace}/bld/bld-${buildType}-input/lfs.patch) ; do
