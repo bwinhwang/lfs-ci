@@ -134,7 +134,7 @@ copyAndExtractBuildArtifactsFromProject() {
         fi
 
         local canRemove=$(getConfig LFS_CI_artifacts_can_remove_artifacts_from_other_project -t base:${base})
-        if [[ -z ${canRemove} ]] ; then
+        if [[ ${canRemove} ]] ; then
             # this is a special handling for pkgpool. Problem is, that pkgpool directory is called 
             # pkgpool and not bld-pkgpool-all.
             local directoryMap=$(getConfig LFS_CI_artifacts_map -t base:${base})
