@@ -377,9 +377,6 @@ mustHaveLocationForSpecialBuild() {
     local location=$(cat ${workspace}/bld/bld-fsmci-summary/location)
     mustHaveValue "${location}" "location"
 
-    local subTaskName=$(getSubTaskNameFromJobName)
-    mustHaveValue "${subTaskName}" "sub task name"
-
     export LFS_CI_GLOBAL_BRANCH_NAME=${location}
     return
 }
