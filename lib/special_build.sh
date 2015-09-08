@@ -66,6 +66,7 @@ specialBuildPreparation() {
     execute mkdir -p ${workspace}/bld/bld-fsmci-summary/
     echo ${label}    > ${workspace}/bld/bld-fsmci-summary/label
     echo ${location} > ${workspace}/bld/bld-fsmci-summary/location
+    echo ${revision} > ${workspace}/bld/bld-fsmci-summary/svnrevision
 
     createFingerprintFile
 
@@ -396,6 +397,7 @@ specialPkgpoolPrepareBuild() {
     local workspace=$(getWorkspaceName)
     mustHaveCleanWorkspace
 
+    mustHaveLocationForSpecialBuild
     local locationName=$(getLocationName)
     mustHaveLocationName
 
@@ -403,7 +405,9 @@ specialPkgpoolPrepareBuild() {
     mustHaveValue "${svnUrlsToUpdate}" "svn urls for pkgpool"
     local revisionFileInSvn=$(dirname ${svnUrlsToUpdate})/src/gitrevision
     info "revisionFileInSvn ${revisionFileInSvn}"
-    local gitRevision=$(svnCat ${revisionFileInSvn})
+    local svnRevision=$(cat ${workspace}/bld/bld-fsmci-summary/svnrevision)
+    info "svnRevision ${svnRevision}"
+    local gitRevision=$(svnCat -r ${svnRevision} ${revisionFileInSvn}@${svnRevision})
     info "gitRevision ${gitRevision}"
 
     local gitUpstreamRepos=$(getConfig PKGPOOL_git_repos_url)
