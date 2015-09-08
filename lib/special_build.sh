@@ -402,7 +402,9 @@ specialPkgpoolPrepareBuild() {
     local svnUrlsToUpdate=$(getConfig PKGPOOL_PROD_update_dependencies_svn_url)
     mustHaveValue "${svnUrlsToUpdate}" "svn urls for pkgpool"
     local revisionFileInSvn=$(basename ${svnUrlsToUpdate}/src/gitrevision)
+    info "revisionFileInSvn ${revisionFileInSvn}"
     local gitRevision=$(svnCat ${revisionFileInSvn})
+    info "gitRevision ${gitRevision}"
 
     local gitUpstreamRepos=$(getConfig PKGPOOL_git_repos_url)
     mustHaveValue "${gitUpstreamRepos}" "git upstream repos url"
