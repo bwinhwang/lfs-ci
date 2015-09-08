@@ -18,6 +18,12 @@ usecase_LFS_TEST_COVERAGE_COLLECT() {
     local branchName=$(getBranchName)
     mustHaveBranchName
 
+    mustHaveNextCiLabelName
+    local buildName=$(getNextCiLabelName)
+
+    # makingTest_testsWithoutTarget need the delivery directory
+    export DELIVERY_DIRECTORY=$(getConfig LFS_CI_UC_package_copy_to_share_real_location)/${buildName}
+
     createBasicWorkspace -l ${branchName} src-test src-fsmddal
 
     mustHavePreparedWorkspace --no-clean-workspace
