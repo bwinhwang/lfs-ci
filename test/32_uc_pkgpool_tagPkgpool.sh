@@ -27,13 +27,19 @@ oneTimeSetUp() {
         echo "TempFile"
     }
     getConfig() {
-        echo $1 
+        echo ${UT_CAN_RELEASE}
     }
-    _preparePkgpoolWorkspace() {
-        mockedCommand "_preparePkgpoolWorkspace $@"
+    gitDescribe() {
+        echo gitRevision
     }
-    _tagPkgpool() {
-        mockedCommand "_tagPkgpool $@"
+    gitTagAndPushToOrigin() {
+        mockedCommand "gitTagAndPushToOrigin $@"
+    }
+    gitRevParse() {
+        echo "gitRevParserRev"
+    }
+    setBuildDescription() {
+        mockedCommand "setBuildDescription $@"
     }
 
     return
@@ -44,7 +50,8 @@ setUp() {
     export WORKSPACE=$(createTempDirectory)
     export JOB_NAME=PKGPOOL_CI_-_trunk_-_Build
     export BUILD_NUMBER=123
-    mkdir ${WORKSPACE}/src/
+    mkdir -p ${WORKSPACE}/src/
+    mkdir -p ${WORKSPACE}/workspace/bld/bld-pkgpool-release/
 }
 
 tearDown() {
@@ -54,23 +61,35 @@ tearDown() {
 }
 
 test1() {
-    assertTrue "usecase_PKGPOOL_BUILD"
+    export UT_CAN_RELEASE=1
+    local file=$(createTempFile)
+    assertTrue "_tagPkgpool ${file}"
 
     local expect=$(createTempFile)
     cat <<EOF > ${expect}
-_preparePkgpoolWorkspace 
-execute -l TempFile ${WORKSPACE}/src/build PKGPOOL_additional_build_parameters
-execute mkdir -p ${WORKSPACE}/workspace/bld/bld-pkgpool-release/
-execute cp TempFile ${WORKSPACE}/workspace/bld/bld-pkgpool-release/build.log
-execute cp -a ${WORKSPACE}/workspace/logs ${WORKSPACE}/workspace/bld/bld-pkgpool-release/
-_tagPkgpool TempFile
-createArtifactArchive 
+execute -n sed -ne s,^\(\[[0-9 :-]*\] \)\?release \([^ ]*\) complete,\2,p TempFile
+gitTagAndPushToOrigin PKGPOOL_FOO
+setBuildDescription PKGPOOL_CI_-_trunk_-_Build 123 PKGPOOL_FOO
+execute -n sed -ne s|^src [^ ]* \(.*\)$|PS_LFS_PKG = \1|p ${WORKSPACE}/workspace/pool/*.meta
 EOF
     assertExecutedCommands ${expect}
 
     return
 }
 
+test2() {
+    export UT_CAN_RELEASE=
+    local file=$(createTempFile)
+    assertTrue "_tagPkgpool ${file}"
+
+    # no commands are exectued!
+    local expect=$(createTempFile)
+    cat <<EOF > ${expect}
+EOF
+    assertExecutedCommands ${expect}
+
+    return
+}
 
 source lib/shunit2
 
