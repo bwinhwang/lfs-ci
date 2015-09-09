@@ -376,8 +376,8 @@ mustHaveLocationForSpecialBuild() {
     # fakeing the branch name for workspace creation...
     local location=$(cat ${workspace}/bld/bld-fsmci-summary/location)
     mustHaveValue "${location}" "location"
-
     export LFS_CI_GLOBAL_BRANCH_NAME=${location}
+
     return
 }
 
