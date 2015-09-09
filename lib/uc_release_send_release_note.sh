@@ -2,6 +2,7 @@
 
 [[ -z ${LFS_CI_SOURCE_release}      ]] && source ${LFS_CI_ROOT}/lib/release.sh
 [[ -z ${LFS_CI_SOURCE_workflowtool} ]] && source ${LFS_CI_ROOT}/lib/workflowtool.sh
+[[ -z ${LFS_CI_SOURCE_database}     ]] && source ${LFS_CI_ROOT}/lib/database.sh
 
 ## @fn      usecase_LFS_RELEASE_SEND_RELEASE_NOTE()
 #  @brief   create a release note and send it to the community
