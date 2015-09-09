@@ -70,9 +70,9 @@ startLogfile() {
         # hardcoded variables here. We have no possibility to use settings here - before the logfile is running
         local url=
         case ${USER} in
-            psulm)    url=http://ullinn11.emea.nsn-net.net/lfs/ci/log/ ;;
-            lfscidev) url=https://lfs-sandbox.emea.nsn-net.net/logs/ ;;
-            ca_lrcci) url=https://lfs-lrc-ci.int.net.nokia.com/logs/ ;;
+            psulm)    url=http://ullinn11.emea.nsn-net.net/lfs/ci/log ;;
+            lfscidev) url=https://lfs-sandbox.emea.nsn-net.net/logs ;;
+            ca_lrcci) url=https://lfs-lrc-ci.int.net.nokia.com/logs ;;
         esac
         if [[ ${url} ]] ; then
             echo 1>&2 "short log    : ${url}/${datePath}/$(basename ${CI_LOGGING_LOGFILENAME})"
