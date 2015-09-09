@@ -75,6 +75,7 @@ __preparation(){
     JENKINS_API_TOKEN=$(getConfig jenkinsApiToken)
     JENKINS_API_USER=$(getConfig jenkinsApiUser)
     JOBS_EXCLUDE_LIST=$(getConfig branchingExcludeJobs)
+    PROMOTIONS_EXCLUDE_LIST=$(getConfig branchingExcludePromotions)
     MAIN_BUILD_JOB_NAME_LRC=$(getConfig jenkinsMainBuildJobName_LRC)
 
     mustHaveValue "${MAIN_BUILD_JOB_NAME_LRC}" "MAIN_BUILD_JOB_NAME_LRC"
@@ -84,6 +85,7 @@ __preparation(){
     echo JENKINS_API_TOKEN=${JENKINS_API_TOKEN} > ${WORKSPACE}/${VARS_FILE}
     echo JENKINS_API_USER=${JENKINS_API_USER} >> ${WORKSPACE}/${VARS_FILE}
     echo JOBS_EXCLUDE_LIST=${JOBS_EXCLUDE_LIST} >> ${WORKSPACE}/${VARS_FILE}
+    echo PROMOTIONS_EXCLUDE_LIST=${PROMOTIONS_EXCLUDE_LIST} >> ${WORKSPACE}/${VARS_FILE}
     echo MAIN_BUILD_JOB_NAME_LRC=${MAIN_BUILD_JOB_NAME_LRC} >> ${WORKSPACE}/${VARS_FILE}
 }
 
