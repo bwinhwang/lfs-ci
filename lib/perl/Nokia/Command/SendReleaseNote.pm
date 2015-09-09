@@ -18,15 +18,18 @@ sub prepare {
     
     # t: := tag name
     # r: := release note template file
-    getopts( "r:t:f:n", \my %opts );
+    getopts( "r:t:f:nT:P:", \my %opts );
     $self->{releaseNoteFile} = $opts{r} || die "no r";
     $self->{tagName}         = $opts{t} || die "no t";
     $self->{configFileName}  = $opts{f} || die "no f";
-    $self->{configFileName}  = $opts{f} || die "no f";
     $self->{noSvnActions}    = $opts{n};
+    $self->{type}            = $opts{T} || die "no T"; # type of rel: REL or OS
+    $self->{productName}     = $opts{P} || die "no P"; # type of the product: LFS, PKGPOOL, UBOOT, ...
 
     my $config = Nokia::Singleton::config();
     $config->loadData( configFileName => $self->{configFileName} );
+    $config->addConfig( name  => "type", value => $self->{type} );
+    $config->addConfig( name  => "productName", value => $self->{productName} );
 
     $self->{fromAddress}     = $config->getConfig( name => "LFS_PROD_ReleaseNote_FromAddress" );
     $self->{fakeFromAddress} = $config->getConfig( name => "LFS_PROD_ReleaseNote_FakeFromAddress" );

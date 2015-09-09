@@ -66,7 +66,9 @@ _sendReleaseNote() {
         execute ${LFS_CI_ROOT}/bin/sendReleaseNote      \
             -r ${workspace}/os/releasenote.txt          \
             -t ${LFS_PROD_RELEASE_CURRENT_TAG_NAME_REL} \
-            -f ${LFS_CI_CONFIG_FILE}
+            -f ${LFS_CI_CONFIG_FILE}                    \
+            -T OS                                       \
+            -P LFS
     else
         warning "sending the release note is disabled in config"
     fi
