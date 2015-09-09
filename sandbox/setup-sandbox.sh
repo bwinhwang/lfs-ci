@@ -126,7 +126,7 @@ pre_actions() {
         echo "ERROR: This script may not run on $(hostname)."
         exit 1
     fi
-    
+
     if [[ ${USER} == psulm ]]; then
         echo "ERROR: This script may not run as user psulm."
         exit 2
@@ -354,12 +354,15 @@ jenkins_start_sandbox() {
         echo ${PID} > ${PID_FILE}
         echo "    java process ID: $(cat ${PID_FILE})"
         echo "    waiting for Jenkins to be fully running"
+        sleep 15
         RET=1
         while [[ ${RET} -ne 0 ]]; do
             curl -s http://localhost:${HTTP_PORT} --noproxy localhost > /dev/null 2>&1
             RET=$?
-            sleep 15
+            sleep 3
         done
+        echo "    waiting for master node to become ready"
+        java -jar ${JENKINS_CLI_JAR} -s http://localhost:${HTTP_PORT} wait-node-online ""
     elif [[ ${START_OPTION} == "sysv" ]]; then
         echo "Start Jenkins via /etc/init.d/jenkins"
         /etc/init.d/jenknis start
@@ -378,7 +381,8 @@ jenkins_configure_sandbox() {
     local nestedViews=$NESTED_VIEWS
     [[ -z ${rootViews} ]] && rootViews="None"
     [[ -z ${nestedViews} ]] && nestedViews="None"
-    echo "Invoke groovy script on new Sandbox... ${SANDBOX_SCRIPT_DIR}/setup-sandbox.gry create_views ${rootViews} ${nestedViews} ${BRANCH_VIEWS} ${LRC}"
+    echo "Invoke groovy script on new Sandbox"
+    echo "    ${SANDBOX_SCRIPT_DIR}/setup-sandbox.gry create_views ${rootViews} ${nestedViews} ${BRANCH_VIEWS} ${LRC}"
     java -jar ${JENKINS_CLI_JAR} -s http://localhost:${HTTP_PORT}/ groovy \
         ${SANDBOX_SCRIPT_DIR}/setup-sandbox.gry create_views ${rootViews} ${nestedViews} ${BRANCH_VIEWS} ${LRC}
 
