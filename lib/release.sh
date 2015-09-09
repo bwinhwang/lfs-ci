@@ -31,6 +31,15 @@ mustBePreparedForReleaseTask() {
     copyFileFromWorkspaceToBuildDirectory ${JOB_NAME} ${BUILD_NUMBER} \
             ${workspace}/bld/bld-lfs-release/label.txt
 
+    local buildJobName=$(getBuildJobNameFromFingerprint)
+    mustHaveValue "${buildJobName}" "build job name from fingerprint"
+    local buildBuildNumber=$(getBuildBuildNumberFromFingerprint)
+    mustHaveValue "${buildBuildNumber}" "build build name from fingerprint"
+
+    info "based on build ${buildJobName} ${buildBuildNumber}"
+    local requiredArtifacts=$(getConfig LFS_CI_prepare_workspace_required_artifacts)
+    copyArtifactsToWorkspace ${buildJobName} ${buildBuildNumber} "${requiredArtifacts}"
+
     local releaseSummaryJobName=${JOB_NAME//${subJob}/summary}
     info "release job name is ${releaseSummaryJobName}"
 
