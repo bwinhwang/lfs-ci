@@ -452,6 +452,10 @@ specialPkgpoolPrepareBuild() {
     return
 }
 
+## @fn      specialPkgpoolCollectArtifacts()
+#  @brief   collect the artifacts of the pkgpool build and store it in the upstream job
+#  @param   <none>
+#  @return  <none>
 specialPkgpoolCollectArtifacts() {
     requiredParameters LFS_CI_ROOT UPSTREAM_PROJECT UPSTREAM_BUILD
 

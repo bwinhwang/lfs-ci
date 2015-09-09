@@ -60,11 +60,19 @@ gitClone() {
     return
 }
 
+## @fn      gitCheckout()
+#  @brief   perform the git checkout command
+#  @param   {arguments}    arguments for git checkout
+#  @return  <none>
 gitCheckout() {
     execute git checkout $@
     return
 }
 
+## @fn      gitSubmodule()
+#  @brief   perform the git submodule command
+#  @param   {arguments}    arguments for git submodule
+#  @return  <none>
 gitSubmodule() {
     execute git submodule $@
     return

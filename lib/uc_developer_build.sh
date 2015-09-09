@@ -94,6 +94,10 @@ usecase_LFS_DEVELOPER_PACKAGE() {
 }
 
 
+## @fn      usecase_PKGPOOL_DEVELOPER_BUILD()
+#  @brief   run the usecase developer pkgpool build
+#  @param   <none>
+#  @return  <none>
 usecase_PKGPOOL_DEVELOPER_BUILD() {
     specialPkgpoolPrepareBuild dev
     usecase_PKGPOOL_BUILD
