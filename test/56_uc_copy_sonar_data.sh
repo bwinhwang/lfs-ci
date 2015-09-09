@@ -13,7 +13,7 @@ oneTimeSetUp() {
         mockedCommand "getConfig $@"
         case ${1} in
             jenkinsMasterServerHostName)        echo localhost ;;
-            jenkinsMasterServerPath)            echo ${jenkinsRoot}/home ;;
+            jenkinsMasterServerPath)            echo ${JENKINS_ROOT}/home ;;
             LFS_CI_unittest_coverage_data_path) echo bld/bld-unittests-fsmr3_fsmddal/results/__artifacts ;;
             *)                                  echo $1
         esac
@@ -38,7 +38,7 @@ oneTimeTearDown() {
 
 setUp() {
     export WORKSPACE=$(createTempDirectory)
-    export jenkinsRoot=$(createTempDirectory)
+    export JENKINS_ROOT=$(createTempDirectory)
     export SONAR_DATA_PATH=$(getConfig LFS_CI_unittest_coverage_data_path)
     mkdir -p ${WORKSPACE}/${SONAR_DATA_PATH}
     touch ${WORKSPACE}/${SONAR_DATA_PATH}/coverage.xml.gz
@@ -53,27 +53,28 @@ tearDown() {
 }
 
 test_FSMr3() {
-    export JOB_NAME=LFS_CI_-_trunk_-_Build_-_FSM-r3-UT_-_fsmr3_fsmddal
     assertTrue "usecase_LFS_COPY_SONAR_DATA"
     
-    # check that files exist
-    local TARGET_TYPE=$(getSubTaskNameFromJobName)
-    assertTrue "coverage.xml.gz not found!"         "[[ -e ${jenkinsRoot}/home/userContent/sonar/${TARGET_TYPE}/coverage.xml.gz ]]"
-    assertTrue "testcases.merged.xml.gz not found!" "[[ -e ${jenkinsRoot}/home/userContent/sonar/${TARGET_TYPE}/testcases.merged.xml.gz ]]"
-
+    export JOB_NAME=LFS_CI_-_trunk_-_Build_-_FSM-r3-UT_-_fsmr3_fsmddal
+    check_FilesExist
 
     return
 }
 
 test_FSMr4() {
-    export JOB_NAME=LFS_CI_-_trunk_-_Build_-_FSM-r4-UT_-_fsmr4_fsmddal
     assertTrue "usecase_LFS_COPY_SONAR_DATA"
-    
-    # check that files exist
-    local TARGET_TYPE=$(getSubTaskNameFromJobName)
-    assertTrue "coverage.xml.gz not found!"         "[[ -e ${jenkinsRoot}/home/userContent/sonar/${TARGET_TYPE}/coverage.xml.gz ]]"
-    assertTrue "testcases.merged.xml.gz not found!" "[[ -e ${jenkinsRoot}/home/userContent/sonar/${TARGET_TYPE}/testcases.merged.xml.gz ]]"
 
+    export JOB_NAME=LFS_CI_-_trunk_-_Build_-_FSM-r4-UT_-_fsmr4_fsmddal
+    check_FilesExist
+
+    return
+}
+
+check_FilesExist() {
+    # check that files exist
+    local targetType=$(getSubTaskNameFromJobName)
+    assertTrue "coverage.xml.gz not found!"         "[[ -e ${JENKINS_ROOT}/home/userContent/sonar/${targetType}/coverage.xml.gz ]]"
+    assertTrue "testcases.merged.xml.gz not found!" "[[ -e ${JENKINS_ROOT}/home/userContent/sonar/${targetType}/testcases.merged.xml.gz ]]"
 
     return
 }
