@@ -135,6 +135,12 @@ EOF
     exit 0
 }
 
+pre_checks() {
+    which java > /dev/null || { echo "java is needed"; exit 1; }
+    which curl > /dev/null || { echo "curl is needed"; exit 1; }
+    which rsync > /dev/null || { echo "rsync is needed"; exit 1; }
+}
+
 ## @fn      pre_actions()
 #  @brief   check needed requirements
 #  @return  <none>
@@ -707,6 +713,7 @@ get_args() {
 
 main() {
     get_args $*
+    pre_checks
     pre_actions
     ajust_args
 
