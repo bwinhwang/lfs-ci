@@ -24,5 +24,5 @@ usecase_LFS_COPY_SONAR_DATA() {
     copyFileToUserContentDirectory ${workspace}/${sonarDataPath}/coverage.xml.gz sonar/${targetType}
     copyFileToUserContentDirectory ${workspace}/${sonarDataPath}/testcases.merged.xml.gz sonar/${targetType}
 
-    return
+    return 0
 }
