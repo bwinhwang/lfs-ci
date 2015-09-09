@@ -254,6 +254,7 @@ _createLfsRelReleaseNoteXml() {
                             -t ${LFS_PROD_RELEASE_CURRENT_TAG_NAME_REL}  \
                             -o ${LFS_PROD_RELEASE_PREVIOUS_TAG_NAME_REL} \
                             -T OS                                        \
+                            -P LFS                                       \
                             -f ${LFS_CI_CONFIG_FILE}                     \
                             > releasenote.xml
     rawDebug ${workspace}/releasenote.xml
