@@ -57,7 +57,8 @@ usecase_PKGPOOL_BUILD() {
 
     # put build log for later analysis into the artifacts
     execute mkdir -p ${workspace}/bld/bld-pkgpool-release/
-    execute cp ${buildLogFile} ${workspace}/bld/bld-pkgpool-release/build.log
+    execute cp ${buildLogFile}      ${workspace}/bld/bld-pkgpool-release/build.log
+    execute cp -a ${workspace}/logs ${workspace}/bld/bld-pkgpool-release/
 
     # in case of build from scratch (own jenkins job), we do not have a release tag.
     # => no release
@@ -324,7 +325,7 @@ usecase_PKGPOOL_UPDATE_DEPS() {
 }
 
 ## @fn      usecase_PKGPOOL_CHECK_FOR_FAILED_VTC()
-#  @brief   checks the build.log of pkgpool for a string, which indicates, that vtc build failed.
+#  @brief   check, if there are files in the addon arm-cortexa15-linux-gnueabihf-vtc.tar.gz in pkgpool
 #  @details vtc is a addon from Transport, which is build within the pkgpool. Current state (2015-08-01) is,
 #           that this addon is experimantal and should not be blocking.
 #           This usecase was requested by "Sapalski, Samuel (Nokia - DE/Ulm)" <samuel.sapalski@nokia.com>.
@@ -332,16 +333,27 @@ usecase_PKGPOOL_UPDATE_DEPS() {
 #  @param   <none>
 #  @return  <none>
 usecase_PKGPOOL_CHECK_FOR_FAILED_VTC() {
+    requiredParameters UPSTREAM_PROJECT UPSTREAM_BUILD
+
+    # --no-build-description will not copy artifacts from the upstream build...
     mustHavePreparedWorkspace --no-build-description
+    # so we have to do this by our own...
+    copyAndExtractBuildArtifactsFromProject "${UPSTREAM_PROJECT}" "${UPSTREAM_BUILD}" "pkgpool"
 
     local workspace=$(getWorkspaceName)
     mustHaveWorkspaceName
 
-    # grep returns 0, if the string was found in the file, otherwise 1
-    if execute -i grep --silent "LVTC FSMR4 BUILD FAILED" ${workspace}/bld/bld-pkgpool-release/build.log ; then
-        execute -i grep -A 100 -B 100 "LVTC FSMR4 BUILD FAILED" ${workspace}/bld/bld-pkgpool-release/build.log 
-        fatal "found LVTC FSMR4 BUILD FAILED in build.log of pkgpool"
+    local buildName=$(cat ${workspace}/bld/bld-pkgpool-release/label)
+    mustHaveValue "${buildName}" "build name of pkgpool"
+
+    local vtcAddon=$(getConfig PKGPOOL_location_on_share)/${buildName}/arm-cortexa15-linux-gnueabihf-vtc.tar.gz
+    mustExistFile ${vtcAddon}
+
+    local filesInTar=$(execute -n tar tvf ${vtcAddon} | wc -l)
+
+    if [[ ${filesInTar} == 0 ]] ; then
+        fatal "the vtc addon ${vtcAddon} is empty. please check build logs for compile error"
     fi
 
-    return
+    return 0
 }

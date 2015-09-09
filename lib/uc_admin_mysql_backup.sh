@@ -39,7 +39,7 @@ usecase_ADMIN_MYSQL_BACKUP() {
 #  @param   <none>
 #  @return  <none>
 usecase_ADMIN_MYSQL_RESTORE() {
-    requiredParameters HOME
+    requiredParameters HOME LFS_CI_ROOT
 
     mustHaveDatabaseCredentials
 
@@ -49,5 +49,6 @@ usecase_ADMIN_MYSQL_RESTORE() {
 
     execute ssh ${dbHost} mysql -h ${dbHost} -u ${dbUser} -p${dbPass} ${dbName} < ${LFS_CI_ROOT}/database/drop.sql 
     execute ssh ${dbHost} mysql -h ${dbHost} -u ${dbUser} -p${dbPass} ${dbName} < ${HOME}/mysql_backup/dump.sql 
+
     return 0
 }

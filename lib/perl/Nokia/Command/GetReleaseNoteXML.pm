@@ -7,6 +7,7 @@ use XML::Simple;
 use Data::Dumper;
 use POSIX qw(strftime);
 use Getopt::Std;
+use Encode;
 
 use Nokia::Singleton;
 use Nokia::Model::ReleaseNote;
@@ -19,6 +20,7 @@ sub quote {
     $data =~ s/&/&amp;/g;
     $data =~ s/</&lt;/g;
     $data =~ s/>/&gt;/g;
+    $data = Encode::encode( "ISO-8859-1", $data );
     return $data;
 }
 

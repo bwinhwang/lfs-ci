@@ -280,7 +280,14 @@ applyKnifePatches() {
             # apply patch only on files which exists in workspace
             for fileInPatch in $(execute -n lsdiff ${workspace}/bld/bld-${type}-input/lfs.patch) ; do
                 info "matching file ${fileInPatch}"
-                [[ -e ${workspace}/${fileInPatch} ]] || continue
+
+                # we are checking for the existance of the basedirectory (src-foobar). If the directory exists,
+                # we can apply the patch - also for new files.
+                local dirName=$(dirname ${fileInPatch} | cut -d/ -f1)
+                mustHaveValue "${dirName}" "dir name (src-dir) from ${fileInPatch}"
+                [[ -d ${workspace}/${dirName} ]] || continue
+
+                info "applying patch ${fileInPatch}"
                 local tmpPatchFile=$(createTempFile)
                 execute -n filterdiff -i ${fileInPatch} ${workspace}/bld/bld-${type}-input/lfs.patch > ${tmpPatchFile}
                 rawDebug ${tmpPatchFile}

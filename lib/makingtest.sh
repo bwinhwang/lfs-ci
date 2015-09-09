@@ -375,8 +375,7 @@ makingTest_testLRC_check() {
 
 ## @fn      makingTest_install()
 #  @brief   install a software load via making test on the target
-#  @warning this is only used by LRC at the moment, but should also work for FSM
-#  @param   {testSuiteDirectory}    directory of a test suite
+#  @param   <none>
 #  @return  <none>
 makingTest_install() {
     local testSuiteDirectory=$(makingTest_testSuiteDirectory)
@@ -408,15 +407,20 @@ makingTest_install() {
     # on LRC: currently install does show wrong (old) version after reboot and
     # SHP sometimes fails to be up when install is retried.
     # We try installation up to 4 times
+    # on FSM: the install counter can be used, but currently it's set to 1
     local maxInstallTries=$(getConfig LFS_CI_uc_test_making_test_installation_tries -t "testTargetName:${targetName}")
     mustHaveValue "${maxInstallTries}" "max installation tries"
 
     for i in $(seq 1 ${maxInstallTries}) ; do
         trace "install loop ${i}"
 
+        # we try to install several times, but in the last loop, we want to see the error in the console.
+        local ignoreError=-i
+        [[ ${i} == ${maxInstallTries} ]] && ignoreError=
+
         local installOptions=$(getConfig LFS_CI_uc_test_making_test_install_options -t "testTargetName:${targetName}")
         info "running install with options ${installOptions:-none}"
-        execute -i ${make} install ${installOptions} FORCE=yes || { sleep 20 ; continue ; }
+        execute ${ignoreError} ${make} install ${installOptions} FORCE=yes || { sleep 20 ; continue ; }
 
         local shouldSkipNextSteps=$(getConfig LFS_CI_uc_test_making_test_skip_steps_after_make_install)
         if [[ ${shouldSkipNextSteps} ]] ; then
@@ -428,7 +432,7 @@ makingTest_install() {
         local doFirmwareupgrade="$(getConfig LFS_CI_uc_test_making_test_do_firmwareupgrade)"
         if [[ ${doFirmwareupgrade} ]] ; then
             info "perform firmware upgrade an all boards of $testTargetName."
-            execute -i ${make} firmwareupgrade FORCED_UPGRADE=true
+            execute ${ignoreError} ${make} firmwareupgrade FORCED_UPGRADE=true
         fi
 
         info "rebooting target..."
@@ -437,10 +441,10 @@ makingTest_install() {
         mustHaveMakingTestRunningTarget
 
         info "running setup..."
-        execute -i ${make} setup || continue
+        execute ${ignoreError} ${make} setup || continue
 
         info "running check..."
-        execute -i ${make} check || continue
+        execute ${ignoreError} ${make} check || continue
 
         info "install was successful."
 
@@ -522,8 +526,9 @@ mustHaveMakingTestRunningTarget() {
         [[ ${rebootRetry} -eq 0 ]] && opt=
         if execute ${opt} make -C ${testSuiteDirectory} waitssh ; then
             # target is up and running 
-            debug "sleeping for 60 seconds..."
-            execute sleep 60
+            local sleepInSecond=$(getConfig LFS_CI_uc_test_sleep_in_seconds_after_waitssh)
+            debug "sleeping for ${sleepInSecond} seconds..."
+            execute sleep ${sleepInSecond}
             info "target is up."
             return
         fi
