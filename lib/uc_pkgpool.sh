@@ -43,25 +43,73 @@ usecase_PKGPOOL_BUILD() {
     # git clone, created by jenkins git plugin
     mustExistDirectory ${gitWorkspace}
 
-    info "preparing git workspace..."
-    cd ${gitWorkspace}
-
-    if [[ ${cleanWorkspace} ]] ; then
-        execute rm -rf ${gitWorkspace}/src
-        gitReset --hard
-    fi
-
-    info "bootstrap build environment..."
-    execute ./bootstrap
-    cd ${workspace}
+    _preparePkgpoolWorkspace
 
     info "building pkgpool..."
+    cd ${workspace}
     execute -l ${buildLogFile} ${gitWorkspace}/build ${buildParameters} 
 
     # put build log for later analysis into the artifacts
     execute mkdir -p ${workspace}/bld/bld-pkgpool-release/
     execute cp ${buildLogFile}      ${workspace}/bld/bld-pkgpool-release/build.log
     execute cp -a ${workspace}/logs ${workspace}/bld/bld-pkgpool-release/
+
+    _tagPkgpool ${buildLogFile}
+    createArtifactArchive
+
+    return
+}
+
+## @fn      _preparePkgpoolWorkspace()
+#  @brief   prepare the pkgpool workspace
+#  @param   <none>
+#  @return  <none>
+_preparePkgpoolWorkspace() {
+
+    local gitWorkspace=${WORKSPACE}/src
+
+    info "preparing git workspace..."
+    cd ${gitWorkspace}
+    # TODO: demx2fk3 2015-09-09 add "no resetting git workspace" here
+    gitReset --hard
+
+    info "bootstrap build environment..."
+    execute ./bootstrap
+
+    # checking for changed files.
+    local directory=
+    for directory in $(gitStatus -s | cut -c3-) ; do
+        debug "updating ${directory}"
+        gitSubmodule update ${directory}
+    done
+
+    # ensure, that everything is clean
+    # git status does not return a non-zero exit code in case that there are untracked / unchecked-in files.
+    if [[ "$(gitStatus -s)" ]] ; then
+        warning "the git workspace is not clean after update. We will fallback to the clean way."
+        execute rm -rf ${gitWorkspace}/src
+        gitReset --hard
+        info "bootstrap build environment..."
+        execute ./bootstrap
+    fi
+
+    return 0
+}
+
+## @fn      _tagPkgpool()
+#  @brief   create the tag of the pkgpool in git
+#  @param   {builgLogFile}    name of the build log file
+#  @return  <none>
+_tagPkgpool() {
+    local buildLogFile=$1
+    mustExistFile ${buildLogFile}
+
+    local workspace=$(getWorkspaceName)
+    mustHaveWorkspaceName
+
+    requiredParameters JOB_NAME BUILD_NUMBER WORKSPACE
+
+    local gitWorkspace=${WORKSPACE}/src
 
     # in case of build from scratch (own jenkins job), we do not have a release tag.
     # => no release
@@ -90,10 +138,9 @@ usecase_PKGPOOL_BUILD() {
         rawDebug ${workspace}/bld/bld-pkgpool-release/forReleaseNote.txt
     fi
 
-    createArtifactArchive
-
-    return
+    return 0
 }
+
 
 ## @fn      usecase_PKGPOOL_TEST()
 #  @brief   run the usecase PKGPOOL_TEST
