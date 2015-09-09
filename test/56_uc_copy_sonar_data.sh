@@ -48,23 +48,23 @@ setUp() {
 }
 
 tearDown() {
-    # rm -rf ${WORKSPACE}
+    rm -rf ${WORKSPACE}
     return 
 }
 
 test_FSMr3() {
-    assertTrue "usecase_LFS_COPY_SONAR_DATA"
-    
     export JOB_NAME=LFS_CI_-_trunk_-_Build_-_FSM-r3-UT_-_fsmr3_fsmddal
+    assertTrue "usecase_LFS_COPY_SONAR_DATA for FSMr3 failed!" "usecase_LFS_COPY_SONAR_DATA"
+    
     check_FilesExist
 
     return
 }
 
 test_FSMr4() {
-    assertTrue "usecase_LFS_COPY_SONAR_DATA"
-
     export JOB_NAME=LFS_CI_-_trunk_-_Build_-_FSM-r4-UT_-_fsmr4_fsmddal
+    assertTrue "usecase_LFS_COPY_SONAR_DATA for FSMr4 failed!" "usecase_LFS_COPY_SONAR_DATA"
+
     check_FilesExist
 
     return
@@ -76,7 +76,7 @@ check_FilesExist() {
     assertTrue "coverage.xml.gz not found!"         "[[ -e ${JENKINS_ROOT}/home/userContent/sonar/${targetType}/coverage.xml.gz ]]"
     assertTrue "testcases.merged.xml.gz not found!" "[[ -e ${JENKINS_ROOT}/home/userContent/sonar/${targetType}/testcases.merged.xml.gz ]]"
 
-    return
+    return 0
 }
 
 source lib/shunit2
