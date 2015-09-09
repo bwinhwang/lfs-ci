@@ -20,8 +20,8 @@ ITSME=$(basename $0)
 
 # Defaults
 BRANCH_VIEWS="trunk"
-NESTED_VIEWS="DEV/Developer_Build,DEV/Knife_alpha"
-ROOT_VIEWS="ADMIN,UBOOT"
+NESTED_VIEWS=""
+ROOT_VIEWS=""
 DISABLE_BUILD_JOBS="true"
 LRC="true"
 KEEP_JENKINS_PLUGINS="false"
@@ -69,12 +69,12 @@ cat << EOF
              Disable all .*_Build$ jobs (-e is missing) and keep already existing Jenkins plugins (-p).
 
     Options and Flags:
-        -f Complete path of CI scripting config file. This option is mandatory.
+        -f Complete path of CI scripting config file.
         -b Comma separated list of BRANCHES to be copied from LFS CI (not LRC branches). Defaults to ${BRANCH_VIEWS}.
            If you specify -b on commandline and you want to create trunk as well, 'trunk' must be in the list of
            branches to be copied (eg -b trunk,FB1506,MD11504).
-        -n Comma separated list of nested view that should be created in Sandbox. Defaults to ${NESTED_VIEWS}.
-        -r Comma separated list of root views (Jenkins top level tabs) that should be created in Sandbox. Defaults to ${ROOT_VIEWS}.
+        -n Comma separated list of nested view that should be created in Sandbox. Eg. DEV/Developer_Build,DEV/Knife_alpha.
+        -r Comma separated list of root views (Jenkins top level tabs) that should be created within Sandbox. Eg. ADMIN,UBOOT.
         -w Specify \$LOCAL_WORK_DIR directory for Jenkins installation. Defaults to ${LOCAL_WORK_DIR}.
         -i LFS CI user. Defaults to ${CI_USER}.
         -c LFS LRC CI user. Defaults to ${LRC_CI_USER}.
@@ -94,16 +94,16 @@ cat << EOF
     Examples:
 
         Standard Sandbox installation:
-            ${ITSME} 
+            ${ITSME} -f <path-to-development.cfg>
 
-        Skip LRC, use existing Jenkins plugins and start Sandbox on port 9090:
-            ${ITSME} -l -p -t 9090
+        Skip LRC (-l), use existing Jenkins plugins (-p) and start Sandbox on port 9090 (-t):
+            ${ITSME} -l -p -t 9090 -f <path-to-development.cfg>
 
-        Just start Sandbox in background:
+        Just start Jenkins(-o):
             ${ITSME} -o -f ~/lfs-ci/etc/development.cfg
 
-        Just start Sandbox by usging script /etc/init.d/jenkins
-            ${ITSME} -o -g sysv -f ~/lfs-ci/etc/development.cfg
+        Just start Sandbox by usging script /etc/init.d/jenkins (-g)
+            ${ITSME} -o -g sysv -f <path-to-development.cfg>
 
         Update Sandbox:
             ${ITSME} -j
@@ -354,10 +354,11 @@ jenkins_start_sandbox() {
         echo ${PID} > ${PID_FILE}
         echo "    java process ID: $(cat ${PID_FILE})"
         echo "    waiting for Jenkins to be fully running"
-        while [[ ${RET} != 0 ]]; do
+        RET=1
+        while [[ ${RET} -ne 0 ]]; do
             curl -s http://localhost:${HTTP_PORT} --noproxy localhost > /dev/null 2>&1
             RET=$?
-            sleep 3
+            sleep 15
         done
     elif [[ ${START_OPTION} == "sysv" ]]; then
         echo "Start Jenkins via /etc/init.d/jenkins"
@@ -373,29 +374,39 @@ jenkins_start_sandbox() {
 #           via jenkins CLI.
 #  @return  <none>
 jenkins_configure_sandbox() {
-    echo "Invoke groovy script on new Sandbox..."
+    local rootViews=$ROOT_VIEWS
+    local nestedViews=$NESTED_VIEWS
+    [[ -z ${rootViews} ]] && rootViews="None"
+    [[ -z ${nestedViews} ]] && nestedViews="None"
+    echo "Invoke groovy script on new Sandbox... ${SANDBOX_SCRIPT_DIR}/setup-sandbox.gry create_views ${rootViews} ${nestedViews} ${BRANCH_VIEWS} ${LRC}"
     java -jar ${JENKINS_CLI_JAR} -s http://localhost:${HTTP_PORT}/ groovy \
-        ${SANDBOX_SCRIPT_DIR}/setup-sandbox.gry create_views ${ROOT_VIEWS} ${NESTED_VIEWS} ${BRANCH_VIEWS} ${LRC}
+        ${SANDBOX_SCRIPT_DIR}/setup-sandbox.gry create_views ${rootViews} ${nestedViews} ${BRANCH_VIEWS} ${LRC}
 
-    echo "Configure Jenkins top branch views (tabs) in new Sandbox"
-    for VIEW in $(echo ${BRANCH_VIEWS} | tr ',' ' '); do
-        echo "    Configure $VIEW view"
-        curl http://localhost:${HTTP_PORT}/view/${VIEW}/config.xml --noproxy localhost --data-binary @${TMP}/${VIEW}_view_config.xml
-    done
+    if [[ ! -z ${BRANCH_VIEWS} ]]; then
+        echo "Configure Jenkins top branch views (tabs) in new Sandbox"
+        for VIEW in $(echo ${BRANCH_VIEWS} | tr ',' ' '); do
+            echo "    Configure $VIEW view"
+            curl http://localhost:${HTTP_PORT}/view/${VIEW}/config.xml --noproxy localhost --data-binary @${TMP}/${VIEW}_view_config.xml
+        done
+    fi
 
-    echo "Configure Jenkins top level views (tabs) in new Sandbox"
-    for VIEW in $(echo ${ROOT_VIEWS} | tr ',' ' '); do
-        echo "    Configure $VIEW view"
-        curl http://localhost:${HTTP_PORT}/view/${VIEW}/config.xml --noproxy localhost --data-binary @${TMP}/${VIEW}_view_config.xml
-    done
+    if [[ ! -z ${ROOT_VIEWS} ]]; then
+        echo "Configure Jenkins top level views (tabs) in new Sandbox"
+        for VIEW in $(echo ${ROOT_VIEWS} | tr ',' ' '); do
+            echo "    Configure $VIEW view"
+            curl http://localhost:${HTTP_PORT}/view/${VIEW}/config.xml --noproxy localhost --data-binary @${TMP}/${VIEW}_view_config.xml
+        done
+    fi
 
-    echo "Configure Jenkins nested views (nested tabs) in new Sandbox"
-    for VIEW in $(echo ${NESTED_VIEWS} | tr ',' ' '); do
-        local parentTab=$(echo ${VIEW} | cut -d'/' -f1)
-        local childTab=$(echo ${VIEW} | cut -d'/' -f2)
-        echo "    Configure ${parentTab}/view/${childTab} view"
-        curl http://localhost:${HTTP_PORT}/view/${parentTab}/view/${childTab}/config.xml --noproxy localhost --data-binary @${TMP}/${parentTab}_${childTab}_view_config.xml
-    done
+    if [[ ! -z ${NESTED_VIEWS} ]]; then
+        echo "Configure Jenkins nested views (nested tabs) in new Sandbox"
+        for VIEW in $(echo ${NESTED_VIEWS} | tr ',' ' '); do
+            local parentTab=$(echo ${VIEW} | cut -d'/' -f1)
+            local childTab=$(echo ${VIEW} | cut -d'/' -f2)
+            echo "    Configure ${parentTab}/view/${childTab} view"
+            curl http://localhost:${HTTP_PORT}/view/${parentTab}/view/${childTab}/config.xml --noproxy localhost --data-binary @${TMP}/${parentTab}_${childTab}_view_config.xml
+        done
+    fi
 
     if [[ "${LRC}" == "true" ]]; then
         echo "    Configure LRC view"

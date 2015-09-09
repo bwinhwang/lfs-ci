@@ -18,7 +18,13 @@ usecase_LFS_TEST_COVERAGE_COLLECT() {
     local branchName=$(getBranchName)
     mustHaveBranchName
 
-    createBasicWorkspace -l ${branchName} src-test
+    mustHaveNextCiLabelName
+    local buildName=$(getNextCiLabelName)
+
+    # makingTest_testsWithoutTarget need the delivery directory
+    export DELIVERY_DIRECTORY=$(getConfig LFS_CI_UC_package_copy_to_share_real_location)/${buildName}
+
+    createBasicWorkspace -l ${branchName} src-test src-fsmddal
 
     mustHavePreparedWorkspace --no-clean-workspace
     _copyCodecoverageArtifactsToWorkspace
@@ -34,7 +40,6 @@ usecase_LFS_TEST_COVERAGE_COLLECT() {
 _copyCodecoverageArtifactsToWorkspace() {
     local workspace=$(getWorkspaceName)
     mustHaveWorkspaceName
-    mustHaveCleanWorkspace
 
     local fingerPrint=$(getFingerprintOfCurrentJob)
     mustHaveValue "${fingerPrint}" "fingerprint md5 sum of current job"

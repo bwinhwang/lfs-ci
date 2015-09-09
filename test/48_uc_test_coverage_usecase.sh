@@ -29,6 +29,12 @@ oneTimeSetUp() {
     mustHavePreparedWorkspace() {
         mockedCommand "mustHavePreparedWorkspace $@"
     }
+    mustHaveNextCiLabelName() {
+        mockedCommand "mustHaveNextCiLabelName $@"
+    }
+    getNextCiLabelName() {
+        echo PS_LFS_OS_2015_09_0001
+    }
     return
 }
 
@@ -48,7 +54,9 @@ test1() {
 
     local expect=$(createTempFile)
     cat <<EOF > ${expect}
-createBasicWorkspace -l branchName src-test
+mustHaveNextCiLabelName 
+getConfig LFS_CI_UC_package_copy_to_share_real_location
+createBasicWorkspace -l branchName src-test src-fsmddal
 mustHavePreparedWorkspace --no-clean-workspace
 _copyCodecoverageArtifactsToWorkspace 
 makingTest_testsWithoutTarget 
