@@ -1,6 +1,7 @@
 #!/bin/bash
 
-[[ -z ${LFS_CI_SOURCE_release} ]] && source ${LFS_CI_ROOT}/lib/release.sh
+[[ -z ${LFS_CI_SOURCE_release}      ]] && source ${LFS_CI_ROOT}/lib/release.sh
+[[ -z ${LFS_CI_SOURCE_workflowtool} ]] && source ${LFS_CI_ROOT}/lib/workflowtool.sh
 
 ## @fn      usecase_LFS_RELEASE_PRE_RELEASE_CHECKS()
 #  @brief   run some pre release checks
