@@ -42,13 +42,12 @@ sub md5sumOfAllEntries() {
     my $self = shift;
 
     my $sth = $self->prepare( 
-        'select MD5(GROUP_CONCAT( id SEPARATOR " " )) as md5 from branches';
+        'select MD5(GROUP_CONCAT( id SEPARATOR " " )) as md5 from branches'
     );
     $sth->execute()
         or LOGDIE sprintf( "can not get ps branch information" );
 
     my $hashref = $sth->fetchall_arrayref();
-    print Dumper( $hashref );
-    return $hashref;
+    return $hashref->[0]->[0];;
 }
 1;

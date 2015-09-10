@@ -15,6 +15,7 @@ BEGIN {
 use lib sprintf( "%s/lib/perl/", $lfs_ci_root );
 
 use Nokia::Singleton;
+use Nokia::Command::CustomScm::DatabaseBranches;
 
 my %l4p_config = (
     'log4perl.category'                                  => 'TRACE, Logfile',
