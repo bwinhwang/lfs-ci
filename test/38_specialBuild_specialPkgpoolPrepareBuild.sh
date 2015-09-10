@@ -39,6 +39,16 @@ oneTimeSetUp() {
             ${WORKSPACE}/workspace/bld/bld-dev-input/lfs.patch
 
     }
+    mustHaveLocationForSpecialBuild() {
+        mockedCommand "mustHaveLocationForSpecialBuild $@"
+    }
+    getLocationName() {
+        mockedCommand "getLocationName $@"
+        echo pronb-developer
+    }
+    mustHaveLocationName() {
+        return
+    }
     return
 }
 
@@ -48,6 +58,7 @@ setUp() {
     export WORKSPACE=$(createTempDirectory)
     export UPSTREAM_PROJECT=LFS_DEV_-_DEVELOPER_-_Build
     export UPSTREAM_BUILD=123
+    export LFS_CI_GLOBAL_BRANCH_NAME=trunk
 
     return
 }
@@ -63,6 +74,8 @@ test1() {
     local expect=$(createTempFile)
     cat <<EOF > ${expect}
 execute mkdir -p ${WORKSPACE}/workspace
+mustHaveLocationForSpecialBuild 
+getLocationName 
 copyArtifactsToWorkspace LFS_DEV_-_DEVELOPER_-_Build 123
 execute rm -rf ${WORKSPACE}/src
 gitClone PKGPOOL_git_repos_url ${WORKSPACE}/src
