@@ -46,8 +46,8 @@ usecase_PKGPOOL_BUILD() {
     info "preparing git workspace..."
     cd ${gitWorkspace}
 
+    local cleanWorkspace=$(getConfig PKGPOOL_CI_uc_build_can_clean_workspace)
     if [[ ${cleanWorkspace} ]] ; then
-        execute rm -rf ${gitWorkspace}/src
         gitReset --hard
     fi
 
