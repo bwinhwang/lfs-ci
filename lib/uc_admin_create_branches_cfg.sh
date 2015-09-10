@@ -21,6 +21,11 @@ usecase_ADMIN_CREATE_BRANCHES_CFG() {
         fatal "there must be a problem with branches.cfg. The branches.cfg has less than 100 lines."
     fi
 
+    if execute -i cmp ${cfgFile} ${LFS_CI_ROOT}/etc/branches.cfg ; then
+        info "no change detected in config file"
+        return
+    fi
+        
     execute mv ${cfgFile} ${LFS_CI_ROOT}/etc/branches.cfg
 
     info "new branches.cfg successfully generated."
