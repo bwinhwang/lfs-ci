@@ -9,10 +9,13 @@ LFS_CI_SOURCE_workflowtool='$Id$'
 #           the xml release note
 #  @param   {tagName}    name of the tag
 #  @param   {fileName}   name of the xml release note
+#  @param   {restricted} optional / if set, this release will be marked as 'released with restriction'
 #  @return  <none>
 createReleaseInWorkflowTool() {
     local tagName=$1
     local fileName=$2
+    local state=$3
+
     mustExistFile ${fileName}
 
     local workspace=$(getWorkspaceName)
@@ -36,9 +39,15 @@ createReleaseInWorkflowTool() {
         update="-F update=no" # does not exist 
     fi
 
+    #check, if this shall be a restricted release
+    local restricted=""
+    if [[ ${state} == "release_with_restrictions" ]] ; then
+        restricted="-F state_machine=external -F state=released_with_restrictions"
+    fi
+
     info "creating release based on ${fileName} in wft"
-    execute ${curl} ${update} -F file=@${fileName}
-    echo "${curl} ${update} -F file=@${fileName}" >> ${workspace}/redo.sh
+    execute ${curl} ${update} ${restricted} -F file=@${fileName}
+    echo "${curl} ${update} ${restricted} -F file=@${fileName}" >> ${workspace}/redo.sh
 
     if ! existsBaselineInWorkflowTool ${tagName} ; then
         error "just created baseline ${tagName} does not exist in WFT"
@@ -92,12 +101,13 @@ uploadToWorkflowTool() {
 ## @fn      existsBaselineInWorkflowTool()
 #  @brief   checks, if the given release / tagName exists in the workflowtool
 #  @param   {tagName}    name of the release
-#  @return  1 if release existss in WFT, 0 otherwise
+#  @return  0 if release existss in WFT, 1 otherwise
 existsBaselineInWorkflowTool() {
     local tagName=$1
 
     local wftApiKey=$(getConfig WORKFLOWTOOL_api_key)
     local wftBuildContent=$(getConfig WORKFLOWTOOL_url_build_content)
+    # TODO: vm048635 2015-08-12 check why this curl statement is not used
     local curl="curl -k ${wftUploadAttachment}/${tagName} -F access_key=${wftApiKey} "
 
     # check, if wft already knows about the release
