@@ -195,5 +195,8 @@ storeRevisions() {
 
     done
 
+    info "revision file:"
+    rawDebug ${revisionsFile}
+
     return
 }
