@@ -343,17 +343,17 @@ usecase_PKGPOOL_CHECK_FOR_FAILED_VTC() {
     local workspace=$(getWorkspaceName)
     mustHaveWorkspaceName
 
-    local buildName=$(cat ${workspace}/bld/bld-pkgpool-release/label)
-    mustHaveValue "${buildName}" "build name of pkgpool"
+    local logfile=${workspace}/bld/bld-pkgpool-release/logs/arm-cortexa15-linux-gnueabihf-vtc.log.gz
+    info "checking for ${logfile}"
 
-    local vtcAddon=$(getConfig PKGPOOL_location_on_share)/${buildName}/arm-cortexa15-linux-gnueabihf-vtc.tar.gz
-    mustExistFile ${vtcAddon}
-
-    local filesInTar=$(execute -n tar tvf ${vtcAddon} | wc -l)
-
-    if [[ ${filesInTar} == 0 ]] ; then
-        fatal "the vtc addon ${vtcAddon} is empty. please check build logs for compile error"
+    if [[ -e ${logfile} ]] ; then
+        if execute -i zgrep -s "LVTC FSMR4 BUILD FAILED" ${logfile} ; then
+            execute -i -n zcat ${logfile}
+            fatal "VTC build failed."
+        fi
     fi
 
+    info "vtc build is ok."
+        
     return 0
 }
