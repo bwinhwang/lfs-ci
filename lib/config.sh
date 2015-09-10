@@ -82,7 +82,12 @@ getTargetBoardName() {
 #  @return  name of the product
 getProductNameFromJobName() {
     local jobName=${1:-${JOB_NAME}}
-    ${LFS_CI_ROOT}/bin/getFromString.pl "${jobName}" productName
+
+    if [[ -z ${LFS_CI_GLOBAL_PRODUCT_NAME} ]] ; then
+        export LFS_CI_GLOBAL_PRODUCT_NAME=$(${LFS_CI_ROOT}/bin/getFromString.pl "${jobName}" productName)
+    fi
+
+    echo ${LFS_CI_GLOBAL_PRODUCT_NAME}
     return
 }
 
@@ -133,3 +138,4 @@ getConfig() {
 
     return
 }
+

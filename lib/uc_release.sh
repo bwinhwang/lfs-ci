@@ -350,13 +350,20 @@ sendReleaseNote() {
     info "collect revisions from all sub build jobs"
     sort -u ${workspace}/bld/bld-externalComponents-*/usedRevisions.txt > ${workspace}/revisions.txt
 
-    copyImportantNoteFilesFromSubversionToWorkspace 
+    copyImportantNoteFilesFromSubversionToWorkspace
+ 
+    local state=
+    if isPatchedRelease ; then
+        state="release_with_restrictions"
+        addImportantNoteFromPatchedBuild
+    fi
 
     # create the os or uboot release note
     info "new release label is ${releaseTagName} based on ${oldReleaseTagName}"
     _createLfsOsReleaseNote ${buildJobName} ${buildBuildNumber}
 
-    createReleaseInWorkflowTool ${osTagName} ${workspace}/os/os_releasenote.xml
+    createReleaseInWorkflowTool ${osTagName} ${workspace}/os/os_releasenote.xml ${state}
+
     uploadToWorkflowTool        ${osTagName} ${workspace}/os/os_releasenote.xml
     uploadToWorkflowTool        ${osTagName} ${workspace}/os/releasenote.txt
     uploadToWorkflowTool        ${osTagName} ${workspace}/os/changelog.xml
@@ -364,6 +371,9 @@ sendReleaseNote() {
 
     [[ -e ${workspace}/importantNote.txt ]] &&
         uploadToWorkflowTool    ${osTagName} ${workspace}/importantNote.txt
+
+    # In case of a patched release perform some specific actions
+    handlePatchedRelease
 
     execute cp -f ${workspace}/os/os_releasenote.xml                                 ${workspace}/bld/bld-lfs-release/lfs_os_releasenote.xml
     execute cp -f ${workspace}/os/releasenote.txt                                    ${workspace}/bld/bld-lfs-release/lfs_os_releasenote.txt
@@ -375,7 +385,7 @@ sendReleaseNote() {
 
     if [[ ${productName} == "LFS" ]] ; then
         _createLfsRelReleaseNoteXml ${releaseTagName} ${workspace}/rel/releasenote.xml
-        createReleaseInWorkflowTool ${releaseTagName} ${workspace}/rel/releasenote.xml
+        createReleaseInWorkflowTool ${releaseTagName} ${workspace}/rel/releasenote.xml ${state}
         uploadToWorkflowTool        ${releaseTagName} ${workspace}/rel/releasenote.xml
 
         execute cp -f ${workspace}/rel/releasenote.xml ${workspace}/bld/bld-lfs-release/lfs_rel_releasenote.xml
@@ -911,5 +921,72 @@ updateDependencyFiles() {
     info "update done."
 
     return
+}
+
+## @fn      isPatchedRelease()
+#  @brief   If /os/doc/patched_build.xml is existing, this release is a 'patched release', i.e. at least one board variant is not idential to the base build.
+#  @param   <none>
+#  @return  {0 or 1}
+isPatchedRelease() {
+
+    mustHaveValue "${releaseDirectory}" "releaseDirectory"
+    local importantNoteXML=${releaseDirectory}/os/doc/patched_build.xml
+    if [[ -f ${importantNoteXML} ]] ; then
+      return 0 
+    fi
+    return 1
+}
+
+## @fn      handlePatchedRelease()
+#  @brief   If /os/doc/patched_build.xml is existing, this release is a 'patched release', i.e. at least one board variant is not idential to the base build.
+#           In that case we need to add specific files and descrition to the release note
+#  @param   <none>
+#  @return  <none>
+handlePatchedRelease() {
+    if ! isPatchedRelease ; then
+        return
+    fi
+ 
+    mustHaveValue "${releaseDirectory}" "releaseDirectory"
+    mustHaveWorkspaceName
+    mustHaveValue "${releaseLabel}" "release label"
+    mustHaveValue "${osTagName}" "osTagName"
+ 
+    local importantNoteXML=${releaseDirectory}/os/doc/patched_build.xml
+    #copy all patch related files to workflowtool
+    info "Uploading all patch related files to WFT"
+    uploadToWorkflowTool ${osTagName}  ${importantNoteXML} 
+    for file in $(find ${releaseDirectory}/os/doc/patched_release -maxdepth 1 -type f) ; do
+        uploadToWorkflowTool ${osTagName} ${file}
+    done
+    for dir in $(find ${releaseDirectory}/os/doc/patched_release -mindepth 1 -maxdepth 1 -type d) ; do
+        dir=${dir##*/}
+        header=${dir%_*}
+        for file in $(find ${releaseDirectory}/os/doc/patched_release/${dir} -type f) ; do
+            execute mv ${file}  ${releaseDirectory}/os/doc/patched_release/${dir}/${header}_${file##*/}
+            uploadToWorkflowTool ${osTagName}  ${releaseDirectory}/os/doc/patched_release/${dir}/${header}_${file##*/}
+        done
+    done
+    
+    #TODO Richie Maybe later
+    #for-loop       execute cp -f ${workspace}/os/patched_build/xxx  ${workspace}/bld/bld-lfs-release/xxx 
+}
+
+## @fn      addImportantNoteFromPatchedBuid()
+#  @brief   If existing, extract the <Important Note> part out of /os/doc/patched_build.xml and add to importantNote.txt
+#  @param   <none
+#  @return  <none>
+addImportantNoteFromPatchedBuild() {
+    local importantNoteXML=${releaseDirectory}/os/doc/patched_build.xml
+    debug "using xsltproc to extract important note from ${importantNoteXML}" 
+    extractedText=$(xsltproc                                             \
+                    ${LFS_CI_ROOT}/lib/contrib/patchedImportantNote.xslt \
+                    ${importantNoteXML})
+    debug "extractedText=${extractedText}"
+
+    info "adding important notes from patched_build.xml to importantNotes.txt"
+    echo "${extractedText}" >> ${workspace}/importantNote.txt
+    debug "Content of ${workspace}/importantNote.txt = "
+    debug "`cat ${workspace}/importantNote.txt`"
 }
 
