@@ -68,7 +68,7 @@ execute() {
             rawDebug ${output}
         fi
 
-        debug "exit code of \"${command}\" was ${exitCode}"
+        trace "exit code of \"${command}\" was ${exitCode}"
 
         # fucking stupid workaround to get the logfile for the command outside
         # of the function.....
