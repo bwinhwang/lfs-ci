@@ -117,7 +117,8 @@ mustHaveCleanWorkspace
 copyArtifactsToWorkspace PKGPOOL_CI_-_trunk_-_Test 1234 pkgpool
 setBuildDescription LFS_CI_-_trunk_-_Build 123 LABEL
 execute rm -rfv ${WORKSPACE}/src
-gitClone ssh://git@psulm.nsn-net.net/build/build ${WORKSPACE}/src
+getConfig PKGPOOL_git_repos_url
+gitClone PKGPOOL_git_repos_url ${WORKSPACE}/src
 getConfig PKGPOOL_PROD_update_dependencies_svn_url
 svnCheckout http://host/path ${WORKSPACE}/workspace
 gitLog --format=medium oldRevision..newRevision
@@ -158,7 +159,8 @@ mustHaveCleanWorkspace
 copyArtifactsToWorkspace PKGPOOL_CI_-_trunk_-_Test 1234 pkgpool
 setBuildDescription LFS_CI_-_trunk_-_Build 123 LABEL
 execute rm -rfv ${WORKSPACE}/src
-gitClone ssh://git@psulm.nsn-net.net/build/build ${WORKSPACE}/src
+getConfig PKGPOOL_git_repos_url
+gitClone PKGPOOL_git_repos_url ${WORKSPACE}/src
 getConfig PKGPOOL_PROD_update_dependencies_svn_url
 svnCheckout http://host/path ${WORKSPACE}/workspace
 gitLog --format=medium oldRevision..newRevision
@@ -199,7 +201,8 @@ mustHaveCleanWorkspace
 copyArtifactsToWorkspace PKGPOOL_CI_-_trunk_-_Test 1234 pkgpool
 setBuildDescription LFS_CI_-_trunk_-_Build 123 LABEL
 execute rm -rfv ${WORKSPACE}/src
-gitClone ssh://git@psulm.nsn-net.net/build/build ${WORKSPACE}/src
+getConfig PKGPOOL_git_repos_url
+gitClone PKGPOOL_git_repos_url ${WORKSPACE}/src
 getConfig PKGPOOL_PROD_update_dependencies_svn_url
 svnCheckout http://host/path ${WORKSPACE}/workspace
 gitLog --format=medium oldRevision..newRevision
@@ -238,7 +241,8 @@ mustHaveCleanWorkspace
 copyArtifactsToWorkspace PKGPOOL_CI_-_trunk_-_Test 1234 pkgpool
 setBuildDescription LFS_CI_-_trunk_-_Build 123 LABEL
 execute rm -rfv ${WORKSPACE}/src
-gitClone ssh://git@psulm.nsn-net.net/build/build ${WORKSPACE}/src
+getConfig PKGPOOL_git_repos_url
+gitClone PKGPOOL_git_repos_url ${WORKSPACE}/src
 getConfig PKGPOOL_PROD_update_dependencies_svn_url
 svnCheckout http://host/path ${WORKSPACE}/workspace
 gitLog --format=medium oldRevision..newRevision
@@ -282,7 +286,8 @@ mustHaveCleanWorkspace
 copyArtifactsToWorkspace PKGPOOL_CI_-_trunk_-_Test 1234 pkgpool
 setBuildDescription LFS_CI_-_trunk_-_Build 123 LABEL
 execute rm -rfv ${WORKSPACE}/src
-gitClone ssh://git@psulm.nsn-net.net/build/build ${WORKSPACE}/src
+getConfig PKGPOOL_git_repos_url
+gitClone PKGPOOL_git_repos_url ${WORKSPACE}/src
 getConfig PKGPOOL_PROD_update_dependencies_svn_url
 svnCheckout http://host/path ${WORKSPACE}/workspace
 gitLog --format=medium oldRevision..newRevision
