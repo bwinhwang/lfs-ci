@@ -173,7 +173,7 @@ pre_actions() {
     fi
 }
 
-ajust_args() {
+adjust_args() {
     if [[ ${ROOT_VIEWS} ]]; then
         ROOT_VIEWS=${ROOT_VIEWS},ADMIN
     else
@@ -715,7 +715,7 @@ main() {
     get_args $*
     pre_checks
     pre_actions
-    ajust_args
+    adjust_args
 
     if [[ ${PURGE_SANDBOX} == true ]]; then
         purge_sandbox
