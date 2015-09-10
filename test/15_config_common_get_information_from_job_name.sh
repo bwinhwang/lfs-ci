@@ -47,16 +47,35 @@ test4_getTargetBoardName() {
     return
 }
 
+test5_getProductNameFromJobName_global() {
+    export LFS_CI_GLOBAL_PRODUCT_NAME=ABC
+    assertTrue "getProductNameFromJobName"
+    local value=$(getProductNameFromJobName)
+    assertEquals "ABC" "${value}"
+    export LFS_CI_GLOBAL_PRODUCT_NAME=
+    return
+}
+
 test5_getProductNameFromJobName() {
     assertTrue "getProductNameFromJobName"
     local value=$(getProductNameFromJobName)
     assertEquals "LFS" "${value}"
     return
 }
+
 test6_getProductNameFromJobName() {
     assertTrue "getProductNameFromJobName UBOOT_CI_-_trunk_-_Build_-_FSM-r4_-_fsm4_axm"
     local value=$(getProductNameFromJobName UBOOT_CI_-_trunk_-_Build_-_FSM-r4_-_fsm4_axm)
     assertEquals "UBOOT" "${value}"
+    return
+}
+
+test6_getProductNameFromJobName_global() {
+    export LFS_CI_GLOBAL_PRODUCT_NAME=ABC
+    assertTrue "getProductNameFromJobName UBOOT_CI_-_trunk_-_Build_-_FSM-r4_-_fsm4_axm"
+    local value=$(getProductNameFromJobName UBOOT_CI_-_trunk_-_Build_-_FSM-r4_-_fsm4_axm)
+    assertEquals "ABC" "${value}"
+    export LFS_CI_GLOBAL_PRODUCT_NAME=
     return
 }
 

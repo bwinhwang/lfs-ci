@@ -35,59 +35,78 @@ getFingerprintOfCurrentJob() {
 
     return
 }
-   
+
+## @fn      getFingerprintFromBuildName()
+#  @brief   get the fingerprint of a given build name 
+#  @param   {buildName} name of a build
+#  @return  fingerprint of the current build name
+getFingerprintFromBuildName() {
+    local buildName=${1}
+    mustHaveValue "${buildName}" "build name"
+
+    md5sum=$(echo ${buildName} | md5sum | cut -c1-32)
+    debug "getFingerprintFromBuildName: fingerprint of ${buildName} = ${md5sum}"
+    mustHaveValue "${md5sum}" "md5sum of fingerprint file"
+
+    echo ${md5sum}
+
+    return
+} 
+
 ## @fn      getTestJobNameFromFingerprint()
 #  @brief   get name of the test job from the fingerprint (current job)
-#  @param   <none>
+#  @param   {buildName}	optional
 #  @return  name of the test job
 getTestJobNameFromFingerprint() {
-    _getJobInformationFromFingerprint '_Test:' 1
+    _getJobInformationFromFingerprint '_Test:' 1 $1
 }
    
 ## @fn      getTestBuildNumberFromFingerprint()
 #  @brief   get build number of the test job from the fingerprint (current job)
-#  @param   <none>
+#  @param   {buildName}	optional
 #  @return  build number of the test job
 getTestBuildNumberFromFingerprint() {
-    _getJobInformationFromFingerprint '_Test:' 2
+    _getJobInformationFromFingerprint '_Test:' 2 $1
 }
 
 ## @fn      getBuildJobNameFromFingerprint()
 #  @brief   get name of the build job from the fingerprint (current job)
-#  @param   <none>
+#  @param   {buildName}	optional
 #  @return  name of the build job
 getBuildJobNameFromFingerprint() {
-    _getJobInformationFromFingerprint '_Build:' 1
+    _getJobInformationFromFingerprint '_Build:' 1 $1
 }
 
 ## @fn      getBuildBuildNumberFromFingerprint()
 #  @brief   get build number of the build job from the fingerprint (current job)
-#  @param   <none>
+#  @param   {buildName}	optional
 #  @return  build number of the build job
 getBuildBuildNumberFromFingerprint() {
-    _getJobInformationFromFingerprint '_Build:' 2
-}
-
-## @fn      getPackageBuildNumberFromFingerprint()
-#  @brief   get name of the package job from the fingerprint (current job)
-#  @param   <none>
-#  @return  name of the package job
-getPackageJobNameFromFingerprint() {
-    _getJobInformationFromFingerprint '_Package_-_package:' 1
+    _getJobInformationFromFingerprint '_Build:' 2 $1
 }
 
 ## @fn      getPackageJobNameFromFingerprint()
+#  @brief   get name of the package job from the fingerprint (current job)
+#  @param   {buildName}	optional
+#  @return  name of the package job
+getPackageJobNameFromFingerprint() {
+    _getJobInformationFromFingerprint '_Package_-_package:' 1 $1
+}
+
+## @fn      getPackageBuildNumberFromFingerprint()
 #  @brief   get build number of the package job from the fingerprint (current job)
-#  @param   <none>
+#  @param   {buildName}	optional
 #  @return  build number of the package job
 getPackageBuildNumberFromFingerprint() {
-    _getJobInformationFromFingerprint '_Package_-_package:' 2
+    _getJobInformationFromFingerprint '_Package_-_package:' 2 $1
 }
 
 ## @fn      _getJobInformationFromFingerprint()
 #  @brief   get job information of the fingerprint
 #  @param   {jobNamePart}      name (regex) of the requested job (Build, Test, ...)
 #  @param   {fieldNumber}      number of the file
+#  @param   {buildName}        name of the build (This is an optional parameter. If set, the md5sum is calculated based on the build name and not based on the current job)
+
 #  @return  result value from job (job name, build number)
 _getJobInformationFromFingerprint() {
     requiredParameters LFS_CI_ROOT
@@ -98,9 +117,12 @@ _getJobInformationFromFingerprint() {
     local fieldNumber=${2}
     mustHaveValue "${fieldNumber}" "field number (1 / 2)"
 
-    local md5sum=${3}
-    if [[ -z ${md5sum} ]] ; then
+    local buildName=${3}
+    local md5sum=
+    if [[ -z ${buildName} ]] ; then
         md5sum=$(getFingerprintOfCurrentJob)
+    else
+        md5sum=$(getFingerprintFromBuildName ${buildName})
     fi
     mustHaveValue "${md5sum}" "md5sum fingerprint"
 
