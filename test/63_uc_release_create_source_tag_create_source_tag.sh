@@ -52,7 +52,7 @@ test1() {
     cat <<EOF > ${expect}
 _mustHaveLfsSourceSubversionUrl 
 getConfig LFS_CI_uc_release_can_create_source_tag
-svnCopy -m ${WORKSPACE}/commitMessage http://svnMasterServerHostName//os/branches/pre_PS_LFS_OS_2015_09_0001 http://svnMasterServerHostName//os/tags/PS_LFS_OS_2015_09_0001
+svnCopy -F ${WORKSPACE}/commitMessage http://svnMasterServerHostName//os/branches/pre_PS_LFS_OS_2015_09_0001 http://svnMasterServerHostName//os/tags/PS_LFS_OS_2015_09_0001
 svnRemove -F ${WORKSPACE}/commitMessage http://svnMasterServerHostName/os/branches/pre_PS_LFS_OS_2015_09_0001
 EOF
     assertExecutedCommands ${expect}

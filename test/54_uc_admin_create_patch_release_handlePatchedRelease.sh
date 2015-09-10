@@ -1,7 +1,7 @@
 #!/bin/bash
 
 source test/common.sh
-source lib/uc_release.sh
+source lib/uc_release_send_release_note.sh
 
 oneTimeSetUp() {
     mockedCommand() {
@@ -18,13 +18,17 @@ oneTimeSetUp() {
 
     uploadToWorkflowTool() {
         mockedCommand "uploadToWorkflowTool$@"
-        info uploadToWorkflowTool $@
+        info "uploadToWorkflowTool $@"
     }
 
     return
 }
 
 setUp() {
+
+    export LFS_PROD_RELEASE_CURRENT_TAG_NAME_REL=PS_LFS_REL_2015_08_0001
+    export LFS_PROD_RELEASE_CURRENT_TAG_NAME=PS_LFS_OS_2015_08_0001
+
     export workspace=$(createTempDirectory)
     mkdir -p ${workspace}/workspace
     workspace=${workspace}/workspace

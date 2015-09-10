@@ -22,11 +22,16 @@ oneTimeSetUp() {
     uploadToSubversion() {
         mockedCommand "uploadToSubversion $@"
     }
+    createArtifactArchive() {
+        mockedCommand "createArtifactArchive $@"
+    }
     return
 }
 
 setUp() {
     cp -f /dev/null ${UT_MOCKED_COMMANDS}
+    export JOB_NAME=LFS_PROD_-_trunk_-_Release_-_upload
+    export BUILD_NUMBER=1234
     return
 }
 
@@ -36,7 +41,8 @@ tearDown() {
 }
 
 test1() {
-    assertTrue "usecase_LFS_RELEASE_UPLOAD_TO_SUBVERSION"
+    # assertTrue "usecase_LFS_RELEASE_UPLOAD_TO_SUBVERSION"
+    usecase_LFS_RELEASE_UPLOAD_TO_SUBVERSION
 
     local expect=$(createTempFile)
     cat <<EOF > ${expect}
@@ -44,6 +50,7 @@ mustBePreparedForReleaseTask
 getConfig LFS_CI_UC_package_copy_to_share_real_location
 mustExistDirectory LFS_CI_UC_package_copy_to_share_real_location/
 uploadToSubversion LFS_CI_UC_package_copy_to_share_real_location//os
+createArtifactArchive 
 EOF
     assertExecutedCommands ${expect}
 
