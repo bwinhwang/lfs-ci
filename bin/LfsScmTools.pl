@@ -58,6 +58,7 @@ my %commands = (
                  sendReleaseNote                => "Nokia::Command::SendReleaseNote",
                  sortBuildsFromDependencies     => "Nokia::Command::SortBuildsFromDependencies",
                  unreserveTarget                => "Nokia::Command::UnreserveTarget",
+                 customScmDatabaseBranches      => "Nokia::Command::CustomScm::DatabaseBranches",
                );
 
 if( not exists $commands{$program} ) {
