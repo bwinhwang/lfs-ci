@@ -81,6 +81,7 @@ execute rm -rf ${WORKSPACE}/src
 gitClone PKGPOOL_git_repos_url ${WORKSPACE}/src
 gitCheckout 
 gitReset --hard
+execute ./bootstrap
 execute -n lsdiff ${WORKSPACE}/workspace/bld/bld-dev-input/lfs.patch
 execute git submodule update src/fsmddal
 execute -n filterdiff -i src/fsmddal/Dependencies ${WORKSPACE}/workspace/bld/bld-dev-input/lfs.patch

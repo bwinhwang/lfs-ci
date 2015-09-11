@@ -431,6 +431,7 @@ specialPkgpoolPrepareBuild() {
     cd ${WORKSPACE}/src
     gitCheckout ${gitRevision}
     gitReset --hard
+    execute ./bootstrap
 
     for fileInPatch in $(execute -n lsdiff ${workspace}/bld/bld-${buildType}-input/lfs.patch) ; do
         local pathName=$(cut -d/ -f1,2 <<< ${fileInPatch})
