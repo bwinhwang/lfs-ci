@@ -444,7 +444,7 @@ specialPkgpoolPrepareBuild() {
                    local tmpPatchFile=$(createTempFile)
                    execute -n filterdiff -i ${fileInPatch} ${workspace}/bld/bld-${buildType}-input/lfs.patch > ${tmpPatchFile}
                    rawDebug ${tmpPatchFile}
-                   execute patch -p0 -d ${WORKSPACE} < ${tmpPatchFile}
+                   execute patch -p0 -d ${WORKSPACE}/src < ${tmpPatchFile}
             ;;
         esac
     done
