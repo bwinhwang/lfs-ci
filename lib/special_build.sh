@@ -13,6 +13,7 @@
 [[ -z ${LFS_CI_SOURCE_artifacts}       ]] && source ${LFS_CI_ROOT}/lib/artifacts.sh
 [[ -z ${LFS_CI_SOURCE_common}          ]] && source ${LFS_CI_ROOT}/lib/common.sh
 [[ -z ${LFS_CI_SOURCE_amazons3}        ]] && source ${LFS_CI_ROOT}/lib/amazons3.sh
+[[ -z ${LFS_CI_SOURCE_git}             ]] && source ${LFS_CI_ROOT}/lib/git.sh
 
 LFS_CI_SOURCE_special_build='$Id$'
 
@@ -65,6 +66,7 @@ specialBuildPreparation() {
     execute mkdir -p ${workspace}/bld/bld-fsmci-summary/
     echo ${label}    > ${workspace}/bld/bld-fsmci-summary/label
     echo ${location} > ${workspace}/bld/bld-fsmci-summary/location
+    echo ${revision} > ${workspace}/bld/bld-fsmci-summary/svnrevision
 
     createFingerprintFile
 
@@ -153,6 +155,7 @@ specialBuildisRequiredForLrc() {
 
     return 0
 }
+
 ## @fn      specialBuildisRequiredSelectedByUser(  )
 #  @brief   checks, if the build is requested by the user (via jenkins input)
 #  @param   {buildType}    type of the build, values DEV or KNIFE
@@ -371,8 +374,6 @@ specialBuildUploadAndNotifyUser() {
 #  @param   <none>
 #  @return  <none>
 mustHaveLocationForSpecialBuild() {
-    requiredParameters UPSTREAM_PROJECT UPSTREAM_BUILD
-
     local workspace=$(getWorkspaceName)
     mustHaveWorkspaceName
 
@@ -383,10 +384,84 @@ mustHaveLocationForSpecialBuild() {
     local location=$(cat ${workspace}/bld/bld-fsmci-summary/location)
     mustHaveValue "${location}" "location"
 
-    local subTaskName=$(getSubTaskNameFromJobName)
-    mustHaveValue "${subTaskName}" "sub task name"
-
     export LFS_CI_GLOBAL_BRANCH_NAME=${location}
     return
 }
 
+## @fn      specialPkgpoolPrepareBuild()
+#  @brief   prepare the workspace for a git pkgpool build
+#  @param   {buildType}    type of the build (e.g. DEV, KNIFE)
+#  @return  <none>
+specialPkgpoolPrepareBuild() {
+    requiredParameters WORKSPACE UPSTREAM_PROJECT UPSTREAM_BUILD
+
+    local buildType=$1
+    mustHaveValue "${buildType}" "build type"
+
+    local workspace=$(getWorkspaceName)
+    mustHaveCleanWorkspace
+
+    mustHaveLocationForSpecialBuild
+    local locationName=$(getLocationName)
+    mustHaveLocationName
+
+    local svnUrlsToUpdate=$(getConfig PKGPOOL_PROD_update_dependencies_svn_url)
+    mustHaveValue "${svnUrlsToUpdate}" "svn urls for pkgpool"
+    local revisionFileInSvn=$(dirname ${svnUrlsToUpdate})/src/gitrevision
+    info "revisionFileInSvn ${revisionFileInSvn}"
+    local svnRevision=$(cat ${workspace}/bld/bld-fsmci-summary/svnrevision)
+    info "svnRevision ${svnRevision}"
+    local gitRevision=$(svnCat -r ${svnRevision} ${revisionFileInSvn}@${svnRevision})
+    info "gitRevision ${gitRevision}"
+
+    local gitUpstreamRepos=$(getConfig PKGPOOL_git_repos_url)
+    mustHaveValue "${gitUpstreamRepos}" "git upstream repos url"
+
+    local gitWorkspace=${WORKSPACE}/src
+
+    copyArtifactsToWorkspace "${UPSTREAM_PROJECT}" "${UPSTREAM_BUILD}"
+
+    # cleanup old workspace from git
+    execute rm -rf ${WORKSPACE}/src
+
+    # clone git repos
+    gitClone ${gitUpstreamRepos} ${WORKSPACE}/src
+
+    # switch branch
+    cd ${WORKSPACE}/src
+    gitCheckout ${gitRevision}
+    gitReset --hard
+
+    for fileInPatch in $(execute -n lsdiff ${workspace}/bld/bld-${buildType}-input/lfs.patch) ; do
+        local pathName=$(cut -d/ -f1,2 <<< ${fileInPatch})
+        case ${pathName} in
+            src-*) : ;;
+            src/*) 
+                   info "updating submodule ${pathName}"
+                   gitSubmodule update ${pathName}
+
+                   info "applying patch ${fileInPatch}"
+                   local tmpPatchFile=$(createTempFile)
+                   execute -n filterdiff -i ${fileInPatch} ${workspace}/bld/bld-${buildType}-input/lfs.patch > ${tmpPatchFile}
+                   rawDebug ${tmpPatchFile}
+                   execute patch -p0 -d ${workspace} < ${tmpPatchFile}
+            ;;
+        esac
+    done
+
+    return
+}
+
+specialPkgpoolCollectArtifacts() {
+    requiredParameters LFS_CI_ROOT UPSTREAM_PROJECT UPSTREAM_BUILD
+
+    local workspace=$(getWorkspaceName)
+    mustHaveWorkspaceName
+
+    info "creating artifacts of pkgpool"
+    cd ${workspace}
+    execute tar cv --use-compress-program ${LFS_CI_ROOT}/bin/pigz --file ${workspace}/bld-pkgpool-artifacts.tar.gz --transform='s:^\pool/:pkgpool/:' pool/
+    copyFileToArtifactDirectory ${workspace}/bld-pkgpool-artifacts.tar.gz ${UPSTREAM_PROJECT} ${UPSTREAM_BUILD}
+
+    return
+}
