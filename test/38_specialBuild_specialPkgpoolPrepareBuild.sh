@@ -84,13 +84,13 @@ gitReset --hard
 execute -n lsdiff ${WORKSPACE}/workspace/bld/bld-dev-input/lfs.patch
 execute git submodule update src/fsmddal
 execute -n filterdiff -i src/fsmddal/Dependencies ${WORKSPACE}/workspace/bld/bld-dev-input/lfs.patch
-execute patch -p0 -d ${WORKSPACE}/workspace
+execute patch -p0 -d ${WORKSPACE}
 execute git submodule update src/fsmpsl
 execute -n filterdiff -i src/fsmpsl/Buildfile ${WORKSPACE}/workspace/bld/bld-dev-input/lfs.patch
-execute patch -p0 -d ${WORKSPACE}/workspace
+execute patch -p0 -d ${WORKSPACE}
 execute git submodule update src/fsmpsl
 execute -n filterdiff -i src/fsmpsl/Dependencies ${WORKSPACE}/workspace/bld/bld-dev-input/lfs.patch
-execute patch -p0 -d ${WORKSPACE}/workspace
+execute patch -p0 -d ${WORKSPACE}
 EOF
     assertExecutedCommands ${expect}
 
