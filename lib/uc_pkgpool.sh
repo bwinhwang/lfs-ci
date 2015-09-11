@@ -45,8 +45,11 @@ usecase_PKGPOOL_BUILD() {
 
     info "preparing git workspace..."
     cd ${gitWorkspace}
-    execute rm -rf ${gitWorkspace}/src
-    gitReset --hard
+
+    local cleanWorkspace=$(getConfig PKGPOOL_CI_uc_build_can_clean_workspace)
+    if [[ ${cleanWorkspace} ]] ; then
+        gitReset --hard
+    fi
 
     info "bootstrap build environment..."
     execute ./bootstrap
@@ -231,7 +234,9 @@ usecase_PKGPOOL_UPDATE_DEPS() {
     info "new label is ${label}/${newGitRevision} based on ${oldLabel}"
 
     execute rm -rfv ${WORKSPACE}/src
-    gitClone ssh://git@psulm.nsn-net.net/build/build ${WORKSPACE}/src
+    local gitUpstreamRepos=$(getConfig PKGPOOL_git_repos_url)
+    mustHaveValue "${gitUpstreamRepos}" "git upstream repos url"
+    gitClone ${gitUpstreamRepos} ${WORKSPACE}/src
 
     local svnUrlsToUpdate=$(getConfig PKGPOOL_PROD_update_dependencies_svn_url)
     mustHaveValue "${svnUrlsToUpdate}" "svn urls for pkgpool"
@@ -343,17 +348,17 @@ usecase_PKGPOOL_CHECK_FOR_FAILED_VTC() {
     local workspace=$(getWorkspaceName)
     mustHaveWorkspaceName
 
-    local buildName=$(cat ${workspace}/bld/bld-pkgpool-release/label)
-    mustHaveValue "${buildName}" "build name of pkgpool"
+    local logfile=${workspace}/bld/bld-pkgpool-release/logs/arm-cortexa15-linux-gnueabihf-vtc.log.gz
+    info "checking for ${logfile}"
 
-    local vtcAddon=$(getConfig PKGPOOL_location_on_share)/${buildName}/arm-cortexa15-linux-gnueabihf-vtc.tar.gz
-    mustExistFile ${vtcAddon}
-
-    local filesInTar=$(execute -n tar tvf ${vtcAddon} | wc -l)
-
-    if [[ ${filesInTar} == 0 ]] ; then
-        fatal "the vtc addon ${vtcAddon} is empty. please check build logs for compile error"
+    if [[ -e ${logfile} ]] ; then
+        if execute -i zgrep -s "LVTC FSMR4 BUILD FAILED" ${logfile} ; then
+            execute -i -n zcat ${logfile}
+            fatal "VTC build failed."
+        fi
     fi
 
+    info "vtc build is ok."
+        
     return 0
 }

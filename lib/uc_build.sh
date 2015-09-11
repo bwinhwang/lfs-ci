@@ -85,6 +85,7 @@ usecase_LFS_BUILD_PLATFORM() {
     info "building targets..."
     local subTaskName=$(getSubTaskNameFromJobName)
     mustHaveValue "${subTaskName}"
+    mustHaveCleanWorkspace
 
     copyAndExtractBuildArtifactsFromProject "${UPSTREAM_PROJECT}" "${UPSTREAM_BUILD}" "fsmci"
     mustHaveNextCiLabelName

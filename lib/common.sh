@@ -150,7 +150,11 @@ setupNewWorkspace() {
     debug "creating a new workspace in \"${workspace}\""
 
     execute cd "${workspace}"
-    execute build setup
+
+    LFS_CI_additional_parameters="-U $(getConfig lfsSourceRepos)/os/trunk/bldtools/bld-buildtools-common"
+    debug "additional parameters for build setup: ${LFS_CI_additional_parameters}"
+
+    execute build ${LFS_CI_additional_parameters} setup
     return
 }
 
@@ -420,10 +424,10 @@ getJenkinsJobBuildDirectory() {
 #  @throws  raise an error, if the value is empty
 mustHaveValue() {
     local value=$1
-    local message="${2:-unkown variable name}"
+    local message="${2:-unknown variable name}"
 
     if [[ -z "${value}" ]] ; then
-        fatal "excpect a value for ${message}, but didn't got one..."
+        fatal "expect a value for ${message}, but didn't get one..."
     fi
 
     return
@@ -487,6 +491,24 @@ mustExistFile() {
 
     if [[ ! -f ${file} ]] ; then
         fatal "${file} is not a file"
+    fi
+    return
+}
+
+## @fn      mustNotExistFile()
+#  @brief   ensure, that the file does not exist
+#  @param   {file}    name of the file
+#  @return  <none>
+#  @throws  raise an error, if the file does exist
+mustNotExistFile() {
+    local file=$1
+
+    if [[ -z ${file} ]] ; then
+        fatal "filename is empty"
+    fi
+
+    if [[ -f ${file} ]] ; then
+        fatal "${file} file exists"
     fi
     return
 }
@@ -849,6 +871,22 @@ getBranchPart() {
     [[ ${what} == NR ]] && echo ${nr}
 }
 
+## @fn      getBranchNameFromBuildName()
+#  @brief   get branch name of a release
+#  @param   {buildName} the name of a build eg PS_LFS_OS_2015_08_0088
+#  @return  <none>
+getBranchNameFromBuildName() {
+    local buildName=$1
+    mustHaveValue "${buildName}" "required buildName"
+
+    # TODO: dems18x0 - 20150806 : current workaround till branch/location cleanup task is done
+    local rel_location=$(getConfig LFS_PROD_tag_to_branch -t tagName:${buildName})
+    mustHaveValue "${rel_location}" "rel_location"
+
+    local branchName=${rel_location}
+    echo ${branchName}
+}
+
 ## @fn      mustHaveFreeDiskSpace()
 #  @brief   ensure, that there is enough free diskspace on given filesystem
 #  @param   {filesystem}    path of the filesystem (e.g. /var/fpwork)
@@ -903,7 +941,7 @@ sanityCheck() {
         fi
     fi
 
-    # check job name convetions
+    # check job name conventions
     if [[ ${JOB_NAME} =~ Admin_-_.* ]] ; then
         debug "admin job, naming is ok"
     elif [[ ${JOB_NAME} =~ Test-.* ]] ; then
