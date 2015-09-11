@@ -443,9 +443,14 @@ specialPkgpoolPrepareBuild() {
 
                    info "applying patch ${fileInPatch}"
                    local tmpPatchFile=$(createTempFile)
+                   cd ${WORKSPACE}/src}
                    execute -n filterdiff -i ${fileInPatch} ${workspace}/bld/bld-${buildType}-input/lfs.patch > ${tmpPatchFile}
                    rawDebug ${tmpPatchFile}
                    execute patch -p0 -d ${WORKSPACE}/src < ${tmpPatchFile}
+                   cd ${pathName}
+                   execute git add -f .
+                   execute git commit -m patch_commit 
+                   
             ;;
         esac
     done
