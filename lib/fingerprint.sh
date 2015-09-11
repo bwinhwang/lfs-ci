@@ -103,7 +103,7 @@ getPackageBuildNumberFromFingerprint() {
 
 ## @fn      getJobBuildNumberFromFingerprint()
 #  @brief   get build number of any job from the fingerprint (current job)
-#  @param   {jobNamePart}	name of the jobname
+#  @param   {jobNamePart}	part (regex) of the jobname
 #  @param   {buildName}	    optional
 #  @return  build number of any job
 getJobBuildNumberFromFingerprint() {
@@ -112,11 +112,11 @@ getJobBuildNumberFromFingerprint() {
 
 ## @fn      getJobJobNameFromFingerprint()
 #  @brief   get job name of any job from the fingerprint (current job)
-#  @param   {jobNamePart}	name of the jobname
+#  @param   {jobNamePart}	part (regex) of the jobname
 #  @param   {buildName}	    optional
 #  @return  job name of any job
 getJobJobNameFromFingerprint() {
-    _getJobInformationFromFingerprint $1 2 $2
+    _getJobInformationFromFingerprint $1 1 $2
 }
 
 ## @fn      _getJobInformationFromFingerprint()

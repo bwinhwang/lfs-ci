@@ -53,9 +53,9 @@ test1() {
 
     local expect=$(createTempFile)
     cat <<EOF > ${expect}
+getJobJobNameFromFingerprint Build_-_FSM_r4_-_fsm4_axm$
 getJobBuildNumberFromFingerprint Build_-_FSM_r4_-_fsm4_axm$
-getJobBuildNumberFromFingerprint Build_-_FSM_r4_-_fsm4_axm$
-copyAndExtractBuildArtifactsFromProject 1234 1234
+copyAndExtractBuildArtifactsFromProject build_job 1234
 getNextCiLabelName 
 setBuildDescription LFS_CI_-_trunk_-_foobar 1234 LABEL<br>
  PKG_1234<br>
@@ -69,3 +69,4 @@ EOF
 source lib/shunit2
 
 exit 0
+
