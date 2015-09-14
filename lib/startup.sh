@@ -38,7 +38,7 @@ prepareStartup() {
     requiredParameters LFS_CI_ROOT JOB_NAME HOSTNAME USER 
 
     # we are always require a config file. 
-    requiredParameters LFS_CI_CONFIG_FILE
+    # requiredParameters LFS_CI_CONFIG_FILE
 
     showAllEnvironmentVariables
     sanityCheck
