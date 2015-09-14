@@ -17,12 +17,14 @@ usecase_VTC_PLUS_LFS_SYNC_PRODUCTION() {
     mustHaveNextCiLabelName
     local labelName=$(getNextCiLabelName)
 
+    _setBuildDescriptionForVtc
+
     local releaseDirectory=$(getConfig LFS_CI_UC_package_copy_to_share_real_location)/${labelName}
     mustExistDirectory ${releaseDirectory}
     debug "found results of package job on share: ${labelName}"
 
     info "adding files from VCF to transferlist"
-    execute -n ${LFS_CI_ROOT}/bin/xpath -q -e '/versionControllFile/file/@source' ${releaseDirectory}/os/version_control.xml | \
+    execute -n xpath -q -e '/versionControllFile/file/@source' ${releaseDirectory}/os/version_control.xml | \
         cut -d'"' -f 2 | sed "s:^:os/:" > ${workspace}/filelist_to_sync
 
     local listToSync=$(getConfig LFS_CI_uc_vtc_plus_lfs_files_to_sync)
@@ -53,5 +55,29 @@ usecase_VTC_PLUS_LFS_SYNC_PRODUCTION() {
 
     echo "DELIVERY_DIRECTORY=${releaseDirectory}" > ${workspace}/env.txt
 
-    return
+    return 0
+}
+
+
+_setBuildDescriptionForVtc() {
+    local workspace=$(getWorkspaceName)
+    mustHaveWorkspaceName
+
+    local fsmr4BuildJobName=$(getJobJobNameFromFingerprint 'Build_-_FSM_r4_-_fsm4_axm$')
+    mustHaveValue "${fsmr4BuildJobName}" "job name of fsm-r4 axm build job"
+
+    local fsmr4BuildBuildNumber=$(getJobBuildNumberFromFingerprint 'Build_-_FSM_r4_-_fsm4_axm$')
+    mustHaveValue "${fsmr4BuildBuildNumber}" "build number of fsm-r4 axm build job"
+
+    local tmpFile=${workspace}/tempFile
+    copyAndExtractBuildArtifactsFromProject ${fsmr4BuildJobName} ${fsmr4BuildBuildNumber}
+
+    local labelName=$(getNextCiLabelName)
+
+    echo ${labelName} > ${tmpFile}
+    execute -n cut -d= -f2- ${workspace}/bld-externalComponents-summary/externalComponents | sort -u >> ${tmpFile}
+
+    setBuildDescription ${JOB_NAME} ${BUILD_NUMBER} "$(sed 's/$/<br>/g' ${tmpFile} )"
+
+    return 0
 }
