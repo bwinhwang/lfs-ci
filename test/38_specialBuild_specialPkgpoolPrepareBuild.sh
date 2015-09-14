@@ -39,6 +39,16 @@ oneTimeSetUp() {
             ${WORKSPACE}/workspace/bld/bld-dev-input/lfs.patch
 
     }
+    mustHaveLocationForSpecialBuild() {
+        mockedCommand "mustHaveLocationForSpecialBuild $@"
+    }
+    getLocationName() {
+        mockedCommand "getLocationName $@"
+        echo pronb-developer
+    }
+    mustHaveLocationName() {
+        return
+    }
     return
 }
 
@@ -48,6 +58,7 @@ setUp() {
     export WORKSPACE=$(createTempDirectory)
     export UPSTREAM_PROJECT=LFS_DEV_-_DEVELOPER_-_Build
     export UPSTREAM_BUILD=123
+    export LFS_CI_GLOBAL_BRANCH_NAME=trunk
 
     return
 }
@@ -63,21 +74,30 @@ test1() {
     local expect=$(createTempFile)
     cat <<EOF > ${expect}
 execute mkdir -p ${WORKSPACE}/workspace
+mustHaveLocationForSpecialBuild 
+getLocationName 
 copyArtifactsToWorkspace LFS_DEV_-_DEVELOPER_-_Build 123
 execute rm -rf ${WORKSPACE}/src
 gitClone PKGPOOL_git_repos_url ${WORKSPACE}/src
 gitCheckout 
 gitReset --hard
+execute ./bootstrap
 execute -n lsdiff ${WORKSPACE}/workspace/bld/bld-dev-input/lfs.patch
 execute git submodule update src/fsmddal
 execute -n filterdiff -i src/fsmddal/Dependencies ${WORKSPACE}/workspace/bld/bld-dev-input/lfs.patch
-execute patch -p0 -d ${WORKSPACE}/workspace
+execute patch -p0 -d ${WORKSPACE}/src
+execute git add -f .
+execute git commit -m patch_commit
 execute git submodule update src/fsmpsl
 execute -n filterdiff -i src/fsmpsl/Buildfile ${WORKSPACE}/workspace/bld/bld-dev-input/lfs.patch
-execute patch -p0 -d ${WORKSPACE}/workspace
+execute patch -p0 -d ${WORKSPACE}/src
+execute git add -f .
+execute git commit -m patch_commit
 execute git submodule update src/fsmpsl
 execute -n filterdiff -i src/fsmpsl/Dependencies ${WORKSPACE}/workspace/bld/bld-dev-input/lfs.patch
-execute patch -p0 -d ${WORKSPACE}/workspace
+execute patch -p0 -d ${WORKSPACE}/src
+execute git add -f .
+execute git commit -m patch_commit
 EOF
     assertExecutedCommands ${expect}
 
