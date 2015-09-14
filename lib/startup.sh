@@ -62,7 +62,7 @@ prepareStartup() {
         export LFS_CI_CONFIG_FILE=${LFS_CI_ROOT}/etc/lfs-ci.cfg
     fi
 
-    # we are always require a config file. 
+    # we always require a config file. 
     requiredParameters LFS_CI_CONFIG_FILE
 
     return
