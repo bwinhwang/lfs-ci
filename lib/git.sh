@@ -59,3 +59,13 @@ gitClone() {
     execute git clone $@
     return
 }
+
+gitCheckout() {
+    execute git checkout $@
+    return
+}
+
+gitSubmodule() {
+    execute git submodule $@
+    return
+}

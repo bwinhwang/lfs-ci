@@ -52,7 +52,7 @@ test1() {
 mustHaveMakingTestTestConfig 
 makingTest_testSuiteDirectory 
 execute make -C ${WORKSPACE}/workspace/path/to/test/suite waitssh
-execute sleep 60
+execute sleep 1
 EOF
     assertExecutedCommands ${expect}
 
@@ -72,7 +72,7 @@ makingTest_testSuiteDirectory
 execute -i make -C ${WORKSPACE}/workspace/path/to/test/suite waitssh
 execute make -C ${WORKSPACE}/workspace/path/to/test/suite powercycle
 execute -i make -C ${WORKSPACE}/workspace/path/to/test/suite waitssh
-execute sleep 60
+execute sleep 4
 EOF
     assertExecutedCommands ${expect}
 

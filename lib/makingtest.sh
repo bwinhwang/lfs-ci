@@ -526,8 +526,9 @@ mustHaveMakingTestRunningTarget() {
         [[ ${rebootRetry} -eq 0 ]] && opt=
         if execute ${opt} make -C ${testSuiteDirectory} waitssh ; then
             # target is up and running 
-            debug "sleeping for 60 seconds..."
-            execute sleep 60
+            local sleepInSecond=$(getConfig LFS_CI_uc_test_sleep_in_seconds_after_waitssh)
+            debug "sleeping for ${sleepInSecond} seconds..."
+            execute sleep ${sleepInSecond}
             info "target is up."
             return
         fi

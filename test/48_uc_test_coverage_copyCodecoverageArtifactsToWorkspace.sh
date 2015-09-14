@@ -31,8 +31,8 @@ oneTimeSetUp() {
     copyAndExtractBuildArtifactsFromProject() {
         mockedCommand "copyAndExtractBuildArtifactsFromProject $@"
     }
-    mustHaveCleanWorkspace() {
-        mockedCommand "mustHaveCleanWorkspace $@"
+    mustHaveWorkspaceName() {
+        mockedCommand "mustHaveWorkspaceName $@"
         mkdir -p ${WORKSPACE}/workspace
     }
     return
@@ -54,7 +54,7 @@ test1() {
 
     local expect=$(createTempFile)
     cat <<EOF > ${expect}
-mustHaveCleanWorkspace 
+mustHaveWorkspaceName 
 getFingerprintOfCurrentJob 
 _getProjectDataFromFingerprint fingerPrint ${WORKSPACE}/workspace/data.xml
 execute -n ${LFS_CI_ROOT}/bin/getFingerprintData ${WORKSPACE}/workspace/data.xml

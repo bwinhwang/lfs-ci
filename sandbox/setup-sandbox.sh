@@ -19,11 +19,15 @@
 ITSME=$(basename $0)
 
 # Defaults
+ADMIN_JOBS="false"
+UBOOT="false"
+DEV_VIEWS="false"
+TEST_JOBS="false"
 BRANCH_VIEWS="trunk"
 NESTED_VIEWS=""
 ROOT_VIEWS=""
 DISABLE_BUILD_JOBS="true"
-LRC="true"
+LRC="false"
 KEEP_JENKINS_PLUGINS="false"
 WORK_DIR="/var/fpwork"
 LOCAL_WORK_DIR=${WORK_DIR}
@@ -40,41 +44,46 @@ START_OPTION=""
 JUST_START="false"
 JENKINS_DIR="lfs-jenkins" # subdirectory within $WORK_DIR/$USER
 
+# Following jobs are copied always. The copy command for example will look like "rsync -a LFS_CI_-_trunk_-_* ..."
+DEFAULT_JOBS="LFS_BRANCHING_-_ Admin_-_reserveTarget Admin_-_releaseTarget Admin_-_deployCiScripting"
+TRUNK_JOBS="LFS_CI_-_trunk_-_ LFS_Prod_-_trunk_-_ PKGPOOL_-_trunk_-_"
+
 usage() {
 cat << EOF
 
     Script in order to setup a LFS CI Jenkins on local machine. Such a installation  is
     also known as LFS CI Sandbox.
 
-    IMPORTANT: 
+    IMPORTANT:
 
         - This script is interactive!
 
         - Before or after running this script you probably might run setup-database.sh.
 
     Jenkins will be installed into directory \${LOCAL_WORK_DIR}/$USER/${JENKINS_DIR}/home. This
-    can be overridden by using -w LOCAL_WORK_DIR. CI scripting will be cloned to \${LFS_CI_ROOT} 
-    pointing to branch development in which \${LFS_CI_ROOT} defaults to \${USER}/lfs-ci but can 
+    can be overridden by using -w LOCAL_WORK_DIR. CI scripting will be cloned to \${LFS_CI_ROOT}
+    pointing to branch development in which \${LFS_CI_ROOT} defaults to \${USER}/lfs-ci but can
     be overriden with the -s option.
 
-    Job and view configuration are copied from Jenkins server ${PROD_JENKINS_SERVER}. Per default 
-    all .*_Build$ Jobs will be disabled in the Sandbox. If you want them to be enabled in Sandbox
-    use the -e flag. LRC trunk is copied per default except the -l flag is present on the commandline.
+    Job and view configuration are copied from Jenkins production server. Per default all *_Build$ Jobs
+    will be disabled within the Sandbox. If you want them to be enabled use the -e flag.
 
     After the script has been finished check the system settings of the new LFS CI Sandbox.
 
-    Example: $ITSME -r UBOOT -n DEV/Developer_Build -b trunk,FB1503 -l -p
+    Example: $ITSME -a -u -x -l -f ~/my-local-development.cfg
 
-             Copy UBOOT, Developer_Build (within DEV view) and trunk. Skip creating LRC on Sandbox (-l).
-             Disable all .*_Build$ jobs (-e is missing) and keep already existing Jenkins plugins (-p).
+             Copy all Admin_-_* jobs (-a), create UBOOT (-u), DEV/* (-x) and trunk (created per default) views.
+             Skip creating LRC on Sandbox (-l). Disable all *_Build$ jobs (-e is missing). Also copy LRC into
+             Sandbox (-l).
 
     Options and Flags:
         -f Complete path of CI scripting config file.
         -b Comma separated list of BRANCHES to be copied from LFS CI (not LRC branches). Defaults to ${BRANCH_VIEWS}.
-           If you specify -b on commandline and you want to create trunk as well, 'trunk' must be in the list of
+           If you specify -b on command line and you want to create trunk as well, 'trunk' must be in the list of
            branches to be copied (eg -b trunk,FB1506,MD11504).
-        -n Comma separated list of nested view that should be created in Sandbox. Eg. DEV/Developer_Build,DEV/Knife_alpha.
-        -r Comma separated list of root views (Jenkins top level tabs) that should be created within Sandbox. Eg. ADMIN,UBOOT.
+        -n Comma separated list of nested view that should be created in Sandbox. DEV/* views can be specified via -x.
+        -r Comma separated list of root views (Jenkins top level tabs) that should be created within Sandbox. Eg. 1506,1405.
+           The ADMIN view is created per default and the UBOOT view can be created by adding -u flag.
         -w Specify \$LOCAL_WORK_DIR directory for Jenkins installation. Defaults to ${LOCAL_WORK_DIR}.
         -i LFS CI user. Defaults to ${CI_USER}.
         -c LFS LRC CI user. Defaults to ${LRC_CI_USER}.
@@ -83,17 +92,25 @@ cat << EOF
         -t HTTP_PORT for Jenkins. Defaults to ${HTTP_PORT}.
         -g <sysv> If -g is omitted, Jenkins is started via nohup in the background.
                   sysv: Start Jenkins via the script /etc/init.d/jenkins.
-        -e (flag) Disable all .*_Build$ jobs in Sandbox. Default is to disable all .*_Build$ jobs (missing -e).
-        -l (flag) Create LRC trunk within Sandbox. Default is to creates LRC in Sandbox (missing -l).
-        -p (flag) Keep Jenkins plugins from an existing Sandbox installation. Defaults to ${KEEP_JENKINS_PLUGINS} (missing -p).
+        -e (flag) Disable all *_Build$ jobs in Sandbox. Default is to disable all *_Build$ jobs (missing -e).
+        -l (flag) Create LRC trunk within Sandbox. Default is don't create LRC in Sandbox.
+        -p (flag) Keep Jenkins plugins from an existing Sandbox installation. Defaults is false (missing -p).
         -o (flag) Just start Jenkins (don't do anything else). Default is false (missing -o). Additionally you can also use -g.
-        -j (flag) Update Sandbox Jenkins in ${LOCAL_WORK_DIR}. Additionally use -w -b -n and -l if you want to
-                  update a non standard installation. Jenkins plugins and jobs will be updated from ${PROD_JENKINS_SERVER}.
+        -j (flag) Update Sandbox Jenkins in ${LOCAL_WORK_DIR}. Additionally use -w -b -n -x -u -a and -l if you want to
+                  update a non standard installation. Jenkins plugins and jobs will be updated from Jenkins production server.
+                  After this reload Jenkins config from disk or start/restart Sandbox.
+        -x (flag) Create the DEV/* views within Sandbox and copy the related jobs. Additional nested views (eg. 1508)
+                  can be created via -n parameter. Default is not creating DEV/* nested views.
+        -u (flag) Create the UBOOT view and copy the related jobs. Default is not creating UBOOT.
+        -a (flag) Copy the Admin_-_* jobs. Default is not coping the Admin_-_* jobs execpt the mandatroy
+                  jobs ${DEFAULT_JOBS}.
+        -k (flag) Copy the "Test-*" jobs. Default is not coping "Test-*" jobs.
         -h Get help
 
     Examples:
 
-        Standard Sandbox installation:
+        Standard Sandbox installation (copy trunk jobs, create trunk view, copy LRC jobs, create LRC view,
+        create ADMIN view and copy jobs ${DEFAULT_JOBS}:
             ${ITSME} -f <path-to-development.cfg>
 
         Skip LRC (-l), use existing Jenkins plugins (-p) and start Sandbox on port 9090 (-t):
@@ -118,6 +135,12 @@ EOF
     exit 0
 }
 
+pre_checks() {
+    which java > /dev/null || { echo "java is needed"; exit 1; }
+    which curl > /dev/null || { echo "curl is needed"; exit 1; }
+    which rsync > /dev/null || { echo "rsync is needed"; exit 1; }
+}
+
 ## @fn      pre_actions()
 #  @brief   check needed requirements
 #  @return  <none>
@@ -126,7 +149,7 @@ pre_actions() {
         echo "ERROR: This script may not run on $(hostname)."
         exit 1
     fi
-    
+
     if [[ ${USER} == psulm ]]; then
         echo "ERROR: This script may not run as user psulm."
         exit 2
@@ -147,6 +170,30 @@ pre_actions() {
     if [[ ! -r ${LFS_CI_CONFIG_FILE} && ${PURGE_SANDBOX} == false && ${UPDATE_JENKINS} == false ]]; then
         echo "ERROR: Can't read config file ${LFS_CI_CONFIG_FILE}."
         exit 6
+    fi
+}
+
+adjust_args() {
+    if [[ ${ROOT_VIEWS} ]]; then
+        ROOT_VIEWS=${ROOT_VIEWS},ADMIN
+    else
+        ROOT_VIEWS=ADMIN
+    fi
+
+    if [[ ${UBOOT} == true ]]; then
+        if [[ ${ROOT_VIEWS} ]]; then
+            ROOT_VIEWS=${ROOT_VIEWS},UBOOT
+        else
+            ROOT_VIEWS=UBOOT
+        fi
+    fi
+
+    if [[ ${DEV_VIEWS} == true ]]; then
+        if [[ ${NESTED_VIEWS} ]]; then
+            NESTED_VIEWS=${NESTED_VIEWS},DEV/Developer_Build,DEV/Knife_alpha
+        else
+            NESTED_VIEWS=DEV/Developer_Build,DEV/Knife_alpha
+        fi
     fi
 }
 
@@ -231,23 +278,48 @@ jenkins_copy_jobs() {
                     --exclude=htmlreports \
                     --exclude=workspace*"
 
-    echo "    Rsync jenkins jobs from ${PROD_JENKINS_SERVER}"
-    for JOB_PREFIX in LFS_CI_-_trunk_-_ LFS_Prod_-_trunk_-_ PKGPOOL_-_trunk_-_ UBOOT_ Test- LFS_KNIFE_-_ LFS_BRANCHING_-_ LFS_DEV_-_developer_-_ Admin_-_reserveTarget Admin_-_releaseTarget Admin_-_deployCiScripting; do
+    for JOB_PREFIX in ${TRUNK_JOBS} ${DEFAULT_JOBS}; do
+        echo "    rsync ${JOB_PREFIX}* jobs"
         rsync -a ${excludes} ${PROD_JENKINS_SERVER}:${PROD_JENKINS_JOBS}/${JOB_PREFIX}* ${JENKINS_HOME}/jobs/
     done
 
+    if [[ ${UBOOT} == true ]]; then
+        JOB_PREFIX=UBOOT
+        echo "    rsync ${JOB_PREFIX}* jobs"
+        rsync -a ${excludes} ${PROD_JENKINS_SERVER}:${PROD_JENKINS_JOBS}/${JOB_PREFIX}* ${JENKINS_HOME}/jobs/
+    fi
+
+    if [[ ${TEST_JOBS} == true ]]; then
+        JOB_PREFIX=Test-
+        echo "    rsync ${JOB_PREFIX}* jobs"
+        rsync -a ${excludes} ${PROD_JENKINS_SERVER}:${PROD_JENKINS_JOBS}/${JOB_PREFIX}* ${JENKINS_HOME}/jobs/
+    fi
+
+    if [[ ${DEV_VIEWS} == true ]]; then
+        for JOB_PREFIX in LFS_KNIFE_-_ LFS_DEV_-_developer_-_; do
+            echo "    rsync ${JOB_PREFIX}* jobs"
+            rsync -a ${excludes} ${PROD_JENKINS_SERVER}:${PROD_JENKINS_JOBS}/${JOB_PREFIX}* ${JENKINS_HOME}/jobs/
+        done
+    fi
+
+    if [[ ${ADMIN_JOBS} == true ]]; then
+        JOB_PREFIX=Admin_-_
+        echo "    rsync ${JOB_PREFIX}* jobs"
+        rsync -a ${excludes} ${PROD_JENKINS_SERVER}:${PROD_JENKINS_JOBS}/${JOB_PREFIX}* ${JENKINS_HOME}/jobs/
+    fi
+
     for BRANCH_VIEW in $(echo ${BRANCH_VIEWS} | tr ',' ' '); do
         if [[ ${BRANCH_VIEW} != trunk ]]; then
-            echo "    Rsync jenkins jobs for ${BRANCH_VIEW} from ${PROD_JENKINS_SERVER}"
             for JOB_PREFIX in LFS_CI_-_ LFS_Prod_-_ PKGPOOL_-_; do
+                echo "    rsync ${JOB_PREFIX}* jobs"
                 rsync -a ${excludes} ${PROD_JENKINS_SERVER}:${PROD_JENKINS_JOBS}/${JOB_PREFIX}${BRANCH_VIEW}_-_* ${JENKINS_HOME}/jobs
             done
         fi
     done
 
     if [[ "${LRC}" == "true" ]]; then
-        echo "    Rsync jenkins jobs from ${LRC_PROD_JENKINS_SERVER}"
         for JOB_PREFIX in LFS_CI_-_LRC_-_ LFS_Prod_-_LRC_-_ PKGPOOL_-_LRC_-_; do
+            echo "    rsync ${JOB_PREFIX}* jobs"
             rsync -a ${excludes} ${LRC_PROD_JENKINS_SERVER}:${LRC_PROD_JENKINS_JOBS}/${JOB_PREFIX}* ${JENKINS_HOME}/jobs/
         done
     fi
@@ -324,6 +396,12 @@ jenkins_get_configs() {
         echo "    Get ${VIEW} view configuration"
         curl -k https://${PROD_JENKINS_SERVER}/view/${VIEW}/config.xml --noproxy localhost > ${TMP}/${VIEW}_view_config.xml 2> /dev/null
     done
+    # ADMIN view is mandatory. If -a is not specified it needs to be created explicitly.
+    VIEW=ADMIN
+    echo ${ROOT_VIEWS} | grep -q ${VIEW} || {
+        echo "    Get ${VIEW} view configuration";
+        curl -k https://${PROD_JENKINS_SERVER}/view/${VIEW}/config.xml --noproxy localhost > ${TMP}/${VIEW}_view_config.xml 2> /dev/null;
+    }
 
     for VIEW in $(echo ${NESTED_VIEWS} | tr ',' ' '); do
         local parentTab=$(echo ${VIEW} | cut -d'/' -f1)
@@ -354,12 +432,15 @@ jenkins_start_sandbox() {
         echo ${PID} > ${PID_FILE}
         echo "    java process ID: $(cat ${PID_FILE})"
         echo "    waiting for Jenkins to be fully running"
+        sleep 15
         RET=1
         while [[ ${RET} -ne 0 ]]; do
             curl -s http://localhost:${HTTP_PORT} --noproxy localhost > /dev/null 2>&1
             RET=$?
-            sleep 15
+            sleep 3
         done
+        echo "    waiting for master node to become ready"
+        java -jar ${JENKINS_CLI_JAR} -s http://localhost:${HTTP_PORT} wait-node-online ""
     elif [[ ${START_OPTION} == "sysv" ]]; then
         echo "Start Jenkins via /etc/init.d/jenkins"
         /etc/init.d/jenknis start
@@ -378,7 +459,8 @@ jenkins_configure_sandbox() {
     local nestedViews=$NESTED_VIEWS
     [[ -z ${rootViews} ]] && rootViews="None"
     [[ -z ${nestedViews} ]] && nestedViews="None"
-    echo "Invoke groovy script on new Sandbox... ${SANDBOX_SCRIPT_DIR}/setup-sandbox.gry create_views ${rootViews} ${nestedViews} ${BRANCH_VIEWS} ${LRC}"
+    echo "Invoke groovy script on new Sandbox"
+    echo "    ${SANDBOX_SCRIPT_DIR}/setup-sandbox.gry create_views ${rootViews} ${nestedViews} ${BRANCH_VIEWS} ${LRC}"
     java -jar ${JENKINS_CLI_JAR} -s http://localhost:${HTTP_PORT}/ groovy \
         ${SANDBOX_SCRIPT_DIR}/setup-sandbox.gry create_views ${rootViews} ${nestedViews} ${BRANCH_VIEWS} ${LRC}
 
@@ -397,6 +479,11 @@ jenkins_configure_sandbox() {
             curl http://localhost:${HTTP_PORT}/view/${VIEW}/config.xml --noproxy localhost --data-binary @${TMP}/${VIEW}_view_config.xml
         done
     fi
+    VIEW=ADMIN
+    echo ${ROOT_VIEWS} | grep -q ${VIEW} || {
+        echo "    Configure $VIEW view";
+        curl http://localhost:${HTTP_PORT}/view/${VIEW}/config.xml --noproxy localhost --data-binary @${TMP}/${VIEW}_view_config.xml;
+    }
 
     if [[ ! -z ${NESTED_VIEWS} ]]; then
         echo "Configure Jenkins nested views (nested tabs) in new Sandbox"
@@ -529,7 +616,7 @@ purge_sandbox() {
 }
 
 get_args() {
-    while getopts ":r:n:b:w:i:c:s:t:f:g:delpjoh" OPT; do
+    while getopts ":r:n:b:w:i:c:s:t:f:g:delpjohaxuk" OPT; do
         case ${OPT} in
             b)
                 BRANCH_VIEWS=$OPTARG
@@ -568,7 +655,7 @@ get_args() {
                 DISABLE_BUILD_JOBS="false"
             ;;
             l)
-                LRC="false"
+                LRC="true"
             ;;
             p)
                 KEEP_JENKINS_PLUGINS="true"
@@ -578,6 +665,18 @@ get_args() {
             ;;
             o)
                 JUST_START="true"
+            ;;
+            a)
+                ADMIN_JOBS="true"
+            ;;
+            u)
+                UBOOT="true"
+            ;;
+            x)
+                DEV_VIEWS="true"
+            ;;
+            k)
+                TEST_JOBS="true"
             ;;
             h)
                 usage
@@ -614,7 +713,9 @@ get_args() {
 
 main() {
     get_args $*
+    pre_checks
     pre_actions
+    adjust_args
 
     if [[ ${PURGE_SANDBOX} == true ]]; then
         purge_sandbox
