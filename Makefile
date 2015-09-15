@@ -1,7 +1,7 @@
 tests := $(foreach file,$(shell ls test/*.sh),$(dir $(file)).tested/$(notdir $(file)))
 tests_single := $(shell ls test/*.sh)
 
-.PHONY: all test tags doc clean
+.PHONY: all test tags doc clean $(tests_single)
 
 all:
 	echo nothing todo...
