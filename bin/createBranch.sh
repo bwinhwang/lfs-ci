@@ -31,7 +31,7 @@ info "# DEBUG:                ${DEBUG}"
 info "###############################################################"
 
 
-SVN_REPO=$(getConfig branchingSvnServer)
+SVN_REPO=$(getConfig branchingSvnUrl)
 SVN_DIR="os"
 SRC_PROJECT="src-project"
 VARS_FILE="VARIABLES.TXT"
