@@ -50,6 +50,11 @@ sub prepare {
         my @newMessage;
         foreach my $line ( split( /[\n\r]+/, $msg ) ) {
 
+            if( $line =~ m/^\%RB=(\d+)(.*)$/) {
+                DEBUG "found RB entry";
+                DEBUG "line = $line";
+                $self->{releaseNote}->addImportantNoteMessage( sprintf( "RB=%d: %s --> https://psreviewboard.emea.nsn-net.net/r/%d", $1, $2, $1 ) );
+            }
             if( $line =~ m/[\%\#]REM (.*)/) {
                 $self->{releaseNote}->addImportantNoteMessage( $1 );
             }

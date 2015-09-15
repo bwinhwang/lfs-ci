@@ -56,6 +56,9 @@ sub prepare {
                         : $entry->{msg}->[0] ;
 
         foreach my $msg ( split( /\n/, $completeMessage ) ) {
+            if( $msg =~ m/^\%RB=(\d+)(.*)$/) {
+                $self->{releaseNote}->addImportantNoteMessage( $self->quote( sprintf( "RB=%d ", $1 )http://link/to/rbt/$1 ) );
+            }
             if( $msg =~ m/[\%\#]REM (.*)/) {
                 $self->{releaseNote}->addImportantNoteMessage( $self->quote( $1 ) );
             }

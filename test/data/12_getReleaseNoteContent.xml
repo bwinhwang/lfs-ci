@@ -176,6 +176,7 @@ Date:   Thu Oct 16 16:30:09 2014 +0200
 <msg>%FIN %PR=121050ESPE04
 %FIN %PR=121288ESPE04
 %FIN %PR=147903ESPE02
+%RB=12345 This is the first test to bring RB entries into the important note section
 %REM Hopefully a final fix in the ddal_spawn() function
 %REM This should fix the issues with starting GPSd (LFS) from the context of GNSS which is a HWAPI process.
 </msg>
@@ -236,6 +237,7 @@ Date:   Thu Oct 16 16:30:09 2014 +0200
 <msg>%FIN %PR=121050ESPE04
 %FIN %PR=121288ESPE04
 %FIN %PR=147903ESPE02
+%RB=12345 This is the first test to bring RB entries into the important note section
 %REM Hopefully a final fix in the ddal_spawn() function
 %REM This should fix the issues with starting GPSd (LFS) from the context of GNSS which is a HWAPI process.
 </msg>
@@ -296,6 +298,7 @@ Date:   Thu Oct 16 16:30:09 2014 +0200
 <msg>%FIN %PR=121050ESPE04
 %FIN %PR=121288ESPE04
 %FIN %PR=147903ESPE02
+%RB=12345 This is the first test to bring RB entries into the important note section
 %REM Hopefully a final fix in the ddal_spawn() function
 %REM This should fix the issues with starting GPSd (LFS) from the context of GNSS which is a HWAPI process.
 </msg>
@@ -356,6 +359,7 @@ Date:   Thu Oct 16 16:30:09 2014 +0200
 <msg>%FIN %PR=121050ESPE04
 %FIN %PR=121288ESPE04
 %FIN %PR=147903ESPE02
+%RB=12345 This is the first test to bring RB entries into the important note section
 %REM Hopefully a final fix in the ddal_spawn() function
 %REM This should fix the issues with starting GPSd (LFS) from the context of GNSS which is a HWAPI process.
 </msg>
@@ -416,6 +420,7 @@ Date:   Thu Oct 16 16:30:09 2014 +0200
 <msg>%FIN %PR=121050ESPE04
 %FIN %PR=121288ESPE04
 %FIN %PR=147903ESPE02
+%RB=12345 This is the first test to bring RB entries into the important note section
 %REM Hopefully a final fix in the ddal_spawn() function
 %REM This should fix the issues with starting GPSd (LFS) from the context of GNSS which is a HWAPI process.
 </msg>

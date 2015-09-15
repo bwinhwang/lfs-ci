@@ -25,6 +25,9 @@ testGetReleaseNoteContent() {
     assertEquals "value from getConfig" \
         "$(cat ${LFS_CI_ROOT}/test/data/12_getReleaseNoteContent.txt)" \
         "$(cat ${rn_txt})"
+#RWE
+    echo "Dumping Important Note part"
+    echo $(grep -A 20 " Important Note " ${rn_txt})
 }
 
 source lib/shunit2
