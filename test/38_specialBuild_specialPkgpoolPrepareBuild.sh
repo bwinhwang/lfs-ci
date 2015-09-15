@@ -38,6 +38,7 @@ oneTimeSetUp() {
     }
     copyArtifactsToWorkspace() {
         mockedCommand "copyArtifactsToWorkspace $@"
+
         mkdir -p ${WORKSPACE}/workspace/bld/bld-dev-input/
         cp ${LFS_CI_ROOT}/test/data/28_uc_knife_build_applyKnifePatches.pkgpool.patch \
             ${WORKSPACE}/workspace/bld/bld-dev-input/lfs.patch
@@ -51,7 +52,14 @@ oneTimeSetUp() {
         echo pronb-developer
     }
     mustHaveLocationName() {
+        # hack, found no better place to do this.
+        mkdir -p ${WORKSPACE}/workspace/bld/bld-fsmci-summary/
+        echo 12345 > ${WORKSPACE}/workspace/bld/bld-fsmci-summary/svnrevision
         return
+    }
+    svnCat() {
+        mockedCommand "svnCat $@"
+        echo gitRevision
     }
     return
 }
@@ -80,10 +88,11 @@ test1() {
 execute mkdir -p ${WORKSPACE}/workspace
 mustHaveLocationForSpecialBuild 
 getLocationName 
+svnCat -r 12345 ./src/gitrevision@12345
 copyArtifactsToWorkspace LFS_DEV_-_DEVELOPER_-_Build 123
 execute rm -rf ${WORKSPACE}/src
 gitClone PKGPOOL_git_repos_url ${WORKSPACE}/src
-gitCheckout -b dev_build
+gitCheckout gitRevision -b dev_build
 gitReset --hard
 execute ./bootstrap
 execute rm -rf ${WORKSPACE}/.alreadyUpdated
