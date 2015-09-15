@@ -13,11 +13,11 @@ rootViews = []
 nestedViews = []
 lrc = true
 
-if(args.length > 1) {
+if(args.length > 1 && args[1] != "None") {
     rootViews=args[1].split(",")
 }
 
-if(args.length > 2) {
+if(args.length > 2 && args[2] != "None") {
     nestedViews=args[2].split(",")
 }
 
@@ -47,7 +47,7 @@ if(what == "create_views") {
             j.addView(parentTab)
             cnt++;
         }
-        println("    create sub view $childView")
+        println("        create sub view $childView")
         childTab = new hudson.model.ListView(childView, parentTab)
         parentTab.addView(childTab)
     }

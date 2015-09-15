@@ -31,6 +31,8 @@ oneTimeSetUp() {
 setUp() {
     cp -f /dev/null ${UT_MOCKED_COMMANDS}
     export HOME=$(createTempDirectory)
+    mkdir -p ${HOME}/mysql_backup
+    touch ${HOME}/mysql_backup/dump.sql
     return
 }
 
@@ -74,6 +76,20 @@ execute ssh dbHost mysqldump -h dbHost -u dbUser -pdbPass --routines dbName --re
 execute git add dump.sql
 execute git commit -q -m backup 
 execute git gc -q
+EOF
+    assertExecutedCommands ${expect}
+
+    return
+}
+
+test3() {
+    assertTrue "usecase_ADMIN_MYSQL_RESTORE"
+
+    local expect=$(createTempFile)
+    cat <<EOF > ${expect}
+mustHaveDatabaseCredentials 
+execute ssh dbHost mysql -h dbHost -u dbUser -pdbPass dbName
+execute ssh dbHost mysql -h dbHost -u dbUser -pdbPass dbName
 EOF
     assertExecutedCommands ${expect}
 

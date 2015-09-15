@@ -66,12 +66,12 @@ test1() {
 
     local expect=$(createTempFile)
     cat <<EOF > ${expect}
-execute rm -rf ${WORKSPACE}/src/src
 gitReset --hard
 execute ./bootstrap
 execute -l TempFile ${WORKSPACE}/src/build PKGPOOL_additional_build_parameters
 execute mkdir -p ${WORKSPACE}/workspace/bld/bld-pkgpool-release/
 execute cp TempFile ${WORKSPACE}/workspace/bld/bld-pkgpool-release/build.log
+execute cp -a ${WORKSPACE}/workspace/logs ${WORKSPACE}/workspace/bld/bld-pkgpool-release/
 execute -n sed -ne s,^\(\[[0-9 :-]*\] \)\?release \([^ ]*\) complete,\2,p TempFile
 gitDescribe --abbrev=0
 gitTagAndPushToOrigin PKGPOOL_FOO
@@ -92,12 +92,12 @@ test2() {
 
     local expect=$(createTempFile)
     cat <<EOF > ${expect}
-execute rm -rf ${WORKSPACE}/src/src
 gitReset --hard
 execute ./bootstrap
 execute -l TempFile ${WORKSPACE}/src/build PKGPOOL_additional_build_parameters
 execute mkdir -p ${WORKSPACE}/workspace/bld/bld-pkgpool-release/
 execute cp TempFile ${WORKSPACE}/workspace/bld/bld-pkgpool-release/build.log
+execute cp -a ${WORKSPACE}/workspace/logs ${WORKSPACE}/workspace/bld/bld-pkgpool-release/
 createArtifactArchive 
 EOF
     assertExecutedCommands ${expect}

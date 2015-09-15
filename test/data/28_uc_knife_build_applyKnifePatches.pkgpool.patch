@@ -1,0 +1,77 @@
+Index: src/fsmddal/Dependencies
+===================================================================
+--- src/fsmddal/Dependencies	(revision 207699)
++++ src/fsmddal/Dependencies	(working copy)
+@@ -5,7 +5,7 @@
+ use src-project
+ 
+ use-readonly bld/bld-rfs-fct
+-use-readonly bld/bld-rfs-arm
++use-readonly bld/bld-rfs-fsm4_arm
+ use-readonly bld/bld-rfs-qemu_x86_64
+ 
+ use-readonly bld/pkgpool
+Index: src/fsmpsl/Buildfile
+--- src/fsmpsl/Buildfile	(revision 207699)
++++ src/fsmpsl/Buildfile	(working copy)
+@@ -161,10 +161,10 @@
+ 	cp -rf $(BLD)-fsmbrm35-axm/results/factory $(BLD)-$(SUBSYS)-fsm4_axm/results/
+ endif
+ 	mkdir $(BLD)-$(SUBSYS)-fsm4_axm/results/addons
+-	cp -f $(BLD)-rfs-arm/results/addons/python.tar.gz $(BLD)-$(SUBSYS)-fsm4_axm/results/addons/python.tgz
+-	cp -f $(BLD)-rfs-arm/results/addons/iic.tar.gz $(BLD)-$(SUBSYS)-fsm4_axm/results/addons/iic.tgz
+-	cp -f $(BLD)-rfs-arm/results/addon_devtools.tar.gz $(BLD)-$(SUBSYS)-fsm4_axm/results/addons/devtools.tgz	
+-	cp -f $(BLD)-rfs-arm/results/addon_lighttpd.tar.gz $(BLD)-$(SUBSYS)-fsm4_axm/results/addons/lighttpd.tgz
++	cp -f $(BLD)-rfs-fsm4_arm/results/addons/python.tar.gz $(BLD)-$(SUBSYS)-fsm4_axm/results/addons/python.tgz
++	cp -f $(BLD)-rfs-fsm4_arm/results/addons/iic.tar.gz $(BLD)-$(SUBSYS)-fsm4_axm/results/addons/iic.tgz
++	cp -f $(BLD)-rfs-fsm4_arm/results/addon_devtools.tar.gz $(BLD)-$(SUBSYS)-fsm4_axm/results/addons/devtools.tgz	
++	cp -f $(BLD)-rfs-fsm4_arm/results/addon_lighttpd.tar.gz $(BLD)-$(SUBSYS)-fsm4_axm/results/addons/lighttpd.tgz
+ 	#cp -f src/addons/TouchAppDef.tgz $(BLD)-$(SUBSYS)-fsm4_axm/results/addons/TouchAppDef.tgz
+ 	#cp -f src/addons/uRec_ptsw_appdef.tgz $(BLD)-$(SUBSYS)-fsm4_axm/results/addons/uRec_ptsw_appdef.tgz
+ 	#cp -f src/addons/SetHWYConnectorType.tgz $(BLD)-$(SUBSYS)-fsm4_axm/results/addons/SetHWYConnectorType.tgz
+@@ -230,20 +230,20 @@
+ endif
+ 
+ 	mkdir $(BLD)-$(SUBSYS)-fsm4_k2/results/addons
+-	cp -f $(BLD)-rfs-arm/results/addons/python.tar.gz $(BLD)-$(SUBSYS)-fsm4_k2/results/addons/python.tgz
+-	#cp -f $(BLD)-rfs-arm/results/hotplug.tar.gz $(BLD)-$(SUBSYS)-fsm4_k2/results/addons/hotplug.tgz
+-	#cp -f $(BLD)-rfs-arm/results/addon_lighttpd.tar.gz $(BLD)-$(SUBSYS)-fsm4_k2/results/addons/lighttpd.tgz
+-	#cp -f $(BLD)-rfs-arm/results/addon_lxc.tar.gz $(BLD)-$(SUBSYS)-fsm4_k2/results/addons/lxc.tgz
+-	#cp -f $(BLD)-rfs-arm/results/addon_openssh.tar.gz $(BLD)-$(SUBSYS)-fsm4_k2/results/addons/ssh.tgz
+-	#cp -f $(BLD)-rfs-arm/results/addon_gdb.tar.gz $(BLD)-$(SUBSYS)-fsm4_k2/results/addons/gdb.tgz
+-	cp -f $(BLD)-rfs-arm/results/addon_devtools.tar.gz $(BLD)-$(SUBSYS)-fsm4_k2/results/addons/devtools.tgz
+-	#cp -f $(BLD)-rfs-arm/results/addon_ipsec.tar.gz $(BLD)-$(SUBSYS)-fsm4_k2/results/addons/ipsec.tgz
+-	#cp -f $(BLD)-rfs-arm/results/addon_dhcp.tar.gz $(BLD)-$(SUBSYS)-fsm4_k2/results/addons/dhcp.tgz
+-	#cp -f $(BLD)-rfs-arm/results/addon_ntp.tar.gz $(BLD)-$(SUBSYS)-fsm4_k2/results/addons/ntp.tgz
++	cp -f $(BLD)-rfs-fsm4_arm/results/addons/python.tar.gz $(BLD)-$(SUBSYS)-fsm4_k2/results/addons/python.tgz
++	#cp -f $(BLD)-rfs-fsm4_arm/results/hotplug.tar.gz $(BLD)-$(SUBSYS)-fsm4_k2/results/addons/hotplug.tgz
++	#cp -f $(BLD)-rfs-fsm4_arm/results/addon_lighttpd.tar.gz $(BLD)-$(SUBSYS)-fsm4_k2/results/addons/lighttpd.tgz
++	#cp -f $(BLD)-rfs-fsm4_arm/results/addon_lxc.tar.gz $(BLD)-$(SUBSYS)-fsm4_k2/results/addons/lxc.tgz
++	#cp -f $(BLD)-rfs-fsm4_arm/results/addon_openssh.tar.gz $(BLD)-$(SUBSYS)-fsm4_k2/results/addons/ssh.tgz
++	#cp -f $(BLD)-rfs-fsm4_arm/results/addon_gdb.tar.gz $(BLD)-$(SUBSYS)-fsm4_k2/results/addons/gdb.tgz
++	cp -f $(BLD)-rfs-fsm4_arm/results/addon_devtools.tar.gz $(BLD)-$(SUBSYS)-fsm4_k2/results/addons/devtools.tgz
++	#cp -f $(BLD)-rfs-fsm4_arm/results/addon_ipsec.tar.gz $(BLD)-$(SUBSYS)-fsm4_k2/results/addons/ipsec.tgz
++	#cp -f $(BLD)-rfs-fsm4_arm/results/addon_dhcp.tar.gz $(BLD)-$(SUBSYS)-fsm4_k2/results/addons/dhcp.tgz
++	#cp -f $(BLD)-rfs-fsm4_arm/results/addon_ntp.tar.gz $(BLD)-$(SUBSYS)-fsm4_k2/results/addons/ntp.tgz
+ 	#cp -f $(BLD)-fsmrfs-addon_fakefile_octeon2/results/rfs.tgz $(BLD)-$(SUBSYS)-fsm4_k2/results/addons/fakefile.tgz
+-	#cp -f $(BLD)-rfs-arm/results/addon_ip_setup.tar.gz $(BLD)-$(SUBSYS)-fsm4_k2/results/addons/setupDefLMP.tgz
+-	#cp -f $(BLD)-rfs-arm/results/addon_resetcnt.tar.gz $(BLD)-$(SUBSYS)-fsm4_k2/results/addons/resetCnt.tgz
+-	#cp -f $(BLD)-rfs-arm/results/addon_ptsw_cacert.tar.gz $(BLD)-$(SUBSYS)-fsm4_k2/results/addons/ptsw_cacert.tgz
++	#cp -f $(BLD)-rfs-fsm4_arm/results/addon_ip_setup.tar.gz $(BLD)-$(SUBSYS)-fsm4_k2/results/addons/setupDefLMP.tgz
++	#cp -f $(BLD)-rfs-fsm4_arm/results/addon_resetcnt.tar.gz $(BLD)-$(SUBSYS)-fsm4_k2/results/addons/resetCnt.tgz
++	#cp -f $(BLD)-rfs-fsm4_arm/results/addon_ptsw_cacert.tar.gz $(BLD)-$(SUBSYS)-fsm4_k2/results/addons/ptsw_cacert.tgz
+ 	cp -f src/addons/TouchAppDef.tgz $(BLD)-$(SUBSYS)-fsm4_k2/results/addons/TouchAppDef.tgz
+ 	cp -f src/addons/uRec_ptsw_appdef.tgz $(BLD)-$(SUBSYS)-fsm4_k2/results/addons/uRec_ptsw_appdef.tgz
+ 	cp -f src/addons/SetHWYConnectorType.tgz $(BLD)-$(SUBSYS)-fsm4_k2/results/addons/SetHWYConnectorType.tgz
+Index: src/fsmpsl/Dependencies
+--- src/fsmpsl/Dependencies	(revision 207699)
++++ src/fsmpsl/Dependencies	(working copy)
+@@ -30,7 +30,7 @@
+ 
+ use-readonly bld/bld-rfs-fct
+ use-readonly bld/bld-rfs-qemu_x86_64
+-use-readonly bld/bld-rfs-arm
++use-readonly bld/bld-rfs-fsm4_arm
+ 
+ use-readonly bld/bld-fsmfmon-fct
+ 

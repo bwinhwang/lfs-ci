@@ -941,6 +941,7 @@ BEGIN
     DECLARE var_prefix VARCHAR(64);
     DECLARE var_value VARCHAR(64);
     DECLARE var_regex VARCHAR(64);
+    DECLARE var_build_name VARCHAR(64);
     DECLARE var_branch_cnt INT;
 
     SELECT _branch_exists(in_branch) INTO var_branch_cnt;
@@ -952,15 +953,14 @@ BEGIN
     SET var_regex = CONCAT(in_label_prefix, var_regex);
     SET var_regex = CONCAT('^', CONCAT(var_regex, '$'));
 
-    -- "ORDER BY timestamp" can not be used:
-    -- I got lower values when using ORDER BY timestamp.
-
-    -- "ORDER BY id" can not be used:
-    -- I got lower values when using ORDER BY id.
-
-    SELECT LPAD(CONVERT(SUBSTRING(MAX(build_name), -4)+1, CHAR), 4, '0') INTO var_suffix FROM v_build_events 
+    -- 03.09.2015:
+    -- "ORDER BY timestamp" should work now. An issue was fixed in CI scripting.
+    SELECT build_name INTO var_build_name FROM v_build_events 
         WHERE build_name REGEXP var_regex AND event_state='finished' AND product_name=in_product_name
-        AND event_type='subbuild' AND task_name='build' AND build_name NOT REGEXP '_99[0-9][0-9]$';
+        AND event_type='build' AND task_name='build' AND build_name NOT REGEXP '_99[0-9][0-9]$'
+        ORDER BY timestamp DESC LIMIT 1;
+
+    SELECT LPAD(CONVERT(SUBSTRING(var_build_name, -4)+1, CHAR), 4, '0') INTO var_suffix;
 
     SET var_value = CONCAT(var_prefix, var_suffix);
 
@@ -983,15 +983,24 @@ BEGIN
 
     SELECT _branch_exists(in_branch) INTO var_branch_cnt;
 
-    SELECT replace(replace(release_name_regex, '${date_%Y}', YEAR(NOW())), '${date_%m}', LPAD(MONTH(NOW()), 2, 0)) 
-        INTO var_regex FROM branches WHERE branch_name=in_branch AND location_name != CONCAT(in_branch, '_FSMR4');
+    IF in_branch = 'trunk' THEN
+        SELECT replace(replace(release_name_regex, '${date_%Y}', '20[0-9][0-9]'), '${date_%m}', '[0-9][0-9]') 
+            INTO var_regex FROM branches WHERE branch_name=in_branch;
+    ELSE
+        SELECT replace(replace(release_name_regex, '${date_%Y}', YEAR(NOW())), '${date_%m}', LPAD(MONTH(NOW()), 2, 0)) 
+            INTO var_regex FROM branches WHERE branch_name=in_branch AND location_name != CONCAT(in_branch, '_FSMR4');
+        IF var_regex IS NULL THEN
+            SELECT replace(based_on_release, 'REL', 'OS') INTO var_regex FROM branches WHERE branch_name=in_branch;
+        END IF;
+    END IF;
 
     SET var_regex = CONCAT(in_label_prefix, var_regex);
     SET var_regex = CONCAT('^', CONCAT(var_regex, '$'));
 
-    SELECT MAX(build_name) INTO var_value FROM v_build_events 
+    SELECT build_name INTO var_value FROM v_build_events 
         WHERE build_name REGEXP var_regex AND event_state='finished' AND product_name=in_product_name
-        AND event_type='subbuild' AND task_name='build' AND build_name NOT REGEXP '_99[0-9][0-9]$';
+        AND event_type='build' AND task_name='build' AND build_name NOT REGEXP '_99[0-9][0-9]$'
+        ORDER BY timestamp DESC LIMIT 1;
 RETURN (var_value);
 END //
 DELIMITER ;

@@ -103,6 +103,7 @@ env.put("TEMPLATE_DIR", build.getEnvironment(listener).get("CONFIGXML_TEMPLATE_D
 env.put("TEMPLATE_SUFFIX", build.getEnvironment(listener).get("CONFIGXML_TEMPLATE_SUFFIX"))
 env.put("WORKSPACE", build.getEnvironment(listener).get("WORKSPACE"))
 env.put("JOBS_EXCLUDE_LIST", build.getEnvironment(listener).get("JOBS_EXCLUDE_LIST"))
+env.put("PROMOTIONS_EXCLUDE_LIST", build.getEnvironment(listener).get("PROMOTIONS_EXCLUDE_LIST"))
 env.put("MAIN_BUILD_JOB_NAME_LRC", build.getEnvironment(listener).get("MAIN_BUILD_JOB_NAME_LRC"))
 
 def config = new HashMap()
@@ -214,6 +215,7 @@ class CreateBranch extends Common {
     def jobsToEnable
     def jobNameReplace
     def jobs2Exclude
+    def promotions2Exclude
     def srcBranchNumber
 
     /**
@@ -242,6 +244,8 @@ class CreateBranch extends Common {
         // List of jobs to be excluded. Job names can also be a regex.
         this.jobs2Exclude = this.env.get("JOBS_EXCLUDE_LIST").split(",")
         this.inf("jobs to exclude: ${this.jobs2Exclude}")
+        this.promotions2Exclude = this.env.get("PROMOTIONS_EXCLUDE_LIST").split(",")
+        this.inf("promotions to exclude: ${this.promotions2Exclude}")
         this.jobsList = []
 
         if(this.srcBranch[0..1] == "FB") {
@@ -249,7 +253,7 @@ class CreateBranch extends Common {
         } else if(this.srcBranch[0..1] == "MD") {
             this.srcBranchNumber = this.srcBranch[3..6].toInteger()
         }
-        
+
         if(this.debug) {
             this.dbg("srcBranchNumber is ${this.srcBranchNumber}")
         }
@@ -324,6 +328,23 @@ class CreateBranch extends Common {
         job.updateByXml(new StreamSource(is));
         job.save();
         this.inf("reloaded config for job \"$job.name\"")
+    }
+
+    /**
+     * Remove promotions directoy for "job" if specified in
+     * the CI scripting config via parameter branchingExcludePromotions.
+     * Argument "job" is the source (the original) job (eg. LFS_CI_-_trunk_-_Build)
+     * and not the new job.
+     */
+    void removePromotion(job) {
+        for(promo in this.promotions2Exclude) {
+            // We need the promotion path of the new job.
+            def promoPath = new File(this.env.get("JENKINS_HOME") + "/jobs/" + promo.replace(this.srcBranch, this.newBranch))
+            if(promo.startsWith(job.name) && promoPath.exists()) {
+                this.inf("remove promotion dir ${promoPath}")
+                promoPath.deleteDir()
+            }
+        }
     }
 
     /**
@@ -559,6 +580,7 @@ class CreateBranch extends Common {
                     this.updateWorkspace(newJob)
                     configFile = this.updateJobConfig(job, newJob)
                     this.copyPromotions(job, newJob)
+                    this.removePromotion(job)
                     // avoid having two projects point to the same location
                     this.reloadJobConfig(newJob, configFile)
                 }
@@ -588,7 +610,7 @@ class CreateBranchLRC extends CreateBranch {
         this.displayNameSrcBranch = this.srcBranch.replaceFirst("_", " ")
         this.displayNameNewBranch = this.newBranch.replaceFirst("_", " ")
         this.pkgPoolReplace = "*/LRC"
-        
+
         if(this.fromTrunk) {
             this.jobNameReplace = "LRC"
         } else {

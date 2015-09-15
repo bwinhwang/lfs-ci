@@ -8,6 +8,10 @@ oneTimeSetUp() {
     mockedCommand() {
         echo "$@" >> ${UT_MOCKED_COMMANDS}
     }
+    getConfig() {
+        mockedCommand "getConfig $@"
+        echo $1
+    }
     execute() {
         mockedCommand "execute $@"
         return ${UT_GREP_FAILED}
@@ -15,17 +19,38 @@ oneTimeSetUp() {
     mustHavePreparedWorkspace() {
         mockedCommand "mustHavePreparedWorkspace $@"
     }
-        
-
+    copyAndExtractBuildArtifactsFromProject() {
+        mockedCommand "copyAndExtractBuildArtifactsFromProject $@"
+        mkdir -p ${WORKSPACE}/workspace/bld/bld-pkgpool-release
+        echo buildName > ${WORKSPACE}/workspace/bld/bld-pkgpool-release/label
+        mkdir -p ${WORKSPACE}/workspace/bld/bld-pkgpool-release/logs
+        case ${_shunit_test_} in
+            test1)
+                # touch ${WORKSPACE}/workspace/bld/bld-pkgpool-release/logs/arm-cortexa15-linux-gnueabihf-vtc.log.gz
+            ;;
+            test2)
+                touch ${WORKSPACE}/workspace/bld/bld-pkgpool-release/logs/arm-cortexa15-linux-gnueabihf-vtc.log.gz
+            ;;
+            test3)
+                touch ${WORKSPACE}/workspace/bld/bld-pkgpool-release/logs/arm-cortexa15-linux-gnueabihf-vtc.log.gz
+            ;;
+        esac            
+    }
+    mustExistFile() {
+        mockedCommand "mustExistFile $@"
+    }
     return
 }
 
 setUp() {
     cp -f /dev/null ${UT_MOCKED_COMMANDS}
     export WORKSPACE=$(createTempDirectory)
-    export JOB_NAME=PKGPOOL_CI_-_trunk_-_Build
+    export JOB_NAME=PKGPOOL_CI_-_trunk_-_Build_vtc_check
     export BUILD_NUMBER=123
+    export UPSTREAM_PROJECT=PKGPOOL_CI_-_trunk_-_Build
+    export UPSTREAM_BUILD=123
     mkdir ${WORKSPACE}/src/
+    return
 }
 
 tearDown() {
@@ -36,14 +61,12 @@ tearDown() {
 
 test1() {
     export UT_GREP_FAILED=0
-
-    assertFalse "usecase_PKGPOOL_CHECK_FOR_FAILED_VTC"
+    assertTrue "ok" "usecase_PKGPOOL_CHECK_FOR_FAILED_VTC"
 
     local expect=$(createTempFile)
     cat <<EOF > ${expect}
 mustHavePreparedWorkspace --no-build-description
-execute -i grep --silent LVTC FSMR4 BUILD FAILED ${WORKSPACE}/workspace/bld/bld-pkgpool-release/build.log
-execute -i grep -A 100 -B 100 LVTC FSMR4 BUILD FAILED ${WORKSPACE}/workspace/bld/bld-pkgpool-release/build.log
+copyAndExtractBuildArtifactsFromProject PKGPOOL_CI_-_trunk_-_Build 123 pkgpool
 EOF
     assertExecutedCommands ${expect}
 
@@ -53,13 +76,29 @@ EOF
 
 test2() {
     export UT_GREP_FAILED=1
-
-    assertTrue "usecase_PKGPOOL_CHECK_FOR_FAILED_VTC"
+    assertTrue "ok" "usecase_PKGPOOL_CHECK_FOR_FAILED_VTC"
 
     local expect=$(createTempFile)
     cat <<EOF > ${expect}
 mustHavePreparedWorkspace --no-build-description
-execute -i grep --silent LVTC FSMR4 BUILD FAILED ${WORKSPACE}/workspace/bld/bld-pkgpool-release/build.log
+copyAndExtractBuildArtifactsFromProject PKGPOOL_CI_-_trunk_-_Build 123 pkgpool
+execute -i zgrep -s LVTC FSMR4 BUILD FAILED ${WORKSPACE}/workspace/bld/bld-pkgpool-release/logs/arm-cortexa15-linux-gnueabihf-vtc.log.gz
+EOF
+    assertExecutedCommands ${expect}
+
+    return
+}
+
+test3() {
+    export UT_GREP_FAILED=0
+    assertFalse "failed" "usecase_PKGPOOL_CHECK_FOR_FAILED_VTC"
+
+    local expect=$(createTempFile)
+    cat <<EOF > ${expect}
+mustHavePreparedWorkspace --no-build-description
+copyAndExtractBuildArtifactsFromProject PKGPOOL_CI_-_trunk_-_Build 123 pkgpool
+execute -i zgrep -s LVTC FSMR4 BUILD FAILED ${WORKSPACE}/workspace/bld/bld-pkgpool-release/logs/arm-cortexa15-linux-gnueabihf-vtc.log.gz
+execute -i -n zcat ${WORKSPACE}/workspace/bld/bld-pkgpool-release/logs/arm-cortexa15-linux-gnueabihf-vtc.log.gz
 EOF
     assertExecutedCommands ${expect}
 
