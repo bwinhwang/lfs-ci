@@ -1,6 +1,6 @@
 --- Important Note ---
 
-RB=12345: This is the first test to bring RB entries into the important note section --> https://psreviewboard.emea.nsn-net.net/r/12345
+RB=12345: This is the first test to bring RB entries into the important note section -- https://psreviewboard.emea.nsn-net.net/r/12345
 Hopefully a final fix in the ddal_spawn() function
 This should fix the issues with starting GPSd (LFS) from the context of GNSS which is a HWAPI process.
 

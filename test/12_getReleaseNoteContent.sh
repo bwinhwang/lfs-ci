@@ -23,11 +23,8 @@ testGetReleaseNoteContent() {
     assertTrue "${LFS_CI_ROOT}/bin/getReleaseNoteContent -t TAG"
     ${LFS_CI_ROOT}/bin/getReleaseNoteContent -t TAG > ${rn_txt}
     assertEquals "value from getConfig" \
-        "$(cat ${LFS_CI_ROOT}/test/data/12_getReleaseNoteContent.txt)" \
-        "$(cat ${rn_txt})"
-#RWE
-    echo "Dumping Important Note part"
-    echo $(grep -A 20 " Important Note " ${rn_txt})
+        "$(cat ${LFS_CI_ROOT}/test/data/12_getReleaseNoteContent.txt|xargs)" \
+        "$(cat ${rn_txt}|xargs)"
 }
 
 source lib/shunit2
