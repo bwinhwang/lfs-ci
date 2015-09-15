@@ -21,9 +21,9 @@ oneTimeSetUp() {
     }
     copyAndExtractBuildArtifactsFromProject() {
         mockedCommand "copyAndExtractBuildArtifactsFromProject $@"
-        mkdir -p ${WORKSPACE}/workspace/bld-externalComponents-summary
-        echo "SDK = SDK_1_2"  >> ${WORKSPACE}/workspace/bld-externalComponents-summary/externalComponents
-        echo "PKG = PKG_1234" >> ${WORKSPACE}/workspace/bld-externalComponents-summary/externalComponents
+        mkdir -p ${WORKSPACE}/workspace/bld/bld-externalComponents-summary
+        echo "SDK = SDK_1_2"  >> ${WORKSPACE}/workspace/bld/bld-externalComponents-summary/externalComponents
+        echo "PKG = PKG_1234" >> ${WORKSPACE}/workspace/bld/bld-externalComponents-summary/externalComponents
     }
     setBuildDescription() {
         mockedCommand "setBuildDescription $@"
