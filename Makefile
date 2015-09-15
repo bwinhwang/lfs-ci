@@ -32,5 +32,5 @@ help:
 	@echo "clean   -- remove old test result files"
 	@echo "test    -- run all unit tests"
 	@echo "retest  -- run only failed and not ran unit tests"
-	@echo "tags    -- create ctags file from vim"
+	@echo "tags    -- create ctags file for vim"
 
