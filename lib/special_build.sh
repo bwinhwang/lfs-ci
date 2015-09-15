@@ -460,6 +460,7 @@ _specialPkgpoolBuildApplyPatch() {
     if ! execute -i grep -s -e "^${pathName}$" ${WORKSPACE}/.alreadyUpdated ; then
         info "updating submodule ${pathName}"
         gitSubmodule update ${pathName}
+        gitCheckout -b dev_build
         echo ${pathName} >> ${WORKSPACE}/.alreadyUpdated
     fi 
 

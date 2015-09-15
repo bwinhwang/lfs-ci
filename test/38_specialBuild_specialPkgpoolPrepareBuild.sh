@@ -90,12 +90,14 @@ execute rm -rf ${WORKSPACE}/.alreadyUpdated
 execute -n lsdiff ${WORKSPACE}/workspace/bld/bld-dev-input/lfs.patch
 execute -i grep -s -e ^src/fsmddal$ ${WORKSPACE}/.alreadyUpdated
 execute git submodule update src/fsmddal
+gitCheckout -b dev_build
 execute -n filterdiff -i src/fsmddal/Dependencies ${WORKSPACE}/workspace/bld/bld-dev-input/lfs.patch
 execute patch -p0 -d ${WORKSPACE}/src
 execute git add -f .
 execute git commit -m patch_commit
 execute -i grep -s -e ^src/fsmpsl$ ${WORKSPACE}/.alreadyUpdated
 execute git submodule update src/fsmpsl
+gitCheckout -b dev_build
 execute -n filterdiff -i src/fsmpsl/Buildfile ${WORKSPACE}/workspace/bld/bld-dev-input/lfs.patch
 execute patch -p0 -d ${WORKSPACE}/src
 execute git add -f .
