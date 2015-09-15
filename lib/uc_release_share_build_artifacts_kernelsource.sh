@@ -27,7 +27,7 @@ usecase_LFS_RELEASE_SHARE_BUILD_ARTIFACTS_KERNELSOURCES() {
     local buildName=${LFS_PROD_RELEASE_CURRENT_TAG_NAME}
     mustHaveValue "${buildName}"
 
-    local triggeredJobData=$(getDownStreamProjectsData ${testedJobName} ${testedBuildNumber})
+    local triggeredJobData=$(getDownStreamProjectsData ${jobName} ${buildNumber})
     mustHaveValue "${triggeredJobData}" "triggered job data"
 
     local jobData=
