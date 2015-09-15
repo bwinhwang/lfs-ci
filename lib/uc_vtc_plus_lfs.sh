@@ -74,7 +74,7 @@ _setBuildDescriptionForVtc() {
     mustHaveValue "${fsmr4BuildBuildNumber}" "build number of fsm-r4 axm build job"
 
     local tmpFile=${workspace}/tempFile
-    copyAndExtractBuildArtifactsFromProject ${fsmr4BuildJobName} ${fsmr4BuildBuildNumber}
+    copyAndExtractBuildArtifactsFromProject ${fsmr4BuildJobName} ${fsmr4BuildBuildNumber} "externalComponents fsmci"
 
     local labelName=$(getNextCiLabelName)
 
