@@ -436,6 +436,7 @@ specialPkgpoolPrepareBuild() {
     # We are recording all src/<component> sub directory, which we have done a git submodule update.
     # This is only allowed one in a run.
     execute rm -rf ${WORKSPACE}/.alreadyUpdated
+    execute touch ${WORKSPACE}/.alreadyUpdated
 
     for fileInPatch in $(execute -n lsdiff ${workspace}/bld/bld-${buildType}-input/lfs.patch) ; do
         local pathName=$(cut -d/ -f1,2 <<< ${fileInPatch})

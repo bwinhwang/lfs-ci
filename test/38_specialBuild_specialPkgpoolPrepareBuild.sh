@@ -96,6 +96,7 @@ gitCheckout gitRevision -b dev_build
 gitReset --hard
 execute ./bootstrap
 execute rm -rf ${WORKSPACE}/.alreadyUpdated
+execute touch ${WORKSPACE}/.alreadyUpdated
 execute -n lsdiff ${WORKSPACE}/workspace/bld/bld-dev-input/lfs.patch
 execute -i grep -s -e ^src/fsmddal$ ${WORKSPACE}/.alreadyUpdated
 execute git submodule update src/fsmddal
