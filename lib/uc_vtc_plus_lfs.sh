@@ -67,10 +67,10 @@ _setBuildDescriptionForVtc() {
     local workspace=$(getWorkspaceName)
     mustHaveWorkspaceName
 
-    local fsmr4BuildJobName=$(getJobJobNameFromFingerprint 'Build_-_FSM-r4_-_fsm4_axm$')
+    local fsmr4BuildJobName=$(getJobJobNameFromFingerprint 'Build_-_FSM-r4_-_fsm4_axm:')
     mustHaveValue "${fsmr4BuildJobName}" "job name of fsm-r4 axm build job"
 
-    local fsmr4BuildBuildNumber=$(getJobBuildNumberFromFingerprint 'Build_-_FSM-r4_-_fsm4_axm$')
+    local fsmr4BuildBuildNumber=$(getJobBuildNumberFromFingerprint 'Build_-_FSM-r4_-_fsm4_axm:')
     mustHaveValue "${fsmr4BuildBuildNumber}" "build number of fsm-r4 axm build job"
 
     local tmpFile=${workspace}/tempFile
