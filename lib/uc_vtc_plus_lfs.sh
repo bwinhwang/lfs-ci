@@ -79,7 +79,7 @@ _setBuildDescriptionForVtc() {
     local labelName=$(getNextCiLabelName)
 
     echo ${labelName} > ${tmpFile}
-    execute -n cut -d= -f2- ${workspace}/bld-externalComponents-summary/externalComponents | sort -u >> ${tmpFile}
+    execute -n cut -d= -f2- ${workspace}/bld/bld-externalComponents-summary/externalComponents | sort -u >> ${tmpFile}
 
     setBuildDescription ${JOB_NAME} ${BUILD_NUMBER} "$(sed 's/$/<br>/g' ${tmpFile} )"
 
