@@ -429,7 +429,7 @@ specialPkgpoolPrepareBuild() {
 
     # switch branch
     cd ${WORKSPACE}/src
-    gitCheckout ${gitRevision}
+    gitCheckout ${gitRevision} -b dev_build
     gitReset --hard
     execute ./bootstrap
 
@@ -460,7 +460,6 @@ _specialPkgpoolBuildApplyPatch() {
     if ! execute -i grep -s -e "^${pathName}$" ${WORKSPACE}/.alreadyUpdated ; then
         info "updating submodule ${pathName}"
         gitSubmodule update ${pathName}
-        gitCheckout -b dev_build
         echo ${pathName} >> ${WORKSPACE}/.alreadyUpdated
     fi 
 
