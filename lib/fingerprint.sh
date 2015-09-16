@@ -160,10 +160,9 @@ _getProjectDataFromFingerprint() {
 
     local server=$(getConfig jenkinsMasterServerHostName)
     mustHaveValue "${server}" "server name"
-    execute -r 10 -l ${file} curl -k https://lfs-sandbox.emea.nsn-net.net/fingerprint/${md5sum}/api/xml
-#    execute -r 10 rsync --archive --rsh=ssh --verbose \
-#                        ${server}:${fingerprintFile}  \
-#                        ${file}
+    execute -r 10 rsync --archive --rsh=ssh --verbose \
+                        ${server}:${fingerprintFile}  \
+                        ${file}
     if [[ -e ${file} && ! -s ${file} ]] ; then
         fatal "can not get fingerprint information from ${md5sum} / ${fingerprintFile}"
     fi
