@@ -6,7 +6,7 @@ source ${LFS_CI_ROOT}/lib/jenkins.sh
 
 initTempDirectory
 
-SVN_REPO="https://svne1.access.nsn.com/isource/svnroot/BTS_SC_LFS"
+SVN_REPO=$(getConfig branchingSvnUrl)
 SVN_DIR="os"
 SVN_BLD_DIR="trunk/bldtools"
 SHARE="/build/home/CI_LFS/Release_Candidates"
