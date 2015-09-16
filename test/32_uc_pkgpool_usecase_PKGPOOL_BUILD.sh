@@ -66,6 +66,7 @@ test1() {
 
     local expect=$(createTempFile)
     cat <<EOF > ${expect}
+execute rm -rf ${WORKSPACE}/src/src
 gitReset --hard
 execute ./bootstrap
 execute -l TempFile ${WORKSPACE}/src/build PKGPOOL_additional_build_parameters
@@ -92,6 +93,7 @@ test2() {
 
     local expect=$(createTempFile)
     cat <<EOF > ${expect}
+execute rm -rf ${WORKSPACE}/src/src
 gitReset --hard
 execute ./bootstrap
 execute -l TempFile ${WORKSPACE}/src/build PKGPOOL_additional_build_parameters

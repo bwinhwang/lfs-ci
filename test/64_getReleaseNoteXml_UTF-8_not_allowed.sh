@@ -35,7 +35,7 @@ test2() {
     cd ${WORKSPACE}
     ${LFS_CI_ROOT}/bin/getReleaseNoteContent -t TAG_NAME > ${releaseNoteTXT}
 
-    assertEquals "changelog is not ok" "$(cat ${releaseNoteTXT})" "$(cat ${LFS_CI_ROOT}/test/data/64_output_changelog.txt)"
+    assertEquals "changelog is not ok" "$(cat ${LFS_CI_ROOT}/test/data/64_output_changelog.txt)" "$(cat ${releaseNoteTXT})" 
     diff -rub ${releaseNoteTXT} ${LFS_CI_ROOT}/test/data/64_output_changelog.txt
 
     return

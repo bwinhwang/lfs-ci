@@ -39,7 +39,6 @@ oneTimeTearDown() {
 setUp() {
     export WORKSPACE=$(createTempDirectory)
     export JENKINS_ROOT=$(createTempDirectory)
-    export target=fsmr3
 
     for target in fsmr3 fsmr4 
     do
