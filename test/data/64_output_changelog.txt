@@ -1,6 +1,12 @@
+--- Important Note ---
+
+RB=12345:  This is the first test to bring RB entries into the important note section -- https://psreviewboard.emea.nsn-net.net/r/12345
+RB=12346:  This is the second test to bring RB entries into the important note section -- https://psreviewboard.emea.nsn-net.net/r/12346
+
 
 === DDAL Library ===
    * Merge correction from trunk
+     RB=12346 This is the second test to bring RB entries into the important note section
      PR PR071990 (completed)
      From: Zbigniew Chyla <zbigniew.chyla@nokia.com>
    * PR PR055917 DDAL API ?ddal_lx2_802_1q_set_config? taking long time in FL15A move back to IOCTL from SYSFS (completed)
@@ -8,3 +14,4 @@
 === FSMr2 DDAL ===
    * Merge from fsmr3.
      PR PR071990 (completed)
+     RB=12345 This is the first test to bring RB entries into the important note section

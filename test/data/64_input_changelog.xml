@@ -11,6 +11,7 @@
 <msg>Merge from fsmr3.
 
 %FIN %PR=PR071990
+%RB=12345 This is the first test to bring RB entries into the important note section
 </msg>
 </logentry>
   <logentry revision="293707">
@@ -22,6 +23,7 @@
 </paths>
 <msg>Merge correction from trunk
 
+%RB=12346 This is the second test to bring RB entries into the important note section
 %FIN %PR=PR071990
 
 From: Zbigniew Chyla &lt;zbigniew.chyla@nokia.com&gt;</msg>
