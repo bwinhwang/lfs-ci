@@ -66,7 +66,7 @@ sub prepare {
             $line =~ s/[\%\#]TBC  *[\%\#](\w+)=(\S+)\s*(.*)/$1 $2 $3 (to be continued)/g;
             $line =~ s/[\%\#]TPC  *[\%\#](\w+)=(\S+)\s*(.*)/$1 $2 $3 (work in progress)/g;
             $line =~ s/[\%\#]REM /Remark: /g;
-            $line =~ s/[\%[#]RB=(\d+)(.*)$/RB=$1 $2/g;
+            $line =~ s/\%RB=(\d+)(.*)$/RB=$1 $2/g;
             $line =~ s/\s*commit [0-9a-f]+\s*//g;
             $line =~ s/\s*Author: .*[@].+//g;
             $line =~ s/\s*Date: .* [0-9]+:[0-9]+:[0-9]+ .*//g;
