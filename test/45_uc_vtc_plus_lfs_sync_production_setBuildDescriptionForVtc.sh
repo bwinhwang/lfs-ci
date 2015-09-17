@@ -55,7 +55,7 @@ test1() {
     cat <<EOF > ${expect}
 getJobJobNameFromFingerprint Build_-_FSM-r4_-_fsm4_axm:
 getJobBuildNumberFromFingerprint Build_-_FSM-r4_-_fsm4_axm:
-copyAndExtractBuildArtifactsFromProject build_job 1234
+copyAndExtractBuildArtifactsFromProject build_job 1234 externalComponents fsmci
 getNextCiLabelName 
 setBuildDescription LFS_CI_-_trunk_-_foobar 1234 LABEL<br>
  PKG_1234<br>
