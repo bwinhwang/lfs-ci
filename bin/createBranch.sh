@@ -31,7 +31,7 @@ info "# DEBUG:                ${DEBUG}"
 info "###############################################################"
 
 
-SVN_REPO=$(getConfig branchingSvnServer)
+SVN_REPO=$(getConfig branchingSvnUrl)
 SVN_DIR="os"
 SRC_PROJECT="src-project"
 VARS_FILE="VARIABLES.TXT"
@@ -267,7 +267,7 @@ createBranchInGit() {
     info "--------------------------------------------------------"
 
     if [[ "${DO_GIT}" == "false" ]]; then
-        info "Not creating branch in GIT"
+        info "Not creating branch in Git"
         return 0
     fi
 
@@ -395,7 +395,6 @@ main() {
             svnCopyBranch ${SRC_BRANCH} ${NEW_BRANCH}
             svnCopyLocations ${LOCATIONS} ${SRC_BRANCH} ${NEW_BRANCH}
             svnCopyLocationsFSMR4 ${SRC_BRANCH} ${NEW_BRANCH}
-            createBranchInGit ${NEW_BRANCH}
             svnDummyCommit ${NEW_BRANCH}
         elif [[ ${LRC} == "true" ]]; then
             svnCopyBranchLRC LRC_${SRC_BRANCH} LRC_${NEW_BRANCH}
@@ -407,6 +406,7 @@ main() {
         info "$(basename $0): Nothing to do."
     fi
 
+    createBranchInGit ${NEW_BRANCH}
     dbInsert ${NEW_BRANCH}
 }
 

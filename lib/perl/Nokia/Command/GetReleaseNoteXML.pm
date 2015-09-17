@@ -58,6 +58,9 @@ sub prepare {
                         : $entry->{msg}->[0] ;
 
         foreach my $msg ( split( /\n/, $completeMessage ) ) {
+            if( $msg =~ m/^\%RB=(\d+)(.*)$/) {
+                $self->{releaseNote}->addImportantNoteMessage( $self->quote( sprintf( "RB=%d: %s -- https://psreviewboard.emea.nsn-net.net/r/%d", $1, $2, $1 ) ) );
+            }
             if( $msg =~ m/[\%\#]REM (.*)/) {
                 $self->{releaseNote}->addImportantNoteMessage( $self->quote( $1 ) );
             }
