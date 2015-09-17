@@ -51,15 +51,18 @@ startLogfile() {
         fi
 
         CI_LOGGING_LOGFILENAME=${LFS_CI_ROOT}/log/${datePath}/ci.${dateString}.${hostName}.${userName}.${jobName}.${prefix}${counter}.log
+        CI_LOGGING_LOGFILENAME_COMPLETE=${LFS_CI_ROOT}/log/${datePath}/ci.${dateString}.${hostName}.${userName}.${jobName}.${prefix}${counter}.complete.log
         mkdir -p ${LFS_CI_ROOT}/log/${datePath}/ 
 
         while [[ -e ${CI_LOGGING_LOGFILENAME}    ||
                  -e ${CI_LOGGING_LOGFILENAME}.gz ]] ; do
             counter=$(( counter + 1 ))
             CI_LOGGING_LOGFILENAME=${LFS_CI_ROOT}/log/${datePath}/ci.${dateString}.${hostName}.${userName}.${jobName}.${counter}.log
+            CI_LOGGING_LOGFILENAME_COMPLETE=${LFS_CI_ROOT}/log/${datePath}/ci.${dateString}.${hostName}.${userName}.${jobName}.${counter}.complete.log
         done
 
         export CI_LOGGING_LOGFILENAME
+        export CI_LOGGING_LOGFILENAME_COMPLETE
         export CI_LOGGING_DURATION_START_DATE=$(date +%s.%N)
 
         echo 1>&2 "logfile is ${CI_LOGGING_LOGFILENAME}"
@@ -67,16 +70,17 @@ startLogfile() {
         # hardcoded variables here. We have no possibility to use settings here - before the logfile is running
         local url=
         case ${USER} in
-            psulm)    url=http://ullinn11.emea.nsn-net.net/lfs/ci/log/ ;;
-            lfscidev) url=https://lfs-sandbox.emea.nsn-net.net/logs/ ;;
-            ca_lrcci) url=https://lfs-lrc-ci.int.net.nokia.com/logs/ ;;
+            psulm)    url=http://ullinn11.emea.nsn-net.net/lfs/ci/log ;;
+            lfscidev) url=https://lfs-sandbox.emea.nsn-net.net/logs ;;
+            ca_lrcci) url=https://lfs-lrc-ci.int.net.nokia.com/logs ;;
         esac
         if [[ ${url} ]] ; then
-            echo 1>&2 "${url}/${datePath}/$(basename ${CI_LOGGING_LOGFILENAME})"
+            echo 1>&2 "short log    : ${url}/${datePath}/$(basename ${CI_LOGGING_LOGFILENAME})"
+            echo 1>&2 "complete log : ${url}/${datePath}/$(basename ${CI_LOGGING_LOGFILENAME_COMPLETE})"
         fi
 
         printf -- "------------------------------------------------------------------\n" >  ${CI_LOGGING_LOGFILENAME}
-        printf -- "starting logfile\n"                                                   >> ${CI_LOGGING_LOGFILENAME}
+        printf -- "starting short logfile\n"                                             >> ${CI_LOGGING_LOGFILENAME}
         printf -- "  script: $0\n"                                                       >> ${CI_LOGGING_LOGFILENAME}
         printf -- "  jobName:  $jobName\n"                                               >> ${CI_LOGGING_LOGFILENAME}
         printf -- "  hostname: $hostName\n"                                              >> ${CI_LOGGING_LOGFILENAME}
@@ -85,6 +89,17 @@ startLogfile() {
         printf -- "-- Please note, all timestamps are in UTC                       --\n" >> ${CI_LOGGING_LOGFILENAME}
         printf -- "------------------------------------------------------------------\n" >> ${CI_LOGGING_LOGFILENAME}
         printf -- "{{{\n"                                                                >> ${CI_LOGGING_LOGFILENAME}
+
+        printf -- "------------------------------------------------------------------\n" >  ${CI_LOGGING_LOGFILENAME_COMPLETE}
+        printf -- "starting complete logfile\n"                                          >> ${CI_LOGGING_LOGFILENAME_COMPLETE}
+        printf -- "  script: $0\n"                                                       >> ${CI_LOGGING_LOGFILENAME_COMPLETE}
+        printf -- "  jobName:  $jobName\n"                                               >> ${CI_LOGGING_LOGFILENAME_COMPLETE}
+        printf -- "  hostname: $hostName\n"                                              >> ${CI_LOGGING_LOGFILENAME_COMPLETE}
+        printf -- "  username: $userName\n"                                              >> ${CI_LOGGING_LOGFILENAME_COMPLETE}
+        printf -- "------------------------------------------------------------------\n" >> ${CI_LOGGING_LOGFILENAME_COMPLETE}
+        printf -- "-- Please note, all timestamps are in UTC                       --\n" >> ${CI_LOGGING_LOGFILENAME_COMPLETE}
+        printf -- "------------------------------------------------------------------\n" >> ${CI_LOGGING_LOGFILENAME_COMPLETE}
+        printf -- "{{{\n"                                                                >> ${CI_LOGGING_LOGFILENAME_COMPLETE}
     fi
 }
 
@@ -98,8 +113,14 @@ stopLogfile() {
         printf -- "}}}\n"                                                                 >> ${CI_LOGGING_LOGFILENAME}
         printf -- "-------------------------------------------------------------------\n" >> ${CI_LOGGING_LOGFILENAME}
         printf -- "script: $0\n"                                                          >> ${CI_LOGGING_LOGFILENAME}
-        printf -- "ending logfile\n"                                                      >> ${CI_LOGGING_LOGFILENAME}
+        printf -- "ending short logfile\n"                                                >> ${CI_LOGGING_LOGFILENAME}
         printf -- "-------------------------------------------------------------------\n" >> ${CI_LOGGING_LOGFILENAME}
+
+        printf -- "}}}\n"                                                                 >> ${CI_LOGGING_LOGFILENAME_COMPLETE}
+        printf -- "-------------------------------------------------------------------\n" >> ${CI_LOGGING_LOGFILENAME_COMPLETE}
+        printf -- "script: $0\n"                                                          >> ${CI_LOGGING_LOGFILENAME_COMPLETE}
+        printf -- "ending complete logfile\n"                                             >> ${CI_LOGGING_LOGFILENAME_COMPLETE}
+        printf -- "-------------------------------------------------------------------\n" >> ${CI_LOGGING_LOGFILENAME_COMPLETE}
 
         # disabled gzipping..
         # gzip ${CI_LOGGING_LOGFILENAME}
@@ -168,90 +189,117 @@ message() {
     local logType=$1
     shift
     local logMessage=$@
-
-    if [[ ${CI_LOGGING_ENABLE_COLORS} ]] ; then
-        YELLOW="\033[33m"
-        WHITE="\033[37m"
-        RED="\033[31m"
-        GREEN="\033[32m"
-        CYAN="\033[36m"
-    fi
-
-    local color=${CI_LOGGING_COLOR-${CI_LOGGING_COLOR_HASH["$logType"]}}
-
-
-    if [[ "${CI_LOGGING_ENABLE_COLORS}" && "${color}" ]] ; then
-        echo -en 1>&2 ${!color} 
-    fi
+    local logLine=
 
     startLogfile
+    
+    # current defined log formats:
+    # console output:
+    # PREFIX DATE_SHORT SPACE DURATION SPACE TYPE SPACE MESSAGE
+    # short log file:
+    # PREFIX DATE_SHORT SPACE TYPE SPACE MESSAGE -- CALLER
+    # complete log file:
+    # PREFIX DATE SPACE DURATION SPACE TYPE SPACE MESSAGE SPACE -- SPACE CALLER
 
-    logLine=$(_loggingLine ${logType} "${logMessage}")
+    # create and write log message into complete logfile
+    local logLineFile=$(_loggingLine "${logType}"                                                                                  \
+                                     "${LFS_CI_LOGGING_CONFIG-"PREFIX DATE SPACE DURATION SPACE TYPE SPACE MESSAGE SPACE -- SPACE CALLER"}" \
+                                     "${logMessage}")
+    echo -e 1>&2 "${logLineFile}" >> ${CI_LOGGING_LOGFILENAME_COMPLETE}
 
-    # ------------------------------------------------------------------------------------------
-    # interal stuff
-    # generate the logline
-    local config=${CI_LOGGING_CONFIG-"PREFIX DATE SPACE DURATION SPACE TYPE SPACE MESSAGE NEWLINE"}
-    local prefix=${CI_LOGGING_PREFIX-${CI_LOGGING_PREFIX_HASH["$logType"]}}
-    local dateFormat=${CI_LOGGING_DATEFORMAT-"+%Y-%m-%d %H:%M:%S.%N %Z"}
+    # this is a blacklisting. 
+    # filter out the messages which should not be in the shorten log file
+    shouldWriteLogMessageToFile ${logType} || return 0
 
-    for template in ${config}
-    do
-        case "${template}" in 
-            LINE)    logLine=$(printf "%s%s" "${logLine}" "-----------------------------------------------------------------") ;;
-            SPACE)   logLine=$(printf "%s "  "${logLine}" ) ;;
-            NEWLINE) logLine=$(printf "%s\n" "${logLine}" ) ;;
-            TAB)     logLine=$(printf "%s\t" "${logLine}" ) ;;
-            PREFIX)  logLine=$(printf "%s%s" "${logLine}" "${prefix}" ) ;;
-            DATE)    logLine=$(printf "%s%s" "${logLine}" "$(date "${dateFormat}")" ) ;;
-            TYPE)    logLine=$(printf "%s%-10s" "${logLine}" "[${logType}]" );;
-            DURATION) 
-                     local cur=$(date +%s.%N)
-                     local old=${CI_LOGGING_DURATION_START_DATE}
-                     local dur=$(echo ${cur} - ${old} | bc)
-                     logLine=$(printf "%s[%9.3f]" "${logLine}" ${dur})
-            ;;
-            NONE)    : ;;
-            MESSAGE) 
-                logLine=$(printf "%s%s" "${logLine}" "${logMessage}")
-            ;;
-            CALLER)
-                logLine=$(printf "called from Method '%s' in File %s, Line %s" \
-                    "${logLine}"                                               \
-                    "${FUNCNAME[2]}"                                           \
-                    "${BASH_SOURCE[2]}"                                        \
-                    "${BASH_LINENO[1]}" )
-            ;;
-            STACKTRACE)
-                _stackTrace
-            ;;
-        esac
+    # create and write log message into shorten logfile
+    logLineFile=$(_loggingLine "${logType}"                                                                                  \
+                               "${LFS_CI_LOGGING_CONFIG-"PREFIX DATE_SHORT SPACE TYPE SPACE MESSAGE SPACE -- SPACE CALLER"}" \
+                               "${logMessage}")
+    echo -e 1>&2 "${logLineFile}" >> ${CI_LOGGING_LOGFILENAME}
 
-    done
-    # -------------------------------------------------------------------------------------------
-
+    # don't show TRACE and DEBUG message in screen, 
+    # For screen, we create a different type of message.
     case "${logType}" in
-        TRACE) : ;;
-        DEBUG) : ;;
-        *) echo -e 1>&2 "${logLine}" ;;
+        TRACE) return ;;
+        DEBUG) return ;;
     esac
 
-    echo -e 1>&2 "${logLine}" >> ${CI_LOGGING_LOGFILENAME}
+    # create and show the log message to the console
+    local logLine=$(_loggingLine "${logType}"                                                                                      \
+                                 "${LFS_CI_LOGGING_CONFIG-"PREFIX DATE SPACE DURATION SPACE TYPE MESSAGE"}" \
+                                 "${logMessage}")
+    # We are redirecting log messages to stderr. 
+    # We don't want to have log messages in a local foobar=$(getFunction) call.
+    echo -e 1>&2 "${logLine}" 
+    return 0
+}
 
-    if [[ "${CI_LOGGING_ENABLE_COLORS}" && "${color}" ]] ; then
-        echo -en 1>&2 ${WHITE}
+## @fn      shouldWriteLogMessageToFile()
+#  @brief   checks, if a log message should be written into the logfile or not.
+#  @param   {logType}    type of the log message (INFO, WARNING, ERROR, DEBUG, TRACE)
+#  @return  1 if message should be logged, 0 otherwise
+shouldWriteLogMessageToFile() {
+    local logType=$1
+    local sourceFile=${BASH_SOURCE[2]/${LFS_CI_ROOT}\//}
+    local sourceFunction=${FUNCNAME[3]}
+
+    # grep returns with 0 if grep finds the string.
+    # => if is true and returns 1
+    if grep --silent -e "^${logType}:${sourceFile}:${sourceFunction}$" ${LFS_CI_ROOT}/etc/logging.cfg
+    then
+        return 1
     fi
+    return 0
 }
 
 ## @fn      _loggingLine()
 #  @brief   format a log line
 #  @param   {logType}    type of the message
+#  @param   {logConfig}  config of a log message line
 #  @param   {logMessage} a text message
-#  @return  <none>
+#  @return  log line
 _loggingLine() {
     local logType=$1
-    local logMessage=$2
+    local logConfig=$2
+    local logMessage=$3
+    local logLine=
 
+    local prefix=${CI_LOGGING_PREFIX-${CI_LOGGING_PREFIX_HASH["$logType"]}}
+
+    for template in ${logConfig} ; do
+
+        case "${template}" in 
+            LINE)       logLine=$(printf "%s%s" "${logLine}" "-----------------------------------------------------------------") ;;
+            SPACE)      logLine=$(printf "%s "  "${logLine}" ) ;;
+            NEWLINE)    logLine=$(printf "%s%s" "${logLine}" "\n" ) ;;
+            TAB)        logLine=$(printf "%s\t" "${logLine}" ) ;;
+            PREFIX)     logLine=$(printf "%s%s" "${logLine}" "${prefix}" ) ;;
+            DATE_SHORT) logLine=$(printf "%s%s" "${logLine}" "$(date "+%Y-%m-%d %H:%M:%S")" ) ;;
+            DATE)       logLine=$(printf "%s%s" "${logLine}" "$(date "+%Y-%m-%d %H:%M:%S.%N %Z")" ) ;;
+            TYPE)       logLine=$(printf "%s%-10s" "${logLine}" "[${logType}]" );;
+            DURATION) 
+                        local cur=$(date +%s.%N)
+                        local old=${CI_LOGGING_DURATION_START_DATE}
+                        local dur=$(echo ${cur} - ${old} | bc)
+                        logLine=$(printf "%s[%9.3f]" "${logLine}" ${dur})
+            ;;
+            NONE)       : ;;
+            MESSAGE)    logLine=$(printf "%s%s" "${logLine}" "${logMessage}") ;;
+            CALLER)     local sourceFile=${BASH_SOURCE[3]/${LFS_CI_ROOT}\//}
+                        logLine=$(printf "%s%s:%s#%s"        \
+                                         "${logLine}"        \
+                                         "${sourceFile}"     \
+                                         "${FUNCNAME[3]}"    \
+                                         "${BASH_LINENO[3]}" )
+            ;;
+            STACKTRACE) _stackTrace ;;
+            *)          logLine=$(printf "%s%s" "${logLine}" "${template}") ;;
+        esac
+
+    done
+
+    echo "${logLine}"
+    return
 }
 
 ## @fn      _stackTrace()
@@ -297,6 +345,7 @@ rawDebug() {
     trace "{{{ adding content of file ${fileToLog} to logfile"
     trace     "----------------------------------------------"
     cat ${fileToLog} >> ${CI_LOGGING_LOGFILENAME}
+    cat ${fileToLog} >> ${CI_LOGGING_LOGFILENAME_COMPLETE}
     trace "}}} ----------------------------------------------"
 
     return
