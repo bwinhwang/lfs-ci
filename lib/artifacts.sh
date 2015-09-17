@@ -282,7 +282,6 @@ linkFileToArtifactsDirectory() {
     local linkDestination=$2
 
     info "create link to artifacts"
-    local artifactesShare=$(getConfig artifactesShare)
     local artifactsPathOnMaster=$(getBuildDirectoryOnMaster)/archive
     executeOnMaster mkdir -p  ${artifactsPathOnMaster}
     executeOnMaster ln    -sf ${linkSource} ${artifactsPathOnMaster}

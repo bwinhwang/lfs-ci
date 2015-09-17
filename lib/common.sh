@@ -692,8 +692,11 @@ _getUpstreamProjects() {
 #  @return  <none>
 _getDownstreamProjects() {
     local jobName=$1
+    mustHaveValue "${jobName}" "job name"
     local buildNumber=$2
+    mustHaveValue "${buildNumber}" "build number"
     local downstreamFile=$3
+    mustHaveValue "${downstreamFile}" "downstream file"
 
     requiredParameters LFS_CI_ROOT 
 
