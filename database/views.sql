@@ -10,3 +10,6 @@ CREATE OR REPLACE VIEW v_releases AS
 CREATE OR REPLACE VIEW v_test_results AS
     SELECT r.id, r.test_execution_id, n.test_result_name, r.test_result_value  FROM test_results r, test_result_names n WHERE r.test_result_name_id = n.id;
 
+CREATE OR REPLACE VIEW v_ps_branches as
+    SELECT ps.ps_branch_name, b.branch_name, ps.status, ps.ecl_url, ps.comment  from ps_branches ps, branches b, nm_branches_ps_branches nm where b.id = nm.branch_id and nm.ps_branch_id = ps.id;
+

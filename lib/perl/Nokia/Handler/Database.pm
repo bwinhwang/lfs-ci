@@ -7,6 +7,7 @@ use parent qw( Nokia::Object );
 
 use Nokia::Store::Database::Events;
 use Nokia::Store::Database::Branches;
+use Nokia::Singleton;
 
 sub newTestResult {
     my $self  = shift;
@@ -84,6 +85,11 @@ sub newSubversionCommit {
     return;
 }
 
+## @fn      branchInformation()
+#  @brief   get all information from database about branches and ps branches and convert them
+#           into a datastructure for a config file
+#  @param   <none>
+#  @return  hash ref with data
 sub branchInformation {
     my $self = shift;
 
@@ -93,43 +99,76 @@ sub branchInformation {
 
     my @branchData = $self->{store}->branchInformation();
     my $psBranches = $self->{store}->platformBranchInformation();
+    my $result;
 
-    printf "# This file was automatically created by %s.\n", $0;
-    printf "# Do not edit it by hand.\n";
-    print "\n";
-    printf "LFS_CI_internal_config_file_branch_cfg = %d\n", time();
-    print "\n";
+    # in case, we are lfs-sandbox, we add the prefix
+    my $prefix     = uc Nokia::Singleton::config()->getConfig( name => "LFS_PROD_label_prefix" );
+
     foreach my $row ( @branchData ) {
-        printf "\n# %s\n", "-"x80;
-        printf "# branch id %d\n", $row->{id};
-        printf "# branch creation date: %s\n", $row->{date_created};
-        printf "# branch close date   : %s\n", $row->{date_closed};
-        printf "# branch comment      : %s\n", $row->{comment} || "<none>";
-        printf "#\n";
-        printf "LFS_PROD_branch_to_tag_regex              < productName:LFS, location:%s > = %s\n", $row->{location_name}, $row->{release_name_regex}; 
+        my $locationTagString = sprintf( "productName:LFS, location:%s", $row->{location_name} );
 
-        printf "LFS_CI_branch_status                      < productName:LFS, location:%s > = %s\n", $row->{location_name}, $row->{status}; 
-
-        printf "LFS_PROD_tag_to_branch                    < productName:LFS, tagName~%s > = %s\n",  $row->{release_name_regex}, $row->{location_name} || "";
-
-        printf "LFS_CI_uc_update_ecl_url                  < productName:LFS, location:%s > = %s\n", $row->{location_name}, join (" ", map { $_->{ecl_url} } grep { $_->{status} ne "closed" } @{ $psBranches->{ $row->{branch_name} } || [] } ) || "";
-
-        printf "LFS_PROD_uc_release_based_on              < productName:LFS, location:%s > = %s\n", $row->{location_name}, $row->{based_on_release} || "";
-
-        printf "LFS_PROD_uc_release_based_on_revision     < productName:LFS, location:%s > = %s\n", $row->{location_name}, $row->{based_on_revision} || "";
-
-        printf "LFS_PROD_ps_scm_branch_name               < productName:LFS, location:%s > = %s\n", $row->{location_name}, $row->{ps_branch_name} || "";
-
-        printf "CUSTOM_SCM_svn_trigger_svn_is_maintenance < productName:LFS, location:%s > = 1\n",  $row->{location_name} if $row->{status} ne "open";
-
+        # mapping between the branches and the svn delivery repos
         my $reposName = $row->{release_name_regex};
         $reposName =~ s/.*PS_LFS_OS_(\$\{[^\}]+})_(\$\{[^\}]+})_.*/$1_$2/g;
         $reposName =~ s/.*PS_LFS_OS_(\d+)_(\d+)_.*/$1_$2/g;
-        # printf "# mapping between the branches and the svn delivery repos\n";
-        printf "LFS_PROD_svn_delivery_repos_name          < productName:LFS, location:%s > = BTS_D_SC_LFS_%s\n", 
-               $row->{location_name}, $reposName;
+
+        push @{ $result }, { name  => "LFS_PROD_svn_delivery_repos_name",
+                             tags  => $locationTagString,
+                             value => sprintf( "BTS_D_SC_LFS_%s", $reposName ) };
+
+        push @{ $result }, { name  => "LFS_CI_global_mapping_location",
+                             tags  => $locationTagString,
+                             value => $row->{branch_name} };
+
+        push @{ $result }, { name  => "LFS_CI_global_mapping_location_branch",
+                             tags  => $locationTagString,
+                             value => $row->{branch_name} };
+
+        push @{ $result }, { name  => "LFS_CI_global_mapping_branch_location",
+                             tags  => sprintf( 'productName:LFS, branchName:%s', $row->{branch_name} ),
+                             value => $row->{location_name} };
+
+        push @{ $result }, { name  => "LFS_PROD_branch_to_tag_regex",
+                             tags  => $locationTagString,
+                             value => $row->{release_name_regex} };
+
+        my $regex = $row->{release_name_regex} || "";
+        $regex =~ s/\$\{date_%Y\}/(\\d\\d\\d\\d\)/g;
+        $regex =~ s/\$\{date_%m\}/(\\d\\d\)/g;
+        push @{ $result }, { name  => "LFS_PROD_tag_to_branch",
+                             tags  => sprintf( 'productName:LFS, tagName~^%s%s$', $prefix, $regex ),
+                             value => $row->{location_name} };
+
+        push @{ $result }, { name  => "LFS_CI_uc_update_ecl_url",
+                             tags  => $locationTagString,
+                             value => join (" ", map  { sprintf( '${BTS_SCM_PS_url}/ECL/%s/ECL_BASE', $_->{ps_branch_name} ) } 
+                                                 grep { $_->{status} ne "closed" } 
+                                                 @{ $psBranches->{ $row->{branch_name} } || [] } ) || "" };
+        push @{ $result }, { name  => "LFS_PROD_uc_release_based_on",
+                             tags  => $locationTagString,
+                             value => $row->{based_on_release} };
+        push @{ $result }, { name  => "LFS_PROD_uc_release_based_on_revision",
+                             tags  => $locationTagString,
+                             value => $row->{based_on_revision} };
+        push @{ $result }, { name  => "LFS_PROD_ps_scm_branch_name",
+                             tags  => $locationTagString,
+                             value => $psBranches->{ $row->{branch_name} }->[0]->{ps_branch_name} || "" };
+        push @{ $result }, { name  => "LFS_CI_branch_status",
+                             tags  => $locationTagString,
+                             value => $row->{status} };
+        push @{ $result }, { name  => "CUSTOM_SCM_svn_trigger_svn_is_maintenance",
+                             tags  => $locationTagString,
+                             value => $row->{status} ne "open" ? 1 : "" };
+
+        my $pkgpoolPrefix = $row->{release_name_regex};
+        $pkgpoolPrefix =~ s/_\(.*//;
+        $pkgpoolPrefix =~ s/_\$.*//;
+        $pkgpoolPrefix =~ s/PS_LFS_../PS_LFS_PKG/;
+        push @{ $result }, { name  => "PKGPOOL_PROD_release_prefix",
+                             tags  => sprintf( "location:%s", $row->{location_name} ), 
+                             value => $pkgpoolPrefix };
     }
-    return;
+    return $result;
 }
 
 sub locationsText {

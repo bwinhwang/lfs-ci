@@ -15,6 +15,7 @@ BEGIN {
 use lib sprintf( "%s/lib/perl/", $lfs_ci_root );
 
 use Nokia::Singleton;
+use Nokia::Command::CustomScm::DatabaseBranches;
 
 if( $ENV{CI_LOGGING_LOGFILENAME} ) {
     my $logFile = $ENV{CI_LOGGING_LOGFILENAME};
@@ -60,6 +61,7 @@ my %commands = (
                  sendReleaseNote                => "Nokia::Command::SendReleaseNote",
                  sortBuildsFromDependencies     => "Nokia::Command::SortBuildsFromDependencies",
                  unreserveTarget                => "Nokia::Command::UnreserveTarget",
+                 customScmDatabaseBranches      => "Nokia::Command::CustomScm::DatabaseBranches",
                );
 
 if( not exists $commands{$program} ) {
