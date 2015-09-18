@@ -32,6 +32,7 @@ setUp() {
     cp -f /dev/null ${UT_MOCKED_COMMANDS}
     export JOB_NAME=LFS_PROD_-_trunk_-_Release_-_upload
     export BUILD_NUMBER=1234
+    export LFS_PROD_RELEASE_CURRENT_TAG_NAME=PS_LFS_OS_2015_09_0001
     return
 }
 
@@ -41,15 +42,16 @@ tearDown() {
 }
 
 test1() {
-    # assertTrue "usecase_LFS_RELEASE_UPLOAD_TO_SUBVERSION"
-    usecase_LFS_RELEASE_UPLOAD_TO_SUBVERSION
+    assertTrue "usecase_LFS_RELEASE_UPLOAD_TO_SUBVERSION"
 
     local expect=$(createTempFile)
     cat <<EOF > ${expect}
 mustBePreparedForReleaseTask 
 getConfig LFS_CI_UC_package_copy_to_share_real_location
-mustExistDirectory LFS_CI_UC_package_copy_to_share_real_location/
-uploadToSubversion LFS_CI_UC_package_copy_to_share_real_location//os
+mustExistDirectory LFS_CI_UC_package_copy_to_share_real_location/PS_LFS_OS_2015_09_0001
+getConfig LFS_PROD_svn_delivery_release_repos_urjl -t tagName:PS_LFS_OS_2015_09_0001
+getConfig LFS_PROD_uc_release_upload_to_subversion_map_location_to_branch
+uploadToSubversion LFS_CI_UC_package_copy_to_share_real_location/PS_LFS_OS_2015_09_0001/os LFS_PROD_svn_delivery_release_repos_urjl os/LFS_PROD_uc_release_upload_to_subversion_map_location_to_branch tags/PS_LFS_OS_2015_09_0001 upload of new lfs build PS_LFS_OS_2015_09_0001
 createArtifactArchive 
 EOF
     assertExecutedCommands ${expect}

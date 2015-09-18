@@ -12,6 +12,11 @@ mustBePreparedForReleaseTask() {
 
     info "upstream project is ${UPSTREAM_PROJECT} / ${UPSTREAM_PROJECT}"
 
+    if [[ ! ${JOB_NAME} =~ summary$ ]] ; then
+        databaseEventSubReleaseStarted
+        exit_add _releaseDatabaseEventSubReleaseFailedOrFinished
+    fi
+
     local workspace=$(getWorkspaceName)
     mustHaveWorkspaceName
     mustHaveCleanWorkspace
@@ -69,5 +74,21 @@ mustBePreparedForReleaseTask() {
          <a href=https://wft.inside.nsn.com/ALL/builds/${LFS_PROD_RELEASE_CURRENT_TAG_NAME_REL}>${LFS_PROD_RELEASE_CURRENT_TAG_NAME_REL}</a>"
 
     return
+}
+
+_releaseDatabaseEventReleaseFailedOrFinished() {
+    if [[ ${1} -gt 0 ]] ; then
+        databaseEventReleaseFailed
+    else
+        databaseEventReleaseFinished
+    fi            
+}
+
+_releaseDatabaseEventSubReleaseFailedOrFinished() {
+    if [[ ${1} -gt 0 ]] ; then
+        databaseEventSubReleaseFailed
+    else
+        databaseEventSubReleaseFinished
+    fi            
 }
 

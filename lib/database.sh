@@ -172,6 +172,23 @@ databaseEventReleaseFinished() {
     return
 }
 
+databaseEventReleaseFailed() {
+    _storeEvent release_failed
+    return
+}
+databaseEventSubReleaseFinished() {
+    _storeEvent subrelease_finished
+    return
+}
+databaseEventSubReleaseFailed() {
+    _storeEvent subrelease_failed
+    return
+}
+databaseEventSubReleaseStarted() {
+    _storeEvent subrelease_started
+    return
+}
+
 ## @fn      databaseEventTestStarted()
 #  @brief   create an entry in the database table build_events for a started test 
 #  @param   <none>
