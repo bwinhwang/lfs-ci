@@ -11,11 +11,11 @@
 usecase_LFS_RELEASE_SEND_RELEASE_NOTE() {
     mustBePreparedForReleaseTask
 
+    exit_add _releaseDatabaseEventReleaseFailedOrFinished
+
     _workflowToolCreateRelease
     _sendReleaseNote
     _storeArtifactsFromRelease
-
-    databaseEventReleaseFinished
     createArtifactArchive
 
     info "release is done."
