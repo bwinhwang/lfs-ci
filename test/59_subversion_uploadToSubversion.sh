@@ -28,6 +28,18 @@ oneTimeSetUp() {
     mustHaveFreeDiskSpace() {
         mockedCommand "mustHaveFreeDiskSpace $@"
     }
+    mustExistSubversionDirectory() {
+        mockedCommand "mustExistSubversionDirectory $@"
+    }
+    _uploadToSubversionPrepareUpload() {
+        mockedCommand "_uploadToSubversionPrepareUpload $@"
+    }
+    _uploadToSubversionCopyToLocalDisk() {
+        mockedCommand "_uploadToSubversionCopyToLocalDisk $@"
+    }
+    _uploadToSubversionCheckoutWorkspace() {
+        mockedCommand "_uploadToSubversionCheckoutWorkspace $@"
+    }
     return
 }
 
@@ -49,35 +61,57 @@ tearDown() {
 }
 
 test1() {
-    assertTrue "uploadToSubversion ${UPLOAD_DIR}"
+    assertTrue "uploadToSubversion ${UPLOAD_DIR} http://svne1/BTS_D_SC_LFS os/branches os/tags/T1 'message to commit'"
 
     local expect=$(createTempFile)
     cat <<EOF > ${expect}
-mustHaveNextLabelName 
-getConfig LFS_PROD_svn_delivery_release_repos_url -t tagName:BUILD_NAME
-getConfig LFS_PROD_uc_release_upload_to_subversion_map_location_to_branch
-mustExistBranchInSubversion LFS_PROD_svn_delivery_release_repos_url os
-mustExistBranchInSubversion LFS_PROD_svn_delivery_release_repos_url/os branches
-mustExistBranchInSubversion LFS_PROD_svn_delivery_release_repos_url/os tags
-mustExistBranchInSubversion LFS_PROD_svn_delivery_release_repos_url/os/branches LFS_PROD_uc_release_upload_to_subversion_map_location_to_branch
-getConfig OS_ramdisk
-execute mkdir -p ${UT_RAM_DISK}/job_name.userName/tmp
-getConfig LFS_PROD_uc_release_upload_to_subversion_free_space_on_ramdisk
-mustHaveFreeDiskSpace ${UT_RAM_DISK}/job_name.userName/tmp LFS_PROD_uc_release_upload_to_subversion_free_space_on_ramdisk
-execute rm -rf ${UT_RAM_DISK}/job_name.userName/tmp
-execute mkdir -p ${UT_RAM_DISK}/job_name.userName/tmp
-execute mkdir -p ${UT_RAM_DISK}/job_name.userName/tmp/upload
-execute rsync --delete -av ${UPLOAD_DIR}/ ${UT_RAM_DISK}/job_name.userName/tmp/upload/
-execute mkdir -p ${UT_RAM_DISK}/job_name.userName/tmp/workspace
-execute -r 3 svn --non-interactive --trust-server-cert checkout LFS_PROD_svn_delivery_release_repos_url/os/branches/LFS_PROD_uc_release_upload_to_subversion_map_location_to_branch ${UT_RAM_DISK}/job_name.userName/tmp/workspace
 getConfig LFS_PROD_uc_release_upload_to_subversion_sleep_time_after_commit
-execute -r 3 ${LFS_CI_ROOT}/lib/contrib/svn_load_dirs/svn_load_dirs.pl -v -t os/tags/BUILD_NAME -wc ${UT_RAM_DISK}/job_name.userName/tmp/workspace -no_user_input -no_diff_tag -glob_ignores=#.# -sleep LFS_PROD_uc_release_upload_to_subversion_sleep_time_after_commit LFS_PROD_svn_delivery_release_repos_url os/branches/LFS_PROD_uc_release_upload_to_subversion_map_location_to_branch ${UT_RAM_DISK}/job_name.userName/tmp/upload
+mustExistSubversionDirectory http://svne1/BTS_D_SC_LFS os/branches
+_uploadToSubversionPrepareUpload 
+_uploadToSubversionCopyToLocalDisk ${UPLOAD_DIR}
+_uploadToSubversionCheckoutWorkspace http://svne1/BTS_D_SC_LFS/os/branches
+mustExistSubversionDirectory http://svne1/BTS_D_SC_LFS os/tags
+execute -r 3 ${LFS_CI_ROOT}/lib/contrib/svn_load_dirs/svn_load_dirs.pl -t os/tags/T1 -message 'message to commit' -v -no_user_input -no_diff_tag -glob_ignores=#.# -sleep LFS_PROD_uc_release_upload_to_subversion_sleep_time_after_commit http://svne1/BTS_D_SC_LFS os/branches ${UPLOAD_DIR}
 EOF
     assertExecutedCommands ${expect}
 
     return
 }
 
+test2() {
+    assertTrue "uploadToSubversion ${UPLOAD_DIR} http://svne1/BTS_D_SC_LFS os/branches os/tags/T1 "
+
+    local expect=$(createTempFile)
+    cat <<EOF > ${expect}
+getConfig LFS_PROD_uc_release_upload_to_subversion_sleep_time_after_commit
+mustExistSubversionDirectory http://svne1/BTS_D_SC_LFS os/branches
+_uploadToSubversionPrepareUpload 
+_uploadToSubversionCopyToLocalDisk ${UPLOAD_DIR}
+_uploadToSubversionCheckoutWorkspace http://svne1/BTS_D_SC_LFS/os/branches
+mustExistSubversionDirectory http://svne1/BTS_D_SC_LFS os/tags
+execute -r 3 ${LFS_CI_ROOT}/lib/contrib/svn_load_dirs/svn_load_dirs.pl -t os/tags/T1 -v -no_user_input -no_diff_tag -glob_ignores=#.# -sleep LFS_PROD_uc_release_upload_to_subversion_sleep_time_after_commit http://svne1/BTS_D_SC_LFS os/branches ${UPLOAD_DIR}
+EOF
+    assertExecutedCommands ${expect}
+
+    return
+}
+
+test3() {
+    assertTrue "uploadToSubversion ${UPLOAD_DIR} http://svne1/BTS_D_SC_LFS os/branches"
+
+    local expect=$(createTempFile)
+    cat <<EOF > ${expect}
+getConfig LFS_PROD_uc_release_upload_to_subversion_sleep_time_after_commit
+mustExistSubversionDirectory http://svne1/BTS_D_SC_LFS os/branches
+_uploadToSubversionPrepareUpload 
+_uploadToSubversionCopyToLocalDisk ${UPLOAD_DIR}
+_uploadToSubversionCheckoutWorkspace http://svne1/BTS_D_SC_LFS/os/branches
+execute -r 3 ${LFS_CI_ROOT}/lib/contrib/svn_load_dirs/svn_load_dirs.pl -v -no_user_input -no_diff_tag -glob_ignores=#.# -sleep LFS_PROD_uc_release_upload_to_subversion_sleep_time_after_commit http://svne1/BTS_D_SC_LFS os/branches ${UPLOAD_DIR}
+EOF
+    assertExecutedCommands ${expect}
+
+    return
+}
 source lib/shunit2
 
 exit 0
