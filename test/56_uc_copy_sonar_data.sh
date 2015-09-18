@@ -38,10 +38,8 @@ oneTimeTearDown() {
 }
 
 setUp() {
-    # export WORKSPACE=$(createTempDirectory)
-    # export JENKINS_ROOT=$(createTempDirectory)
-    export WORKSPACE=/tmp/vm048635/workspace
-    export JENKINS_ROOT=/tmp/vm048635/jenkinsroot
+    export WORKSPACE=$(createTempDirectory)
+    export JENKINS_ROOT=$(createTempDirectory)
 
     for TARGET in fsmr3 fsmr4 
     do
@@ -65,7 +63,7 @@ setUp() {
 }
 
 tearDown() {
-    # rm -rf ${WORKSPACE}
+    rm -rf ${WORKSPACE}
     return 
 }
 
