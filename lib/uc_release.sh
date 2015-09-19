@@ -52,8 +52,6 @@ ci_job_release() {
 usecase_LFS_RELEASE_PREPARE() {
     mustBePreparedForReleaseTask
     databaseEventReleaseStarted
-    exit_add databaseEventReleaseFailed
-
     createArtifactArchive
     return
 }
