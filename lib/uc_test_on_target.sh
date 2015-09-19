@@ -25,7 +25,11 @@ usecase_LFS_CI_TESTING_TMF_ON_TARGET() {
 ci_job_test_on_target() {
     requiredParameters LABEL JOB_NAME BUILD_NUMBER DELIVERY_DIRECTORY UPSTREAM_PROJECT
 
-    setBuildDescription ${JOB_NAME} ${BUILD_NUMBER} ${LABEL}
+    mustHavePreparedWorkspace
+
+    info "testing production ${LABEL}"
+    databaseEventSubTestStarted 
+    exit_add _exitHandlerDatabaseEventsSubTestFailed
 
     local workspace=$(getWorkspaceName)
     mustHaveWorkspaceName
@@ -63,9 +67,6 @@ ci_job_test_on_target() {
     local testType=$(getConfig LFS_CI_uc_test_making_test_type -t "testTargetName:${targetName}")
     mustHaveValue "${testType}" "test type"
 
-    info "testing production ${LABEL}"
-    databaseEventSubTestStarted 
-    exit_add _exitHandlerDatabaseEventsSubTestFailed
 
     for type in ${testType} ; do
         info "running test type ${type} on target ${targetName}"
