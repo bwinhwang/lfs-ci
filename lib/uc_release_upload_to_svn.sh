@@ -29,8 +29,7 @@ usecase_LFS_RELEASE_UPLOAD_TO_SUBVERSION() {
     uploadToSubversion ${releaseDirectory}/os              \
                        ${svnReposUrl}                      \
                        os/branches/${branchName}           \
-                       tags/${tagName}                     \
-                       "upload of new lfs build ${tagName}"
+                       tags/${tagName}                     
 
     createArtifactArchive
 
