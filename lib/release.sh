@@ -12,11 +12,6 @@ mustBePreparedForReleaseTask() {
 
     info "upstream project is ${UPSTREAM_PROJECT} / ${UPSTREAM_PROJECT}"
 
-    if [[ ! ${JOB_NAME} =~ summary$ ]] ; then
-        databaseEventSubReleaseStarted
-        exit_add _releaseDatabaseEventSubReleaseFailedOrFinished
-    fi
-
     local workspace=$(getWorkspaceName)
     mustHaveWorkspaceName
     mustHaveCleanWorkspace
@@ -30,7 +25,12 @@ mustBePreparedForReleaseTask() {
     mustExistDirectory ${releaseDirectory}
     info  "found release on share: ${releaseDirectory}"
 
-    # storing new and old label name into files for later use and archive
+     if [[ ! ${JOB_NAME} =~ summary$ ]] ; then
+        databaseEventSubReleaseStarted
+        exit_add _releaseDatabaseEventSubReleaseFailedOrFinished
+    fi
+
+   # storing new and old label name into files for later use and archive
     execute mkdir -p ${workspace}/bld/bld-lfs-release/
     echo ${releaseLabel} > ${workspace}/bld/bld-lfs-release/label.txt
     copyFileFromWorkspaceToBuildDirectory ${JOB_NAME} ${BUILD_NUMBER} \
