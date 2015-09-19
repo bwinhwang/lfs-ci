@@ -37,9 +37,6 @@ usecase_LFS_RELEASE_SHARE_BUILD_ARTIFACTS() {
         _synchronizeBuildResultsToShare ${basename} ${basename}/${buildName}
     done
 
-    info "clean up workspace"
-    execute rm -rf ${workspace}/bld
-
     return
 }
 
