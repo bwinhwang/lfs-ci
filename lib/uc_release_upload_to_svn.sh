@@ -18,7 +18,7 @@ usecase_LFS_RELEASE_UPLOAD_TO_SUBVERSION() {
     local releaseDirectory=$(getConfig LFS_CI_UC_package_copy_to_share_real_location)/${tagName}
     mustExistDirectory ${releaseDirectory}
 
-    local svnReposUrl=$(getConfig LFS_PROD_svn_delivery_release_repos_urjl -t tagName:${tagName})
+    local svnReposUrl=$(getConfig LFS_PROD_svn_delivery_release_repos_url -t tagName:${tagName})
     mustHaveValue "${svnReposUrl}" "svn repos url"
 
     local branchName=$(getConfig LFS_PROD_uc_release_upload_to_subversion_map_location_to_branch)
