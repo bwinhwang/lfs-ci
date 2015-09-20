@@ -27,18 +27,22 @@ ci_job_release() {
     mustHaveValue "${subJob}" "subtask name"
 
     info "task is ${subJob}"
+    local usecase=
     case ${subJob} in
-        build_results_to_share)               usecase_LFS_RELEASE_SHARE_BUILD_ARTIFACTS               ;;
-        build_results_to_share_kernelsources) usecase_LFS_RELEASE_SHARE_BUILD_ARTIFACTS_KERNELSOURCES ;;
+        build_results_to_share)               LFS_CI_GLOBAL_USECASE=LFS_RELEASE_SHARE_BUILD_ARTIFACTS               ;;
+        build_results_to_share_kernelsources) LFS_CI_GLOBAL_USECASE=LFS_RELEASE_SHARE_BUILD_ARTIFACTS_KERNELSOURCES ;;
+        create_release_tag)                   LFS_CI_GLOBAL_USECASE=LFS_RELEASE_CREATE_RELEASE_TAG                  ;;
+        create_source_tag)                    LFS_CI_GLOBAL_USECASE=LFS_RELEASE_CREATE_SOURCE_TAG                   ;;
+        pre_release_checks)                   LFS_CI_GLOBAL_USECASE=LFS_RELEASE_PRE_RELEASE_CHECKS                  ;;
+        summary)                              LFS_CI_GLOBAL_USECASE=LFS_RELEASE_SEND_RELEASE_NOTE                   ;;
+        update_dependency_files)              LFS_CI_GLOBAL_USECASE=LFS_RELEASE_UPDATE_DEPS                         ;;
+        upload_to_subversion)                 LFS_CI_GLOBAL_USECASE=LFS_RELEASE_UPLOAD_TO_SUBVERSION                ;;
         create_proxy_release_tag)             warning "disabled due to BI#293"                        ;;
-        create_release_tag)                   usecase_LFS_RELEASE_CREATE_RELEASE_TAG                  ;;
-        create_source_tag)                    usecase_LFS_RELEASE_CREATE_SOURCE_TAG                   ;;
-        pre_release_checks)                   usecase_LFS_RELEASE_PRE_RELEASE_CHECKS                  ;;
-        summary)                              usecase_LFS_RELEASE_SEND_RELEASE_NOTE                   ;;
-        update_dependency_files)              usecase_LFS_RELEASE_UPDATE_DEPS                         ;;
-        upload_to_subversion)                 usecase_LFS_RELEASE_UPLOAD_TO_SUBVERSION                ;;
         *)                                    fatal "subJob not known (${subJob})"                    ;;
     esac
+
+    export LFS_CI_GLOBAL_USECASE
+    usecase_${LFS_CI_GLOBAL_USECASE}
 
     return
 }
