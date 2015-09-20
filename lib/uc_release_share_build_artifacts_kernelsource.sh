@@ -76,6 +76,9 @@ usecase_LFS_RELEASE_SHARE_BUILD_ARTIFACTS_KERNELSOURCES() {
         fi
     done
 
+    # restore build name artifact for database events
+    copyAndExtractBuildArtifactsFromProject "${UPSTREAM_PROJECT}" "${UPSTREAM_BUILD}" "fsmci"
+
     return
 }
 
