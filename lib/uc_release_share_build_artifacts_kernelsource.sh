@@ -76,9 +76,6 @@ usecase_LFS_RELEASE_SHARE_BUILD_ARTIFACTS_KERNELSOURCES() {
         fi
     done
 
-    info "clean up workspace"
-    execute rm -rf ${workspace}
-
     return
 }
 

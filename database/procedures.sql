@@ -834,7 +834,7 @@ BEGIN
     IF cnt_started = cnt_finished THEN
         -- TODO: demx2fk3 2015-09-19 HACK special handling for release jobs
         -- release jobs should only create failed or unstable message, not finished.
-        IF in_event_type = 'release' THEN
+        IF in_event_type != 'release' THEN
             CALL new_build_event( in_build_name, in_comment, in_job_name, in_build_number, 
                                 in_product_name, in_task_name, in_event_type, 'finished' );
         END IF;
