@@ -57,6 +57,7 @@ mustBePreparedForReleaseTask() {
     else
         # TODO: demx2fk3 2014-08-08 this should be an error message.
         # TODO: demx2fk3 2015-08-04 should be retrieved from the database
+        info "didn't get prev release. use based_on"
         local basedOn=$(getConfig LFS_PROD_uc_release_based_on)
         echo ${basedOn} > ${workspace}/bld/bld-lfs-release/oldLabel.txt
     fi
