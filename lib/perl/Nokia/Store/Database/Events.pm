@@ -95,7 +95,7 @@ sub newBuildEvent {
             package_started     => $dataListShort,
             release_finished    => $dataListShort,
             release_started     => $dataListShort,
-            release_failedd     => $dataListShort,
+            release_failed      => $dataListShort,
             subrelease_finished => $dataListShort,
             subrelease_started  => $dataListShort,
             subrelease_failed   => $dataListShort,
