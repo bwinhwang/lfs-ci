@@ -24,7 +24,7 @@ usecase_LFS_RELEASE_UPLOAD_TO_SUBVERSION() {
     local branchName=$(getConfig LFS_PROD_uc_release_upload_to_subversion_map_location_to_branch)
     mustHaveValue "${branchName}" "branch name"
 
-    info "upload local path ${pathToUpload} to ${branch} as ${tagName}"
+    info "upload local path ${releaseDirectory} to ${branchName} as ${tagName}"
 
     uploadToSubversion ${releaseDirectory}/os              \
                        ${svnReposUrl}                      \
