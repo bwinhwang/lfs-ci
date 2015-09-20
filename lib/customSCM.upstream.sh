@@ -91,9 +91,9 @@ actionCheckout() {
     fi
 
     # failsafe: something is wrong: the upstream jobs names are different.
-    if [[ ${upstreamProjectName} != ${oldUpstreamProjectName} ]] ; then
-        fatal "there is something wrong. The upstream project and the upstream project name from old job is different."
-    fi
+    # if [[ ${upstreamProjectName} != ${oldUpstreamProjectName} ]] ; then
+    #     fatal "there is something wrong. The upstream project and the upstream project name from old job is different."
+    # fi
 
     build=${upstreamBuildNumber}
     while [[ ${build} -gt ${oldUpstreamBuildNumber} ]] ; do
