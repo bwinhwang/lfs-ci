@@ -1,4 +1,6 @@
 #!/bin/bash
+# @file  uc_release_upload_to_svn.sh
+# @brief usecase "release - upload release to subversion"
 
 [[ -z ${LFS_CI_SOURCE_release}    ]] && source ${LFS_CI_ROOT}/lib/release.sh
 [[ -z ${LFS_CI_SOURCE_artifacts}  ]] && source ${LFS_CI_ROOT}/lib/artifacts.sh

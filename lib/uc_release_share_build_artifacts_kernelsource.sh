@@ -1,4 +1,6 @@
 #!/bin/bash
+# @file  uc_release_share_build_artifacts_kernelsource.sh
+# @brief usecase "release - copy linux kernel sources (artifacts) to share"
 
 [[ -z ${LFS_CI_SOURCE_release} ]] && source ${LFS_CI_ROOT}/lib/release.sh
 
@@ -79,7 +81,6 @@ usecase_LFS_RELEASE_SHARE_BUILD_ARTIFACTS_KERNELSOURCES() {
     # restore build name artifact for database events
     copyAndExtractBuildArtifactsFromProject "${UPSTREAM_PROJECT}" "${UPSTREAM_BUILD}" "fsmci"
 
-    return
+    return 0
 }
-
 

@@ -1,4 +1,6 @@
 #!/bin/bash
+# @file  uc_release_create_source_tag.sh
+# @brief usecase "release - create source tag in subversion"
 
 [[ -z ${LFS_CI_SOURCE_release} ]] && source ${LFS_CI_ROOT}/lib/release.sh
 
@@ -31,7 +33,8 @@ usecase_LFS_RELEASE_CREATE_SOURCE_TAG() {
 
     _createSourceTag
     info "tagging done."
-    return
+
+    return 0
 }
 
 ## @fn      _copySourceDirectoryToBranch()
@@ -87,7 +90,7 @@ _copySourceDirectoryToBranch() {
         warning "creating a source tag is disabled in config"
     fi
 
-    return
+    return 0
 }
 
 ## @fn      _createSourceTag()
@@ -110,6 +113,8 @@ _createSourceTag() {
     else
         warning "creating a source tag is disabled in config"
     fi
+
+    return 0
 }
 
 ## @fn      _createUsedRevisionsFile()
@@ -182,5 +187,5 @@ _mustHaveLfsSourceSubversionUrl() {
 
     branchName=pre_${osLabelName}
 
-    return
+    return 0
 }
