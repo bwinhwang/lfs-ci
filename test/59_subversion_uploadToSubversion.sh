@@ -28,6 +28,9 @@ oneTimeSetUp() {
     mustHaveFreeDiskSpace() {
         mockedCommand "mustHaveFreeDiskSpace $@"
     }
+    mustExistSubversionDirectory() {
+        mockedCommand "mustExistSubversionDirectory $@"
+    }
     _uploadToSubversionPrepareUpload() {
         mockedCommand "_uploadToSubversionPrepareUpload $@"
     }
@@ -63,11 +66,11 @@ test1() {
     local expect=$(createTempFile)
     cat <<EOF > ${expect}
 getConfig LFS_PROD_uc_release_upload_to_subversion_sleep_time_after_commit
-mustExistBranchInSubversion http://svne1/BTS_D_SC_LFS os/branches
+mustExistSubversionDirectory http://svne1/BTS_D_SC_LFS os/branches
 _uploadToSubversionPrepareUpload 
 _uploadToSubversionCopyToLocalDisk ${UPLOAD_DIR}
 _uploadToSubversionCheckoutWorkspace http://svne1/BTS_D_SC_LFS/os/branches
-mustExistBranchInSubversion http://svne1/BTS_D_SC_LFS os/tags
+mustExistSubversionDirectory http://svne1/BTS_D_SC_LFS os/tags
 execute -r 3 ${LFS_CI_ROOT}/lib/contrib/svn_load_dirs/svn_load_dirs.pl -t os/tags/T1 -message 'message to commit' -v -no_user_input -no_diff_tag -glob_ignores=#.# -sleep LFS_PROD_uc_release_upload_to_subversion_sleep_time_after_commit http://svne1/BTS_D_SC_LFS os/branches ${UPLOAD_DIR}
 EOF
     assertExecutedCommands ${expect}
@@ -81,11 +84,11 @@ test2() {
     local expect=$(createTempFile)
     cat <<EOF > ${expect}
 getConfig LFS_PROD_uc_release_upload_to_subversion_sleep_time_after_commit
-mustExistBranchInSubversion http://svne1/BTS_D_SC_LFS os/branches
+mustExistSubversionDirectory http://svne1/BTS_D_SC_LFS os/branches
 _uploadToSubversionPrepareUpload 
 _uploadToSubversionCopyToLocalDisk ${UPLOAD_DIR}
 _uploadToSubversionCheckoutWorkspace http://svne1/BTS_D_SC_LFS/os/branches
-mustExistBranchInSubversion http://svne1/BTS_D_SC_LFS os/tags
+mustExistSubversionDirectory http://svne1/BTS_D_SC_LFS os/tags
 execute -r 3 ${LFS_CI_ROOT}/lib/contrib/svn_load_dirs/svn_load_dirs.pl -t os/tags/T1 -v -no_user_input -no_diff_tag -glob_ignores=#.# -sleep LFS_PROD_uc_release_upload_to_subversion_sleep_time_after_commit http://svne1/BTS_D_SC_LFS os/branches ${UPLOAD_DIR}
 EOF
     assertExecutedCommands ${expect}
@@ -99,7 +102,7 @@ test3() {
     local expect=$(createTempFile)
     cat <<EOF > ${expect}
 getConfig LFS_PROD_uc_release_upload_to_subversion_sleep_time_after_commit
-mustExistBranchInSubversion http://svne1/BTS_D_SC_LFS os/branches
+mustExistSubversionDirectory http://svne1/BTS_D_SC_LFS os/branches
 _uploadToSubversionPrepareUpload 
 _uploadToSubversionCopyToLocalDisk ${UPLOAD_DIR}
 _uploadToSubversionCheckoutWorkspace http://svne1/BTS_D_SC_LFS/os/branches
