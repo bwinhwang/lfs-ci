@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# @file  uc_release_prechecks.sh
+# @brief usecase "release - prechecks before release"
+
 [[ -z ${LFS_CI_SOURCE_release}      ]] && source ${LFS_CI_ROOT}/lib/release.sh
 [[ -z ${LFS_CI_SOURCE_workflowtool} ]] && source ${LFS_CI_ROOT}/lib/workflowtool.sh
 
@@ -33,6 +36,6 @@ usecase_LFS_RELEASE_PRE_RELEASE_CHECKS() {
         fi                
     fi
     
-    return
+    return 0
 }
 

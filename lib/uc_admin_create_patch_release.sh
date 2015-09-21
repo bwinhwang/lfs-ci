@@ -1,6 +1,5 @@
 #!/bin/bash
-
-# @file uc_admin_create_patch_release.sh
+# @file  uc_admin_create_patch_release.sh
 # @brief start a patch release
 
 [[ -z ${LFS_CI_SOURCE_artifacts}   ]] && source ${LFS_CI_ROOT}/lib/artifacts.sh
@@ -113,7 +112,7 @@ mustHaveAllBuildsOfSameBranch() {
     return
 }
 
-## @fn      mustHaveOneEmptyPatch()
+## @fn      mustHaveOneEmptyPatchBuild()
 #  @brief   At least one build must be the same as the base build. 
 #  @param   environment variables (FSMR2_PATCH_BUILD, FSMR3_PATCH_BUILD and/or FSMR4_PATCH_BUILD)
 #  @return  <none>
@@ -177,7 +176,7 @@ mustBeUnreleasedBaseBuild() {
     return 0
 }
 
-## @fn      mustHaveFinishedAllPackageJobs
+## @fn      mustHaveFinishedAllPackageJobs()
 #  @brief   guarantee that package job of all affected builds has finished already 
 #  @param   environment variables (BASE_BUILD FSMR2_PATCH_BUILD FSMR3_PATCH_BUILD FSMR4_PATCH_BUILD) 
 #  @return  0, if all package jobs are finished
@@ -196,7 +195,7 @@ mustHaveFinishedAllPackageJobs() {
     return
 }
 
-## @fn     markBaseBuildAsPatched 
+## @fn     markBaseBuildAsPatched()
 #  @brief   
 #  @param   environment variables (BASE_BUILD, BUILD_USER, IMPORTANT_NOTE)
 #  @return  <none>
@@ -233,7 +232,7 @@ EOF
     return
 }
 
-## @fn     copyPatchBuildsIntoBaseBuild
+## @fn     copyPatchBuildsIntoBaseBuild()
 #  @brief  copies all patch release relevant parts to base release.
 #  @warning common dirs per target is only configured one. (eg. k2 and axm common dirs only connfigured for k2)
 #  @brief   

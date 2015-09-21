@@ -1,4 +1,6 @@
 #!/bin/bash
+# @file  uc_release_create_rel_tag.sh
+# @brief usecase "release - create release tag in svn"
 
 [[ -z ${LFS_CI_SOURCE_release} ]] && source ${LFS_CI_ROOT}/lib/release.sh
 

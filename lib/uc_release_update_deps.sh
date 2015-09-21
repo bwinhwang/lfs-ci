@@ -1,4 +1,6 @@
 #!/bin/bash
+# @file  uc_release_update_deps.sh
+# @brief usecase "release - update dependencies files in svn"
 
 [[ -z ${LFS_CI_SOURCE_release} ]] && source ${LFS_CI_ROOT}/lib/release.sh
 
@@ -47,7 +49,9 @@ usecase_LFS_RELEASE_UPDATE_DEPS() {
         fi
         
         info "update ${name}/Dependencies";
-        execute perl -p -i -e "s/\b[A-Z0-9_]*PS_LFS_OS\S+\b/${releaseLabelName}/g" ${dependenciesFile}
+        local buildNameStaticPart=$(getConfig LFS_PROD_uc_release_update_deps_build_name_part)
+        mustHaveValue "${buildNameStaticPart}" "build name static part/LFS_PROD_uc_release_update_deps_build_name_part"
+        execute perl -p -i -e "s/\b[A-Z0-9_]*${buildNameStaticPart}\S+\b/${releaseLabelName}/g" ${dependenciesFile}
         svnDiff ${dependenciesFile}
 
         if [[ ${canCommitDependencies} ]] ; then 
@@ -66,7 +70,7 @@ usecase_LFS_RELEASE_UPDATE_DEPS() {
     done < ${componentsFile}
 
     info "update done."
-    return
-}
 
+    return 0
+}
 

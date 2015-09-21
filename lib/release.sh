@@ -1,4 +1,6 @@
 #!/bin/bash
+# @file  release.sh
+# @brief release related functions
 
 LFS_CI_SOURCE_release='$Id$'
 
@@ -6,6 +8,12 @@ LFS_CI_SOURCE_release='$Id$'
 [[ -z ${LFS_CI_SOURCE_jenkins} ]] && source ${LFS_CI_ROOT}/lib/jenkins.sh
 
 
+## @fn      mustBePreparedForReleaseTask()
+#  @brief   ensures, that the workspace is prepared for a release task
+#  @details this function copy all required artifacts into the workspace and
+#           set a log of variables, which are in use for the a release task
+#  @param   <none>
+#  @return  <none>
 mustBePreparedForReleaseTask() {
     requiredParameters UPSTREAM_PROJECT UPSTREAM_BUILD \
                        JOB_NAME         BUILD_NUMBER
@@ -77,6 +85,11 @@ mustBePreparedForReleaseTask() {
     return
 }
 
+## @fn      _releaseDatabaseEventReleaseFailedOrFinished()
+#  @brief   create a database entry for a failed or a finished release task
+#  @details this function is called by the exit handler
+#  @param   {rc}    exit code
+#  @return  <none>
 _releaseDatabaseEventReleaseFailedOrFinished() {
     if [[ ${1} -gt 0 ]] ; then
         databaseEventReleaseFailed
@@ -85,6 +98,11 @@ _releaseDatabaseEventReleaseFailedOrFinished() {
     fi            
 }
 
+## @fn      _releaseDatabaseEventSubReleaseFailedOrFinished()
+#  @brief   create a database entry for a failed or a finished sub release task
+#  @details this function is called by the exit handler
+#  @param   {rc}    exit code
+#  @return  <none>
 _releaseDatabaseEventSubReleaseFailedOrFinished() {
     if [[ ${1} -gt 0 ]] ; then
         databaseEventSubReleaseFailed

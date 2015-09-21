@@ -1,20 +1,11 @@
 #!/bin/bash
-## @file  uc_release.sh
-#  @brief usecase release 
+# @file  uc_release.sh
+# @brief usecase release 
 
 [[ -z ${LFS_CI_SOURCE_artifacts}       ]] && source ${LFS_CI_ROOT}/lib/artifacts.sh
 [[ -z ${LFS_CI_SOURCE_createWorkspace} ]] && source ${LFS_CI_ROOT}/lib/createWorkspace.sh
 [[ -z ${LFS_CI_SOURCE_release}         ]] && source ${LFS_CI_ROOT}/lib/release.sh
 [[ -z ${LFS_CI_SOURCE_database}        ]] && source ${LFS_CI_ROOT}/lib/database.sh
-
-source ${LFS_CI_ROOT}/lib/uc_release_create_rel_tag.sh
-source ${LFS_CI_ROOT}/lib/uc_release_create_source_tag.sh
-source ${LFS_CI_ROOT}/lib/uc_release_prechecks.sh
-source ${LFS_CI_ROOT}/lib/uc_release_send_release_note.sh
-source ${LFS_CI_ROOT}/lib/uc_release_share_build_artifacts.sh
-source ${LFS_CI_ROOT}/lib/uc_release_share_build_artifacts_kernelsource.sh
-source ${LFS_CI_ROOT}/lib/uc_release_update_deps.sh
-source ${LFS_CI_ROOT}/lib/uc_release_upload_to_svn.sh
 
 ## @fn      ci_job_release()
 #  @brief   dispatcher for the release jobs
@@ -37,11 +28,16 @@ ci_job_release() {
         summary)                              LFS_CI_GLOBAL_USECASE=LFS_RELEASE_SEND_RELEASE_NOTE                   ;;
         update_dependency_files)              LFS_CI_GLOBAL_USECASE=LFS_RELEASE_UPDATE_DEPS                         ;;
         upload_to_subversion)                 LFS_CI_GLOBAL_USECASE=LFS_RELEASE_UPLOAD_TO_SUBVERSION                ;;
-        create_proxy_release_tag)             warning "disabled due to BI#293"                        ;;
-        *)                                    fatal "subJob not known (${subJob})"                    ;;
+        create_proxy_release_tag)             warning "disabled due to BI#293"                                      ;;
+        *)                                    fatal "subJob not known (${subJob})"                                  ;;
     esac
 
+    requiredParameters LFS_CI_ROOT
+
     export LFS_CI_GLOBAL_USECASE
+    sourceFile=$(getConfig LFS_CI_usecase_file)
+    mustExistFile ${LFS_CI_ROOT}/lib/${sourceFile}
+    source ${LFS_CI_ROOT}/lib/${sourceFile}
     usecase_${LFS_CI_GLOBAL_USECASE}
 
     return
