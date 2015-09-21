@@ -155,18 +155,21 @@ pre_actions() {
         exit 2
     fi
 
-    if [[ $(ps aux | grep java | grep jenkins) ]]; then
-        echo "ERROR: Jenkins is sill running."
+    if [[ ${UPDATE_JENKINS} == false && $(ps aux | grep java | grep jenkins) ]]; then
+        echo "ERROR: Jenkins is still running."
         exit 3
     fi
+
     if [[ -d ${LOCAL_WORK_DIR} && ! -w ${LOCAL_WORK_DIR} ]]; then
         echo "ERROR: Ensure that ${LOCAL_WORK_DIR} is writable for user ${SANDBOX_USER}."
         exit 4
     fi
+
     if [[ "${KEEP_JENKINS_PLUGINS}" == "true" && ! -d ${JENKINS_PLUGINS} ]]; then
         echo "ERROR: -p makes no sense because there is no ${JENKINS_PLUGINS}"
         exit 5
     fi
+
     if [[ ! -r ${LFS_CI_CONFIG_FILE} && ${PURGE_SANDBOX} == false && ${UPDATE_JENKINS} == false ]]; then
         echo "ERROR: Can't read config file ${LFS_CI_CONFIG_FILE}."
         exit 6
