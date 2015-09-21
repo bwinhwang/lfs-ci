@@ -10,6 +10,7 @@ LFS_CI_SOURCE_git='$Id$'
 #  @return  log from git
 gitLog() {
     execute -n git log $@
+    return 0
 }
 
 ## @fn      gitTagAndPushToOrigin()
@@ -21,7 +22,7 @@ gitTagAndPushToOrigin() {
     mustHaveValue "${tagName}" "tagName"
     execute git tag -a -m "new tag ${tagName}" ${tagName}
     execute git push origin ${tagName}
-    return
+    return 0
 }
 
 ## @fn      gitReset()
@@ -30,7 +31,7 @@ gitTagAndPushToOrigin() {
 #  @return  <none>
 gitReset() {
     execute git reset $@
-    return
+    return 0
 }
 
 ## @fn      gitDescribe()
@@ -39,7 +40,7 @@ gitReset() {
 #  @return  description from git
 gitDescribe() {
     execute -n git describe $@
-    return
+    return 0
 }
 
 ## @fn      gitRevParse()
@@ -48,7 +49,7 @@ gitDescribe() {
 #  @return  <none>
 gitRevParse() {
     execute -n git rev-parse $@
-    return
+    return 0
 }
 
 ## @fn      gitClone()
@@ -57,7 +58,7 @@ gitRevParse() {
 #  @return  <none>
 gitClone() {
     execute git clone $@
-    return
+    return 0
 }
 
 ## @fn      gitCheckout()
@@ -66,7 +67,7 @@ gitClone() {
 #  @return  <none>
 gitCheckout() {
     execute git checkout $@
-    return
+    return 0
 }
 
 ## @fn      gitSubmodule()
@@ -75,5 +76,5 @@ gitCheckout() {
 #  @return  <none>
 gitSubmodule() {
     execute git submodule $@
-    return
+    return 0
 }

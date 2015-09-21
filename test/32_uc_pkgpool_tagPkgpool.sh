@@ -24,7 +24,11 @@ oneTimeSetUp() {
         mkdir -p ${WORKSPACE}/workspace
     }
     createTempFile() {
-        echo "TempFile"
+        local cnt=$(cat ${UT_TMPDIR}/.cnt)
+        cnt=$((cnt + 1 ))
+        echo ${cnt} > ${UT_TMPDIR}/.cnt
+        touch ${UT_TMPDIR}/tmp.${cnt}
+        echo ${UT_TMPDIR}/tmp.${cnt}
     }
     getConfig() {
         echo ${UT_CAN_RELEASE}
@@ -52,11 +56,14 @@ setUp() {
     export BUILD_NUMBER=123
     mkdir -p ${WORKSPACE}/src/
     mkdir -p ${WORKSPACE}/workspace/bld/bld-pkgpool-release/
+    export UT_TMPDIR=$(createTempDirectory)
+    echo 0 > ${UT_TMPDIR}/.cnt
 }
 
 tearDown() {
     rm -rf ${UT_MOCKED_COMMANDS}
     rm -rf ${CI_LOGGING_LOGFILENAME}
+    rm -rf ${UT_TMPDIR}
     return
 }
 
@@ -67,7 +74,7 @@ test1() {
 
     local expect=$(createTempFile)
     cat <<EOF > ${expect}
-execute -n sed -ne s,^\(\[[0-9 :-]*\] \)\?release \([^ ]*\) complete,\2,p TempFile
+execute -n sed -ne s,^\(\[[0-9 :-]*\] \)\?release \([^ ]*\) complete,\2,p ${UT_TMPDIR}/tmp.1
 gitTagAndPushToOrigin PKGPOOL_FOO
 setBuildDescription PKGPOOL_CI_-_trunk_-_Build 123 PKGPOOL_FOO
 execute -n sed -ne s|^src [^ ]* \(.*\)$|PS_LFS_PKG = \1|p ${WORKSPACE}/workspace/pool/*.meta

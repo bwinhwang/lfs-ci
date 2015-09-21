@@ -1,5 +1,4 @@
 #!/bin/bash
-
 ## @file    uc_pkgpool.sh
 #  @brief   build and release a pkgpool release
 #  @details The usecase will build and release a pkgpool release.
@@ -57,7 +56,7 @@ usecase_PKGPOOL_BUILD() {
     _tagPkgpool ${buildLogFile}
     createArtifactArchive
 
-    return
+    return 0
 }
 
 ## @fn      _preparePkgpoolWorkspace()
@@ -65,16 +64,19 @@ usecase_PKGPOOL_BUILD() {
 #  @param   <none>
 #  @return  <none>
 _preparePkgpoolWorkspace() {
-
-    local gitWorkspace=${WORKSPACE}/src
+    requiredParameters WORKSPACE
 
     info "preparing git workspace..."
+    local gitWorkspace=${WORKSPACE}/src
+    mustExistDirectory ${gitWorkspace}
     cd ${gitWorkspace}
-    # TODO: demx2fk3 2015-09-09 add "no resetting git workspace" here
-    gitReset --hard
 
-    info "bootstrap build environment..."
-    execute ./bootstrap
+    local cleanWorkspace=$(getConfig PKGPOOL_CI_uc_build_can_clean_workspace)
+    if [[ ${cleanWorkspace} ]] ; then
+        info "bootstrap build environment..."
+        gitReset --hard
+        execute ./bootstrap
+    fi
 
     # checking for changed files.
     local directory=
@@ -153,7 +155,8 @@ usecase_PKGPOOL_TEST() {
 
     copyArtifactsToWorkspace ${UPSTREAM_PROJECT} ${UPSTREAM_BUILD} "pkgpool"
     createArtifactArchive
-    return
+
+    return 0
 }
 
 ## @fn      usecase_PKGPOOL_RELEASE()
@@ -252,7 +255,7 @@ usecase_PKGPOOL_RELEASE() {
     local artifactsPathOnShare=$(getConfig artifactesShare)/${JOB_NAME}/${BUILD_NUMBER}
     linkFileToArtifactsDirectory ${artifactsPathOnShare}
 
-    return
+    return 0
 }
 
 ## @fn      usecase_PKGPOOL_UPDATE_DEPS()
@@ -288,9 +291,7 @@ usecase_PKGPOOL_UPDATE_DEPS() {
     local svnUrlsToUpdate=$(getConfig PKGPOOL_PROD_update_dependencies_svn_url)
     mustHaveValue "${svnUrlsToUpdate}" "svn urls for pkgpool"
 
-
     local urlToUpdate=""
-
     for urlToUpdate in ${svnUrlsToUpdate} ; do
         info "url to update ${urlToUpdate}"
 
@@ -373,7 +374,7 @@ usecase_PKGPOOL_UPDATE_DEPS() {
         info "update done for ${urlToUpdate}"
     done
 
-    return
+    return 0
 }
 
 ## @fn      usecase_PKGPOOL_CHECK_FOR_FAILED_VTC()
@@ -395,17 +396,17 @@ usecase_PKGPOOL_CHECK_FOR_FAILED_VTC() {
     local workspace=$(getWorkspaceName)
     mustHaveWorkspaceName
 
-    local buildName=$(cat ${workspace}/bld/bld-pkgpool-release/label)
-    mustHaveValue "${buildName}" "build name of pkgpool"
+    local logfile=${workspace}/bld/bld-pkgpool-release/logs/arm-cortexa15-linux-gnueabihf-vtc.log.gz
+    info "checking for ${logfile}"
 
-    local vtcAddon=$(getConfig PKGPOOL_location_on_share)/${buildName}/arm-cortexa15-linux-gnueabihf-vtc.tar.gz
-    mustExistFile ${vtcAddon}
-
-    local filesInTar=$(execute -n tar tvf ${vtcAddon} | wc -l)
-
-    if [[ ${filesInTar} == 0 ]] ; then
-        fatal "the vtc addon ${vtcAddon} is empty. please check build logs for compile error"
+    if [[ -e ${logfile} ]] ; then
+        if execute -i zgrep -s "LVTC FSMR4 BUILD FAILED" ${logfile} ; then
+            execute -i -n zcat ${logfile}
+            fatal "VTC build failed."
+        fi
     fi
 
+    info "vtc build is ok."
+        
     return 0
 }
