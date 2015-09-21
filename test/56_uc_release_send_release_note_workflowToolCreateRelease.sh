@@ -99,8 +99,8 @@ _copyFileToBldDirectory ${WORKSPACE}/workspace/os/changelog.xml lfs_os_changelog
 _copyFileToBldDirectory ${WORKSPACE}/workspace/revisions.txt revisions.txt
 _copyFileToBldDirectory ${WORKSPACE}/workspace/importantNote.txt importantNote.txt
 _copyFileToBldDirectory ${WORKSPACE}/workspace/bld/bld-externalComponents-summary/externalComponents externalComponents.txt
-_createLfsRelReleaseNoteXml PS_LFS_REL_BUILD_NAME ${WORKSPACE}/workspace/rel/releasenote.xml release_with_restrictions
-createReleaseInWorkflowTool PS_LFS_REL_BUILD_NAME ${WORKSPACE}/workspace/rel/releasenote.xml
+_createLfsRelReleaseNoteXml 
+createReleaseInWorkflowTool PS_LFS_REL_BUILD_NAME ${WORKSPACE}/workspace/rel/releasenote.xml release_with_restrictions
 uploadToWorkflowTool PS_LFS_REL_BUILD_NAME ${WORKSPACE}/workspace/rel/releasenote.xml
 _copyFileToBldDirectory ${WORKSPACE}/workspace/rel/releasenote.xml lfs_rel_releasenote.xml
 EOF
@@ -130,7 +130,7 @@ _copyFileToBldDirectory ${WORKSPACE}/workspace/os/changelog.xml lfs_os_changelog
 _copyFileToBldDirectory ${WORKSPACE}/workspace/revisions.txt revisions.txt
 _copyFileToBldDirectory ${WORKSPACE}/workspace/importantNote.txt importantNote.txt
 _copyFileToBldDirectory ${WORKSPACE}/workspace/bld/bld-externalComponents-summary/externalComponents externalComponents.txt
-_createLfsRelReleaseNoteXml PS_LFS_REL_BUILD_NAME ${WORKSPACE}/workspace/rel/releasenote.xml
+_createLfsRelReleaseNoteXml 
 createReleaseInWorkflowTool PS_LFS_REL_BUILD_NAME ${WORKSPACE}/workspace/rel/releasenote.xml
 uploadToWorkflowTool PS_LFS_REL_BUILD_NAME ${WORKSPACE}/workspace/rel/releasenote.xml
 _copyFileToBldDirectory ${WORKSPACE}/workspace/rel/releasenote.xml lfs_rel_releasenote.xml
@@ -191,7 +191,7 @@ _copyFileToBldDirectory ${WORKSPACE}/workspace/os/changelog.xml lfs_os_changelog
 _copyFileToBldDirectory ${WORKSPACE}/workspace/revisions.txt revisions.txt
 _copyFileToBldDirectory ${WORKSPACE}/workspace/importantNote.txt importantNote.txt
 _copyFileToBldDirectory ${WORKSPACE}/workspace/bld/bld-externalComponents-summary/externalComponents externalComponents.txt
-_createLfsRelReleaseNoteXml PS_LFS_REL_BUILD_NAME ${WORKSPACE}/workspace/rel/releasenote.xml
+_createLfsRelReleaseNoteXml 
 createReleaseInWorkflowTool PS_LFS_REL_BUILD_NAME ${WORKSPACE}/workspace/rel/releasenote.xml
 uploadToWorkflowTool PS_LFS_REL_BUILD_NAME ${WORKSPACE}/workspace/rel/releasenote.xml
 _copyFileToBldDirectory ${WORKSPACE}/workspace/rel/releasenote.xml lfs_rel_releasenote.xml
@@ -222,7 +222,7 @@ _copyFileToBldDirectory ${WORKSPACE}/workspace/os/changelog.xml lfs_os_changelog
 _copyFileToBldDirectory ${WORKSPACE}/workspace/revisions.txt revisions.txt
 _copyFileToBldDirectory ${WORKSPACE}/workspace/importantNote.txt importantNote.txt
 _copyFileToBldDirectory ${WORKSPACE}/workspace/bld/bld-externalComponents-summary/externalComponents externalComponents.txt
-_createLfsRelReleaseNoteXml PS_LFS_REL_BUILD_NAME ${WORKSPACE}/workspace/rel/releasenote.xml
+_createLfsRelReleaseNoteXml 
 createReleaseInWorkflowTool PS_LFS_REL_BUILD_NAME ${WORKSPACE}/workspace/rel/releasenote.xml
 uploadToWorkflowTool PS_LFS_REL_BUILD_NAME ${WORKSPACE}/workspace/rel/releasenote.xml
 _copyFileToBldDirectory ${WORKSPACE}/workspace/rel/releasenote.xml lfs_rel_releasenote.xml

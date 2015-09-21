@@ -135,9 +135,8 @@ _workflowToolCreateRelease() {
     _copyFileToBldDirectory ${workspace}/bld/bld-externalComponents-summary/externalComponents externalComponents.txt
 
     if [[ ${productName} == "LFS" ]] ; then
-        # TODO: demx2fk3 2015-09-17 parameter are not in use
-        _createLfsRelReleaseNoteXml ${releaseTagName} ${workspace}/rel/releasenote.xml ${state}
-        createReleaseInWorkflowTool ${releaseTagName} ${workspace}/rel/releasenote.xml
+        _createLfsRelReleaseNoteXml 
+        createReleaseInWorkflowTool ${releaseTagName} ${workspace}/rel/releasenote.xml ${state}
         uploadToWorkflowTool        ${releaseTagName} ${workspace}/rel/releasenote.xml
 
         _copyFileToBldDirectory ${workspace}/rel/releasenote.xml lfs_rel_releasenote.xml
