@@ -21,9 +21,9 @@ oneTimeSetUp() {
     }
     copyAndExtractBuildArtifactsFromProject() {
         mockedCommand "copyAndExtractBuildArtifactsFromProject $@"
-        mkdir -p ${WORKSPACE}/workspace/bld-externalComponents-summary
-        echo "SDK = SDK_1_2"  >> ${WORKSPACE}/workspace/bld-externalComponents-summary/externalComponents
-        echo "PKG = PKG_1234" >> ${WORKSPACE}/workspace/bld-externalComponents-summary/externalComponents
+        mkdir -p ${WORKSPACE}/workspace/bld/bld-externalComponents-summary
+        echo "SDK = SDK_1_2"  >> ${WORKSPACE}/workspace/bld/bld-externalComponents-summary/externalComponents
+        echo "PKG = PKG_1234" >> ${WORKSPACE}/workspace/bld/bld-externalComponents-summary/externalComponents
     }
     setBuildDescription() {
         mockedCommand "setBuildDescription $@"
@@ -53,9 +53,9 @@ test1() {
 
     local expect=$(createTempFile)
     cat <<EOF > ${expect}
-getJobJobNameFromFingerprint Build_-_FSM_r4_-_fsm4_axm$
-getJobBuildNumberFromFingerprint Build_-_FSM_r4_-_fsm4_axm$
-copyAndExtractBuildArtifactsFromProject build_job 1234
+getJobJobNameFromFingerprint Build_-_FSM-r4_-_fsm4_axm:
+getJobBuildNumberFromFingerprint Build_-_FSM-r4_-_fsm4_axm:
+copyAndExtractBuildArtifactsFromProject build_job 1234 externalComponents fsmci
 getNextCiLabelName 
 setBuildDescription LFS_CI_-_trunk_-_foobar 1234 LABEL<br>
  PKG_1234<br>

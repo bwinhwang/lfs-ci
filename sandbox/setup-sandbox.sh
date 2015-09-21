@@ -79,7 +79,7 @@ cat << EOF
     Options and Flags:
         -f Complete path of CI scripting config file.
         -b Comma separated list of BRANCHES to be copied from LFS CI (not LRC branches). Defaults to ${BRANCH_VIEWS}.
-           If you specify -b on command line and you want to create trunk as well, 'trunk' must be in the list of
+           If you specify -b on command line and you want to create trunk as well, trunk must be in the list of
            branches to be copied (eg -b trunk,FB1506,MD11504).
         -n Comma separated list of nested view that should be created in Sandbox. DEV/* views can be specified via -x.
         -r Comma separated list of root views (Jenkins top level tabs) that should be created within Sandbox. Eg. 1506,1405.
@@ -96,9 +96,10 @@ cat << EOF
         -l (flag) Create LRC trunk within Sandbox. Default is don't create LRC in Sandbox.
         -p (flag) Keep Jenkins plugins from an existing Sandbox installation. Defaults is false (missing -p).
         -o (flag) Just start Jenkins (don't do anything else). Default is false (missing -o). Additionally you can also use -g.
-        -j (flag) Update Sandbox Jenkins in ${LOCAL_WORK_DIR}. Additionally use -w -b -n -x -u -a and -l if you want to
-                  update a non standard installation. Jenkins plugins and jobs will be updated from Jenkins production server.
-                  After this reload Jenkins config from disk or start/restart Sandbox.
+        -j (flag) Update Sandbox Jenkins in ${LOCAL_WORK_DIR}. Additionally the options -w -b -n -x -u -a and -l can be used.
+                  Jenkins plugins and jobs will be updated from Jenkins production server. After this reload Jenkins config
+                  from disk or start/restart Sandbox. Note: No views are created by using -j. This option is for updating jobs
+                  and plugins.
         -x (flag) Create the DEV/* views within Sandbox and copy the related jobs. Additional nested views (eg. 1508)
                   can be created via -n parameter. Default is not creating DEV/* nested views.
         -u (flag) Create the UBOOT view and copy the related jobs. Default is not creating UBOOT.
@@ -155,18 +156,21 @@ pre_actions() {
         exit 2
     fi
 
-    if [[ $(ps aux | grep java | grep jenkins) ]]; then
-        echo "ERROR: Jenkins is sill running."
+    if [[ ${UPDATE_JENKINS} == false && $(ps aux | grep java | grep jenkins) ]]; then
+        echo "ERROR: Jenkins is still running."
         exit 3
     fi
+
     if [[ -d ${LOCAL_WORK_DIR} && ! -w ${LOCAL_WORK_DIR} ]]; then
         echo "ERROR: Ensure that ${LOCAL_WORK_DIR} is writable for user ${SANDBOX_USER}."
         exit 4
     fi
+
     if [[ "${KEEP_JENKINS_PLUGINS}" == "true" && ! -d ${JENKINS_PLUGINS} ]]; then
         echo "ERROR: -p makes no sense because there is no ${JENKINS_PLUGINS}"
         exit 5
     fi
+
     if [[ ! -r ${LFS_CI_CONFIG_FILE} && ${PURGE_SANDBOX} == false && ${UPDATE_JENKINS} == false ]]; then
         echo "ERROR: Can't read config file ${LFS_CI_CONFIG_FILE}."
         exit 6

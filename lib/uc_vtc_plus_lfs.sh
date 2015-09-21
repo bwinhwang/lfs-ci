@@ -59,23 +59,27 @@ usecase_VTC_PLUS_LFS_SYNC_PRODUCTION() {
 }
 
 
+## @fn      _setBuildDescriptionForVtc()
+#  @brief   set the build description for the vtc test job
+#  @param   <none>
+#  @return  <none>
 _setBuildDescriptionForVtc() {
     local workspace=$(getWorkspaceName)
     mustHaveWorkspaceName
 
-    local fsmr4BuildJobName=$(getJobJobNameFromFingerprint 'Build_-_FSM_r4_-_fsm4_axm$')
+    local fsmr4BuildJobName=$(getJobJobNameFromFingerprint 'Build_-_FSM-r4_-_fsm4_axm:')
     mustHaveValue "${fsmr4BuildJobName}" "job name of fsm-r4 axm build job"
 
-    local fsmr4BuildBuildNumber=$(getJobBuildNumberFromFingerprint 'Build_-_FSM_r4_-_fsm4_axm$')
+    local fsmr4BuildBuildNumber=$(getJobBuildNumberFromFingerprint 'Build_-_FSM-r4_-_fsm4_axm:')
     mustHaveValue "${fsmr4BuildBuildNumber}" "build number of fsm-r4 axm build job"
 
     local tmpFile=${workspace}/tempFile
-    copyAndExtractBuildArtifactsFromProject ${fsmr4BuildJobName} ${fsmr4BuildBuildNumber}
+    copyAndExtractBuildArtifactsFromProject ${fsmr4BuildJobName} ${fsmr4BuildBuildNumber} "externalComponents fsmci"
 
     local labelName=$(getNextCiLabelName)
 
     echo ${labelName} > ${tmpFile}
-    execute -n cut -d= -f2- ${workspace}/bld-externalComponents-summary/externalComponents | sort -u >> ${tmpFile}
+    execute -n cut -d= -f2- ${workspace}/bld/bld-externalComponents-summary/externalComponents | sort -u >> ${tmpFile}
 
     setBuildDescription ${JOB_NAME} ${BUILD_NUMBER} "$(sed 's/$/<br>/g' ${tmpFile} )"
 
