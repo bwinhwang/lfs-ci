@@ -36,15 +36,14 @@ usecase_PKGPOOL_BUILD() {
     # build parameters could be empty => no mustHaveValue
     # mustHaveValue "${buildParameters}" "additional build parameters"
 
-    local buildLogFile=$(createTempFile)
-    local gitWorkspace=${WORKSPACE}/src
-
     # git clone, created by jenkins git plugin
+    local gitWorkspace=${WORKSPACE}/src
     mustExistDirectory ${gitWorkspace}
 
     _preparePkgpoolWorkspace
 
     info "building pkgpool..."
+    local buildLogFile=$(createTempFile)
     cd ${workspace}
     execute -l ${buildLogFile} ${gitWorkspace}/build ${buildParameters} 
 
@@ -74,9 +73,11 @@ _preparePkgpoolWorkspace() {
     local cleanWorkspace=$(getConfig PKGPOOL_CI_uc_build_can_clean_workspace)
     if [[ ${cleanWorkspace} ]] ; then
         info "bootstrap build environment..."
+        execute rm -rf ${gitWorkspace}/src
         gitReset --hard
-        execute ./bootstrap
     fi
+
+    execute ./bootstrap
 
     # checking for changed files.
     local directory=
@@ -89,9 +90,9 @@ _preparePkgpoolWorkspace() {
     # git status does not return a non-zero exit code in case that there are untracked / unchecked-in files.
     if [[ "$(gitStatus -s)" ]] ; then
         warning "the git workspace is not clean after update. We will fallback to the clean way."
+        info "resetting workspace and bootstrap clean build environment..."
         execute rm -rf ${gitWorkspace}/src
         gitReset --hard
-        info "bootstrap build environment..."
         execute ./bootstrap
     fi
 

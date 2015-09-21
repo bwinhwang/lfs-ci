@@ -58,6 +58,7 @@ test1() {
 
     local expect=$(createTempFile)
     cat <<EOF > ${expect}
+execute rm -rf ${WORKSPACE}/src/src
 gitReset --hard
 execute ./bootstrap
 gitStatus -s
@@ -75,6 +76,7 @@ test2() {
 
     local expect=$(createTempFile)
     cat <<EOF > ${expect}
+execute rm -rf ${WORKSPACE}/src/src
 gitReset --hard
 execute ./bootstrap
 gitStatus -s
@@ -93,6 +95,7 @@ test3() {
 
     local expect=$(createTempFile)
     cat <<EOF > ${expect}
+execute rm -rf ${WORKSPACE}/src/src
 gitReset --hard
 execute ./bootstrap
 gitStatus -s
