@@ -88,11 +88,10 @@ cat << EOF
 
     After the script has been finished check the system settings of the new LFS CI Sandbox.
 
-    Example: $ITSME -a -u -x -l -f ~/my-local-development.cfg
+    Example: $ITSME -k -u -x -l -f /home/lfscidev/lfs-ci/etc/development.cfg
 
-             Copy all Admin_-_* jobs (-a), create UBOOT (-u), DEV/* (-x) and trunk (created per default) views.
-             Skip creating LRC on Sandbox (-l). Disable all *_Build$ jobs (-e is missing). Also copy LRC into
-             Sandbox (-l).
+             Create UBOOT (-u), DEV/* (-x), ADMIN and trunk (as per default) and LRC (-l) views.
+             Disable all *_Build$ jobs (-e is missing). Also copy all Test-* jobs (-k).
 
     Options and Flags:
         -f Complete path of CI scripting config file.
@@ -111,7 +110,7 @@ cat << EOF
         -g <sysv> If -g is omitted, Jenkins is started via nohup in the background.
                   sysv: Start Jenkins via the script /etc/init.d/jenkins.
         -e (flag) Disable all *_Build$ jobs in Sandbox. Default is to disable all *_Build$ jobs (missing -e).
-        -l (flag) Create LRC trunk within Sandbox. Default is don't create LRC in Sandbox.
+        -l (flag) Create LRC view in Sandbox. Default is don't create LRC in Sandbox.
         -p (flag) Keep Jenkins plugins from an existing Sandbox installation. Defaults is false (missing -p).
         -o (flag) Just start Jenkins (don't do anything else). Default is false (missing -o). Additionally you can also use -g.
         -j (flag) Update Sandbox Jenkins in ${LOCAL_WORK_DIR}. Additionally the options -w -b -n -x -u -a and -l can be used.
@@ -128,20 +127,18 @@ cat << EOF
 
     Examples:
 
-        Standard Sandbox installation (copy trunk jobs, create trunk view, copy LRC jobs, create LRC view,
-        create ADMIN view and copy jobs ${DEFAULT_JOBS}:
+        Standard Sandbox installation. (Copy trunk jobs, create trunk view, create ADMIN view and copy
+        jobs ${DEFAULT_JOBS}):
+
             ${ITSME} -f <path-to-development.cfg>
 
-        Skip LRC (-l), use existing Jenkins plugins (-p) and start Sandbox on port 9090 (-t):
+        Create LRC (-l), use existing Jenkins plugins (-p) and start Sandbox on port 9090 (-t):
             ${ITSME} -l -p -t 9090 -f <path-to-development.cfg>
 
         Just start Jenkins(-o):
             ${ITSME} -o -f ~/lfs-ci/etc/development.cfg
 
-        Just start Sandbox by usging script /etc/init.d/jenkins (-g)
-            ${ITSME} -o -g sysv -f <path-to-development.cfg>
-
-        Update Sandbox:
+        Update trunk jobs and ${DEFAULT_JOBS} in Sandbox:
             ${ITSME} -j
 
         Remove standard Sandbox:
@@ -761,6 +758,7 @@ main() {
     if [[ ${UPDATE_JENKINS} == true ]]; then
         jenkins_copy_jobs
         jenkins_update_plugins
+        jenkins_configure_deploy_ci_scripting_job
         exit $?
     fi
 
