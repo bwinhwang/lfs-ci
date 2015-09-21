@@ -42,10 +42,28 @@ UPDATE_JENKINS="false"
 PROD_JENKINS_SERVER="lfs-ci.emea.nsn-net.net"
 START_OPTION=""
 JUST_START="false"
+# Subdirectory within $WORK_DIR/$USER
 JENKINS_DIR="lfs-jenkins" # subdirectory within $WORK_DIR/$USER
-
-# Following jobs are copied always. The copy command for example will look like "rsync -a LFS_CI_-_trunk_-_* ..."
-DEFAULT_JOBS="LFS_BRANCHING_-_ Admin_-_reserveTarget Admin_-_releaseTarget Admin_-_deployCiScripting"
+# Following jobs are copied always.
+DEFAULT_JOBS="LFS_BRANCHING_-_ \
+Admin_-_reserveTarget \
+Admin_-_releaseTarget \
+Admin_-_deployCiScripting"
+# This jos are copied in case the script is started as user lfscidev.
+OTHER_ADMIN_JOBS="Admin_-_backup_mysql \
+Admin_-_backupJenkins \
+Admin_-_cleanUpArtifactsShare \
+Admin_-_cleanupS3Storage_-_lfs-developer-builds \
+Admin_-_cleanupS3Storage_-_lfs-knives \
+Admin_-_create_patch_release \
+Admin_-_createLfsBaselineListFromEcl \
+Admin_-_enable_jenkins_job \
+Admin_-_recreate_branches_cfg_from_database \
+Admin_-_repairTarget \
+Admin_-_restore_mysql \
+Admin_-_svn_clone_restore_from_master \
+Admin_-_svn_clone_sync_BTS_SC_LFS \
+Admin_-_updateLocationsTextFile"
 TRUNK_JOBS="LFS_CI_-_trunk_-_ LFS_Prod_-_trunk_-_ PKGPOOL_-_trunk_-_"
 
 usage() {
@@ -287,6 +305,13 @@ jenkins_copy_jobs() {
         rsync -a ${excludes} ${PROD_JENKINS_SERVER}:${PROD_JENKINS_JOBS}/${JOB_PREFIX}* ${JENKINS_HOME}/jobs/
     done
 
+    if [[ ${USER} == lfscidev ]]; then
+        for JOB in ${OTHER_ADMIN_JOBS}; do
+            echo "    rsync job ${JOB}"
+            rsync -a ${excludes} ${PROD_JENKINS_SERVER}:${PROD_JENKINS_JOBS}/${JOB} ${JENKINS_HOME}/jobs/
+        done
+    fi
+
     if [[ ${UBOOT} == true ]]; then
         JOB_PREFIX=UBOOT
         echo "    rsync ${JOB_PREFIX}* jobs"
@@ -329,13 +354,20 @@ jenkins_copy_jobs() {
     fi
 }
 
-## @fn      jenkins_disable_deploy_ci_scripting_job()
+## @fn      jenkins_configure_deploy_ci_scripting_job()
 #  @brief   disable job Admin_-_deployCiScripting in new Sandbox Jenkins.
 #  @return  <none>
-jenkins_disable_deploy_ci_scripting_job() {
-    [[ ! -f ${JENKINS_HOME}/jobs/Admin_-_deployCiScripting/config.xml ]] && return
-    echo "    Disable job Admin_-_deployCiScripting"
-    sed -i -e "s,<disabled>false</disabled>,<disabled>true</disabled>," ${JENKINS_HOME}/jobs/Admin_-_deployCiScripting/config.xml
+jenkins_configure_deploy_ci_scripting_job() {
+    JOB_NAME="Admin_-_deployCiScripting"
+    [[ ! -f ${JENKINS_HOME}/jobs/${JOB_NAME}/config.xml ]] && return
+    echo "    Configure job ${JOB_NAME}"
+
+    sed -i -e "s,<disabled>false</disabled>,<disabled>true</disabled>," \
+           -e "s,<name>\*/master</name>,<name>\*/development</name>," \
+           -e "s,\${WORKSPACE}/bin/unitTest.sh,#\${WORKSPACE}/bin/unitTest.sh," \
+           -e "s,cd /ps/lfs/ci,cd \${HOME}/lfs-ci," \
+           -e "s,git pull git-master master,git pull origin development," \
+           ${JENKINS_HOME}/jobs/${JOB_NAME}/config.xml
 }
 
 ## @fn      jenkins_plugins()
@@ -595,7 +627,7 @@ jenkins_stuff() {
     jenkins_plugins "copy"
     jenkins_prepare_sandbox
     jenkins_copy_jobs
-    jenkins_disable_deploy_ci_scripting_job
+    jenkins_configure_deploy_ci_scripting_job
     jenkins_get_configs
     jenkins_plugins "restore"
     jenkins_start_sandbox
