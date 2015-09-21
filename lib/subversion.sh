@@ -163,6 +163,7 @@ mustExistSubversionDirectory() {
     
     if [[ ${newRestPath} = ${localPath} ]] ; then
         # end of recursion condition
+        debug "end of recursion"
         return
     elif [[ -z ${newLocalPath} ]] ; then
         # someone started or ended the localPath with a /
