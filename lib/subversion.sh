@@ -28,7 +28,7 @@ uploadToSubversion() {
 
     local sleepTimeAfterCommit=$(getConfig LFS_PROD_uc_release_upload_to_subversion_sleep_time_after_commit)
 
-    mustExistBranchInSubversion ${svnUrl} ${svnBranchDirectory}
+    mustExistSubversionDirectory ${svnUrl} ${svnBranchDirectory}
 
     local oldTemp=${TMPDIR:-/tmp}
     _uploadToSubversionPrepareUpload
@@ -39,7 +39,7 @@ uploadToSubversion() {
     if [[ ${svnTagDirectory} ]] ; then
         svnUploadDirsOptions="${svnUploadDirsOptions} -t ${svnTagDirectory}"
         # we have to ensure, that the prefix path exists in svn: e.g. /os/tags/
-        mustExistBranchInSubversion ${svnUrl} $(dirname ${svnTagDirectory})
+        mustExistSubversionDirectory ${svnUrl} $(dirname ${svnTagDirectory})
     fi
 
     local workspace=${TMPDIR}/workspace
@@ -141,6 +141,41 @@ _uploadToSubversionCleanupTempDirectory() {
     local tmpDirectory=${ramDisk}/${JOB_NAME}.${USER}
     [[ -d ${tmpDirectory} ]] && rm -rf ${tmpDirectory}
 
+    return
+}
+
+
+## @fn      mustExistSubversionDirectory()
+#  @brief   ensure, that the directory in subversion exists
+#  @param   {prefixPath}    svn server url
+#  @param   {pathName}      path name
+#  @return  <none>
+mustExistSubversionDirectory() {
+    local prefixPath=${1}
+    mustHaveValue "${prefixPath}" "prefix path"
+    local localPath=${2} 
+    mustHaveValue "${localPath}" "local path"
+
+    debug "check for sub dir ${prefixPath} ${localPath}"
+    
+    local newLocalPath=$(cut -d/ -f1 <<< ${localPath})
+    local newRestPath=$(cut -d/ -f2- <<< ${localPath})
+    
+    if [[ ${newRestPath} = ${localPath} ]] ; then
+        # end of recursion condition
+        debug "end of recursion"
+        return
+    elif [[ -z ${newLocalPath} ]] ; then
+        # someone started or ended the localPath with a /
+        # so we skip the element
+        debug "skipping -z ${newLocalPath}"
+        mustExistSubversionDirectory ${prefixPath}/${newLocalPath} ${newRestPath}
+    else 
+        debug "creating svn dir ${prefixPath} ${newRestPath}"
+        mustExistBranchInSubversion ${prefixPath} ${newLocalPath}
+        mustExistSubversionDirectory ${prefixPath}/${newLocalPath} ${newRestPath}
+    fi  
+    
     return
 }
 
@@ -328,7 +363,7 @@ mustExistBranchInSubversion() {
     echo "creating a new branch: ${branch}" > ${logMessage}
     if ! existsInSubversion ${url} ${branch} ; then
         echo "BTSPS-1657 IN rh: DESRIPTION: NOJCHK : create dir ${url}/${branch}" > ${logMessage}
-        svnMkdir --parents -F ${logMessage} ${url}/${branch}
+        svnMkdir -F ${logMessage} ${url}/${branch}
     fi
 
     return 0
