@@ -131,8 +131,11 @@ switchToNewLocation() {
     #     fatal "${USER} has wrong group id. correct is pronb"
     # fi
 
+    local additionalParameters="$(getConfig LFS_CI_uc_build_additional_build_setup_parameters)"
+    debug "additional parameters for build setup: ${additionalParameters}"
+
     info "switching to new location \"${location}\""
-    execute build newlocations ${location}
+    execute build ${additionalParameters} newlocations ${location}
 
     return
 }
@@ -151,10 +154,10 @@ setupNewWorkspace() {
 
     execute cd "${workspace}"
 
-    LFS_CI_additional_parameters="-U $(getConfig lfsSourceRepos)/os/trunk/bldtools/bld-buildtools-common"
-    debug "additional parameters for build setup: ${LFS_CI_additional_parameters}"
+    additionalParameters="$(getConfig LFS_CI_uc_build_additional_build_setup_parameters)"
+    debug "additional parameters for build setup: ${additionalParameters}"
 
-    execute build ${LFS_CI_additional_parameters} setup
+    execute build ${additionalParameters} setup
     return
 }
 
