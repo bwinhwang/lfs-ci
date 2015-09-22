@@ -25,11 +25,13 @@ sub prepare {
     $self->{noSvnActions}    = $opts{n};
     $self->{type}            = $opts{T} || die "no T"; # type of rel: REL or OS
     $self->{productName}     = $opts{P} || die "no P"; # type of the product: LFS, PKGPOOL, UBOOT, ...
+    $self->{locationName}    = $opts{L} || die "no L"; # name of the location
 
     my $config = Nokia::Singleton::config();
     $config->loadData( configFileName => $self->{configFileName} );
-    $config->addConfig( name  => "type", value => $self->{type} );
+    $config->addConfig( name  => "type",        value => $self->{type} );
     $config->addConfig( name  => "productName", value => $self->{productName} );
+    $config->addConfig( name  => "location",    value => $self->{locationName} );
 
     $self->{fromAddress}     = $config->getConfig( name => "LFS_PROD_ReleaseNote_FromAddress" );
     $self->{fakeFromAddress} = $config->getConfig( name => "LFS_PROD_ReleaseNote_FakeFromAddress" );
