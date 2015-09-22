@@ -96,8 +96,13 @@ for(slave in jenkins.slaves) {
                     println(" [DEBUG] DELETE job: $d (dryRun)")
                 }
                 else {
-                    d.deleteRecursive()
-                    println(" [INFO] DELETED job directory: $d")
+                    try {
+                        d.deleteRecursive()
+                        println(" [INFO] DELETED job directory: $d")
+                    } catch(Exception e) {
+                        println(" [WARNING] Deleting job directory failed: $d : " + e)
+                        println("           Error message: " + e)
+                    }
                 }
             } else if(jobName == dirName && LRC_deleteJobs && jobName.find("LRC")) {
                 if(debug == true) {

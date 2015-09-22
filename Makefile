@@ -1,6 +1,7 @@
 tests := $(foreach file,$(shell ls test/*.sh),$(dir $(file)).tested/$(notdir $(file)))
+tests_single := $(shell ls test/*.sh)
 
-.PHONY: all test tags doc clean
+.PHONY: all test tags doc clean $(tests_single)
 
 all:
 	echo nothing todo...
@@ -11,6 +12,11 @@ $(tests):
 	bash test/$(@F)
 	@mkdir -p $(@D)
 	@touch $@
+
+$(tests_single):
+	@echo running test/$(@F)
+	@export LFS_CI_ROOT=${PWD} ; \
+	bash test/$(@F)
 
 test: clean $(tests)
 
