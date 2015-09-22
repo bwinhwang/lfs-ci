@@ -71,7 +71,8 @@ _sendReleaseNote() {
             -t ${LFS_PROD_RELEASE_CURRENT_TAG_NAME_REL} \
             -f ${LFS_CI_CONFIG_FILE}                    \
             -T OS                                       \
-            -P LFS
+            -P $(getProductNameFromJobName)             \
+            -L $(getLocationName)
     else
         warning "sending the release note is disabled in config"
     fi
@@ -135,9 +136,8 @@ _workflowToolCreateRelease() {
     _copyFileToBldDirectory ${workspace}/bld/bld-externalComponents-summary/externalComponents externalComponents.txt
 
     if [[ ${productName} == "LFS" ]] ; then
-        # TODO: demx2fk3 2015-09-17 parameter are not in use
-        _createLfsRelReleaseNoteXml ${releaseTagName} ${workspace}/rel/releasenote.xml ${state}
-        createReleaseInWorkflowTool ${releaseTagName} ${workspace}/rel/releasenote.xml
+        _createLfsRelReleaseNoteXml 
+        createReleaseInWorkflowTool ${releaseTagName} ${workspace}/rel/releasenote.xml ${state}
         uploadToWorkflowTool        ${releaseTagName} ${workspace}/rel/releasenote.xml
 
         _copyFileToBldDirectory ${workspace}/rel/releasenote.xml lfs_rel_releasenote.xml

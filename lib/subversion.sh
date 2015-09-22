@@ -155,18 +155,23 @@ mustExistSubversionDirectory() {
     mustHaveValue "${prefixPath}" "prefix path"
     local localPath=${2} 
     mustHaveValue "${localPath}" "local path"
+
+    debug "check for sub dir ${prefixPath} ${localPath}"
     
     local newLocalPath=$(cut -d/ -f1 <<< ${localPath})
     local newRestPath=$(cut -d/ -f2- <<< ${localPath})
     
     if [[ ${newRestPath} = ${localPath} ]] ; then
         # end of recursion condition
+        debug "end of recursion"
         return
     elif [[ -z ${newLocalPath} ]] ; then
         # someone started or ended the localPath with a /
         # so we skip the element
+        debug "skipping -z ${newLocalPath}"
         mustExistSubversionDirectory ${prefixPath}/${newLocalPath} ${newRestPath}
     else 
+        debug "creating svn dir ${prefixPath} ${newRestPath}"
         mustExistBranchInSubversion ${prefixPath} ${newLocalPath}
         mustExistSubversionDirectory ${prefixPath}/${newLocalPath} ${newRestPath}
     fi  
