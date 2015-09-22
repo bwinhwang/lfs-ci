@@ -102,18 +102,18 @@ execute -i grep -s -e ^src/fsmddal$ ${WORKSPACE}/.alreadyUpdated
 execute git submodule update src/fsmddal
 execute -n filterdiff -i src/fsmddal/Dependencies ${WORKSPACE}/workspace/bld/bld-dev-input/lfs.patch
 execute patch -p0 -d ${WORKSPACE}/src
-execute git add -f .
+execute git add -Af .
 execute git commit -m patch_commit
 execute -i grep -s -e ^src/fsmpsl$ ${WORKSPACE}/.alreadyUpdated
 execute git submodule update src/fsmpsl
 execute -n filterdiff -i src/fsmpsl/Buildfile ${WORKSPACE}/workspace/bld/bld-dev-input/lfs.patch
 execute patch -p0 -d ${WORKSPACE}/src
-execute git add -f .
+execute git add -Af .
 execute git commit -m patch_commit
 execute -i grep -s -e ^src/fsmpsl$ ${WORKSPACE}/.alreadyUpdated
 execute -n filterdiff -i src/fsmpsl/Dependencies ${WORKSPACE}/workspace/bld/bld-dev-input/lfs.patch
 execute patch -p0 -d ${WORKSPACE}/src
-execute git add -f .
+execute git add -Af .
 execute git commit -m patch_commit
 EOF
     assertExecutedCommands ${expect}
