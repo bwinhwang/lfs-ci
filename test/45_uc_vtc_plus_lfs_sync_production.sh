@@ -33,6 +33,9 @@ oneTimeSetUp() {
         mockedCommand "getNextCiLabelName $@"
         echo LABEL
     }
+    _setBuildDescriptionForVtc() {
+        mockedCommand "_setBuildDescriptionForVtc $@"
+    }
     getConfig() {
         mockedCommand "getConfig $@"
         case $1 in
@@ -80,8 +83,9 @@ mustHaveWorkspaceName
 mustHavePreparedWorkspace 
 mustHaveNextCiLabelName 
 getNextCiLabelName 
+_setBuildDescriptionForVtc 
 getConfig LFS_CI_UC_package_copy_to_share_real_location
-execute -n ${LFS_CI_ROOT}/bin/xpath -q -e /versionControllFile/file/@source ${UT_PRODUCTION_SHARE}/LABEL/os/version_control.xml
+execute -n xpath -q -e /versionControllFile/file/@source ${UT_PRODUCTION_SHARE}/LABEL/os/version_control.xml
 getConfig LFS_CI_uc_vtc_plus_lfs_files_to_sync
 getConfig LFS_CI_uc_vtc_plus_lfs_remote_server
 getConfig LFS_CI_uc_vtc_plus_lfs_remote_path

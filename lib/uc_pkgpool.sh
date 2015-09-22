@@ -72,7 +72,6 @@ _preparePkgpoolWorkspace() {
 
     local cleanWorkspace=$(getConfig PKGPOOL_CI_uc_build_can_clean_workspace)
     if [[ ${cleanWorkspace} ]] ; then
-        info "bootstrap build environment..."
         execute rm -rf ${gitWorkspace}/src
         gitReset --hard
     fi

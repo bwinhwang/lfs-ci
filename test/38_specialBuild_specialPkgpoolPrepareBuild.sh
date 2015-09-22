@@ -18,6 +18,10 @@ oneTimeSetUp() {
             shift
             $@
         fi
+        if [[ $@ =~ grep ]] ; then
+            shift
+            $@
+        fi
     }
     getConfig() {
         echo $1
@@ -34,6 +38,7 @@ oneTimeSetUp() {
     }
     copyArtifactsToWorkspace() {
         mockedCommand "copyArtifactsToWorkspace $@"
+
         mkdir -p ${WORKSPACE}/workspace/bld/bld-dev-input/
         cp ${LFS_CI_ROOT}/test/data/28_uc_knife_build_applyKnifePatches.pkgpool.patch \
             ${WORKSPACE}/workspace/bld/bld-dev-input/lfs.patch
@@ -50,7 +55,14 @@ oneTimeSetUp() {
         echo pronb-developer
     }
     mustHaveLocationName() {
+        # hack, found no better place to do this.
+        mkdir -p ${WORKSPACE}/workspace/bld/bld-fsmci-summary/
+        echo 12345 > ${WORKSPACE}/workspace/bld/bld-fsmci-summary/svnrevision
         return
+    }
+    svnCat() {
+        mockedCommand "svnCat $@"
+        echo gitRevision
     }
     return
 }
@@ -80,24 +92,29 @@ test1() {
 execute mkdir -p ${WORKSPACE}/workspace
 mustHaveLocationForSpecialBuild 
 getLocationName 
+svnCat -r 12345 ./src/gitrevision@12345
 copyArtifactsToWorkspace LFS_DEV_-_DEVELOPER_-_Build 123
 execute rm -rf ${WORKSPACE}/src
 gitClone PKGPOOL_git_repos_url ${WORKSPACE}/src
-gitCheckout 
+gitCheckout gitRevision -b dev_build
 gitReset --hard
 execute ./bootstrap
+execute rm -rf ${WORKSPACE}/.alreadyUpdated
+execute touch ${WORKSPACE}/.alreadyUpdated
 execute -n lsdiff ${WORKSPACE}/workspace/bld/bld-dev-input/lfs.patch
+execute -i grep -s -e ^src/fsmddal$ ${WORKSPACE}/.alreadyUpdated
 execute git submodule update src/fsmddal
 execute -n filterdiff -i src/fsmddal/Dependencies ${WORKSPACE}/workspace/bld/bld-dev-input/lfs.patch
 execute patch -p0 -d ${WORKSPACE}/src
 execute git add -f .
 execute git commit -m patch_commit
+execute -i grep -s -e ^src/fsmpsl$ ${WORKSPACE}/.alreadyUpdated
 execute git submodule update src/fsmpsl
 execute -n filterdiff -i src/fsmpsl/Buildfile ${WORKSPACE}/workspace/bld/bld-dev-input/lfs.patch
 execute patch -p0 -d ${WORKSPACE}/src
 execute git add -f .
 execute git commit -m patch_commit
-execute git submodule update src/fsmpsl
+execute -i grep -s -e ^src/fsmpsl$ ${WORKSPACE}/.alreadyUpdated
 execute -n filterdiff -i src/fsmpsl/Dependencies ${WORKSPACE}/workspace/bld/bld-dev-input/lfs.patch
 execute patch -p0 -d ${WORKSPACE}/src
 execute git add -f .

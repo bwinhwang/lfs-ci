@@ -429,33 +429,51 @@ specialPkgpoolPrepareBuild() {
 
     # switch branch
     cd ${WORKSPACE}/src
-    gitCheckout ${gitRevision}
+    gitCheckout ${gitRevision} -b dev_build
     gitReset --hard
     execute ./bootstrap
+
+    # We are recording all src/<component> sub directory, which we have done a git submodule update.
+    # This is only allowed one in a run.
+    execute rm -rf ${WORKSPACE}/.alreadyUpdated
+    execute touch ${WORKSPACE}/.alreadyUpdated
 
     for fileInPatch in $(execute -n lsdiff ${workspace}/bld/bld-${buildType}-input/lfs.patch) ; do
         local pathName=$(cut -d/ -f1,2 <<< ${fileInPatch})
         case ${pathName} in
             src-*) : ;;
-            src/*) 
-                   info "updating submodule ${pathName}"
-                   gitSubmodule update ${pathName}
-
-                   info "applying patch ${fileInPatch}"
-                   local tmpPatchFile=$(createTempFile)
-                   cd ${WORKSPACE}/src
-                   execute -n filterdiff -i ${fileInPatch} ${workspace}/bld/bld-${buildType}-input/lfs.patch > ${tmpPatchFile}
-                   rawDebug ${tmpPatchFile}
-                   execute patch -p0 -d ${WORKSPACE}/src < ${tmpPatchFile}
-                   cd ${pathName}
-                   execute git add -f .
-                   execute git commit -m patch_commit 
-                   
-            ;;
+            src/*) _specialPkgpoolBuildApplyPatch ${fileInPatch} ;;
         esac
     done
 
     return
+}
+
+_specialPkgpoolBuildApplyPatch() {
+    requiredParameters WORKSPACE 
+
+    local fileToPatch=$1
+    mustHaveValue "${fileToPatch}" "file to patch"
+    local pathName=$(cut -d/ -f1,2 <<< ${fileToPatch})
+
+    cd ${WORKSPACE}/src
+
+    if ! execute -i grep -s -e "^${pathName}$" ${WORKSPACE}/.alreadyUpdated ; then
+        info "updating submodule ${pathName}"
+        gitSubmodule update ${pathName}
+        echo ${pathName} >> ${WORKSPACE}/.alreadyUpdated
+    fi 
+
+    info "applying patch ${fileToPatch}"
+    local tmpPatchFile=$(createTempFile)
+    execute -n filterdiff -i ${fileToPatch} ${workspace}/bld/bld-${buildType}-input/lfs.patch > ${tmpPatchFile}
+    rawDebug ${tmpPatchFile}
+    execute patch -p0 -d ${WORKSPACE}/src < ${tmpPatchFile}
+
+    # commiting the change is required. Otherwise pkgpool build does not find the change.
+    cd ${pathName}
+    execute git add -f .
+    execute git commit -m patch_commit 
 }
 
 ## @fn      specialPkgpoolCollectArtifacts()

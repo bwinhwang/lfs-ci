@@ -70,11 +70,12 @@ ci_job_test_on_target() {
     for type in ${testType} ; do
         info "running test type ${type} on target ${targetName}"
         case ${testType} in
-            checkUname)        makingTest_checkUname ;;
-            testProductionLRC) makingTest_testLRC ;;
-            testProductionFSM) makingTest_testFSM ;;
+            checkUname)        makingTest_checkUname         ;;
+            testProductionLRC) makingTest_testLRC            ;;
+            testProductionFSM) makingTest_testFSM            ;;
             testWithoutTarget) makingTest_testsWithoutTarget ;;
-            *)                 fatal "unknown testType"; ;;
+            testSandboxDummy)  testSandboxDummy              ;;
+            *)                 fatal "unknown testType";     ;;
         esac
     done
 
@@ -123,4 +124,21 @@ uc_job_test_on_target_archive_logs() {
     linkFileToArtifactsDirectory ${artifactsPathOnShare}/save
 
     return
+}
+
+## @fn      usecase_LFS_CI_SANDBOX_TEST_TARGET_DUMMY()
+#  @brief   only a dummy function for testing
+#  @details dummy function that only add entries to db
+#  @param   <none>
+#  @return  <none>
+testSandboxDummy() {
+    requiredParameters LFS_CI_ROOT
+
+    local workspace=$(getWorkspaceName)
+    mustHaveWorkspaceName
+
+    execute mkdir -p ${workspace}/xml-reports/                                                                                                   
+    execute cp ${LFS_CI_ROOT}/test/junitResult.xml ${workspace}/xml-reports/
+
+    return 0
 }
