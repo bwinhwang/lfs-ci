@@ -18,7 +18,7 @@ sub prepare {
     
     # t: := tag name
     # r: := release note template file
-    getopts( "r:t:f:nT:P:", \my %opts );
+    getopts( "r:t:f:nT:P:L:", \my %opts );
     $self->{releaseNoteFile} = $opts{r} || die "no r";
     $self->{tagName}         = $opts{t} || die "no t";
     $self->{configFileName}  = $opts{f} || die "no f";
