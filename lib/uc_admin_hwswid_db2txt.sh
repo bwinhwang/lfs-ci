@@ -13,12 +13,13 @@ usecase_ADMIN_HWSWID_DB2TXT() {
     requiredParameters JOB_NAME
 
     local WORKDIR=$(getConfig LFS_CI_HWSWID_WORKDIR)
-
     rm -rf ${WORKDIR}
     mkdir -p ${WORKDIR}
     cd ${WORKDIR}
 
+
     createHwSwIdTxtFile
+    #HwSwIdToSubVersion
 
     #setBuildDescription ${JOB_NAME} ${BUILD_NUMBER} "${JENKINS_JOB_NAME}"
 
@@ -26,63 +27,51 @@ usecase_ADMIN_HWSWID_DB2TXT() {
 }
 
 ## @fn      createHwSwIdTxtFile
-#  @brief   
+#  @brief
 #  @param   <none>
 #  @return  <none>
 createHwSwIdTxtFile() {
     local MYSQL_TABLE_FSMR3=$(getConfig LFS_CI_HWSWID_DB_TABLE -t hw_platform:fsmr3)
     local MYSQL_TABLE_FSMR4=$(getConfig LFS_CI_HWSWID_DB_TABLE -t hw_platform:fsmr4)
 
-    # FSM-r3 for firmwaretype
-    for firmewaretype in $(getConfig LFS_CI_HWSWID_FIRMWARETYPE_FSMR3)
+    for hw_platform in fsmr3 fsmr4
     do
-        datafrommysql HwSwId_${firmewaretype}.txt "firmwaretype=\"${firmewaretype}\""  "$MYSQL_TABLE_FSMR3"
+        for firmewaretype in $(getConfig LFS_CI_HWSWID_FIRMWARETYPE -t hw_platform:${hw_platform})
+        do
+            datafrommysql HwSwId_${firmewaretype}.txt "firmwaretype=\"${firmewaretype}\""  "$(getConfig LFS_CI_HWSWID_DB_TABLE -t hw_platform:${hw_platform})"
+        done
     done
 
-    # FSM-r4 for firmwaretype
-    for firmewaretype in $(getConfig LFS_CI_HWSWID_FIRMWARETYPE_FSMR4)
-    do
-        datafrommysql HwSwId_${firmewaretype}.txt  "firmwaretype=\"${firmewaretype}\""  "$MYSQL_TABLE_FSMR4"
-    done
-
-    # FSM-r3 for basebandfpga
-    for basebandfpga in $(getConfig LFS_CI_HWSWID_BASEBANDFPGA_FSMR3)
-    do
-        datafrommysql HwSwId_${basebandfpga}.txt "basebandfpga=\"${basebandfpga}\""  "$MYSQL_TABLE_FSMR3"
-    done
+    datafrommysql HwSwId_CPRIMON.txt 'basebandfpga="CPRIMON"'     "$MYSQL_TABLE_FSMR3"
+    datafrommysql HwSwId_CPRIIF.txt  'basebandfpga="CPRIIF"'      "$MYSQL_TABLE_FSMR3"
+    datafrommysql HwSwId_D4P.txt     'basebandfpga="D4P"'         "$MYSQL_TABLE_FSMR3"
 
     datafrommysql HwSwId_UBOOT.txt  'boardname != "FSPN" and boardname != "FIFC"'  "$MYSQL_TABLE_FSMR3"
     removeminor HwSwId_UBOOT.txt
-    showtable HwSwId_UBOOT.txt
+    rawDebug "HwSwId_UBOOT.txt"
 
     datafrommysql HwSwId_UBOOT_FSMR4.txt  '1=1'  "$MYSQL_TABLE_FSMR4"
     removeminor HwSwId_UBOOT_FSMR4.txt
-    showtable HwSwId_UBOOT_FSMR4.txt
+    rawDebug "HwSwId_UBOOT_FSMR4.txt"
 
     datafrommysql HwSwId_UBOOT_FSMR4_FCT.txt  'boardname = "FCTJ" or boardname = "FSCA"'  "$MYSQL_TABLE_FSMR4"
     removeminor HwSwId_UBOOT_FSMR4_FCT.txt
-    showtable HwSwId_UBOOT_FSMR4_FCT.txt
-
+    rawDebug "HwSwId_UBOOT_FSMR4_FCT.txt"
     datafrommysql HwSwId_UBOOT_FSMR4_FSP.txt  'boardname like "FSP%"'  "$MYSQL_TABLE_FSMR4"
     removeminor HwSwId_UBOOT_FSMR4_FSP.txt
-    showtable HwSwId_UBOOT_FSMR4_FSP.txt
+    rawDebug "HwSwId_UBOOT_FSMR4_FSP.txt"
 
     datafrommysql HwSwId_FSPN.txt  'boardname = "FSPN"'  "$MYSQL_TABLE_FSMR3"
     removeminor HwSwId_FSPN.txt
-    showtable HwSwId_FSPN.txt
+    rawDebug "HwSwId_FSPN.txt"
 }
 
-## @fn      datafrommysql
-#  @brief   
+## @fn      createHwSwIdTxtFile
+#  @brief
 #  @param   <none>
 #  @return  <none>
 datafrommysql() {
     local WORKDIR=$(getConfig LFS_CI_HWSWID_WORKDIR)
-
-    #local MYSQL_USER=$(getConfig LFS_CI_HWSWID_DB_USER)
-    #local MYSQL_HOST=$(getConfig LFS_CI_HWSWID_DB_HOST)
-    #local MYSQL_PASSWORD=$(getConfig LFS_CI_HWSWID_DB_PASSWORD)
-    #local MYSQL=$(getConfig LFS_CI_HWSWID_DB_MYSQL)
 
     export databaseName=hwswid_database
     mustHaveDatabaseCredentials
@@ -91,32 +80,21 @@ datafrommysql() {
     local QUERY="$2"
     local CURRENT_MYSQL_TABLE="$3"
 
-    #echo creating "$TABLENAME" using MYSQL query "$QUERY" in "$WORKDIR" '(MYSQL '$MYSQL_USER@$MYSQL_HOST table $TABLENAME')'
-    #echo +++ "$MYSQL" -u"$MYSQL_USER" -h"$MYSQL_HOST" --password="$MYSQL_PASSWORD" -B -r -s -e 'SELECT DISTINCT `hw-sw-id` FROM '"$CURRENT_MYSQL_TABLE"' WHERE '"$QUERY"
-    #"$MYSQL" -u"$MYSQL_USER" -h"$MYSQL_HOST" --password="$MYSQL_PASSWORD" -B -r -s -e 'SELECT DISTINCT `hw-sw-id` FROM '"$CURRENT_MYSQL_TABLE"' WHERE '"$QUERY" >"$TABLENAME".tmp
+    info creating "$TABLENAME" using MYSQL query "$QUERY" in "$WORKDIR" '(MYSQL '$MYSQL_USER@$MYSQL_HOST table $TABLENAME')'
+    info +++ ${mysql_cli} -B -r -s -e 'SELECT DISTINCT `hw_sw_id` FROM '"$CURRENT_MYSQL_TABLE"' WHERE '"$QUERY" >"$TABLENAME".tmp
+    ### dems18x0: 2015-09-22: execute before mysql command is not working !
+    ${mysql_cli} -B -r -s -e 'SELECT DISTINCT `hw_sw_id` FROM '"$CURRENT_MYSQL_TABLE"' WHERE '"$QUERY" >"$TABLENAME".tmp
 
-    info execute ${mysql_cli} -B -r -s -e 'SELECT DISTINCT `hw-sw-id` FROM '"$CURRENT_MYSQL_TABLE"' WHERE '"$QUERY" >"$TABLENAME".tmp
-    execute ${mysql_cli} -B -r -s -e 'SELECT DISTINCT `hw-sw-id` FROM '"$CURRENT_MYSQL_TABLE"' WHERE '"$QUERY" >"$TABLENAME".tmp
+    cat "$TABLENAME".tmp | grep -v '^$' | grep -v 'NULL' | sort -u >"$TABLENAME"
+    rm "$TABLENAME.tmp"
 
-    #cat "$TABLENAME".tmp | grep -v '^$' | grep -v 'NULL' | sort -u >"$TABLENAME"
-    execute grep -v -e '^$' -e 'NULL'  $TABLENAME.tmp | sort -u >"$TABLENAME"
-    execute rm "$TABLENAME.tmp"
-
-    rawDebug ${TABLENAME}
-}
-
-## @fn      showtable
-#  @brief   
-#  @param   <none>
-#  @return  <none>
-showtable() {
-    local TABLENAME=${1}
-
+    cat $TABLENAME
     rawDebug $TABLENAME
 }
 
-## @fn      removeminor
-#  @brief   
+
+## @fn     removeminor
+#  @brief
 #  @param   <none>
 #  @return  <none>
 removeminor() {
@@ -126,3 +104,72 @@ removeminor() {
     mv "$HWSWID".new "$HWSWID"
 }
 
+
+## @fn     HwSwIdToSubVersion
+#  @brief
+#  @param   <none>
+#  @return  <none>
+HwSwIdToSubVersion() {
+    local DEFSFILE="$PROJECT_SUBTASKS/HwSwId/HwSwIdToSubVersion.def"
+    local WORKDIR=/lvol2/production_jenkins/tmp/HwSwId
+    local SVNWORKDIR=/lvol2/production_jenkins/tmp/HwSwId.SVN
+    local AUTOCOMMIT=true
+
+    while read URL
+    do
+        case "$URL"
+        in \#* | "" ) continue
+        esac
+
+        TMPFILE=$(mktemp /tmp/HwSwId1.XXXXXXXX)
+        svn list "$URL" >"$TMPFILE"
+
+        HWSWIDFOUND=false
+        DIFF=false
+        echo checking "$URL"
+        while read FILENAME
+        do
+            case "$FILENAME"
+            in HwSwId_*.txt)
+                HWSWIDFOUND=true
+            esac
+        done <"$TMPFILE"
+        rm -f "$TMPFILE"
+        $HWSWIDFOUND || error "$URL: no HwSwId...txt file found"
+        rm -rf "$SVNWORKDIR"
+        svn co "$URL" "$SVNWORKDIR"
+        DIFF=false
+        for FILE in "$SVNWORKDIR"/HwSwId*.txt
+        do
+            FILENAME=$(basename "$FILE")
+            [ -f "$WORKDIR"/"$FILENAME" ] || error "$FILENAME" not in current workdir "$WORKDIR"
+            diff "$WORKDIR"/"$FILENAME" "$FILE" || {
+                DIFF=true
+                cp -f "$WORKDIR"/"$FILENAME" "$FILE"
+            }
+        done
+        if $DIFF
+        then
+            if $AUTOCOMMIT
+            then
+                cd "$SVNWORKDIR"
+                svn info | grep "^URL:"
+                svn diff
+                # DISABLED ###svn commit -m "BTSPS-1657 IN psulm: update HwSwId NOJCHK"
+                info TODO: svn commit -m "BTSPS-1657 IN psulm: update HwSwId NOJCHK"
+                cd -
+            else
+                info
+                info Please goto "$SVNWORKDIR" and commit changes
+                info Then rerun $0
+                info '    cd '"$SVNWORKDIR"
+                info '    svn commit -m "BTSPS-1657 IN psulm: update HwSwId NOJCHK"'
+                info '    cd -'
+                info '    '"$PROJECT_SUBTASK_REEXECPREFIX"
+                exit 1
+            fi
+        fi
+
+    done <"$DEFSFILE"
+    rm -rf "$SVNWORKDIR"
+}
