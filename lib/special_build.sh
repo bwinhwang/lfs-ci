@@ -472,7 +472,7 @@ _specialPkgpoolBuildApplyPatch() {
 
     # commiting the change is required. Otherwise pkgpool build does not find the change.
     cd ${pathName}
-    execute git add -f .
+    execute git add -Af .
     execute git commit -m patch_commit 
 }
 
