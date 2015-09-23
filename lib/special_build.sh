@@ -471,9 +471,8 @@ _specialPkgpoolBuildApplyPatch() {
     rawDebug ${tmpPatchFile}
     execute patch -p0 -d ${WORKSPACE}/src < ${tmpPatchFile}
 
-    # commiting the change is required. Otherwise pkgpool build does not find the change.
-    
-    if [[ ! ${pathname} =~ recipes ]] ; then 
+    # commiting the change is required, if it's not a recipe. Otherwise pkgpool build does not find the change.
+    if [[ ! ${pathName} =~ recipes ]] ; then 
         cd ${pathName}
         execute git add -Af .
         execute git commit -m patch_commit 
