@@ -443,7 +443,8 @@ specialPkgpoolPrepareBuild() {
         case ${pathName} in
             src-*) : ;;
             src/*) _specialPkgpoolBuildApplyPatch ${fileInPatch} ;;
-        esac
+            recipes/*) _specialPkgpoolBuildApplyPatch ${fileInPatch} ;;
+         esac
     done
 
     return
