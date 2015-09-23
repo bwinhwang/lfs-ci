@@ -472,7 +472,9 @@ _specialPkgpoolBuildApplyPatch() {
     execute patch -p0 -d ${WORKSPACE}/src < ${tmpPatchFile}
 
     # commiting the change is required. Otherwise pkgpool build does not find the change.
-    cd ${pathName}
+    
+    #cd ${pathName}
+    if [[ ${pathname} =~ recipes ]] ; then cd ${pathName}; fi
     execute git add -Af .
     execute git commit -m patch_commit 
 }
