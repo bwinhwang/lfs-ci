@@ -105,7 +105,7 @@ sub branchInformation {
     my $prefix     = uc Nokia::Singleton::config()->getConfig( name => "LFS_PROD_label_prefix" );
 
     foreach my $row ( @branchData ) {
-        my $locationTagString = sprintf( "productName:LFS, location:%s", $row->{location_name} );
+        my $locationTagString = sprintf( "productName:%s, location:%s", $row->{product_name}, $row->{location_name} );
 
         # mapping between the branches and the svn delivery repos
         my $reposName = $row->{release_name_regex};
