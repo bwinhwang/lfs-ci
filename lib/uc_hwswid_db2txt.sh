@@ -4,11 +4,11 @@
 [[ -z ${LFS_CI_SOURCE_jenkins}    ]] && source ${LFS_CI_ROOT}/lib/jenkins.sh
 [[ -z ${LFS_CI_SOURCE_database}   ]] && source ${LFS_CI_ROOT}/lib/database.sh
 
-## @fn      ADMIN_HWSWID_DB2TXT()
-#  @brief   usecase Admin - create HwSwId.txt
+## @fn      HWSWID_DB2TXT()
+#  @brief   usecase create HwSwId.txt out of database
 #  @param   <none>
 #  @return  <none>
-usecase_ADMIN_HWSWID_DB2TXT() {
+usecase_HWSWID_DB2TXT() {
     requiredParameters JOB_NAME
 
     local WORKDIR=$(getConfig LFS_CI_HWSWID_WORKDIR)
@@ -153,6 +153,8 @@ HwSwIdToSubVersion() {
             svn diff
             info TODO ENABLE: svn commit -m "BTSPS-1657 IN psulm: update HwSwId NOJCHK"
             cd -
+        else
+            info No HwSwId changes.
         fi
 
     done
