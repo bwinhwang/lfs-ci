@@ -473,10 +473,11 @@ _specialPkgpoolBuildApplyPatch() {
 
     # commiting the change is required. Otherwise pkgpool build does not find the change.
     
-    #cd ${pathName}
-    if [[ ${pathname} =~ recipes ]] ; then cd ${pathName}; fi
-    execute git add -Af .
-    execute git commit -m patch_commit 
+    if [[ ! ${pathname} =~ recipes ]] ; then 
+        cd ${pathName}
+        execute git add -Af .
+        execute git commit -m patch_commit 
+    fi
 }
 
 specialPkgpoolCollectArtifacts() {
