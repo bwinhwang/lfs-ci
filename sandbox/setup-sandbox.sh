@@ -42,10 +42,28 @@ UPDATE_JENKINS="false"
 PROD_JENKINS_SERVER="lfs-ci.emea.nsn-net.net"
 START_OPTION=""
 JUST_START="false"
+# Subdirectory within $WORK_DIR/$USER
 JENKINS_DIR="lfs-jenkins" # subdirectory within $WORK_DIR/$USER
-
-# Following jobs are copied always. The copy command for example will look like "rsync -a LFS_CI_-_trunk_-_* ..."
-DEFAULT_JOBS="LFS_BRANCHING_-_ Admin_-_reserveTarget Admin_-_releaseTarget Admin_-_deployCiScripting"
+# Following jobs are copied always.
+DEFAULT_JOBS="LFS_BRANCHING_-_ \
+Admin_-_reserveTarget \
+Admin_-_releaseTarget \
+Admin_-_deployCiScripting"
+# This jos are copied in case the script is started as user lfscidev.
+OTHER_ADMIN_JOBS="Admin_-_backup_mysql \
+Admin_-_backupJenkins \
+Admin_-_cleanUpArtifactsShare \
+Admin_-_cleanupS3Storage_-_lfs-developer-builds \
+Admin_-_cleanupS3Storage_-_lfs-knives \
+Admin_-_create_patch_release \
+Admin_-_createLfsBaselineListFromEcl \
+Admin_-_enable_jenkins_job \
+Admin_-_recreate_branches_cfg_from_database \
+Admin_-_repairTarget \
+Admin_-_restore_mysql \
+Admin_-_svn_clone_restore_from_master \
+Admin_-_svn_clone_sync_BTS_SC_LFS \
+Admin_-_updateLocationsTextFile"
 TRUNK_JOBS="LFS_CI_-_trunk_-_ LFS_Prod_-_trunk_-_ PKGPOOL_-_trunk_-_"
 
 usage() {
@@ -70,16 +88,15 @@ cat << EOF
 
     After the script has been finished check the system settings of the new LFS CI Sandbox.
 
-    Example: $ITSME -a -u -x -l -f ~/my-local-development.cfg
+    Example: $ITSME -k -u -x -l -f /home/lfscidev/lfs-ci/etc/development.cfg
 
-             Copy all Admin_-_* jobs (-a), create UBOOT (-u), DEV/* (-x) and trunk (created per default) views.
-             Skip creating LRC on Sandbox (-l). Disable all *_Build$ jobs (-e is missing). Also copy LRC into
-             Sandbox (-l).
+             Create UBOOT (-u), DEV/* (-x), ADMIN and trunk (as per default) and LRC (-l) views.
+             Disable all *_Build$ jobs (-e is missing). Also copy all Test-* jobs (-k).
 
     Options and Flags:
         -f Complete path of CI scripting config file.
         -b Comma separated list of BRANCHES to be copied from LFS CI (not LRC branches). Defaults to ${BRANCH_VIEWS}.
-           If you specify -b on command line and you want to create trunk as well, 'trunk' must be in the list of
+           If you specify -b on command line and you want to create trunk as well, trunk must be in the list of
            branches to be copied (eg -b trunk,FB1506,MD11504).
         -n Comma separated list of nested view that should be created in Sandbox. DEV/* views can be specified via -x.
         -r Comma separated list of root views (Jenkins top level tabs) that should be created within Sandbox. Eg. 1506,1405.
@@ -93,12 +110,13 @@ cat << EOF
         -g <sysv> If -g is omitted, Jenkins is started via nohup in the background.
                   sysv: Start Jenkins via the script /etc/init.d/jenkins.
         -e (flag) Disable all *_Build$ jobs in Sandbox. Default is to disable all *_Build$ jobs (missing -e).
-        -l (flag) Create LRC trunk within Sandbox. Default is don't create LRC in Sandbox.
+        -l (flag) Create LRC view in Sandbox. Default is don't create LRC in Sandbox.
         -p (flag) Keep Jenkins plugins from an existing Sandbox installation. Defaults is false (missing -p).
         -o (flag) Just start Jenkins (don't do anything else). Default is false (missing -o). Additionally you can also use -g.
-        -j (flag) Update Sandbox Jenkins in ${LOCAL_WORK_DIR}. Additionally use -w -b -n -x -u -a and -l if you want to
-                  update a non standard installation. Jenkins plugins and jobs will be updated from Jenkins production server.
-                  After this reload Jenkins config from disk or start/restart Sandbox.
+        -j (flag) Update Sandbox Jenkins in ${LOCAL_WORK_DIR}. Additionally the options -w -b -n -x -u -a and -l can be used.
+                  Jenkins plugins and jobs will be updated from Jenkins production server. After this reload Jenkins config
+                  from disk or start/restart Sandbox. Note: No views are created by using -j. This option is for updating jobs
+                  and plugins.
         -x (flag) Create the DEV/* views within Sandbox and copy the related jobs. Additional nested views (eg. 1508)
                   can be created via -n parameter. Default is not creating DEV/* nested views.
         -u (flag) Create the UBOOT view and copy the related jobs. Default is not creating UBOOT.
@@ -109,20 +127,18 @@ cat << EOF
 
     Examples:
 
-        Standard Sandbox installation (copy trunk jobs, create trunk view, copy LRC jobs, create LRC view,
-        create ADMIN view and copy jobs ${DEFAULT_JOBS}:
+        Standard Sandbox installation. (Copy trunk jobs, create trunk view, create ADMIN view and copy
+        jobs ${DEFAULT_JOBS}):
+
             ${ITSME} -f <path-to-development.cfg>
 
-        Skip LRC (-l), use existing Jenkins plugins (-p) and start Sandbox on port 9090 (-t):
+        Create LRC (-l), use existing Jenkins plugins (-p) and start Sandbox on port 9090 (-t):
             ${ITSME} -l -p -t 9090 -f <path-to-development.cfg>
 
         Just start Jenkins(-o):
             ${ITSME} -o -f ~/lfs-ci/etc/development.cfg
 
-        Just start Sandbox by usging script /etc/init.d/jenkins (-g)
-            ${ITSME} -o -g sysv -f <path-to-development.cfg>
-
-        Update Sandbox:
+        Update trunk jobs and ${DEFAULT_JOBS} in Sandbox:
             ${ITSME} -j
 
         Remove standard Sandbox:
@@ -155,18 +171,21 @@ pre_actions() {
         exit 2
     fi
 
-    if [[ $(ps aux | grep java | grep jenkins) ]]; then
-        echo "ERROR: Jenkins is sill running."
+    if [[ ${UPDATE_JENKINS} == false && $(ps aux | grep java | grep jenkins) ]]; then
+        echo "ERROR: Jenkins is still running."
         exit 3
     fi
+
     if [[ -d ${LOCAL_WORK_DIR} && ! -w ${LOCAL_WORK_DIR} ]]; then
         echo "ERROR: Ensure that ${LOCAL_WORK_DIR} is writable for user ${SANDBOX_USER}."
         exit 4
     fi
+
     if [[ "${KEEP_JENKINS_PLUGINS}" == "true" && ! -d ${JENKINS_PLUGINS} ]]; then
         echo "ERROR: -p makes no sense because there is no ${JENKINS_PLUGINS}"
         exit 5
     fi
+
     if [[ ! -r ${LFS_CI_CONFIG_FILE} && ${PURGE_SANDBOX} == false && ${UPDATE_JENKINS} == false ]]; then
         echo "ERROR: Can't read config file ${LFS_CI_CONFIG_FILE}."
         exit 6
@@ -283,6 +302,13 @@ jenkins_copy_jobs() {
         rsync -a ${excludes} ${PROD_JENKINS_SERVER}:${PROD_JENKINS_JOBS}/${JOB_PREFIX}* ${JENKINS_HOME}/jobs/
     done
 
+    if [[ ${USER} == lfscidev ]]; then
+        for JOB in ${OTHER_ADMIN_JOBS}; do
+            echo "    rsync job ${JOB}"
+            rsync -a ${excludes} ${PROD_JENKINS_SERVER}:${PROD_JENKINS_JOBS}/${JOB} ${JENKINS_HOME}/jobs/
+        done
+    fi
+
     if [[ ${UBOOT} == true ]]; then
         JOB_PREFIX=UBOOT
         echo "    rsync ${JOB_PREFIX}* jobs"
@@ -325,13 +351,20 @@ jenkins_copy_jobs() {
     fi
 }
 
-## @fn      jenkins_disable_deploy_ci_scripting_job()
+## @fn      jenkins_configure_deploy_ci_scripting_job()
 #  @brief   disable job Admin_-_deployCiScripting in new Sandbox Jenkins.
 #  @return  <none>
-jenkins_disable_deploy_ci_scripting_job() {
-    [[ ! -f ${JENKINS_HOME}/jobs/Admin_-_deployCiScripting/config.xml ]] && return
-    echo "    Disable job Admin_-_deployCiScripting"
-    sed -i -e "s,<disabled>false</disabled>,<disabled>true</disabled>," ${JENKINS_HOME}/jobs/Admin_-_deployCiScripting/config.xml
+jenkins_configure_deploy_ci_scripting_job() {
+    JOB_NAME="Admin_-_deployCiScripting"
+    [[ ! -f ${JENKINS_HOME}/jobs/${JOB_NAME}/config.xml ]] && return
+    echo "    Configure job ${JOB_NAME}"
+
+    sed -i -e "s,<disabled>false</disabled>,<disabled>true</disabled>," \
+           -e "s,<name>\*/master</name>,<name>\*/development</name>," \
+           -e "s,\${WORKSPACE}/bin/unitTest.sh,#\${WORKSPACE}/bin/unitTest.sh," \
+           -e "s,cd /ps/lfs/ci,cd \${HOME}/lfs-ci," \
+           -e "s,git pull git-master master,git pull origin development," \
+           ${JENKINS_HOME}/jobs/${JOB_NAME}/config.xml
 }
 
 ## @fn      jenkins_plugins()
@@ -591,7 +624,7 @@ jenkins_stuff() {
     jenkins_plugins "copy"
     jenkins_prepare_sandbox
     jenkins_copy_jobs
-    jenkins_disable_deploy_ci_scripting_job
+    jenkins_configure_deploy_ci_scripting_job
     jenkins_get_configs
     jenkins_plugins "restore"
     jenkins_start_sandbox
@@ -725,6 +758,7 @@ main() {
     if [[ ${UPDATE_JENKINS} == true ]]; then
         jenkins_copy_jobs
         jenkins_update_plugins
+        jenkins_configure_deploy_ci_scripting_job
         exit $?
     fi
 
