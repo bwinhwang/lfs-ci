@@ -21,6 +21,7 @@ CREATE TABLE branches (
     date_closed        DATETIME,
     comment            TEXT,
     branch_description TEXT,
+    product_name       VARCHAR(16) DEFAULT 'LFS',
 
     PRIMARY KEY (id),
     INDEX(branch_name)
