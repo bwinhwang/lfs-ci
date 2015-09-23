@@ -85,8 +85,11 @@ _preparePkgpoolWorkspace() {
         gitSubmodule update ${directory}
     done
 
-    # ensure, that everything is clean
+    # ensure, that everything is clean. If it is not clean, git status will show some output and
+    # we will ensure, that it is clean again by removing everything in .../src and check it out / bootstrep it 
+    # again.
     # git status does not return a non-zero exit code in case that there are untracked / unchecked-in files.
+    # but git status will output nothing, if everything is clean and fine.
     if [[ "$(gitStatus -s)" ]] ; then
         warning "the git workspace is not clean after update. We will fallback to the clean way."
         info "resetting workspace and bootstrap clean build environment..."
