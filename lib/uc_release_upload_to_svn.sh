@@ -1,4 +1,6 @@
 #!/bin/bash
+# @file  uc_release_upload_to_svn.sh
+# @brief usecase "release - upload release to subversion"
 
 [[ -z ${LFS_CI_SOURCE_release}    ]] && source ${LFS_CI_ROOT}/lib/release.sh
 [[ -z ${LFS_CI_SOURCE_artifacts}  ]] && source ${LFS_CI_ROOT}/lib/artifacts.sh
@@ -24,13 +26,12 @@ usecase_LFS_RELEASE_UPLOAD_TO_SUBVERSION() {
     local branchName=$(getConfig LFS_PROD_uc_release_upload_to_subversion_map_location_to_branch)
     mustHaveValue "${branchName}" "branch name"
 
-    info "upload local path ${pathToUpload} to ${branch} as ${tagName}"
+    info "upload local path ${releaseDirectory} to ${branchName} as ${tagName}"
 
     uploadToSubversion ${releaseDirectory}/os              \
                        ${svnReposUrl}                      \
-                       os/${branchName}                    \
-                       tags/${tagName}                     \
-                       "upload of new lfs build ${tagName}"
+                       os/branches/${branchName}           \
+                       os/tags/${tagName}
 
     createArtifactArchive
 

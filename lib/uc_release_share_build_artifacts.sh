@@ -1,4 +1,6 @@
 #!/bin/bash
+# @file  uc_release_share_build_artifacts.sh
+# @brief usecase "release - copy build artifacts to share"
 
 [[ -z ${LFS_CI_SOURCE_release} ]] && source ${LFS_CI_ROOT}/lib/release.sh
 
@@ -37,10 +39,7 @@ usecase_LFS_RELEASE_SHARE_BUILD_ARTIFACTS() {
         _synchronizeBuildResultsToShare ${basename} ${basename}/${buildName}
     done
 
-    info "clean up workspace"
-    execute rm -rf ${workspace}/bld
-
-    return
+    return 0
 }
 
 ## @fn      _synchronizeBuildResultsToShare()
@@ -73,5 +72,5 @@ _synchronizeBuildResultsToShare() {
         warning "storing artifacts on share is disabled in config"
     fi
 
-    return
+    return 0
 }

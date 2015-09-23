@@ -362,7 +362,6 @@ DELIMITER ;
 
 -- }}}
 -- {{{ release_started
-
 DROP PROCEDURE IF EXISTS release_started;
 DELIMITER //
 CREATE PROCEDURE release_started( IN in_build_name   VARCHAR(128), 
@@ -380,7 +379,6 @@ DELIMITER ;
 
 -- }}}
 -- {{{ release_finished
-
 DROP PROCEDURE IF EXISTS release_finished;
 DELIMITER //
 CREATE PROCEDURE release_finished( IN in_build_name VARCHAR(128), 
@@ -398,7 +396,6 @@ DELIMITER ;
 
 -- }}}
 -- {{{ release_failed
-
 DROP PROCEDURE IF EXISTS release_failed;
 DELIMITER //
 CREATE PROCEDURE release_failed( IN in_build_name VARCHAR(128), 
@@ -416,7 +413,6 @@ DELIMITER ;
 
 -- }}}
 -- {{{ subrelease_started
-
 DROP PROCEDURE IF EXISTS subrelease_started;
 DELIMITER //
 CREATE PROCEDURE subrelease_started( IN in_build_name   VARCHAR(128), 
@@ -435,7 +431,6 @@ DELIMITER ;
 
 -- }}}
 -- {{{ subrelease_finished
-
 DROP PROCEDURE IF EXISTS subrelease_finished;
 DELIMITER //
 CREATE PROCEDURE subrelease_finished( IN in_build_name   VARCHAR(128), 
@@ -454,7 +449,6 @@ DELIMITER ;
 
 -- }}}
 -- {{{ subrelease_failed
-
 DROP PROCEDURE IF EXISTS subrelease_failed;
 DELIMITER //
 CREATE PROCEDURE subrelease_failed( IN in_build_name   VARCHAR(128), 
@@ -472,7 +466,6 @@ END //
 DELIMITER ;
 
 -- }}}
-
 -- {{{ other_started
 
 DROP PROCEDURE IF EXISTS other_started;
@@ -839,8 +832,12 @@ BEGIN
     SELECT _running_tasks( var_build_id, in_event_type, 'unstable', in_product_name, in_task_name) INTO cnt_unstable;
 
     IF cnt_started = cnt_finished THEN
-        CALL new_build_event( in_build_name, in_comment, in_job_name, in_build_number, 
-                            in_product_name, in_task_name, in_event_type, 'finished' );
+        -- TODO: demx2fk3 2015-09-19 HACK special handling for release jobs
+        -- release jobs should only create failed or unstable message, not finished.
+        IF in_event_type != 'release' THEN
+            CALL new_build_event( in_build_name, in_comment, in_job_name, in_build_number, 
+                                in_product_name, in_task_name, in_event_type, 'finished' );
+        END IF;
     ELSEIF cnt_started = cnt_finished + cnt_unstable THEN
         CALL new_build_event( in_build_name, in_comment, in_job_name, in_build_number, 
                             in_product_name, in_task_name, in_event_type, 'unstable' );

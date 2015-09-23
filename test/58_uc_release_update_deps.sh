@@ -83,7 +83,8 @@ execute -n sort -u ${WORKSPACE}/workspace/bld/bld-externalComponents-fcmd/usedRe
 getConfig LFS_CI_uc_release_can_commit_depencencies
 execute rm -rf ${WORKSPACE}/workspace/src-bar
 svnCheckout --depth=immediates --ignore-externals http://svnUrl/src-bar ${WORKSPACE}/workspace/src-bar
-execute perl -p -i -e s/\b[A-Z0-9_]*PS_LFS_OS\S+\b/PS_LFS_OS_BUILD_NAME/g ${WORKSPACE}/workspace/src-bar/Dependencies
+getConfig LFS_PROD_uc_release_update_deps_build_name_part
+execute perl -p -i -e s/\b[A-Z0-9_]*LFS_PROD_uc_release_update_deps_build_name_part\S+\b/PS_LFS_OS_BUILD_NAME/g ${WORKSPACE}/workspace/src-bar/Dependencies
 svnDiff ${WORKSPACE}/workspace/src-bar/Dependencies
 getConfig LFS_PROD_uc_release_svn_message_template -t releaseName:PS_LFS_OS_BUILD_NAME -t oldReleaseName:PS_LFS_OS_OLD_BUILD_NAME -t revision:1234
 svnCommit -F ${WORKSPACE}/workspace/commitMessage ${WORKSPACE}/workspace/src-bar/Dependencies
@@ -91,7 +92,8 @@ execute rm -rf ${WORKSPACE}/workspace/src-foobar
 svnCheckout --depth=immediates --ignore-externals http://svnUrl/src-foobar ${WORKSPACE}/workspace/src-foobar
 execute rm -rf ${WORKSPACE}/workspace/src-test
 svnCheckout --depth=immediates --ignore-externals http://svnUrl/src-test ${WORKSPACE}/workspace/src-test
-execute perl -p -i -e s/\b[A-Z0-9_]*PS_LFS_OS\S+\b/PS_LFS_OS_BUILD_NAME/g ${WORKSPACE}/workspace/src-test/Dependencies
+getConfig LFS_PROD_uc_release_update_deps_build_name_part
+execute perl -p -i -e s/\b[A-Z0-9_]*LFS_PROD_uc_release_update_deps_build_name_part\S+\b/PS_LFS_OS_BUILD_NAME/g ${WORKSPACE}/workspace/src-test/Dependencies
 svnDiff ${WORKSPACE}/workspace/src-test/Dependencies
 getConfig LFS_PROD_uc_release_svn_message_template -t releaseName:PS_LFS_OS_BUILD_NAME -t oldReleaseName:PS_LFS_OS_OLD_BUILD_NAME -t revision:1234
 svnCommit -F ${WORKSPACE}/workspace/commitMessage ${WORKSPACE}/workspace/src-test/Dependencies
@@ -112,13 +114,15 @@ execute -n sort -u ${WORKSPACE}/workspace/bld/bld-externalComponents-fcmd/usedRe
 getConfig LFS_CI_uc_release_can_commit_depencencies
 execute rm -rf ${WORKSPACE}/workspace/src-bar
 svnCheckout --depth=immediates --ignore-externals http://svnUrl/src-bar ${WORKSPACE}/workspace/src-bar
-execute perl -p -i -e s/\b[A-Z0-9_]*PS_LFS_OS\S+\b/PS_LFS_OS_BUILD_NAME/g ${WORKSPACE}/workspace/src-bar/Dependencies
+getConfig LFS_PROD_uc_release_update_deps_build_name_part
+execute perl -p -i -e s/\b[A-Z0-9_]*LFS_PROD_uc_release_update_deps_build_name_part\S+\b/PS_LFS_OS_BUILD_NAME/g ${WORKSPACE}/workspace/src-bar/Dependencies
 svnDiff ${WORKSPACE}/workspace/src-bar/Dependencies
 execute rm -rf ${WORKSPACE}/workspace/src-foobar
 svnCheckout --depth=immediates --ignore-externals http://svnUrl/src-foobar ${WORKSPACE}/workspace/src-foobar
 execute rm -rf ${WORKSPACE}/workspace/src-test
 svnCheckout --depth=immediates --ignore-externals http://svnUrl/src-test ${WORKSPACE}/workspace/src-test
-execute perl -p -i -e s/\b[A-Z0-9_]*PS_LFS_OS\S+\b/PS_LFS_OS_BUILD_NAME/g ${WORKSPACE}/workspace/src-test/Dependencies
+getConfig LFS_PROD_uc_release_update_deps_build_name_part
+execute perl -p -i -e s/\b[A-Z0-9_]*LFS_PROD_uc_release_update_deps_build_name_part\S+\b/PS_LFS_OS_BUILD_NAME/g ${WORKSPACE}/workspace/src-test/Dependencies
 svnDiff ${WORKSPACE}/workspace/src-test/Dependencies
 EOF
     assertExecutedCommands ${expect}

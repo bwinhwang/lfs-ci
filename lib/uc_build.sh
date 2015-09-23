@@ -117,7 +117,7 @@ usecase_LFS_BUILD_PLATFORM() {
     return
 }
 
-## @fn      usecase_LFS_BUILD_CREATE_VERSION
+## @fn      usecase_LFS_BUILD_CREATE_VERSION()
 #  @brief   usecase which creates the new build name
 #  @details this usecase get the old and new build name from the database
 #           by invoking stored procedures on the database.

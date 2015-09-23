@@ -1,4 +1,6 @@
 #!/bin/bash
+# @file  uc_release_send_release_note.sh
+# @brief usecase "release - send release note and create release in WFT"
 
 [[ -z ${LFS_CI_SOURCE_release}      ]] && source ${LFS_CI_ROOT}/lib/release.sh
 [[ -z ${LFS_CI_SOURCE_workflowtool} ]] && source ${LFS_CI_ROOT}/lib/workflowtool.sh
@@ -20,7 +22,7 @@ usecase_LFS_RELEASE_SEND_RELEASE_NOTE() {
 
     info "release is done."
 
-    return
+    return 0
 }
 
 ## @fn      _storeArtifactsFromRelease()
@@ -45,7 +47,7 @@ _storeArtifactsFromRelease() {
     local artifactsPathOnMaster=$(getBuildDirectoryOnMaster)/archive
     executeOnMaster ln -sf ${remoteDirectory} ${artifactsPathOnMaster}/release
 
-    return
+    return 0
 }
 
 ## @fn      _sendReleaseNote()
@@ -69,12 +71,13 @@ _sendReleaseNote() {
             -t ${LFS_PROD_RELEASE_CURRENT_TAG_NAME_REL} \
             -f ${LFS_CI_CONFIG_FILE}                    \
             -T OS                                       \
-            -P LFS
+            -P $(getProductNameFromJobName)             \
+            -L $(getLocationName)
     else
         warning "sending the release note is disabled in config"
     fi
 
-    return
+    return 0
 }
 
 ## @fn      _workflowToolCreateRelease()
@@ -133,15 +136,14 @@ _workflowToolCreateRelease() {
     _copyFileToBldDirectory ${workspace}/bld/bld-externalComponents-summary/externalComponents externalComponents.txt
 
     if [[ ${productName} == "LFS" ]] ; then
-        # TODO: demx2fk3 2015-09-17 parameter are not in use
-        _createLfsRelReleaseNoteXml ${releaseTagName} ${workspace}/rel/releasenote.xml ${state}
-        createReleaseInWorkflowTool ${releaseTagName} ${workspace}/rel/releasenote.xml
+        _createLfsRelReleaseNoteXml 
+        createReleaseInWorkflowTool ${releaseTagName} ${workspace}/rel/releasenote.xml ${state}
         uploadToWorkflowTool        ${releaseTagName} ${workspace}/rel/releasenote.xml
 
         _copyFileToBldDirectory ${workspace}/rel/releasenote.xml lfs_rel_releasenote.xml
     fi
 
-    return
+    return 0
 }
 
 ## @fn      _copyFileToBldDirectory()
@@ -189,7 +191,7 @@ copyImportantNoteFilesFromSubversionToWorkspace() {
         svnCat -r ${svnRev} ${svnUrl}/src/release_note/${importantNoteFileName}@${svnRev} > ${workspace}/importantNote.txt
     fi
 
-    return
+    return 0
 }
 
 ## @fn      _createLfsOsReleaseNote()
@@ -236,7 +238,7 @@ _createLfsOsReleaseNote() {
 
     mustBeValidXmlReleaseNote ${workspace}/os/os_releasenote.xml
 
-    return
+    return 0
 }
 
 ## @fn      _createLfsRelReleaseNoteXml()
@@ -273,7 +275,7 @@ _createLfsRelReleaseNoteXml() {
                             > releasenote.xml
     rawDebug ${workspace}/releasenote.xml
 
-    return
+    return 0
 }
 
 ## @fn      isPatchedRelease()
