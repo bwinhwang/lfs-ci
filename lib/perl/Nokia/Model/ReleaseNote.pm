@@ -7,13 +7,23 @@ use parent qw( Nokia::Model );
 use File::Slurp;
 use Log::Log4perl qw( :easy );
 
+## @fn      init()
+#  @brief   initialize the release note object
+#  @param   <none>
+#  @return  <none>
+sub init {
+    my $self = shift;
+    $self->{mustHaveFileData} = undef;
+    return;
+}
+
 ## @fn      releaseName()
 #  @brief   get the name of the release
 #  @param   <none>
 #  @return  release name
 sub releaseName {
     my $self = shift;
-    return $self->{releaseName};
+    return $self->{releaseName} || "";
 }
 
 ## @fn      commentForRevision( $param )
@@ -52,6 +62,10 @@ sub importantNote {
                        @{ $self->{importantNote} || [] } );
 }
 
+## @fn      addImportantNoteMessage()
+#  @brief   add a message / line to the important notes
+#  @param   {message}    message, which should be added to the important note
+#  @return  <none>
 sub addImportantNoteMessage {
     my $self    = shift;
     my $message = shift;
@@ -66,18 +80,19 @@ sub addImportantNoteMessage {
 sub mustHaveFileData {
     my $self     = shift;
     my $fileType = shift;
-    if( not exists $self->{ $fileType } ) {
+
+    if( not exists $self->{mustHaveFileData}{ $fileType } ) {
         foreach my $file ( ( sprintf( "%s/releaseNotes/%s/%s.txt", $ENV{HOME}, $self->releaseName(), $fileType ),
                              sprintf( "%s/workspace/%s.txt", $ENV{WORKSPACE}, $fileType ) ) ) {
-            if ( -e $file ) {
-                DEBUG "loading important note from $file";
+            if( -f $file ) {
+                DEBUG "loading data from $file";
                 # read file into an array (each line) without new line at the end
                 push @{ $self->{ $fileType } }, map { chomp; $_ } read_file( $file );
             }
         }
+        $self->{mustHaveFileData}{ $fileType } = 1;
     }
-    return
+    return;
 }
-
 
 1;

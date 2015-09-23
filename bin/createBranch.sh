@@ -18,6 +18,8 @@ info "# SOURCE_RELEASE:       ${SOURCE_RELEASE}"
 info "# ECL_URLS:             ${ECL_URLS}"
 info "# DESCRIPTION:          ${DESCRIPTION}"
 info "# COMMENT:              ${COMMENT}"
+info "# ADDED_TO_CONFIG:      ${ADDED_TO_CONFIG}"
+info "# WFT_READY:            ${WFT_READY}"
 info "# PS_BRANCH_COMMENT:    ${PS_BRANCH_COMMENT}"
 info "# FSMR4:                ${FSMR4}"
 info "# DO_SVN:               ${DO_SVN}"
@@ -31,7 +33,7 @@ info "# DEBUG:                ${DEBUG}"
 info "###############################################################"
 
 
-SVN_REPO=$(getConfig branchingSvnServer)
+SVN_REPO=$(getConfig branchingSvnUrl)
 SVN_DIR="os"
 SRC_PROJECT="src-project"
 VARS_FILE="VARIABLES.TXT"
@@ -62,6 +64,14 @@ __checkParams() {
 
     if [[ ${LRC} == true ]]; then
         echo ${NEW_BRANCH} | grep -q -e "^LRC_" && { error "LRC: \"LRC_\" is automatically added as prefix to NEW_BRANCH"; exit 1; }
+    fi
+
+    if [[ ${ADDED_TO_CONFIG} == false ]]; then
+        fatal "Add the branch to branches.cfg and pkgpool.cfg"
+    fi
+
+    if [[ ${WFT_READY} == false ]]; then
+        fatal "WFT must be ready for this branch."
     fi
 
     echo ${SOURCE_RELEASE} | grep -q _OS_ && {
@@ -267,7 +277,7 @@ createBranchInGit() {
     info "--------------------------------------------------------"
 
     if [[ "${DO_GIT}" == "false" ]]; then
-        info "Not creating branch in GIT"
+        info "Not creating branch in Git"
         return 0
     fi
 
@@ -395,7 +405,6 @@ main() {
             svnCopyBranch ${SRC_BRANCH} ${NEW_BRANCH}
             svnCopyLocations ${LOCATIONS} ${SRC_BRANCH} ${NEW_BRANCH}
             svnCopyLocationsFSMR4 ${SRC_BRANCH} ${NEW_BRANCH}
-            createBranchInGit ${NEW_BRANCH}
             svnDummyCommit ${NEW_BRANCH}
         elif [[ ${LRC} == "true" ]]; then
             svnCopyBranchLRC LRC_${SRC_BRANCH} LRC_${NEW_BRANCH}
@@ -407,6 +416,7 @@ main() {
         info "$(basename $0): Nothing to do."
     fi
 
+    createBranchInGit ${NEW_BRANCH}
     dbInsert ${NEW_BRANCH}
 }
 
