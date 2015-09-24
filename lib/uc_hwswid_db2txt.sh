@@ -11,26 +11,28 @@
 usecase_HWSWID_DB2TXT() {
     requiredParameters JOB_NAME
 
-    local WORKDIR=$(getConfig LFS_CI_HWSWID_WORKDIR)
-    rm -rf ${WORKDIR}
-    mkdir -p ${WORKDIR}
-    cd ${WORKDIR}
+    export workspace=$(getConfig LFS_CI_HWSWID_WORKDIR)
+    #export workspace=$(getWorkspaceName)
+    mustHaveWorkspaceName
+
+    export hwswidWorkdirDb=${workspace}/HwSwId.DB
+    rm -rf ${hwswidWorkdirDb}
+    mkdir -p ${hwswidWorkdirDb}
+    cd ${hwswidWorkdirDb}
 
     createHwSwIdTxtFile
     HwSwIdToSubVersion
-
-    #setBuildDescription ${JOB_NAME} ${BUILD_NUMBER} "${JENKINS_JOB_NAME}"
 
     return
 }
 
 ## @fn      createHwSwIdTxtFile
-#  @brief
+#  @brief   create intermediate HwSwId_<firmware>.txt files out of the database
 #  @param   <none>
 #  @return  <none>
 createHwSwIdTxtFile() {
-    local MYSQL_TABLE_FSMR3=$(getConfig LFS_CI_HWSWID_DB_TABLE -t hw_platform:fsmr3)
-    local MYSQL_TABLE_FSMR4=$(getConfig LFS_CI_HWSWID_DB_TABLE -t hw_platform:fsmr4)
+    local mysqlTableFsmr3=$(getConfig LFS_CI_HWSWID_DB_TABLE -t hw_platform:fsmr3)
+    local mysqlTableFsmr4=$(getConfig LFS_CI_HWSWID_DB_TABLE -t hw_platform:fsmr4)
 
     # FSM-r{3,4} for firmewaretype
     for hw_platform in fsmr3 fsmr4
@@ -44,120 +46,120 @@ createHwSwIdTxtFile() {
     # FSM-r3 for basebandfpga
     for basebandfpga in $(getConfig LFS_CI_HWSWID_BASEBANDFPGA -t hw_platform:fsmr3)
     do
-        datafrommysql HwSwId_${basebandfpga}.txt "basebandfpga=\"${basebandfpga}\""  "$MYSQL_TABLE_FSMR3"
+        datafrommysql HwSwId_${basebandfpga}.txt "basebandfpga=\"${basebandfpga}\""  "$mysqlTableFsmr3"
     done
 
-    datafrommysql HwSwId_UBOOT.txt  'boardname != "FSPN" and boardname != "FIFC"'  "$MYSQL_TABLE_FSMR3"
+    datafrommysql HwSwId_UBOOT.txt  'boardname != "FSPN" and boardname != "FIFC"'  "$mysqlTableFsmr3"
     removeminor HwSwId_UBOOT.txt
     rawDebug "HwSwId_UBOOT.txt"
 
-    datafrommysql HwSwId_UBOOT_FSMR4.txt  '1=1'  "$MYSQL_TABLE_FSMR4"
+    datafrommysql HwSwId_UBOOT_FSMR4.txt  '1=1'  "$mysqlTableFsmr4"
     removeminor HwSwId_UBOOT_FSMR4.txt
     rawDebug "HwSwId_UBOOT_FSMR4.txt"
 
-    datafrommysql HwSwId_UBOOT_FSMR4_FCT.txt  'boardname = "FCTJ" or boardname = "FSCA"'  "$MYSQL_TABLE_FSMR4"
+    datafrommysql HwSwId_UBOOT_FSMR4_FCT.txt  'boardname = "FCTJ" or boardname = "FSCA"'  "$mysqlTableFsmr4"
     removeminor HwSwId_UBOOT_FSMR4_FCT.txt
     rawDebug "HwSwId_UBOOT_FSMR4_FCT.txt"
-    datafrommysql HwSwId_UBOOT_FSMR4_FSP.txt  'boardname like "FSP%"'  "$MYSQL_TABLE_FSMR4"
+    datafrommysql HwSwId_UBOOT_FSMR4_FSP.txt  'boardname like "FSP%"'  "$mysqlTableFsmr4"
     removeminor HwSwId_UBOOT_FSMR4_FSP.txt
     rawDebug "HwSwId_UBOOT_FSMR4_FSP.txt"
 
-    datafrommysql HwSwId_FSPN.txt  'boardname = "FSPN"'  "$MYSQL_TABLE_FSMR3"
+    datafrommysql HwSwId_FSPN.txt  'boardname = "FSPN"'  "$mysqlTableFsmr3"
     removeminor HwSwId_FSPN.txt
     rawDebug "HwSwId_FSPN.txt"
 }
 
 ## @fn      createHwSwIdTxtFile
-#  @brief
-#  @param   <none>
+#  @brief   execute sql command to create intermediate HwSwId_<firmware>.txt files out of the database
+#  @param   HwSwId_xxx.txt file
+#  @param   sql where clause
+#  @param   mysql table name
 #  @return  <none>
 datafrommysql() {
-    local TABLENAME="$1"
-    local QUERY="$2"
-    local CURRENT_MYSQL_TABLE="$3"
-    local WORKDIR=$(getConfig LFS_CI_HWSWID_WORKDIR)
+    local hwswidTxtFile="$1"
+    local query="$2"
+    local currentMysqlTable="$3"
 
     export databaseName=hwswid_database
     mustHaveDatabaseCredentials
 
-    info creating "$TABLENAME"
-    debug creating "$TABLENAME" using MYSQL query "$QUERY" in "$WORKDIR" '(MYSQL '$MYSQL_USER@$MYSQL_HOST table $TABLENAME')'
-    debug +++ ${mysql_cli} -B -r -s -e 'SELECT DISTINCT `hw_sw_id` FROM '"$CURRENT_MYSQL_TABLE"' WHERE '"$QUERY" >"$TABLENAME".tmp
+    info creating "$hwswidTxtFile"
+    debug creating "$hwswidTxtFile" using MYSQL query "$query" in "${hwswidWorkdirDb}" '(MYSQL '$MYSQL_USER@$MYSQL_HOST table $hwswidTxtFile')'
+    debug +++ ${mysql_cli} -B -r -s -e 'SELECT DISTINCT `hw_sw_id` FROM '"$currentMysqlTable"' WHERE '"$query" >"$hwswidTxtFile".tmp
     ### dems18x0: 2015-09-22: execute before mysql command is not working !
-    ${mysql_cli} -B -r -s -e 'SELECT DISTINCT `hw_sw_id` FROM '"$CURRENT_MYSQL_TABLE"' WHERE '"$QUERY" >"$TABLENAME".tmp
+    ${mysql_cli} -B -r -s -e 'SELECT DISTINCT `hw_sw_id` FROM '"$currentMysqlTable"' WHERE '"$query" >"$hwswidTxtFile".tmp
 
-    cat "$TABLENAME".tmp | grep -v '^$' | grep -v 'NULL' | sort -u >"$TABLENAME"
-    rm "$TABLENAME.tmp"
+    cat "$hwswidTxtFile".tmp | grep -v '^$' | grep -v 'NULL' | sort -u >"$hwswidTxtFile"
+    rm "$hwswidTxtFile.tmp"
 
-    cat $TABLENAME
+    cat $hwswidTxtFile
 }
 
 
 ## @fn      removeminor
-#  @brief   remove all HwSwId entries not ending with 01
-#  @param   <none>
+#  @brief   substitute all latest 2 digits of HwSwId entries 01
+#  @param   HwSwId_xxx.txt file
 #  @return  <none>
 removeminor() {
-    local HWSWID="$1"
+    local hwswidTxtFile="$1"
 
-    sed -e 's/..$/01/' "$HWSWID" | sort -u  >"$HWSWID".new
-    mv "$HWSWID".new "$HWSWID"
+    sed -e 's/..$/01/' "${hwswidTxtFile}" | sort -u  >"${hwswidTxtFile}".new
+    mv "${hwswidTxtFile}".new "${hwswidTxtFile}"
 }
 
 
 ## @fn      HwSwIdToSubVersion
-#  @brief   merge created HwSwId.txt from DB with SVN file and do upload to SVN
+#  @brief   merge created HwSwId.txt from DB with SVN file and do upload to SVN if chnaged
 #  @param   <none>
 #  @return  <none>
 HwSwIdToSubVersion() {
-    local WORKDIR=$(getConfig LFS_CI_HWSWID_WORKDIR)
-    local SVNWORKDIR=/home/dems18x0/tmp/HwSwId.SVN
+    local hwswidWorkdirSvn=${workspace}/HwSwId.SVN
 
-    for URL in $(getConfig LFS_CI_HWSWID_URLS)
+    for url in $(getConfig LFS_CI_HWSWID_URLS)
     do
-        info Writing HwSwId to URL ${URL} ...
+        info Writing HwSwId to URL ${url} ...
 
         # Check if there is a HwSwId_* file at this URL
-        local HWSWIDFOUND=false
-        local TMPFILE=$(mktemp /tmp/HwSwId1.XXXXXXXX)
-        svn list "$URL" >"$TMPFILE"
+        local hwswidTxtFound=false
+        local tmpfile=$(mktemp /tmp/HwSwId1.XXXXXXXX)
+        svn list "${url}" >"${tmpfile}"
 
-        while read FILENAME
+        while read filename
         do
-            case "$FILENAME"
-            in HwSwId_*.txt)    HWSWIDFOUND=true
+            case "${filename}"
+            in HwSwId_*.txt)    hwswidTxtFound=true
             esac
-        done <"$TMPFILE"
-        rm -f "$TMPFILE"
-        $HWSWIDFOUND || error "$URL: no HwSwId...txt file found"
-        rm -rf "$SVNWORKDIR"
-        svn co "$URL" "$SVNWORKDIR"
+        done <"${tmpfile}"
+        rm -f "${tmpfile}"
+        ${hwswidTxtFound} || error "${url}: no HwSwId...txt file found"
+        rm -rf "${hwswidWorkdirSvn}"
+        svn co "${url}" "${hwswidWorkdirSvn}"
 
         # Diff generated HwSwId file from DB with downloaded HwSwId file from SVN
-        local diff_found=false
-        for FILE in "$SVNWORKDIR"/HwSwId*.txt
+        local diffFound=false
+        for FILE in "${hwswidWorkdirSvn}"/HwSwId*.txt
         do
-            FILENAME=$(basename "$FILE")
-            [ -f "$WORKDIR"/"$FILENAME" ] || error "$FILENAME" not in current workdir "$WORKDIR"
-            diff "$WORKDIR"/"$FILENAME" "$FILE" || {
-                diff_found=true
-                cp -f "$WORKDIR"/"$FILENAME" "$FILE"
+            filename=$(basename "$FILE")
+            [ -f "${hwswidWorkdirDb}"/"${filename}" ] || error "${filename}" not in current workdir "${hwswidWorkdirDb}"
+            diff "${hwswidWorkdirDb}"/"${filename}" "$FILE" || {
+                diffFound=true
+                cp -f "${hwswidWorkdirDb}"/"${filename}" "$FILE"
             }
         done
 
         # if there is a changed hwswid file for that branch then commit it
-        if $diff_found
+        if $diffFound
         then
-            cd "$SVNWORKDIR"
+            cd "${hwswidWorkdirSvn}"
             svn info | grep "^URL:"
             svn diff
             info TODO ENABLE: svn commit -m "BTSPS-1657 IN psulm: update HwSwId NOJCHK"
             cd -
         else
-            info No HwSwId changes.
+            info No HwSwId changes in ${url}
         fi
 
     done
 
-    rm -rf "$SVNWORKDIR"
+    rm -rf "${hwswidWorkdirSvn}"
 }
