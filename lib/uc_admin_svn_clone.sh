@@ -31,7 +31,7 @@ usecase_ADMIN_CLONE_SVN() {
 
     execute svnsync sync file://${svnCloneDirectory}/
 
-    return
+    return 0
 }
 
 ## @fn      usecase_ADMIN_RESTORE_SVN_CLONE()
@@ -47,5 +47,15 @@ usecase_ADMIN_RESTORE_SVN_CLONE() {
     execute mkdir -p ${workingDirectory}
     execute rsync --delete -avrP ${masterDirectory}/. ${workingDirectory}/.
 
-    return
+    local svnUrl=$(getConfig BTS_SC_LFS_url)
+    mustHaveValue "${svnUrl}" "svn url for BTS_SC_LFS"
+
+    local workspace=$(getWorkspaceName)
+    mustHaveWorkspaceName
+    svnCheckout ${svnUrl}/os/trunk/bldtools/ ${workspace}
+    execute find ${workspace} -name Dependencies | xargs perl -p -i -e 's^https.*BTS_SC_LFS^${svnRepos}^g'
+    svnCommit -m updated_svn_url ${workspace}
+    execute rm -rf ${workspace}
+
+    return 0
 }
