@@ -53,7 +53,7 @@ usecase_ADMIN_RESTORE_SVN_CLONE() {
     local workspace=$(getWorkspaceName)
     mustHaveWorkspaceName
     svnCheckout ${svnUrl}/os/trunk/bldtools/ ${workspace}
-    execute find ${workspace} -name Dependencies | xargs perl -p -i -e 's^https.*BTS_SC_LFS^${svnRepos}^g'
+    execute find ${workspace} -name Dependencies | xargs perl -p -i -e 's^https.*BTS_SC_LFS^${svnUrl}^g'
     svnCommit -m updated_svn_url ${workspace}
     execute rm -rf ${workspace}
 
