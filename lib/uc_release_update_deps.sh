@@ -51,7 +51,7 @@ usecase_LFS_RELEASE_UPDATE_DEPS() {
         info "update ${name}/Dependencies";
         local buildNameStaticPart=$(getConfig LFS_PROD_uc_release_update_deps_build_name_part)
         mustHaveValue "${buildNameStaticPart}" "build name static part/LFS_PROD_uc_release_update_deps_build_name_part"
-        execute perl -p -i -e "s/\b[A-Z0-9_]*${buildNameStaticPart}\S+\b/${releaseLabelName}/g" ${dependenciesFile}
+        execute perl -p -i -e "s/\b${buildNameStaticPart}\S+\b/${releaseLabelName}/g" ${dependenciesFile}
         svnDiff ${dependenciesFile}
 
         if [[ ${canCommitDependencies} ]] ; then 
