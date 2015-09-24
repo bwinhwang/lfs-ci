@@ -11,12 +11,12 @@
 usecase_HWSWID_DB2TXT() {
     requiredParameters JOB_NAME
 
-    export workspace=$(getConfig LFS_CI_HWSWID_WORKDIR)
-    #export workspace=$(getWorkspaceName)
+    export workspace=$(getWorkspaceName)
     mustHaveWorkspaceName
+    mustHaveCleanWorkspace
 
     export hwswidWorkdirDb=${workspace}/HwSwId.DB
-    rm -rf ${hwswidWorkdirDb}
+    mustHaveValue "${hwswidWorkdirDb}" "hwswidWorkdirDb"
     mkdir -p ${hwswidWorkdirDb}
     cd ${hwswidWorkdirDb}
 
@@ -32,7 +32,9 @@ usecase_HWSWID_DB2TXT() {
 #  @return  <none>
 createHwSwIdTxtFile() {
     local mysqlTableFsmr3=$(getConfig LFS_CI_HWSWID_DB_TABLE -t hw_platform:fsmr3)
+    mustHaveValue "${mysqlTableFsmr3}" "mysqlTableFsmr3"
     local mysqlTableFsmr4=$(getConfig LFS_CI_HWSWID_DB_TABLE -t hw_platform:fsmr4)
+    mustHaveValue "${mysqlTableFsmr4}" "mysqlTableFsmr4"
 
     # FSM-r{3,4} for firmewaretype
     for hw_platform in fsmr3 fsmr4
@@ -77,8 +79,11 @@ createHwSwIdTxtFile() {
 #  @return  <none>
 datafrommysql() {
     local hwswidTxtFile="$1"
+    mustHaveValue "${hwswidTxtFile}" "hwswidTxtFile"
     local query="$2"
+    mustHaveValue "${query}" "query"
     local currentMysqlTable="$3"
+    mustHaveValue "${currentMysqlTable}" "currentMysqlTable"
 
     export databaseName=hwswid_database
     mustHaveDatabaseCredentials
@@ -102,6 +107,7 @@ datafrommysql() {
 #  @return  <none>
 removeminor() {
     local hwswidTxtFile="$1"
+    mustHaveValue "${hwswidTxtFile}" "hwswidTxtFile"
 
     sed -e 's/..$/01/' "${hwswidTxtFile}" | sort -u  >"${hwswidTxtFile}".new
     mv "${hwswidTxtFile}".new "${hwswidTxtFile}"
@@ -114,6 +120,7 @@ removeminor() {
 #  @return  <none>
 HwSwIdToSubVersion() {
     local hwswidWorkdirSvn=${workspace}/HwSwId.SVN
+    mustHaveValue "${hwswidWorkdirSvn}" "hwswidWorkdirSvn"
 
     for url in $(getConfig LFS_CI_HWSWID_URLS)
     do
@@ -140,6 +147,7 @@ HwSwIdToSubVersion() {
         for FILE in "${hwswidWorkdirSvn}"/HwSwId*.txt
         do
             filename=$(basename "$FILE")
+            mustHaveValue "${filename}" "filename"
             [ -f "${hwswidWorkdirDb}"/"${filename}" ] || error "${filename}" not in current workdir "${hwswidWorkdirDb}"
             diff "${hwswidWorkdirDb}"/"${filename}" "$FILE" || {
                 diffFound=true
