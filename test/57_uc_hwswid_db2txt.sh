@@ -4,6 +4,21 @@ source test/common.sh
 source lib/uc_hwswid_db2txt.sh
 
 oneTimeSetUp() {
+    mockedCommand() {
+        echo "$@" >> ${UT_MOCKED_COMMANDS}
+    }
+    mkdir() {
+        echo mkdir
+    }
+    cd() {
+        echo cd
+    }
+    createHwSwIdTxtFile() {
+        mockedCommand "createHwSwIdTxtFile $@"
+    }
+    HwSwIdToSubVersion() {
+        mockedCommand "HwSwIdToSubVersion $@"
+    }
 
     # create a temp file.cfg
     export UT_CFG_FILE=$(createTempFile)
@@ -27,6 +42,14 @@ oneTimeSetUp() {
 
     export LFS_CI_CONFIG_FILE=${UT_CFG_FILE}
 
+
+    # create HwSwId_uBMU.txt
+    export HWSWID_TXT_FILE=$(createTempFile)
+    echo "0x0020D001" > $HWSWID_TXT_FILE
+    echo "0x0020D002" >> $HWSWID_TXT_FILE
+    echo "0x0020D003" >> $HWSWID_TXT_FILE
+    echo "0x0020D904" >> $HWSWID_TXT_FILE
+
     return
 }
 
@@ -36,6 +59,7 @@ oneTimeTearDown() {
 
 setUp() {
     export LFS_CI_GLOBAL_PRODUCT_NAME=LFS
+
     return
 }
 
@@ -44,31 +68,51 @@ tearDown() {
 }
 
 test_setup() {
+    echo +++ LFS_CI_CONFIG_FILE=${LFS_CI_CONFIG_FILE}
     cat ${LFS_CI_CONFIG_FILE}
 
-    echo LFS_CI_CONFIG_FILE=${LFS_CI_CONFIG_FILE}
+    echo "+++ HWSWID_TXT_FILE:"
+    cat ${HWSWID_TXT_FILE}
+
+    echo ""
 }
 
 test_usecase_HWSWID_DB2TXT() {
+    JOB_NAME=Admin_-_HwSwId_db2txt
+
+    assertTrue "usecase_HWSWID_DB2TXT"
+
     return
 }
 
 test_createHwSwIdTxtFile() {
+    assertTrue "createHwSwIdTxtFile"
+
     return
 }
 
-test_datafrommysql() {
+test_datafrommysql_HwSwId_UBOOT_FSMR4_TXT() {
+    hwswidTxtFile=$(createTempFile)
+    query='1=1'
+    currentMysqlTable="flexibtshw.v_fsmr4boards"
+    assertTrue "datafrommysql ${hwswidTxtFile} ${query} ${currentMysqlTable}"
+
+    cat ${hwswidTxtFile}
+
     return
 }
 
 test_removeminor() {
+    assertTrue "removeminor ${HWSWID_TXT_FILE}"
 
-    #assertTrue "Error in removeminor" "removeminor"
+    cat ${HWSWID_TXT_FILE}
 
     return
 }
 
 test_HwSwIdToSubVersion() {
+    assertTrue "HwSwIdToSubVersion"
+
     return
 }
 
