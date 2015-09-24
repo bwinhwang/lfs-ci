@@ -222,7 +222,7 @@ _createLfsOsReleaseNote() {
 
     execute -n ${LFS_CI_ROOT}/bin/getReleaseNoteContent \
             -t ${LFS_PROD_RELEASE_CURRENT_TAG_NAME}     \
-            > releasenote.txt
+            > ${workspace}/os/releasenote.txt
     rawDebug ${workspace}/os/releasenote.txt
 
     execute -n ${LFS_CI_ROOT}/bin/getReleaseNoteXML          \
@@ -231,11 +231,8 @@ _createLfsOsReleaseNote() {
                     -f ${LFS_CI_CONFIG_FILE}                 \
                     -T OS                                    \
                     -P $(getProductNameFromJobName)          \
-                    > releasenote.xml
-    rawDebug ${workspace}/os/releasenote.xml
-
-    execute mv -f ${workspace}/os/releasenote.xml ${workspace}/os/os_releasenote.xml
-
+                    > ${workspace}/os/os_releasenote.xml
+    rawDebug ${workspace}/os/os_releasenote.xml
     mustBeValidXmlReleaseNote ${workspace}/os/os_releasenote.xml
 
     return 0
@@ -310,9 +307,6 @@ handlePatchedRelease() {
  
     local releaseDirectory=$(getConfig LFS_CI_UC_package_copy_to_share_real_location)/${LFS_PROD_RELEASE_CURRENT_TAG_NAME}
     mustExistDirectory ${releaseDirectory}
-
-    local releaseLabel=${LFS_PROD_RELEASE_CURRENT_TAG_NAME_REL}
-    mustHaveValue "${releaseLabel}" "release label"
 
     local osTagName=${LFS_PROD_RELEASE_CURRENT_TAG_NAME}
     mustHaveValue "${osTagName}" "osTagName"
