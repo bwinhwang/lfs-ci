@@ -115,6 +115,10 @@ execute -n filterdiff -i src/fsmpsl/Dependencies ${WORKSPACE}/workspace/bld/bld-
 execute patch -p0 -d ${WORKSPACE}/src
 execute git add -Af .
 execute git commit -m patch_commit
+execute -i grep -s -e ^recipes/dtfs-fuse$ ${WORKSPACE}/.alreadyUpdated
+execute git submodule update recipes/dtfs-fuse
+execute -n filterdiff -i recipes/dtfs-fuse ${WORKSPACE}/workspace/bld/bld-dev-input/lfs.patch
+execute patch -p0 -d ${WORKSPACE}/src
 EOF
     assertExecutedCommands ${expect}
 
