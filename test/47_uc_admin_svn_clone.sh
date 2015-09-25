@@ -17,11 +17,18 @@ oneTimeSetUp() {
     mustExistDirectory() {
         mockedCommand "mustExistDirectory $@"
     }
+    svnCheckout() {
+        mockedCommand "svnCheckout $@"
+    }
+    svnCommit() {
+        mockedCommand "svnCommit $@"
+    }
     return
 }
 
 setUp() {
     cp -f /dev/null ${UT_MOCKED_COMMANDS}
+    export WORKSPACE=$(createTempDirectory)
     return
 }
 
@@ -54,6 +61,11 @@ mustExistDirectory ADMIN_lfs_svn_clone_master_directory
 getConfig ADMIN_lfs_svn_clone_working_directory
 execute mkdir -p ADMIN_lfs_svn_clone_working_directory
 execute rsync --delete -avrP ADMIN_lfs_svn_clone_master_directory/. ADMIN_lfs_svn_clone_working_directory/.
+getConfig BTS_SC_LFS_url
+svnCheckout BTS_SC_LFS_url/os/trunk/bldtools/ ${WORKSPACE}/workspace
+execute -n find ${WORKSPACE}/workspace -name Dependencies
+svnCommit -m updated_svn_url ${WORKSPACE}/workspace
+execute rm -rf ${WORKSPACE}/workspace
 EOF
     assertExecutedCommands ${expect}
 
