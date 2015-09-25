@@ -157,25 +157,29 @@ sub command {
     return;
 }
 
-## @fn      normalizeSvnUrl( $url )
-#  @brief   normalize the svn url
-#  @details the normalized format is ths ulscmi.inside.nsn.com
+## @fn      replaceMasterByUlmServer( $url )
+#  @brief   replace the svnMasterServerUrl by the svn url of the local Ulm server
 #  @param   {url}    svn url
-#  @return  normalized svn url
+#  @return  changed svn url
 sub replaceMasterByUlmServer {
     my $self = shift;
     my $url  = shift;
-    $url =~ s/svne1.access.nokiasiemensnetworks.com/ulscmi.inside.nsn.com/g;
-    $url =~ s/svne1.access.nsn.com/ulscmi.inside.nsn.com/g;
+    my $masterServer = Nokia::Singleton::config->getConfig( name => "svnMasterServerHostName" );
+    my $slaveServer = Nokia::Singleton::config->getConfig( name => "svnSlaveServerUlmHostName" );
+    $url =~ s/$masterServer/$slaveServer/g;
     return $url;
 }
 
+## @fn      replaceUlmByMasterServer( $url )
+#  @brief   replace the svn url of the local Ulm server by the svnMasterServerUrl
+#  @param   {url}    svn url
+#  @return  changed svn url
 sub replaceUlmByMasterServer {
     my $self = shift;
     my $url  = shift;
-    # TODO: demx2fk3 2014-11-27 put this in the config
-    $url =~ s/ulscmi.inside.nsn.com/svne1.access.nsn.com/g;
-    $url =~ s/ulisop10.emea.nsn-net.net/svne1.access.nsn.com/g;
+    my $masterServer = Nokia::Singleton::config->getConfig( name => "svnMasterServerHostName" );
+    my $slaveServer = Nokia::Singleton::config->getConfig( name => "svnSlaveServerUlmHostName" );
+    $url =~ s/$slaveServer/$masterServer/g;
     return $url;
 }
 
