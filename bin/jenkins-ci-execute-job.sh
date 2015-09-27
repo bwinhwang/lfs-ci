@@ -39,6 +39,7 @@ if [[ ${LFS_CI_GLOBAL_USECASE} ]] ; then
     source ${LFS_CI_ROOT}/lib/${sourceFile}
 
     usecase_${LFS_CI_GLOBAL_USECASE}
+    info "usecase ${LFS_CI_GLOBAL_USECASE} finished successfully"
     exit 0
 fi
 

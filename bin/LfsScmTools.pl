@@ -16,16 +16,18 @@ use lib sprintf( "%s/lib/perl/", $lfs_ci_root );
 
 use Nokia::Singleton;
 
-my %l4p_config = (
-    'log4perl.category'                                  => 'TRACE, Logfile',
-    'log4perl.category.Sysadm.Install'                   => 'OFF',
-    'log4perl.appender.Logfile'                          => 'Log::Log4perl::Appender::File',
-    'log4perl.appender.Logfile.filename'                 => $ENV{CI_LOGGING_LOGFILENAME}, 
-    'log4perl.appender.Logfile.layout'                   => 'Log::Log4perl::Layout::PatternLayout',
-    'log4perl.appender.Logfile.layout.ConversionPattern' => '%d{ISO8601}       UTC [%9r] [%-8p] %M:%L -- %m%n',
-);
-
 if( $ENV{CI_LOGGING_LOGFILENAME} ) {
+    my $logFile = $ENV{CI_LOGGING_LOGFILENAME};
+    $logFile =~ s/\.log$/.perl.log/;
+
+    my %l4p_config = (
+        'log4perl.category'                                  => 'TRACE, Logfile',
+        'log4perl.category.Sysadm.Install'                   => 'OFF',
+        'log4perl.appender.Logfile'                          => 'Log::Log4perl::Appender::File',
+        'log4perl.appender.Logfile.filename'                 => $logFile,
+        'log4perl.appender.Logfile.layout'                   => 'Log::Log4perl::Layout::PatternLayout',
+        'log4perl.appender.Logfile.layout.ConversionPattern' => '%d{ISO8601}       UTC [%9r] [%-8p] %M:%L -- %m%n',
+    );
     # we are only create a log, if the log already exists.
     # this is the case, if the perl script is called from the ci scripting (bash)
     Log::Log4perl::init( \%l4p_config );
