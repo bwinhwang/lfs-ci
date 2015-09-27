@@ -383,8 +383,8 @@ mustHaveLocationForSpecialBuild() {
     # fakeing the branch name for workspace creation...
     local location=$(cat ${workspace}/bld/bld-fsmci-summary/location)
     mustHaveValue "${location}" "location"
-
     export LFS_CI_GLOBAL_BRANCH_NAME=${location}
+
     return
 }
 
@@ -479,6 +479,10 @@ _specialPkgpoolBuildApplyPatch() {
     fi
 }
 
+## @fn      specialPkgpoolCollectArtifacts()
+#  @brief   collect the artifacts of the pkgpool build and store it in the upstream job
+#  @param   <none>
+#  @return  <none>
 specialPkgpoolCollectArtifacts() {
     requiredParameters LFS_CI_ROOT UPSTREAM_PROJECT UPSTREAM_BUILD
 
