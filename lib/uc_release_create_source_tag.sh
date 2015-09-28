@@ -136,8 +136,9 @@ _createUsedRevisionsFile() {
         local cfg=$(cut -d- -f3 <<< ${dirName})
         local tagDirectory=$(getConfig LFS_PROD_uc_release_source_tag_directory -t cfg:${cfg})
         info "using tag dir ${tagDirectory} for cfg ${cfg}"
+        execute touch ${workspace}/rev/${tagDirectory}
 
-        execute -l ${workspace}/rev/${tagDirectory} sort -u ${revisionFile} 
+        execute -l ${workspace}/rev/${tagDirectory} sort -u ${revisionFile} ${workspace}/rev/${tagDirectory}
         rawDebug ${workspace}/rev/${tagDirectory}
     done
 
