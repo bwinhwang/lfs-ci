@@ -81,7 +81,7 @@ _copySourceDirectoryToBranch() {
         if [[ ${src} =~ src-* ]] && \
            ! existsInSubversion ${svnUrl}/subsystems/${src}/ ${tagPrefix}${osLabelName} ; then
 
-            svnCopy -m ${commitMessageFile} \
+            svnCopy -F ${commitMessageFile} \
                 ${svnUrlOs}/branches/${branchName}/${target}/${src} \
                 ${svnUrl}/subsystems/${src}/${tagPrefix}${osLabelName}
             trace "CLEANUP svn rm -m cleanup ${svnUrl}/subsystems/${src}/${tagPrefix}${osLabelName}"
