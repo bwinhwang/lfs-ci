@@ -208,10 +208,11 @@ usecase_PKGPOOL_RELEASE() {
 
     echo "<log/>" > ${workspace}/changelog.xml
     cd ${workspace}
-    export productName=PKGPOOL
     execute -n ${LFS_CI_ROOT}/bin/getReleaseNoteXML \
                 -t ${label}                         \
                 -o ${oldLabel}                      \
+                -T OS                               \
+                -P PKGPOOL                          \
                 -f ${LFS_CI_CONFIG_FILE} > ${workspace}/releasenote.xml
     
     rawDebug ${workspace}/releasenote.xml
