@@ -78,3 +78,8 @@ gitSubmodule() {
     execute git submodule $@
     return 0
 }
+
+gitStatus() {
+    execute git status $@
+    return 0
+}
