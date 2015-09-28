@@ -15,6 +15,10 @@ oneTimeSetUp() {
             mkdir $@
         fi
     }
+    getConfig() {
+        mockedCommand "getConfig $@"
+        echo $1
+    }
     createWorkspace() {
         mockedCommand "createWorkspace $@"
     }
@@ -78,8 +82,10 @@ test1() {
 
     local expect=$(createTempFile)
 cat <<EOF > ${expect}
-mustExistInSubversion https://ulscmi.inside.nsn.com/isource/svnroot/BTS_D_SC_LFS_2015_03/os/tags/PS_LFS_OS_2015_03_0001/doc/scripts/ revisions.txt
-svnCat https://ulscmi.inside.nsn.com/isource/svnroot/BTS_D_SC_LFS_2015_03/os/tags/PS_LFS_OS_2015_03_0001/doc/scripts/revisions.txt
+getConfig LFS_PROD_svn_delivery_os_repos_url -t tagName:PS_LFS_OS_2015_03_0001
+mustExistInSubversion LFS_PROD_svn_delivery_os_repos_url/tags/PS_LFS_OS_2015_03_0001/doc/scripts/ revisions.txt
+svnCat LFS_PROD_svn_delivery_os_repos_url/tags/PS_LFS_OS_2015_03_0001/doc/scripts/revisions.txt
+getConfig LFS_PROD_tag_to_branch -t tagName:PS_LFS_OS_2015_03_0001
 execute mkdir -p ${WORKSPACE}/workspace
 execute mkdir -p ${WORKSPACE}/workspace/bld/bld-fsmci-summary/
 createFingerprintFile 
