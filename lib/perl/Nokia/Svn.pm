@@ -164,10 +164,11 @@ sub command {
 sub replaceMasterByUlmServer {
     my $self = shift;
     my $url  = shift;
-    my $masterServer = Nokia::Singleton::config->getConfig( name => "svnMasterServerHostName" );
-    my $slaveServer = Nokia::Singleton::config->getConfig( name => "svnSlaveServerUlmHostName" );
-    TRACE "replaceMasterByUlmServer called with url: $url\nmasterServer=$masterServer\nslaveServer=$slaveServer"
-     $url =~ s/$masterServer/$slaveServer/g;
+    my $masterServer = Nokia::Singleton::config()->getConfig( name => "svnMasterServerHostName" );
+    my $slaveServer = Nokia::Singleton::config()->getConfig( name => "svnSlaveServerUlmHostName" );
+    if( $masterServer and $slaveServer ) {
+        $url =~ s/$masterServer/$slaveServer/g;
+    }
     return $url;
 }
 
@@ -178,11 +179,11 @@ sub replaceMasterByUlmServer {
 sub replaceUlmByMasterServer {
     my $self = shift;
     my $url  = shift;
-    TRACE "replaceUlmByMasterServer called with url: $url"
-    my $masterServer = Nokia::Singleton::config->getConfig( name => "svnMasterServerHostName" );
-    my $slaveServer = Nokia::Singleton::config->getConfig( name => "svnSlaveServerUlmHostName" );
-    TRACE "replaceUlmByMasterServer called with url: $url\nmasterServer=$masterServer\nslaveServer=$slaveServer"
-    $url =~ s/$slaveServer/$masterServer/g;
+    my $masterServer = Nokia::Singleton::config()->getConfig( name => "svnMasterServerHostName" );
+    my $slaveServer = Nokia::Singleton::config()->getConfig( name => "svnSlaveServerUlmHostName" );
+    if( $masterServer and $slaveServer ) {
+        $url =~ s/$slaveServer/$masterServer/g;
+    }
     return $url;
 }
 
