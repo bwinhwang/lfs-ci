@@ -172,6 +172,42 @@ databaseEventReleaseFinished() {
     return
 }
 
+## @fn      databaseEventReleaseFailed()
+#  @brief   create an entry in the database table build_events for a failed release process
+#  @param   <none>
+#  @return  <none>
+databaseEventReleaseFailed() {
+    _storeEvent release_failed
+    return
+}
+
+## @fn      databaseEventSubReleaseFinished()
+#  @brief   create an entry in the database table build_events for a finished subrelease process
+#  @param   <none>
+#  @return  <none>
+databaseEventSubReleaseFinished() {
+    _storeEvent subrelease_finished
+    return
+}
+
+## @fn      databaseEventSubReleaseFailed()
+#  @brief   create an entry in the database table build_events for a failed subrelease process
+#  @param   <none>
+#  @return  <none>
+databaseEventSubReleaseFailed() {
+    _storeEvent subrelease_failed
+    return
+}
+
+## @fn      databaseEventSubReleaseStarted()
+#  @brief   create an entry in the database table build_events for a started subrelease process
+#  @param   <none>
+#  @return  <none>
+databaseEventSubReleaseStarted() {
+    _storeEvent subrelease_started
+    return
+}
+
 ## @fn      databaseEventTestStarted()
 #  @brief   create an entry in the database table build_events for a started test 
 #  @param   <none>

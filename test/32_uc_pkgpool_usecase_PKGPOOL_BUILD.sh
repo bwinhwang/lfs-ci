@@ -11,15 +11,6 @@ oneTimeSetUp() {
     gitReset() {
         mockedCommand "gitReset $@"
     }
-    gitTagAndPushToOrigin() {
-        mockedCommand "gitTagAndPushToOrigin $@"
-    }
-    gitDescribe() {
-        mockedCommand "gitDescribe $@"
-    }
-    setBuildDescription() {
-        mockedCommand "setBuildDescription $@"
-    }
     execute() {
         mockedCommand "execute $@"
         if [[ $2 = sed ]] ; then
@@ -33,13 +24,20 @@ oneTimeSetUp() {
         mkdir -p ${WORKSPACE}/workspace
     }
     createTempFile() {
-        echo "TempFile"
+        local cnt=$(cat ${UT_TMPDIR}/.cnt)
+        cnt=$((cnt + 1 ))
+        echo ${cnt} > ${UT_TMPDIR}/.cnt
+        touch ${UT_TMPDIR}/tmp.${cnt}
+        echo ${UT_TMPDIR}/tmp.${cnt}
     }
     getConfig() {
-        case $1 in 
-            PKGPOOL_CI_uc_build_can_create_tag_in_git) echo ${UT_CAN_RELEASE} ;;
-            *) echo $1 ;;
-        esac
+        echo $1 
+    }
+    _preparePkgpoolWorkspace() {
+        mockedCommand "_preparePkgpoolWorkspace $@"
+    }
+    _tagPkgpool() {
+        mockedCommand "_tagPkgpool $@"
     }
 
     return
@@ -51,34 +49,28 @@ setUp() {
     export JOB_NAME=PKGPOOL_CI_-_trunk_-_Build
     export BUILD_NUMBER=123
     mkdir ${WORKSPACE}/src/
+    export UT_TMPDIR=$(createTempDirectory)
+    echo 0 > ${UT_TMPDIR}/.cnt
 }
 
 tearDown() {
     rm -rf ${UT_MOCKED_COMMANDS}
     rm -rf ${CI_LOGGING_LOGFILENAME}
+    rm -rf ${UT_TMPDIR}
     return
 }
 
 test1() {
-    export UT_CAN_RELEASE=1
-
     assertTrue "usecase_PKGPOOL_BUILD"
 
     local expect=$(createTempFile)
     cat <<EOF > ${expect}
-execute rm -rf ${WORKSPACE}/src/src
-gitReset --hard
-execute ./bootstrap
-execute -l TempFile ${WORKSPACE}/src/build PKGPOOL_additional_build_parameters
+_preparePkgpoolWorkspace 
+execute -l ${UT_TMPDIR}/tmp.2 ${WORKSPACE}/src/build PKGPOOL_additional_build_parameters
 execute mkdir -p ${WORKSPACE}/workspace/bld/bld-pkgpool-release/
-execute cp TempFile ${WORKSPACE}/workspace/bld/bld-pkgpool-release/build.log
+execute cp ${UT_TMPDIR}/tmp.2 ${WORKSPACE}/workspace/bld/bld-pkgpool-release/build.log
 execute cp -a ${WORKSPACE}/workspace/logs ${WORKSPACE}/workspace/bld/bld-pkgpool-release/
-execute -n sed -ne s,^\(\[[0-9 :-]*\] \)\?release \([^ ]*\) complete,\2,p TempFile
-gitDescribe --abbrev=0
-gitTagAndPushToOrigin PKGPOOL_FOO
-execute -n git rev-parse HEAD
-setBuildDescription PKGPOOL_CI_-_trunk_-_Build 123 PKGPOOL_FOO
-execute -n sed -ne s|^src [^ ]* \(.*\)$|PS_LFS_PKG = \1|p ${WORKSPACE}/workspace/pool/*.meta
+_tagPkgpool ${UT_TMPDIR}/tmp.2
 createArtifactArchive 
 EOF
     assertExecutedCommands ${expect}
@@ -93,13 +85,12 @@ test2() {
 
     local expect=$(createTempFile)
     cat <<EOF > ${expect}
-execute rm -rf ${WORKSPACE}/src/src
-gitReset --hard
-execute ./bootstrap
-execute -l TempFile ${WORKSPACE}/src/build PKGPOOL_additional_build_parameters
+_preparePkgpoolWorkspace 
+execute -l ${UT_TMPDIR}/tmp.2 ${WORKSPACE}/src/build PKGPOOL_additional_build_parameters
 execute mkdir -p ${WORKSPACE}/workspace/bld/bld-pkgpool-release/
-execute cp TempFile ${WORKSPACE}/workspace/bld/bld-pkgpool-release/build.log
+execute cp ${UT_TMPDIR}/tmp.2 ${WORKSPACE}/workspace/bld/bld-pkgpool-release/build.log
 execute cp -a ${WORKSPACE}/workspace/logs ${WORKSPACE}/workspace/bld/bld-pkgpool-release/
+_tagPkgpool ${UT_TMPDIR}/tmp.2
 createArtifactArchive 
 EOF
     assertExecutedCommands ${expect}

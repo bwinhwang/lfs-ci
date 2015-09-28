@@ -1,5 +1,4 @@
 #!/bin/bash
-
 ## @file    uc_pkgpool.sh
 #  @brief   build and release a pkgpool release
 #  @details The usecase will build and release a pkgpool release.
@@ -37,13 +36,38 @@ usecase_PKGPOOL_BUILD() {
     # build parameters could be empty => no mustHaveValue
     # mustHaveValue "${buildParameters}" "additional build parameters"
 
-    local buildLogFile=$(createTempFile)
-    local gitWorkspace=${WORKSPACE}/src
-
     # git clone, created by jenkins git plugin
+    local gitWorkspace=${WORKSPACE}/src
     mustExistDirectory ${gitWorkspace}
 
+    _preparePkgpoolWorkspace
+
+    info "building pkgpool..."
+    local buildLogFile=$(createTempFile)
+    cd ${workspace}
+    execute -l ${buildLogFile} ${gitWorkspace}/build ${buildParameters} 
+
+    # put build log for later analysis into the artifacts
+    execute mkdir -p ${workspace}/bld/bld-pkgpool-release/
+    execute cp ${buildLogFile}      ${workspace}/bld/bld-pkgpool-release/build.log
+    execute cp -a ${workspace}/logs ${workspace}/bld/bld-pkgpool-release/
+
+    _tagPkgpool ${buildLogFile}
+    createArtifactArchive
+
+    return 0
+}
+
+## @fn      _preparePkgpoolWorkspace()
+#  @brief   prepare the pkgpool workspace
+#  @param   <none>
+#  @return  <none>
+_preparePkgpoolWorkspace() {
+    requiredParameters WORKSPACE
+
     info "preparing git workspace..."
+    local gitWorkspace=${WORKSPACE}/src
+    mustExistDirectory ${gitWorkspace}
     cd ${gitWorkspace}
 
     local cleanWorkspace=$(getConfig PKGPOOL_CI_uc_build_can_clean_workspace)
@@ -52,17 +76,45 @@ usecase_PKGPOOL_BUILD() {
         gitReset --hard
     fi
 
-    info "bootstrap build environment..."
     execute ./bootstrap
-    cd ${workspace}
 
-    info "building pkgpool..."
-    execute -l ${buildLogFile} ${gitWorkspace}/build ${buildParameters} 
+    # checking for changed files.
+    local directory=
+    for directory in $(gitStatus -s | cut -c3-) ; do
+        debug "updating ${directory}"
+        gitSubmodule update ${directory}
+    done
 
-    # put build log for later analysis into the artifacts
-    execute mkdir -p ${workspace}/bld/bld-pkgpool-release/
-    execute cp ${buildLogFile}      ${workspace}/bld/bld-pkgpool-release/build.log
-    execute cp -a ${workspace}/logs ${workspace}/bld/bld-pkgpool-release/
+    # ensure, that everything is clean. If it is not clean, git status will show some output and
+    # we will ensure, that it is clean again by removing everything in .../src and check it out / bootstrep it 
+    # again.
+    # git status does not return a non-zero exit code in case that there are untracked / unchecked-in files.
+    # but git status will output nothing, if everything is clean and fine.
+    if [[ "$(gitStatus -s)" ]] ; then
+        warning "the git workspace is not clean after update. We will fallback to the clean way."
+        info "resetting workspace and bootstrap clean build environment..."
+        execute rm -rf ${gitWorkspace}/src
+        gitReset --hard
+        execute ./bootstrap
+    fi
+
+    return 0
+}
+
+## @fn      _tagPkgpool()
+#  @brief   create the tag of the pkgpool in git
+#  @param   {builgLogFile}    name of the build log file
+#  @return  <none>
+_tagPkgpool() {
+    local buildLogFile=$1
+    mustExistFile ${buildLogFile}
+
+    local workspace=$(getWorkspaceName)
+    mustHaveWorkspaceName
+
+    requiredParameters JOB_NAME BUILD_NUMBER WORKSPACE
+
+    local gitWorkspace=${WORKSPACE}/src
 
     # in case of build from scratch (own jenkins job), we do not have a release tag.
     # => no release
@@ -91,10 +143,9 @@ usecase_PKGPOOL_BUILD() {
         rawDebug ${workspace}/bld/bld-pkgpool-release/forReleaseNote.txt
     fi
 
-    createArtifactArchive
-
-    return
+    return 0
 }
+
 
 ## @fn      usecase_PKGPOOL_TEST()
 #  @brief   run the usecase PKGPOOL_TEST
@@ -107,7 +158,8 @@ usecase_PKGPOOL_TEST() {
 
     copyArtifactsToWorkspace ${UPSTREAM_PROJECT} ${UPSTREAM_BUILD} "pkgpool"
     createArtifactArchive
-    return
+
+    return 0
 }
 
 ## @fn      usecase_PKGPOOL_RELEASE()
@@ -206,7 +258,7 @@ usecase_PKGPOOL_RELEASE() {
     local artifactsPathOnShare=$(getConfig artifactesShare)/${JOB_NAME}/${BUILD_NUMBER}
     linkFileToArtifactsDirectory ${artifactsPathOnShare}
 
-    return
+    return 0
 }
 
 ## @fn      usecase_PKGPOOL_UPDATE_DEPS()
@@ -242,9 +294,7 @@ usecase_PKGPOOL_UPDATE_DEPS() {
     local svnUrlsToUpdate=$(getConfig PKGPOOL_PROD_update_dependencies_svn_url)
     mustHaveValue "${svnUrlsToUpdate}" "svn urls for pkgpool"
 
-
     local urlToUpdate=""
-
     for urlToUpdate in ${svnUrlsToUpdate} ; do
         info "url to update ${urlToUpdate}"
 
@@ -327,7 +377,7 @@ usecase_PKGPOOL_UPDATE_DEPS() {
         info "update done for ${urlToUpdate}"
     done
 
-    return
+    return 0
 }
 
 ## @fn      usecase_PKGPOOL_CHECK_FOR_FAILED_VTC()

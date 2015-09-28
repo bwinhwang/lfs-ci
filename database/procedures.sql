@@ -362,7 +362,6 @@ DELIMITER ;
 
 -- }}}
 -- {{{ release_started
-
 DROP PROCEDURE IF EXISTS release_started;
 DELIMITER //
 CREATE PROCEDURE release_started( IN in_build_name   VARCHAR(128), 
@@ -380,7 +379,6 @@ DELIMITER ;
 
 -- }}}
 -- {{{ release_finished
-
 DROP PROCEDURE IF EXISTS release_finished;
 DELIMITER //
 CREATE PROCEDURE release_finished( IN in_build_name VARCHAR(128), 
@@ -393,6 +391,77 @@ CREATE PROCEDURE release_finished( IN in_build_name VARCHAR(128),
 BEGIN
     CALL new_build_event( in_build_name, in_comment, in_job_name, in_build_number, 
                           in_product_name, in_task_name, 'release', 'finished' );
+END //
+DELIMITER ;
+
+-- }}}
+-- {{{ release_failed
+DROP PROCEDURE IF EXISTS release_failed;
+DELIMITER //
+CREATE PROCEDURE release_failed( IN in_build_name VARCHAR(128), 
+                                 IN in_comment TEXT,
+                                 IN in_job_name VARCHAR(128), 
+                                 IN in_build_number INT,
+                                 IN in_product_name VARCHAR(128),
+                                 IN in_task_name    VARCHAR(128) 
+                               )
+BEGIN
+    CALL new_build_event( in_build_name, in_comment, in_job_name, in_build_number, 
+                          in_product_name, in_task_name, 'release', 'failed' );
+END //
+DELIMITER ;
+
+-- }}}
+-- {{{ subrelease_started
+DROP PROCEDURE IF EXISTS subrelease_started;
+DELIMITER //
+CREATE PROCEDURE subrelease_started( IN in_build_name   VARCHAR(128), 
+                                     IN in_comment      TEXT, 
+                                     IN in_job_name     VARCHAR(128), 
+                                     IN in_build_number INT,
+                                     IN in_product_name VARCHAR(128),
+                                     IN in_task_name    VARCHAR(128) 
+                                   )
+BEGIN
+    CALL new_build_event( in_build_name, in_comment, in_job_name, in_build_number, 
+                          in_product_name, in_task_name, 'subrelease', 'started' );
+    CALL mustHaveRunningEvent( in_build_name, 'release', in_product_name, in_task_name );
+END //
+DELIMITER ;
+
+-- }}}
+-- {{{ subrelease_finished
+DROP PROCEDURE IF EXISTS subrelease_finished;
+DELIMITER //
+CREATE PROCEDURE subrelease_finished( IN in_build_name   VARCHAR(128), 
+                                    IN in_comment      TEXT,
+                                    IN in_job_name     VARCHAR(128), 
+                                    IN in_build_number INT,
+                                    IN in_product_name VARCHAR(128),
+                                    IN in_task_name    VARCHAR(128) 
+                                  )
+BEGIN
+    CALL new_build_event( in_build_name, in_comment, in_job_name, in_build_number, 
+                          in_product_name, in_task_name, 'subrelease', 'finished' );
+    CALL _check_if_event_builds( in_build_name, in_comment, in_job_name, in_build_number, in_product_name, in_task_name, 'release' );
+END //
+DELIMITER ;
+
+-- }}}
+-- {{{ subrelease_failed
+DROP PROCEDURE IF EXISTS subrelease_failed;
+DELIMITER //
+CREATE PROCEDURE subrelease_failed( IN in_build_name   VARCHAR(128), 
+                                    IN in_comment      TEXT,
+                                    IN in_job_name     VARCHAR(128), 
+                                    IN in_build_number INT,
+                                    IN in_product_name VARCHAR(128),
+                                    IN in_task_name    VARCHAR(128) 
+                                  )
+BEGIN
+    CALL new_build_event( in_build_name, in_comment, in_job_name, in_build_number, 
+                          in_product_name, in_task_name, 'subrelease', 'failed' );
+    CALL _check_if_event_builds( in_build_name, in_comment, in_job_name, in_build_number, in_product_name, in_task_name, 'release' );
 END //
 DELIMITER ;
 
@@ -731,6 +800,7 @@ BEGIN
 
 END //
 DELIMITER ;
+-- }}}
 
 -- {{{ migrateBranchData
 DROP PROCEDURE IF EXISTS migrateBranchData;
@@ -762,8 +832,12 @@ BEGIN
     SELECT _running_tasks( var_build_id, in_event_type, 'unstable', in_product_name, in_task_name) INTO cnt_unstable;
 
     IF cnt_started = cnt_finished THEN
-        CALL new_build_event( in_build_name, in_comment, in_job_name, in_build_number, 
-                            in_product_name, in_task_name, in_event_type, 'finished' );
+        -- TODO: demx2fk3 2015-09-19 HACK special handling for release jobs
+        -- release jobs should only create failed or unstable message, not finished.
+        IF in_event_type != 'release' THEN
+            CALL new_build_event( in_build_name, in_comment, in_job_name, in_build_number, 
+                                in_product_name, in_task_name, in_event_type, 'finished' );
+        END IF;
     ELSEIF cnt_started = cnt_finished + cnt_unstable THEN
         CALL new_build_event( in_build_name, in_comment, in_job_name, in_build_number, 
                             in_product_name, in_task_name, in_event_type, 'unstable' );
@@ -1080,6 +1154,93 @@ BEGIN
         SELECT max(id) INTO var_nm_id FROM nm_branches_ps_branches;
 
     COMMIT;
+END //
+DELIMITER ;
+-- }}}
+
+
+
+-- {{{ setBuildEventStateToUnstable
+DROP PROCEDURE IF EXISTS tmp_bm;
+DELIMITER //
+CREATE PROCEDURE tmp_bm(
+                                               IN in_task_name    VARCHAR(128)
+                                             )
+BEGIN
+    DECLARE var_event_id_unstable    INT;
+    DECLARE cnt_event_id_unstable    INT;
+
+    DECLARE v_finished INTEGER DEFAULT 0;
+    DECLARE v_branch_name VARCHAR(20);
+
+    DECLARE last_build_branches CURSOR FOR
+        SELECT DISTINCT branch_name FROM v_build_events AS be, v_builds AS b WHERE b.id = be.build_id AND timestamp BETWEEN DATE_SUB(NOW(), INTERVAL 5 DAY) AND NOW();
+
+    DECLARE CONTINUE HANDLER
+        FOR NOT FOUND SET v_finished = 1;
+    CREATE TEMPORARY TABLE tmp_bm_results (
+        id_event INT,
+        build_id INT,
+        build_name_event TEXT,
+        timestamp DATETIME,
+        comment_event TEXT,
+        job_name TEXT,
+        build_number INT,
+        event_type TEXT,
+        event_state TEXT,
+        product_name TEXT,
+        task_name TEXT,
+        id INT,
+        build_name TEXT,
+        branch_name TEXT,
+        revision INT,
+        comment TEXT
+    );
+
+ 
+    OPEN last_build_branches;
+ 
+branch: LOOP
+        FETCH last_build_branches INTO v_branch_name;
+        IF v_finished = 1 THEN
+            LEAVE branch;
+        END IF;
+        INSERT INTO tmp_bm_results
+            SELECT * FROM v_build_events AS be, v_builds AS b 
+                WHERE b.id = be.build_id AND branch_name = v_branch_name AND task_name = 'smoketest' AND product_name = 'LFS' AND event_type = 'test' ORDER BY timestamp DESC LIMIT 1;
+        INSERT INTO tmp_bm_results
+            SELECT * FROM v_build_events AS be, v_builds AS b 
+                WHERE b.id = be.build_id AND branch_name = v_branch_name AND task_name = 'build' AND product_name = 'LFS' AND event_type = 'build' ORDER BY timestamp DESC LIMIT 1;
+        INSERT INTO tmp_bm_results
+            SELECT * FROM v_build_events AS be, v_builds AS b 
+                WHERE b.id = be.build_id AND branch_name = v_branch_name AND task_name = 'test' AND product_name = 'LFS' AND event_type = 'test' ORDER BY timestamp DESC LIMIT 1;
+        INSERT INTO tmp_bm_results
+            SELECT * FROM v_build_events AS be, v_builds AS b 
+                WHERE b.id = be.build_id AND branch_name = v_branch_name AND task_name = 'releasing' AND product_name = 'LFS' AND event_type = 'release' ORDER BY timestamp DESC LIMIT 1;
+    
+    END LOOP branch;
+ 
+    CLOSE last_build_branches;
+
+    SET @sql = NULL;
+    SET SESSION group_concat_max_len = 40000;
+    SELECT GROUP_CONCAT(DISTINCT
+           CONCAT('MAX(CASE WHEN task_name = ''', task_name,
+           ''' THEN id_event END) `', task_name, '`'))
+    INTO @sql
+    FROM tmp_bm_results;
+
+    DROP TABLE IF EXISTS tmp_bm_results_2;
+    SET @sql =
+        CONCAT('CREATE TEMPORARY TABLE tmp_bm_results_2
+            SELECT branch_name, ', @sql, '
+                     FROM tmp_bm_results
+                    GROUP BY branch_name');
+
+    PREPARE stmt FROM @sql;
+    EXECUTE stmt;
+    DEALLOCATE PREPARE stmt;
+
 END //
 DELIMITER ;
 -- }}}

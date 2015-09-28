@@ -10,103 +10,172 @@ LFS_CI_SOURCE_subversion='$Id$'
 #  @brief   uploads a directory to the specified svn location and commit it
 #  @details this method upload a directory to subversion using the script svn_load_dirs.pl
 #           which is part of the subversion source package.
-#  @param   {pathToUpload}    path names, which contains the files to upload to svn
-#  @param   {branchToUpload}  svn location where the files should be uploaded
-#  @param   {commitMessage}   commit message
+#  @param   {pathToUpload}       path names, which contains the files to upload to svn
+#  @param   {svnUrl}             svn repos url - protokoll and servername / rootpath of the repos
+#  @param   {svnBranchDirectory} svn path to upload without / at the beginning
+#  @param   {svnTagDirectory}    svn path to create tag - including tag
+#  @param   {message}            commit message
 #  @return  <none>
 uploadToSubversion() {
-    requiredParameters LFS_CI_ROOT JOB_NAME USER
-
     local pathToUpload=$1
-    local branchToUpload=$2
-    local commitMessage="$3"
+    mustHaveValue "${pathToUpload}" "location to upload to subversoin"
+    local svnUrl=$2
+    mustHaveValue "${svnUrl}" "svn url - pathout path"
+    local svnBranchDirectory=$3
+    mustHaveValue "${svnBranchDirectory}" "svn path to upload, without / at the end / beginning"
+    local svnTagDirectory=$4
+    local message="$5"
 
-    # fsmci artifact file is already copied to workspace by upper function
-    mustHaveNextLabelName
-    export tagName=$(getNextReleaseLabel)
+    local sleepTimeAfterCommit=$(getConfig LFS_PROD_uc_release_upload_to_subversion_sleep_time_after_commit)
 
-    local svnReposUrl=$(getConfig LFS_PROD_svn_delivery_release_repos_url)
-
-    info "upload local path ${pathToUpload} to ${branchToUpload} as ${tagName}"
-
-    local branch=$(getConfig LFS_PROD_uc_release_upload_to_subversion_map_location_to_branch)
-    if [[ ! "${branch}" ]] ; then
-        debug "mapping for branchToUpload ${branchToUpload} not found"
-        branch=${branchToUpload}
-    fi
-
-    info "upload to ${branch}"
-
-    local branchPath=os/branches
-    local tagPath=os/tags
-    mustHaveValue "${tagPath}" "tag path"
-    mustHaveValue "${branchPath}" "branch path"
-
-    mustExistBranchInSubversion ${svnReposUrl} os
-    mustExistBranchInSubversion ${svnReposUrl}/os branches
-    mustExistBranchInSubversion ${svnReposUrl}/os tags
-    mustExistBranchInSubversion ${svnReposUrl}/os/branches "${branch}"
+    mustExistSubversionDirectory ${svnUrl} ${svnBranchDirectory}
 
     local oldTemp=${TMPDIR:-/tmp}
-    export TMPDIR=/dev/shm/${JOB_NAME}.${USER}/tmp
+    _uploadToSubversionPrepareUpload
+    _uploadToSubversionCopyToLocalDisk ${pathToUpload}
+    _uploadToSubversionCheckoutWorkspace ${svnUrl}/${svnBranchDirectory}
+
+    local svnUploadDirsOptions=""
+    if [[ ${svnTagDirectory} ]] ; then
+        svnUploadDirsOptions="${svnUploadDirsOptions} -t ${svnTagDirectory}"
+        # we have to ensure, that the prefix path exists in svn: e.g. /os/tags/
+        mustExistSubversionDirectory ${svnUrl} $(dirname ${svnTagDirectory})
+    fi
+
+    local workspace=${TMPDIR}/workspace
+    if [[ -d ${workspace} ]] ; then
+        svnUploadDirsOptions="${svnUploadDirsOptions} -wc ${workspace}"
+    fi
+
+    local svnCommitMessage=""
+    if [[ "${message}" ]] ; then
+        svnUploadDirsOptions="${svnUploadDirsOptions} -message '${message}'"
+    fi
+
+    info "upload to svn and create copy (${tagName})"
+    execute -r 3 ${LFS_CI_ROOT}/lib/contrib/svn_load_dirs/svn_load_dirs.pl  \
+                                         ${svnUploadDirsOptions}            \
+                                         -v                                 \
+                                         -no_user_input                     \
+                                         -no_diff_tag                       \
+                                         -glob_ignores="#.#"                \
+                                         -sleep ${sleepTimeAfterCommit:-60} \
+                                         ${svnUrl}                          \
+                                         ${svnBranchDirectory}              \
+                                         ${pathToUpload}       
+    info "upload done";
+    export TMPDIR=${oldTemp}
+
+    return 0
+}
+
+## @fn      _uploadToSubversionPrepareUpload()
+#  @brief   prepare the svn upload
+#  @param   <none>
+#  @return  <none>
+_uploadToSubversionPrepareUpload() {
+    local ramDisk=$(getConfig OS_ramdisk)
+    mustExistDirectory "${ramDisk}" 
+
+    debug "using ram disk ${ramDisk} for upload"
+
+    export TMPDIR=${ramDisk}/${JOB_NAME}.${USER}/tmp
+
     debug "cleanup tmp directory"
+    execute rm -rf ${TMPDIR}
     execute mkdir -p ${TMPDIR}
-
-    # ensure, that there are 15 GB disk space
-    mustHaveFreeDiskSpace ${TMPDIR} 15000000 
-
-    # ensure, that there are 15 GB disk space
-    mustHaveFreeDiskSpace ${TMPDIR} 15000000 
 
     # TMPDIR is not handled/created via createTempDirectory. So we have to
     # take care to clean up the temp directory after exit and failure
-    exit_add subversionUploadCleanupTempDirectory
+    exit_add _uploadToSubversionCleanupTempDirectory
 
-    rm -rf ${TMPDIR}
-    mkdir -p ${TMPDIR}
-    
+    # ensure, that there are 15 GB disk space
+    local freeDiskSpace=$(getConfig LFS_PROD_uc_release_upload_to_subversion_free_space_on_ramdisk)
+    mustHaveFreeDiskSpace ${TMPDIR} ${freeDiskSpace} 
+
+    return 0
+}
+
+## @fn      _uploadToSubversionCopyToLocalDisk()
+#  @brief   copy the directory (to upload) to the local disk
+#  @param   {pathToUpload}    path to upload to svn
+#  @return  <none>
+_uploadToSubversionCopyToLocalDisk() {
+    local pathToUpload=$1
+    mustExistDirectory ${pathToUpload}
+
     info "copy baseline to upload on local disk"
     local uploadDirectoryOnLocalDisk=${TMPDIR}/upload
     execute mkdir -p ${uploadDirectoryOnLocalDisk}
     execute rsync --delete -av ${pathToUpload}/ ${uploadDirectoryOnLocalDisk}/
 
+    return 0
+}
+
+## @fn      _uploadToSubversionCheckoutWorkspace()
+#  @brief   (pre)checkout the svn repos to the workspace, which svn upload will use
+#  @param   {svnUrl}    svn url with path 
+#  @return  <none>
+_uploadToSubversionCheckoutWorkspace() {
+    local svnUrl=$1
+
     local workspace=${TMPDIR}/workspace
-    if [[ ! -d ${workspace} ]] ; then
-        info "checkout svn workspace for upload preparation"
-        execute mkdir -p ${workspace}
-        svnCheckout ${svnReposUrl}/${branchPath}/${branch} ${workspace}
-    fi
+    info "checkout svn workspace for upload preparation"
+    execute rm -rf ${workspace}
+    execute mkdir -p ${workspace}
+    svnCheckout ${svnUrl} ${workspace}
 
-    info "upload to svn and create copy (${tagName})"
+    return 0
+}
 
-    execute -r 3 \
-                ${LFS_CI_ROOT}/bin/svn_load_dirs.pl    \
-                -v                                     \
-                -t ${tagPath}/${tagName}               \
-                -wc ${workspace}                       \
-                -no_user_input                         \
-                -no_diff_tag                           \
-                -glob_ignores="#.#"                    \
-                -sleep 60                              \
-                ${svnReposUrl} ${branchPath}/${branch} \
-                ${uploadDirectoryOnLocalDisk} 
+## @fn      _uploadToSubversionCleanupTempDirectory()
+#  @brief   cleanup the created temp directory in svn upload function
+#  @param   <none>
+#  @return  <none>
+_uploadToSubversionCleanupTempDirectory() {
+    requiredParameters JOB_NAME USER
 
-    export TMPDIR=${oldTemp}
-    info "upload done";
+    local ramDisk=$(getConfig OS_ramdisk)
+    mustExistDirectory "${ramDisk}" 
+
+    local tmpDirectory=${ramDisk}/${JOB_NAME}.${USER}
+    [[ -d ${tmpDirectory} ]] && rm -rf ${tmpDirectory}
 
     return
 }
 
-## @fn      subversionUploadCleanupTempDirectory()
-#  @brief   cleanup the created temp directory in svn upload function
-#  @param   <none>
+
+## @fn      mustExistSubversionDirectory()
+#  @brief   ensure, that the directory in subversion exists
+#  @param   {prefixPath}    svn server url
+#  @param   {pathName}      path name
 #  @return  <none>
-subversionUploadCleanupTempDirectory() {
-    requiredParameters JOB_NAME USER
+mustExistSubversionDirectory() {
+    local prefixPath=${1}
+    mustHaveValue "${prefixPath}" "prefix path"
+    local localPath=${2} 
+    mustHaveValue "${localPath}" "local path"
 
-    local tmpDirectory=/dev/shm/${JOB_NAME}.${USER}
-    [[ -d ${tmpDirectory} ]] && rm -rf ${tmpDirectory}
-
+    debug "check for sub dir ${prefixPath} ${localPath}"
+    
+    local newLocalPath=$(cut -d/ -f1 <<< ${localPath})
+    local newRestPath=$(cut -d/ -f2- <<< ${localPath})
+    
+    if [[ ${newRestPath} = ${localPath} ]] ; then
+        # end of recursion condition
+        debug "end of recursion"
+        return
+    elif [[ -z ${newLocalPath} ]] ; then
+        # someone started or ended the localPath with a /
+        # so we skip the element
+        debug "skipping -z ${newLocalPath}"
+        mustExistSubversionDirectory ${prefixPath}/${newLocalPath} ${newRestPath}
+    else 
+        debug "creating svn dir ${prefixPath} ${newRestPath}"
+        mustExistBranchInSubversion ${prefixPath} ${newLocalPath}
+        mustExistSubversionDirectory ${prefixPath}/${newLocalPath} ${newRestPath}
+    fi  
+    
     return
 }
 
@@ -286,6 +355,10 @@ mustExistBranchInSubversion() {
     local logMessage=$(createTempFile)
 
     info "checking for branch ${url} / ${branch}"
+
+    # TODO: demx2fk3 2015-08-04 enable this code
+    # local svnCommitMessagePrefix=$(getConfig LFS_PROD_uc_release_svn_message_prefix)
+    # mustHaveValue "${svnCommitMessagePrefix}" "svn commit message"
 
     echo "creating a new branch: ${branch}" > ${logMessage}
     if ! existsInSubversion ${url} ${branch} ; then

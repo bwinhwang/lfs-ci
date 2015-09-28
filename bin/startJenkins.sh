@@ -14,10 +14,7 @@ startJenkinsMasterServer() {
     local JENKINS_HOME=$(getConfig jenkinsHome)
     local JENKINS_ROOT=$(getConfig jenkinsRoot)
 
-    local jenkinsMasterSslCertificate=$(getConfig jenkinsMasterSslCertificate)
-    local jenkinsMasterSslPrivateKey=$(getConfig jenkinsMasterSslPrivateKey)
     local jenkinsMasterServerHttpPort=$(getConfig jenkinsMasterServerHttpPort)
-    local jenkinsMasterServerHttpsPort=$(getConfig jenkinsMasterServerHttpsPort)
 
     export JENKINS_HOME JENKINS_ROOT LFS_CI_ROOT
     export TZ=UTC+0

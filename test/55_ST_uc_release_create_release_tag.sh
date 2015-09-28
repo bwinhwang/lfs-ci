@@ -1,7 +1,8 @@
 #!/bin/bash
 
 source test/common.sh
-source lib/uc_release.sh
+# source lib/uc_release.sh
+source lib/uc_release_create_rel_tag.sh
 
 oneTimeSetUp() {
     mockedCommand() {
@@ -90,8 +91,8 @@ tearDown() {
 
 test1() {
     # TODO: demx2fk3 2015-08-05 REMOVE ME, this is required for old implementation
-    assertTrue "createReleaseTag LFS_CI_-_trunk_-_Build 1234"
-    # assertTrue "usecase_LFS_RELEASE_CREATE_RELEASE_TAG"
+    # assertTrue "createReleaseTag LFS_CI_-_trunk_-_Build 1234"
+    assertTrue "usecase_LFS_RELEASE_CREATE_RELEASE_TAG"
 
     assertTrue   "REL tag exists"                          "svn info file://${UT_SVN_ROOT}/isource/svnroot/BTS_D_SC_LFS_2015_08/tags/PS_LFS_REL_2015_08_0001"
     assertEquals "List tags ok" "PS_LFS_REL_2015_08_0001/" "$(svn ls file://${UT_SVN_ROOT}/isource/svnroot/BTS_D_SC_LFS_2015_08/tags)"
