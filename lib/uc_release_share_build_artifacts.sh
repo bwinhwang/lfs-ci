@@ -36,7 +36,7 @@ usecase_LFS_RELEASE_SHARE_BUILD_ARTIFACTS() {
         [[ -d ${dir} ]] || continue
         local basename=$(basename ${dir})
         info "copy ${basename} to buildresults share ${basename}/${buildName}"
-        _synchronizeBuildResultsToShare ${basename} {buildName}
+        _synchronizeBuildResultsToShare ${basename} ${buildName}
     done
 
     return 0
