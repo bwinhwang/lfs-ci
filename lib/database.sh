@@ -424,5 +424,8 @@ mustHaveDatabaseCredentials() {
     [[ -z ${dbHost} ]] && dbHost=$(getConfig MYSQL_db_hostname)
     mustHaveValue "${dbName}" "dbHost"
 
+    [[ -z ${mysql_cli} ]] && mysql_cli="mysql -u${dbUser} -h${dbHost} --password=${dbPass}"
+    mustHaveValue "${mysql_cli}" "mysql_cli"
+
     return
 }

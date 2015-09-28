@@ -74,4 +74,26 @@ Index: src/fsmpsl/Dependencies
 +use-readonly bld/bld-rfs-fsm4_arm
  
  use-readonly bld/bld-fsmfmon-fct
+index 2c2f004..c504c36 100644
+--- recipes/dtfs-fuse
++++ recipes/dtfs-fuse
+@@ -2,9 +2,9 @@
+ #|ins $target-gcc
+ #|ins $target-fuse-devel /$target/sys-root
+ #|ins i686-build_pc-linux-gnu-pkg-config
+-#|pkg name $target-dtfs_fuse
++#|pkg name $target-dtfs
+ #|pkg auto $target
+-#|pkg . /usr/bin/dtfs_fuse
++#|pkg . /usr/bin/dtfs
+ #|pkg name $target-dtfs_fuse-test
+ #|pkg auto $target
+ #|pkg . /usr/bin/test_dtfs_fuse
+@@ -20,6 +20,6 @@ export PKG_CONFIG_SYSTEM_LIBRARY_PATH=/usr/$lib
+ export PKG_CONFIG_SYSROOT_DIR=$srcdir/$target/sys-root
+ make $parallel CC=$target-gcc CFLAGS="$target_opt_flags" FUSE_CFLAGS="$(pkg-config fuse --cflags)" FUSE_LDLIBS="$(pkg-config fuse --libs)"
+ mkdir -p $destdir/usr/bin
+-cp dtfs_fuse test_dtfs_fuse $destdir/usr/bin/
++cp dtfs test_dtfs_fuse $destdir/usr/bin/
  
+ $recipes/strip_debug --strip-all $target $destdir /usr/lib/debug / 

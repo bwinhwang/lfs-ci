@@ -62,9 +62,9 @@ mustBePreparedForReleaseTask
 getBuildJobNameFromFingerprint 
 getBuildBuildNumberFromFingerprint 
 copyArtifactsToWorkspace 12345 Build_Job_Name
-_synchronizeBuildResultsToShare bld-fsmddal-abc bld-fsmddal-abc/PS_LFS_OS_BUILD_NAME
-_synchronizeBuildResultsToShare bld-fsmpsl-abc bld-fsmpsl-abc/PS_LFS_OS_BUILD_NAME
-_synchronizeBuildResultsToShare bld-rfs-abc bld-rfs-abc/PS_LFS_OS_BUILD_NAME
+_synchronizeBuildResultsToShare bld-fsmddal-abc PS_LFS_OS_BUILD_NAME
+_synchronizeBuildResultsToShare bld-fsmpsl-abc PS_LFS_OS_BUILD_NAME
+_synchronizeBuildResultsToShare bld-rfs-abc PS_LFS_OS_BUILD_NAME
 EOF
     assertExecutedCommands ${expect}
 

@@ -53,7 +53,7 @@ _copyCodecoverageArtifactsToWorkspace() {
     rawDebug ${dataFile}
     rawDebug ${xmlFile}
 
-    for jobData in $(grep CodeCoverage ${dataFile}) ; do
+    for jobData in $(egrep 'CodeCoverage|UT_' ${dataFile}) ; do
         local jobName=$(cut -d: -f1 <<< ${jobData})
         mustHaveValue "${jobName}" "job name"
         local buildNumber=$(cut -d: -f2 <<< ${jobData})

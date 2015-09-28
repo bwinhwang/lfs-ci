@@ -34,6 +34,8 @@ oneTimeSetUp() {
 
 setUp() {
     cat /dev/null > ${UT_MOCKED_COMMANDS}
+    export WORKSPACE=$(createTempDirectory)
+    mkdir -p ${WORKSPACE}/workspace/
     return
 }
 
@@ -83,7 +85,7 @@ test3() {
 _mustHaveLfsSourceSubversionUrl 
 existsInSubversion http://svnMasterServerHostName/os/tags PS_LFS_OS_2015_09_0001
 existsInSubversion http://svnMasterServerHostName/os/branches pre_PS_LFS_OS_2015_09_0001
-svnRemove -F /commitMessage http://svnMasterServerHostName/os/branches/pre_PS_LFS_OS_2015_09_0001
+svnRemove -F ${WORKSPACE}/commitMessage http://svnMasterServerHostName/os/branches/pre_PS_LFS_OS_2015_09_0001
 mustExistBranchInSubversion http://svnMasterServerHostName/os/branches pre_PS_LFS_OS_2015_09_0001
 EOF
     assertExecutedCommands ${expect}

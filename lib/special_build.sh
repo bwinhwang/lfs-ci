@@ -383,8 +383,8 @@ mustHaveLocationForSpecialBuild() {
     # fakeing the branch name for workspace creation...
     local location=$(cat ${workspace}/bld/bld-fsmci-summary/location)
     mustHaveValue "${location}" "location"
-
     export LFS_CI_GLOBAL_BRANCH_NAME=${location}
+
     return
 }
 
@@ -443,7 +443,8 @@ specialPkgpoolPrepareBuild() {
         case ${pathName} in
             src-*) : ;;
             src/*) _specialPkgpoolBuildApplyPatch ${fileInPatch} ;;
-        esac
+            recipes/*) _specialPkgpoolBuildApplyPatch ${fileInPatch} ;;
+         esac
     done
 
     return
@@ -470,12 +471,18 @@ _specialPkgpoolBuildApplyPatch() {
     rawDebug ${tmpPatchFile}
     execute patch -p0 -d ${WORKSPACE}/src < ${tmpPatchFile}
 
-    # commiting the change is required. Otherwise pkgpool build does not find the change.
-    cd ${pathName}
-    execute git add -Af .
-    execute git commit -m patch_commit 
+    # commiting the change is required, if it's not a recipe. Otherwise pkgpool build does not find the change.
+    if [[ ! ${pathName} =~ recipes ]] ; then 
+        cd ${pathName}
+        execute git add -Af .
+        execute git commit -m patch_commit 
+    fi
 }
 
+## @fn      specialPkgpoolCollectArtifacts()
+#  @brief   collect the artifacts of the pkgpool build and store it in the upstream job
+#  @param   <none>
+#  @return  <none>
 specialPkgpoolCollectArtifacts() {
     requiredParameters LFS_CI_ROOT UPSTREAM_PROJECT UPSTREAM_BUILD
 

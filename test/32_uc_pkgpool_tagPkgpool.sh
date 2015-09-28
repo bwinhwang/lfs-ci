@@ -31,13 +31,19 @@ oneTimeSetUp() {
         echo ${UT_TMPDIR}/tmp.${cnt}
     }
     getConfig() {
-        echo $1 
+        echo ${UT_CAN_RELEASE}
     }
-    _preparePkgpoolWorkspace() {
-        mockedCommand "_preparePkgpoolWorkspace $@"
+    gitDescribe() {
+        echo gitRevision
     }
-    _tagPkgpool() {
-        mockedCommand "_tagPkgpool $@"
+    gitTagAndPushToOrigin() {
+        mockedCommand "gitTagAndPushToOrigin $@"
+    }
+    gitRevParse() {
+        echo "gitRevParserRev"
+    }
+    setBuildDescription() {
+        mockedCommand "setBuildDescription $@"
     }
 
     return
@@ -48,7 +54,8 @@ setUp() {
     export WORKSPACE=$(createTempDirectory)
     export JOB_NAME=PKGPOOL_CI_-_trunk_-_Build
     export BUILD_NUMBER=123
-    mkdir ${WORKSPACE}/src/
+    mkdir -p ${WORKSPACE}/src/
+    mkdir -p ${WORKSPACE}/workspace/bld/bld-pkgpool-release/
     export UT_TMPDIR=$(createTempDirectory)
     echo 0 > ${UT_TMPDIR}/.cnt
 }
@@ -61,17 +68,16 @@ tearDown() {
 }
 
 test1() {
-    assertTrue "usecase_PKGPOOL_BUILD"
+    export UT_CAN_RELEASE=1
+    local file=$(createTempFile)
+    assertTrue "_tagPkgpool ${file}"
 
     local expect=$(createTempFile)
     cat <<EOF > ${expect}
-_preparePkgpoolWorkspace 
-execute -l ${UT_TMPDIR}/tmp.2 ${WORKSPACE}/src/build PKGPOOL_additional_build_parameters
-execute mkdir -p ${WORKSPACE}/workspace/bld/bld-pkgpool-release/
-execute cp ${UT_TMPDIR}/tmp.2 ${WORKSPACE}/workspace/bld/bld-pkgpool-release/build.log
-execute cp -a ${WORKSPACE}/workspace/logs ${WORKSPACE}/workspace/bld/bld-pkgpool-release/
-_tagPkgpool ${UT_TMPDIR}/tmp.2
-createArtifactArchive 
+execute -n sed -ne s,^\(\[[0-9 :-]*\] \)\?release \([^ ]*\) complete,\2,p ${UT_TMPDIR}/tmp.1
+gitTagAndPushToOrigin PKGPOOL_FOO
+setBuildDescription PKGPOOL_CI_-_trunk_-_Build 123 PKGPOOL_FOO
+execute -n sed -ne s|^src [^ ]* \(.*\)$|PS_LFS_PKG = \1|p ${WORKSPACE}/workspace/pool/*.meta
 EOF
     assertExecutedCommands ${expect}
 
@@ -80,18 +86,12 @@ EOF
 
 test2() {
     export UT_CAN_RELEASE=
+    local file=$(createTempFile)
+    assertTrue "_tagPkgpool ${file}"
 
-    assertTrue "usecase_PKGPOOL_BUILD"
-
+    # no commands are exectued!
     local expect=$(createTempFile)
     cat <<EOF > ${expect}
-_preparePkgpoolWorkspace 
-execute -l ${UT_TMPDIR}/tmp.2 ${WORKSPACE}/src/build PKGPOOL_additional_build_parameters
-execute mkdir -p ${WORKSPACE}/workspace/bld/bld-pkgpool-release/
-execute cp ${UT_TMPDIR}/tmp.2 ${WORKSPACE}/workspace/bld/bld-pkgpool-release/build.log
-execute cp -a ${WORKSPACE}/workspace/logs ${WORKSPACE}/workspace/bld/bld-pkgpool-release/
-_tagPkgpool ${UT_TMPDIR}/tmp.2
-createArtifactArchive 
 EOF
     assertExecutedCommands ${expect}
 

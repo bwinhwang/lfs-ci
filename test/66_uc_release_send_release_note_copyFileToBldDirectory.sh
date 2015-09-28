@@ -24,6 +24,7 @@ setUp() {
     export WORKSPACE=$(createTempDirectory)
 
     mkdir -p ${WORKSPACE}/workspace/
+    cd ${WORKSPACE}/workspace
     touch    ${WORKSPACE}/workspace/changelog.xml
 
     return
