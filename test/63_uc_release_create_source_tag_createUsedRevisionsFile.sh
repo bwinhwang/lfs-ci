@@ -63,7 +63,8 @@ test2() {
     cat <<EOF > ${expect}
 execute mkdir -p ${WORKSPACE}/workspace/rev/
 getConfig LFS_PROD_uc_release_source_tag_directory -t cfg:fcmd
-execute -l ${WORKSPACE}/workspace/rev/LFS_PROD_uc_release_source_tag_directory sort -u ${WORKSPACE}/workspace/bld/bld-externalComponents-fcmd/usedRevisions.txt
+execute touch ${WORKSPACE}/workspace/rev/LFS_PROD_uc_release_source_tag_directory
+execute -l ${WORKSPACE}/workspace/rev/LFS_PROD_uc_release_source_tag_directory sort -u ${WORKSPACE}/workspace/bld/bld-externalComponents-fcmd/usedRevisions.txt ${WORKSPACE}/workspace/rev/LFS_PROD_uc_release_source_tag_directory
 EOF
     assertExecutedCommands ${expect}
 
