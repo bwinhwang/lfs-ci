@@ -109,8 +109,8 @@ sub branchInformation {
 
         # mapping between the branches and the svn delivery repos
         my $reposName = $row->{release_name_regex};
-        $reposName =~ s/.*PS_LFS_OS_(\$\{[^\}]+})_(\$\{[^\}]+})_.*/$1_$2/g;
-        $reposName =~ s/.*PS_LFS_OS_(\d+)_(\d+)_.*/$1_$2/g;
+        $reposName =~ s/.*PS_LFS_.._(\$\{[^\}]+})_(\$\{[^\}]+})_.*/$1_$2/g;
+        $reposName =~ s/.*PS_LFS_.._(\d+)_(\d+)_.*/$1_$2/g;
 
         push @{ $result }, { name  => "LFS_PROD_svn_delivery_repos_name",
                              tags  => $locationTagString,
