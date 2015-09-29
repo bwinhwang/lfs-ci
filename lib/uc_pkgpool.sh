@@ -213,6 +213,7 @@ usecase_PKGPOOL_RELEASE() {
                 -o ${oldLabel}                      \
                 -T OS                               \
                 -P PKGPOOL                          \
+                -L ${location}                      \
                 -f ${LFS_CI_CONFIG_FILE} > ${workspace}/releasenote.xml
     
     rawDebug ${workspace}/releasenote.xml
