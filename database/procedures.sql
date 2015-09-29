@@ -778,26 +778,22 @@ DELIMITER //
 CREATE PROCEDURE build_results()
 BEGIN
 
-    -- TODO: demx2fk3 2015-04-15 FIXME
-    -- DROP TABLE IF EXISTS tmp_build_results;
-    -- CREATE TEMPORARY TABLE tmp_build_results
-    -- SELECT b.id, 
-    --        b.build_name, 
-    --       b.branch_name, 
-    --        b.revision, 
-    --        b.comment, 
-    --        be1.timestamp AS build_started, 
-    --        CASE isFailed( b.id )
-    --             WHEN 0 THEN be2.timestamp
-    --             ELSE IF( be3.timestamp, be3.timestamp, DATE_ADD( be1.timestamp, INTERVAL 2 HOUR) )
-    --        END AS build_ended,
-    --        isFailed( b.id ) AS isFailed
-    -- FROM v_builds b, 
-    -- LEFT JOIN build_events be1 ON (b.id = be1.build_id AND be1.event_id = 1 )
-    -- LEFT JOIN build_events be2 ON (b.id = be2.build_id AND be2.event_id = 2 )
-    -- LEFT JOIN build_events be3 ON (b.id = be3.build_id AND be3.event_id = 3 )
-    -- ;
-
+    DROP TABLE IF EXISTS tmp_build_results;
+    CREATE TEMPORARY TABLE tmp_build_results
+    SELECT b.id, 
+           b.build_name, 
+           b.branch_name, 
+           b.revision, 
+           b.comment, 
+           be1.timestamp AS build_started,
+           IF( be2.timestamp, be2.timestamp, be3.timestamp ) AS build_ended,
+           IF( be3.timestamp, 1, 0 ) AS isFailed
+    FROM v_builds b
+    LEFT JOIN v_build_events be1 ON ( b.id = be1.build_id AND be1.event_type = 'build' AND be1.task_name = 'build' AND b.product_name = 'LFS' AND be1.event_state = 'started' )
+    LEFT JOIN v_build_events be2 ON ( b.id = be2.build_id AND be2.event_type = 'build' AND be2.task_name = 'build' AND b.product_name = 'LFS' and be2.event_state = 'finished' )
+    LEFT JOIN v_build_events be3 ON ( b.id = be3.build_id AND be3.event_type = 'build' AND be3.task_name = 'build' AND b.product_name = 'LFS' AND be3.event_state = 'failed' )
+    WHERE b.product_name = 'LFS'
+    ;
 END //
 DELIMITER ;
 -- }}}
