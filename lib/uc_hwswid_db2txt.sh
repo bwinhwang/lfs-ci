@@ -128,7 +128,7 @@ hwSwIdToSubVersion() {
         svnCheckout ${url} "${hwswidWorkdirSvn}"
         cp -a ${hwswidWorkdirDb}/* "${hwswidWorkdirSvn}"/
         svn diff ${hwswidWorkdirSvn}
-        info TODO ENABLE: svn commit -m "update HwSwId NOJCHK" ${hwswidWorkdirSvn}
+        svn commit -m "update HwSwId NOJCHK" ${hwswidWorkdirSvn}
 
     done
 }
