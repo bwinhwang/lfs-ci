@@ -247,9 +247,9 @@ svnCopyLocationsFSMR4() {
 #  @return  <none>
 svnDeleteBootManager() {
     local newBranch=$1
-    __cmd svn delete -m \"Branching: removed frmbrm from branch $branch\" \
+    __cmd svn delete -m \"Branching: removed src-frmbrm from branch $newBranch\" \
             ${SVN_REPO}/${SVN_DIR}/${newBranch}/trunk/fsmr3/src-fsmbrm;
-    __cmd svn delete -m \"Branching: removed frmbrm35 from branch $branch\" \
+    __cmd svn delete -m \"Branching: removed src-frmbrm35 from branch $newBranch\" \
             ${SVN_REPO}/${SVN_DIR}/${newBranch}/trunk/fsmr35/src-fsmbrm35;
 }
 
