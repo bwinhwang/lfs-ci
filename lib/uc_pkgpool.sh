@@ -241,9 +241,10 @@ usecase_PKGPOOL_RELEASE() {
     local canSendReleaseNote=$(getConfig LFS_CI_uc_release_can_send_release_note)
     if [[ ${canSendReleaseNote} ]] ; then
         if [[ -s ${releaseNoteTxt} ]] ; then
-            execute ${LFS_CI_ROOT}/bin/sendReleaseNote  -r ${releaseNoteTxt}          \
-                                                        -t ${label}                   \
-                                                        -f ${LFS_CI_CONFIG_FILE}
+            execute ${LFS_CI_ROOT}/bin/sendReleaseNote  -r ${releaseNoteTxt}     \
+                                                        -t ${label}              \
+                                                        -f ${LFS_CI_CONFIG_FILE} \
+                                                        -T OS -P PKGPOOL
         fi                                                            
     else
         warning "sending release note is disabled via config"
