@@ -175,6 +175,7 @@ sub replaceUlmByMasterServer {
     my $url  = shift;
     # TODO: demx2fk3 2014-11-27 put this in the config
     $url =~ s/ulscmi.inside.nsn.com/svne1.access.nsn.com/g;
+    DEBUG "asdf"
     $url =~ s/ulisop10.emea.nsn-net.net/svne1.access.nsn.com/g;
     return $url;
 }
