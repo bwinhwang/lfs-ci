@@ -176,7 +176,7 @@ svnCopyLocations() {
     mustHaveValue "${newBranch}" "newBranch"
 
     svn ls ${SVN_REPO}/${SVN_DIR}/trunk/bldtools/locations-${newBranch} || {
-        __cmd svn copy -m \"copy locations branch ${newBranch}\" \
+        __cmd svn copy -m \"Branching: copy locations branch ${newBranch}\" \
             ${SVN_REPO}/${SVN_DIR}/trunk/bldtools/${locations} \
             ${SVN_REPO}/${SVN_DIR}/trunk/bldtools/locations-${newBranch};
         __cmd svn checkout ${SVN_REPO}/${SVN_DIR}/trunk/bldtools/locations-${newBranch};
@@ -186,8 +186,8 @@ svnCopyLocations() {
         else
             __cmd sed -i -e "'s,/os/${srcBranch}/,/os/${branchLocation}/,'" Dependencies;
         fi
-        __cmd svn commit -m \"added location locations-${newBranch}.\" || exit 1;
-        __cmd svn delete -m \"removed bldtools, because they are always used from MAINTRUNK\" \
+        __cmd svn commit -m \"Branching: added location locations-${newBranch}.\" || exit 1;
+        __cmd svn delete -m \"Branching: removed bldtools, because they are always used from MAINTRUNK\" \
             ${SVN_REPO}/${SVN_DIR}/${newBranch}/trunk/bldtools;
     }
 }
@@ -227,7 +227,7 @@ svnCopyLocationsFSMR4() {
     mustHaveValue "${newBranch}" "newBranch"
 
     svn ls ${SVN_REPO}/${SVN_DIR}/trunk/bldtools/locations-${newBranch}_FSMR4 || {
-        __cmd svn copy -m \"copy locations branch ${newBranch}\" ${SVN_REPO}/${SVN_DIR}/trunk/bldtools/${LOCATIONS_FSMR4} \
+        __cmd svn copy -m \"Branching: copy locations branch ${newBranch}\" ${SVN_REPO}/${SVN_DIR}/trunk/bldtools/${LOCATIONS_FSMR4} \
             ${SVN_REPO}/${SVN_DIR}/trunk/bldtools/locations-${newBranch}_FSMR4;
         __cmd svn checkout ${SVN_REPO}/${SVN_DIR}/trunk/bldtools/locations-${newBranch}_FSMR4;
         __cmd cd locations-${newBranch}_FSMR4;
@@ -236,8 +236,21 @@ svnCopyLocationsFSMR4() {
         else
             __cmd sed -i -e "'s,/os/${srcBranch}/,/os/${branchLocation}/,'" Dependencies;
         fi
-        __cmd svn commit -m \"added location ${LOCATIONS_FSMR4}.\" || exit 1;
+        __cmd svn commit -m \"Branching: added location ${LOCATIONS_FSMR4}.\" || exit 1;
     }
+}
+
+## @fn      svnDeleteBootManager()
+#  @brief   Delete boot manager from new branch
+#  @brief   Delete boot manager from new branch, because it is always used from trunk.
+#  @param   <newBranch> name of the new branch
+#  @return  <none>
+svnDeleteBootManager() {
+    local newBranch=$1
+    __cmd svn delete -m \"Branching: removed frmbrm from branch $branch\" \
+            ${SVN_REPO}/${SVN_DIR}/${newBranch}/trunk/fsmr3/src-fsmbrm;
+    __cmd svn delete -m \"Branching: removed frmbrm35 from branch $branch\" \
+            ${SVN_REPO}/${SVN_DIR}/${newBranch}/trunk/fsmr35/src-fsmbrm35;
 }
 
 __getGitRevisionFile() {
@@ -327,7 +340,7 @@ svnDummyCommit() {
     if [[ -d ${SRC_PROJECT} ]]; then
         cd ${SRC_PROJECT}
         echo >> src/README
-        __cmd svn commit -m \"dummy commit\" src/README
+        __cmd svn commit -m \"Branching: dummy commit\" src/README
     fi
 }
 
@@ -405,6 +418,7 @@ main() {
             svnCopyBranch ${SRC_BRANCH} ${NEW_BRANCH}
             svnCopyLocations ${LOCATIONS} ${SRC_BRANCH} ${NEW_BRANCH}
             svnCopyLocationsFSMR4 ${SRC_BRANCH} ${NEW_BRANCH}
+            svnDeleteBootManager ${NEW_BRANCH}
             svnDummyCommit ${NEW_BRANCH}
         elif [[ ${LRC} == "true" ]]; then
             svnCopyBranchLRC LRC_${SRC_BRANCH} LRC_${NEW_BRANCH}
