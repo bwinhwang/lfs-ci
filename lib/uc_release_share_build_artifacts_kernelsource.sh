@@ -62,7 +62,7 @@ usecase_LFS_RELEASE_SHARE_BUILD_ARTIFACTS_KERNELSOURCES() {
         local destinationBaseDirectory=$(dirname ${lastKernelLocation})
         mustExistDirectory ${destinationBaseDirectory}
 
-        local destination=${destinationBaseDirectory}/${labelName}
+        local destination=${destinationBaseDirectory}/${buildName}
 
         debug "checking for bld/bld-kernelsources-linux"
         [[ ! -d ${workspace}/bld/bld-kernelsources-linux ]] && continue
