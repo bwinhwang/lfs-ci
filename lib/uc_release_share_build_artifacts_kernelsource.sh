@@ -64,13 +64,16 @@ usecase_LFS_RELEASE_SHARE_BUILD_ARTIFACTS_KERNELSOURCES() {
 
         local destination=${destinationBaseDirectory}/${labelName}
 
+        debug "checking for bld/bld-kernelsources-linux"
         [[ ! -d ${workspace}/bld/bld-kernelsources-linux ]] && continue
+        debug "checking for ${destination}"
         [[   -d ${destination}                           ]] && continue
 
         info "copy kernelsources from ${jobName} to buildresults share ${destination}"
 
         if [[ ${canStoreArtifactsOnShare} ]] ; then
             # TODO: demx2fk3 2015-03-03 FIXME use execute -r 10 ssh master
+            debug "starting rsync of ${workspace}/bld/bld-kernelsources-linux to ${server}:${destination}"
             executeOnMaster chmod u+w $(dirname ${destination})
             executeOnMaster mkdir -p  ${destination}
             execute rsync -av --exclude=.svn ${workspace}/bld/bld-kernelsources-linux/. ${server}:${destination}/
