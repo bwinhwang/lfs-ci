@@ -105,7 +105,7 @@ execute mv ${WORKSPACE}/forReleaseNote.txt ${WORKSPACE}/workspace/forReleaseNote
 copyFileFromBuildDirectoryToWorkspace PKGPOOL_PROD_-_trunk_-_Release lastSuccessfulBuild gitrevision
 execute mv ${WORKSPACE}/gitrevision ${WORKSPACE}/workspace/gitrevision.old
 setBuildDescription PKGPOOL_PROD_-_trunk_-_Release 1234 LABEL
-execute -n ${LFS_CI_ROOT}/bin/getReleaseNoteXML -t LABEL -o OLD_LABEL -T OS -P PKGPOOL -f ${LFS_CI_ROOT}/etc/lfs-ci.cfg
+execute -n ${LFS_CI_ROOT}/bin/getReleaseNoteXML -t LABEL -o OLD_LABEL -T OS -P PKGPOOL -L pronb-developer -f ${LFS_CI_ROOT}/etc/lfs-ci.cfg
 mustBeValidXmlReleaseNote ${WORKSPACE}/workspace/releasenote.xml
 execute touch ${WORKSPACE}/workspace/releasenote.txt
 execute sed -i -e s/PS_LFS_PKG = //g ${WORKSPACE}/workspace/forReleaseNote.txt.old
