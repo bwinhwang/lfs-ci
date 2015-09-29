@@ -32,6 +32,8 @@ usecase_LFS_RELEASE_SHARE_BUILD_ARTIFACTS_KERNELSOURCES() {
     local triggeredJobData=$(getDownStreamProjectsData ${jobName} ${buildNumber})
     mustHaveValue "${triggeredJobData}" "triggered job data"
 
+    local canStoreArtifactsOnShare=$(getConfig LFS_CI_uc_release_can_store_build_results_on_share)
+
     local jobData=
     for jobData in ${triggeredJobData} ; do
         local buildNumber=$(echo ${jobData} | cut -d: -f 1)
