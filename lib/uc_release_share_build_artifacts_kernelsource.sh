@@ -33,6 +33,7 @@ usecase_LFS_RELEASE_SHARE_BUILD_ARTIFACTS_KERNELSOURCES() {
     mustHaveValue "${triggeredJobData}" "triggered job data"
 
     local canStoreArtifactsOnShare=$(getConfig LFS_CI_uc_release_can_store_build_results_on_share)
+    local server=$(getConfig LINSEE_server)
 
     local jobData=
     for jobData in ${triggeredJobData} ; do
@@ -62,7 +63,7 @@ usecase_LFS_RELEASE_SHARE_BUILD_ARTIFACTS_KERNELSOURCES() {
         local destinationBaseDirectory=$(dirname ${lastKernelLocation})
         mustExistDirectory ${destinationBaseDirectory}
 
-        local destination=${destinationBaseDirectory}/${labelName}
+        local destination=${destinationBaseDirectory}/${buildName}
 
         debug "checking for bld/bld-kernelsources-linux"
         [[ ! -d ${workspace}/bld/bld-kernelsources-linux ]] && continue

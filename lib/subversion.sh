@@ -161,9 +161,10 @@ mustExistSubversionDirectory() {
     local newLocalPath=$(cut -d/ -f1 <<< ${localPath})
     local newRestPath=$(cut -d/ -f2- <<< ${localPath})
     
-    if [[ ${newRestPath} = ${localPath} ]] ; then
+    if [[ ${newRestPath} == ${localPath} ]] ; then
         # end of recursion condition
         debug "end of recursion"
+        mustExistBranchInSubversion ${prefixPath} ${newLocalPath}
         return
     elif [[ -z ${newLocalPath} ]] ; then
         # someone started or ended the localPath with a /
