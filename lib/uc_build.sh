@@ -157,6 +157,8 @@ usecase_LFS_BUILD_CREATE_VERSION() {
     echo ${buildName}    > ${workspace}/bld/bld-fsmci-summary/label
     if [[ ${oldBuildName} ]]; then
         echo ${oldBuildName} > ${workspace}/bld/bld-fsmci-summary/oldLabel
+    else
+        echo "invalid_string_from_usecase_LFS_BUILD_CREATE_VERSION" > ${workspace}/bld/bld-fsmci-summary/oldLabel
     fi
     
     createFingerprintFile
