@@ -26,10 +26,13 @@ LFS_CI_SOURCE_config='$Id$'
 getLocationName() {
     local jobName=${1}
 
+    trace "try to get location name (jobName:${jobName:-empty})"
     if [[ -z ${LFS_CI_GLOBAL_LOCATION_NAME} || ${jobName}  ]] ; then
         local branchName=$(getBranchName ${jobName:-${JOB_NAME}})
         # skipped due to performance
         # mustHaveValue "${branchName}" "branch name from job name"
+
+        trace "branch name is ${branchName}"
 
         local configFile=${LFS_CI_CONFIG_FILE:-${LFS_CI_ROOT}/etc/global.cfg}
         # skipped due to performance
@@ -42,6 +45,8 @@ getLocationName() {
         [[ -z ${jobName} ]] && \
             export LFS_CI_GLOBAL_LOCATION_NAME=${mappedLocation}
     fi
+
+    trace "location is ${mappedLocation} / ${LFS_CI_GLOBAL_LOCATION_NAME}"
 
     echo ${mappedLocation:-${LFS_CI_GLOBAL_LOCATION_NAME}}
     return 0
