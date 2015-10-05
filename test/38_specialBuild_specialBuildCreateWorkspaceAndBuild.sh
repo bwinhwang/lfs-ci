@@ -47,7 +47,7 @@ oneTimeSetUp() {
     }
     mustHaveLocationForSpecialBuild() {
         mockedCommand "mustHaveLocationForSpecialBuild $@"
-        export LFS_CI_GLOBAL_BRANCH_NAME=LOCATION
+        export LFS_CI_GLOBAL_LOCATION_NAME=LOCATION
 
         local wd=${WORKSPACE}/workspace/bld/bld-dev-input/
         mkdir -p ${wd}

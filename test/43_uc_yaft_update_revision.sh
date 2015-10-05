@@ -42,6 +42,9 @@ oneTimeSetUp() {
         mockedCommand "getSvnLastChangedRevision $@"
         echo 1234
     }
+    getLocationName() {
+        echo "pronb-developer"
+    }
     createBasicWorkspace() {
         mockedCommand "createBasicWorkspace $@"
         mkdir -p ${WORKSPACE}/workspace/src-project

@@ -20,29 +20,50 @@ LFS_CI_SOURCE_config='$Id$'
 #
 
 ## @fn      getLocationName()
-#  @brief   get the location name (aka branch) from the jenkins job name
+#  @brief   get the location name (mapped from  branch name) from the jenkins job name
 #  @param   {jobName} name of the job, optional, default JOB_NAME
 #  @return  location name
 getLocationName() {
-    local jobName=${1:-${JOB_NAME}}
+    local jobName=${1}
 
-    if [[ -z ${LFS_CI_GLOBAL_BRANCH_NAME} ]] ; then
-        local location=$(${LFS_CI_ROOT}/bin/getFromString.pl "${jobName}" location)
+    if [[ -z ${LFS_CI_GLOBAL_LOCATION_NAME} || ${jobName}  ]] ; then
+        local branchName=$(getBranchName ${jobName:-${JOB_NAME}})
         # skipped due to performance
-        # mustHaveValue "${location}" "location from job name"
+        # mustHaveValue "${branchName}" "branch name from job name"
 
         local configFile=${LFS_CI_CONFIG_FILE:-${LFS_CI_ROOT}/etc/global.cfg}
         # skipped due to performance
         # mustExistDirectory ${configFile}
         
-        local mappedLocation=$(${LFS_CI_ROOT}/bin/getConfig -k LFS_CI_global_mapping_location -t job_location:${location} -f ${configFile})
+        local mappedLocation=$(${LFS_CI_ROOT}/bin/getConfig -k LFS_CI_global_mapping_branch_location -t branchName:${branchName} -f ${configFile})
         # skipped due to performance
         # mustHaveValue "${mappedLocation}" "mapped location from jobname / config file"
-        export LFS_CI_GLOBAL_BRANCH_NAME=${mappedLocation}
+
+        [[ -z ${jobName} ]] && \
+            export LFS_CI_GLOBAL_LOCATION_NAME=${mappedLocation}
     fi
 
-    echo ${LFS_CI_GLOBAL_BRANCH_NAME}
-    return
+    echo ${mappedLocation:-${LFS_CI_GLOBAL_LOCATION_NAME}}
+    return 0
+}
+
+## @fn      getBranchName()
+#  @brief   get the branch name from the jenkins job name
+#  @param   <none>
+#  @return  return the branch name
+getBranchName() { 
+    local jobName=${1}
+
+    if [[ -z ${LFS_CI_GLOBAL_BRANCH_NAME} || ${jobName} ]] ; then
+        local branchName=$(${LFS_CI_ROOT}/bin/getFromString.pl "${jobName:-${JOB_NAME}}" branchName)
+        # mustHaveValue "${branchName}" "branch name from job name"
+
+        [[ -z ${jobName} ]] && \
+            export LFS_CI_GLOBAL_BRANCH_NAME=${branchName}
+    fi
+
+    echo ${branchName:-${LFS_CI_GLOBAL_BRANCH_NAME}}
+    return 0
 }
 
 ## @fn      getTaskNameFromJobName()

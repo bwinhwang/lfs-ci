@@ -64,7 +64,7 @@ test1() {
     export UPSTREAM_BUILD=123
     export JOB_NAME=LFS_KNIFE_-_knife_-_Build
     export BUILD_NUMBER=1234
-    export LFS_CI_GLOBAL_BRANCH_NAME=trunk
+    export LFS_CI_GLOBAL_LOCATION_NAME=trunk
 
     assertTrue "usecase_LFS_KNIFE_PACKAGE"
 
