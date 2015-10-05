@@ -9,12 +9,10 @@ oneTimeSetUp() {
 setUp() {
     export JOB_NAME=LFS_CI_-_trunk_-_Build_-_FSM-r3_-_fsm3_octeon2
     export LFS_CI_CONFIG_FILE=$(createTempFile)
-    echo 'LFS_CI_global_mapping_location < job_location:trunk > = pronb-developer'  > ${LFS_CI_CONFIG_FILE}
-    echo 'LFS_CI_global_mapping_location <                    > = ${job_location}' >> ${LFS_CI_CONFIG_FILE}
-    echo 'LFS_CI_global_mapping_branch_location < branchName:trunk > = pronb-developer' >> ${LFS_CI_CONFIG_FILE}
+    echo 'LFS_CI_global_mapping_branch_location < branchName:trunk > = pronb-developer'  >> ${LFS_CI_CONFIG_FILE}
     echo 'LFS_CI_global_mapping_location_branch < locationName:pronb-deveoper > = trunk' >> ${LFS_CI_CONFIG_FILE}
-    echo 'LFS_CI_global_mapping_branch_location < branchName:FB1506 > = FB1506' >> ${LFS_CI_CONFIG_FILE}
-    echo 'LFS_CI_global_mapping_location_branch < locationName:FB1505 > = FB1506' >> ${LFS_CI_CONFIG_FILE}
+    echo 'LFS_CI_global_mapping_branch_location < branchName:FB1506 > = FB1506'          >> ${LFS_CI_CONFIG_FILE}
+    echo 'LFS_CI_global_mapping_location_branch < locationName:FB1505 > = FB1506'        >> ${LFS_CI_CONFIG_FILE}
 
     return
 }

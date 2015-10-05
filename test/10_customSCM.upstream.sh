@@ -125,10 +125,9 @@ setUp() {
             ${JEKINS_HOME}/jobs/upstream_job_name/builds/2/changelog.xml
 
     export LFS_CI_CONFIG_FILE=$(createTempFile)
-    echo 'jenkinsMasterServerHostName=localhost'            >  ${LFS_CI_CONFIG_FILE}
-    echo 'jenkinsMasterServerPath = ${JEKINS_HOME}'         >> ${LFS_CI_CONFIG_FILE}
-    echo 'CUSTOM_SCM_upstream_job_name = upstream_job_name' >> ${LFS_CI_CONFIG_FILE}
-    echo "LFS_CI_global_mapping_location < job_location:trunk > = pronb-developer" >> ${LFS_CI_CONFIG_FILE}
+    echo 'jenkinsMasterServerHostName=localhost'                                        >  ${LFS_CI_CONFIG_FILE}
+    echo 'jenkinsMasterServerPath = ${JEKINS_HOME}'                                     >> ${LFS_CI_CONFIG_FILE}
+    echo 'CUSTOM_SCM_upstream_job_name = upstream_job_name'                             >> ${LFS_CI_CONFIG_FILE}
     echo "LFS_CI_global_mapping_branch_location < branchName:trunk > = pronb-developer" >> ${LFS_CI_CONFIG_FILE}
 
 
