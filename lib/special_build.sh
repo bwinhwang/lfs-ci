@@ -364,7 +364,12 @@ specialBuildUploadAndNotifyUser() {
             -r ${readmeFile}                   \
             -t ${label}                        \
             -n                                 \
-            -f ${LFS_CI_CONFIG_FILE}
+#RWE
+            -T OS                              \
+            -P $(getProductNameFromJobName)    \
+            -L  $(getLocationName)             \
+#RWE
+             -f ${LFS_CI_CONFIG_FILE}         
     return
 }
 
