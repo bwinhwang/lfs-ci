@@ -364,6 +364,9 @@ specialBuildUploadAndNotifyUser() {
             -r ${readmeFile}                   \
             -t ${label}                        \
             -n                                 \
+            -T OS                              \
+            -P $(getProductNameFromJobName)    \
+            -L  $(getLocationName)             \
             -f ${LFS_CI_CONFIG_FILE}         
     return
 }
