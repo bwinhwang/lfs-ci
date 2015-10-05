@@ -50,6 +50,9 @@ oneTimeSetUp() {
     copyAndExtractBuildArtifactsFromProject() {
         mockedCommand "copyAndExtractBuildArtifactsFromProject $@"
     }
+    getLocationName() {
+        echo pronb-developer
+    }
 
     return
 }

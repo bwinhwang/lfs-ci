@@ -14,6 +14,10 @@ oneTimeSetUp() {
             *) echo $1 ;;
         esac
     }
+    getLocationName() {
+        mockedCommand "getLocationName $@"
+        echo "location_name"
+    }
     execute() {
         mockedCommand "execute $@"
     }
@@ -41,7 +45,8 @@ test1() {
     local expect=$(createTempFile)
     cat <<EOF > ${expect}
 getConfig LFS_CI_uc_release_can_send_release_note
-execute ${LFS_CI_ROOT}/bin/sendReleaseNote -r ${WORKSPACE}/workspace/os/releasenote.txt -t PS_LFS_REL_BUILD_NAME -f ${LFS_CI_ROOT}/etc/global.cfg -T OS -P LFS -L pronb-developer
+getLocationName 
+execute ${LFS_CI_ROOT}/bin/sendReleaseNote -r ${WORKSPACE}/workspace/os/releasenote.txt -t PS_LFS_REL_BUILD_NAME -f ${LFS_CI_ROOT}/etc/global.cfg -T OS -P LFS -L location_name
 EOF
     assertExecutedCommands ${expect}
 

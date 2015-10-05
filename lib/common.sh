@@ -20,13 +20,6 @@ mustHaveTargetBoardName() {
     return
 }
 
-## @fn      getBranchName()
-#  @brief   alias for getLocationName
-#  @param   <none>
-#  @return  return the branch name
-getBranchName() { 
-    getLocationName $@
-}
 
 ## @fn      mustHaveLocationName()
 #  @brief   ensure, that there is a location name (aka branch)
@@ -44,7 +37,9 @@ mustHaveLocationName() {
 #  @param   <none>
 #  @return  <none>
 mustHaveBranchName() { 
-    mustHaveLocationName 
+    local branchName=$(getBranchName) 
+    mustHaveValue "${branchName}" "correct branch name from JOB_NAME ${JOB_NAME}"
+    return
 }
 
 ## @fn      getWorkspaceName()

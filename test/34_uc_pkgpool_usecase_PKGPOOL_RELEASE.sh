@@ -14,6 +14,14 @@ oneTimeSetUp() {
         mockedCommand "mustHaveCleanWorkspace"
         mkdir -p ${WORKSPACE}/workspace
     }
+    getBranchName() {
+        mockedCommand "getBranchName $@"
+        echo "trunk"
+    }
+    getLocationName() {
+        mockedCommand "getLocationName $@"
+        echo "pronb-developer"
+    }
     setBuildDescription() {
         mockedCommand "setBuildDescription $@"
     }
@@ -97,6 +105,7 @@ test1() {
 # execute ${LFS_CI_ROOT}/bin/sendReleaseNote -r ${WORKSPACE}/workspace/releasenote.txt -t LABEL -f ${LFS_CI_ROOT}/etc/lfs-ci.cfg
     cat <<EOF > ${expect}
 mustHaveCleanWorkspace
+getLocationName 
 copyArtifactsToWorkspace PKGPOOL_CI_-_trunk_-_Test 1234 pkgpool
 getBuildDirectoryOnMaster PKGPOOL_PROD_-_trunk_-_Release lastSuccessfulBuild
 runOnMaster test -e /path/to/jenkins/jobname/buildnumber/forReleaseNote.txt

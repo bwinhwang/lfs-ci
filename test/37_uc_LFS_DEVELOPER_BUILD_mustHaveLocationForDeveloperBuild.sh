@@ -46,7 +46,7 @@ EOF
     assertExecutedCommands ${expect}
 
     mustHaveLocationForSpecialBuild
-    assertEquals "LOCATION" "${LFS_CI_GLOBAL_BRANCH_NAME}"
+    assertEquals "LOCATION" "${LFS_CI_GLOBAL_LOCATION_NAME}"
 
     return
 }
@@ -63,7 +63,7 @@ EOF
     assertExecutedCommands ${expect}
 
     mustHaveLocationForSpecialBuild
-    assertEquals "trunk" "${LFS_CI_GLOBAL_BRANCH_NAME}"
+    assertEquals "trunk" "${LFS_CI_GLOBAL_LOCATION_NAME}"
 
     return
 }
@@ -79,7 +79,7 @@ EOF
     assertExecutedCommands ${expect}
 
     mustHaveLocationForSpecialBuild
-    assertEquals "pronb-developer" "${LFS_CI_GLOBAL_BRANCH_NAME}"
+    assertEquals "pronb-developer" "${LFS_CI_GLOBAL_LOCATION_NAME}"
 
     return
 }
@@ -96,7 +96,7 @@ EOF
     assertExecutedCommands ${expect}
 
     mustHaveLocationForSpecialBuild
-    assertEquals "LOCATION" "${LFS_CI_GLOBAL_BRANCH_NAME}"
+    assertEquals "LOCATION" "${LFS_CI_GLOBAL_LOCATION_NAME}"
 
     return
 }
@@ -113,7 +113,7 @@ EOF
     assertExecutedCommands ${expect}
 
     mustHaveLocationForSpecialBuild
-    assertEquals "trunk" "${LFS_CI_GLOBAL_BRANCH_NAME}"
+    assertEquals "trunk" "${LFS_CI_GLOBAL_LOCATION_NAME}"
 
     return
 }
@@ -129,7 +129,7 @@ EOF
     assertExecutedCommands ${expect}
 
     mustHaveLocationForSpecialBuild
-    assertEquals "pronb-developer" "${LFS_CI_GLOBAL_BRANCH_NAME}"
+    assertEquals "pronb-developer" "${LFS_CI_GLOBAL_LOCATION_NAME}"
 
     return
 }

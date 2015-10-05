@@ -17,6 +17,7 @@ export JOB_NAME="LFS_CI_-_trunk_-_Build"
 export LFS_CI_CONFIG_FILE=$(createTempFile)
 echo "lfsSourceRepos = ${reposUrl}"                                             > ${LFS_CI_CONFIG_FILE}
 echo "LFS_CI_global_mapping_location < job_location:trunk > = pronb-developer" >> ${LFS_CI_CONFIG_FILE}
+echo "LFS_CI_global_mapping_branch_location < branchName:trunk > = pronb-developer" >> ${LFS_CI_CONFIG_FILE}
 echo "svnMasterServerHostName <> = $repos" >> ${LFS_CI_CONFIG_FILE}
 echo "svnSlaveServerUlmHostName <> = $repos" >> ${LFS_CI_CONFIG_FILE}
 

@@ -85,7 +85,7 @@ usecase_LFS_KNIFE_BUILD() {
     local location=$(getConfig LFS_PROD_tag_to_branch -t tagName:${baseLabel})
     mustHaveValue "${location}" "location from base label"
 
-    export LFS_CI_GLOBAL_BRANCH_NAME=${location}
+    export LFS_CI_GLOBAL_LOCATION_NAME=${location}
 
     info "using revision ${location}@${revision} instead of ${KNIFE_LFS_BASELINE}"
 
