@@ -35,10 +35,12 @@ getLocationName() {
         trace "branch name is ${branchName}"
 
         local configFile=${LFS_CI_CONFIG_FILE:-${LFS_CI_ROOT}/etc/global.cfg}
+        trace "config file is ${configFile}"
         # skipped due to performance
         # mustExistDirectory ${configFile}
         
         local mappedLocation=$(${LFS_CI_ROOT}/bin/getConfig -k LFS_CI_global_mapping_branch_location -t branchName:${branchName} -f ${configFile})
+        trace "mappedLocation is ${mappedLocation}"
         # skipped due to performance
         # mustHaveValue "${mappedLocation}" "mapped location from jobname / config file"
 
