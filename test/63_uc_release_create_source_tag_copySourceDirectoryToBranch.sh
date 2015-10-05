@@ -60,7 +60,7 @@ getConfig LFS_PROD_uc_release_source_tag_prefix -t target:fsmr2
 _mustHaveLfsSourceSubversionUrl 
 svnCopy -r 12345 -F http://svnMasterServerHostName/os/trunk/src-bos http://svnMasterServerHostName/os/branches/pre_PS_LFS_OS_2015_09_0001/fsmr2/src-bos
 existsInSubversion http://svnMasterServerHostName//subsystems/src-bos/ LFS_PROD_uc_release_source_tag_prefixPS_LFS_OS_2015_09_0001
-svnCopy -m http://svnMasterServerHostName/os/branches/pre_PS_LFS_OS_2015_09_0001/fsmr2/src-bos http://svnMasterServerHostName//subsystems/src-bos/LFS_PROD_uc_release_source_tag_prefixPS_LFS_OS_2015_09_0001
+svnCopy -F http://svnMasterServerHostName/os/branches/pre_PS_LFS_OS_2015_09_0001/fsmr2/src-bos http://svnMasterServerHostName//subsystems/src-bos/LFS_PROD_uc_release_source_tag_prefixPS_LFS_OS_2015_09_0001
 EOF
     assertExecutedCommands ${expect}
 

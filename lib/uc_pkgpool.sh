@@ -208,10 +208,11 @@ usecase_PKGPOOL_RELEASE() {
 
     echo "<log/>" > ${workspace}/changelog.xml
     cd ${workspace}
-    export productName=PKGPOOL
     execute -n ${LFS_CI_ROOT}/bin/getReleaseNoteXML \
                 -t ${label}                         \
                 -o ${oldLabel}                      \
+                -T OS                               \
+                -P PKGPOOL                          \
                 -f ${LFS_CI_CONFIG_FILE} > ${workspace}/releasenote.xml
     
     rawDebug ${workspace}/releasenote.xml
@@ -240,9 +241,11 @@ usecase_PKGPOOL_RELEASE() {
     local canSendReleaseNote=$(getConfig LFS_CI_uc_release_can_send_release_note)
     if [[ ${canSendReleaseNote} ]] ; then
         if [[ -s ${releaseNoteTxt} ]] ; then
-            execute ${LFS_CI_ROOT}/bin/sendReleaseNote  -r ${releaseNoteTxt}          \
-                                                        -t ${label}                   \
-                                                        -f ${LFS_CI_CONFIG_FILE}
+            execute ${LFS_CI_ROOT}/bin/sendReleaseNote  -r ${releaseNoteTxt}     \
+                                                        -t ${label}              \
+                                                        -f ${LFS_CI_CONFIG_FILE} \
+                                                        -L ${location}           \
+                                                        -T OS -P PKGPOOL
         fi                                                            
     else
         warning "sending release note is disabled via config"

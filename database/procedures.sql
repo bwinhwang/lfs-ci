@@ -778,26 +778,22 @@ DELIMITER //
 CREATE PROCEDURE build_results()
 BEGIN
 
-    -- TODO: demx2fk3 2015-04-15 FIXME
-    -- DROP TABLE IF EXISTS tmp_build_results;
-    -- CREATE TEMPORARY TABLE tmp_build_results
-    -- SELECT b.id, 
-    --        b.build_name, 
-    --       b.branch_name, 
-    --        b.revision, 
-    --        b.comment, 
-    --        be1.timestamp AS build_started, 
-    --        CASE isFailed( b.id )
-    --             WHEN 0 THEN be2.timestamp
-    --             ELSE IF( be3.timestamp, be3.timestamp, DATE_ADD( be1.timestamp, INTERVAL 2 HOUR) )
-    --        END AS build_ended,
-    --        isFailed( b.id ) AS isFailed
-    -- FROM v_builds b, 
-    -- LEFT JOIN build_events be1 ON (b.id = be1.build_id AND be1.event_id = 1 )
-    -- LEFT JOIN build_events be2 ON (b.id = be2.build_id AND be2.event_id = 2 )
-    -- LEFT JOIN build_events be3 ON (b.id = be3.build_id AND be3.event_id = 3 )
-    -- ;
-
+    DROP TABLE IF EXISTS tmp_build_results;
+    CREATE TEMPORARY TABLE tmp_build_results
+    SELECT b.id, 
+           b.build_name, 
+           b.branch_name, 
+           b.revision, 
+           b.comment, 
+           be1.timestamp AS build_started,
+           IF( be2.timestamp, be2.timestamp, be3.timestamp ) AS build_ended,
+           IF( be3.timestamp, 1, 0 ) AS isFailed
+    FROM v_builds b
+    LEFT JOIN v_build_events be1 ON ( b.id = be1.build_id AND be1.event_type = 'build' AND be1.task_name = 'build' AND b.product_name = 'LFS' AND be1.event_state = 'started' )
+    LEFT JOIN v_build_events be2 ON ( b.id = be2.build_id AND be2.event_type = 'build' AND be2.task_name = 'build' AND b.product_name = 'LFS' and be2.event_state = 'finished' )
+    LEFT JOIN v_build_events be3 ON ( b.id = be3.build_id AND be3.event_type = 'build' AND be3.task_name = 'build' AND b.product_name = 'LFS' AND be3.event_state = 'failed' )
+    WHERE b.product_name = 'LFS'
+    ;
 END //
 DELIMITER ;
 -- }}}
@@ -1015,31 +1011,25 @@ BEGIN
     DECLARE var_prefix VARCHAR(64);
     DECLARE var_value VARCHAR(64);
     DECLARE var_regex VARCHAR(64);
-    DECLARE var_build_name VARCHAR(64);
     DECLARE var_branch_cnt INT;
 
     SELECT _branch_exists(in_branch) INTO var_branch_cnt;
 
-    SELECT replace(replace(release_name_regex, '${date_%Y}', YEAR(NOW())), '${date_%m}', LPAD(MONTH(NOW()), 2, 0)) 
-        INTO var_regex FROM branches WHERE branch_name=in_branch AND location_name != CONCAT(in_branch, '_FSMR4');
+    SELECT replace(replace(release_name_regex, '${date_%Y}', YEAR(NOW())), '${date_%m}', LPAD(MONTH(NOW()), 2, 0))
+      INTO var_regex FROM branches WHERE branch_name=in_branch AND location_name != CONCAT(in_branch, '_FSMR4');
 
     SET var_prefix = SUBSTRING(var_regex, 1, LENGTH(var_regex)-22);
     SET var_regex = CONCAT(in_label_prefix, var_regex);
     SET var_regex = CONCAT('^', CONCAT(var_regex, '$'));
 
-    -- 03.09.2015:
-    -- "ORDER BY timestamp" should work now. An issue was fixed in CI scripting.
-    SELECT build_name INTO var_build_name FROM v_build_events 
-        WHERE build_name REGEXP var_regex AND event_state='finished' AND product_name=in_product_name
-        AND event_type='build' AND task_name='build' AND build_name NOT REGEXP '_99[0-9][0-9]$'
-        ORDER BY timestamp DESC LIMIT 1;
-
-    SELECT LPAD(CONVERT(SUBSTRING(var_build_name, -4)+1, CHAR), 4, '0') INTO var_suffix;
+    SELECT LPAD(CONVERT(SUBSTRING(MAX(build_name), -4)+1, CHAR), 4, '0') INTO var_suffix FROM v_build_events
+      WHERE build_name REGEXP var_regex AND event_state='finished' AND product_name=in_product_name
+      AND event_type='subbuild' AND task_name='build' AND build_name NOT REGEXP '_99[0-9][0-9]$';
 
     SET var_value = CONCAT(var_prefix, var_suffix);
 
     IF var_suffix IS NULL THEN
-        SET var_value = CONCAT(var_prefix, '0001');
+      SET var_value = CONCAT(var_prefix, '0001');
     END IF;
 RETURN (var_value);
 END //
