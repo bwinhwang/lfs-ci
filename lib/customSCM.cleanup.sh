@@ -32,7 +32,6 @@ actionCheckout() {
     # TODO: demx2fk3 2014-07-28 cleanup
 
     local subTaskName=$(getSubTaskNameFromJobName)
-
     info "subtask name is ${subTaskName}"
 
     case ${subTaskName} in 
@@ -44,14 +43,15 @@ actionCheckout() {
             _ciLfsOldReleasesOnBranches ${tmpFileA}
             execute touch ${tmpFileB}
         ;;
-        phase_3_CI_LFS_in_Ulm)
-            fatal "not implemented"
-        ;;
         phase_2_SC_LFS_in_Ulm)
-            _scLfsOldReleasesOnBranches ${tmpFileA}
+            _scLfsOldReleasesOnBranches bld ${tmpFileA}
             execute touch ${tmpFileB}
         ;;
-        phase_3_SC_LFS_in_Ulm)
+        phase_2_SC_LFS_linuxkernel_in_Ulm)
+            _scLfsOldReleasesOnBranches kernel ${tmpFileA}
+            execute touch ${tmpFileB}
+        ;;
+        phase_3_*)
             fatal "not implemented"
         ;;
         phase_4_CI_LFS_in_*)
@@ -68,31 +68,51 @@ actionCheckout() {
             esac
         ;;
         phase_4_SC_LFS_in_*)
-            _scLfsRemoteSites ul ${tmpFileB}
+            _scLfsRemoteSites ul kernel ${tmpFileB}
+            _scLfsRemoteSites ul bld    ${tmpFileB}
 
             case ${subTaskName} in
-                *_in_ou) _scLfsRemoteSites ou ${tmpFileA} ;;
-                *_in_be) _scLfsRemoteSites be ${tmpFileA} ;;
-                *_in_wr) _scLfsRemoteSites wr ${tmpFileA} ;;
-                *_in_bh) _scLfsRemoteSites bh ${tmpFileA} ;;
-                *_in_hz) _scLfsRemoteSites hz ${tmpFileA} ;;
-                *_in_cloud) 
-                        _scLfsRemoteSites cloud ${tmpFileA} ;;
-                *_in_du) 
-                    execute sed -i "s:/build/home/SC_LFS/releases/bld:/usrd9/build/home/SC_LFS/releases/bld:g" ${tmpFileB}
-                    _scLfsRemoteSites du ${tmpFileA} 
+                *_in_ou)    
+                    _scLfsRemoteSites ou    kernel ${tmpFileA} 
+                    _scLfsRemoteSites ou    bld    ${tmpFileA}
                 ;;
-                *) exit 1 ;;
+                *_in_be)    
+                    _scLfsRemoteSites be    kernel ${tmpFileA} 
+                    _scLfsRemoteSites be    bld    ${tmpFileA}
+                ;;
+                *_in_be2)   
+                    _scLfsRemoteSites be2   kernel ${tmpFileA} 
+                    _scLfsRemoteSites be2   bld    ${tmpFileA} 
+                ;;
+                *_in_wr)    
+                    _scLfsRemoteSites wr    kernel ${tmpFileA} 
+                    _scLfsRemoteSites wr    bld    ${tmpFileA}
+                ;;
+                *_in_bh)    
+                    _scLfsRemoteSites bh    kernel ${tmpFileA} 
+                    _scLfsRemoteSites bh    bld    ${tmpFileA}
+                ;;
+                *_in_hz)    
+                    _scLfsRemoteSites hz    kernel ${tmpFileA} 
+                    _scLfsRemoteSites hz    bld    ${tmpFileA}
+                ;;
+                *_in_cloud) 
+                    _scLfsRemoteSites cloud kernel ${tmpFileA} 
+                    _scLfsRemoteSites cloud bld    ${tmpFileA}
+                ;;
+                *)  fatal "subTaskName ${subTaskName} not implemented" ;;
             esac
-
         ;;
         lfsArtifacts)
             _lfsArtifactsRemoveOldArtifacts ${tmpFileA}
         ;;
     esac
 
+    # don't delete baselines, which are listed in the exclution list
     if [[ -e ${LFS_CI_ROOT}/etc/baselineExclutionList.sed ]] ; then
+        info "removing removal canidates from list, which are excluded in baselineExclutionList.sed"
         execute sed -i -f ${LFS_CI_ROOT}/etc/baselineExclutionList.sed ${tmpFileA}
+        rawDebug ${tmpFileA}
     fi
 
     # don't delete baselines, which are in the ECL
@@ -101,13 +121,15 @@ actionCheckout() {
     debug "used baselines in ecl"
     rawDebug ${WORKSPACE}/usedBaselinesInEcl.txt
 
-    grep -vf ${WORKSPACE}/usedBaselinesInEcl.txt ${tmpFileA} > ${tmpFileC}
+    execute -l ${tmpFileC} grep -vf ${WORKSPACE}/usedBaselinesInEcl.txt ${tmpFileA} 
     execute cp -f ${tmpFileC} ${tmpFileA}
 
     debug "tmpFile A"
     rawDebug ${tmpFileA}
+
     debug "tmpFile B"
     rawDebug ${tmpFileB}
+
     ${LFS_CI_ROOT}/bin/diffToChangelog.pl -d -a ${tmpFileA} -b ${tmpFileB} > ${CHANGELOG}
 
     debug "changelog"
@@ -172,26 +194,34 @@ _ciLfsNotReleasedBuilds() {
 
 ## @fn      _scLfsOldReleasesOnBranches()
 #  @brief   create a list of all old releases on all branches from SC_LFS share (> 60 days)
+#  @param   {shareType}   type of the share (e.g. bld, kernel, ...)
 #  @param   {resultFile}    file which contains the results
 #  @return  <none>
 _scLfsOldReleasesOnBranches() {
-    local resultFile=$1
+    local shareType=$1
+    local resultFile=$2
+
     local tmpFileA=$(createTempFile)
     local tmpFileB=$(createTempFile)
-    # TODO: demx2fk3 2015-07-30 replace with getconfig
-    local directoryToCleanup=/build/home/SC_LFS/releases/bld/
-    # TODO: demx2fk3 2015-07-30 replace with getconfig
-    local days=60
+
+    local directoryToCleanup=$(getConfig ADMIN_sync_share_remote_directoryName -t siteName:ul -t shareType:${shareType})
+    mustExistDirectory ${directoryToCleanup}
+
+    local days=$(getConfig ADMIN_sync_share_retention_in_days -t shareType:${shareType})
+    mustHaveValue "${days}" "retention in days"
+
+    local depth=$(getConfig ADMIN_sync_share_check_depth -t shareType:${shareType})
+    mustHaveValue "${depth}" "depth to check in the filesystem (for find)"
 
     info "check for baselines older than ${days} days in ${directoryToCleanup}"
-    find ${directoryToCleanup} -mindepth 2 -maxdepth 2 -mtime +${days} -type d -printf "%p\n" \
-        | sort -u > ${tmpFileA}
+    execute -l ${tmpFileA}   find ${directoryToCleanup} -mindepth ${depth} -maxdepth ${depth} -mtime +${days} -type d -printf "%p\n" 
 
-    ${LFS_CI_ROOT}/bin/removalCandidates.pl  < ${tmpFileA} > ${tmpFileB}
+    execute -l ${tmpFileA}   sort -u ${tmpFileA} 
+    cat ${tmpFileA} |  ${LFS_CI_ROOT}/bin/removalCandidates.pl  > ${tmpFileB}
+    execute -l ${resultFile} grep -w -f ${tmpFileB} ${tmpFileA} 
+    execute                  sed -i -e "s/^/1 /g" ${resultFile}
 
-    grep -w -f ${tmpFileB} ${tmpFileA} | sed "s/^/1 /g" > ${resultFile}
-
-    return
+    return 0
 }
 
 ## @fn      _ciLfsRemoteSites()
@@ -219,21 +249,24 @@ _ciLfsRemoteSites() {
 ## @fn      _scLfsRemoteSites()
 #  @brief   create a list of all releases in SC_LFS on a remove site
 #  @param   {siteName}    name of the site (two letters)
+#  @param   {shareType}   type of the share (e.g. bld, kernel, ...)
 #  @param   {resultFile}  file which contains the results  
 #  @return  <none>
 _scLfsRemoteSites() {
     local siteName=$1
-    local resultFile=$2
+    local shareType=$2
+    local resultFile=$3
 
-    export siteName
-    export shareType=bld
-    local directoryToCleanup=$(getConfig ADMIN_sync_share_remote_directoryName)
-    local find=$(getConfig ADMIN_sync_share_find_command)
+    local directoryToCleanup=$(getConfig ADMIN_sync_share_remote_directoryName -t siteName:${siteName} -t shareType:${shareType})
+    local find=$(getConfig ADMIN_sync_share_find_command -t siteName:${siteName} -t shareType:${shareType})
 
     info "directoryToCleanup is ${directoryToCleanup}"
     ssh ${siteName}sync "${find} ${directoryToCleanup} -mindepth 2 -maxdepth 2 -type d -printf \"1 %p\n\" " \
-        | sort -u > ${resultFile} 
+        | sort -u >> ${resultFile} 
     mustBeSuccessfull "$?" "ssh find ${siteName}"
+
+    debug "direactories to cleanup in ${siteName} ${shareType}"
+    rawDebug ${resultFile}
 
     return
 }
