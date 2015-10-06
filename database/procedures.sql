@@ -9,11 +9,11 @@ BEGIN
     DECLARE cnt_branch_id INT;
     DECLARE var_branch_id INT;
 
-    SELECT count(id) INTO cnt_branch_id FROM branches WHERE location_name = in_branch_name;
+    SELECT count(id) INTO cnt_branch_id FROM branches WHERE branch_name = in_branch_name;
     IF cnt_branch_id = 0 THEN
         INSERT INTO branches ( ps_branch_name, location_name, branch_name, date_created, comment ) VALUES ( in_branch_name, in_branch_name, in_branch_name, NOW(), in_comment );
     END IF;
-    SELECT id INTO var_branch_id FROM branches WHERE location_name = in_branch_name;
+    SELECT id INTO var_branch_id FROM branches WHERE branch_name = in_branch_name;
 
     INSERT INTO builds (build_name, branch_id, revision, comment) VALUES ( in_build_name, var_branch_id, in_revision, in_comment );
    
@@ -708,11 +708,6 @@ END //
 DELIMITER ;
 
 -- }}}
--- {{{ isFailed
-
-DROP FUNCTION IF EXISTS isFailed;
-
--- }}}
 -- {{{ _running_tasks
 
 DROP FUNCTION IF EXISTS _running_tasks;
@@ -798,9 +793,6 @@ END //
 DELIMITER ;
 -- }}}
 
--- {{{ migrateBranchData
-DROP PROCEDURE IF EXISTS migrateBranchData;
--- }}}
 -- {{{ _check_if_event_builds
 
 DROP PROCEDURE IF EXISTS _check_if_event_builds;
@@ -1016,7 +1008,7 @@ BEGIN
     SELECT _branch_exists(in_branch) INTO var_branch_cnt;
 
     SELECT replace(replace(release_name_regex, '${date_%Y}', YEAR(NOW())), '${date_%m}', LPAD(MONTH(NOW()), 2, 0))
-      INTO var_regex FROM branches WHERE branch_name=in_branch AND location_name != CONCAT(in_branch, '_FSMR4');
+      INTO var_regex FROM branches WHERE branch_name=in_branch AND branch_name != CONCAT(in_branch, '_FSMR4');
 
     SET var_prefix = SUBSTRING(var_regex, 1, LENGTH(var_regex)-22);
     SET var_regex = CONCAT(in_label_prefix, var_regex);
@@ -1052,7 +1044,7 @@ BEGIN
             INTO var_regex FROM branches WHERE branch_name=in_branch;
     ELSE
         SELECT replace(replace(release_name_regex, '${date_%Y}', YEAR(NOW())), '${date_%m}', LPAD(MONTH(NOW()), 2, 0)) 
-            INTO var_regex FROM branches WHERE branch_name=in_branch AND location_name != CONCAT(in_branch, '_FSMR4');
+            INTO var_regex FROM branches WHERE branch_name=in_branch AND branch_name != CONCAT(in_branch, '_FSMR4');
         IF var_regex IS NULL THEN
             SELECT replace(based_on_release, 'REL', 'OS') INTO var_regex FROM branches WHERE branch_name=in_branch;
         END IF;
@@ -1078,7 +1070,7 @@ BEGIN
     DECLARE var_branch_cnt INT;
 
     SELECT COUNT(branch_name) INTO var_branch_cnt FROM branches 
-        WHERE branch_name=in_branch AND location_name != CONCAT(in_branch, '_FSMR4');
+        WHERE branch_name=in_branch AND branch_name != CONCAT(in_branch, '_FSMR4');
 
     IF var_branch_cnt = 0 THEN
         SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'branch does not exist in table branches';
@@ -1148,9 +1140,7 @@ END //
 DELIMITER ;
 -- }}}
 
-
-
--- {{{ setBuildEventStateToUnstable
+-- {{{ tmp_bm
 DROP PROCEDURE IF EXISTS tmp_bm;
 DELIMITER //
 CREATE PROCEDURE tmp_bm(
