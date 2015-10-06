@@ -71,8 +71,8 @@ sub prepare {
                                                                                      $self->{data}{TAGNAME} ) );
     }
 
-    $self->{subject}     =~ s:__([A-Z_]*)__:  $self->{data}{$1} // $config->getConfig( name => $1 ) :eg; 
-    $self->{releaseNote} =~ s:__([A-Z_]*)__:  $self->{data}{$1} // $config->getConfig( name => $1 ) :eg;  
+    $self->{subject}     =~ s:__([A-Za-z0-9_]*)__:  $self->{data}{$1} // $config->getConfig( name => $1 ) :eg; 
+    $self->{releaseNote} =~ s:__([A-Za-z0-9_]*)__:  $self->{data}{$1} // $config->getConfig( name => $1 ) :eg;  
 
     return;
 }
