@@ -1034,29 +1034,20 @@ DELIMITER //
 CREATE FUNCTION get_last_successful_build_name(in_branch VARCHAR(32), in_product_name VARCHAR(32), in_label_prefix VARCHAR(32)) RETURNS VARCHAR(64)
 BEGIN
     DECLARE var_value VARCHAR(64);
-    DECLARE var_regex VARCHAR(64);
-    DECLARE var_branch_cnt INT;
+    DECLARE tmp INTEGER;
 
-    SELECT _branch_exists(in_branch) INTO var_branch_cnt;
+    SELECT _branch_exists(in_branch) INTO tmp;
 
-    IF in_branch = 'trunk' THEN
-        SELECT replace(replace(release_name_regex, '${date_%Y}', '20[0-9][0-9]'), '${date_%m}', '[0-9][0-9]') 
-            INTO var_regex FROM branches WHERE branch_name=in_branch;
-    ELSE
-        SELECT replace(replace(release_name_regex, '${date_%Y}', YEAR(NOW())), '${date_%m}', LPAD(MONTH(NOW()), 2, 0)) 
-            INTO var_regex FROM branches WHERE branch_name=in_branch AND branch_name != CONCAT(in_branch, '_FSMR4');
-        IF var_regex IS NULL THEN
-            SELECT replace(based_on_release, 'REL', 'OS') INTO var_regex FROM branches WHERE branch_name=in_branch;
-        END IF;
-    END IF;
-
-    SET var_regex = CONCAT(in_label_prefix, var_regex);
-    SET var_regex = CONCAT('^', CONCAT(var_regex, '$'));
-
-    SELECT build_name INTO var_value FROM v_build_events 
-        WHERE build_name REGEXP var_regex AND event_state='finished' AND product_name=in_product_name
-        AND event_type='build' AND task_name='build' AND build_name NOT REGEXP '_99[0-9][0-9]$'
+    SELECT b.build_name INTO var_value
+        FROM v_build_events be, v_builds b 
+        WHERE event_state = 'finished' 
+        AND be.build_id = b.id
+        AND be.event_type = 'build' 
+        AND be.task_name = 'build' 
+        AND b.branch_name = in_branch
+        AND b.product_name = in_product_name
         ORDER BY timestamp DESC LIMIT 1;
+
 RETURN (var_value);
 END //
 DELIMITER ;
