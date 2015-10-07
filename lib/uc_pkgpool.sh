@@ -177,7 +177,7 @@ usecase_PKGPOOL_RELEASE() {
     # branchName and product name is needed in sendReleaseNote
     local productName=$(getProductNameFromJobName)
     mustHaveValue "${productName}" "product name"
-    local branchName=$(getLocationName)
+    local branchName=$(getBranchName)
     mustHaveValue "${branchName}" "branchName"
 
     copyArtifactsToWorkspace ${UPSTREAM_PROJECT} ${UPSTREAM_BUILD} "pkgpool"
