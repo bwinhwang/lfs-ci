@@ -1095,24 +1095,22 @@ DELIMITER ;
 -- {{{ new_branch
 DROP PROCEDURE IF EXISTS new_branch;
 DELIMITER //
-CREATE PROCEDURE new_branch( in_branch_name VARCHAR(128), 
-                             in_location_name VARCHAR(128), 
-                             in_based_on_revision INT, 
-                             in_based_on_release VARCHAR(128), 
-                             in_release_name_regex VARCHAR(128), 
-                             in_date_created DATETIME, 
+CREATE PROCEDURE new_branch( in_branch_name VARCHAR(128),
+                             in_location_name VARCHAR(128),
+                             in_based_on_revision INT,
+                             in_based_on_release VARCHAR(128),
+                             in_release_name_regex VARCHAR(128),
+                             in_date_created DATETIME,
                              in_comment TEXT,
                              in_branch_description TEXT,
                              in_ps_branch_name VARCHAR(128),
                              in_ps_branch_comment TEXT,
                              in_ecl_url VARCHAR(254))
 BEGIN
-    DECLARE var_nm_id INT;
-
     DECLARE EXIT HANDLER FOR SQLEXCEPTION
     BEGIN
         ROLLBACK;
-        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Could not create branch';
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Could not create branch in DB';
     END;
 
     IF in_comment = '' OR in_comment = ' ' THEN
@@ -1135,13 +1133,11 @@ BEGIN
                        in_release_name_regex, in_date_created, in_comment, in_branch_description);
 
         INSERT INTO ps_branches (ps_branch_name, ecl_url, comment)
-            VALUES (in_ps_branch_name, in_ecl_url, in_ps_branch_comment);
+               VALUES (in_ps_branch_name, in_ecl_url, in_ps_branch_comment);
 
         INSERT INTO nm_branches_ps_branches (ps_branch_id, branch_id)
-            VALUES ((SELECT id FROM ps_branches WHERE ps_branch_name=in_ps_branch_name),
-                   (SELECT id FROM branches WHERE branch_name=in_branch_name));
-
-        SELECT max(id) INTO var_nm_id FROM nm_branches_ps_branches;
+               VALUES ((SELECT id FROM ps_branches WHERE ps_branch_name=in_ps_branch_name),
+                       (SELECT id FROM branches WHERE branch_name=in_branch_name));
 
     COMMIT;
 END //
@@ -1231,6 +1227,35 @@ branch: LOOP
     EXECUTE stmt;
     DEALLOCATE PREPARE stmt;
 
+END //
+DELIMITER ;
+-- }}}
+
+-- {{{ new_md_branch_ecl_entry_for_lrc
+DROP PROCEDURE IF EXISTS new_md_branch_ecl_entry_for_lrc;
+DELIMITER //
+CREATE PROCEDURE new_md_branch_ecl_entry_for_lrc(in_branch_name VARCHAR(64), in_ps_branch_name VARCHAR(64))
+BEGIN
+    DECLARE var_nm_entries INT;
+    DECLARE var_branch_number INT;
+    DECLARE var_branch_number_lrc INT;
+    DECLARE var_branch_name_lrc VARCHAR(64);
+    DECLARE var_branch_id_lrc INT;
+
+    SELECT count(id) INTO var_nm_entries FROM nm_branches_ps_branches WHERE ps_branch_id=(
+        SELECT id FROM ps_branches WHERE ps_branch_name=in_ps_branch_name);
+
+    IF var_nm_entries = 1 AND in_branch_name LIKE 'MD%' THEN
+        SET var_branch_number:= substring(in_branch_name, 4);
+        SET var_branch_number_lrc:= var_branch_number - 1;
+        SET var_branch_name_lrc:= concat('LRC_FB', var_branch_number_lrc);
+        SELECT id INTO var_branch_id_lrc FROM branches WHERE branch_name=var_branch_name_lrc AND status!='closed';
+        IF var_branch_id_lrc IS NOT NULL THEN
+            INSERT INTO nm_branches_ps_branches (ps_branch_id, branch_id)
+                VALUES ((SELECT id FROM ps_branches WHERE ps_branch_name=in_ps_branch_name),
+                        (var_branch_id_lrc));
+        END IF;
+    END IF;
 END //
 DELIMITER ;
 -- }}}
