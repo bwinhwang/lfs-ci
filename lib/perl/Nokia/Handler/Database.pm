@@ -125,7 +125,7 @@ sub branchInformation {
                              value => $row->{branch_name} };
 
         push @{ $result }, { name  => "LFS_CI_global_mapping_branch_location",
-                             tags  => sprintf( 'productName:LFS, branchName:%s', $row->{branch_name} ),
+                             tags  => sprintf( 'branchName:%s', $row->{branch_name} ),
                              value => $row->{location_name} };
 
         push @{ $result }, { name  => "LFS_PROD_branch_to_tag_regex",
