@@ -1228,7 +1228,11 @@ BEGIN
 
     IF var_nm_entries = 1 AND in_branch_name LIKE 'MD%' THEN
         SET var_branch_number:= substring(in_branch_name, 4);
-        SET var_branch_number_lrc:= var_branch_number - 1;
+        IF in_branch_name NOT LIKE '%01' THEN
+            SET var_branch_number_lrc:= var_branch_number - 1;
+        ELSE
+            SET var_branch_number_lrc:= var_branch_number - 89;
+        END IF;
         SET var_branch_name_lrc:= concat('LRC_FB', var_branch_number_lrc);
         SELECT id INTO var_branch_id_lrc FROM branches WHERE branch_name=var_branch_name_lrc AND status!='closed';
         IF var_branch_id_lrc IS NOT NULL THEN
