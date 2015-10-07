@@ -114,7 +114,7 @@ Host lfs_share_sync_host_oulu ousync
     UserKnownHostsFile              /dev/null
     LogLevel                        quiet
 
-Host lfs_share_sync_host_ulm ulsync
+Host lfs_share_sync_host_ulm ulsync ul2sync
     Hostname                        ulling05.emea.nsn-net.net
     User                            psulm
     ChallengeResponseAuthentication no
@@ -141,7 +141,7 @@ Host lfs_share_sync_host_wroclaw wrsync
     LogLevel                        quiet
 
 Host lfs_share_sync_host_bangalore bhsync
-    Hostname                        bhlbtr01.apac.nsn-net.net
+    Hostname                        bhling20.apac.nsn-net.net
     User                            psulm
     ChallengeResponseAuthentication no
     PasswordAuthentication          no
