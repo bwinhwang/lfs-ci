@@ -175,11 +175,11 @@ _createRevisionsTxtFile() {
 
     execute touch ${newRevisionsFile}
 
-    # get the locations/<branch>/Dependencies
-    local branch=
-    for branch in ${locationName} 
+    # get the locations/<location>/Dependencies
+    local location=
+    for location in ${locationName} 
     do
-        local dependenciesFileUrl=${srcRepos}/os/trunk/bldtools/locations-${branch}/Dependencies
+        local dependenciesFileUrl=${srcRepos}/os/trunk/bldtools/locations-${location}/Dependencies
         # check, if dependency file exists
         execute svn ls ${dependenciesFileUrl} 
 

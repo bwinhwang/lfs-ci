@@ -174,11 +174,11 @@ usecase_PKGPOOL_RELEASE() {
     local workspace=$(getWorkspaceName)
     mustHaveCleanWorkspace
 
-    # location and product name is needed in sendReleaseNote
+    # branchName and product name is needed in sendReleaseNote
     local productName=$(getProductNameFromJobName)
     mustHaveValue "${productName}" "product name"
-    local location=$(getLocationName)
-    mustHaveValue "${location}" "location"
+    local branchName=$(getBranchName)
+    mustHaveValue "${branchName}" "branchName"
 
     copyArtifactsToWorkspace ${UPSTREAM_PROJECT} ${UPSTREAM_BUILD} "pkgpool"
     local lastSuccessfulBuildDirectory=$(getBuildDirectoryOnMaster ${JOB_NAME} lastSuccessfulBuild)
@@ -244,7 +244,7 @@ usecase_PKGPOOL_RELEASE() {
             execute ${LFS_CI_ROOT}/bin/sendReleaseNote  -r ${releaseNoteTxt}     \
                                                         -t ${label}              \
                                                         -f ${LFS_CI_CONFIG_FILE} \
-                                                        -L ${location}           \
+                                                        -L ${branchName}         \
                                                         -T OS -P PKGPOOL
         fi                                                            
     else

@@ -144,6 +144,7 @@ getConfig() {
 
     local productName=$(getProductNameFromJobName)
     local location=$(getLocationName)
+    local branchName=$(getBranchName)
     local taskName=$(getTaskNameFromJobName)
     local subTaskName=$(getSubTaskNameFromJobName)
     local config=$(getTargetBoardName)
@@ -163,6 +164,7 @@ getConfig() {
         -t taskName:${taskName}       \
         -t subTaskName:${subTaskName} \
         -t location:${location}       \
+        -t branchName:${branchName}   \
         -t config:${config}           \
         ${tags}
 

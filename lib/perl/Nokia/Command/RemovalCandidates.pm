@@ -37,6 +37,7 @@ sub prepare {
                                                  base => $base };
         } elsif ( $base eq "SAMPLEVERSION" or
                   $base eq "EMPTY" or
+                  $base eq "build" or
                   $base eq "DENSE" 
                 ) {
             # ignore this baselines

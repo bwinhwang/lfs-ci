@@ -9,11 +9,11 @@ BEGIN
     DECLARE cnt_branch_id INT;
     DECLARE var_branch_id INT;
 
-    SELECT count(id) INTO cnt_branch_id FROM branches WHERE location_name = in_branch_name;
+    SELECT count(id) INTO cnt_branch_id FROM branches WHERE branch_name = in_branch_name;
     IF cnt_branch_id = 0 THEN
         INSERT INTO branches ( ps_branch_name, location_name, branch_name, date_created, comment ) VALUES ( in_branch_name, in_branch_name, in_branch_name, NOW(), in_comment );
     END IF;
-    SELECT id INTO var_branch_id FROM branches WHERE location_name = in_branch_name;
+    SELECT id INTO var_branch_id FROM branches WHERE branch_name = in_branch_name;
 
     INSERT INTO builds (build_name, branch_id, revision, comment) VALUES ( in_build_name, var_branch_id, in_revision, in_comment );
    
@@ -708,11 +708,6 @@ END //
 DELIMITER ;
 
 -- }}}
--- {{{ isFailed
-
-DROP FUNCTION IF EXISTS isFailed;
-
--- }}}
 -- {{{ _running_tasks
 
 DROP FUNCTION IF EXISTS _running_tasks;
@@ -798,9 +793,6 @@ END //
 DELIMITER ;
 -- }}}
 
--- {{{ migrateBranchData
-DROP PROCEDURE IF EXISTS migrateBranchData;
--- }}}
 -- {{{ _check_if_event_builds
 
 DROP PROCEDURE IF EXISTS _check_if_event_builds;
@@ -1016,7 +1008,7 @@ BEGIN
     SELECT _branch_exists(in_branch) INTO var_branch_cnt;
 
     SELECT replace(replace(release_name_regex, '${date_%Y}', YEAR(NOW())), '${date_%m}', LPAD(MONTH(NOW()), 2, 0))
-      INTO var_regex FROM branches WHERE branch_name=in_branch AND location_name != CONCAT(in_branch, '_FSMR4');
+      INTO var_regex FROM branches WHERE branch_name=in_branch AND branch_name != CONCAT(in_branch, '_FSMR4');
 
     SET var_prefix = SUBSTRING(var_regex, 1, LENGTH(var_regex)-22);
     SET var_regex = CONCAT(in_label_prefix, var_regex);
@@ -1042,29 +1034,20 @@ DELIMITER //
 CREATE FUNCTION get_last_successful_build_name(in_branch VARCHAR(32), in_product_name VARCHAR(32), in_label_prefix VARCHAR(32)) RETURNS VARCHAR(64)
 BEGIN
     DECLARE var_value VARCHAR(64);
-    DECLARE var_regex VARCHAR(64);
-    DECLARE var_branch_cnt INT;
+    DECLARE tmp INTEGER;
 
-    SELECT _branch_exists(in_branch) INTO var_branch_cnt;
+    SELECT _branch_exists(in_branch) INTO tmp;
 
-    IF in_branch = 'trunk' THEN
-        SELECT replace(replace(release_name_regex, '${date_%Y}', '20[0-9][0-9]'), '${date_%m}', '[0-9][0-9]') 
-            INTO var_regex FROM branches WHERE branch_name=in_branch;
-    ELSE
-        SELECT replace(replace(release_name_regex, '${date_%Y}', YEAR(NOW())), '${date_%m}', LPAD(MONTH(NOW()), 2, 0)) 
-            INTO var_regex FROM branches WHERE branch_name=in_branch AND location_name != CONCAT(in_branch, '_FSMR4');
-        IF var_regex IS NULL THEN
-            SELECT replace(based_on_release, 'REL', 'OS') INTO var_regex FROM branches WHERE branch_name=in_branch;
-        END IF;
-    END IF;
-
-    SET var_regex = CONCAT(in_label_prefix, var_regex);
-    SET var_regex = CONCAT('^', CONCAT(var_regex, '$'));
-
-    SELECT build_name INTO var_value FROM v_build_events 
-        WHERE build_name REGEXP var_regex AND event_state='finished' AND product_name=in_product_name
-        AND event_type='build' AND task_name='build' AND build_name NOT REGEXP '_99[0-9][0-9]$'
+    SELECT b.build_name INTO var_value
+        FROM v_build_events be, v_builds b 
+        WHERE event_state = 'finished' 
+        AND be.build_id = b.id
+        AND be.event_type = 'build' 
+        AND be.task_name = 'build' 
+        AND b.branch_name = in_branch
+        AND b.product_name = in_product_name
         ORDER BY timestamp DESC LIMIT 1;
+
 RETURN (var_value);
 END //
 DELIMITER ;
@@ -1078,7 +1061,7 @@ BEGIN
     DECLARE var_branch_cnt INT;
 
     SELECT COUNT(branch_name) INTO var_branch_cnt FROM branches 
-        WHERE branch_name=in_branch AND location_name != CONCAT(in_branch, '_FSMR4');
+        WHERE branch_name=in_branch AND branch_name != CONCAT(in_branch, '_FSMR4');
 
     IF var_branch_cnt = 0 THEN
         SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'branch does not exist in table branches';
@@ -1095,24 +1078,22 @@ DELIMITER ;
 -- {{{ new_branch
 DROP PROCEDURE IF EXISTS new_branch;
 DELIMITER //
-CREATE PROCEDURE new_branch( in_branch_name VARCHAR(128), 
-                             in_location_name VARCHAR(128), 
-                             in_based_on_revision INT, 
-                             in_based_on_release VARCHAR(128), 
-                             in_release_name_regex VARCHAR(128), 
-                             in_date_created DATETIME, 
+CREATE PROCEDURE new_branch( in_branch_name VARCHAR(128),
+                             in_location_name VARCHAR(128),
+                             in_based_on_revision INT,
+                             in_based_on_release VARCHAR(128),
+                             in_release_name_regex VARCHAR(128),
+                             in_date_created DATETIME,
                              in_comment TEXT,
                              in_branch_description TEXT,
                              in_ps_branch_name VARCHAR(128),
                              in_ps_branch_comment TEXT,
                              in_ecl_url VARCHAR(254))
 BEGIN
-    DECLARE var_nm_id INT;
-
     DECLARE EXIT HANDLER FOR SQLEXCEPTION
     BEGIN
         ROLLBACK;
-        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Could not create branch';
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Could not create branch in DB';
     END;
 
     IF in_comment = '' OR in_comment = ' ' THEN
@@ -1135,22 +1116,18 @@ BEGIN
                        in_release_name_regex, in_date_created, in_comment, in_branch_description);
 
         INSERT INTO ps_branches (ps_branch_name, ecl_url, comment)
-            VALUES (in_ps_branch_name, in_ecl_url, in_ps_branch_comment);
+               VALUES (in_ps_branch_name, in_ecl_url, in_ps_branch_comment);
 
         INSERT INTO nm_branches_ps_branches (ps_branch_id, branch_id)
-            VALUES ((SELECT id FROM ps_branches WHERE ps_branch_name=in_ps_branch_name),
-                   (SELECT id FROM branches WHERE branch_name=in_branch_name));
-
-        SELECT max(id) INTO var_nm_id FROM nm_branches_ps_branches;
+               VALUES ((SELECT id FROM ps_branches WHERE ps_branch_name=in_ps_branch_name),
+                       (SELECT id FROM branches WHERE branch_name=in_branch_name));
 
     COMMIT;
 END //
 DELIMITER ;
 -- }}}
 
-
-
--- {{{ setBuildEventStateToUnstable
+-- {{{ tmp_bm
 DROP PROCEDURE IF EXISTS tmp_bm;
 DELIMITER //
 CREATE PROCEDURE tmp_bm(
@@ -1231,6 +1208,35 @@ branch: LOOP
     EXECUTE stmt;
     DEALLOCATE PREPARE stmt;
 
+END //
+DELIMITER ;
+-- }}}
+
+-- {{{ new_md_branch_ecl_entry_for_lrc
+DROP PROCEDURE IF EXISTS new_md_branch_ecl_entry_for_lrc;
+DELIMITER //
+CREATE PROCEDURE new_md_branch_ecl_entry_for_lrc(in_branch_name VARCHAR(64), in_ps_branch_name VARCHAR(64))
+BEGIN
+    DECLARE var_nm_entries INT;
+    DECLARE var_branch_number INT;
+    DECLARE var_branch_number_lrc INT;
+    DECLARE var_branch_name_lrc VARCHAR(64);
+    DECLARE var_branch_id_lrc INT;
+
+    SELECT count(id) INTO var_nm_entries FROM nm_branches_ps_branches WHERE ps_branch_id=(
+        SELECT id FROM ps_branches WHERE ps_branch_name=in_ps_branch_name);
+
+    IF var_nm_entries = 1 AND in_branch_name LIKE 'MD%' THEN
+        SET var_branch_number:= substring(in_branch_name, 4);
+        SET var_branch_number_lrc:= var_branch_number - 1;
+        SET var_branch_name_lrc:= concat('LRC_FB', var_branch_number_lrc);
+        SELECT id INTO var_branch_id_lrc FROM branches WHERE branch_name=var_branch_name_lrc AND status!='closed';
+        IF var_branch_id_lrc IS NOT NULL THEN
+            INSERT INTO nm_branches_ps_branches (ps_branch_id, branch_id)
+                VALUES ((SELECT id FROM ps_branches WHERE ps_branch_name=in_ps_branch_name),
+                        (var_branch_id_lrc));
+        END IF;
+    END IF;
 END //
 DELIMITER ;
 -- }}}
