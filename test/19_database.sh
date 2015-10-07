@@ -12,10 +12,18 @@ oneTimeSetUp() {
     }
     getLocationName() {
         mockCommand "getLocationName $@"
+        echo pronb-developer
+    }
+    getBranchName() {
+        mockCommand "getBranchName $@"
         echo trunk
     }
     mustHaveLocationName() {
         mockCommand "mustHaveLocationName $@"
+        return
+    }
+    mustHaveBranchName() {
+        mockCommand "mustHaveBranchName $@"
         return
     }
     mustHaveNextCiLabelName() {
@@ -61,8 +69,8 @@ testDatabaseEventBuildStarted_ok() {
 
     local expect=$(createTempFile)
     cat <<EOF > ${expect}
-getLocationName
-mustHaveLocationName
+getBranchName
+mustHaveBranchName
 getBuildDirectoryOnMaster LFS_CI_-_trunk_-_Build_-_FSM-r2_-_fcmd 123
 runOnMaster cat /path/to/build/job/number/revisionstate.xml
 execute -i ${LFS_CI_ROOT}/bin/newEvent --buildName=PS_LFS_OS_9999_88_7777 --action=build_started --jobName=${JOB_NAME} --buildNumber=123 --productName=LFS --taskName=build --revision=123456 --branchName=trunk

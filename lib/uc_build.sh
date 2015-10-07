@@ -134,8 +134,6 @@ usecase_LFS_BUILD_CREATE_VERSION() {
     labelPrefix=$(getConfig LFS_PROD_label_prefix)
     branch=$(getBranchName)
     mustHaveBranchName
-    # TODO remove as soon as branchName and locationName are separated
-    [[ ${branch} == "pronb-developer" ]] && branch="trunk"
 
     mustHaveDatabaseCredentials
     local oldBuildName=""

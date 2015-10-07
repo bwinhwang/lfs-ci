@@ -18,6 +18,9 @@ oneTimeSetUp() {
         mockedCommand "getBranchName $@"
         echo "branch_name"
     }
+    mustHaveBranchName() {
+        mockedCommand "mustHaveBranchName $@"
+    }
     svnCopy() {
         mockedCommand "svnCopy $@"
     }
@@ -43,6 +46,7 @@ test1() {
     local expect=$(createTempFile)
     cat <<EOF > ${expect}
 getBranchName 
+mustHaveBranchName 
 getConfig LFS_PROD_svn_delivery_release_repos_url -t tagName:LFS_PROD_RELEASE_CURRENT_TAG_NAME
 getConfig LFS_CI_uc_release_can_create_release_tag
 getConfig LFS_PROD_uc_release_svn_message_prefix

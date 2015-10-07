@@ -46,14 +46,14 @@ EOF
     assertExecutedCommands ${expect}
 
     mustHaveLocationForSpecialBuild
-    assertEquals "LOCATION" "${LFS_CI_GLOBAL_BRANCH_NAME}"
+    assertEquals "LOCATION" "${LFS_CI_GLOBAL_LOCATION_NAME}"
 
     return
 }
 
 test2() {
     export JOB_NAME=LFS_DEV_-_developer_-_Build_-_FSM-r2_-_fcmd
-    export UT_LOCATION=trunk
+    export UT_LOCATION=location_name
     assertTrue "mustHaveLocationForSpecialBuild"
 
     local expect=$(createTempFile)
@@ -63,7 +63,7 @@ EOF
     assertExecutedCommands ${expect}
 
     mustHaveLocationForSpecialBuild
-    assertEquals "trunk" "${LFS_CI_GLOBAL_BRANCH_NAME}"
+    assertEquals "location_name" "${LFS_CI_GLOBAL_LOCATION_NAME}"
 
     return
 }
@@ -79,7 +79,7 @@ EOF
     assertExecutedCommands ${expect}
 
     mustHaveLocationForSpecialBuild
-    assertEquals "pronb-developer" "${LFS_CI_GLOBAL_BRANCH_NAME}"
+    assertEquals "pronb-developer" "${LFS_CI_GLOBAL_LOCATION_NAME}"
 
     return
 }
@@ -96,14 +96,14 @@ EOF
     assertExecutedCommands ${expect}
 
     mustHaveLocationForSpecialBuild
-    assertEquals "LOCATION" "${LFS_CI_GLOBAL_BRANCH_NAME}"
+    assertEquals "LOCATION" "${LFS_CI_GLOBAL_LOCATION_NAME}"
 
     return
 }
 
 test5() {
     export JOB_NAME=LFS_DEV_-_developer_-_Build_-_FSM-r4_-_fcmd
-    export UT_LOCATION=trunk
+    export UT_LOCATION=location_name
     assertTrue "mustHaveLocationForSpecialBuild"
 
     local expect=$(createTempFile)
@@ -113,7 +113,7 @@ EOF
     assertExecutedCommands ${expect}
 
     mustHaveLocationForSpecialBuild
-    assertEquals "trunk" "${LFS_CI_GLOBAL_BRANCH_NAME}"
+    assertEquals "location_name" "${LFS_CI_GLOBAL_LOCATION_NAME}"
 
     return
 }
@@ -129,7 +129,7 @@ EOF
     assertExecutedCommands ${expect}
 
     mustHaveLocationForSpecialBuild
-    assertEquals "pronb-developer" "${LFS_CI_GLOBAL_BRANCH_NAME}"
+    assertEquals "pronb-developer" "${LFS_CI_GLOBAL_LOCATION_NAME}"
 
     return
 }

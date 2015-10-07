@@ -64,7 +64,7 @@ test1() {
     export UPSTREAM_BUILD=123
     export JOB_NAME=LFS_KNIFE_-_knife_-_Build
     export BUILD_NUMBER=1234
-    export LFS_CI_GLOBAL_BRANCH_NAME=trunk
+    export LFS_CI_GLOBAL_LOCATION_NAME=location_name
 
     assertTrue "usecase_LFS_KNIFE_PACKAGE"
 
@@ -84,7 +84,7 @@ execute touch ${WORKSPACE}/workspace/.00_README.txt
 execute tar -cv --transform=s:^\./:os/: -C ${WORKSPACE}/workspace/upload/ -f ${WORKSPACE}/workspace/KNIFE_LABEL.tgz --use-compress-program=${LFS_CI_ROOT}/bin/pigz .
 uploadKnifeToStorage ${WORKSPACE}/workspace/KNIFE_LABEL.tgz
 copyFileToArtifactDirectory ${WORKSPACE}/workspace/.00_README.txt
-execute ${LFS_CI_ROOT}/bin/sendReleaseNote -r ${WORKSPACE}/workspace/.00_README.txt -t KNIFE_LABEL -n -T OS -P LFS -L trunk -f ${LFS_CI_ROOT}/etc/lfs-ci.cfg
+execute ${LFS_CI_ROOT}/bin/sendReleaseNote -r ${WORKSPACE}/workspace/.00_README.txt -t KNIFE_LABEL -n -T OS -P LFS -L location_name -f ${LFS_CI_ROOT}/etc/lfs-ci.cfg
 EOF
     assertExecutedCommands ${expect}
 

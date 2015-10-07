@@ -177,10 +177,6 @@ _createRevisionsTxtFile() {
 
     # get the locations/<branch>/Dependencies
     local branch=
-
-    # TODO: demx2fk3 2014-11-04 this feature does not work
-    # for branch in ${locationName} $(getConfig CUSTOM_SCM_svn_additional_location)
-
     for branch in ${locationName} 
     do
         local dependenciesFileUrl=${srcRepos}/os/trunk/bldtools/locations-${branch}/Dependencies
