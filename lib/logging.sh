@@ -290,7 +290,7 @@ _loggingLine() {
                                          "${logLine}"        \
                                          "${sourceFile}"     \
                                          "${FUNCNAME[3]}"    \
-                                         "${BASH_LINENO[3]}" )
+                                         "${BASH_LINENO[2]}" )
             ;;
             STACKTRACE) _stackTrace ;;
             *)          logLine=$(printf "%s%s" "${logLine}" "${template}") ;;
