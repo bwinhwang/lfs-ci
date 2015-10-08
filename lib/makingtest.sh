@@ -114,7 +114,7 @@ makingTest_testSuiteDirectory() {
     # there is no location in the job name. So we have to use the
     # location of the upstream job.
     local  branchName=$(getBranchName ${UPSTREAM_PROJECT})
-    mustHaveBranchName
+    mustHaveValue "${branchName}" "branch name from ${UPSTREAM_PROJECT}"
 
     local relativeTestSuiteDirectory=
     if [[ -e ${workspace}/src-project/src/TMF/testsuites.cfg ]] ; then
