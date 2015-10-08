@@ -36,7 +36,7 @@ ci_job_test_on_target() {
     mustHaveCleanWorkspace
 
     local locationName=$(getLocationName ${UPSTREAM_PROJECT})
-    mustHaveLocationName
+    mustHaveValue "${locationName}" "location name from ${UPSTREAM_PROJECT}"
 
     if [[ ${JOB_NAME} =~ ^Test- ]] ; then
         # legacy: using the Test-<targetName> job. No detailed information about
@@ -107,7 +107,7 @@ uc_job_test_on_target_archive_logs() {
     export JOB_NAME=${jobName}
 
     local branchName=$(getBranchName ${UPSTREAM_PROJECT})
-    mustHaveBranchName
+    mustHaveValue "${branchName}" "branch name from ${UPSTREAM_PROJECT}"
 
     local testReposPathOnMoritz=$(getConfig LFS_CI_uc_test_on_target_test_repos_on_moritz -t location:${branchName})
     mustHaveValue "${testReposPathOnMoritz}" "test-repos path on moritz"
