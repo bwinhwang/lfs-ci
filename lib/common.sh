@@ -865,11 +865,13 @@ getBranchPart() {
         return 1
     fi
 
-    [[ ${what} == YY ]] && echo ${yy}
-    [[ ${what} == YYYY ]] && echo ${yyyy}
-    [[ ${what} == MM ]] && echo ${mm}
-    [[ ${what} == TYPE ]] && echo ${branchType}
-    [[ ${what} == NR ]] && echo ${nr}
+    case ${what} in
+        YY) echo ${yy};;
+        YYYY) echo ${yyyy};;
+        MM) echo ${mm};;
+        TYPE) echo ${branchType};;
+        NR) echo ${nr};;
+    esac
 }
 
 ## @fn      getBranchNameFromBuildName()
@@ -999,4 +1001,33 @@ createFingerprintFile() {
     execute cp ${workspace}/fingerprint.txt ${workspace}/bld/bld-fsmci-summary/
 
     return
+}
+
+## @fn       branchMinusOne()
+#  @brief    branch minus one months.
+#  @detailed substract one months from branch. Eg FB1501 - 1 = FB1412.
+#  @parma    The branch eg FB1509.
+#  @return   $1 minus 1.
+branchMinusOne() {
+    local branch=$1
+    mustHaveValue $branch "branch is needed"
+    local mm
+    local tmp=$(getBranchPart ${branch} MM)
+    local yy=$(getBranchPart ${branch} YY)
+    local bt=$(getBranchPart ${branch} TYPE)
+
+    if [[ $(echo $tmp | cut -c1) == 0 ]]; then
+        mm=$(echo $tmp | cut -c2)
+    else
+        mm=$tmp
+    fi
+
+    if [[ $mm -eq 1 ]]; then
+        mm=12
+        yy=$((yy-1))
+    else
+        mm=$((mm-1))
+        [[ $mm -lt 10 ]] && mm="0$mm"
+    fi
+    echo "${bt}${yy}${mm}"
 }

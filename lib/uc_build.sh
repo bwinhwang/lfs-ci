@@ -132,7 +132,11 @@ usecase_LFS_BUILD_CREATE_VERSION() {
 
     productName=$(getProductNameFromJobName)
     labelPrefix=$(getConfig LFS_PROD_label_prefix)
-    branch=$(getBranchName)
+    if [[ ${productName} == UBOOT ]]; then
+        branch="FSM_R4_DEV"
+    else
+        branch=$(getBranchName)
+    fi
     mustHaveBranchName
 
     mustHaveDatabaseCredentials
