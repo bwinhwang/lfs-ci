@@ -54,6 +54,23 @@ usecase_LFS_COLLECT_METRICS() {
     return
 }
 
+## @fn      usecase_LFS_COLLECT_METRICS()
+#  @brief   run the usecase collect metrics 
+#  @param   <none>
+#  @return  <none>
+usecase_LFS_COLLECT_REGULARTEST_METRICS() {
+    requiredParameters UPSTREAM_PROJECT UPSTREAM_BUILD 
+    local workspace=$(getWorkspaceName)
+    mustHaveCleanWorkspace
+
+    copyAndExtractBuildArtifactsFromProject ${UPSTREAM_PROJECT} ${UPSTREAM_BUILD} fsmci
+
+    collectMetricsFromTestJobs
+    info "usecase collect RegularTest metrics done"
+    return
+}
+
+
 
 ## @fn      collectMetricsFromBuildJobs()
 #  @brief   collect the metrics of a build job and store them into the database
