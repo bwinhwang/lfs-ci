@@ -54,8 +54,8 @@ usecase_LFS_COLLECT_METRICS() {
     return
 }
 
-## @fn      usecase_LFS_COLLECT_METRICS()
-#  @brief   run the usecase collect metrics 
+## @fn      usecase_LFS_COLLECT_REGULARTEST_METRICS()
+#  @brief   run the usecase collect regulartest metrics 
 #  @param   <none>
 #  @return  <none>
 usecase_LFS_COLLECT_REGULARTEST_METRICS() {
@@ -161,6 +161,7 @@ collectMetricsFromTestJobs() {
         [[ "${jobName}" =~ makingTest$        ]] && continue
         [[ "${jobName}" =~ target$            ]] && continue
         [[ "${jobName}" =~ MakingTest_-_lcpa$ ]] && continue
+        [[ "${jobName}" =~ excludefailures$   ]] && continue
 
         [[ "${state}"   = FAILURE   ]] && continue
         [[ "${state}"   = ABORTED   ]] && continue
