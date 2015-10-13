@@ -30,18 +30,19 @@ sub prepare {
 
     # t: := tag name
     # r: := release note template file
-    getopts( "r:t:f:o:T:P:", \my %opts );
-    $self->{tagName}         = $opts{t} || die "no t";
-    $self->{basedOn}         = $opts{o} || die "no o";
-    $self->{configFileName}  = $opts{f} || die "no f";
-    $self->{type}            = $opts{T} || die "no T"; # type of rel: REL or OS
-    $self->{productName}     = $opts{P} || die "no P"; # type of the product: LFS, PKGPOOL, UBOOT, ...
+    getopts( "r:t:f:o:T:P:L:", \my %opts );
+    $self->{tagName}         = $opts{t} || die "no tagName";
+    $self->{basedOn}         = $opts{o} || die "no basedOn";
+    $self->{configFileName}  = $opts{f} || die "no configFilename";
+    $self->{type}            = $opts{T} || die "no Type"; # type of rel: REL or OS
+    $self->{productName}     = $opts{P} || die "no ProductName"; # type of the product: LFS, PKGPOOL, UBOOT, ...
+    $self->{locationName}    = $opts{L} || die "no Location"; # name of the location: 
 
     my $config = Nokia::Singleton::config();
     $config->loadData( configFileName => $self->{configFileName} );
-    $config->addConfig( name  => "type", value => $self->{type} );
+    $config->addConfig( name  => "type",        value => $self->{type} );
     $config->addConfig( name  => "productName", value => $self->{productName} );
-
+    $config->addConfig( name  => "location",    value => $self->{locationName} );
 
     $self->{releaseNote} = Nokia::Model::ReleaseNote->new( releaseName => $self->{tagName} );
 
@@ -53,8 +54,6 @@ sub prepare {
     foreach my $entry ( @{ $xml->{logentry} } ) {
 
         my $overrideMessage= $self->{releaseNote}->commentForRevision( $entry->{revision} );
-
-
 
         my $completeMessage = $overrideMessage 
                     ?  $overrideMessage
