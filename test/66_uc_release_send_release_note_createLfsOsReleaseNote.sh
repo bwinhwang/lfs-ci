@@ -69,7 +69,7 @@ execute cd ${WORKSPACE}/workspace/os/
 execute ln -sf ../bld .
 execute rm -f releasenote.txt releasenote.xml
 execute -n ${LFS_CI_ROOT}/bin/getReleaseNoteContent -t PS_LFS_OS_BUILD_NAME
-execute -n ${LFS_CI_ROOT}/bin/getReleaseNoteXML -t PS_LFS_OS_BUILD_NAME -o PS_LFS_OS_OLD_BUILD_NAME -f ${LFS_CI_ROOT}/etc/lfs-ci.cfg -T OS -P LFS
+execute -n ${LFS_CI_ROOT}/bin/getReleaseNoteXML -t PS_LFS_OS_BUILD_NAME -o PS_LFS_OS_OLD_BUILD_NAME -f ${LFS_CI_ROOT}/etc/lfs-ci.cfg -T OS -P LFS -L pronb-developer
 mustBeValidXmlReleaseNote ${WORKSPACE}/workspace/os/os_releasenote.xml
 EOF
     assertExecutedCommands ${expect}
