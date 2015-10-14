@@ -76,7 +76,7 @@ startLogfile() {
         esac
         if [[ ${url} ]] ; then
             echo 1>&2 "short log    : ${url}/${datePath}/$(basename ${CI_LOGGING_LOGFILENAME})"
-            echo 1>&2 "complete log : ${url}/${datePath}/$(basename ${CI_LOGGING_LOGFILENAME_COMPLETE})"
+            echo 1>&2 "complete log : ${url}/${datePath}/$(basename ${CI_LOGGING_LOGFILENAME_COMPLETE}).gz"
         fi
 
         printf -- "------------------------------------------------------------------\n" >  ${CI_LOGGING_LOGFILENAME}
@@ -122,7 +122,6 @@ stopLogfile() {
         printf -- "ending complete logfile\n"                                             >> ${CI_LOGGING_LOGFILENAME_COMPLETE}
         printf -- "-------------------------------------------------------------------\n" >> ${CI_LOGGING_LOGFILENAME_COMPLETE}
 
-        # Disable compressing log file.
         gzip ${CI_LOGGING_LOGFILENAME_COMPLETE}
     fi
     
