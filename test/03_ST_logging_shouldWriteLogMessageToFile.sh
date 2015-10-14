@@ -3,12 +3,12 @@
 source test/common.sh
 source lib/logging.sh
 setUp() {
-    ###export CI_LOGGING_LOGFILENAME=$(createTempFile)
+    export CI_LOGGING_LOGFILENAME=$(createTempFile)
     export CI_LOGGING_LOGFILENAME_COMPLETE=$(createTempFile)
 }
 tearDown() {
     rm -rf ${CI_LOGGING_LOGFILENAME_COMPLETE}
-    ###rm -rf ${CI_LOGGING_LOGFILENAME}
+    rm -rf ${CI_LOGGING_LOGFILENAME}
 }
 
 test1() {
@@ -17,9 +17,9 @@ test1() {
         "1" \
         $(grep -c TEST_MESSAGE ${CI_LOGGING_LOGFILENAME_COMPLETE})
 
-    ###assertEquals "didn't find test message in short log" \
-    ###    "0" \
-    ###    $(grep -c TEST_MESSAGE ${CI_LOGGING_LOGFILENAME})
+    assertEquals "didn't find test message in short log" \
+        "0" \
+        $(grep -c TEST_MESSAGE ${CI_LOGGING_LOGFILENAME})
 }
 
 test2() {
@@ -28,9 +28,9 @@ test2() {
         "1" \
         $(grep -c TEST_MESSAGE ${CI_LOGGING_LOGFILENAME_COMPLETE})
 
-    ###assertEquals "didn't find test message in short log" \
-    ###    "1" \
-    ###    $(grep -c TEST_MESSAGE ${CI_LOGGING_LOGFILENAME})
+    assertEquals "didn't find test message in short log" \
+        "1" \
+        $(grep -c TEST_MESSAGE ${CI_LOGGING_LOGFILENAME})
 
 }
 

@@ -38,12 +38,12 @@ oneTimeSetUp() {
 setUp() {
     cat /dev/null > ${UT_MOCKED_COMMANDS}
     export CI_LOGGING_LOGFILENAME_COMPLETE=$(mktemp)
-    ###export CI_LOGGING_LOGFILENAME=$(mktemp)
+    export CI_LOGGING_LOGFILENAME=$(mktemp)
 }
 
 tearDown() {
     rm -rf ${UT_MOCKED_COMMANDS}
-    ###rm -rf ${CI_LOGGING_LOGFILENAME}
+    rm -rf ${CI_LOGGING_LOGFILENAME}
     rm -rf ${CI_LOGGING_LOGFILENAME_COMPLETE}
     return
 }
@@ -65,9 +65,9 @@ EOF
     assertEquals "complete logfile not ok" \
         "$(cat ${CI_LOGGING_LOGFILENAME_COMPLETE})" \
         "LOG LINE: INFO PREFIX DATE SPACE DURATION SPACE TYPE SPACE MESSAGE SPACE -- SPACE CALLER test" 
-    ###assertEquals "short logfile not ok" \
-    ###    "$(cat ${CI_LOGGING_LOGFILENAME})" \
-    ###    "LOG LINE: INFO PREFIX DATE_SHORT SPACE TYPE SPACE MESSAGE SPACE -- SPACE CALLER test" 
+    assertEquals "short logfile not ok" \
+        "$(cat ${CI_LOGGING_LOGFILENAME})" \
+        "LOG LINE: INFO PREFIX DATE_SHORT SPACE TYPE SPACE MESSAGE SPACE -- SPACE CALLER test" 
 
     return
 }
@@ -89,9 +89,9 @@ EOF
     assertEquals "complete logfile not ok" \
         "$(cat ${CI_LOGGING_LOGFILENAME_COMPLETE})" \
         "LOG LINE: INFO PREFIX DATE SPACE DURATION SPACE TYPE SPACE MESSAGE SPACE -- SPACE CALLER test" 
-    ###assertEquals "short logfile not ok" \
-    ###    "$(cat ${CI_LOGGING_LOGFILENAME})" \
-    ###    "" 
+    assertEquals "short logfile not ok" \
+        "$(cat ${CI_LOGGING_LOGFILENAME})" \
+        "" 
 
     return
 }
@@ -114,9 +114,9 @@ EOF
     assertEquals "complete logfile not ok" \
         "$(cat ${CI_LOGGING_LOGFILENAME_COMPLETE})" \
         "LOG LINE: TRACE PREFIX DATE SPACE DURATION SPACE TYPE SPACE MESSAGE SPACE -- SPACE CALLER test" 
-    ###assertEquals "short logfile not ok" \
-    ###    "$(cat ${CI_LOGGING_LOGFILENAME})" \
-    ###    "LOG LINE: TRACE PREFIX DATE_SHORT SPACE TYPE SPACE MESSAGE SPACE -- SPACE CALLER test" 
+    assertEquals "short logfile not ok" \
+        "$(cat ${CI_LOGGING_LOGFILENAME})" \
+        "LOG LINE: TRACE PREFIX DATE_SHORT SPACE TYPE SPACE MESSAGE SPACE -- SPACE CALLER test" 
 
     return
 }
@@ -139,9 +139,9 @@ EOF
     assertEquals "complete logfile not ok" \
         "$(cat ${CI_LOGGING_LOGFILENAME_COMPLETE})" \
         "LOG LINE: DEBUG PREFIX DATE SPACE DURATION SPACE TYPE SPACE MESSAGE SPACE -- SPACE CALLER test" 
-    ###assertEquals "short logfile not ok" \
-    ###    "$(cat ${CI_LOGGING_LOGFILENAME})" \
-    ###    "LOG LINE: DEBUG PREFIX DATE_SHORT SPACE TYPE SPACE MESSAGE SPACE -- SPACE CALLER test" 
+    assertEquals "short logfile not ok" \
+        "$(cat ${CI_LOGGING_LOGFILENAME})" \
+        "LOG LINE: DEBUG PREFIX DATE_SHORT SPACE TYPE SPACE MESSAGE SPACE -- SPACE CALLER test" 
 
     return
 }
