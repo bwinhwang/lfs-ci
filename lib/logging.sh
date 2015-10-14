@@ -123,7 +123,7 @@ stopLogfile() {
         printf -- "-------------------------------------------------------------------\n" >> ${CI_LOGGING_LOGFILENAME_COMPLETE}
 
         # disabled gzipping..
-        # gzip ${CI_LOGGING_LOGFILENAME}
+        gzip ${CI_LOGGING_LOGFILENAME_COMPLETE}
     fi
     
     unset CI_LOGGING_LOGFILENAME
