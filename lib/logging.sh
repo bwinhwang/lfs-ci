@@ -65,7 +65,7 @@ startLogfile() {
         export CI_LOGGING_LOGFILENAME_COMPLETE
         export CI_LOGGING_DURATION_START_DATE=$(date +%s.%N)
 
-        echo 1>&2 "logfile is ${CI_LOGGING_LOGFILENAME}"
+        ###echo 1>&2 "logfile is ${CI_LOGGING_LOGFILENAME}"
 
         # hardcoded variables here. We have no possibility to use settings here - before the logfile is running
         local url=
@@ -75,20 +75,20 @@ startLogfile() {
             ca_lrcci) url=https://lfs-lrc-ci.int.net.nokia.com/logs ;;
         esac
         if [[ ${url} ]] ; then
-            echo 1>&2 "short log    : ${url}/${datePath}/$(basename ${CI_LOGGING_LOGFILENAME})"
-            echo 1>&2 "complete log : ${url}/${datePath}/$(basename ${CI_LOGGING_LOGFILENAME_COMPLETE}).gz"
+            ###echo 1>&2 "short log    : ${url}/${datePath}/$(basename ${CI_LOGGING_LOGFILENAME})"
+            echo 1>&2 "complete log : ${url}/${datePath}/$(basename ${CI_LOGGING_LOGFILENAME_COMPLETE})"
         fi
 
-        printf -- "------------------------------------------------------------------\n" >  ${CI_LOGGING_LOGFILENAME}
-        printf -- "starting short logfile\n"                                             >> ${CI_LOGGING_LOGFILENAME}
-        printf -- "  script: $0\n"                                                       >> ${CI_LOGGING_LOGFILENAME}
-        printf -- "  jobName:  $jobName\n"                                               >> ${CI_LOGGING_LOGFILENAME}
-        printf -- "  hostname: $hostName\n"                                              >> ${CI_LOGGING_LOGFILENAME}
-        printf -- "  username: $userName\n"                                              >> ${CI_LOGGING_LOGFILENAME}
-        printf -- "------------------------------------------------------------------\n" >> ${CI_LOGGING_LOGFILENAME}
-        printf -- "-- Please note, all timestamps are in UTC                       --\n" >> ${CI_LOGGING_LOGFILENAME}
-        printf -- "------------------------------------------------------------------\n" >> ${CI_LOGGING_LOGFILENAME}
-        printf -- "{{{\n"                                                                >> ${CI_LOGGING_LOGFILENAME}
+        ###printf -- "------------------------------------------------------------------\n" >  ${CI_LOGGING_LOGFILENAME}
+        ###printf -- "starting short logfile\n"                                             >> ${CI_LOGGING_LOGFILENAME}
+        ###printf -- "  script: $0\n"                                                       >> ${CI_LOGGING_LOGFILENAME}
+        ###printf -- "  jobName:  $jobName\n"                                               >> ${CI_LOGGING_LOGFILENAME}
+        ###printf -- "  hostname: $hostName\n"                                              >> ${CI_LOGGING_LOGFILENAME}
+        ###printf -- "  username: $userName\n"                                              >> ${CI_LOGGING_LOGFILENAME}
+        ###printf -- "------------------------------------------------------------------\n" >> ${CI_LOGGING_LOGFILENAME}
+        ###printf -- "-- Please note, all timestamps are in UTC                       --\n" >> ${CI_LOGGING_LOGFILENAME}
+        ###printf -- "------------------------------------------------------------------\n" >> ${CI_LOGGING_LOGFILENAME}
+        ###printf -- "{{{\n"                                                                >> ${CI_LOGGING_LOGFILENAME}
 
         printf -- "------------------------------------------------------------------\n" >  ${CI_LOGGING_LOGFILENAME_COMPLETE}
         printf -- "starting complete logfile\n"                                          >> ${CI_LOGGING_LOGFILENAME_COMPLETE}
@@ -110,11 +110,11 @@ startLogfile() {
 stopLogfile() {
 
     if [[ -w ${CI_LOGGING_LOGFILENAME} ]] ; then
-        printf -- "}}}\n"                                                                 >> ${CI_LOGGING_LOGFILENAME}
-        printf -- "-------------------------------------------------------------------\n" >> ${CI_LOGGING_LOGFILENAME}
-        printf -- "script: $0\n"                                                          >> ${CI_LOGGING_LOGFILENAME}
-        printf -- "ending short logfile\n"                                                >> ${CI_LOGGING_LOGFILENAME}
-        printf -- "-------------------------------------------------------------------\n" >> ${CI_LOGGING_LOGFILENAME}
+        ###printf -- "}}}\n"                                                                 >> ${CI_LOGGING_LOGFILENAME}
+        ###printf -- "-------------------------------------------------------------------\n" >> ${CI_LOGGING_LOGFILENAME}
+        ###printf -- "script: $0\n"                                                          >> ${CI_LOGGING_LOGFILENAME}
+        ###printf -- "ending short logfile\n"                                                >> ${CI_LOGGING_LOGFILENAME}
+        ###printf -- "-------------------------------------------------------------------\n" >> ${CI_LOGGING_LOGFILENAME}
 
         printf -- "}}}\n"                                                                 >> ${CI_LOGGING_LOGFILENAME_COMPLETE}
         printf -- "-------------------------------------------------------------------\n" >> ${CI_LOGGING_LOGFILENAME_COMPLETE}
@@ -122,8 +122,8 @@ stopLogfile() {
         printf -- "ending complete logfile\n"                                             >> ${CI_LOGGING_LOGFILENAME_COMPLETE}
         printf -- "-------------------------------------------------------------------\n" >> ${CI_LOGGING_LOGFILENAME_COMPLETE}
 
-        # disabled gzipping..
-        gzip ${CI_LOGGING_LOGFILENAME_COMPLETE}
+        # Disable compressing log file.
+        ###gzip ${CI_LOGGING_LOGFILENAME_COMPLETE}
     fi
     
     unset CI_LOGGING_LOGFILENAME
@@ -215,7 +215,8 @@ message() {
     logLineFile=$(_loggingLine "${logType}"                                                                                  \
                                "${LFS_CI_LOGGING_CONFIG-"PREFIX DATE_SHORT SPACE TYPE SPACE MESSAGE SPACE -- SPACE CALLER"}" \
                                "${logMessage}")
-    echo -e 1>&2 "${logLineFile}" >> ${CI_LOGGING_LOGFILENAME}
+    # Deactivate short log
+    ###echo -e 1>&2 "${logLineFile}" >> ${CI_LOGGING_LOGFILENAME}
 
     # don't show TRACE and DEBUG message in screen, 
     # For screen, we create a different type of message.
@@ -344,7 +345,7 @@ rawDebug() {
 
     trace "{{{ adding content of file ${fileToLog} to logfile"
     trace     "----------------------------------------------"
-    cat ${fileToLog} >> ${CI_LOGGING_LOGFILENAME}
+    ###cat ${fileToLog} >> ${CI_LOGGING_LOGFILENAME}
     cat ${fileToLog} >> ${CI_LOGGING_LOGFILENAME_COMPLETE}
     trace "}}} ----------------------------------------------"
 
