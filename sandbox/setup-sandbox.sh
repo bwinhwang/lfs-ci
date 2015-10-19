@@ -171,7 +171,7 @@ pre_actions() {
         exit 2
     fi
 
-    if [[ ${UPDATE_JENKINS} == false && $(ps aux | grep java | | grep -v slave.jar | grep jenkins) ]]; then
+    if [[ ${UPDATE_JENKINS} == false && $(ps aux | grep java | grep -v slave.jar | grep jenkins) ]]; then
         echo "ERROR: Jenkins is still running."
         exit 3
     fi
