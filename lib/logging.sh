@@ -23,7 +23,7 @@
 #           You can also influence the format of the log file. See CI_LOGGING_CONFIG for details.
 #
 
-LFS_CI_SOURCE_logging='$Id: ca928855aa49fa76f5d8b08dd984eff6e21c5349 $'
+LFS_CI_SOURCE_logging='$Id$'
 
 [[ -z ${LFS_CI_SOURCE_exit_handling} ]] && source ${LFS_CI_ROOT}/lib/exit_handling.sh
 
