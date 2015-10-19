@@ -162,6 +162,8 @@ collectMetricsFromTestJobs() {
         [[ "${jobName}" =~ target$            ]] && continue
         [[ "${jobName}" =~ MakingTest_-_lcpa$ ]] && continue
         [[ "${jobName}" =~ excludefailures$   ]] && continue
+        [[ "${jobName}" =~ _RegularTest$      ]] && continue
+        [[ "${jobName}" =~ _CodeCoverage$     ]] && continue
 
         [[ "${state}"   = FAILURE   ]] && continue
         [[ "${state}"   = ABORTED   ]] && continue
