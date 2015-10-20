@@ -28,6 +28,9 @@ oneTimeSetUp() {
     mustExistFile() {
         mockedCommand "mustExistFile $@"
     }
+    getLocationName() {
+        echo pronb-developer
+    }
     return
 }
 

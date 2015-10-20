@@ -13,3 +13,5 @@ lib/contrib/s3cmd/*/*.pyc
 .~
 .prove
 etc/branches.cfg
+/.project
+/.metadata

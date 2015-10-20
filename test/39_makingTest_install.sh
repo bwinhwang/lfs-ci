@@ -292,7 +292,7 @@ _reserveTarget
 mustHaveMakingTestRunningTarget 
 execute make -C ${WORKSPACE}/workspace/path/to/test/suite setup
 execute -i make -C ${WORKSPACE}/workspace/path/to/test/suite install FORCE=yes
-execute -i make -C ${WORKSPACE}/workspace/path/to/test/suite firmwareupgrade FORCED_UPGRADE=true
+execute -i make -C ${WORKSPACE}/workspace/path/to/test/suite firmwareupgrade
 makingTest_powercycle 
 mustHaveMakingTestRunningTarget 
 execute -i make -C ${WORKSPACE}/workspace/path/to/test/suite setup
