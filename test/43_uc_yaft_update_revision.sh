@@ -60,6 +60,11 @@ setUp() {
     export WORKSPACE=$(createTempDirectory)
     export JOB_NAME=LFS_CI_-_trunk_-_update_yaft_revision
     export BUILD_NUMBER=1234
+    if [[ $USER == "lfscidev" ]] ; then
+        svnServer="lfs-sandbox-svn.dynamic.nsn-net.net"
+    else
+        svnServer="svne1.access.nsn.com"
+    fi
     return
 }
 
@@ -76,8 +81,8 @@ test1() {
 getWorkspaceName 
 mustHaveWorkspaceName 
 mustHaveCleanWorkspace 
-mustExistInSubversion https://svne1.access.nsn.com/isource/svnroot/BTS_T_YAFT trunk
-getSvnLastChangedRevision https://svne1.access.nsn.com/isource/svnroot/BTS_T_YAFT/trunk
+mustExistInSubversion https://${svnServer}/isource/svnroot/BTS_T_YAFT trunk
+getSvnLastChangedRevision https://${svnServer}/isource/svnroot/BTS_T_YAFT/trunk
 createBasicWorkspace -l pronb-developer src-project
 execute sed -i -e s|\(hint *bld/yaft *--revision\).*|\1=1234| ${WORKSPACE}/workspace/src-project/Dependencies
 svnDiff ${WORKSPACE}/workspace/src-project/Dependencies
