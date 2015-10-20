@@ -10,3 +10,8 @@ Best Regards,
 
 PS LFS Release Team
 
+P.S.: To stop receiving these emails send a plain text mail to
+    majordomo@mlist.emea.nsn-intra.net
+with
+    unsubscribe __LFS_email_release_list__
+in the body.

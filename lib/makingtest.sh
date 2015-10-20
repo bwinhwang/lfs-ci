@@ -114,7 +114,7 @@ makingTest_testSuiteDirectory() {
     # there is no location in the job name. So we have to use the
     # location of the upstream job.
     local  branchName=$(getBranchName ${UPSTREAM_PROJECT})
-    mustHaveBranchName
+    mustHaveValue "${branchName}" "branch name from ${UPSTREAM_PROJECT}"
 
     local relativeTestSuiteDirectory=
     if [[ -e ${workspace}/src-project/src/TMF/testsuites.cfg ]] ; then
@@ -145,16 +145,11 @@ makingTest_testSuiteDirectory() {
 #  @param   <none>
 #  @return  <none>
 makingTest_poweron() {
-    mustHaveMakingTestTestConfig
-
-    local testSuiteDirectory=$(makingTest_testSuiteDirectory)
-    mustExistDirectory ${testSuiteDirectory}
-
     makingTest_logConsole
 
     # This should be a poweron, but we don't know the state of the target.
     # So we just powercycle the target
-    execute make -C ${testSuiteDirectory} powercycle
+    makingTest_powercycle
 
     return
 }
@@ -186,8 +181,11 @@ makingTest_powercycle() {
     local testSuiteDirectory=$(makingTest_testSuiteDirectory)
     mustExistDirectory ${testSuiteDirectory}
 
+    local targetName=$(_reserveTarget)
+    mustHaveValue "${targetName}" "target name"
+
     info "powercycle the target ..."
-    local powercycleOptions=$(getConfig LFS_CI_uc_test_making_test_powercycle_options)
+    local powercycleOptions=$(getConfig LFS_CI_uc_test_making_test_powercycle_options -t testTargetName:${targetName})
     execute make -C ${testSuiteDirectory} powercycle ${powercycleOptions}
 
     return
@@ -432,7 +430,7 @@ makingTest_install() {
         local doFirmwareupgrade="$(getConfig LFS_CI_uc_test_making_test_do_firmwareupgrade)"
         if [[ ${doFirmwareupgrade} ]] ; then
             info "perform firmware upgrade an all boards of $testTargetName."
-            execute ${ignoreError} ${make} firmwareupgrade FORCED_UPGRADE=true
+            execute ${ignoreError} ${make} firmwareupgrade
         fi
 
         info "rebooting target..."

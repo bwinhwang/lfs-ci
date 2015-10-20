@@ -45,7 +45,7 @@ oneTimeSetUp() {
     }
     copyAndExtractBuildArtifactsFromProject() {
         mkdir -p ${WORKSPACE}/workspace/bld/bld-fsmci-summary/
-        echo trunk > ${WORKSPACE}/workspace/bld/bld-fsmci-summary/location
+        echo pronb-developer > ${WORKSPACE}/workspace/bld/bld-fsmci-summary/location
     }
     mustHaveLocationForSpecialBuild() {
         mockedCommand "mustHaveLocationForSpecialBuild $@"
@@ -73,7 +73,7 @@ setUp() {
     export WORKSPACE=$(createTempDirectory)
     export UPSTREAM_PROJECT=LFS_DEV_-_DEVELOPER_-_Build
     export UPSTREAM_BUILD=123
-    export LFS_CI_GLOBAL_BRANCH_NAME=trunk
+    export LFS_CI_GLOBAL_LOCATION_NAME=pronb-developer
     export JOB_NAME=LFS_CI_-_trunk_-_Build_-_FSM-r2_-_fcmd
 
     return

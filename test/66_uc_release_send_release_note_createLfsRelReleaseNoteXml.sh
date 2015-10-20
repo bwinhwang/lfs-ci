@@ -16,6 +16,9 @@ oneTimeSetUp() {
     execute() {
         mockedCommand "execute $@"
     }
+    getLocationName() {
+        echo pronb-developer
+    }
     return
 }
 
@@ -52,7 +55,7 @@ test1() {
 execute mkdir -p ${WORKSPACE}/workspace/rel/bld/bld-externalComponents-summary
 execute cd ${WORKSPACE}/workspace/rel/
 execute grep sdk ${WORKSPACE}/workspace/bld/bld-externalComponents-summary/externalComponents
-execute -n ${LFS_CI_ROOT}/bin/getReleaseNoteXML -t PS_LFS_REL_BUILD_NAME -o PS_LFS_REL_OLD_BUILD_NAME -T OS -P LFS -f ${LFS_CI_ROOT}/etc/lfs-ci.cfg
+execute -n ${LFS_CI_ROOT}/bin/getReleaseNoteXML -t PS_LFS_REL_BUILD_NAME -o PS_LFS_REL_OLD_BUILD_NAME -T OS -P LFS -f ${LFS_CI_ROOT}/etc/lfs-ci.cfg -L pronb-developer
 EOF
     assertExecutedCommands ${expect}
 

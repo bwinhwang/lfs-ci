@@ -125,7 +125,7 @@ sub branchInformation {
                              value => $row->{branch_name} };
 
         push @{ $result }, { name  => "LFS_CI_global_mapping_branch_location",
-                             tags  => sprintf( 'productName:LFS, branchName:%s', $row->{branch_name} ),
+                             tags  => sprintf( 'branchName:%s', $row->{branch_name} ),
                              value => $row->{location_name} };
 
         push @{ $result }, { name  => "LFS_PROD_branch_to_tag_regex",
@@ -165,7 +165,7 @@ sub branchInformation {
         $pkgpoolPrefix =~ s/_\$.*//;
         $pkgpoolPrefix =~ s/PS_LFS_../PS_LFS_PKG/;
         push @{ $result }, { name  => "PKGPOOL_PROD_release_prefix",
-                             tags  => sprintf( "location:%s", $row->{location_name} ), 
+                             tags  => sprintf( "branchName:%s", $row->{branch_name} ), 
                              value => $pkgpoolPrefix };
     }
     return $result;
