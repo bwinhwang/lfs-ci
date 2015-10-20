@@ -88,7 +88,8 @@ usecase_LFS_COLLECT_BUILDANDTEST_METRICS() {
     copyAndExtractBuildArtifactsFromProject ${UPSTREAM_PROJECT} ${UPSTREAM_BUILD} fsmci
 
     local artifactsPath=bld/bld-unittests-fsmr3_fsmddal
-    storeMetricsFromArtifacts ${JOB_NAME} ${BUILD_NUMBER} ${artifactsPath}
+    collectMetricsFromTestJobs ${artifactsPath}
+
     info "usecase collect Build&Test metrics done"
     return
 }
