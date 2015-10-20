@@ -49,7 +49,10 @@ usecase_LFS_COLLECT_METRICS() {
 
     collectMetricsFromBuildJobs
     collectMetricsFromPackageJob
-    collectMetricsFromTestJobs
+
+    local artifactsPath=bld/bld-test-artifacts
+    collectMetricsFromTestJobs ${artifactsPath}
+
     info "usecase collect metrics done"
     return
 }
@@ -65,8 +68,28 @@ usecase_LFS_COLLECT_REGULARTEST_METRICS() {
 
     copyAndExtractBuildArtifactsFromProject ${UPSTREAM_PROJECT} ${UPSTREAM_BUILD} fsmci
 
-    collectMetricsFromTestJobs
+    local artifactsPath=bld/bld-test-artifacts
+    collectMetricsFromTestJobs ${artifactsPath}
+
     info "usecase collect RegularTest metrics done"
+    return
+}
+
+
+## @fn      usecase_LFS_COLLECT_REGULARTEST_METRICS()
+#  @brief   run the usecase collect regulartest metrics 
+#  @param   <none>
+#  @return  <none>
+usecase_LFS_COLLECT_BUILDANDTEST_METRICS() {
+    requiredParameters UPSTREAM_PROJECT UPSTREAM_BUILD 
+    local workspace=$(getWorkspaceName)
+    mustHaveCleanWorkspace
+
+    copyAndExtractBuildArtifactsFromProject ${UPSTREAM_PROJECT} ${UPSTREAM_BUILD} fsmci
+
+    local artifactsPath=bld/bld-unittests-fsmr3_fsmddal
+    storeMetricsFromArtifacts ${JOB_NAME} ${BUILD_NUMBER} ${artifactsPath}
+    info "usecase collect Build&Test metrics done"
     return
 }
 
@@ -133,11 +156,12 @@ collectMetricsFromBuildJobs() {
 
 ## @fn      collectMetricsFromTestJobs()
 #  @brief   collect all metrics from a test job (and sub tests) and store them into the database
-#  @param   <none>
+#  @param   {artifactsPath}  path in workspace where artifacts can be found
 #  @return  <none>
 collectMetricsFromTestJobs() {
     requiredParameters UPSTREAM_PROJECT UPSTREAM_BUILD 
 
+    local artifactsPath=$1
     local workspace=$(getWorkspaceName)
     mustHaveWorkspaceName
     cd ${workspace}
@@ -170,7 +194,7 @@ collectMetricsFromTestJobs() {
         [[ "${state}"   = NOT_BUILT ]] && continue
 
         storeMetricsForTestJob    ${jobName} ${buildNumber}
-        storeMetricsFromArtifacts ${jobName} ${buildNumber}
+        storeMetricsFromArtifacts ${jobName} ${buildNumber} ${artifactsPath}
     done
 
     return
@@ -265,6 +289,7 @@ storeMetricsForTestJob() {
 #  @brief   store the metrics, which are included in the artifacts into the database
 #  @param   {jobName}        name of the job
 #  @param   {buildNumber}    number of the build
+#  @param   {artifactsPath}  path in workspace where artifacts can be found
 #  @return  <none>
 storeMetricsFromArtifacts() {
     local jobName=$1
@@ -272,6 +297,9 @@ storeMetricsFromArtifacts() {
 
     local buildNumber=$2
     mustHaveValue "${buildNumber}" "build number"
+
+    local artifactsPath=$3
+    mustHaveValue "${artifactsPath}" "artifacts path"
 
     mustHaveNextCiLabelName
     local label=$(getNextCiLabelName)
@@ -284,10 +312,10 @@ storeMetricsFromArtifacts() {
     debug "copy artifacts from ${jobName} ${buildNumber}..."
     copyArtifactsToWorkspace ${jobName} ${buildNumber} "test" 
 
-    [[ -d ${workspace}/bld/bld-test-artifacts/         ]] || return
-    [[ -d ${workspace}/bld/bld-test-artifacts/results/ ]] || return
+    [[ -d ${workspace}/${artifactsPath}/         ]] || return
+    [[ -d ${workspace}/${artifactsPath}/results/ ]] || return
 
-    for file in ${workspace}/bld/bld-test-artifacts/results/*-metrics-database-values.txt ; do
+    for file in ${workspace}/${artifactsPath}/results/*-metrics-database-values.txt ; do
         [[ -e ${file} ]] || continue
         debug "adding values from ${file} to metrics database"
 
