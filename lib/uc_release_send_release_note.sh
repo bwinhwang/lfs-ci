@@ -231,6 +231,7 @@ _createLfsOsReleaseNote() {
                     -f ${LFS_CI_CONFIG_FILE}                 \
                     -T OS                                    \
                     -P $(getProductNameFromJobName)          \
+                    -L $(getLocationName)                    \
                     > ${workspace}/os/os_releasenote.xml
     rawDebug ${workspace}/os/os_releasenote.xml
     mustBeValidXmlReleaseNote ${workspace}/os/os_releasenote.xml
@@ -269,6 +270,7 @@ _createLfsRelReleaseNoteXml() {
                             -T OS                                        \
                             -P LFS                                       \
                             -f ${LFS_CI_CONFIG_FILE}                     \
+                            -L $(getLocationName)                        \
                             > releasenote.xml
     rawDebug ${workspace}/releasenote.xml
 
