@@ -131,6 +131,8 @@ createRebuildScript() {
         # TODO: demx2fk3 2014-09-08 make the pathnames configurable
         if [[ ${name} =~ sdk ]] ; then
             echo "ln -sf /build/home/SC_LFS/sdk/tags/${tag} bld/${name}"                   >> ${script}
+        #elif [[ ${name} =~ pkgpool_oldboost ]] ; then
+        #    echo "ln -sf /build/home/SC_LFS/pkgpool/${tag} bld/${name}"                    >> ${script}
         elif [[ ${name} =~ pkgpool ]] ; then
             echo "ln -sf /build/home/SC_LFS/pkgpool/${tag} bld/${name}"                    >> ${script}
         elif [[ ${name} =~ bld- ]] ; then
