@@ -145,8 +145,17 @@ runOnMaster() {
 showAllEnvironmentVariables() {
     requiredParameters LFS_CI_ROOT
 
-    execute printenv        
-    execute -i ${LFS_CI_ROOT}/bin/dumpConfig -f ${LFS_CI_CONFIG_FILE:-${LFS_CI_ROOT}/etc/global.cfg}
+    local tmpFile=$(createTempFile)
+    execute -l ${tmpFile} printenv        
+    rawTrace ${tmpFile}
+
+    execute -l ${tmpFile} -i ${LFS_CI_ROOT}/bin/dumpConfig -f ${LFS_CI_CONFIG_FILE:-${LFS_CI_ROOT}/etc/global.cfg}
+    rawTrace ${tmpFile}
+
     return
+}
+
+rawTrace() {
+    cat ${1} >> ${CI_LOGGING_LOGFILENAME_COMPLETE}
 }
 
