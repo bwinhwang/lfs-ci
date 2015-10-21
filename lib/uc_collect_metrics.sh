@@ -78,11 +78,11 @@ usecase_LFS_COLLECT_REGULARTEST_METRICS() {
 }
 
 
-## @fn      usecase_LFS_COLLECT_BUILDANDTEST_METRICS()
+## @fn      usecase_LFS_COLLECT_UNITTEST_METRICS()
 #  @brief   run the usecase collect regulartest metrics 
 #  @param   <none>
 #  @return  <none>
-usecase_LFS_COLLECT_BUILDANDTEST_METRICS() {
+usecase_LFS_COLLECT_UNITTEST_METRICS() {
     requiredParameters UPSTREAM_PROJECT UPSTREAM_BUILD 
     local workspace=$(getWorkspaceName)
     mustHaveCleanWorkspace
