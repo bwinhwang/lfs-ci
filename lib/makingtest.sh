@@ -427,12 +427,10 @@ makingTest_install() {
             return
         fi
 
-        if [[ ! ${JOB_NAME} =~ SmokeTest ]]; then
-            local doFirmwareupgrade="$(getConfig LFS_CI_uc_test_making_test_do_firmwareupgrade)"
-            if [[ ${doFirmwareupgrade} ]] ; then
-                info "perform firmware (FPGA) upgrade."
-                execute ${ignoreError} ${make} firmwareupgrade
-            fi
+        local doFirmwareupgrade="$(getConfig LFS_CI_uc_test_making_test_do_firmwareupgrade)"
+        if [[ ${doFirmwareupgrade} ]] ; then
+            info "perform firmware (FPGA) upgrade."
+            execute ${ignoreError} ${make} firmwareupgrade
         fi
 
         makingTest_powercycle
