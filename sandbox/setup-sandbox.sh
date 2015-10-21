@@ -171,7 +171,7 @@ pre_actions() {
         exit 2
     fi
 
-    if [[ ${UPDATE_JENKINS} == false && $(ps aux | grep java | grep jenkins) ]]; then
+    if [[ ${UPDATE_JENKINS} == false && $(ps aux | grep java | grep -v slave.jar | grep jenkins) ]]; then
         echo "ERROR: Jenkins is still running."
         exit 3
     fi
@@ -249,7 +249,7 @@ git_stuff() {
             git checkout development
             echo "    Pulling branch development"
             git pull origin development
-            cd - 
+            cd -
         elif [[ ${ans} -eq 3 ]]; then
             _git_clone
         else
@@ -306,6 +306,13 @@ jenkins_copy_jobs() {
         for JOB in ${OTHER_ADMIN_JOBS}; do
             echo "    rsync job ${JOB}"
             rsync -a ${excludes} ${PROD_JENKINS_SERVER}:${PROD_JENKINS_JOBS}/${JOB} ${JENKINS_HOME}/jobs/
+        done
+    fi
+
+    if [[ ${USER} == ca_urecci ]]; then
+        for JOB in FB1405_RLD_ FB1405_RLD9_; do
+            echo "    rsync job *${JOB}*"
+            rsync -a ${excludes} ${PROD_JENKINS_SERVER}:${PROD_JENKINS_JOBS}/*${JOB}* ${JENKINS_HOME}/jobs/
         done
     fi
 
@@ -639,9 +646,16 @@ jenkins_stuff() {
 
 purge_sandbox() {
     local ans="N"
-    read -p "Removing ${LOCAL_WORK_DIR}/${SANDBOX_USER}/${JENKINS_DIR} and ${LFS_CI_ROOT} (y|N): " ans
+    read -p "Removing ${LOCAL_WORK_DIR}/${SANDBOX_USER}/${JENKINS_DIR}: " ans
     if [[ "${ans}" == "y" || "${ans}" == "Y" ]]; then
         rm -rf ${LOCAL_WORK_DIR}/${SANDBOX_USER}/${JENKINS_DIR}
+    else
+        echo "Nothing was deleted"
+    fi
+
+    ans="N"
+    read -p "Removing ${LFS_CI_ROOT} (y|N): " ans
+    if [[ "${ans}" == "y" || "${ans}" == "Y" ]]; then
         rm -rf ${LFS_CI_ROOT}
     else
         echo "Nothing was deleted"
