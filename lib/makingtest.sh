@@ -432,9 +432,9 @@ makingTest_install() {
 
         local doFirmwareupgrade="$(getConfig LFS_CI_uc_test_making_test_do_firmwareupgrade)"
         if [[ ${doFirmwareupgrade} ]] ; then
-            info "perform firmware (FPGA) upgrade."
             info "running setup..."
             execute ${ignoreError} ${make} setup || continue
+            info "perform firmware (FPGA) upgrade."
             execute ${make} firmwareupgrade
             mustHaveMakingTestRunningTarget
         fi
