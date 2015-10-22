@@ -294,6 +294,7 @@ execute make -C ${WORKSPACE}/workspace/path/to/test/suite setup
 execute -i make -C ${WORKSPACE}/workspace/path/to/test/suite install FORCE=yes
 makingTest_powercycle 
 mustHaveMakingTestRunningTarget 
+execute -i make -C ${WORKSPACE}/workspace/path/to/test/suite setup
 execute make -C ${WORKSPACE}/workspace/path/to/test/suite firmwareupgrade
 mustHaveMakingTestRunningTarget 
 execute -i make -C ${WORKSPACE}/workspace/path/to/test/suite setup
