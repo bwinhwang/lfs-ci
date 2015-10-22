@@ -167,6 +167,8 @@ collectMetricsFromTestJobs() {
     requiredParameters UPSTREAM_PROJECT UPSTREAM_BUILD 
 
     local artifactsPath=$1
+    local artifactsFilter=$2
+    info "starting collectMetricsFromTestJobs with artifactsPath=${artifactsPath} and artifactsFilter=${artifactsFilter}"
     local workspace=$(getWorkspaceName)
     mustHaveWorkspaceName
     cd ${workspace}
@@ -306,6 +308,11 @@ storeMetricsFromArtifacts() {
 
     local artifactsPath=$3
     mustHaveValue "${artifactsPath}" "artifacts path"
+
+    local artifactsFilter=$3
+    mustHaveValue "${artifactsFilter}" "artifacts filter"
+
+    info "starting collectMetricsFromTestJobs with artifactsPath=${artifactsPath} and artifactsFilter=${artifactsFilter}"
 
     mustHaveNextCiLabelName
     local label=$(getNextCiLabelName)
