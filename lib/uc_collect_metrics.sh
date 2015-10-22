@@ -93,7 +93,7 @@ usecase_LFS_COLLECT_UNITTEST_METRICS() {
     local artifactsFilter="unittests"
     collectMetricsFromTestJobs ${artifactsPath} ${artifactsFilter}
 
-    info "usecase collect Build&Test metrics done"
+    info "usecase collect UNITTEST metrics done"
     return
 }
 
@@ -180,11 +180,13 @@ collectMetricsFromTestJobs() {
     info "label name is ${label}"
 
     local testJobData=$(getDownStreamProjectsData ${UPSTREAM_PROJECT} ${UPSTREAM_BUILD})
+    info "testJobData=${testJobData}"
     for line in ${testJobData} ; do
         info ${line}
         local buildNumber=$(cut -d: -f1 <<< ${line})
         local jobName=$(cut -d: -f3 <<< ${line})
         local state=$(cut -d: -f2 <<< ${line})
+        info "checking job ${jobName}"
 
         # no need to collect the metrics for some types of test jobs
         # (dummy jobs) and for some states...
