@@ -309,10 +309,10 @@ storeMetricsFromArtifacts() {
     local artifactsPath=$3
     mustHaveValue "${artifactsPath}" "artifacts path"
 
-    local artifactsFilter=$3
+    local artifactsFilter=$4
     mustHaveValue "${artifactsFilter}" "artifacts filter"
 
-    info "starting collectMetricsFromTestJobs with artifactsPath=${artifactsPath} and artifactsFilter=${artifactsFilter}"
+    info "starting storeMetricsFromArtifacts with artifactsPath=${artifactsPath} and artifactsFilter=${artifactsFilter}"
 
     mustHaveNextCiLabelName
     local label=$(getNextCiLabelName)
