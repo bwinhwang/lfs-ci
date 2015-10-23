@@ -1249,7 +1249,7 @@ DELIMITER //
 CREATE PROCEDURE delete_md_branch_for_lrc(in_branch_name VARCHAR(64), in_ps_branch_name VARCHAR(64))
 BEGIN
 
-    UPDATE branches SET status='closed' WHERE branch_name=in_branch_name;
+    UPDATE branches SET status='closed',date_closed=now() WHERE branch_name=in_branch_name;
     UPDATE ps_branches SET status='closed' WHERE ps_branch_name=in_ps_branch_name;
 
 END //
