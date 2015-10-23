@@ -30,20 +30,20 @@ usecase_LFS_RELEASE_PRE_RELEASE_CHECKS() {
         fatal "previous Version ${LFS_PROD_RELEASE_PREVIOUS_TAG_NAME} does not exist in WFT"
     fi
 
-    local svnUrl=$(getConfig LFS_PROD_svn_delivery_release_repos_url -t tagName:LFS_PROD_RELEASE_CURRENT_TAG_NAME)
-    mustHaveValue "${svnUrl}" "svn url"
-
-    # check if os tag already exists
-    if existsInSubversion ${svnUrl}/os/tags ${LFS_PROD_RELEASE_CURRENT_TAG_NAME} ; then
-        fatal "tag ${svnUrl}/os/tags/${LFS_PROD_RELEASE_CURRENT_TAG_NAME} already exists."
-    fi
-
-    # check if rel tag already exists
-    if existsInSubversion ${svnUrl}/tags ${LFS_PROD_RELEASE_CURRENT_TAG_NAME_REL} ; then
-        fatal "tag ${svnUrl}/tags/${LFS_PROD_RELEASE_CURRENT_TAG_NAME_REL} already exists."
-    fi
-
     if [[ $(getProductNameFromJobName) =~ LFS ]] ; then
+        local svnUrl=$(getConfig LFS_PROD_svn_delivery_release_repos_url -t tagName:LFS_PROD_RELEASE_CURRENT_TAG_NAME)
+        mustHaveValue "${svnUrl}" "svn url"
+
+        # check if os tag already exists
+        if existsInSubversion ${svnUrl}/os/tags ${LFS_PROD_RELEASE_CURRENT_TAG_NAME} ; then
+            fatal "tag ${svnUrl}/os/tags/${LFS_PROD_RELEASE_CURRENT_TAG_NAME} already exists."
+        fi
+
+        # check if rel tag already exists
+        if existsInSubversion ${svnUrl}/tags ${LFS_PROD_RELEASE_CURRENT_TAG_NAME_REL} ; then
+            fatal "tag ${svnUrl}/tags/${LFS_PROD_RELEASE_CURRENT_TAG_NAME_REL} already exists."
+        fi
+
         if ! existsBaselineInWorkflowTool ${LFS_PROD_RELEASE_PREVIOUS_TAG_NAME_REL} ; then
             fatal "previous Release Version ${LFS_PROD_RELEASE_PREVIOUS_TAG_NAME_REL} does not exist in WFT"
         fi
