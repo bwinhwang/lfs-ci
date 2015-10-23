@@ -58,6 +58,7 @@ ci_job_test() {
     if [[ ${JOB_NAME} =~ .*_-_Test$           || \
           ${JOB_NAME} =~ .*_-_StabilityTest$  || \
           ${JOB_NAME} =~ .*_-_SmokeTest$      || \
+          ${JOB_NAME} =~ .*_-_Unittest$       || \
           ${JOB_NAME} =~ .*_-_RegularTest$
        ]] 
     then
