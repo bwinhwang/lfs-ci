@@ -11,6 +11,7 @@ oneTimeSetUp() {
         mockedCommand "getConfig $@"
         case $1 in 
             LFS_CI_uc_release_can_create_release_in_wft) echo ${UT_CAN_PRECHECK} ;;
+            LFS_PROD_svn_delivery_release_repos_url) echo ${UT_CAN_PRECHECK} ;;
             *) echo $1 ;;
         esac
     }
@@ -27,6 +28,10 @@ oneTimeSetUp() {
     existsBaselineInWorkflowTool() {
         mockedCommand "existsBaselineInWorkflowTool $@"
         return ${UT_EXISTS_IN_WFT}
+    }
+    existsInSubversion() {
+        mockedCommand "existsInSubversion $@"
+        return ${UT_EXISTS_IN_SVN}
     }
     return
 }
@@ -45,6 +50,7 @@ tearDown() {
 
 test1() {
     export UT_EXISTS_IN_WFT=0
+    export UT_EXISTS_IN_SVN="1/os/tags PS_LFS_OS_BUILD_NAME"
     export UT_CAN_PRECHECK=1
     assertTrue "usecase_LFS_RELEASE_PRE_RELEASE_CHECKS"
 
@@ -53,6 +59,9 @@ test1() {
 mustBePreparedForReleaseTask 
 getConfig LFS_CI_uc_release_can_create_release_in_wft
 existsBaselineInWorkflowTool PS_LFS_OS_OLD_BUILD_NAME
+getConfig LFS_PROD_svn_delivery_release_repos_url -t tagName:LFS_PROD_RELEASE_CURRENT_TAG_NAME
+existsInSubversion 1/os/tags PS_LFS_OS_BUILD_NAME
+existsInSubversion 1/tags PS_LFS_REL_BUILD_NAME
 existsBaselineInWorkflowTool PS_LFS_REL_OLD_BUILD_NAME
 EOF
     assertExecutedCommands ${expect}
