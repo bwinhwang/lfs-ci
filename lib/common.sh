@@ -107,9 +107,14 @@ mustHaveCleanWorkspace() {
 removeWorkspace() {
     local workspace=$1
 
-    execute chmod -R u+w "${workspace}"
-    execute rm -rf "${workspace}"
-
+    execute -i rm -rf "${workspace}"
+    # it may happen that some files could not be removed due to wrong access rights.
+    # if that's the case, change access rights and perform the rm command again.
+    if [[ -d ${workspace} ]] ; then
+        debug "workspace not empty after removing files; need to chmod and remove again"
+        execute chmod -R u+w "${workspace}"
+        execute rm -rf "${workspace}"
+    fi
     return
 }
 
