@@ -109,7 +109,7 @@ removeWorkspace() {
 
     
     execute rm -rf "${workspace}"
-    execute -n ls -R1|wc -l >> ${files_left}
+    files_left=$(execute -n ls -R1|wc -l)
     debug "files left after executing \"rm -rf ${workspace}\": ${files_left}"
     debug "changing access rights for left files"
     execute chmod -R u+w "${workspace}"
