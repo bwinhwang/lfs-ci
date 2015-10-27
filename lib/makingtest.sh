@@ -388,8 +388,8 @@ makingTest_install() {
     if [[ ${shouldHaveRunningTarget} ]] ; then
         mustHaveMakingTestRunningTarget
 
-        info "installing software on target"
-        execute ${make} setup
+        #info "installing software on target"
+        #execute ${make} setup
 
         local forceInstallSameVersion=$(getConfig LFS_CI_uc_test_making_test_force_reinstall_same_version)
         if [[ -z ${forceInstallSameVersion} ]] ; then
