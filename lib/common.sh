@@ -107,6 +107,11 @@ mustHaveCleanWorkspace() {
 removeWorkspace() {
     local workspace=$1
 
+    
+    execute rm -rf "${workspace}"
+    execute -n ls -R1|wc -l >> ${files_left}
+    debug "files left after executing \"rm -rf ${workspace}\": ${files_left}"
+    debug "changing access rights for left files"
     execute chmod -R u+w "${workspace}"
     execute rm -rf "${workspace}"
 
