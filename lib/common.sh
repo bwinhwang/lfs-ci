@@ -112,6 +112,7 @@ removeWorkspace() {
     # if that's the case, change access rights and perform the rm command again.
     if [[ -d ${workspace} ]] ; then
         debug "workspace not empty after removing files; need to chmod and remove again"
+        execute ls -Rl "${workspace}"
         execute chmod -R u+w "${workspace}"
         execute rm -rf "${workspace}"
     fi
