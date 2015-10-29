@@ -49,11 +49,7 @@ usecase_LFS_COLLECT_METRICS() {
 
     collectMetricsFromBuildJobs
     collectMetricsFromPackageJob
-
-    local artifactsPath=bld/bld-test-artifacts
-    local artifactsFilter="test"
-    collectMetricsFromTestJobs ${artifactsPath} ${artifactsFilter}
-
+    collectMetricsFromTestJobs
     info "usecase collect metrics done"
     return
 }
@@ -69,31 +65,8 @@ usecase_LFS_COLLECT_REGULARTEST_METRICS() {
 
     copyAndExtractBuildArtifactsFromProject ${UPSTREAM_PROJECT} ${UPSTREAM_BUILD} fsmci
 
-    local artifactsPath=bld/bld-test-artifacts
-    local artifactsFilter="test"
-    collectMetricsFromTestJobs ${artifactsPath} ${artifactsFilter}
-
+    collectMetricsFromTestJobs
     info "usecase collect RegularTest metrics done"
-    return
-}
-
-
-## @fn      usecase_LFS_COLLECT_UNITTEST_METRICS()
-#  @brief   run the usecase collect regulartest metrics 
-#  @param   <none>
-#  @return  <none>
-usecase_LFS_COLLECT_UNITTEST_METRICS() {
-    requiredParameters UPSTREAM_PROJECT UPSTREAM_BUILD 
-    local workspace=$(getWorkspaceName)
-    mustHaveCleanWorkspace
-
-    copyAndExtractBuildArtifactsFromProject ${UPSTREAM_PROJECT} ${UPSTREAM_BUILD} fsmci
-
-    local artifactsPath=bld/bld-unittests-fsmr3_fsmddal
-    local artifactsFilter="unittests"
-    collectMetricsFromTestJobs ${artifactsPath} ${artifactsFilter}
-
-    info "usecase collect UNITTEST metrics done"
     return
 }
 
@@ -160,15 +133,11 @@ collectMetricsFromBuildJobs() {
 
 ## @fn      collectMetricsFromTestJobs()
 #  @brief   collect all metrics from a test job (and sub tests) and store them into the database
-#  @param   {artifactsPath}    path in workspace where artifacts can be found
-#  @param   {artifactsFilter}  filter for selecting artifacts
+#  @param   <none>
 #  @return  <none>
 collectMetricsFromTestJobs() {
     requiredParameters UPSTREAM_PROJECT UPSTREAM_BUILD 
 
-    local artifactsPath=$1
-    local artifactsFilter=$2
-    info "starting collectMetricsFromTestJobs with artifactsPath=${artifactsPath} and artifactsFilter=${artifactsFilter}"
     local workspace=$(getWorkspaceName)
     mustHaveWorkspaceName
     cd ${workspace}
@@ -180,13 +149,11 @@ collectMetricsFromTestJobs() {
     info "label name is ${label}"
 
     local testJobData=$(getDownStreamProjectsData ${UPSTREAM_PROJECT} ${UPSTREAM_BUILD})
-    info "testJobData=${testJobData}"
     for line in ${testJobData} ; do
         info ${line}
         local buildNumber=$(cut -d: -f1 <<< ${line})
         local jobName=$(cut -d: -f3 <<< ${line})
         local state=$(cut -d: -f2 <<< ${line})
-        info "checking job ${jobName}"
 
         # no need to collect the metrics for some types of test jobs
         # (dummy jobs) and for some states...
@@ -203,7 +170,7 @@ collectMetricsFromTestJobs() {
         [[ "${state}"   = NOT_BUILT ]] && continue
 
         storeMetricsForTestJob    ${jobName} ${buildNumber}
-        storeMetricsFromArtifacts ${jobName} ${buildNumber} ${artifactsPath} ${artifactsFilter}
+        storeMetricsFromArtifacts ${jobName} ${buildNumber}
     done
 
     return
@@ -296,10 +263,8 @@ storeMetricsForTestJob() {
 
 ## @fn      storeMetricsFromArtifacts()
 #  @brief   store the metrics, which are included in the artifacts into the database
-#  @param   {jobName}          name of the job
-#  @param   {buildNumber}      number of the build
-#  @param   {artifactsPath}    path in workspace where artifacts can be found
-#  @param   {artifactsFilter}  filter for selecting artifacts
+#  @param   {jobName}        name of the job
+#  @param   {buildNumber}    number of the build
 #  @return  <none>
 storeMetricsFromArtifacts() {
     local jobName=$1
@@ -308,29 +273,21 @@ storeMetricsFromArtifacts() {
     local buildNumber=$2
     mustHaveValue "${buildNumber}" "build number"
 
-    local artifactsPath=$3
-    mustHaveValue "${artifactsPath}" "artifacts path"
-
-    local artifactsFilter=$4
-    mustHaveValue "${artifactsFilter}" "artifacts filter"
-
-    info "starting storeMetricsFromArtifacts with artifactsPath=${artifactsPath} and artifactsFilter=${artifactsFilter}"
-
     mustHaveNextCiLabelName
     local label=$(getNextCiLabelName)
 
     local workspace=$(getWorkspaceName)
     mustHaveWorkspaceName
 
-    debug "cleanup artifacts from test in ${artifactsPath} ..."
-    execute rm -rf ${workspace}/${artifactsPath}
+    debug "cleanup artifacts from test in .../bld/bld-test-*"
+    execute rm -rf ${workspace}/bld/bld-test*
     debug "copy artifacts from ${jobName} ${buildNumber}..."
-    copyArtifactsToWorkspace ${jobName} ${buildNumber} ${artifactsFilter} 
+    copyArtifactsToWorkspace ${jobName} ${buildNumber} "test" 
 
-    [[ -d ${workspace}/${artifactsPath}/         ]] || return
-    [[ -d ${workspace}/${artifactsPath}/results/ ]] || return
+    [[ -d ${workspace}/bld/bld-test-artifacts/         ]] || return
+    [[ -d ${workspace}/bld/bld-test-artifacts/results/ ]] || return
 
-    for file in ${workspace}/${artifactsPath}/results/*-metrics-database-values.txt ; do
+    for file in ${workspace}/bld/bld-test-artifacts/results/*-metrics-database-values.txt ; do
         [[ -e ${file} ]] || continue
         debug "adding values from ${file} to metrics database"
 
