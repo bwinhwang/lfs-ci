@@ -32,13 +32,11 @@ usecase_LFS_BRANCHING_MD_FOR_LRC() {
     case ${ACTION} in
         create)
             info "Insert new branch into tables branches and ps_branches."
-            echo "CALL new_ps_branch_for_md_lrc('"${BRANCH}"', '"${PS_BRANCH}"', '"${ECL_URL}"')" / ${mysql_cli} -Dlfspt_lrc
-            #echo "CALL new_ps_branch_for_md_lrc('"${BRANCH}"', '"${PS_BRANCH}"', '"${ECL_URL}"')" | ${mysql_cli} -Dlfspt_lrc
+            echo "CALL new_ps_branch_for_md_lrc('"${BRANCH}"', '"${PS_BRANCH}"', '"${ECL_URL}"')" | ${mysql_cli} -Dlfspt_lrc
         ;;
         close)
             info "Close branch in tables branches and ps_branches."
-            echo "CALL close_ps_branch_for_md_lrc('"${PS_BRANCH}"')" / ${mysql_cli} -Dlfspt_lrc
-            #echo "CALL close_ps_branch_for_md_lrc('"${PS_BRANCH}"')" | ${mysql_cli} -Dlfspt_lrc
+            echo "CALL close_ps_branch_for_md_lrc('"${PS_BRANCH}"')" | ${mysql_cli} -Dlfspt_lrc
         ;;
     esac
 }
