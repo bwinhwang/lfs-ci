@@ -18,6 +18,8 @@ setUp() {
 }
 
 tearDown() {
+    rm -rf ${CI_LOGGING_LOGFILENAME}
+    rm -rf ${CI_LOGGING_LOGFILENAME_COMPLETE}
     return
 }
 

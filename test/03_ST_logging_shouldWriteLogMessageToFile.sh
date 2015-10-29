@@ -7,7 +7,8 @@ setUp() {
     export CI_LOGGING_LOGFILENAME_COMPLETE=$(createTempFile)
 }
 tearDown() {
-    return
+    rm -rf ${CI_LOGGING_LOGFILENAME_COMPLETE}
+    rm -rf ${CI_LOGGING_LOGFILENAME}
 }
 
 test1() {
