@@ -150,7 +150,7 @@ ci_job_unittest() {
 
     local workspace=$(getWorkspaceName)
     mustHaveWorkspaceName
-    mustHaveCleanWorkspace
+    mustHavePreparedWorkspace
     
     return
 }
