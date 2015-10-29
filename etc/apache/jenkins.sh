@@ -12,17 +12,25 @@ source /etc/rc.d/init.d/functions
 export DAEMON_COREFILE_LIMI=unlimited
 
 case $(hostname -s) in
-    ulegcpmaxi) 
-        export LFS_CI_ROOT=/ps/lfs/ci 
+    ulegcpmaxi)
+        export LFS_CI_ROOT=/ps/lfs/ci
+        export LFS_CI_CONFIG_FILE=${LFS_CI_ROOT}/etc/lfs-ci.cfg
         user=psulm
     ;;
     ullteb02)
         export LFS_CI_ROOT=/home/ca_lrcci/lfs-ci
+        export LFS_CI_CONFIG_FILE=${LFS_CI_ROOT}/etc/lfs-lrc-ci.cfg
         user=ca_lrcci
     ;;
-    ulegcpeag15) 
-        export LFS_CI_ROOT=/home/lfscidev/lfs-ci 
+    ulegcpeag15)
+        export LFS_CI_ROOT=/home/lfscidev/lfs-ci
+        export LFS_CI_CONFIG_FILE=${LFS_CI_ROOT}/etc/development.cfg
         user=lfscidev
+    ;;
+    ulegcpcisand)
+        export LFS_CI_ROOT=/home/ca_urecci/lfs-ci
+        export LFS_CI_CONFIG_FILE=${LFS_CI_ROOT}/etc/lfs-urec-ci.cfg
+        user=ca_urecci
     ;;
 esac
 
@@ -49,7 +57,7 @@ stop() {
     echo -n $"Shutting down $prog: "
     killproc -p $pidfile java
     RETVAL=$?
-   
+
     echo
     [ $RETVAL -eq 0 ] && rm -f $lockfile
     return $RETVAL
