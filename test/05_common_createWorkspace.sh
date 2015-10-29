@@ -63,7 +63,6 @@ setUp() {
 
 tearDown() {
     rm -rf ${UNITTEST_COMMAND}
-    rm -rf ${CI_LOGGING_LOGFILENAME}
     return
 }
 
