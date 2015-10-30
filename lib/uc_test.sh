@@ -151,6 +151,7 @@ ci_job_unittest() {
     local workspace=$(getWorkspaceName)
     mustHaveWorkspaceName
     mustHavePreparedWorkspace
+    createArtifactArchive
     
     return
 }
