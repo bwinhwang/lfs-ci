@@ -14,14 +14,6 @@ usecase_LFS_TEST() {
     ci_job_test
 }
 
-## @fn      usecase_LFS_UNITTEST()
-#  @brief   runs the usecase LFS_UNITTEST (wrapper only)
-#  @param   <none>
-#  @return  <none>
-usecase_LFS_UNITTEST() {
-    ci_job_unittest
-}
-
 ## @fn      ci_job_test()
 #  @brief   dispatcher for test jobs
 #  @details prepare the build artifacts to have it in the correct way for the test framework
@@ -66,7 +58,6 @@ ci_job_test() {
     if [[ ${JOB_NAME} =~ .*_-_Test$           || \
           ${JOB_NAME} =~ .*_-_StabilityTest$  || \
           ${JOB_NAME} =~ .*_-_SmokeTest$      || \
-          ${JOB_NAME} =~ .*_-_Unittest$       || \
           ${JOB_NAME} =~ .*_-_RegularTest$
        ]] 
     then
@@ -138,23 +129,6 @@ ci_job_test() {
 
     return
 }
-
-## @fn      ci_job_test()
-#  @brief   dispatcher for test jobs
-#  @details prepare the build artifacts to have it in the correct way for the test framework
-#  @param   <none>
-#  @return  <none>
-ci_job_unittest() {
-    # unittest jobs will be executed by jenkins job, so we can exit very early
-    requiredParameters JOB_NAME BUILD_NUMBER WORKSPACE UPSTREAM_PROJECT UPSTREAM_BUILD
-
-    local workspace=$(getWorkspaceName)
-    mustHaveWorkspaceName
-    mustHaveCleanWorkspace
-    
-    return
-}
-    
 
 ## @fn      _exitHandlerDatabaseTestFailed()
 #  @brief   exit handler for storing the event in the database for a failed test
