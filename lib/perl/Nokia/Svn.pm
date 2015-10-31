@@ -46,7 +46,7 @@ sub cat {
 
     TRACE sprintf( "running svn cat for %s - rev %s", $url, $revision || "undef" );
 
-    my $cmd = sprintf( "%s cat %s %s|",
+    my $cmd = sprintf( "%s cat --non-interactive --trust-server-cert %s %s|",
                         $self->{svnCli},
                         $revision ? sprintf( "-r %d", $revision ) : "",
                         $url );
@@ -72,7 +72,7 @@ sub propget {
     my $url      = $self->replaceMasterByUlmServer( $param->{url} );
     my $property = $param->{property};
 
-    my $cmd = sprintf( "%s pg %s %s|",
+    my $cmd = sprintf( "%s pg --non-interactive --trust-server-cert %s %s|",
                         $self->{svnCli},
                         $property,
                         $url );
@@ -95,16 +95,16 @@ sub info {
     my $count = 0;
 
     while ( $xml eq "" and $count < 8 ) {
-        TRACE "running ($count) svn info --xml ${url}";
-        open SVN_INFO, sprintf( "%s --xml info %s|", $self->{svnCli}, $url ) or next;
-        TRACE "svn info --xml ${url} command was ok";
+        TRACE "running ($count) svn info --non-interactive --trust-server-cert --xml ${url}";
+        open SVN_INFO, sprintf( "%s --non-interactive --trust-server-cert --xml info %s|", $self->{svnCli}, $url ) or next;
+        TRACE "svn info --non-interactive --trust-server-cert --xml ${url} command was ok";
         $xml = join( "", <SVN_INFO> );
         TRACE "xml is $xml";
         close SVN_INFO;
         $count++;
     }
     if( $xml eq "" ) {
-        die "svn info --xml failed";
+        die "svn info --non-interactive --trust-server-cert --xml failed";
     }
 
     my $xmlDataHash = XMLin( $xml );
@@ -122,7 +122,7 @@ sub ls {
     my $param = { @_ };
     my $url   = $self->replaceMasterByUlmServer( $param->{url} || "" );
 
-    open SVN_LS, sprintf( "%s --xml ls %s|", $self->{svnCli}, $url ) || die "can not open svn info: %!";
+    open SVN_LS, sprintf( "%s --non-interactive --trust-server-cert --xml ls %s|", $self->{svnCli}, $url ) || die "can not open svn info: %!";
     my $xml = join( "", <SVN_LS> );
     close SVN_LS;
 
@@ -144,7 +144,7 @@ sub command {
     my $action   = $param->{action}   || "";
     my $args     = join( " ", @{ $param->{args} || [] } );
 
-    my $cmd = sprintf( "%s %s -q %s %s %s",
+    my $cmd = sprintf( "%s %s --non-interactive --trust-server-cert -q %s %s %s",
                         $self->{svnCli},
                         $action,
                         $revision ? sprintf( "-r%d", $revision ) : "",

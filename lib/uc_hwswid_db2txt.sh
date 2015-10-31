@@ -126,9 +126,13 @@ hwSwIdToSubVersion() {
 
         rm -rf "${hwswidWorkdirSvn}"
         svnCheckout ${url} "${hwswidWorkdirSvn}"
-        cp -a ${hwswidWorkdirDb}/* "${hwswidWorkdirSvn}"/
-        svn diff ${hwswidWorkdirSvn}
-        svn commit -m "update HwSwId NOJCHK" ${hwswidWorkdirSvn}
+        execute cp -a ${hwswidWorkdirDb}/* "${hwswidWorkdirSvn}"/
+        svnDiff ${hwswidWorkdirSvn}
+        local msg=$(createTempFile)
+        echo "update HwSwId" > ${msg} 
+        svnCommit -F ${msg} ${hwswidWorkdirSvn}
 
     done
+
+    return 0
 }
