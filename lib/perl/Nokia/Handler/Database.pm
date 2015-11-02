@@ -34,7 +34,7 @@ sub newTestCaseResult {
             testCaseDuration    => $entry->{duration}->[0]    || 0.0,
             testCaseFailedSince => $entry->{failedSince}->[0] || 0,
             testCaseSkipped     => $entry->{skipped}->[0]     || 0,
-            testCaseResult      => exists $entry->{errorStackTrace} ? $entry->{errorStackTrace}->[0] || "",
+            testCaseResult      => exists $entry->{errorStackTrace} ? $entry->{errorStackTrace}->[0] : "",
         );
     }
     return;
