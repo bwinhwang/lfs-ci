@@ -1,0 +1,10 @@
+<?xml version="1.0" ?>
+<testsuite errors="0" failures="0" name="Test_Versions" tests="1" time="1.483">
+	<testcase classname="Test_Versions" name="test_versions" time="1.483"/>
+	<system-out>
+<![CDATA[ FAKE TEST
+
+]]>	</system-out>
+	<system-err>
+<![CDATA[]]>	</system-err>
+</testsuite>
