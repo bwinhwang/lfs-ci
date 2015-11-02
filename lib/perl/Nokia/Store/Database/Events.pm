@@ -85,15 +85,13 @@ sub newTestResult {
     my $testExecutionId = $param->{testExecutionId};
     my $testResultName  = $param->{testResultName};
     my $testResultValue = $param->{testResultValue};
-    my $buildNumber     = $param->{buildNumber};
-    my $jobName         = $param->{jobName};
 
     my $sth = $self->prepare(
-        'CALL add_new_test_result( ?, ?, ?, ?, ? )'
+        'CALL add_new_test_result( ?, ?, ? )'
     );
-    $sth->execute( $testExecutionId, $testResultName, $testResultValue, $jobName, $buildNumber )
-        or LOGDIE sprintf( "can not insert test result: %s, %s, %s, %s, %s", 
-                                $testExecutionId, $testResultName, $testResultValue, $jobName, $buildNumber );
+    $sth->execute( $testExecutionId, $testResultName, $testResultValue )
+        or LOGDIE sprintf( "can not insert test result: %s, %s, %s", 
+                                $testExecutionId, $testResultName, $testResultValue );
 
     return;
 }
