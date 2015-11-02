@@ -16,6 +16,9 @@ oneTimeSetUp() {
     execute() {
         mockedCommand "execute $@"
     }
+    getLocationName() {
+        echo pronb-developer
+    }
     return
 }
 

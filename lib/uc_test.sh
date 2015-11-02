@@ -2,9 +2,10 @@
 ## @file  uc_test
 #  @brief the test usecase
 
-[[ -z ${LFS_CI_SOURCE_jenkins}   ]] && source ${LFS_CI_ROOT}/lib/jenkins.sh
-[[ -z ${LFS_CI_SOURCE_artifacts} ]] && source ${LFS_CI_ROOT}/lib/artifacts.sh
-[[ -z ${LFS_CI_SOURCE_database}  ]] && source ${LFS_CI_ROOT}/lib/database.sh
+[[ -z ${LFS_CI_SOURCE_jenkins}         ]] && source ${LFS_CI_ROOT}/lib/jenkins.sh
+[[ -z ${LFS_CI_SOURCE_artifacts}       ]] && source ${LFS_CI_ROOT}/lib/artifacts.sh
+[[ -z ${LFS_CI_SOURCE_createWorkspace} ]] && source ${LFS_CI_ROOT}/lib/createWorkspace.sh
+[[ -z ${LFS_CI_SOURCE_database}        ]] && source ${LFS_CI_ROOT}/lib/database.sh
 
 ## @fn      usecase_LFS_TEST()
 #  @brief   runs the usecase LFS_TEST (wrapper only)
@@ -12,6 +13,14 @@
 #  @return  <none>
 usecase_LFS_TEST() {
     ci_job_test
+}
+
+## @fn      usecase_LFS_UNITTEST()
+#  @brief   runs the usecase LFS_UNITTEST (wrapper only)
+#  @param   <none>
+#  @return  <none>
+usecase_LFS_UNITTEST() {
+    ci_job_unittest
 }
 
 ## @fn      ci_job_test()
@@ -58,6 +67,7 @@ ci_job_test() {
     if [[ ${JOB_NAME} =~ .*_-_Test$           || \
           ${JOB_NAME} =~ .*_-_StabilityTest$  || \
           ${JOB_NAME} =~ .*_-_SmokeTest$      || \
+          ${JOB_NAME} =~ .*_-_Unittest$       || \
           ${JOB_NAME} =~ .*_-_RegularTest$
        ]] 
     then
@@ -129,6 +139,24 @@ ci_job_test() {
 
     return
 }
+
+## @fn      ci_job_test()
+#  @brief   dispatcher for test jobs
+#  @details prepare the build artifacts to have it in the correct way for the test framework
+#  @param   <none>
+#  @return  <none>
+ci_job_unittest() {
+    # unittest jobs will be executed by jenkins job, so we can exit very early
+    requiredParameters JOB_NAME BUILD_NUMBER WORKSPACE UPSTREAM_PROJECT UPSTREAM_BUILD
+
+    local workspace=$(getWorkspaceName)
+    mustHaveWorkspaceName
+    mustHavePreparedWorkspace
+    createArtifactArchive
+    
+    return
+}
+    
 
 ## @fn      _exitHandlerDatabaseTestFailed()
 #  @brief   exit handler for storing the event in the database for a failed test
