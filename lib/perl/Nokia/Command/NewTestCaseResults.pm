@@ -30,7 +30,7 @@ sub execute {
     my $handler = Nokia::Handler::Database->new();
 
     my $xml = XMLin( $self->{opt_resultFile}, ForceArray => 1 );
-    $handler->newTestResult(
+    $handler->newTestCaseResult(
         buildName     => $self->{opt_name},
         testSuiteName => $self->{opt_testSuiteName},
         targetName    => $self->{opt_targetName},
