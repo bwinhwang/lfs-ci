@@ -18,7 +18,6 @@ info "# SOURCE_RELEASE:       ${SOURCE_RELEASE}"
 info "# ECL_URLS:             ${ECL_URLS}"
 info "# DESCRIPTION:          ${DESCRIPTION}"
 info "# COMMENT:              ${COMMENT}"
-info "# ADDED_TO_CONFIG:      ${ADDED_TO_CONFIG}"
 info "# WFT_READY:            ${WFT_READY}"
 info "# PS_BRANCH_COMMENT:    ${PS_BRANCH_COMMENT}"
 info "# FSMR4:                ${FSMR4}"
@@ -64,10 +63,6 @@ __checkParams() {
 
     if [[ ${LRC} == true ]]; then
         echo ${NEW_BRANCH} | grep -q -e "^LRC_" && { error "LRC: \"LRC_\" is automatically added as prefix to NEW_BRANCH"; exit 1; }
-    fi
-
-    if [[ ${ADDED_TO_CONFIG} == false ]]; then
-        fatal "Add the branch to branches.cfg and pkgpool.cfg"
     fi
 
     if [[ ${WFT_READY} == false ]]; then
@@ -247,12 +242,18 @@ svnCopyLocationsFSMR4() {
 #  @return  <none>
 svnDeleteBootManager() {
     local newBranch=$1
-    __cmd svn delete -m \"Branching: removed src-fbrm from branch $newBranch\" \
-            ${SVN_REPO}/${SVN_DIR}/${newBranch}/trunk/fsmr3/src-fbrm;
-    __cmd svn delete -m \"Branching: removed src-fsmbrm from branch $newBranch\" \
-            ${SVN_REPO}/${SVN_DIR}/${newBranch}/trunk/fsmr3/src-fsmbrm;
-    __cmd svn delete -m \"Branching: removed src-fsmbrm35 from branch $newBranch\" \
-            ${SVN_REPO}/${SVN_DIR}/${newBranch}/trunk/fsmr35/src-fsmbrm35;
+
+    svn ls ${SVN_REPO}/${SVN_DIR}/${newBranch}/trunk/fsmr3/src-fbrm && \
+        __cmd svn delete -m \"Branching: removed src-fbrm from branch $newBranch\" \
+        ${SVN_REPO}/${SVN_DIR}/${newBranch}/trunk/fsmr3/src-fbrm;
+
+    svn ls ${SVN_REPO}/${SVN_DIR}/${newBranch}/trunk/fsmr3/src-fsmbrm && \
+        __cmd svn delete -m \"Branching: removed src-fsmbrm from branch $newBranch\" \
+        ${SVN_REPO}/${SVN_DIR}/${newBranch}/trunk/fsmr3/src-fsmbrm;
+
+    svn ls ${SVN_REPO}/${SVN_DIR}/${newBranch}/trunk/fsmr35/src-fsmbrm35 && \
+        __cmd svn delete -m \"Branching: removed src-fsmbrm35 from branch $newBranch\" \
+        ${SVN_REPO}/${SVN_DIR}/${newBranch}/trunk/fsmr35/src-fsmbrm35;
 }
 
 __getGitRevisionFile() {

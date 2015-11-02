@@ -53,3 +53,5 @@
 /PS_LFS_OS_20M2_09_83/d
 
 
+# remove "/results" from the directory, if exists
+s/\/results$//g

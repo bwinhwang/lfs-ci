@@ -70,7 +70,7 @@ execute() {
 
         trace "exit code of \"${command}\" was ${exitCode}"
 
-        # fucking stupid workaround to get the logfile for the command outside
+        # stupid workaround to get the logfile for the command outside
         # of the function.....
         # TODO: demx2fk3 2015-02-10 find a better way to do this.
         if [[ -e ${logfile} ]] ; then

@@ -9,15 +9,17 @@ oneTimeSetUp() {
 setUp() {
     export JOB_NAME=LFS_CI_-_trunk_-_Build_-_FSM-r3_-_fsm3_octeon2
     export LFS_CI_CONFIG_FILE=$(createTempFile)
-    echo 'LFS_CI_global_mapping_location < job_location:trunk > = pronb-developer'  > ${LFS_CI_CONFIG_FILE}
-    echo 'LFS_CI_global_mapping_location <                    > = ${job_location}' >> ${LFS_CI_CONFIG_FILE}
+    echo 'LFS_CI_global_mapping_branch_location < branchName:trunk > = pronb-developer'  >> ${LFS_CI_CONFIG_FILE}
+    echo 'LFS_CI_global_mapping_location_branch < locationName:pronb-deveoper > = trunk' >> ${LFS_CI_CONFIG_FILE}
+    echo 'LFS_CI_global_mapping_branch_location < branchName:FB1506 > = FB1506'          >> ${LFS_CI_CONFIG_FILE}
+    echo 'LFS_CI_global_mapping_location_branch < locationName:FB1505 > = FB1506'        >> ${LFS_CI_CONFIG_FILE}
 
     return
 }
 
 tearDown() {
-    unset LFS_CI_GLOBAL_BRANCH_NAME
-    export LFS_CI_GLOBAL_BRANCH_NAME
+    unset LFS_CI_GLOBAL_LOCATION_NAME
+    export LFS_CI_GLOBAL_LOCATION_NAME
     return
 }
 
@@ -118,7 +120,7 @@ test12_getLocationName() {
     return
 }
 test13_getLocationName() {
-    export LFS_CI_GLOBAL_BRANCH_NAME="abc"
+    export LFS_CI_GLOBAL_LOCATION_NAME="abc"
     assertTrue "getLocationName"
     local value=$(getLocationName)
     assertEquals "abc" "${value}"
@@ -133,34 +135,34 @@ test14_getLocationName() {
 
 
 test15_getBranchName() {
-    assertTrue "test15_getBranchName" "getLocationName"
-    local value=$(getLocationName)
-    assertEquals "pronb-developer" "${value}"
+    assertTrue "test15_getBranchName" "getBranchName"
+    local value=$(getBranchName)
+    assertEquals "trunk" "${value}"
     return
 }
 test16_getBranchName() {
-    assertTrue "getLocationName LFS_CI_-_trunk_-_Build"
-    local value=$(getLocationName LFS_CI_-_trunk_-_Build)
-    assertEquals "pronb-developer" "${value}"
+    assertTrue "getBranchName LFS_CI_-_trunk_-_Build"
+    local value=$(getBranchName LFS_CI_-_trunk_-_Build)
+    assertEquals "trunk" "${value}"
     return
 }
 test17_getBranchName() {
-    assertTrue "getLocationName LFS_CI_-_FB1506_-_Build"
-    local value=$(getLocationName LFS_CI_-_FB1506_-_Build)
+    assertTrue "getBranchName LFS_CI_-_FB1506_-_Build"
+    local value=$(getBranchName LFS_CI_-_FB1506_-_Build)
     assertEquals "FB1506" "${value}"
     return
 }
 test18_getBranchName() {
     export JOB_NAME=LFS_CI_-_FB1506_-_Build
-    assertTrue "getLocationName"
-    local value=$(getLocationName)
+    assertTrue "getBranchName"
+    local value=$(getBranchName)
     assertEquals "FB1506" "${value}"
     return
 }
 test19_getBranchName() {
     export LFS_CI_GLOBAL_BRANCH_NAME="abc"
-    assertTrue "getLocationName"
-    local value=$(getLocationName)
+    assertTrue "getBranchName"
+    local value=$(getBranchName)
     assertEquals "abc" "${value}"
     return
 }
@@ -173,7 +175,7 @@ test20_mustHaveLocationName() {
 test21_mustHaveLocationName() {
     unset JOB_NAME
     export JOB_NAME
-    assertTrue "mustHaveLocationName"
+    assertFalse "mustHaveLocationName"
     return
 }
 test22_mustHaveLocationName() {
@@ -184,14 +186,9 @@ test22_mustHaveLocationName() {
 test23_mustHaveBranchName() {
     unset JOB_NAME
     export JOB_NAME
-    assertTrue "mustHaveBranchName"
-    return
-}
-
-test24_mustHaveBranchName() {
-    unset JOB_NAME
-    export JOB_NAME
-    assertTrue "mustHaveBranchName"
+    unset LFS_CI_GLOBAL_BRANCH_NAME
+    export LFS_CI_GLOBAL_BRANCH_NAME
+    assertFalse "mustHaveBranchName"
     return
 }
 

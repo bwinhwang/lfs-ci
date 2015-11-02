@@ -26,6 +26,12 @@ oneTimeSetUp() {
     makingTest_logConsole() {
         mockedCommand "makingTest_logConsole $@"
     }
+    getConfig() {
+        echo $1
+    }
+    _reserveTarget() {
+        echo "reservedTarget"
+    }
 
     return
 }
@@ -45,11 +51,11 @@ test1_poweron() {
 
     local expect=$(createTempFile)
     cat <<EOF > ${expect}
+makingTest_logConsole 
 mustHaveMakingTestTestConfig 
 makingTest_testSuiteDirectory 
 mustExistDirectory /path/to/test/suite
-makingTest_logConsole 
-execute make -C /path/to/test/suite powercycle
+execute make -C /path/to/test/suite powercycle LFS_CI_uc_test_making_test_powercycle_options
 EOF
     assertExecutedCommands ${expect}
 
@@ -79,7 +85,7 @@ test1_powercycle() {
 mustHaveMakingTestTestConfig 
 makingTest_testSuiteDirectory 
 mustExistDirectory /path/to/test/suite
-execute make -C /path/to/test/suite powercycle
+execute make -C /path/to/test/suite powercycle LFS_CI_uc_test_making_test_powercycle_options
 EOF
     assertExecutedCommands ${expect}
 

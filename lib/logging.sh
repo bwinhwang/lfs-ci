@@ -76,7 +76,7 @@ startLogfile() {
         esac
         if [[ ${url} ]] ; then
             echo 1>&2 "short log    : ${url}/${datePath}/$(basename ${CI_LOGGING_LOGFILENAME})"
-            echo 1>&2 "complete log : ${url}/${datePath}/$(basename ${CI_LOGGING_LOGFILENAME_COMPLETE})"
+            echo 1>&2 "complete log : ${url}/${datePath}/$(basename ${CI_LOGGING_LOGFILENAME_COMPLETE}).gz"
         fi
 
         printf -- "------------------------------------------------------------------\n" >  ${CI_LOGGING_LOGFILENAME}
@@ -122,8 +122,7 @@ stopLogfile() {
         printf -- "ending complete logfile\n"                                             >> ${CI_LOGGING_LOGFILENAME_COMPLETE}
         printf -- "-------------------------------------------------------------------\n" >> ${CI_LOGGING_LOGFILENAME_COMPLETE}
 
-        # disabled gzipping..
-        # gzip ${CI_LOGGING_LOGFILENAME}
+        gzip ${CI_LOGGING_LOGFILENAME_COMPLETE}
     fi
     
     unset CI_LOGGING_LOGFILENAME
@@ -215,6 +214,7 @@ message() {
     logLineFile=$(_loggingLine "${logType}"                                                                                  \
                                "${LFS_CI_LOGGING_CONFIG-"PREFIX DATE_SHORT SPACE TYPE SPACE MESSAGE SPACE -- SPACE CALLER"}" \
                                "${logMessage}")
+    # Deactivate short log
     echo -e 1>&2 "${logLineFile}" >> ${CI_LOGGING_LOGFILENAME}
 
     # don't show TRACE and DEBUG message in screen, 
@@ -290,7 +290,7 @@ _loggingLine() {
                                          "${logLine}"        \
                                          "${sourceFile}"     \
                                          "${FUNCNAME[3]}"    \
-                                         "${BASH_LINENO[3]}" )
+                                         "${BASH_LINENO[2]}" )
             ;;
             STACKTRACE) _stackTrace ;;
             *)          logLine=$(printf "%s%s" "${logLine}" "${template}") ;;

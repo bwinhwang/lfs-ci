@@ -77,7 +77,7 @@ usecase_LFS_RELEASE_SHARE_BUILD_ARTIFACTS_KERNELSOURCES() {
             debug "starting rsync of ${workspace}/bld/bld-kernelsources-linux to ${server}:${destination}"
             executeOnMaster chmod u+w $(dirname ${destination})
             executeOnMaster mkdir -p  ${destination}
-            execute rsync -av --exclude=.svn ${workspace}/bld/bld-kernelsources-linux/. ${server}:${destination}/
+            execute rsync -av -e ssh --exclude=.svn ${workspace}/bld/bld-kernelsources-linux/. ${server}:${destination}/
             touch ${destination}
         else
             warning "storing artifacts on share is disabled in config"

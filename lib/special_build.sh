@@ -211,7 +211,7 @@ specialBuildCreateWorkspaceAndBuild() {
     copyArtifactsToWorkspace "${UPSTREAM_PROJECT}" "${UPSTREAM_BUILD}"
 
     mustHaveLocationForSpecialBuild
-    local location=${LFS_CI_GLOBAL_BRANCH_NAME}
+    local location=${LFS_CI_GLOBAL_LOCATION_NAME}
 
     if ! specialBuildisRequiredForLrc ${location} ; then
         warning "build is not required."
@@ -222,7 +222,7 @@ specialBuildCreateWorkspaceAndBuild() {
         exit 0
     fi
 
-    export LFS_CI_GLOBAL_BRANCH_NAME=${location}
+    export LFS_CI_GLOBAL_LOCATION_NAME=${location}
 
     # createWorkspace will copy the revision state file from the upstream job
     execute rm -rf ${WORKSPACE}/revisions.txt
@@ -364,7 +364,10 @@ specialBuildUploadAndNotifyUser() {
             -r ${readmeFile}                   \
             -t ${label}                        \
             -n                                 \
-            -f ${LFS_CI_CONFIG_FILE}
+            -T OS                              \
+            -P $(getProductNameFromJobName)    \
+            -L  $(getLocationName)             \
+            -f ${LFS_CI_CONFIG_FILE}         
     return
 }
 
@@ -383,7 +386,7 @@ mustHaveLocationForSpecialBuild() {
     # fakeing the branch name for workspace creation...
     local location=$(cat ${workspace}/bld/bld-fsmci-summary/location)
     mustHaveValue "${location}" "location"
-    export LFS_CI_GLOBAL_BRANCH_NAME=${location}
+    export LFS_CI_GLOBAL_LOCATION_NAME=${location}
 
     return
 }

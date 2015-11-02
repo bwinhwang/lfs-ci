@@ -14,6 +14,18 @@ oneTimeSetUp() {
         mockedCommand "mustHaveCleanWorkspace"
         mkdir -p ${WORKSPACE}/workspace
     }
+    getBranchName() {
+        mockedCommand "getBranchName $@"
+        echo "trunk"
+    }
+    getLocationName() {
+        mockedCommand "getLocationName $@"
+        echo "pronb-developer"
+    }
+    getBranchName() {
+        mockedCommand "getBranchName $@"
+        echo "trunk"
+    }
     setBuildDescription() {
         mockedCommand "setBuildDescription $@"
     }
@@ -97,6 +109,7 @@ test1() {
 # execute ${LFS_CI_ROOT}/bin/sendReleaseNote -r ${WORKSPACE}/workspace/releasenote.txt -t LABEL -f ${LFS_CI_ROOT}/etc/lfs-ci.cfg
     cat <<EOF > ${expect}
 mustHaveCleanWorkspace
+getBranchName 
 copyArtifactsToWorkspace PKGPOOL_CI_-_trunk_-_Test 1234 pkgpool
 getBuildDirectoryOnMaster PKGPOOL_PROD_-_trunk_-_Release lastSuccessfulBuild
 runOnMaster test -e /path/to/jenkins/jobname/buildnumber/forReleaseNote.txt
@@ -105,7 +118,8 @@ execute mv ${WORKSPACE}/forReleaseNote.txt ${WORKSPACE}/workspace/forReleaseNote
 copyFileFromBuildDirectoryToWorkspace PKGPOOL_PROD_-_trunk_-_Release lastSuccessfulBuild gitrevision
 execute mv ${WORKSPACE}/gitrevision ${WORKSPACE}/workspace/gitrevision.old
 setBuildDescription PKGPOOL_PROD_-_trunk_-_Release 1234 LABEL
-execute -n ${LFS_CI_ROOT}/bin/getReleaseNoteXML -t LABEL -o OLD_LABEL -T OS -P PKGPOOL -f ${LFS_CI_ROOT}/etc/lfs-ci.cfg
+getLocationName 
+execute -n ${LFS_CI_ROOT}/bin/getReleaseNoteXML -t LABEL -o OLD_LABEL -T OS -P PKGPOOL -L pronb-developer -f ${LFS_CI_ROOT}/etc/lfs-ci.cfg
 mustBeValidXmlReleaseNote ${WORKSPACE}/workspace/releasenote.xml
 execute touch ${WORKSPACE}/workspace/releasenote.txt
 execute sed -i -e s/PS_LFS_PKG = //g ${WORKSPACE}/workspace/forReleaseNote.txt.old

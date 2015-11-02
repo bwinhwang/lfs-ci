@@ -7,6 +7,7 @@ use warnings;
 use XML::Simple;
 use Data::Dumper;
 use Log::Log4perl qw( :easy );
+use Nokia::Singleton;
 
 use parent qw( Nokia::Object );
 

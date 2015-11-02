@@ -20,13 +20,6 @@ mustHaveTargetBoardName() {
     return
 }
 
-## @fn      getBranchName()
-#  @brief   alias for getLocationName
-#  @param   <none>
-#  @return  return the branch name
-getBranchName() { 
-    getLocationName $@
-}
 
 ## @fn      mustHaveLocationName()
 #  @brief   ensure, that there is a location name (aka branch)
@@ -44,7 +37,9 @@ mustHaveLocationName() {
 #  @param   <none>
 #  @return  <none>
 mustHaveBranchName() { 
-    mustHaveLocationName 
+    local branchName=$(getBranchName) 
+    mustHaveValue "${branchName}" "correct branch name from JOB_NAME ${JOB_NAME}"
+    return
 }
 
 ## @fn      getWorkspaceName()
@@ -112,9 +107,15 @@ mustHaveCleanWorkspace() {
 removeWorkspace() {
     local workspace=$1
 
-    execute chmod -R u+w "${workspace}"
-    execute rm -rf "${workspace}"
-
+    execute -i rm -rf "${workspace}"
+    # it may happen that some files could not be removed due to wrong access rights.
+    # if that's the case, change access rights and perform the rm command again.
+    if [[ -d ${workspace} ]] ; then
+        debug "workspace not empty after removing files; need to chmod and remove again"
+        execute ls -Rl "${workspace}"
+        execute chmod -R u+w "${workspace}"
+        execute rm -rf "${workspace}"
+    fi
     return
 }
 
@@ -870,11 +871,13 @@ getBranchPart() {
         return 1
     fi
 
-    [[ ${what} == YY ]] && echo ${yy}
-    [[ ${what} == YYYY ]] && echo ${yyyy}
-    [[ ${what} == MM ]] && echo ${mm}
-    [[ ${what} == TYPE ]] && echo ${branchType}
-    [[ ${what} == NR ]] && echo ${nr}
+    case ${what} in
+        YY) echo ${yy};;
+        YYYY) echo ${yyyy};;
+        MM) echo ${mm};;
+        TYPE) echo ${branchType};;
+        NR) echo ${nr};;
+    esac
 }
 
 ## @fn      getBranchNameFromBuildName()
@@ -1004,4 +1007,33 @@ createFingerprintFile() {
     execute cp ${workspace}/fingerprint.txt ${workspace}/bld/bld-fsmci-summary/
 
     return
+}
+
+## @fn       branchMinusOne()
+#  @brief    branch minus one months.
+#  @detailed substract one months from branch. Eg FB1501 - 1 = FB1412.
+#  @parma    The branch eg FB1509.
+#  @return   $1 minus 1.
+branchMinusOne() {
+    local branch=$1
+    mustHaveValue $branch "branch is needed"
+    local mm
+    local tmp=$(getBranchPart ${branch} MM)
+    local yy=$(getBranchPart ${branch} YY)
+    local bt=$(getBranchPart ${branch} TYPE)
+
+    if [[ $(echo $tmp | cut -c1) == 0 ]]; then
+        mm=$(echo $tmp | cut -c2)
+    else
+        mm=$tmp
+    fi
+
+    if [[ $mm -eq 1 ]]; then
+        mm=12
+        yy=$((yy-1))
+    else
+        mm=$((mm-1))
+        [[ $mm -lt 10 ]] && mm="0$mm"
+    fi
+    echo "${bt}${yy}${mm}"
 }
