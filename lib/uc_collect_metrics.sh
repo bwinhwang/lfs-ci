@@ -152,7 +152,7 @@ collectMetricsFromBuildJobs() {
 
         rawDebug ${resultFile}
 
-        databaseTestResults ${label} "Build" ${jobName} "host" ${resultFile}
+        databaseTestResults ${label} "Build" ${jobName} "host" ${resultFile} ${jobName} ${buildNumber}
     done
     
     return
@@ -233,7 +233,7 @@ collectMetricsFromPackageJob() {
     local resultFile=$(createTempFile)
     local duration=$(${LFS_CI_ROOT}/bin/xpath -q -e '/build/duration/node()' ${workspace}/${packageJobName}_build.xml)
     printf "duration;%s\n" ${duration} >> ${resultFile}
-    databaseTestResults ${label} "Package" ${packageJobName} "host" ${resultFile}
+    databaseTestResults ${label} "Package" ${packageJobName} "host" ${resultFile} ${packageJobName} ${packageBuildNumber}
 
     return
 }
@@ -289,7 +289,8 @@ storeMetricsForTestJob() {
     local targetType=$(getConfig LFS_CI_uc_test_target_type_mapping)
     mustHaveValue "${targetType}" "target type"
 
-    databaseTestResults ${label} ${testSuiteType} ${jobName} "${targetType}" ${resultFile}
+    databaseTestResults     ${label} ${testSuiteType} ${jobName} "${targetType}" ${resultFile} ${jobName} ${buildNumber}
+    databaseTestCaseResults ${label} ${testSuiteType} ${jobName} "${targetType}" ${resultFile} ${jobName} ${buildNumber}
 
     return
 }
@@ -341,7 +342,7 @@ storeMetricsFromArtifacts() {
         local targetType=$(getConfig LFS_CI_uc_test_target_type_mapping)
         mustHaveValue "${targetType}" "target type"
 
-        databaseTestResults ${label} ${testSuiteType} ${jobName} "${targetType}" ${file}
+        databaseTestResults ${label} ${testSuiteType} ${jobName} "${targetType}" ${file} ${jobName} ${buildNumber}
 
     done
 

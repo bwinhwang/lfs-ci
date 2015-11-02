@@ -593,30 +593,89 @@ DELIMITER ;
 
 -- }}}
 
--- {{{ add_new_test_execution
+-- {{{ add_new_test_case_result
+-- @fn     add_new_test_case_result
+-- @brief  add a new test case result into the test resuls table
+-- @param  test_case_name           name of the test case
+-- @param  test_execution_id        id of the test execution
+-- @param  test_case_failed_since   test case failed since
+-- @param  test_case_skipped        is test case skipped?
+-- @param  test_case_result         result of the test case
+-- @return <none>
+DROP PROCEDURE IF EXISTS add_new_test_case_result;
+DELIMITER //
+CREATE PROCEDURE add_new_test_case_result( IN in_test_case_name         VARCHAR(128), 
+                                           IN in_test_execution_id      INTEGER,
+                                           IN in_test_case_duration     FLOAT,
+                                           IN in_test_case_failed_since INTEGER,
+                                           IN in_test_case_skipped      BOOLEAN,
+                                           IN in_test_case_result       VARCHAR(128)
+                                         )
+BEGIN
+    DECLARE cnt_test_case_id INT;
+    DECLARE var_test_case_id INT;
 
+    DECLARE cnt_test_execution_id INT;
+
+    SELECT count(id) INTO cnt_test_case_id FROM test_cases WHERE test_case_name = in_test_case_name;
+    IF cnt_test_execution_id = 0 THEN
+        INSERT INTO ( test_case_name ) VALUES ( in_test_case_name );
+    END IF;
+
+    SELECT count(id) INTO var_test_case_id FROM test_cases WHERE test_case_name = in_test_case_name;
+
+
+    INSERT INTO test_case_results ( test_case_id, test_execution_id, test_case_duration, test_case_failed_since, test_case_skipped, test_case_result ) 
+        VALUES ( var_test_case_id, in_test_execution_id, in_test_case_duration, in_test_case_failed_since, in_test_case_skipped, in_test_case_result );
+
+END //
+DELIMITER ;
+
+-- }}}
+
+-- {{{ add_new_test_execution
+-- @fn     add_new_test_execution
+-- @brief  add and get the an new test execution
+-- @detail this procedure is used while writing the test case results into the database
+-- @param  in_build_name      name of the build
+-- @param  in_test_suite_name name of the test suite
+-- @param  in_target_name     name of the target
+-- @param  in_target_type     type of the target
+-- @param  in_job_name        name of the jenkins job
+-- @param  in_build_number    build number of jenkins job
+-- @return id of the new inserted test execution
 DROP PROCEDURE IF EXISTS add_new_test_execution;
 DELIMITER //
 CREATE PROCEDURE add_new_test_execution( IN in_build_name          VARCHAR(128),
                                          IN in_test_suite_name     VARCHAR(128),
                                          IN in_target_name         VARCHAR(128),
                                          IN in_target_type         VARCHAR(128),
+                                         IN in_job_name            VARCHAR(128),
+                                         IN in_build_number        INTEGER,
                                          OUT out_test_execution_id INT )
 BEGIN
-   DECLARE cnt_build_id INT;
-   DECLARE var_build_id INT;
+    DECLARE cnt_build_id INT;
+    DECLARE var_build_id INT;
+    DECLARE cnt_test_execution_id INT;
 
-   SELECT count(id) INTO cnt_build_id FROM builds WHERE build_name = in_build_name;
-   -- check if build name exists
-   -- IF cnt_build_id = 0 THEN
-   --      SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'build_name does not exist';
-   -- END IF;
-   -- more code below
-   -- TODO: demx2fk3 2015-01-13 this is an hack, there is no better way to ghet the latest build id
-   SELECT max(id) INTO var_build_id FROM builds WHERE build_name = in_build_name;
+    SELECT count(id) INTO cnt_build_id FROM builds WHERE build_name = in_build_name;
+    -- check if build name exists
+    IF cnt_build_id = 0 THEN
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'build_name does not exist';
+    END IF;
+    -- more code below
+    -- TODO: demx2fk3 2015-01-13 this is an hack, there is no better way to ghet the latest build id
+    SELECT max(id) INTO var_build_id FROM builds WHERE build_name = in_build_name;
 
-    INSERT INTO test_executions ( build_id, test_suite_name, target_name, target_type ) VALUES ( var_build_id, in_test_suite_name, in_target_name, in_target_type );
-    SET out_test_execution_id = LAST_INSERT_ID();
+    SELECT count(id) INTO cnt_test_execution_id FROM test_executions WHERE job_name = in_job_name AND build_number = in_build_number;
+    IF cnt_test_execution_id = 0 THEN
+        INSERT INTO test_executions ( build_id, test_suite_name, target_name, target_type, job_name, build_number ) 
+        VALUES ( var_build_id, in_test_suite_name, in_target_name, in_target_type );
+        SET out_test_execution_id = LAST_INSERT_ID();
+    ELSE
+        SELECT id INTO out_test_execution_id 
+            WHERE job_name = in_job_name AND build_number = in_build_number;
+    END IF;
 
 END //
 DELIMITER ;
@@ -811,8 +870,28 @@ BEGIN
     DECLARE cnt_finished INT;
     DECLARE cnt_failed   INT;
     DECLARE cnt_unstable INT;
+    DECLARE var_started_job_name     TEXT;
+    DECLARE var_started_build_number TEXT;
 
     SELECT _get_build_id_of_build( in_build_name ) INTO var_build_id;
+
+    SELECT job_name INTO var_started_job_name
+        FROM v_build_events 
+        WHERE build_id       = var_build_id
+            AND be.event_id  = e.id
+            AND event_type   = in_event_type 
+            AND product_name = in_product_name
+            AND task_name    = in_task_name
+            AND event_state  = 'started';
+
+    SELECT build_number INTO var_started_build_number
+        FROM v_build_events 
+        WHERE build_id       = var_build_id
+            AND be.event_id  = e.id
+            AND event_type   = in_event_type 
+            AND product_name = in_product_name
+            AND task_name    = in_task_name
+            AND event_state  = 'started';
 
     SELECT _running_tasks( var_build_id, in_event_type, 'started',  in_product_name, in_task_name) INTO cnt_started;
     SELECT _running_tasks( var_build_id, in_event_type, 'finished', in_product_name, in_task_name) INTO cnt_finished;
@@ -823,15 +902,15 @@ BEGIN
         -- TODO: demx2fk3 2015-09-19 HACK special handling for release jobs
         -- release jobs should only create failed or unstable message, not finished.
         IF in_event_type != 'release' THEN
-            CALL new_build_event( in_build_name, in_comment, in_job_name, in_build_number,
+            CALL new_build_event( in_build_name, in_comment, var_started_job_name, var_started_build_number, 
                                 in_product_name, in_task_name, in_event_type, 'finished' );
         END IF;
     ELSEIF cnt_started = cnt_finished + cnt_unstable THEN
-        CALL new_build_event( in_build_name, in_comment, in_job_name, in_build_number,
-                            in_product_name, in_task_name, in_event_type, 'unstable' );
+        CALL new_build_event( in_build_name, in_comment, var_started_job_name, var_started_build_number, 
+                              in_product_name, in_task_name, in_event_type, 'unstable' );
     ELSEIF cnt_started = cnt_finished + cnt_failed + cnt_unstable THEN
-        CALL new_build_event( in_build_name, in_comment, in_job_name, in_build_number,
-                            in_product_name, in_task_name, in_event_type, 'failed' );
+        CALL new_build_event( in_build_name, in_comment, var_started_job_name, var_started_build_number, 
+                              in_product_name, in_task_name, in_event_type, 'failed' );
     END IF;
 END //
 DELIMITER ;
@@ -1239,6 +1318,42 @@ BEGIN
                         (var_branch_id_lrc));
         END IF;
     END IF;
+END //
+DELIMITER ;
+-- }}}
+
+-- {{{ new_ps_branch_for_md_lrc
+DROP PROCEDURE IF EXISTS new_ps_branch_for_md_lrc;
+DELIMITER //
+CREATE PROCEDURE new_ps_branch_for_md_lrc(in_branch_name VARCHAR(64), in_ps_branch_name VARCHAR(64), in_ecl_url VARCHAR(254))
+BEGIN
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        ROLLBACK;
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Could not create entry for MD LRC PS branch in DB';
+    END;
+
+    START TRANSACTION;
+
+        INSERT INTO ps_branches (ps_branch_name, ecl_url) VALUES (in_ps_branch_name, in_ecl_url);
+
+        INSERT INTO nm_branches_ps_branches (ps_branch_id, branch_id)
+               VALUES ((SELECT id FROM ps_branches WHERE ps_branch_name=in_ps_branch_name),
+                       (SELECT id FROM branches WHERE branch_name=in_branch_name));
+    COMMIT;
+
+END //
+DELIMITER ;
+-- }}}
+
+-- {{{ close_ps_branch_for_md_lrc
+DROP PROCEDURE IF EXISTS close_ps_branch_for_md_lrc;
+DELIMITER //
+CREATE PROCEDURE close_ps_branch_for_md_lrc(in_ps_branch_name VARCHAR(64))
+BEGIN
+
+    UPDATE ps_branches SET status='closed' WHERE ps_branch_name=in_ps_branch_name;
+
 END //
 DELIMITER ;
 -- }}}

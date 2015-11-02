@@ -9,6 +9,37 @@ use Nokia::Store::Database::Events;
 use Nokia::Store::Database::Branches;
 use Nokia::Singleton;
 
+
+sub newTestCaseResult {
+    my $self  = shift;
+    my $param = { @_ };
+
+    my $testExecutionId = $self->newTestExecution(
+        buildName     => $param->{buildName},
+        testSuiteName => $param->{testSuiteName},
+        targetName    => $param->{targetName},
+        targetType    => $param->{targetType},
+        buildNumber   => $param->{buildNumber},
+        jobName       => $param->{jobName}, );
+
+    if( not $self->{store} ) {
+        $self->{store} = Nokia::Store::Database::Events->new();
+    }
+
+    foreach my $entry ( @{ $param->{entries} } ) {
+        $self->{store}->newTestCaseResult(
+            testCaseName        => sprintf( "%s.%s", $entry->{className}->[0], 
+                                                     $entry->{testName}->[0] ),
+            testExecutionId     => $testExecutionId,
+            testCaseDuration    => $entry->{duration}->[0]    || 0.0,
+            testCaseFailedSince => $entry->{failedSince}->[0] || 0,
+            testCaseSkipped     => $entry->{skipped}->[0]     || 0,
+            testCaseResult      => exists $entry->{errorStackTrace} ? $entry->{errorStackTrace}->[0] : "",
+        );
+    }
+    return;
+}
+
 sub newTestResult {
     my $self  = shift;
     my $param = { @_ };
@@ -34,6 +65,8 @@ sub newTestExecution {
     my $testSuiteName = $param->{testSuiteName};
     my $targetName    = $param->{targetName};
     my $targetType    = $param->{targetType};
+    my $buildNumber   = $param->{buildNumber};
+    my $jobName       = $param->{jobName};
 
     if( not $self->{store} ) {
         $self->{store} = Nokia::Store::Database::Events->new();
@@ -42,7 +75,10 @@ sub newTestExecution {
     my $id = $self->{store}->newTestExecution( buildName     => $param->{buildName},
                                                testSuiteName => $param->{testSuiteName},
                                                targetName    => $param->{targetName},
-                                               targetType    => $param->{targetType},);
+                                               targetType    => $param->{targetType},
+                                               buildNumber   => $param->{buildNumber},
+                                               jobName       => $param->{jobName},
+                                             );
     return $id;
 }
 

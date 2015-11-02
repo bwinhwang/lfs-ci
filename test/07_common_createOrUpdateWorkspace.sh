@@ -29,7 +29,6 @@ setUp() {
 
 tearDown() {
     rm -rf ${UT_MOCKED_COMMANDS}
-    rm -rf ${CI_LOGGING_LOGFILENAME}
     return
 }
 

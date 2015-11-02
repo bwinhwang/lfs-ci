@@ -108,13 +108,11 @@ removeWorkspace() {
     local workspace=$1
 
     execute -i rm -rf "${workspace}"
-
     # it may happen that some files could not be removed due to wrong access rights.
     # if that's the case, change access rights and perform the rm command again.
     if [[ -d ${workspace} ]] ; then
-        local files_left=$(execute -n ls -R1 ${workspace} | wc -l)
-        debug "files left after executing \"rm -rf ${workspace}\": ${files_left}"
-        debug "changing access rights for left files"
+        debug "workspace not empty after removing files; need to chmod and remove again"
+        execute ls -Rl "${workspace}"
         execute chmod -R u+w "${workspace}"
         execute rm -rf "${workspace}"
     fi

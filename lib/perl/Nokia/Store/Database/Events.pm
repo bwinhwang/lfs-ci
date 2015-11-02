@@ -8,6 +8,36 @@ use Data::Dumper;
 
 use parent qw( Nokia::Store::Database );
 
+sub newTestCaseResult {
+    my $self  = shift;
+    my $param = { @_ };
+
+    my $testCaseName        = $param->{testCaseName};
+    my $testExecutionId     = $param->{testExecutionId};
+    my $testCaseDuration    = $param->{testCaseDuration};
+    my $testCaseFailedSince = $param->{testCaseFailedSince};
+    my $testCaseSkipped     = $param->{testCaseSkipped};
+    my $testCaseResult      = $param->{testCaseResult};
+
+    my $sth = $self->prepare(
+        'CALL add_test_case_result( ?, ?, ?, ?, ? ? )'
+    );
+    $sth->execute( $testCaseName, 
+                   $testExecutionId, 
+                   $testCaseDuration, 
+                   $testCaseFailedSince, 
+                   $testCaseSkipped, 
+                   $testCaseResult, )
+        or LOGDIE sprintf( "can not insert test case result: %s, %s, %s, %s, %s, %s", 
+                   $testCaseName, 
+                   $testExecutionId, 
+                   $testCaseDuration, 
+                   $testCaseFailedSince, 
+                   $testCaseSkipped, 
+                   $testCaseResult, );
+    return;
+}
+
 sub newTestExecution {
     my $self  = shift;
     my $param = { @_ };
@@ -55,12 +85,15 @@ sub newTestResult {
     my $testExecutionId = $param->{testExecutionId};
     my $testResultName  = $param->{testResultName};
     my $testResultValue = $param->{testResultValue};
+    my $buildNumber     = $param->{buildNumber};
+    my $jobName         = $param->{jobName};
 
     my $sth = $self->prepare(
-        'CALL add_new_test_result( ?, ?, ? )'
+        'CALL add_new_test_result( ?, ?, ?, ?, ? )'
     );
-    $sth->execute( $testExecutionId, $testResultName, $testResultValue )
-        or LOGDIE sprintf( "can not insert test result: %s, %s, %s", $testExecutionId, $testResultName, $testResultValue );
+    $sth->execute( $testExecutionId, $testResultName, $testResultValue, $jobName, $buildNumber )
+        or LOGDIE sprintf( "can not insert test result: %s, %s, %s, %s, %s", 
+                                $testExecutionId, $testResultName, $testResultValue, $jobName, $buildNumber );
 
     return;
 }

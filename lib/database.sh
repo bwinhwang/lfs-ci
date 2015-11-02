@@ -358,6 +358,8 @@ databaseAddNewCommits() {
 #  @param   {targetName}       name of the target
 #  @param   {targetType}       type of the target
 #  @param   {resultFile}       file with results
+#  @param   {jobName}          name of the jenkins job
+#  @param   {buildNumer}       build number of the jenkins job
 #  @return  <none>
 databaseTestResults() {
     local labelName=$1
@@ -365,6 +367,8 @@ databaseTestResults() {
     local targetName=$3
     local targetType=$4
     local resultFile=$5
+    local jobName=$6
+    local buildNumber=$7
 
     info "adding metrics for ${labelName}, ${testSuiteName}, ${targetName}/${targetType}"
     execute -i ${LFS_CI_ROOT}/bin/newTestResults   \
@@ -372,7 +376,41 @@ databaseTestResults() {
             --resultFile=${resultFile}             \
             --testSuiteName=${testSuiteName}       \
             --targetName=${targetName}             \
-            --targetType=${targetType} 
+            --targetType=${targetType}             \
+            --jobName=${jobName}                   \
+            --buildNumber=${buildNumber} 
+
+    return
+}
+
+## @fn      databaseTestCaseResults()
+#  @brief   add new test case results from a test job into the database
+#  @param   {labelName}        name of the label
+#  @param   {testSuiteName}    name of the test suite
+#  @param   {targetName}       name of the target
+#  @param   {targetType}       type of the target
+#  @param   {resultFile}       file with results
+#  @param   {jobName}          name of the jenkins job
+#  @param   {buildNumer}       build number of the jenkins job
+#  @return  <none>
+databaseTestCaseResults() {
+    local labelName=$1
+    local testSuiteName=$2
+    local targetName=$3
+    local targetType=$4
+    local resultFile=$5
+    local jobName=$6
+    local buildNumber=$7
+
+    info "adding metrics for ${labelName}, ${testSuiteName}, ${targetName}/${targetType}"
+    execute -i ${LFS_CI_ROOT}/bin/newTestCaseResults \
+            --buildName=${labelName}                 \
+            --resultFile=${resultFile}               \
+            --testSuiteName=${testSuiteName}         \
+            --targetName=${targetName}               \
+            --targetType=${targetType}               \
+            --jobName=${jobName}                     \
+            --buildNumber=${buildNumber} 
 
     return
 }

@@ -122,7 +122,7 @@ stopLogfile() {
         printf -- "ending complete logfile\n"                                             >> ${CI_LOGGING_LOGFILENAME_COMPLETE}
         printf -- "-------------------------------------------------------------------\n" >> ${CI_LOGGING_LOGFILENAME_COMPLETE}
 
-        gzip ${CI_LOGGING_LOGFILENAME_COMPLETE}
+        gzip -f ${CI_LOGGING_LOGFILENAME_COMPLETE}
     fi
     
     unset CI_LOGGING_LOGFILENAME
@@ -290,7 +290,7 @@ _loggingLine() {
                                          "${logLine}"        \
                                          "${sourceFile}"     \
                                          "${FUNCNAME[3]}"    \
-                                         "${BASH_LINENO[3]}" )
+                                         "${BASH_LINENO[2]}" )
             ;;
             STACKTRACE) _stackTrace ;;
             *)          logLine=$(printf "%s%s" "${logLine}" "${template}") ;;

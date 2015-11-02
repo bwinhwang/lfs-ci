@@ -388,8 +388,8 @@ makingTest_install() {
     if [[ ${shouldHaveRunningTarget} ]] ; then
         mustHaveMakingTestRunningTarget
 
-        info "installing software on target"
-        execute ${make} setup
+        #info "installing software on target"
+        #execute ${make} setup
 
         local forceInstallSameVersion=$(getConfig LFS_CI_uc_test_making_test_force_reinstall_same_version)
         if [[ -z ${forceInstallSameVersion} ]] ; then
@@ -427,16 +427,17 @@ makingTest_install() {
             return
         fi
 
+        makingTest_powercycle
+        mustHaveMakingTestRunningTarget
+
         local doFirmwareupgrade="$(getConfig LFS_CI_uc_test_making_test_do_firmwareupgrade)"
         if [[ ${doFirmwareupgrade} ]] ; then
-            info "perform firmware upgrade an all boards of $testTargetName."
-            execute ${ignoreError} ${make} firmwareupgrade
+            info "running setup..."
+            execute ${ignoreError} ${make} setup || continue
+            info "perform firmware (FPGA) upgrade."
+            execute ${make} firmwareupgrade
+            mustHaveMakingTestRunningTarget
         fi
-
-        info "rebooting target..."
-        makingTest_powercycle
-
-        mustHaveMakingTestRunningTarget
 
         info "running setup..."
         execute ${ignoreError} ${make} setup || continue
