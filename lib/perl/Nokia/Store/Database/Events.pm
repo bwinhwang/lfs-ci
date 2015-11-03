@@ -16,29 +16,29 @@ sub newTestCaseResult {
     my $testExecutionId     = $param->{testExecutionId};
     my $testCaseDuration    = $param->{testCaseDuration};
     my $testCaseFailedSince = $param->{testCaseFailedSince};
-    my $testCaseSkipped     = $param->{testCaseSkipped};
+    my $testCaseSkipped     = $param->{testCaseSkipped} eq "true" ? 1 : 0;
     my $testCaseResult      = $param->{testCaseResult};
 
     my $sth = $self->prepare(
-        'CALL add_test_case_result( ?, ?, ?, ?, ? ? )'
+        'CALL add_new_test_case_result( ?, ?, ?, ?, ?, ? )'
     );
-    DEBUG printf( "can not insert test case result: %s, %s, %s, %s, %s, %s", 
-                   $testCaseName, 
+    DEBUG sprintf( "can not insert test case result: %s, %s, %s, %s, %s, %s", 
                    $testExecutionId, 
+                   $testCaseName, 
                    $testCaseDuration, 
                    $testCaseFailedSince, 
                    $testCaseSkipped, 
                    $testCaseResult, );
 
-    $sth->execute( $testCaseName, 
-                   $testExecutionId, 
+    $sth->execute( $testExecutionId, 
+                   $testCaseName, 
                    $testCaseDuration, 
                    $testCaseFailedSince, 
                    $testCaseSkipped, 
                    $testCaseResult, )
         or LOGDIE sprintf( "can not insert test case result: %s, %s, %s, %s, %s, %s", 
-                   $testCaseName, 
                    $testExecutionId, 
+                   $testCaseName, 
                    $testCaseDuration, 
                    $testCaseFailedSince, 
                    $testCaseSkipped, 
@@ -54,13 +54,15 @@ sub newTestExecution {
     my $testSuiteName = $param->{testSuiteName};
     my $targetName    = $param->{targetName};
     my $targetType    = $param->{targetType};
+    my $jobName       = $param->{jobName};
+    my $buildNumber   = $param->{buildNumber};
 
     my $sth = $self->prepare(
-        'CALL add_new_test_execution( ?, ?, ?, ?, @id )'
+        'CALL add_new_test_execution( ?, ?, ?, ?, ?, ?, @id )'
     );
-    DEBUG sprintf( "insert test execution: %s, %s, %s, %s", $buildName, $testSuiteName, $targetName, $targetType);
-    $sth->execute( $buildName, $testSuiteName, $targetName, $targetType )
-        or LOGDIE sprintf( "can not insert test execution: %s, %s, %s, %s", $buildName, $testSuiteName, $targetName, $targetType);
+    DEBUG sprintf( "insert test execution: %s, %s, %s, %s, %s %s", $buildName, $testSuiteName, $targetName, $targetType, $jobName, $buildNumber );
+    $sth->execute( $buildName, $testSuiteName, $targetName, $targetType, $jobName, $buildNumber )
+        or LOGDIE sprintf( "can not insert test execution: %s, %s, %s, %s, %s, %s", $buildName, $testSuiteName, $targetName, $targetType, $jobName, $buildNumber );
     my $id = $self->{dbi}->selectrow_array('SELECT @id');
 
     return $id;
@@ -93,7 +95,7 @@ sub newTestResult {
 
     my $testExecutionId = $param->{testExecutionId};
     my $testResultName  = $param->{testResultName};
-    my $testResultValue = $param->{testResultValue};
+    my $testResultValue = $param->{testResultValue} eq "false" ? 0 : $param->{testResultValue};
 
     my $sth = $self->prepare(
         'CALL add_new_test_result( ?, ?, ? )'

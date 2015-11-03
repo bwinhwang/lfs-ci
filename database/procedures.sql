@@ -604,8 +604,8 @@ DELIMITER ;
 -- @return <none>
 DROP PROCEDURE IF EXISTS add_new_test_case_result;
 DELIMITER //
-CREATE PROCEDURE add_new_test_case_result( IN in_test_case_name         VARCHAR(128), 
-                                           IN in_test_execution_id      INTEGER,
+CREATE PROCEDURE add_new_test_case_result( IN in_test_execution_id      INTEGER,
+                                           IN in_test_case_name         VARCHAR(128), 
                                            IN in_test_case_duration     FLOAT,
                                            IN in_test_case_failed_since INTEGER,
                                            IN in_test_case_skipped      BOOLEAN,
@@ -618,11 +618,11 @@ BEGIN
     DECLARE cnt_test_execution_id INT;
 
     SELECT count(id) INTO cnt_test_case_id FROM test_cases WHERE test_case_name = in_test_case_name;
-    IF cnt_test_execution_id = 0 THEN
-        INSERT INTO ( test_case_name ) VALUES ( in_test_case_name );
+    IF cnt_test_case_id = 0 THEN
+        INSERT INTO test_cases ( test_case_name, test_case_owner ) VALUES ( in_test_case_name, '' );
     END IF;
 
-    SELECT count(id) INTO var_test_case_id FROM test_cases WHERE test_case_name = in_test_case_name;
+    SELECT id INTO var_test_case_id FROM test_cases WHERE test_case_name = in_test_case_name;
 
 
     INSERT INTO test_case_results ( test_case_id, test_execution_id, test_case_duration, test_case_failed_since, test_case_skipped, test_case_result ) 
@@ -630,6 +630,8 @@ BEGIN
 
 END //
 DELIMITER ;
+
+call add_new_test_case_result( 107214, '...ddal_auth_set_login_faildelay_python', 0.0, 61, 1, '' );
 
 -- }}}
 
@@ -670,10 +672,10 @@ BEGIN
     SELECT count(id) INTO cnt_test_execution_id FROM test_executions WHERE job_name = in_job_name AND build_number = in_build_number;
     IF cnt_test_execution_id = 0 THEN
         INSERT INTO test_executions ( build_id, test_suite_name, target_name, target_type, job_name, build_number ) 
-        VALUES ( var_build_id, in_test_suite_name, in_target_name, in_target_type );
+        VALUES ( var_build_id, in_test_suite_name, in_target_name, in_target_type, in_job_name, in_build_number );
         SET out_test_execution_id = LAST_INSERT_ID();
     ELSE
-        SELECT id INTO out_test_execution_id 
+        SELECT id INTO out_test_execution_id FROM test_executions
             WHERE job_name = in_job_name AND build_number = in_build_number;
     END IF;
 
@@ -706,33 +708,6 @@ BEGIN
 
     INSERT INTO test_results (test_execution_id, test_result_name_id, test_result_value) VALUES ( test_execution_id, var_test_result_name_id, in_test_result_value);
 
-END //
-DELIMITER ;
-
--- }}}
--- {{{ add_new_test_case_result
-
-DROP PROCEDURE IF EXISTS add_new_test_case_result;
-DELIMITER //
-CREATE PROCEDURE add_new_test_case_result( IN test_execution_id     INT,
-                                           IN in_test_case_name     VARCHAR(128),
-                                           IN in_test_case_result   INT,
-                                           IN in_test_case_duration INT,
-                                           IN in_test_case_owner    VARCHAR(128)
-                                           )
-BEGIN
-    DECLARE cnt_test_case_id INT;
-    DECLARE var_test_case_id INT;
-
-    SELECT count(id) INTO cnt_test_case_id FROM test_cases WHERE test_case_name = in_test_case_name;
-
-    IF cnt_test_case_id = 0 THEN
-        INSERT INTO test_cases ( test_case_name, test_case_owner ) VALUES ( in_test_case_name, in_test_case_owner );
-    END IF;
-    SELECT id INTO var_test_case_id FROM test_cases WHERE test_case_name = in_test_case_name;
-
-    INSERT INTO test_case_results ( test_execution_id, test_case_id, test_case_duration, test_case_result )
-        VALUES ( test_execution_id, var_test_case_id, in_test_case_duration, in_test_case_result);
 END //
 DELIMITER ;
 
