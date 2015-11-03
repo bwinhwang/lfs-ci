@@ -826,8 +826,6 @@ BEGIN
 
     SELECT _get_build_id_of_build( in_build_name ) INTO var_build_id;
 
-    select in_build_name, in_comment, in_job_name, in_build_number, in_product_name, in_task_name, in_event_type;
-
     -- for some reason, this is not working in a single select statement
     SELECT build_number INTO var_started_build_number
         FROM v_build_events
@@ -843,8 +841,6 @@ BEGIN
             AND product_name = in_product_name
             AND task_name    = in_task_name
             AND event_state  = 'started';
-
-    select var_started_build_number as abc, var_started_job_name as qwer;
 
     SELECT _running_tasks( var_build_id, in_event_type, 'started',  in_product_name, in_task_name) INTO cnt_started;
     SELECT _running_tasks( var_build_id, in_event_type, 'finished', in_product_name, in_task_name) INTO cnt_finished;
