@@ -371,7 +371,7 @@ databaseTestResults() {
     local buildNumber=$7
 
     info "adding metrics for ${labelName}, ${testSuiteName}, ${targetName}/${targetType}"
-    execute -i ${LFS_CI_ROOT}/bin/newTestResults   \
+    execute ${LFS_CI_ROOT}/bin/newTestResults   \
             --buildName=${labelName}               \
             --resultFile=${resultFile}             \
             --testSuiteName=${testSuiteName}       \
@@ -403,7 +403,7 @@ databaseTestCaseResults() {
     local buildNumber=$7
 
     info "adding metrics for ${labelName}, ${testSuiteName}, ${targetName}/${targetType}"
-    execute -i ${LFS_CI_ROOT}/bin/newTestCaseResults \
+    execute ${LFS_CI_ROOT}/bin/newTestCaseResults \
             --buildName=${labelName}                 \
             --resultFile=${resultFile}               \
             --testSuiteName=${testSuiteName}         \

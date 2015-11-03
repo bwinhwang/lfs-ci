@@ -290,7 +290,7 @@ storeMetricsForTestJob() {
     mustHaveValue "${targetType}" "target type"
 
     databaseTestResults     ${label} ${testSuiteType} ${jobName} "${targetType}" ${resultFile} ${jobName} ${buildNumber}
-    databaseTestCaseResults ${label} ${testSuiteType} ${jobName} "${targetType}" ${workspace}/${jobName}_build.xml ${jobName} ${buildNumber}
+    databaseTestCaseResults ${label} ${testSuiteType} ${jobName} "${targetType}" ${workspace}/${jobName}_junitResult.xml ${jobName} ${buildNumber}
 
     return
 }
