@@ -794,6 +794,16 @@ DELIMITER ;
 -- }}}
 
 -- {{{ _check_if_event_builds
+-- @fn     _check_if_event_builds
+-- @brief  check if all sub builds/tests/... are finished and create the finished event for the parent job
+-- @param  in_build_name          name of the build
+-- @param  in_comment             a comment
+-- @param  in_job_name            name of the jenkins job
+-- @param  in_build_number        build number of the jenkins job
+-- @param  in_product_name        name of the product (LFS, UBOOT, ...)
+-- @param  in_task_name           name of the task (build, test, smoketest, releas)
+-- @param  in_event_type          type of the event (build, test, release, other)
+-- @return <none>
 
 DROP PROCEDURE IF EXISTS _check_if_event_builds;
 DELIMITER //
@@ -811,8 +821,30 @@ BEGIN
     DECLARE cnt_finished INT;
     DECLARE cnt_failed   INT;
     DECLARE cnt_unstable INT;
+    DECLARE var_started_job_name     VARCHAR(128);
+    DECLARE var_started_build_number INT;
 
     SELECT _get_build_id_of_build( in_build_name ) INTO var_build_id;
+
+    select in_build_name, in_comment, in_job_name, in_build_number, in_product_name, in_task_name, in_event_type;
+
+    -- for some reason, this is not working in a single select statement
+    SELECT build_number INTO var_started_build_number
+        FROM v_build_events
+        WHERE build_id       = var_build_id
+            AND event_type   = in_event_type
+            AND product_name = in_product_name
+            AND task_name    = in_task_name
+            AND event_state  = 'started';
+    SELECT job_name INTO var_started_job_name
+        FROM v_build_events
+        WHERE build_id       = var_build_id
+            AND event_type   = in_event_type
+            AND product_name = in_product_name
+            AND task_name    = in_task_name
+            AND event_state  = 'started';
+
+    select var_started_build_number as abc, var_started_job_name as qwer;
 
     SELECT _running_tasks( var_build_id, in_event_type, 'started',  in_product_name, in_task_name) INTO cnt_started;
     SELECT _running_tasks( var_build_id, in_event_type, 'finished', in_product_name, in_task_name) INTO cnt_finished;
@@ -823,14 +855,14 @@ BEGIN
         -- TODO: demx2fk3 2015-09-19 HACK special handling for release jobs
         -- release jobs should only create failed or unstable message, not finished.
         IF in_event_type != 'release' THEN
-            CALL new_build_event( in_build_name, in_comment, in_job_name, in_build_number,
+            CALL new_build_event( in_build_name, in_comment, var_started_job_name, var_started_build_number,
                                 in_product_name, in_task_name, in_event_type, 'finished' );
         END IF;
     ELSEIF cnt_started = cnt_finished + cnt_unstable THEN
-        CALL new_build_event( in_build_name, in_comment, in_job_name, in_build_number,
+        CALL new_build_event( in_build_name, in_comment, var_started_job_name, var_started_build_number,
                             in_product_name, in_task_name, in_event_type, 'unstable' );
     ELSEIF cnt_started = cnt_finished + cnt_failed + cnt_unstable THEN
-        CALL new_build_event( in_build_name, in_comment, in_job_name, in_build_number,
+        CALL new_build_event( in_build_name, in_comment, var_started_job_name, var_started_build_number,
                             in_product_name, in_task_name, in_event_type, 'failed' );
     END IF;
 END //
