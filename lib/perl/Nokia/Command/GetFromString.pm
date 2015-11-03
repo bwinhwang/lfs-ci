@@ -40,6 +40,7 @@ sub execute {
     my $wantMap = {
                     productName => 0,
                     location    => 1,
+                    branchName  => 1,
                     branch      => 1,
                     taskName    => 2,
                     subTaskName => 3,

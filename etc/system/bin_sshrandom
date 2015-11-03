@@ -1,4 +1,14 @@
 #!/bin/bash
+# Select a random host for ssh connection (out of the list).
+# We had the problem in the past, that sshd on a single host
+# is rejecting ssh connection due to the limit of ssh connections
+# per minute. See also MaxStartups in sshd_config.
+# So we select a random host from the list below to avoid the problem.
+#
+# this script should be configured as ProxyCommand in ssh-config.
+# e.g. 
+# Host linsee_server_ulm
+#      ProxyCommand  ~/bin/sshrandom linsee_server_ulm
 
 case $1 in
     linsee_server_ulm)

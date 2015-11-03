@@ -18,6 +18,12 @@ oneTimeSetUp() {
         mockedCommand "getConfig $@"
         echo ${UT_FAKE_TEST_SUITE}
     }
+    getLocationName() {
+        echo pronb-developer
+    }
+    getBranchName() {
+        echo trunk
+    }
     return
 }
 
@@ -44,7 +50,7 @@ test1() {
     local expect=$(createTempFile)
     cat <<EOF > ${expect}
 _reserveTarget 
-getConfig LFS_CI_uc_test_making_test_suite_dir -t targetName:TargetName -t branchName:pronb-developer
+getConfig LFS_CI_uc_test_making_test_suite_dir -t targetName:TargetName -t branchName:trunk
 EOF
     assertExecutedCommands ${expect}
     assertEquals "${WORKSPACE}/workspace/path/to/test/suite" "$(makingTest_testSuiteDirectory)"
@@ -62,7 +68,7 @@ test2() {
     local expect=$(createTempFile)
     cat <<EOF > ${expect}
 _reserveTarget 
-getConfig test_suite -t targetName:TargetName -t branchName:pronb-developer -f ${WORKSPACE}/workspace/src-project/src/TMF/testsuites.cfg
+getConfig test_suite -t targetName:TargetName -t branchName:trunk -f ${WORKSPACE}/workspace/src-project/src/TMF/testsuites.cfg
 EOF
     assertExecutedCommands ${expect}
     assertEquals "${WORKSPACE}/workspace/my/branched/test_suite" "$(makingTest_testSuiteDirectory)"

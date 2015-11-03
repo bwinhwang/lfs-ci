@@ -114,7 +114,7 @@ makingTest_testSuiteDirectory() {
     # there is no location in the job name. So we have to use the
     # location of the upstream job.
     local  branchName=$(getBranchName ${UPSTREAM_PROJECT})
-    mustHaveBranchName
+    mustHaveValue "${branchName}" "branch name from ${UPSTREAM_PROJECT}"
 
     local relativeTestSuiteDirectory=
     if [[ -e ${workspace}/src-project/src/TMF/testsuites.cfg ]] ; then
@@ -145,16 +145,11 @@ makingTest_testSuiteDirectory() {
 #  @param   <none>
 #  @return  <none>
 makingTest_poweron() {
-    mustHaveMakingTestTestConfig
-
-    local testSuiteDirectory=$(makingTest_testSuiteDirectory)
-    mustExistDirectory ${testSuiteDirectory}
-
     makingTest_logConsole
 
     # This should be a poweron, but we don't know the state of the target.
     # So we just powercycle the target
-    execute make -C ${testSuiteDirectory} powercycle
+    makingTest_powercycle
 
     return
 }
@@ -186,8 +181,11 @@ makingTest_powercycle() {
     local testSuiteDirectory=$(makingTest_testSuiteDirectory)
     mustExistDirectory ${testSuiteDirectory}
 
+    local targetName=$(_reserveTarget)
+    mustHaveValue "${targetName}" "target name"
+
     info "powercycle the target ..."
-    local powercycleOptions=$(getConfig LFS_CI_uc_test_making_test_powercycle_options)
+    local powercycleOptions=$(getConfig LFS_CI_uc_test_making_test_powercycle_options -t testTargetName:${targetName})
     execute make -C ${testSuiteDirectory} powercycle ${powercycleOptions}
 
     return
@@ -390,8 +388,8 @@ makingTest_install() {
     if [[ ${shouldHaveRunningTarget} ]] ; then
         mustHaveMakingTestRunningTarget
 
-        info "installing software on target"
-        execute ${make} setup
+        #info "installing software on target"
+        #execute ${make} setup
 
         local forceInstallSameVersion=$(getConfig LFS_CI_uc_test_making_test_force_reinstall_same_version)
         if [[ -z ${forceInstallSameVersion} ]] ; then
@@ -429,16 +427,17 @@ makingTest_install() {
             return
         fi
 
+        makingTest_powercycle
+        mustHaveMakingTestRunningTarget
+
         local doFirmwareupgrade="$(getConfig LFS_CI_uc_test_making_test_do_firmwareupgrade)"
         if [[ ${doFirmwareupgrade} ]] ; then
-            info "perform firmware upgrade an all boards of $testTargetName."
-            execute ${ignoreError} ${make} firmwareupgrade FORCED_UPGRADE=true
+            info "running setup..."
+            execute ${ignoreError} ${make} setup || continue
+            info "perform firmware (FPGA) upgrade."
+            execute ${make} firmwareupgrade
+            mustHaveMakingTestRunningTarget
         fi
-
-        info "rebooting target..."
-        makingTest_powercycle
-
-        mustHaveMakingTestRunningTarget
 
         info "running setup..."
         execute ${ignoreError} ${make} setup || continue

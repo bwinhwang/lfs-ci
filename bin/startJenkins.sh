@@ -16,7 +16,7 @@ startJenkinsMasterServer() {
 
     local jenkinsMasterServerHttpPort=$(getConfig jenkinsMasterServerHttpPort)
 
-    export JENKINS_HOME JENKINS_ROOT LFS_CI_ROOT
+    export JENKINS_HOME JENKINS_ROOT LFS_CI_ROOT LFS_CI_CONFIG_FILE
     export TZ=UTC+0
 
     unset CI_LOGGING_LOGFILENAME
@@ -38,10 +38,9 @@ startJenkinsMasterServer() {
     exec ${java}                                              \
             -XX:PermSize=512M -XX:MaxPermSize=4096M -Xmn128M -Xms1024M -Xmx4096M \
             -jar ${jenkins_war}                               \
-            --httpsPort=${jenkinsMasterServerHttpsPort}       \
             --httpPort=${jenkinsMasterServerHttpPort}         \
             --ajp13Port=-1                                    \
-            > ${JENKINS_ROOT}/log/jenkins.log 2>&1 
+            > ${JENKINS_ROOT}/log/jenkins.log 2>&1
 }
 set -x
 startJenkinsMasterServer

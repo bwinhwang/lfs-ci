@@ -2,6 +2,8 @@ package Nokia::Handler::Database;
 
 use strict;
 use warnings;
+use Log::Log4perl qw( :easy );
+use Data::Dumper;
 
 use parent qw( Nokia::Object );
 
@@ -13,6 +15,7 @@ use Nokia::Singleton;
 sub newTestCaseResult {
     my $self  = shift;
     my $param = { @_ };
+    INFO "newTestCaseResult parameter: " . Dumper( $param );
 
     my $testExecutionId = $self->newTestExecution(
         buildName     => $param->{buildName},
@@ -27,6 +30,7 @@ sub newTestCaseResult {
     }
 
     foreach my $entry ( @{ $param->{entries} } ) {
+        INFO "insert test results from " . Dumper( $entry );
         $self->{store}->newTestCaseResult(
             testCaseName        => sprintf( "%s.%s", $entry->{className}->[0], 
                                                      $entry->{testName}->[0] ),
@@ -34,7 +38,7 @@ sub newTestCaseResult {
             testCaseDuration    => $entry->{duration}->[0]    || 0.0,
             testCaseFailedSince => $entry->{failedSince}->[0] || 0,
             testCaseSkipped     => $entry->{skipped}->[0]     || 0,
-            testCaseResult      => exists $entry->{errorStackTrace} ? $entry->{errorStackTrace}->[0] || "",
+            testCaseResult      => exists $entry->{errorStackTrace} ? $entry->{errorStackTrace}->[0] : "",
         );
     }
     return;
@@ -161,7 +165,7 @@ sub branchInformation {
                              value => $row->{branch_name} };
 
         push @{ $result }, { name  => "LFS_CI_global_mapping_branch_location",
-                             tags  => sprintf( 'productName:LFS, branchName:%s', $row->{branch_name} ),
+                             tags  => sprintf( 'branchName:%s', $row->{branch_name} ),
                              value => $row->{location_name} };
 
         push @{ $result }, { name  => "LFS_PROD_branch_to_tag_regex",
@@ -201,7 +205,7 @@ sub branchInformation {
         $pkgpoolPrefix =~ s/_\$.*//;
         $pkgpoolPrefix =~ s/PS_LFS_../PS_LFS_PKG/;
         push @{ $result }, { name  => "PKGPOOL_PROD_release_prefix",
-                             tags  => sprintf( "location:%s", $row->{location_name} ), 
+                             tags  => sprintf( "branchName:%s", $row->{branch_name} ), 
                              value => $pkgpoolPrefix };
     }
     return $result;

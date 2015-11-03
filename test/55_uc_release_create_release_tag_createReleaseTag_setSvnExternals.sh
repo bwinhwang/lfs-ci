@@ -11,6 +11,9 @@ oneTimeSetUp() {
         mockedCommand "getConfig $@"
         echo $1
     }
+    mustHaveBranchName() {
+        mockedCommand "mustHaveBranchName $@"
+    }
     getBranchName() {
         mockedCommand "getBranchName $@"
         echo "branch_name"
@@ -48,6 +51,7 @@ test1() {
     local expect=$(createTempFile)
     cat <<EOF > ${expect}
 getBranchName 
+mustHaveBranchName 
 getConfig LFS_PROD_svn_delivery_release_repos_url -t tagName:PS_LFS_OS_BUILD_NAME
 getConfig LFS_PROD_svn_delivery_repos_name -t tagName:PS_LFS_OS_BUILD_NAME
 getConfig sdk2 -f ${WORKSPACE}/workspace/bld/bld-externalComponents-summary/externalComponents

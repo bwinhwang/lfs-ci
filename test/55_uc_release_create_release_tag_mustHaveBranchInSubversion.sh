@@ -11,6 +11,9 @@ oneTimeSetUp() {
         mockedCommand "getConfig $@"
         echo $1
     }
+    mustHaveBranchName () {
+        mockedCommand "mustHaveBranchName $@"
+    }
     execute() {
         mockedCommand "execute $@"
     }
@@ -47,6 +50,7 @@ test1() {
     cat <<EOF > ${expect}
 getConfig LFS_PROD_svn_delivery_release_repos_url -t tagName:LFS_PROD_RELEASE_CURRENT_TAG_NAME
 getBranchName 
+mustHaveBranchName 
 mustExistBranchInSubversion LFS_PROD_svn_delivery_release_repos_url tags
 mustExistBranchInSubversion LFS_PROD_svn_delivery_release_repos_url branches
 mustExistBranchInSubversion LFS_PROD_svn_delivery_release_repos_url/branches/ branch_name

@@ -53,7 +53,7 @@ usecase_VTC_PLUS_LFS_SYNC_PRODUCTION() {
 
     info "sync done of ${labelName} for VTC+LFS"
 
-    echo "DELIVERY_DIRECTORY=${releaseDirectory}" > ${workspace}/env.txt
+    echo "DELIVERY_DIRECTORY=${remotePath}/${labelName}" > ${workspace}/env.txt
 
     return 0
 }
