@@ -32,6 +32,9 @@
 #           different, trigger a new build, and store the new file
 #  @param   <none>
 #  @return  1 if if a build is not required, 0 otherwise
+
+[[ -z ${LFS_CI_SOURCE_subversion} ]] && source ${LFS_CI_ROOT}/lib/subversion.sh
+
 actionCompare() {
 
     if [[ -z "${REVISION_STATE_FILE}" ]] ; then
