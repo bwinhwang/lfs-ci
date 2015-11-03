@@ -23,6 +23,12 @@ sub newTestCaseResult {
         'CALL add_test_case_result( ?, ?, ?, ?, ? ? )'
     );
     DEBUG printf( "can not insert test case result: %s, %s, %s, %s, %s, %s", 
+                   $testCaseName, 
+                   $testExecutionId, 
+                   $testCaseDuration, 
+                   $testCaseFailedSince, 
+                   $testCaseSkipped, 
+                   $testCaseResult, );
 
     $sth->execute( $testCaseName, 
                    $testExecutionId, 
@@ -52,7 +58,7 @@ sub newTestExecution {
     my $sth = $self->prepare(
         'CALL add_new_test_execution( ?, ?, ?, ?, @id )'
     );
-    DEBUG printf( "can not insert test case result: %s, %s, %s, %s, %s, %s", 
+    DEBUG sprintf( "insert test execution: %s, %s, %s, %s", $buildName, $testSuiteName, $targetName, $targetType);
     $sth->execute( $buildName, $testSuiteName, $targetName, $targetType )
         or LOGDIE sprintf( "can not insert test execution: %s, %s, %s, %s", $buildName, $testSuiteName, $targetName, $targetType);
     my $id = $self->{dbi}->selectrow_array('SELECT @id');
@@ -73,7 +79,7 @@ sub newSubversionCommit {
     my $sth = $self->prepare(
         'CALL add_new_subversion_commit( ?, ?, ?, ?, ? )'
     );
-    DEBUG sprintf( "can not insert subversion commit: %s, %s, %s, %s, %s", $baselineName, $revision, $author, $date, $msg);
+    DEBUG sprintf( "insert subversion commit: %s, %s, %s, %s, %s", $baselineName, $revision, $author, $date, $msg);
 
     $sth->execute( $baselineName, $revision, $author, $date, $msg )
         or LOGDIE sprintf( "can not insert subversion commit: %s, %s, %s, %s, %s", $baselineName, $revision, $author, $date, $msg);
@@ -92,7 +98,7 @@ sub newTestResult {
     my $sth = $self->prepare(
         'CALL add_new_test_result( ?, ?, ? )'
     );
-    DEBUG sprintf( "insert test result: %s, %s, %s", 
+    DEBUG sprintf( "insert test result: %s, %s, %s", $testExecutionId, $testResultName, $testResultValue );
     $sth->execute( $testExecutionId, $testResultName, $testResultValue )
         or LOGDIE sprintf( "can not insert test result: %s, %s, %s", 
                                 $testExecutionId, $testResultName, $testResultValue );
