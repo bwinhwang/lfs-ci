@@ -15,7 +15,6 @@ use Nokia::Singleton;
 sub newTestCaseResult {
     my $self  = shift;
     my $param = { @_ };
-    INFO "newTestCaseResult parameter: " . Dumper( $param );
 
     my $testExecutionId = $self->newTestExecution(
         buildName     => $param->{buildName},
@@ -30,7 +29,6 @@ sub newTestCaseResult {
     }
 
     foreach my $entry ( @{ $param->{entries} } ) {
-        INFO "insert test results from " . Dumper( $entry );
         $self->{store}->newTestCaseResult(
             testCaseName        => sprintf( "%s.%s", $entry->{className}->[0], 
                                                      $entry->{testName}->[0] ),
