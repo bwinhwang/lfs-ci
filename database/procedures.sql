@@ -828,6 +828,16 @@ DELIMITER ;
 -- }}}
 
 -- {{{ _check_if_event_builds
+-- @fn     _check_if_event_builds
+-- @brief  check if all sub builds/tests/... are finished and create the finished event for the parent job
+-- @param  in_build_name          name of the build
+-- @param  in_comment             a comment
+-- @param  in_job_name            name of the jenkins job
+-- @param  in_build_number        build number of the jenkins job
+-- @param  in_product_name        name of the product (LFS, UBOOT, ...)
+-- @param  in_task_name           name of the task (build, test, smoketest, releas)
+-- @param  in_event_type          type of the event (build, test, release, other)
+-- @return <none>
 
 DROP PROCEDURE IF EXISTS _check_if_event_builds;
 DELIMITER //
@@ -845,25 +855,23 @@ BEGIN
     DECLARE cnt_finished INT;
     DECLARE cnt_failed   INT;
     DECLARE cnt_unstable INT;
-    DECLARE var_started_job_name     TEXT;
-    DECLARE var_started_build_number TEXT;
+    DECLARE var_started_job_name     VARCHAR(128);
+    DECLARE var_started_build_number INT;
 
     SELECT _get_build_id_of_build( in_build_name ) INTO var_build_id;
 
-    SELECT job_name INTO var_started_job_name
-        FROM v_build_events 
+    -- for some reason, this is not working in a single select statement
+    SELECT build_number INTO var_started_build_number
+        FROM v_build_events
         WHERE build_id       = var_build_id
-            AND be.event_id  = e.id
-            AND event_type   = in_event_type 
+            AND event_type   = in_event_type
             AND product_name = in_product_name
             AND task_name    = in_task_name
             AND event_state  = 'started';
-
-    SELECT build_number INTO var_started_build_number
-        FROM v_build_events 
+    SELECT job_name INTO var_started_job_name
+        FROM v_build_events
         WHERE build_id       = var_build_id
-            AND be.event_id  = e.id
-            AND event_type   = in_event_type 
+            AND event_type   = in_event_type
             AND product_name = in_product_name
             AND task_name    = in_task_name
             AND event_state  = 'started';
