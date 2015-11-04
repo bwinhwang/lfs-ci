@@ -16,7 +16,7 @@ startJenkinsMasterServer() {
 
     local jenkinsMasterServerHttpPort=$(getConfig jenkinsMasterServerHttpPort)
 
-    export JENKINS_HOME JENKINS_ROOT LFS_CI_ROOT
+    export JENKINS_HOME JENKINS_ROOT LFS_CI_ROOT LFS_CI_CONFIG_FILE
     export TZ=UTC+0
 
     unset CI_LOGGING_LOGFILENAME
@@ -40,7 +40,7 @@ startJenkinsMasterServer() {
             -jar ${jenkins_war}                               \
             --httpPort=${jenkinsMasterServerHttpPort}         \
             --ajp13Port=-1                                    \
-            > ${JENKINS_ROOT}/log/jenkins.log 2>&1 
+            > ${JENKINS_ROOT}/log/jenkins.log 2>&1
 }
 set -x
 startJenkinsMasterServer

@@ -1242,3 +1242,39 @@ BEGIN
 END //
 DELIMITER ;
 -- }}}
+
+-- {{{ new_ps_branch_for_md_lrc
+DROP PROCEDURE IF EXISTS new_ps_branch_for_md_lrc;
+DELIMITER //
+CREATE PROCEDURE new_ps_branch_for_md_lrc(in_branch_name VARCHAR(64), in_ps_branch_name VARCHAR(64), in_ecl_url VARCHAR(254))
+BEGIN
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        ROLLBACK;
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Could not create entry for MD LRC PS branch in DB';
+    END;
+
+    START TRANSACTION;
+
+        INSERT INTO ps_branches (ps_branch_name, ecl_url) VALUES (in_ps_branch_name, in_ecl_url);
+
+        INSERT INTO nm_branches_ps_branches (ps_branch_id, branch_id)
+               VALUES ((SELECT id FROM ps_branches WHERE ps_branch_name=in_ps_branch_name),
+                       (SELECT id FROM branches WHERE branch_name=in_branch_name));
+    COMMIT;
+
+END //
+DELIMITER ;
+-- }}}
+
+-- {{{ close_ps_branch_for_md_lrc
+DROP PROCEDURE IF EXISTS close_ps_branch_for_md_lrc;
+DELIMITER //
+CREATE PROCEDURE close_ps_branch_for_md_lrc(in_ps_branch_name VARCHAR(64))
+BEGIN
+
+    UPDATE ps_branches SET status='closed' WHERE ps_branch_name=in_ps_branch_name;
+
+END //
+DELIMITER ;
+-- }}}

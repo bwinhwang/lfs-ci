@@ -63,7 +63,6 @@ setUp() {
 
 tearDown() {
     rm -rf ${UNITTEST_COMMAND}
-    rm -rf ${CI_LOGGING_LOGFILENAME}
     return
 }
 
@@ -94,6 +93,21 @@ copyAndExtractBuildArtifactsFromProject
 EOF
 
     assertExecutedCommands ${expect}
+}
+
+testRemoveWorkspace () {
+    export WORKSPACE=$(createTempDirectory)
+    mkdir -p ${WORKSPACE}/dir1
+    echo "Test1" > ${WORKSPACE}/dir1/file1
+    echo "Test2" > ${WORKSPACE}/dir1/file2
+    mkdir -p ${WORKSPACE}/dir2
+    echo "Test1" > ${WORKSPACE}/dir2/file1
+    echo "Test2" > ${WORKSPACE}/dir2/file2
+    chmod u-w  ${WORKSPACE}/dir2
+
+    assertTrue "removeWorkspace ${WORKSPACE}"
+
+    assertFalse "workdir should be empty now" "[[ -d ${WORKSPACE} ]]"
 }
 
 source lib/shunit2
