@@ -16,6 +16,7 @@ oneTimeSetUp() {
             LFS_PROD_svn_delivery_release_repos_url) echo file://${UT_SVN_ROOT}/isource/svnroot/BTS_D_SC_LFS_2015_08/ ;;
             LFS_uc_release_create_release_tag_sdk_external_line) echo /isource/svnroot/BTS_D_SC_LFS_2015_08/sdk sdk;;
             LFS_PROD_svn_delivery_repos_name) echo BTS_D_SC_LFS_2015_08 ;;
+            SVN_cli_args) echo "" ;;
             *) echo $1
         esac
     }
@@ -49,6 +50,9 @@ oneTimeSetUp() {
     runOnMaster() {
         mockedCommand "runOnMaster $@"
         return 1
+    }
+    databaseEventSubReleaseStarted() {
+        mockedCommand "databaseEventSubReleaseStarted $@"
     }
     sleep() {
         return
@@ -92,7 +96,8 @@ tearDown() {
 test1() {
     # TODO: demx2fk3 2015-08-05 REMOVE ME, this is required for old implementation
     # assertTrue "createReleaseTag LFS_CI_-_trunk_-_Build 1234"
-    assertTrue "usecase_LFS_RELEASE_CREATE_RELEASE_TAG"
+    # assertTrue "usecase_LFS_RELEASE_CREATE_RELEASE_TAG"
+    usecase_LFS_RELEASE_CREATE_RELEASE_TAG
 
     assertTrue   "REL tag exists"                          "svn info file://${UT_SVN_ROOT}/isource/svnroot/BTS_D_SC_LFS_2015_08/tags/PS_LFS_REL_2015_08_0001"
     assertEquals "List tags ok" "PS_LFS_REL_2015_08_0001/" "$(svn ls file://${UT_SVN_ROOT}/isource/svnroot/BTS_D_SC_LFS_2015_08/tags)"

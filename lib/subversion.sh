@@ -186,7 +186,8 @@ mustExistSubversionDirectory() {
 #  @return  <none>
 svnCommand() {
     debug "executing svn $@"
-    execute -r 3 svn --non-interactive --trust-server-cert $@
+    local svnArguments=$(getConfig SVN_cli_args -t command:$1)
+    execute -r 3 svn ${svnArguments} $@
     return
 }
 
@@ -253,6 +254,15 @@ svnRemove() {
     return
 }
 
+## @fn      svnStatus()
+#  @brief   executes an svn status command
+#  @param   {args}    args for the svn status command
+#  @return  <none>
+svnStatus() {
+    svnCommand status $@
+    return
+}
+
 ## @fn      svnExport()
 #  @brief   executes an svn export command
 #  @param   {args}    args for the svn export command
@@ -267,7 +277,8 @@ svnExport() {
 #  @param   {args}    args for the svn propset command
 #  @return  <none>
 svnLog() {
-    execute -n -r 3 svn log --non-interactive --trust-server-cert $@
+    local svnArguments=$(getConfig SVN_cli_args -t command:log)
+    execute -n -r 3 svn log ${svnArguments} $@
     return
 }
 
@@ -276,7 +287,8 @@ svnLog() {
 #  @param   {args}    args for the svn cat command
 #  @return  output of the svn cat command
 svnCat() {
-    execute -n -r 3 svn cat --non-interactive --trust-server-cert $@
+    local svnArguments=$(getConfig SVN_cli_args -t command:log)
+    execute -n -r 3 svn cat ${svnArguments} $@
     return
 }
 
@@ -312,9 +324,10 @@ existsInSubversion() {
     local tag=$2
     local tmp=$(createTempFile)
     local tmp2=$(createTempFile)
+    local svnArguments=$(getConfig SVN_cli_args -t command:ls)
 
     debug "checking in subversion for ${tag} in ${url}"
-    execute -l ${tmp}  svn ls --non-interactive --trust-server-cert --xml ${url} 
+    execute -l ${tmp}  svn ls ${svnArguments} --xml ${url} 
     execute -l ${tmp2} ${LFS_CI_ROOT}/bin/xpath -q -e /lists/list/entry/name ${tmp}
 
     if grep -q "<name>${tag}</name>" ${tmp2} ; then
@@ -413,7 +426,8 @@ getSvnInfo() {
     local xmlPath=$2
     local tmpFile=$(createTempFile)
 
-    execute -n svn info --non-interactive --trust-server-cert --xml ${url} > ${tmpFile}
+    local svnArguments=$(getConfig SVN_cli_args -t command:info)
+    execute -n svn info ${svnArguments} --xml ${url} > ${tmpFile}
     execute -n ${LFS_CI_ROOT}/bin/xpath -q -e ${xmlPath} ${tmpFile}
 
     return
