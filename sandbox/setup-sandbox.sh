@@ -155,6 +155,8 @@ pre_checks() {
     which java > /dev/null || { echo "java is needed"; exit 1; }
     which curl > /dev/null || { echo "curl is needed"; exit 1; }
     which rsync > /dev/null || { echo "rsync is needed"; exit 1; }
+    which mysql > /dev/null || { echo "[WARNING] mysql is not available"; }
+    which mysqld > /dev/null || { echo "[WARNING] mysqld is not running"; }
 }
 
 ## @fn      pre_actions()
