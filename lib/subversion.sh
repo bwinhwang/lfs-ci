@@ -287,7 +287,7 @@ svnLog() {
 #  @param   {args}    args for the svn cat command
 #  @return  output of the svn cat command
 svnCat() {
-    local svnArguments=$(getConfig SVN_cli_args -t command:log)
+    local svnArguments=$(getConfig SVN_cli_args -t command:cat)
     execute -n -r 3 svn cat ${svnArguments} $@
     return
 }

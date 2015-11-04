@@ -109,7 +109,7 @@ sub info {
         $count++;
     }
     if( $xml eq "" ) {
-        die "svn info $svnArguments--xml failed";
+        die "svn info $svnArguments --xml failed";
     }
 
     my $xmlDataHash = XMLin( $xml );
