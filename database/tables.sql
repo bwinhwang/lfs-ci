@@ -152,7 +152,7 @@ CREATE TABLE test_case_results (
     test_case_duration      FLOAT NULL,
     test_case_failed_since  INT NULL,
     test_case_skipped       BOOLEAN NULL,
-    test_case_result        VARCHAR(128) NULL,
+    test_case_result        TEXT NULL,
 
     PRIMARY KEY (id),
     FOREIGN KEY (test_execution_id)
