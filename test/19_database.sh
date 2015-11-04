@@ -134,7 +134,18 @@ testDatabaseTestResults() {
 
     local expect=$(createTempFile)
     cat <<EOF > ${expect}
-execute -i ${LFS_CI_ROOT}/bin/newTestResults --buildName=PS_LFS_OS_9999_88_7777 --resultFile=resultFile --testSuiteName=testSuite --targetName=targetName --targetType=targetType --jobName=jobName --buildNumber=buildNumber
+execute ${LFS_CI_ROOT}/bin/newTestResults --buildName=PS_LFS_OS_9999_88_7777 --resultFile=resultFile --testSuiteName=testSuite --targetName=targetName --targetType=targetType --jobName=jobName --buildNumber=buildNumber
+EOF
+
+    assertExecutedCommands ${expect}
+}
+
+testDatabaseTestCaseResults() {
+    assertTrue "databaseTestCaseResults PS_LFS_OS_9999_88_7777 testSuite targetName targetType resultFile jobName buildNumber"
+
+    local expect=$(createTempFile)
+    cat <<EOF > ${expect}
+execute ${LFS_CI_ROOT}/bin/newTestCaseResults --buildName=PS_LFS_OS_9999_88_7777 --resultFile=resultFile --testSuiteName=testSuite --targetName=targetName --targetType=targetType --jobName=jobName --buildNumber=buildNumber
 EOF
 
     assertExecutedCommands ${expect}
