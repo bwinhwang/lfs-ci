@@ -244,6 +244,15 @@ svnPropSet() {
     return
 }
 
+## @fn      svnAdd()
+#  @brief   executes an svn add command
+#  @param   {args}    args for the svn add command
+#  @return  <none>
+svnAdd() {
+    svnCommand add $@
+    return
+}
+
 ## @fn      svnRemove()
 #  @brief   executes an svn remove command
 #  @param   {args}    args for the svn remove command

@@ -56,6 +56,12 @@ usecase_ADMIN_RESTORE_SVN_CLONE() {
     execute -n find ${workspace} -name Dependencies | xargs perl -p -i -e "s^https.*BTS_SC_LFS^${svnUrl}^g"
     svnCommit -m updated_svn_url ${workspace}
     execute rm -rf ${workspace}
+    
+    svnCheckout ${svnUrl}/os/trunk/lrc/src-commonddal/ ${workspace}
+    execute touch ${workspace}/Dependencies
+    svnAdd ${workspace}/Dependencies
+    svnCommit -m fix_for_lrc ${workspace}
+    execute rm -rf ${workspace}
 
     return 0
 }
