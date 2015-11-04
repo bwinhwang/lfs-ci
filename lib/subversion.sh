@@ -314,7 +314,7 @@ existsInSubversion() {
     local tmp2=$(createTempFile)
 
     debug "checking in subversion for ${tag} in ${url}"
-    execute -l ${tmp}  svn ls --xml ${url} 
+    execute -l ${tmp}  svn ls --non-interactive --trust-server-cert --xml ${url} 
     execute -l ${tmp2} ${LFS_CI_ROOT}/bin/xpath -q -e /lists/list/entry/name ${tmp}
 
     if grep -q "<name>${tag}</name>" ${tmp2} ; then
@@ -413,7 +413,7 @@ getSvnInfo() {
     local xmlPath=$2
     local tmpFile=$(createTempFile)
 
-    execute -n svn info --xml ${url} > ${tmpFile}
+    execute -n svn info --non-interactive --trust-server-cert --xml ${url} > ${tmpFile}
     execute -n ${LFS_CI_ROOT}/bin/xpath -q -e ${xmlPath} ${tmpFile}
 
     return
