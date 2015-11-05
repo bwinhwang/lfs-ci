@@ -16,11 +16,19 @@ usecase_LFS_TEST() {
 }
 
 ## @fn      usecase_LFS_UNITTEST()
-#  @brief   runs the usecase LFS_UNITTEST (wrapper only)
+#  @brief   execute the 'master' unittest job
+#  @details this job is only used to trigger the individual unittest jobs and the collect metrics job
 #  @param   <none>
 #  @return  <none>
 usecase_LFS_UNITTEST() {
-    ci_job_unittest
+    requiredParameters JOB_NAME BUILD_NUMBER WORKSPACE UPSTREAM_PROJECT UPSTREAM_BUILD
+
+    local workspace=$(getWorkspaceName)
+    mustHaveWorkspaceName
+    mustHavePreparedWorkspace
+    createArtifactArchive
+    
+    return
 }
 
 ## @fn      ci_job_test()
@@ -139,24 +147,6 @@ ci_job_test() {
 
     return
 }
-
-## @fn      ci_job_test()
-#  @brief   dispatcher for test jobs
-#  @details prepare the build artifacts to have it in the correct way for the test framework
-#  @param   <none>
-#  @return  <none>
-ci_job_unittest() {
-    # unittest jobs will be executed by jenkins job, so we can exit very early
-    requiredParameters JOB_NAME BUILD_NUMBER WORKSPACE UPSTREAM_PROJECT UPSTREAM_BUILD
-
-    local workspace=$(getWorkspaceName)
-    mustHaveWorkspaceName
-    mustHavePreparedWorkspace
-    createArtifactArchive
-    
-    return
-}
-    
 
 ## @fn      _exitHandlerDatabaseTestFailed()
 #  @brief   exit handler for storing the event in the database for a failed test
