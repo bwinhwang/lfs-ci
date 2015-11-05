@@ -57,7 +57,6 @@ oneTimeSetUp() {
     createArtifactArchive() {
         mockedCommand "createArtifactArchive $@"
     }
-                                   
 }
 oneTimeTearDown() {
     true
@@ -113,15 +112,12 @@ getConfig LFS_CI_uc_update_ecl_url
 getBuildJobNameFromFingerprint 
 getBuildBuildNumberFromFingerprint 
 copyAndExtractBuildArtifactsFromProject LFS_CI_-_trunk_-_Build 1234 externalComponents
-getConfig SVN_cli_args -t command:checkout
 getConfig LFS_CI_uc_update_ecl_key_names
 mustHaveNextCiLabelName 
 getNextCiLabelName 
 mustHaveNextCiLabelName 
 getNextCiLabelName 
-getConfig SVN_cli_args -t command:diff
 getConfig LFS_CI_uc_update_ecl_can_commit_ecl
-getConfig SVN_cli_args -t command:commit
 createArtifactArchive 
 EOF
     assertExecutedCommands ${expect}

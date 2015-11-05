@@ -38,8 +38,7 @@ sub prepare {
             or LOGDIE $DBI::errstr;
     }
 
-    my $sth = $self->{dbi}->prepare( $sql ) or LOGDIE $DBI::errstr;
-    return $sth;
+    return $self->{dbi}->prepare( $sql ) or LOGDIE $DBI::errstr;
 }
 
 1;

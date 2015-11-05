@@ -43,8 +43,7 @@ test1() {
     cat <<EOF > ${expect}
 execute rm -rf ${TMPDIR}/workspace
 execute mkdir -p ${TMPDIR}/workspace
-getConfig SVN_cli_args -t command:checkout
-execute -r 3 svn SVN_cli_args checkout http://svn.server/abc ${TMPDIR}/workspace
+execute -r 3 svn --non-interactive --trust-server-cert checkout http://svn.server/abc ${TMPDIR}/workspace
 EOF
     assertExecutedCommands ${expect}
 

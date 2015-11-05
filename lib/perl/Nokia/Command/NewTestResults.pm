@@ -13,13 +13,12 @@ use parent qw( Nokia::Command );
 sub prepare {
     my $self = shift;
     $self->{opt_name} = "";
+    $self->{opt_changelog} = "";
     GetOptions( 'buildName=s',     \$self->{opt_name},
                 'resultFile=s',    \$self->{opt_resultFile},
                 'testSuiteName=s', \$self->{opt_testSuiteName},
                 'targetName=s',    \$self->{opt_targetName},
                 'targetType=s',    \$self->{opt_targetType},
-                'jobName=s',       \$self->{opt_jobName},
-                'buildNumber=s',   \$self->{opt_buildNumber},
             ) or LOGDIE "invalid option";
     return;
 }
@@ -32,10 +31,7 @@ sub execute {
         buildName     => $self->{opt_name},
         testSuiteName => $self->{opt_testSuiteName},
         targetName    => $self->{opt_targetName},
-        targetType    => $self->{opt_targetType}, 
-        jobName       => $self->{opt_jobName},
-        buildNumber   => $self->{opt_buildNumber},
-        );
+        targetType    => $self->{opt_targetType}, );
 
     open FILE, $self->{opt_resultFile} 
         or LOGDIE sprintf( "can not open %s", $self->{opt_resultFile});

@@ -138,9 +138,8 @@ testSandboxDummy() {
     local workspace=$(getWorkspaceName)
     mustHaveWorkspaceName
 
-    local file=$(getConfig LFS_CI_uc_test_dummy_sandbox_result_xml_file)
     execute mkdir -p ${workspace}/xml-reports/                                                                                                   
-    execute cp ${file} ${workspace}/xml-reports/
+    execute cp ${LFS_CI_ROOT}/test/junitResult.xml ${workspace}/xml-reports/
 
     return 0
 }

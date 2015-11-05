@@ -16,7 +16,6 @@ oneTimeSetUp() {
             LFS_PROD_svn_delivery_release_repos_url) echo file://${UT_SVN_ROOT}/isource/svnroot/BTS_D_SC_LFS_2015_08/ ;;
             LFS_uc_release_create_release_tag_sdk_external_line) echo /isource/svnroot/BTS_D_SC_LFS_2015_08/sdk sdk;;
             LFS_PROD_svn_delivery_repos_name) echo BTS_D_SC_LFS_2015_08 ;;
-            SVN_cli_args) echo "" ;;
             *) echo $1
         esac
     }
@@ -41,12 +40,6 @@ oneTimeSetUp() {
         echo SDK3=tag_SDK3 >> ${WORKSPACE}/workspace/bld/bld-externalComponents-summary/externalComponents
         echo SDK=tag_SDK   >> ${WORKSPACE}/workspace/bld/bld-externalComponents-summary/externalComponents
     }
-    getBuildBuildNumberFromFingerprint(){
-        echo 123
-    }
-    getBuildJobNameFromFingerprint(){
-        echo Build_Job
-    }
     setBuildDescription() {
         mockedCommand "setBuildDescription $@"
     }
@@ -56,9 +49,6 @@ oneTimeSetUp() {
     runOnMaster() {
         mockedCommand "runOnMaster $@"
         return 1
-    }
-    databaseEventSubReleaseStarted() {
-        mockedCommand "databaseEventSubReleaseStarted $@"
     }
     sleep() {
         return

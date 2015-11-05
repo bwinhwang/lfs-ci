@@ -45,11 +45,9 @@ sub cat {
     my $revision = $param->{revision};
 
     TRACE sprintf( "running svn cat for %s - rev %s", $url, $revision || "undef" );
-    my $svnArguments = Nokia::Singleton::config()->getConfig( name => "SVN_cli_args" );
 
-    my $cmd = sprintf( "%s cat %s %s %s|",
+    my $cmd = sprintf( "%s cat %s %s|",
                         $self->{svnCli},
-                        $svnArguments,
                         $revision ? sprintf( "-r %d", $revision ) : "",
                         $url );
 
@@ -73,11 +71,9 @@ sub propget {
     my $param= { @_ };
     my $url      = $self->replaceMasterByUlmServer( $param->{url} );
     my $property = $param->{property};
-    my $svnArguments = Nokia::Singleton::config()->getConfig( name => "SVN_cli_args" );
 
-    my $cmd = sprintf( "%s pg %s %s %s|",
+    my $cmd = sprintf( "%s pg %s %s|",
                         $self->{svnCli},
-                        $svnArguments,
                         $property,
                         $url );
     open SVN_CAT, $cmd || die "can not execute $cmd";
@@ -97,19 +93,18 @@ sub info {
     my $url   = $self->replaceMasterByUlmServer( $param->{url} || "" );
     my $xml   = "";
     my $count = 0;
-    my $svnArguments = Nokia::Singleton::config()->getConfig( name => "SVN_cli_args" );
 
     while ( $xml eq "" and $count < 8 ) {
-        TRACE "running ($count) svn info $svnArguments --xml ${url}";
-        open SVN_INFO, sprintf( "%s $svnArguments --xml info %s|", $self->{svnCli}, $url ) or next;
-        TRACE "svn info $svnArguments --xml ${url} command was ok";
+        TRACE "running ($count) svn info --xml ${url}";
+        open SVN_INFO, sprintf( "%s --xml info %s|", $self->{svnCli}, $url ) or next;
+        TRACE "svn info --xml ${url} command was ok";
         $xml = join( "", <SVN_INFO> );
         TRACE "xml is $xml";
         close SVN_INFO;
         $count++;
     }
     if( $xml eq "" ) {
-        die "svn info $svnArguments --xml failed";
+        die "svn info --xml failed";
     }
 
     my $xmlDataHash = XMLin( $xml );
@@ -127,8 +122,7 @@ sub ls {
     my $param = { @_ };
     my $url   = $self->replaceMasterByUlmServer( $param->{url} || "" );
 
-    my $svnArguments = Nokia::Singleton::config()->getConfig( name => "SVN_cli_args" );
-    open SVN_LS, sprintf( "%s $svnArguments --xml ls %s|", $self->{svnCli}, $url ) || die "can not open svn info: %!";
+    open SVN_LS, sprintf( "%s --xml ls %s|", $self->{svnCli}, $url ) || die "can not open svn info: %!";
     my $xml = join( "", <SVN_LS> );
     close SVN_LS;
 
@@ -149,12 +143,10 @@ sub command {
     my $url      = $self->replaceMasterByUlmServer( $param->{url} || "");
     my $action   = $param->{action}   || "";
     my $args     = join( " ", @{ $param->{args} || [] } );
-  
-    my $svnArguments = Nokia::Singleton::config()->getConfig( name => "SVN_cli_args" );
-    my $cmd = sprintf( "%s %s %s -q %s %s %s",
+
+    my $cmd = sprintf( "%s %s -q %s %s %s",
                         $self->{svnCli},
                         $action,
-                        $svnArguments,
                         $revision ? sprintf( "-r%d", $revision ) : "",
                         $url,
                         $args );

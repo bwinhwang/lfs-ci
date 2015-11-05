@@ -2,8 +2,7 @@
 # @file  uc_release_create_rel_tag.sh
 # @brief usecase "release - create release tag in svn"
 
-[[ -z ${LFS_CI_SOURCE_release}  ]] && source ${LFS_CI_ROOT}/lib/release.sh
-[[ -z ${LFS_CI_SOURCE_database} ]] && source ${LFS_CI_ROOT}/lib/database.sh
+[[ -z ${LFS_CI_SOURCE_release} ]] && source ${LFS_CI_ROOT}/lib/release.sh
 
 ## @fn      usecase_LFS_RELEASE_CREATE_RELEASE_TAG()
 #  @brief   create the release tag

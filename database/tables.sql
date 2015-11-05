@@ -102,8 +102,6 @@ CREATE TABLE test_executions (
     test_suite_name VARCHAR(128) NOT NULL,
     target_name     VARCHAR(128) NOT NULL,
     target_type     VARCHAR(128) NOT NULL,
-    job_name        VARCHAR(128) NULL,
-    build_number    INT,
 
     PRIMARY KEY (id), 
     FOREIGN KEY (build_id)
@@ -146,13 +144,11 @@ CREATE TABLE test_cases (
 
 DROP TABLE IF EXISTS test_case_results;
 CREATE TABLE test_case_results (
-    id                      INT NOT NULL AUTO_INCREMENT,
-    test_case_id            INT NOT NULL,
-    test_execution_id       INT NOT NULL,
-    test_case_duration      FLOAT NULL,
-    test_case_failed_since  INT NULL,
-    test_case_skipped       BOOLEAN NULL,
-    test_case_result        TEXT NULL,
+    id                  INT NOT NULL AUTO_INCREMENT,
+    test_case_id        INT NOT NULL,
+    test_execution_id   INT NOT NULL,
+    test_case_duration  INT NOT NULL,
+    test_case_result    VARCHAR(128) NOT NULL,
 
     PRIMARY KEY (id),
     FOREIGN KEY (test_execution_id)

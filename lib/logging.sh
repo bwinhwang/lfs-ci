@@ -122,7 +122,7 @@ stopLogfile() {
         printf -- "ending complete logfile\n"                                             >> ${CI_LOGGING_LOGFILENAME_COMPLETE}
         printf -- "-------------------------------------------------------------------\n" >> ${CI_LOGGING_LOGFILENAME_COMPLETE}
 
-        gzip -f ${CI_LOGGING_LOGFILENAME_COMPLETE}
+        gzip ${CI_LOGGING_LOGFILENAME_COMPLETE}
     fi
     
     unset CI_LOGGING_LOGFILENAME

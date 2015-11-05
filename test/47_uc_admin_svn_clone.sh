@@ -23,9 +23,6 @@ oneTimeSetUp() {
     svnCommit() {
         mockedCommand "svnCommit $@"
     }
-    svnAdd() {
-        mockedCommand "svnAdd $@"
-    }
     return
 }
 
@@ -68,11 +65,6 @@ getConfig BTS_SC_LFS_url
 svnCheckout BTS_SC_LFS_url/os/trunk/bldtools/ ${WORKSPACE}/workspace
 execute -n find ${WORKSPACE}/workspace -name Dependencies
 svnCommit -m updated_svn_url ${WORKSPACE}/workspace
-execute rm -rf ${WORKSPACE}/workspace
-svnCheckout BTS_SC_LFS_url/os/trunk/lrc/src-commonddal/ ${WORKSPACE}/workspace
-execute touch ${WORKSPACE}/workspace/Dependencies
-svnAdd ${WORKSPACE}/workspace/Dependencies
-svnCommit -m fix_for_lrc ${WORKSPACE}/workspace
 execute rm -rf ${WORKSPACE}/workspace
 EOF
     assertExecutedCommands ${expect}

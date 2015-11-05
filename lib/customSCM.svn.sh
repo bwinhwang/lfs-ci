@@ -32,9 +32,6 @@
 #           different, trigger a new build, and store the new file
 #  @param   <none>
 #  @return  1 if if a build is not required, 0 otherwise
-
-[[ -z ${LFS_CI_SOURCE_subversion} ]] && source ${LFS_CI_ROOT}/lib/subversion.sh
-
 actionCompare() {
 
     if [[ -z "${REVISION_STATE_FILE}" ]] ; then
@@ -184,7 +181,7 @@ _createRevisionsTxtFile() {
     do
         local dependenciesFileUrl=${srcRepos}/os/trunk/bldtools/locations-${location}/Dependencies
         # check, if dependency file exists
-        svnCommand ls ${dependenciesFileUrl} 
+        execute svn ls ${dependenciesFileUrl} 
 
         # can not use execute here, so we have to do the error handling by hande
         # do the magic for all dir
@@ -271,8 +268,8 @@ _createChangelogXmlFileFromSubversion() {
             local tmpChangeLogFile=$(createTempFile)
 
             oldRev=$(( oldRev + 1))
-            debug "get subversion changelog ${subSystem} ${oldRev}:${newRev} ${newUrl}"
-            svnLog -v --xml --stop-on-copy -r${oldRev}:${newRev} ${newUrl} > ${tmpChangeLogFile}
+            debug "get svn changelog ${subSystem} ${oldRev}:${newRev} ${newUrl}"
+            execute -n svn log -v --xml --stop-on-copy -r${oldRev}:${newRev} ${newUrl} > ${tmpChangeLogFile}
             mustBeSuccessfull "$?" "svn log -v --xml -r${oldRev}:${newRev} ${newUrl}"
 
             rawDebug ${tmpChangeLogFile}

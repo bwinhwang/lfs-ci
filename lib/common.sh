@@ -232,8 +232,8 @@ switchSvnServerInLocations() {
     perl -pi -e "s/${masterServer}/${slaveServer}/g" \
         ${workspace}/locations/locations-*/Dependencies
 
-    svnCommand status ${workspace}/locations/locations-*/Dependencies
-    svnDiff ${workspace}/locations/locations-*/Dependencies
+    execute svn status ${workspace}/locations/locations-*/Dependencies
+    execute svn diff   ${workspace}/locations/locations-*/Dependencies
 
     return
 }
