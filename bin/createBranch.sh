@@ -243,6 +243,10 @@ svnCopyLocationsFSMR4() {
 svnDeleteBootManager() {
     local newBranch=$1
 
+    info "--------------------------------------------------------"
+    info "SVN: delete boot manager from new branch"
+    info "--------------------------------------------------------"
+
     svn ls ${SVN_REPO}/${SVN_DIR}/${newBranch}/trunk/fsmr3/src-fbrm && \
         __cmd svn delete -m \"Branching: removed src-fbrm from branch $newBranch\" \
         ${SVN_REPO}/${SVN_DIR}/${newBranch}/trunk/fsmr3/src-fbrm;
@@ -254,6 +258,10 @@ svnDeleteBootManager() {
     svn ls ${SVN_REPO}/${SVN_DIR}/${newBranch}/trunk/fsmr35/src-fsmbrm35 && \
         __cmd svn delete -m \"Branching: removed src-fsmbrm35 from branch $newBranch\" \
         ${SVN_REPO}/${SVN_DIR}/${newBranch}/trunk/fsmr35/src-fsmbrm35;
+
+    __cmd cd ${WORKSPACE}/locations-${newBranch}
+    __cmd sed -i -e "'s,^dir src-fsmbrm,,'" -e "'s,^dir src-fbrm,,'" Dependencies
+    __cmd svn commit -m \"Branching: removed src-fsmbrm and src-fbrm from Dependencies file.\" || exit 1
 }
 
 __getGitRevisionFile() {
