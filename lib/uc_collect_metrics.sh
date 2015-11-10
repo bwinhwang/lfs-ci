@@ -89,9 +89,13 @@ usecase_LFS_COLLECT_UNITTEST_METRICS() {
 
     copyAndExtractBuildArtifactsFromProject ${UPSTREAM_PROJECT} ${UPSTREAM_BUILD} fsmci
 
-    local artifactsPath=bld/bld-unittests-fsmr3_fsmddal
-    local artifactsFilter="unittests"
-    collectMetricsFromTestJobs ${artifactsPath} ${artifactsFilter}
+    for target in fsmr3 fsmr4
+    do
+        # unfortunately, the unittest jobs have the target name in the artifacts path
+        local artifactsPath=bld/bld-unittests-${target}_fsmddal
+        local artifactsFilter="unittests"
+        collectMetricsFromTestJobs ${artifactsPath} ${artifactsFilter}
+    done
 
     info "usecase collect UNITTEST metrics done"
     return
