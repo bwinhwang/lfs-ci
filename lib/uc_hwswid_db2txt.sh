@@ -45,7 +45,8 @@ createHwSwIdTxtFile() {
     # FSM-r3 for basebandfpga
     for basebandfpga in $(getConfig LFS_CI_HWSWID_BASEBANDFPGA -t hw_platform:fsmr3)
     do
-        hwswidDataFromMysql HwSwId_${basebandfpga}.txt "basebandfpga=\"${basebandfpga}\""  "$mysqlTableFsmr3"
+        #hwswidDataFromMysql HwSwId_${basebandfpga}.txt "basebandfpga=\"${basebandfpga}\""  "$mysqlTableFsmr3"
+        hwswidDataFromMysql HwSwId_${basebandfpga}.txt "basebandfpga=\"${basebandfpga}\" OR basebandfpga LIKE \"%${basebandfpga}#%\" OR basebandfpga LIKE \"%#${basebandfpga}\""  "$mysqlTableFsmr3"
     done
 
     hwswidDataFromMysql HwSwId_UBOOT.txt  'boardname != "FSPN" and boardname != "FIFC"'  "$mysqlTableFsmr3"
@@ -128,7 +129,7 @@ hwSwIdToSubVersion() {
         svnCheckout ${url} "${hwswidWorkdirSvn}"
         cp -a ${hwswidWorkdirDb}/* "${hwswidWorkdirSvn}"/
         svn diff ${hwswidWorkdirSvn}
-        svn commit -m "update HwSwId NOJCHK" ${hwswidWorkdirSvn}
+        info TODO: svn commit -m "update HwSwId NOJCHK" ${hwswidWorkdirSvn}
 
     done
 }
