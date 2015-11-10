@@ -10,6 +10,9 @@ oneTimeSetUp() {
     execute() {
         mockedCommand "execute $@"
     }
+    getConfig() {
+        echo $1
+    }
 
     return
 }
@@ -32,7 +35,7 @@ test1() {
     local expect=$(createTempFile)
     cat <<EOF > ${expect}
 execute mkdir -p ${WORKSPACE}/workspace/xml-reports/
-execute cp ${LFS_CI_ROOT}/test/junitResult.xml ${WORKSPACE}/workspace/xml-reports/
+execute cp LFS_CI_uc_test_dummy_sandbox_result_xml_file ${WORKSPACE}/workspace/xml-reports/
 EOF
     assertExecutedCommands ${expect}
 
