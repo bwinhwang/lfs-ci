@@ -38,7 +38,9 @@ createHwSwIdTxtFile() {
     do
         for firmewaretype in $(getConfig LFS_CI_HWSWID_FIRMWARETYPE -t hw_platform:${hw_platform})
         do
-            hwswidDataFromMysql HwSwId_${firmewaretype}.txt "firmwaretype=\"${firmewaretype}\""  "$(getConfig LFS_CI_HWSWID_DB_TABLE -t hw_platform:${hw_platform})"
+            local sglWhereSubPart="firmwaretype=\"${firmewaretype}\" OR firmwaretype LIKE \"%${firmewaretype}#%\" OR firmwaretype LIKE \"%#${firmewaretype}\""
+            debug +++ sglWhereSubPart="${sglWhereSubPart}"
+            hwswidDataFromMysql HwSwId_${firmewaretype}.txt "${sglWhereSubPart}"  "$(getConfig LFS_CI_HWSWID_DB_TABLE -t hw_platform:${hw_platform})"
         done
     done
 
