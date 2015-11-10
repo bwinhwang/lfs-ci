@@ -45,8 +45,9 @@ createHwSwIdTxtFile() {
     # FSM-r3 for basebandfpga
     for basebandfpga in $(getConfig LFS_CI_HWSWID_BASEBANDFPGA -t hw_platform:fsmr3)
     do
-        #hwswidDataFromMysql HwSwId_${basebandfpga}.txt "basebandfpga=\"${basebandfpga}\""  "$mysqlTableFsmr3"
-        hwswidDataFromMysql HwSwId_${basebandfpga}.txt "basebandfpga=\"${basebandfpga}\" OR basebandfpga LIKE \"%${basebandfpga}#%\" OR basebandfpga LIKE \"%#${basebandfpga}\""  "$mysqlTableFsmr3"
+        local sglWhereSubPart="basebandfpga=\"${basebandfpga}\" OR basebandfpga LIKE \"%${basebandfpga}#%\" OR basebandfpga LIKE \"%#${basebandfpga}\""
+        debug +++ sglWhereSubPart="${sglWhereSubPart}"
+        hwswidDataFromMysql HwSwId_${basebandfpga}.txt "${sglWhereSubPart}"  "$mysqlTableFsmr3"
     done
 
     hwswidDataFromMysql HwSwId_UBOOT.txt  'boardname != "FSPN" and boardname != "FIFC"'  "$mysqlTableFsmr3"
