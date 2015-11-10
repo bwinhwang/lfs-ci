@@ -55,6 +55,7 @@ my %commands = (
                  newEvent                       => "Nokia::Command::NewEvent",
                  newSubversionCommits           => "Nokia::Command::NewSubversionCommits",
                  newTestResults                 => "Nokia::Command::NewTestResults",
+                 newTestCaseResults             => "Nokia::Command::NewTestCaseResults",
                  removalCandidates              => "Nokia::Command::RemovalCandidates",
                  reserveTarget                  => "Nokia::Command::ReserveTarget",
                  searchTarget                   => "Nokia::Command::SearchTarget",
