@@ -78,10 +78,13 @@ createHwSwIdTxtFile() {
 hwswidDataFromMysql() {
     local hwswidTxtFile="$1"
     mustHaveValue "${hwswidTxtFile}" "hwswidTxtFile"
+    debug +++ hwswidTxtFile="${hwswidTxtFile}"
     local query="$2"
     mustHaveValue "${query}" "query"
+    debug +++ query="${query}"
     local currentMysqlTable="$3"
     mustHaveValue "${currentMysqlTable}" "currentMysqlTable"
+    debug +++ currentMysqlTable="${currentMysqlTable}"
 
     export databaseName=hwswid_database
     mustHaveDatabaseCredentials
@@ -89,7 +92,7 @@ hwswidDataFromMysql() {
     info creating "$hwswidTxtFile"
     debug creating "$hwswidTxtFile" using MYSQL query "$query" in "${hwswidWorkdirDb}" '(MYSQL '$MYSQL_USER@$MYSQL_HOST table $hwswidTxtFile')'
     debug +++ ${mysql_cli} -B -r -s -e 'SELECT DISTINCT `hw_sw_id` FROM '"$currentMysqlTable"' WHERE '"$query" >"$hwswidTxtFile".tmp
-    ### dems18x0: 2015-09-22: execute before mysql command is not working !
+    ### dems18x0: 2015-09-22: "execute" before mysql command is not working !
     ${mysql_cli} -B -r -s -e 'SELECT DISTINCT `hw_sw_id` FROM '"$currentMysqlTable"' WHERE '"$query" >"$hwswidTxtFile".tmp
 
     grep -v -e '^$' -e 'NULL' "$hwswidTxtFile".tmp | sort -u >"$hwswidTxtFile"
