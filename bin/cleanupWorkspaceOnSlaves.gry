@@ -62,10 +62,10 @@ if(!deleteJobs && !LRC_deleteJobs) {
 
 if(debug == true) {
     println("** Execute in DEBUG mode - nothing will be deleted **")
-} 
+}
 
 // Jobs which don't have a custom workspace
-jobNames = jenkins.items.findAll { it instanceof hudson.model.AbstractProject && it.customWorkspace == null && it.name.find(branch) }.collect { it.name }
+jobNames = jenkins.items.findAll { it instanceof hudson.model.AbstractProject && it.customWorkspace == null && it.name.find('_-_'+branch+'_-_') }.collect { it.name }
 
 for(slave in jenkins.slaves) {
     if(!slave.computer.online) {
@@ -85,7 +85,7 @@ for(slave in jenkins.slaves) {
     if(subdirs.size() == 0) {
         println(" (workspace is empty)")
         continue
-    } 
+    }
 
     for(d in subdirs) {
         // Remove any suffixes from the dir name
