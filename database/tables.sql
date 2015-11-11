@@ -138,7 +138,7 @@ CREATE TABLE test_results (
 DROP TABLE IF EXISTS test_cases;
 CREATE TABLE test_cases (
     id                  INT NOT NULL AUTO_INCREMENT,
-    test_case_name      VARCHAR(128) NOT NULL,
+    test_case_name      TEXT NOT NULL,
     test_case_owner     VARCHAR(128) NOT NULL,
 
     PRIMARY KEY (id)
