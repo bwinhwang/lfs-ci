@@ -38,14 +38,18 @@ createHwSwIdTxtFile() {
     do
         for firmewaretype in $(getConfig LFS_CI_HWSWID_FIRMWARETYPE -t hw_platform:${hw_platform})
         do
-            hwswidDataFromMysql HwSwId_${firmewaretype}.txt "firmwaretype=\"${firmewaretype}\""  "$(getConfig LFS_CI_HWSWID_DB_TABLE -t hw_platform:${hw_platform})"
+            local sglWhereSubPart="firmwaretype=\"${firmewaretype}\" OR firmwaretype LIKE \"%${firmewaretype}#%\" OR firmwaretype LIKE \"%#${firmewaretype}\""
+            debug +++ sglWhereSubPart="${sglWhereSubPart}"
+            hwswidDataFromMysql HwSwId_${firmewaretype}.txt "${sglWhereSubPart}"  "$(getConfig LFS_CI_HWSWID_DB_TABLE -t hw_platform:${hw_platform})"
         done
     done
 
     # FSM-r3 for basebandfpga
     for basebandfpga in $(getConfig LFS_CI_HWSWID_BASEBANDFPGA -t hw_platform:fsmr3)
     do
-        hwswidDataFromMysql HwSwId_${basebandfpga}.txt "basebandfpga=\"${basebandfpga}\""  "$mysqlTableFsmr3"
+        local sglWhereSubPart="basebandfpga=\"${basebandfpga}\" OR basebandfpga LIKE \"%${basebandfpga}#%\" OR basebandfpga LIKE \"%#${basebandfpga}\""
+        debug +++ sglWhereSubPart="${sglWhereSubPart}"
+        hwswidDataFromMysql HwSwId_${basebandfpga}.txt "${sglWhereSubPart}"  "$mysqlTableFsmr3"
     done
 
     hwswidDataFromMysql HwSwId_UBOOT.txt  'boardname != "FSPN" and boardname != "FIFC"'  "$mysqlTableFsmr3"
@@ -77,10 +81,13 @@ createHwSwIdTxtFile() {
 hwswidDataFromMysql() {
     local hwswidTxtFile="$1"
     mustHaveValue "${hwswidTxtFile}" "hwswidTxtFile"
+    debug +++ hwswidTxtFile="${hwswidTxtFile}"
     local query="$2"
     mustHaveValue "${query}" "query"
+    debug +++ query="${query}"
     local currentMysqlTable="$3"
     mustHaveValue "${currentMysqlTable}" "currentMysqlTable"
+    debug +++ currentMysqlTable="${currentMysqlTable}"
 
     export databaseName=hwswid_database
     mustHaveDatabaseCredentials
@@ -88,7 +95,7 @@ hwswidDataFromMysql() {
     info creating "$hwswidTxtFile"
     debug creating "$hwswidTxtFile" using MYSQL query "$query" in "${hwswidWorkdirDb}" '(MYSQL '$MYSQL_USER@$MYSQL_HOST table $hwswidTxtFile')'
     debug +++ ${mysql_cli} -B -r -s -e 'SELECT DISTINCT `hw_sw_id` FROM '"$currentMysqlTable"' WHERE '"$query" >"$hwswidTxtFile".tmp
-    ### dems18x0: 2015-09-22: execute before mysql command is not working !
+    ### dems18x0: 2015-09-22: "execute" before mysql command is not working !
     ${mysql_cli} -B -r -s -e 'SELECT DISTINCT `hw_sw_id` FROM '"$currentMysqlTable"' WHERE '"$query" >"$hwswidTxtFile".tmp
 
     grep -v -e '^$' -e 'NULL' "$hwswidTxtFile".tmp | sort -u >"$hwswidTxtFile"
@@ -126,9 +133,13 @@ hwSwIdToSubVersion() {
 
         rm -rf "${hwswidWorkdirSvn}"
         svnCheckout ${url} "${hwswidWorkdirSvn}"
-        cp -a ${hwswidWorkdirDb}/* "${hwswidWorkdirSvn}"/
-        svn diff ${hwswidWorkdirSvn}
-        svn commit -m "update HwSwId NOJCHK" ${hwswidWorkdirSvn}
+        execute cp -a ${hwswidWorkdirDb}/* "${hwswidWorkdirSvn}"/
+        svnDiff ${hwswidWorkdirSvn}
+        local msg=$(createTempFile)
+        echo "update HwSwId" > ${msg} 
+        svnCommit -F ${msg} ${hwswidWorkdirSvn}
 
     done
+
+    return 0
 }
