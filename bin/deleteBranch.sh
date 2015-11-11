@@ -22,7 +22,8 @@ SVN_RESULT_MOVE_BRANCH_LOCATION_FSMR4=0
 SVN_RESULT_MOVE_BRANCH=0
 LRC_SVN_RESULT_MOVE_BRANCH_LOCATION=0
 LRC_SVN_RESULT_MOVE_BRANCH=0
-DB_UPDATE_RESULT=0
+DB_UPDATE_RESULT1=0
+DB_UPDATE_RESULT2=0
 
 __printParams() {
     info "###############################################################"
@@ -335,7 +336,8 @@ dbUpdate() {
     info "--------------------------------------------------------"
 
     local branch=${BRANCH}
-    local sqlString="UPDATE branches SET status='closed',date_closed=now() WHERE branch_name='${branch}' AND status!='closed'"
+    local sqlString1="UPDATE branches SET status='closed',date_closed=now() WHERE branch_name='${branch}' AND status!='closed'"
+    local sqlString2="UPDATE ps_branches SET status='closed' WHERE ps_branch_name='${branch}' AND status!='closed'"
 
     local dbName=$(getConfig MYSQL_db_name)
     local dbUser=$(getConfig MYSQL_db_username)
@@ -344,12 +346,17 @@ dbUpdate() {
     local dbPort=$(getConfig MYSQL_db_port)
 
     if [[ $DEBUG == true ]]; then
-        debug $sqlString
-        echo [DEBUG] $sqlString
+        debug $sqlString1
+        echo [DEBUG] $sqlString1
+        debug $sqlString2
+        echo [DEBUG] $sqlString2
     else
-        info "updating DB: $sqlString"
-        echo $sqlString | mysql -u ${dbUser} --password=${dbPass} -h ${dbHost} -P ${dbPort} -D ${dbName} 2> /dev/null
-        DB_UPDATE_RESULT=$?
+        info "updating DB: $sqlString1"
+        echo $sqlString1 | mysql -u ${dbUser} --password=${dbPass} -h ${dbHost} -P ${dbPort} -D ${dbName} 2> /dev/null
+        DB_UPDATE_RESULT1=$?
+        info "updating DB: $sqlString2"
+        echo $sqlString2 | mysql -u ${dbUser} --password=${dbPass} -h ${dbHost} -P ${dbPort} -D ${dbName} 2> /dev/null
+        DB_UPDATE_RESULT2=$?
     fi
 }
 
@@ -384,7 +391,8 @@ main() {
                     ${SVN_RESULT_MOVE_BRANCH}+\
                     ${LRC_SVN_RESULT_MOVE_BRANCH_LOCATION}+\
                     ${LRC_SVN_RESULT_MOVE_BRANCH}+\
-                    ${DB_UPDATE_RESULT}))
+                    ${DB_UPDATE_RESULT1}+\
+                    ${DB_UPDATE_RESULT2}))
 
     if [[ ${result} -ne 0 ]]; then
         echo ""
@@ -395,7 +403,8 @@ main() {
         info "SVN_RESULT_MOVE_BRANCH: ${SVN_RESULT_MOVE_BRANCH}"
         info "LRC_SVN_RESULT_MOVE_BRANCH_LOCATION: ${LRC_SVN_RESULT_MOVE_BRANCH_LOCATION}"
         info "LRC_SVN_RESULT_MOVE_BRANCH: ${LRC_SVN_RESULT_MOVE_BRANCH}"
-        info "DB_UPDATE_RESULT: ${DB_UPDATE_RESULT}"
+        info "DB_UPDATE_RESULT1: ${DB_UPDATE_RESULT1}"
+        info "DB_UPDATE_RESULT2: ${DB_UPDATE_RESULT2}"
         echo ""
         setBuildResultUnstable
     fi
