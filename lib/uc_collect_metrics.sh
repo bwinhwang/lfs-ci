@@ -92,6 +92,8 @@ usecase_LFS_COLLECT_UNITTEST_METRICS() {
     for target in fsmr3 fsmr4
     do
         # unfortunately, the unittest jobs have the target name in the artifacts path
+        # TODO: in principle it should be possible to do this with only one cycle. Either, the name of the
+        # bld-unittests-* directory has to be changed or it should be made possible to use wildcards here
         local artifactsPath=bld/bld-unittests-${target}_fsmddal
         local artifactsFilter="unittests"
         collectMetricsFromTestJobs ${artifactsPath} ${artifactsFilter}
