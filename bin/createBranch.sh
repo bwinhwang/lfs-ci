@@ -431,6 +431,7 @@ main() {
             svnCopyLocationsFSMR4 ${SRC_BRANCH} ${NEW_BRANCH}
             svnDeleteBootManager ${NEW_BRANCH}
             svnDummyCommit ${NEW_BRANCH}
+            createBranchInGit ${NEW_BRANCH}
         elif [[ ${LRC} == "true" ]]; then
             svnCopyBranchLRC LRC_${SRC_BRANCH} LRC_${NEW_BRANCH}
             svnCopyLocationsLRC ${LOCATIONS_LRC} LRC_${SRC_BRANCH} LRC_${NEW_BRANCH}
@@ -441,7 +442,6 @@ main() {
         info "$(basename $0): Nothing to do."
     fi
 
-    createBranchInGit ${NEW_BRANCH}
     dbInsert ${NEW_BRANCH}
 }
 
