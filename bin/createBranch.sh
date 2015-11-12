@@ -101,6 +101,12 @@ __get_sql_string() {
         '${DESCRIPTION}', '${PS_BRANCH}' ,'${PS_BRANCH_COMMENT}', '${ECL_URLS}')"
 }
 
+__get_sql_string_fsmr4() {
+    echo "INSERT INTO branches (branch_name, location_name, status, based_on_revision, based_on_release, release_name_regex, \
+          date_created, comment, product_name) \
+          VALUES ('${branch}_FSMR4', '${branch}_FSMR4', 'open', ${REVISION}, '${SOURCE_RELEASE}', '${regex}', now(), '${COMMENT}', 'LFS')"
+}
+
 __cmd() {
     if [[ $DEBUG == true ]]; then
         debug $@
@@ -403,13 +409,19 @@ dbInsert() {
     local dbHost=$(getConfig MYSQL_db_hostname)
     local dbPort=$(getConfig MYSQL_db_port)
 
-    if [[ $DEBUG == true ]]; then
+    if [[ ${DEBUG} == true ]]; then
         echo "[DEBUG] $(__get_sql_string)"
+        if [[ ${FSMR4} == true ]]; then
+            echo "[DEBUG] $(__get_sql_string_fsmr4)"
+        fi
     else
         info "insert into DB: $(__get_sql_string)"
         echo $(__get_sql_string) | mysql -u ${dbUser} --password=${dbPass} -h ${dbHost} -P ${dbPort} -D ${dbName}
         if [[ $? -ne 0 ]]; then
             exit 1
+        fi
+        if [[ ${FSMR4} == true ]]; then
+            echo $(__get_sql_string_fsmr4) | mysql -u ${dbUser} --password=${dbPass} -h ${dbHost} -P ${dbPort} -D ${dbName}
         fi
     fi
 }
