@@ -466,6 +466,9 @@ jenkins_get_configs() {
 jenkins_start_sandbox() {
     if [[ ! ${START_OPTION} ]]; then
         echo "Export vars and start Jenkins server..."
+        echo "    LFS_CI_ROOT=${LFS_CI_ROOT}"
+        echo "    LFS_CI_CONFIG_FILE=${LFS_CI_CONFIG_FILE}"
+        echo "    JENKINS_HOME=${JENKINS_HOME}"
         export LFS_CI_ROOT=${LFS_CI_ROOT}
         export LFS_CI_CONFIG_FILE=${LFS_CI_CONFIG_FILE}
         export JENKINS_HOME=${JENKINS_HOME}
@@ -665,13 +668,16 @@ purge_sandbox() {
 }
 
 get_args() {
-    while getopts ":r:n:b:w:i:c:s:t:f:g:delpjohaxuk" OPT; do
+    while getopts ":r:n:m:b:w:i:c:s:t:f:g:delpjohaxuk" OPT; do
         case ${OPT} in
             b)
                 BRANCH_VIEWS=$OPTARG
             ;;
             n)
                 NESTED_VIEWS=$OPTARG
+            ;;
+            m)
+                LFS_CI_ROOT=$OPTARG
             ;;
             r)
                 ROOT_VIEWS=$OPTARG
