@@ -303,7 +303,7 @@ class CreateBranch extends Common {
         }
 
         if(!this.srcBranchViewObj) {
-            err("the source branch view $sourceView does not exist.")
+            this.err("the source branch view $sourceView does not exist.")
             throw new RuntimeException("The source branch view does not exist.")
         }
 
@@ -416,7 +416,7 @@ class CreateBranch extends Common {
                                 copy(tofile: promoDstDir.getAbsolutePath()+"/"+process.getName()+"/config.xml",
                                      file:   promoSrcDir.getAbsolutePath()+"/"+process.getName()+"/config.xml",
                                      overwrite: true)
-                            } 
+                            }
                             def dstFile = new File(promoDstDir.getAbsolutePath()+"/"+process.getName()+"/config.xml")
                             this.inf("configuring file "+dstFile.getAbsolutePath())
                             if(this.debug) {
@@ -560,7 +560,28 @@ class CreateBranch extends Common {
     }
 
     /**
-     * Copy each jobs which is part of this.jobsList.
+     * Remove puplishers related to "Test history matrix (Unitth)"
+     * from job.
+     */
+    void removePublishers(job) {
+        if(job.name.find("_-_Test_-_") || job.name.find("_-_TestNonBlocking_-_")) {
+            for(publisher in job.publishersList) {
+                if(publisher instanceof hudson.tasks.ArtifactArchiver) {
+                    job.publishersList.remove(publisher)
+                    this.inf("removed publisher " + publisher + " from " + job.name)
+                } else if(publisher instanceof org.jenkinsci.plugins.unitth.TestHistoryReporter) {
+                    job.publishersList.remove(publisher)
+                    this.inf("removed publisher " + publisher + " from " + job.name)
+                } else if(publisher instanceof hudson.plugins.parameterizedtrigger.BuildTrigger) {
+                    job.publishersList.remove(publisher)
+                    this.inf("removed publisher " + publisher + " from " + job.name)
+                }
+            }
+        }
+    }
+
+    /**
+     * Copy each job which is part of this.jobsList.
      */
     void copyJobs() {
         def newJob = null
@@ -578,10 +599,12 @@ class CreateBranch extends Common {
                 if(!this.debug) {
                     newJob.save()
                     this.updateWorkspace(newJob)
+                    if(this.fromTrunk) {
+                        this.removePublishers(newJob) // trunk jobs have unitth related publishers
+                    }
                     configFile = this.updateJobConfig(job, newJob)
                     this.copyPromotions(job, newJob)
                     this.removePromotion(job)
-                    // avoid having two projects point to the same location
                     this.reloadJobConfig(newJob, configFile)
                 }
                 numJobs++
@@ -590,7 +613,6 @@ class CreateBranch extends Common {
                 this.warn(e)
             }
         }
-
         this.inf("$numJobs jobs were copied.")
     }
 }
@@ -709,8 +731,8 @@ class CreateViews extends Common {
                 this.trunkView = this.srcBranch
             }
         }
-    }   
-    
+    }
+
     /**
      * Here we go.
      */
@@ -821,11 +843,11 @@ class CreateViews extends Common {
                 sectionedView.owner = parentView
                 parentView.addView(sectionedView)
                 this.inf("created view ${parentView.name}/${this.newBranch}")
-            }   
+            }
             this.configureSectionedView()
         }
-    }   
-    
+    }
+
     /**
       * Configure the sectioned view for this branch.
       * Reads the config.xml of the the source branch view and

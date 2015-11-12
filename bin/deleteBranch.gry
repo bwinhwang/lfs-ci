@@ -224,8 +224,7 @@ def deleteJobs() {
     if(deleteJobs || LRC_deleteJobs) {
         for(p in j.getProjects()) {
             def job_name = p.getName()
-            if(deleteJobs && job_name.find("_"+branch+"_") && !job_name.find("LFS_CI_-_LRC_") && !job_name.find("LFS_Prod_-_LRC_") && !job_name.find("PKGPOOL_-_LRC_")) {
-                remove_job_dir(job_name)
+            if(deleteJobs && job_name.find("_-_"+branch+"_-_") && !job_name.find("LFS_CI_-_LRC_") && !job_name.find("LFS_Prod_-_LRC_") && !job_name.find("PKGPOOL_-_LRC_")) {
                 if(debug) {
                     println("[DEBUG] delete job: $job_name (dry run)")
                 } else {
