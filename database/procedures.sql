@@ -605,11 +605,11 @@ DELIMITER ;
 DROP PROCEDURE IF EXISTS add_new_test_case_result;
 DELIMITER //
 CREATE PROCEDURE add_new_test_case_result( IN in_test_execution_id      INTEGER,
-                                           IN in_test_case_name         VARCHAR(128), 
+                                           IN in_test_case_name         TEXT,
                                            IN in_test_case_duration     FLOAT,
                                            IN in_test_case_failed_since INTEGER,
                                            IN in_test_case_skipped      BOOLEAN,
-                                           IN in_test_case_result       VARCHAR(128)
+                                           IN in_test_case_result       TEXT
                                          )
 BEGIN
     DECLARE cnt_test_case_id INT;
@@ -885,14 +885,14 @@ BEGIN
         -- TODO: demx2fk3 2015-09-19 HACK special handling for release jobs
         -- release jobs should only create failed or unstable message, not finished.
         IF in_event_type != 'release' THEN
-            CALL new_build_event( in_build_name, in_comment, in_job_name, in_build_number,
+            CALL new_build_event( in_build_name, in_comment, var_started_job_name, var_started_build_number,
                                 in_product_name, in_task_name, in_event_type, 'finished' );
         END IF;
     ELSEIF cnt_started = cnt_finished + cnt_unstable THEN
-        CALL new_build_event( in_build_name, in_comment, in_job_name, in_build_number,
+        CALL new_build_event( in_build_name, in_comment, var_started_job_name, var_started_build_number,
                             in_product_name, in_task_name, in_event_type, 'unstable' );
     ELSEIF cnt_started = cnt_finished + cnt_failed + cnt_unstable THEN
-        CALL new_build_event( in_build_name, in_comment, in_job_name, in_build_number,
+        CALL new_build_event( in_build_name, in_comment, var_started_job_name, var_started_build_number,
                             in_product_name, in_task_name, in_event_type, 'failed' );
     END IF;
 END //
