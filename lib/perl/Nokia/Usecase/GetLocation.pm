@@ -63,7 +63,7 @@ sub getLocation {
                                                     directory => $subDir,
                                                     tag       => $tag,
                                                     revision  => $revision,
-                                                    repos     => $repos->{dst},
+                                                    repos     => Nokia::Singleton::svn()->replaceMasterByUlmServer( $repos->{dst} ),
                                                 );
         return $subDirectory;
     }
