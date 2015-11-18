@@ -52,11 +52,10 @@ setUp() {
 
     for TARGET in FSMr3 FSMr4 
     do
-        export DATA_PATH=src-test/src/unittest/testsuites/continousintegration/coverage/summary/__html/LCOV_${TARGET}
+        export DATA_PATH=src-test/src/testsuites/continousintegration/coverage/summary/__html/LCOV_${TARGET}
         export SONAR_DATA_PATH=$(getConfig LFS_CI_unittest_coverage_data_path)
         mkdir -p ${WORKSPACE}/${SONAR_DATA_PATH}
         touch ${WORKSPACE}/${SONAR_DATA_PATH}/coverage.xml.gz
-        # touch ${WORKSPACE}/${SONAR_DATA_PATH}/testcases.merged.xml.gz
     done
 
     return
@@ -95,7 +94,7 @@ test_UT_FSMr4() {
 
 test_SCT() {
     export JOB_NAME=LFS_CI_-_trunk_-_RegularTest
-    export DATA_PATH='src-test/src/unittest/testsuites/continousintegration/coverage/summary/__html/LCOV_${targetType}'
+    export DATA_PATH='src-test/src/testsuites/continousintegration/coverage/summary/__html/LCOV_${targetType}'
     export DATA_FILES="coverage.xml.gz"
     assertTrue "usecase_LFS_COPY_SONAR_SCT_DATA failed!" "usecase_LFS_COPY_SONAR_SCT_DATA"
     
