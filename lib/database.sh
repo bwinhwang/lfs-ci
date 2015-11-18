@@ -462,7 +462,10 @@ mustHaveDatabaseCredentials() {
     [[ -z ${dbHost} ]] && dbHost=$(getConfig MYSQL_db_hostname)
     mustHaveValue "${dbName}" "dbHost"
 
-    [[ -z ${mysql_cli} ]] && mysql_cli="mysql -u${dbUser} -h${dbHost} --password=${dbPass}"
+    if [[ -z ${mysql_cli} ]] ; then
+        mysql_cli="mysql -u${dbUser} -h${dbHost}"
+        [[ ${dbPass} ]] && mysql_cli="${mysql_cli} --password="${dbPass}"
+    fi
     mustHaveValue "${mysql_cli}" "mysql_cli"
 
     return
