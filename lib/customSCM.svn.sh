@@ -38,7 +38,7 @@
 actionCompare() {
 
     if [[ -z "${REVISION_STATE_FILE}" ]] ; then
-        info "no old revision state file found => trigger build"
+        info "no old revision state file found"
         exit 0
     fi
 
@@ -110,12 +110,8 @@ actionCompare() {
         fi
 
         info "changes in revision file found, trigger build"
-        # exit 0
-        exit 1
+        exit 0
     fi
-
-    # remove me
-    exit 1
 
     return
 }
