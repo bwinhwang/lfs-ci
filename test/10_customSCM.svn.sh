@@ -47,18 +47,20 @@ oneTimeTearDown() {
 
 testNoChangeNoBuild() {
     echo "location ${reposUrl}/os/trunk/bldtools/locations-pronb-developer/Dependencies 4" >> ${REVISION_STATE_FILE}
-    echo "src-foo ${reposUrl}/os/trunk/main/src-foo 4"                                     >> ${REVISION_STATE_FILE}
+    echo "src-foo ${reposUrl}/os/trunk/main/src-foo 5"                                     >> ${REVISION_STATE_FILE}
     printf "bld-buildtools ${reposUrl}/os/trunk/bldtools/bld-buildtools-common 3"          >> ${REVISION_STATE_FILE}
 
-    assertTrue "${LFS_CI_ROOT}/bin/customSCM.svn.sh compare"
+    assertFalse "${LFS_CI_ROOT}/bin/customSCM.svn.sh compare"
+    return
 }
 
 testChangeTriggerBuild() {
     echo "location ${reposUrl}/os/trunk/bldtools/locations-pronb-developer/Dependencies 4"  > ${REVISION_STATE_FILE}
     # different revision
-    echo "src-foo ${reposUrl}/os/trunk/main/src-foo 5"                                     >> ${REVISION_STATE_FILE}
-    echo "bld-buildtools ${reposUrl}/os/trunk/bldtools/bld-buildtools-common 3"            >> ${REVISION_STATE_FILE}
+    echo "src-foo ${reposUrl}/os/trunk/main/src-foo 4"                                     >> ${REVISION_STATE_FILE}
+    printf "bld-buildtools ${reposUrl}/os/trunk/bldtools/bld-buildtools-common 3"            >> ${REVISION_STATE_FILE}
 
+    # assertTrue "${LFS_CI_ROOT}/bin/customSCM.svn.sh compare"
     assertFalse "${LFS_CI_ROOT}/bin/customSCM.svn.sh compare"
 }
 
@@ -95,7 +97,8 @@ testChangeWithoutKeywordBuild() {
     assertTrue "svn co -q ${reposUrl} ${workspace}"
     echo d > ${workspace}/os/trunk/main/src-foo/file
     assertTrue "svn ci -m 'commit without keyword' ${workspace}"
-    assertTrue "${LFS_CI_ROOT}/bin/customSCM.svn.sh compare"
+    # assertTrue "${LFS_CI_ROOT}/bin/customSCM.svn.sh compare"
+    assertFalse "${LFS_CI_ROOT}/bin/customSCM.svn.sh compare"
 }
 
 testNoRevisionStateFile() {
