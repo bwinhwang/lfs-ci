@@ -94,12 +94,9 @@ hwswidDataFromMysql() {
 
     info creating "$hwswidTxtFile"
     debug creating "$hwswidTxtFile" using MYSQL query "$query" in "${hwswidWorkdirDb}" '(MYSQL '$MYSQL_USER@$MYSQL_HOST table $hwswidTxtFile')'
-    debug +++ ${mysql_cli} -B -r -s -e 'SELECT DISTINCT `hw_sw_id` FROM '"$currentMysqlTable"' WHERE '"$query" >"$hwswidTxtFile".tmp
-    ### dems18x0: 2015-09-22: "execute" before mysql command is not working !
-    ${mysql_cli} -B -r -s -e 'SELECT DISTINCT `hw_sw_id` FROM '"$currentMysqlTable"' WHERE '"$query" >"$hwswidTxtFile".tmp
-
-    grep -v -e '^$' -e 'NULL' "$hwswidTxtFile".tmp | sort -u >"$hwswidTxtFile"
-    rm "$hwswidTxtFile.tmp"
+    local databaseOutput=$(createTempFile)
+    echo "SELECT DISTINCT hw_sw_id FROM $currentMysqlTable WHERE $query" | execute -l ${databaseOutput} ${mysql_cli} -N
+    grep -v -e '^$' -e 'NULL' "${databaseOutput}" | sort -u >"$hwswidTxtFile"
 
     rawDebug $hwswidTxtFile
 }
@@ -137,7 +134,7 @@ hwSwIdToSubVersion() {
         svnDiff ${hwswidWorkdirSvn}
         local msg=$(createTempFile)
         echo "update HwSwId" > ${msg} 
-        svnCommit -F ${msg} ${hwswidWorkdirSvn}
+        info TODO: svnCommit -F ${msg} ${hwswidWorkdirSvn}
 
     done
 
