@@ -275,7 +275,7 @@ backupJenkinsMasterServerInstallation() {
         execute mkdir -p ${backupPath}/backup.0/
     fi
 
-    execute rsync -av --delete --exclude=workspace ${serverPath}/. ${backupPath}/backup.0/.
+    execute rsync -av --delete --delete-excluded --exclude=workspace --exclude=htmlreports --${serverPath}/. ${backupPath}/backup.0/.
     execute touch ${backupPath}/backup.0
 
     info "backup done"
