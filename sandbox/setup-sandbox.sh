@@ -109,7 +109,7 @@ cat << EOF
         -t HTTP_PORT for Jenkins. Defaults to ${HTTP_PORT}.
         -g <sysv> If -g is omitted, Jenkins is started via nohup in the background.
                   sysv: Start Jenkins via the script /etc/init.d/jenkins.
-        -e (flag) Disable all *_Build$ jobs in Sandbox. Default is to disable all *_Build$ jobs (missing -e).
+        -e (flag) Do not disable all *_Build$ jobs in Sandbox. Default is to disable all *_Build$ jobs (missing -e).
         -l (flag) Create LRC view in Sandbox. Default is don't create LRC in Sandbox.
         -p (flag) Keep Jenkins plugins from an existing Sandbox installation. Defaults is false (missing -p).
         -o (flag) Just start Jenkins (don't do anything else). Default is false (missing -o). Additionally you can also use -g.
