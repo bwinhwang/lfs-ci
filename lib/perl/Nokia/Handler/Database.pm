@@ -179,7 +179,7 @@ sub branchInformation {
 
         push @{ $result }, { name  => "LFS_CI_uc_update_ecl_url",
                              tags  => $locationTagString,
-                             value => join (" ", map  { sprintf( '${BTS_SCM_PS_url}/ECL/%s/ECL_BASE', $_->{ps_branch_name} ) } 
+                             value => join (" ", map  { $_->{ecl_url} } 
                                                  grep { $_->{status} ne "closed" } 
                                                  @{ $psBranches->{ $row->{branch_name} } || [] } ) || "" };
         push @{ $result }, { name  => "LFS_PROD_uc_release_based_on",
