@@ -44,7 +44,7 @@ getConfig jenkinsMasterServerBackupPath
 getConfig jenkinsMasterServerPath
 execute rm -rf ${UT_BACKUP_PATH}/backup.11
 execute mkdir -p ${UT_BACKUP_PATH}/backup.0/
-execute rsync -av --delete --delete-excluded --exclude=workspace --exclude=htmlreports --jenkinsMasterServerPath/. ${UT_BACKUP_PATH}/backup.0/.
+execute rsync -av --delete --delete-excluded --exclude=workspace --exclude=htmlreports jenkinsMasterServerPath/. ${UT_BACKUP_PATH}/backup.0/.
 execute touch ${UT_BACKUP_PATH}/backup.0
 EOF
     assertExecutedCommands ${expect}
@@ -64,7 +64,7 @@ execute rm -rf ${UT_BACKUP_PATH}/backup.11
 execute mv -f ${UT_BACKUP_PATH}/backup.2 ${UT_BACKUP_PATH}/backup.3
 execute mv -f ${UT_BACKUP_PATH}/backup.1 ${UT_BACKUP_PATH}/backup.2
 execute cp -rl ${UT_BACKUP_PATH}/backup.1 ${UT_BACKUP_PATH}/backup.0
-execute rsync -av --delete --delete-excluded --exclude=workspace --exclude=htmlreports --jenkinsMasterServerPath/. ${UT_BACKUP_PATH}/backup.0/.
+execute rsync -av --delete --delete-excluded --exclude=workspace --exclude=htmlreports jenkinsMasterServerPath/. ${UT_BACKUP_PATH}/backup.0/.
 execute touch ${UT_BACKUP_PATH}/backup.0
 EOF
     assertExecutedCommands ${expect}
