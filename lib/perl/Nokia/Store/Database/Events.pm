@@ -123,8 +123,8 @@ sub newBuildEvent {
     my $method       = "";
     my $data         = [];
 
-    my $dataListShort = [ $baselineName, $comment,                         $jobName, $buildNumber, $productName, $taskName ];
-    my $dataListLong  = [ $baselineName, $comment, $branchName, $revision, $jobName, $buildNumber, $productName, $taskName ];
+    my $dataListShort = [ $baselineName, $comment,                         $jobName, $buildNumber, $productName, $taskName, $ENV{HOSTNAME} ];
+    my $dataListLong  = [ $baselineName, $comment, $branchName, $revision, $jobName, $buildNumber, $productName, $taskName, $ENV{HOSTNAME} ];
     my $dataHash      = { 
             build_started       => $dataListLong,
             build_failed        => $dataListShort,
