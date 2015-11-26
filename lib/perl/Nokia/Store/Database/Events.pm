@@ -5,7 +5,7 @@ use warnings;
 use DBI;
 use Log::Log4perl qw( :easy);
 use Data::Dumper;
-use Sys::hostname;
+use Sys::Hostname;
 
 use parent qw( Nokia::Store::Database );
 
