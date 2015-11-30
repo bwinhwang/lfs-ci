@@ -100,7 +100,7 @@ CREATE PROCEDURE build_failed( IN in_build_name   VARCHAR(128),
                              )
 BEGIN
     CALL new_build_event( in_build_name, in_comment, in_job_name, in_build_number,
-                          in_product_name, in_task_name, 'build', 'failed', in_build_number );
+                          in_product_name, in_task_name, 'build', 'failed', in_build_host );
 END //
 DELIMITER ;
 
