@@ -159,7 +159,7 @@ CREATE PROCEDURE subbuild_finished( IN in_build_name   VARCHAR(128),
 BEGIN
     CALL new_build_event( in_build_name, in_comment, in_job_name, in_build_number,
                           in_product_name, in_task_name, 'subbuild', 'finished', in_build_host );
-    CALL _check_if_event_builds( in_build_name, in_comment, in_job_name, in_build_number, in_product_name, in_task_name, 'build' );
+    CALL _check_if_event_builds( in_build_name, in_comment, in_job_name, in_build_number, in_product_name, in_task_name, 'build', in_build_host );
 END //
 DELIMITER ;
 
@@ -179,7 +179,7 @@ CREATE PROCEDURE subbuild_failed( IN in_build_name   VARCHAR(128),
 BEGIN
     CALL new_build_event( in_build_name, in_comment, in_job_name, in_build_number,
                           in_product_name, in_task_name, 'subbuild', 'failed', in_build_host );
-    CALL _check_if_event_builds( in_build_name, in_comment, in_job_name, in_build_number, in_product_name, in_task_name, 'build' );
+    CALL _check_if_event_builds( in_build_name, in_comment, in_job_name, in_build_number, in_product_name, in_task_name, 'build', in_build_host );
 END //
 DELIMITER ;
 
@@ -276,7 +276,7 @@ CREATE PROCEDURE subtest_unstable( IN in_build_name   VARCHAR(128),
 BEGIN
     CALL new_build_event( in_build_name, in_comment, in_job_name, in_build_number,
                           in_product_name, in_task_name, 'subtest', 'unstable', in_build_host );
-    CALL _check_if_event_builds( in_build_name, in_comment, in_job_name, in_build_number, in_product_name, in_task_name, 'test' );
+    CALL _check_if_event_builds( in_build_name, in_comment, in_job_name, in_build_number, in_product_name, in_task_name, 'test', in_build_host );
 END //
 DELIMITER ;
 
@@ -296,7 +296,7 @@ CREATE PROCEDURE subtest_failed( IN in_build_name   VARCHAR(128),
 BEGIN
     CALL new_build_event( in_build_name, in_comment, in_job_name, in_build_number,
                           in_product_name, in_task_name, 'subtest', 'failed', in_build_host );
-    CALL _check_if_event_builds( in_build_name, in_comment, in_job_name, in_build_number, in_product_name, in_task_name, 'test' );
+    CALL _check_if_event_builds( in_build_name, in_comment, in_job_name, in_build_number, in_product_name, in_task_name, 'test', in_build_host );
 END //
 DELIMITER ;
 
@@ -316,7 +316,7 @@ CREATE PROCEDURE subtest_finished( IN in_build_name   VARCHAR(128),
 BEGIN
     CALL new_build_event( in_build_name, in_comment, in_job_name, in_build_number,
                           in_product_name, in_task_name, 'subtest', 'finished', in_build_host );
-    CALL _check_if_event_builds( in_build_name, in_comment, in_job_name, in_build_number, in_product_name, in_task_name, 'test' );
+    CALL _check_if_event_builds( in_build_name, in_comment, in_job_name, in_build_number, in_product_name, in_task_name, 'test', in_build_host );
 END //
 DELIMITER ;
 
@@ -465,7 +465,7 @@ CREATE PROCEDURE subrelease_finished( IN in_build_name VARCHAR(128),
 BEGIN
     CALL new_build_event( in_build_name, in_comment, in_job_name, in_build_number,
                           in_product_name, in_task_name, 'subrelease', 'finished', in_build_host );
-    CALL _check_if_event_builds( in_build_name, in_comment, in_job_name, in_build_number, in_product_name, in_task_name, 'release' );
+    CALL _check_if_event_builds( in_build_name, in_comment, in_job_name, in_build_number, in_product_name, in_task_name, 'release', in_build_host );
 END //
 DELIMITER ;
 
@@ -484,7 +484,7 @@ CREATE PROCEDURE subrelease_failed( IN in_build_name   VARCHAR(128),
 BEGIN
     CALL new_build_event( in_build_name, in_comment, in_job_name, in_build_number,
                           in_product_name, in_task_name, 'subrelease', 'failed', in_build_host );
-    CALL _check_if_event_builds( in_build_name, in_comment, in_job_name, in_build_number, in_product_name, in_task_name, 'release' );
+    CALL _check_if_event_builds( in_build_name, in_comment, in_job_name, in_build_number, in_product_name, in_task_name, 'release', in_build_host );
 END //
 DELIMITER ;
 
@@ -541,7 +541,7 @@ CREATE PROCEDURE other_failed( IN in_build_name   VARCHAR(128),
                              )
 BEGIN
     CALL new_build_event( in_build_name, in_comment, in_job_name, in_build_number,
-                          in_product_name, in_task_name, 'release', 'finished', in_build_number );
+                          in_product_name, in_task_name, 'release', 'finished', in_build_host );
 END //
 DELIMITER ;
 
@@ -877,7 +877,8 @@ CREATE PROCEDURE _check_if_event_builds( in_build_name   VARCHAR(128),
                                          in_build_number INT,
                                          in_product_name VARCHAR(128),
                                          in_task_name    VARCHAR(128),
-                                         in_event_type   TEXT
+                                         in_event_type   TEXT,
+                                         in_build_host   VARCHAR(256)
                                        )
 BEGIN
     DECLARE var_build_id INT;
@@ -916,14 +917,14 @@ BEGIN
         -- release jobs should only create failed or unstable message, not finished.
         IF in_event_type != 'release' THEN
             CALL new_build_event( in_build_name, in_comment, var_started_job_name, var_started_build_number,
-                                in_product_name, in_task_name, in_event_type, 'finished' );
+                                in_product_name, in_task_name, in_event_type, 'finished', in_build_host );
         END IF;
     ELSEIF cnt_started = cnt_finished + cnt_unstable THEN
         CALL new_build_event( in_build_name, in_comment, var_started_job_name, var_started_build_number,
-                            in_product_name, in_task_name, in_event_type, 'unstable' );
+                            in_product_name, in_task_name, in_event_type, 'unstable', in_build_host );
     ELSEIF cnt_started = cnt_finished + cnt_failed + cnt_unstable THEN
         CALL new_build_event( in_build_name, in_comment, var_started_job_name, var_started_build_number,
-                            in_product_name, in_task_name, in_event_type, 'failed' );
+                            in_product_name, in_task_name, in_event_type, 'failed', in_build_host );
     END IF;
 END //
 DELIMITER ;
