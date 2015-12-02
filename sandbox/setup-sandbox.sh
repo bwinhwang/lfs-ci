@@ -469,9 +469,11 @@ jenkins_start_sandbox() {
         echo "    LFS_CI_ROOT=${LFS_CI_ROOT}"
         echo "    LFS_CI_CONFIG_FILE=${LFS_CI_CONFIG_FILE}"
         echo "    JENKINS_HOME=${JENKINS_HOME}"
+        echo "    JENKINS_ROOT=${JENKINS_ROOT}"
         export LFS_CI_ROOT=${LFS_CI_ROOT}
         export LFS_CI_CONFIG_FILE=${LFS_CI_CONFIG_FILE}
         export JENKINS_HOME=${JENKINS_HOME}
+        export JENKINS_ROOT=${JENKINS_ROOT}
         nohup java ${JVM_OPTS} -jar ${JENKINS_WAR} ${JENKINS_OPTS} > ${LOG_FILE} 2>&1 &
         PID=$!
         echo ${PID} > ${PID_FILE}
@@ -753,6 +755,7 @@ get_args() {
     HTTP_ADDRESS="0.0.0.0"
     JENKINS_VERSION="1.532.3"
     JENKINS_HOME="${LOCAL_WORK_DIR}/${SANDBOX_USER}/${JENKINS_DIR}/home"
+    JENKINS_ROOT="${LOCAL_WORK_DIR}/${SANDBOX_USER}/${JENKINS_DIR}"
     JENKINS_PLUGINS="${JENKINS_HOME}/plugins"
     JVM_OPTS="-Djava.io.tmpdir=/var/tmp"
     JENKINS_OPTS="--httpListenAddress=${HTTP_ADDRESS} --httpPort=${HTTP_PORT}"
