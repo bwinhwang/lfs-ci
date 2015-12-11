@@ -564,19 +564,24 @@ class CreateBranch extends Common {
      * from job.
      */
     void removePublishers(job) {
-        if(job.name.find("_-_Test_-_") || job.name.find("_-_TestNonBlocking_-_")) {
-            for(publisher in job.publishersList) {
-                if(publisher instanceof hudson.tasks.ArtifactArchiver) {
-                    job.publishersList.remove(publisher)
-                    this.inf("removed publisher " + publisher + " from " + job.name)
-                } else if(publisher instanceof org.jenkinsci.plugins.unitth.TestHistoryReporter) {
-                    job.publishersList.remove(publisher)
-                    this.inf("removed publisher " + publisher + " from " + job.name)
-                } else if(publisher instanceof hudson.plugins.parameterizedtrigger.BuildTrigger) {
-                    job.publishersList.remove(publisher)
-                    this.inf("removed publisher " + publisher + " from " + job.name)
+        try {
+            if(job.name.find("_-_Test_-_") || job.name.find("_-_TestNonBlocking_-_")) {
+                for(publisher in job.publishersList) {
+                    if(publisher instanceof hudson.tasks.ArtifactArchiver) {
+                        job.publishersList.remove(publisher)
+                        this.inf("removed publisher " + publisher + " from " + job.name)
+                    } else if(publisher instanceof org.jenkinsci.plugins.unitth.TestHistoryReporter) {
+                        job.publishersList.remove(publisher)
+                        this.inf("removed publisher " + publisher + " from " + job.name)
+                    } else if(publisher instanceof hudson.plugins.parameterizedtrigger.BuildTrigger) {
+                        job.publishersList.remove(publisher)
+                        this.inf("removed publisher " + publisher + " from " + job.name)
+                    }
                 }
             }
+        } catch(Exception e) {
+            // Test History plugin is not installed
+            this.warn(e)
         }
     }
 
