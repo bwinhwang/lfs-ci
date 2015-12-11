@@ -579,7 +579,7 @@ class CreateBranch extends Common {
                     }
                 }
             }
-        } catch(Exception e) {
+        } catch(MultipleCompilationErrorsException e) {
             // Test History plugin is not installed
             this.warn(e)
         }
