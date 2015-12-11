@@ -579,7 +579,7 @@ class CreateBranch extends Common {
                     }
                 }
             }
-        } catch(MultipleCompilationErrorsException e) {
+        } catch(org.codehaus.groovy.control.MultipleCompilationErrorsException e) {
             // Test History plugin is not installed
             this.warn(e)
         }
