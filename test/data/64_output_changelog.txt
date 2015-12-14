@@ -3,6 +3,10 @@
 RB=12345:  This is the first test to bring RB entries into the important note section -- https://psreviewboard.emea.nsn-net.net/r/12345
 RB=12346:  This is the second test to bring RB entries into the important note section -- https://psreviewboard.emea.nsn-net.net/r/12346
 A very important note
+File important 1
+Line 2
+A third line 3
+
 very important note
 
 
