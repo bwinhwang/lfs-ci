@@ -57,8 +57,8 @@ oneTimeSetUp() {
         mockedCommand "runOnMaster $@"
         return 1
     }
-    databaseEventSubReleaseStarted() {
-        mockedCommand "databaseEventSubReleaseStarted $@"
+    storeEvent() {
+        mockedCommand "storeEvent $@"
     }
     sleep() {
         return

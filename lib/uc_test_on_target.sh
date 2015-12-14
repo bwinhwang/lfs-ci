@@ -28,7 +28,7 @@ ci_job_test_on_target() {
     mustHavePreparedWorkspace
 
     info "testing production ${LABEL}"
-    databaseEventSubTestStarted 
+    eventSubTestStarted 
     exit_add _exitHandlerDatabaseEventsSubTestFailed
 
     local workspace=$(getWorkspaceName)
@@ -80,7 +80,7 @@ ci_job_test_on_target() {
         esac
     done
 
-    databaseEventSubTestFinished
+    eventSubTestFinished
     info "testing done."
     return
 }
@@ -89,7 +89,7 @@ ci_job_test_on_target() {
 #  @param   {rc}    exit code
 #  @return  <none>
 _exitHandlerDatabaseEventsSubTestFailed() {
-    [[ ${1} -gt 0 ]] && databaseEventSubTestFailed 
+    [[ ${1} -gt 0 ]] && eventSubTestFailed 
 }
 
 ## @fn      uc_job_test_on_target_archive_logs()

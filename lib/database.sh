@@ -50,11 +50,11 @@
 
 LFS_CI_SOURCE_database='$Id$'
 
-## @fn      databaseEventBuildStarted()
+## @fn      eventBuildStarted()
 #  @brief   create an entry in the database table build_events for a started build
 #  @param   <none>
 #  @return  <none>
-databaseEventBuildStarted() {
+eventBuildStarted() {
     requiredParameters LFS_CI_ROOT JOB_NAME BUILD_NUMBER
 
     local branchName=$(getBranchName)
@@ -64,270 +64,92 @@ databaseEventBuildStarted() {
     local revision=$(runOnMaster cat ${buildDirectory}/revisionstate.xml | cut -d" " -f 3 | sort -n -u | tail -n 1)
     mustHaveValue "${revision}" "revision from revision state file"
 
-    _storeEvent build_started --revision=${revision} --branchName=${branchName}
+    storeEvent build_started --revision=${revision} --branchName=${branchName}
     return
 }
 
-## @fn      databaseEventBuildFailed()
-#  @brief   create an entry in the database table build_events for a failed build
-#  @param   <none>
-#  @return  <none>
-databaseEventBuildFailed() {
-    _storeEvent build_failed
-    return
-}
-
-## @fn      databaseEventBuildFinished()
-#  @brief   create an entry in the database table build_events for a finished build
-#  @param   <none>
-#  @return  <none>
-databaseEventBuildFinished() {
-    _storeEvent build_finished
-    return
-}
-
-## @fn      databaseEventOtherStarted()
+## @fn      eventOtherStarted()
 #  @brief   create an entry in the database table build_events for a started "other" event
 #  @param   <none>
 #  @return  <none>
-databaseEventOtherStarted() {
-    _storeEvent other_started $1
+eventOtherStarted() {
+    storeEvent other_started $1
     return
 }
 
-## @fn      databaseEventOtherFinished()
+## @fn      eventOtherFinished()
 #  @brief   create an entry in the database table build_events for a finished "other" event
 #  @param   <none>
 #  @return  <none>
-databaseEventOtherFinished() {
-    _storeEvent other_finished $1
+eventOtherFinished() {
+    storeEvent other_finished $1
     return
 }
 
-## @fn      databaseEventOtherFailed()
+## @fn      eventOtherFailed()
 #  @brief   create an entry in the database table build_events for a failed "other" event
 #  @param   <none>
 #  @return  <none>
-databaseEventOtherFailed() {
-    _storeEvent other_failed $1
+eventOtherFailed() {
+    storeEvent other_failed $1
     return
 }
 
-## @fn      databaseEventOtherUnstable()
+## @fn      eventOtherUnstable()
 #  @brief   create an entry in the database table build_events for a unstable "other" event
 #  @param   <none>
 #  @return  <none>
-databaseEventOtherUnstable() {
-    _storeEvent other_unstable $1
+eventOtherUnstable() {
+    storeEvent other_unstable $1
     return
 }
 
-# databaseEventChangeEventTypeToUnstable() {
-#     _storeEvent changeEventTypeToUnstable ...
-#     return
-# }
-
-## @fn      databaseEventSubBuildStarted()
-#  @brief   create an entry in the database table build_events for a started build
-#  @param   <none>
-#  @return  <none>
-databaseEventSubBuildStarted() {
-    _storeEvent subbuild_started
-    return
-}
-
-## @fn      databaseEventSubBuildFinished()
-#  @brief   create an entry in the database table build_events for a finished build
-#  @param   <none>
-#  @return  <none>
-databaseEventSubBuildFinished() {
-    _storeEvent subbuild_finished
-    return
-}
-
-## @fn      databaseEventSubBuildFailed()
-#  @brief   create an entry in the database table build_events for a failed build
-#  @param   <none>
-#  @return  <none>
-databaseEventSubBuildFailed() {
-    _storeEvent subbuild_failed
-    return
-}
-
-## @fn      databaseEventReleaseStarted()
-#  @brief   create an entry in the database table build_events for a started release process
-#  @param   <none>
-#  @return  <none>
-databaseEventReleaseStarted() {
-    _storeEvent release_started
-    return
-}
-
-## @fn      databaseEventReleaseFinished()
-#  @brief   create an entry in the database table build_events for a finished release process
-#  @param   <none>
-#  @return  <none>
-databaseEventReleaseFinished() {
-    _storeEvent release_finished
-    return
-}
-
-## @fn      databaseEventReleaseFailed()
-#  @brief   create an entry in the database table build_events for a failed release process
-#  @param   <none>
-#  @return  <none>
-databaseEventReleaseFailed() {
-    _storeEvent release_failed
-    return
-}
-
-## @fn      databaseEventSubReleaseFinished()
-#  @brief   create an entry in the database table build_events for a finished subrelease process
-#  @param   <none>
-#  @return  <none>
-databaseEventSubReleaseFinished() {
-    _storeEvent subrelease_finished
-    return
-}
-
-## @fn      databaseEventSubReleaseFailed()
-#  @brief   create an entry in the database table build_events for a failed subrelease process
-#  @param   <none>
-#  @return  <none>
-databaseEventSubReleaseFailed() {
-    _storeEvent subrelease_failed
-    return
-}
-
-## @fn      databaseEventSubReleaseStarted()
-#  @brief   create an entry in the database table build_events for a started subrelease process
-#  @param   <none>
-#  @return  <none>
-databaseEventSubReleaseStarted() {
-    _storeEvent subrelease_started
-    return
-}
-
-## @fn      databaseEventTestStarted()
-#  @brief   create an entry in the database table build_events for a started test 
-#  @param   <none>
-#  @return  <none>
-databaseEventTestStarted() {
-    _storeEvent test_started
-    return
-}
-## @fn      databaseEventTestFailed()
-#  @brief   create an entry in the database table build_events for a failed test 
-#  @param   <none>
-#  @return  <none>
-databaseEventTestFailed() {
-    _storeEvent test_failed
-    return
-}
-
-## @fn      databaseEventPackageStarted()
-#  @brief   create an entry in the database table build_events for a started package process
-#  @param   <none>
-#  @return  <none>
-databaseEventPackageStarted() {
-    _storeEvent package_started
-    return
-}
-
-## @fn      databaseEventPackageFinished()
-#  @brief   create an entry in the database table build_events for a finished package process
-#  @param   <none>
-#  @return  <none>
-databaseEventPackageFinished() {
-    _storeEvent package_finished
-    return
-}
-
-## @fn      databaseEventPackageFailed()
-#  @brief   create an entry in the database table build_events for a failed package process
-#  @param   <none>
-#  @return  <none>
-databaseEventPackageFailed() {
-    _storeEvent package_failed
-    return
-}
-
-databaseEventTargetInstallStarted() {
-    _storeEvent target_install_started
-    return
-}
-
-databaseEventTargetInstallFinished() {
-    _storeEvent target_install_finished
-    return
-}
-
-databaseEventTargetInstallFailed() {
-    _storeEvent target_install_failed
-    return
-}
-
-databaseEventTargetReservationStarted() {
-    _storeEvent target_reservation_started
-    return
-}
-
-databaseEventTargetReservationFinished() {
-    _storeEvent target_reservation_finished
-    return
-}
-
-databaseEventTargetReservationFailed() {
-    _storeEvent target_reservation_failed
-    return
-}
-
-## @fn      databaseEventSubTestStarted()
+## @fn      eventSubTestStarted()
 #  @brief   create an entry in the database table build_events for a started subtest process
 #  @param   <none>
 #  @return  <none>
-databaseEventSubTestStarted() {
+eventSubTestStarted() {
     local taskName=""
     if [[ ${JOB_NAME} =~ ^Test- ]] ; then
         taskName=subtest
     fi
-    _storeEvent subtest_started ${taskName}
+    storeEvent subtest_started ${taskName}
     return
 }
 
-## @fn      databaseEventSubTestFinished()
+## @fn      eventSubTestFinished()
 #  @brief   create an entry in the database table build_events for a finished subtest process
 #  @param   <none>
 #  @return  <none>
-databaseEventSubTestFinished() {
+eventSubTestFinished() {
     local taskName=""
     if [[ ${JOB_NAME} =~ ^Test- ]] ; then
         taskName=subtest
     fi
-    _storeEvent subtest_finished ${taskName}
+    storeEvent subtest_finished ${taskName}
     return
 }
 
-## @fn      databaseEventSubTestFailed()
+## @fn      eventSubTestFailed()
 #  @brief   create an entry in the database table build_events for a failed subtest process
 #  @param   <none>
 #  @return  <none>
-databaseEventSubTestFailed() {
+eventSubTestFailed() {
     local taskName=""
     if [[ ${JOB_NAME} =~ ^Test- ]] ; then
         taskName=subtest
     fi
-    _storeEvent subtest_failed ${taskName}
+    storeEvent subtest_failed ${taskName}
     return
 }
 
-## @fn      _storeEvent()
+## @fn      storeEvent()
 #  @brief   internal function: store the event in the database table build_events  
 #  @param   {eventType}    type of the event
 #  @param   {targetName}   name of the target
 #  @param   {targetType}   type of the target
 #  @return  <none>
-_storeEvent() {
+storeEvent() {
     requiredParameters LFS_CI_ROOT JOB_NAME BUILD_NUMBER
 
     local eventName=$1

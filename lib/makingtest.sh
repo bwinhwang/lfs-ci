@@ -384,9 +384,8 @@ makingTest_install() {
     local targetName=$(_reserveTarget)
     mustHaveValue "${targetName}" "target name"
 
-    databaseEventTargetInstallStarted
-
-    _exitHandlerDatabaseEventTestTargetFailed
+    storeEvent target_install_started
+    _exitHandlerEventTestInstallFailed() {
 
     local shouldHaveRunningTarget=$(getConfig LFS_CI_uc_test_should_target_be_running_before_make_install)
     if [[ ${shouldHaveRunningTarget} ]] ; then
@@ -450,7 +449,7 @@ makingTest_install() {
         execute ${ignoreError} ${make} check || continue
 
         info "install was successful."
-        databaseEventTargetInstallFinished
+        storeEvent target_install_finished
 
         return
     done
@@ -460,8 +459,8 @@ makingTest_install() {
     return
 }
 
-_exitHandlerDatabaseEventTestTargetFailed() {
-    databaseEventTestFailed
+_exitHandlerEventTestInstallFailed() {
+    storeEvent test_failed
     return
 }
 

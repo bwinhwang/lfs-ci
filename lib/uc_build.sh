@@ -91,7 +91,7 @@ usecase_LFS_BUILD_PLATFORM() {
     mustHaveNextCiLabelName
 
     # for the metrics database, we are installing a own exit handler to record the end of this job
-    databaseEventSubBuildStarted
+    storeEvent subbuild started
     exit_add _recordSubBuildEndEvent
 
     local label=$(getNextCiLabelName)
@@ -162,7 +162,7 @@ usecase_LFS_BUILD_CREATE_VERSION() {
     createFingerprintFile
 
     # for the metrics database, we are installing a own exit handler to record the end of this job
-    databaseEventBuildStarted
+    eventBuildStarted
     exit_add _recordBuildEndEvent
 
     info "upload results to artifakts share."
@@ -247,9 +247,9 @@ _build_fsmddal_pdf() {
 _recordSubBuildEndEvent() {
     local rc=${1}
     if [[ ${rc} -gt 0 ]] ; then
-        databaseEventSubBuildFailed
+        storeEvent subbuild_failed
     else
-        databaseEventSubBuildFinished
+        storeEvent subbuild_finished
     fi
     return
 }
@@ -261,9 +261,9 @@ _recordSubBuildEndEvent() {
 _recordBuildEndEvent() {
     local rc=${1}
     if [[ ${rc} -gt 0 ]] ; then
-        databaseEventBuildFailed
+        storeEvent build_failed
     else
-        databaseEventBuildFinished
+        storeEvent build_finished
     fi
     return
 }

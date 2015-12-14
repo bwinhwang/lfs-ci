@@ -34,7 +34,7 @@ mustBePreparedForReleaseTask() {
     info  "found release on share: ${releaseDirectory}"
 
      if [[ ! ${JOB_NAME} =~ summary$ ]] ; then
-        databaseEventSubReleaseStarted
+        storeEvent subrelease_started
         exit_add _releaseDatabaseEventSubReleaseFailedOrFinished
     fi
 
@@ -92,9 +92,9 @@ mustBePreparedForReleaseTask() {
 #  @return  <none>
 _releaseDatabaseEventReleaseFailedOrFinished() {
     if [[ ${1} -gt 0 ]] ; then
-        databaseEventReleaseFailed
+        storeEvent release_failed
     else
-        databaseEventReleaseFinished
+        storeEvent release_finished
     fi            
 }
 
@@ -105,9 +105,9 @@ _releaseDatabaseEventReleaseFailedOrFinished() {
 #  @return  <none>
 _releaseDatabaseEventSubReleaseFailedOrFinished() {
     if [[ ${1} -gt 0 ]] ; then
-        databaseEventSubReleaseFailed
+        storeEvent subrelease_failed
     else
-        databaseEventSubReleaseFinished
+        storeEvent subrelease_finished
     fi            
 }
 
