@@ -474,6 +474,7 @@ jenkins_start_sandbox() {
         export LFS_CI_CONFIG_FILE=${LFS_CI_CONFIG_FILE}
         export JENKINS_HOME=${JENKINS_HOME}
         export JENKINS_ROOT=${JENKINS_ROOT}
+        cd ${JENKINS_HOME}
         nohup java ${JVM_OPTS} -jar ${JENKINS_WAR} ${JENKINS_OPTS} > ${LOG_FILE} 2>&1 &
         PID=$!
         echo ${PID} > ${PID_FILE}
