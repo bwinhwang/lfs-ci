@@ -13,6 +13,7 @@ startJenkinsMasterServer() {
     local jenkins_war=$(getConfig jenkinsWarFile)
     local JENKINS_HOME=$(getConfig jenkinsHome)
     local JENKINS_ROOT=$(getConfig jenkinsRoot)
+    local jettyOptions=$(getConfig jenkinsJettyServerOptions)
 
     local jenkinsMasterServerHttpPort=$(getConfig jenkinsMasterServerHttpPort)
 
@@ -36,6 +37,7 @@ startJenkinsMasterServer() {
 #            -XX:-UseGCOverheadLimit                           \
     cd ${JENKINS_HOME}
     exec ${java}                                              \
+            ${jettyOptions}                                   \
             -XX:PermSize=512M -XX:MaxPermSize=4096M -Xmn128M -Xms1024M -Xmx4096M \
             -jar ${jenkins_war}                               \
             --httpPort=${jenkinsMasterServerHttpPort}         \
