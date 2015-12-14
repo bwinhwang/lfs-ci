@@ -29,8 +29,8 @@ usecase_ADMIN_CREATE_CLOUD_SLAVE_INSTANCE() {
     # source seesetenv euca2ools=3.1.1. is already done via entry in linsee.cfg
     info Sourcing eucarc with: source ${cloudUserRootDir}/${cloudEucarc}
     execute source ${cloudUserRootDir}/${cloudEucarc}
-    
-    info Starting cloud instance with: execute export INST_START_PARAMS="${cloudInstanceStartParams}"; export HVM=1; ${cloudLfs2Cloud} -c${cloudEsloc} -i${cloudEmi} -m${cloudInstanceType} -sLFS_CI -f${cloudInstallScript}
+
+    info Starting cloud instance with: execute export INST_START_PARAMS="${cloudInstanceStartParams}" ';' export HVM=1; ${cloudLfs2Cloud} -c${cloudEsloc} -i${cloudEmi} -m${cloudInstanceType} -sLFS_CI -f${cloudInstallScript}
     execute export INST_START_PARAMS="${cloudInstanceStartParams}"; export HVM=1; ${cloudLfs2Cloud} -c${cloudEsloc} -i${cloudEmi} -m${cloudInstanceType} -sLFS_CI -f${cloudInstallScript}
 
     return 0
