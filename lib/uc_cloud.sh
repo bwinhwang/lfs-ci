@@ -23,18 +23,14 @@ usecase_ADMIN_CREATE_CLOUD_SLAVE_INSTANCE() {
     mustHaveValue "${cloudInstanceType}" "cloudInstanceType"
     local cloudInstanceStartParams=$(getConfig LFS_CI_CLOUD_SLAVE_INST_START_PARAMS)
     mustHaveValue "${cloudInstanceStartParams}" "cloudInstanceStartParams"
-    #local cloudEuco2OolsVersion=$(getConfig LFS_CI_CLOUD_SLAVE_EUCA2OOLS_VERSION)
-    #mustHaveValue "${cloudEuco2OolsVersion}" "cloudEuco2OolsVersion"
     local cloudInstallScript=$(getConfig LFS_CI_CLOUD_SLAVE_INSTALL_SCRIPT)
     mustHaveValue "${cloudInstallScript}" "cloudInstallScript"
 
-    #info +++ cd ${cloudUserRootDir}
-    #execute cd ${cloudUserRootDir}
-    #info +++  source seesetenv euca2ools=${cloudEuco2OolsVersion}
-    #execute source seesetenv euca2ools=${cloudEuco2OolsVersion}
-    info +++ execute source ${cloudUserRootDir}/${cloudEucarc}
+    # source seesetenv euca2ools=3.1.1. is already done via entry in linsee.cfg
+    info Sourcing eucarc with: source ${cloudUserRootDir}/${cloudEucarc}
     execute source ${cloudUserRootDir}/${cloudEucarc}
-    info +++ execute export INST_START_PARAMS="${cloudInstanceStartParams}"; export HVM=1; ${cloudLfs2Cloud} -c${cloudEsloc} -i${cloudEmi} -m${cloudInstanceType} -sLFS_CI -f${cloudInstallScript}
+    
+    info Starting cloud instance with: execute export INST_START_PARAMS="${cloudInstanceStartParams}"; export HVM=1; ${cloudLfs2Cloud} -c${cloudEsloc} -i${cloudEmi} -m${cloudInstanceType} -sLFS_CI -f${cloudInstallScript}
     execute export INST_START_PARAMS="${cloudInstanceStartParams}"; export HVM=1; ${cloudLfs2Cloud} -c${cloudEsloc} -i${cloudEmi} -m${cloudInstanceType} -sLFS_CI -f${cloudInstallScript}
 
     return 0
