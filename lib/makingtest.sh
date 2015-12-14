@@ -384,6 +384,10 @@ makingTest_install() {
     local targetName=$(_reserveTarget)
     mustHaveValue "${targetName}" "target name"
 
+    databaseEventTargetInstallStarted
+
+    _exitHandlerDatabaseEventTestTargetFailed
+
     local shouldHaveRunningTarget=$(getConfig LFS_CI_uc_test_should_target_be_running_before_make_install)
     if [[ ${shouldHaveRunningTarget} ]] ; then
         mustHaveMakingTestRunningTarget
@@ -446,12 +450,18 @@ makingTest_install() {
         execute ${ignoreError} ${make} check || continue
 
         info "install was successful."
+        databaseEventTargetInstallFinished
 
         return
     done
 
     fatal "installation failed after ${maxInstallTries} attempts."
 
+    return
+}
+
+_exitHandlerDatabaseEventTestTargetFailed() {
+    databaseEventTestFailed
     return
 }
 

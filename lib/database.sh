@@ -224,6 +224,7 @@ databaseEventTestFailed() {
     _storeEvent test_failed
     return
 }
+
 ## @fn      databaseEventPackageStarted()
 #  @brief   create an entry in the database table build_events for a started package process
 #  @param   <none>
@@ -248,6 +249,36 @@ databaseEventPackageFinished() {
 #  @return  <none>
 databaseEventPackageFailed() {
     _storeEvent package_failed
+    return
+}
+
+databaseEventTargetInstallStarted() {
+    _storeEvent target_install_started
+    return
+}
+
+databaseEventTargetInstallFinished() {
+    _storeEvent target_install_finished
+    return
+}
+
+databaseEventTargetInstallFailed() {
+    _storeEvent target_install_failed
+    return
+}
+
+databaseEventTargetReservationStarted() {
+    _storeEvent target_reservation_started
+    return
+}
+
+databaseEventTargetReservationFinished() {
+    _storeEvent target_reservation_finished
+    return
+}
+
+databaseEventTargetReservationFailed() {
+    _storeEvent target_reservation_failed
     return
 }
 
