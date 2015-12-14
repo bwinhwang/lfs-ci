@@ -10,6 +10,7 @@
 </paths>
 <msg>Merge from fsmr3.
 
+%REM A very important note
 %FIN %PR=PR071990
 %RB=12345 This is the first test to bring RB entries into the important note section
 </msg>
@@ -23,6 +24,7 @@
 </paths>
 <msg>Merge correction from trunk
 
+%REM very important note
 %RB=12346 This is the second test to bring RB entries into the important note section
 %FIN %PR=PR071990
 
