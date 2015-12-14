@@ -90,8 +90,8 @@ sub mustHaveFileData {
                              sprintf( "%s/workspace/%s.txt", $ENV{WORKSPACE}, $fileType ) ) ) {
             if( -f $file ) {
                 DEBUG "loading data from $file";
-                # read file into an array (each line) without new line at the end
                 my $fileContent = read_file( $file );
+                chomp( $fileContent );
                 push @{ $self->{ $fileType } }, $fileContent;
             }
         }

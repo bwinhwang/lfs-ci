@@ -6,7 +6,6 @@ A very important note
 File important 1
 Line 2
 A third line 3
-
 very important note
 
 
