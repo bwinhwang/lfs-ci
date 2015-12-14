@@ -30,9 +30,17 @@ usecase_ADMIN_CREATE_CLOUD_SLAVE_INSTANCE() {
     info Sourcing eucarc with: source ${cloudUserRootDir}/${cloudEucarc}
     execute source ${cloudUserRootDir}/${cloudEucarc}
 
-    info Starting cloud instance with: execute export INST_START_PARAMS="${cloudInstanceStartParams}" ';' export HVM=1; ${cloudLfs2Cloud} -c${cloudEsloc} -i${cloudEmi} -m${cloudInstanceType} -sLFS_CI -f${cloudInstallScript}
-    execute export INST_START_PARAMS="${cloudInstanceStartParams}"; export HVM=1; ${cloudLfs2Cloud} -c${cloudEsloc} -i${cloudEmi} -m${cloudInstanceType} -sLFS_CI -f${cloudInstallScript}
+    info Starting cloud instance with: execute export INST_START_PARAMS="${cloudInstanceStartParams}" ';' export HVM=1';' ${cloudLfs2Cloud} -c${cloudEsloc} -i${cloudEmi} -m${cloudInstanceType} -sLFS_CI -f${cloudInstallScript}
+    export INST_START_PARAMS="${cloudInstanceStartParams}"
+    export HVM=1
+    local cloudStartLog=$(createTempFile)
+    execute -l ${cloudStartLog} ${cloudLfs2Cloud} -c${cloudEsloc} -i${cloudEmi} -m${cloudInstanceType} -sLFS_CI -f${cloudInstallScript}
 
+    local searchString='successfully started )'
+    local cloudDnsName=$(grep "${searchString}" ${cloudStartLog} | cut -d\( -f2 | sed "s/${searchString}//" | sed "s/ //g")
+    mustHaveValue "${cloudDnsName}" "cloudDnsName"
+
+    setBuildDescription "${JOB_NAME}" "${BUILD_NUMBER}" "${cloudDnsName}"
     return 0
 }
 
