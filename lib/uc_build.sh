@@ -91,7 +91,7 @@ usecase_LFS_BUILD_PLATFORM() {
     mustHaveNextCiLabelName
 
     # for the metrics database, we are installing a own exit handler to record the end of this job
-    storeEvent subbuild started
+    storeEvent subbuild_started
     exit_add _recordSubBuildEndEvent
 
     local label=$(getNextCiLabelName)

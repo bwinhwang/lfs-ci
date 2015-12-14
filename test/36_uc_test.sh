@@ -116,7 +116,7 @@ mustHaveCleanWorkspace
 copyArtifactsToWorkspace LFS_CI_-_trunk_-_Package_-_package 1234 fsmci
 copyFileFromBuildDirectoryToWorkspace LFS_CI_-_trunk_-_Package_-_package 1234 fingerprint.txt
 copyFileFromWorkspaceToBuildDirectory LFS_CI_-_trunk_-_Test 1234 fingerprint.txt
-storeEvent test_started 
+storeEvent test_started
 exit_add _exitHandlerDatabaseTestFailed
 copyFileFromWorkspaceToBuildDirectory LFS_CI_-_trunk_-_Test 1234 ${WORKSPACE}/workspace/upstream
 copyFileFromWorkspaceToBuildDirectory LFS_CI_-_trunk_-_Test 1234 ${WORKSPACE}/workspace/properties
@@ -150,7 +150,7 @@ mustHaveCleanWorkspace
 copyArtifactsToWorkspace LFS_CI_-_trunk_-_Package_-_package 1234 fsmci
 copyFileFromBuildDirectoryToWorkspace LFS_CI_-_trunk_-_Package_-_package 1234 fingerprint.txt
 copyFileFromWorkspaceToBuildDirectory LFS_CI_-_trunk_-_Test 1234 fingerprint.txt
-storeEvent test_started 
+storeEvent test_started
 exit_add _exitHandlerDatabaseTestFailed
 copyFileFromWorkspaceToBuildDirectory LFS_CI_-_trunk_-_Test 1234 ${WORKSPACE}/workspace/upstream
 copyFileFromWorkspaceToBuildDirectory LFS_CI_-_trunk_-_Test 1234 ${WORKSPACE}/workspace/properties

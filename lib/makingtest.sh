@@ -4,6 +4,8 @@
 
 LFS_CI_SOURCE_makingtest='$Id$'
 
+[[ -z ${LFS_CI_SOURCE_database} ]] && source ${LFS_CI_ROOT}/lib/database.sh
+
 ## @fn      makingTest_testFSM()
 #  @brief   running a whole test suite on the target with making test
 #  @details the following making tests commands are executed (simplified)
@@ -385,7 +387,7 @@ makingTest_install() {
     mustHaveValue "${targetName}" "target name"
 
     storeEvent target_install_started
-    _exitHandlerEventTestInstallFailed() {
+    exit_add _exitHandlerEventTestInstallFailed
 
     local shouldHaveRunningTarget=$(getConfig LFS_CI_uc_test_should_target_be_running_before_make_install)
     if [[ ${shouldHaveRunningTarget} ]] ; then
@@ -430,8 +432,14 @@ makingTest_install() {
             return
         fi
 
+        storeEvent target_reboot_started
+        exit_add storeEvent:target_reboot_failed
+
         makingTest_powercycle
         mustHaveMakingTestRunningTarget
+
+        exit_del storeEvent:target_reboot_failed
+        storeEvent target_reboot_finished
 
         local doFirmwareupgrade="$(getConfig LFS_CI_uc_test_making_test_do_firmwareupgrade)"
         if [[ ${doFirmwareupgrade} ]] ; then
