@@ -13,13 +13,10 @@ use parent qw( Nokia::Object );
 
 sub prepare {
     my $self = shift;
-    my @attributes = ();
 
     GetOptions( 'targetName=s', \$self->{opt_targetName},
-                'attributes=s', \@attributes,
+                'attributes=s', \$self->{opt_attributes},
             ) or LOGDIE "invalid option";
-
-    $self->{opt_attributes} = \@attributes;
 
     Nokia::Singleton::config()->addConfig( 
             name  => "databaseName",

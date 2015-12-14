@@ -74,11 +74,7 @@ reserveTargetByFeature() {
     mustHaveValue "${features}" "list of features"
 
     debug "features ${features}"
-    local searchParameter=""
-    for p in ${features} ; do
-        searchParameter="${searchParameter} --attribute=${p}"
-    done
-
+    local searchParameter=" --attribute=\'${features}\'"
     debug "search parameter: ${searchParameter}"
 
     local sleepTime=$(getConfig LFS_uc_test_booking_target_sleep_seconds)
@@ -155,7 +151,6 @@ mustHaveReservedTarget() {
     local targetName=""
     if [[ ${isBookingEnabled} ]] ; then
         # new method via booking from database
-
         local branchName=$(getBranchName ${UPSTREAM_PROJECT})
         mustHaveValue "${branchName}" "branch name from ${UPSTREAM_PROJECT}"
 
