@@ -378,6 +378,120 @@ END //
 DELIMITER ;
 
 -- }}}
+-- {{{ target_install_started
+
+DROP PROCEDURE IF EXISTS target_install_started;
+DELIMITER //
+CREATE PROCEDURE target_install_started( IN in_build_name   VARCHAR(128),
+                                         IN in_comment      TEXT,
+                                         IN in_job_name     VARCHAR(128),
+                                         IN in_build_number INT,
+                                         IN in_product_name VARCHAR(128),
+                                         IN in_task_name    VARCHAR(128),
+                                         IN in_build_host   VARCHAR(256)
+                                       )
+BEGIN
+    CALL new_build_event( in_build_name, in_comment, in_job_name, in_build_number,
+                          in_product_name, in_task_name, 'target_install', 'started', in_build_host );
+END //
+DELIMITER ;
+
+-- }}}
+-- {{{ target_install_finished
+
+DROP PROCEDURE IF EXISTS target_install_finished;
+DELIMITER //
+CREATE PROCEDURE target_install_finished( IN in_build_name   VARCHAR(128),
+                                          IN in_comment      TEXT,
+                                          IN in_job_name     VARCHAR(128),
+                                          IN in_build_number INT,
+                                          IN in_product_name VARCHAR(128),
+                                          IN in_task_name    VARCHAR(128),
+                                          IN in_build_host   VARCHAR(256)
+                                        )
+BEGIN
+    CALL new_build_event( in_build_name, in_comment, in_job_name, in_build_number,
+                          in_product_name, in_task_name, 'target_install', 'finished', in_build_host );
+END //
+DELIMITER ;
+
+-- }}}
+-- {{{ target_install_failed
+
+DROP PROCEDURE IF EXISTS target_install_failed;
+DELIMITER //
+CREATE PROCEDURE target_install_failed( IN in_build_name   VARCHAR(128),
+                                        IN in_comment      TEXT,
+                                        IN in_job_name     VARCHAR(128),
+                                        IN in_build_number INT,
+                                        IN in_product_name VARCHAR(128),
+                                        IN in_task_name    VARCHAR(128),
+                                        IN in_build_host   VARCHAR(256)
+                                      )
+BEGIN 
+    CALL new_build_event( in_build_name, in_comment, in_job_name, in_build_number,
+                          in_product_name, in_task_name, 'target_install', 'failed', in_build_host );
+END //
+DELIMITER ;
+
+-- }}}
+-- {{{ target_reserveration_started
+
+DROP PROCEDURE IF EXISTS target_reserveration_started;
+DELIMITER //
+CREATE PROCEDURE target_reserveration_started( IN in_build_name   VARCHAR(128),
+                                               IN in_comment      TEXT,
+                                               IN in_job_name     VARCHAR(128),
+                                               IN in_build_number INT,
+                                               IN in_product_name VARCHAR(128),
+                                               IN in_task_name    VARCHAR(128),
+                                               IN in_build_host   VARCHAR(256)
+                                             )
+BEGIN
+    CALL new_build_event( in_build_name, in_comment, in_job_name, in_build_number,
+                          in_product_name, in_task_name, 'target_reserveration', 'started', in_build_host );
+END //
+DELIMITER ;
+
+-- }}}
+-- {{{ target_reserveration_finished
+
+DROP PROCEDURE IF EXISTS target_reserveration_finished;
+DELIMITER //
+CREATE PROCEDURE target_reserveration_finished( IN in_build_name   VARCHAR(128),
+                                                IN in_comment      TEXT,
+                                                IN in_job_name     VARCHAR(128),
+                                                IN in_build_number INT,
+                                                IN in_product_name VARCHAR(128),
+                                                IN in_task_name    VARCHAR(128),
+                                                IN in_build_host   VARCHAR(256)
+                                              )
+BEGIN
+    CALL new_build_event( in_build_name, in_comment, in_job_name, in_build_number,
+                          in_product_name, in_task_name, 'target_reservation', 'finished', in_build_host );
+END //
+DELIMITER ;
+
+-- }}}
+-- {{{ target_reserveration_failed
+
+DROP PROCEDURE IF EXISTS target_reserveration_failed;
+DELIMITER //
+CREATE PROCEDURE target_reserveration_failed( IN in_build_name   VARCHAR(128),
+                                              IN in_comment      TEXT,
+                                              IN in_job_name     VARCHAR(128),
+                                              IN in_build_number INT,
+                                              IN in_product_name VARCHAR(128),
+                                              IN in_task_name    VARCHAR(128),
+                                              IN in_build_host   VARCHAR(256)
+                                            )
+BEGIN 
+    CALL new_build_event( in_build_name, in_comment, in_job_name, in_build_number,
+                          in_product_name, in_task_name, 'target_reservation', 'failed', in_build_host );
+END //
+DELIMITER ;
+
+-- }}}
 -- {{{ release_started
 DROP PROCEDURE IF EXISTS release_started;
 DELIMITER //
