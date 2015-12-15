@@ -379,7 +379,17 @@ DELIMITER ;
 
 -- }}}
 -- {{{ target_install_started
-
+-- @fn     target_install_started
+-- @brief  create a new build event for target install started
+-- @param  in_build_name          name of the build
+-- @param  in_comment             a comment
+-- @param  in_job_name            name of the jenkins job
+-- @param  in_build_number        build number of the jenkins job
+-- @param  in_product_name        name of the product (LFS, UBOOT, ...)
+-- @param  in_task_name           name of the task (build, test, smoketest, releas)
+-- @param  in_event_type          type of the event (build, test, release, other)
+-- @param  in_build_host          name of the build host (FQDN)
+-- @return <none>
 DROP PROCEDURE IF EXISTS target_install_started;
 DELIMITER //
 CREATE PROCEDURE target_install_started( IN in_build_name   VARCHAR(128),
@@ -398,6 +408,17 @@ DELIMITER ;
 
 -- }}}
 -- {{{ target_install_finished
+-- @fn     target_install_finished
+-- @brief  create a new build event for target install finished
+-- @param  in_build_name          name of the build
+-- @param  in_comment             a comment
+-- @param  in_job_name            name of the jenkins job
+-- @param  in_build_number        build number of the jenkins job
+-- @param  in_product_name        name of the product (LFS, UBOOT, ...)
+-- @param  in_task_name           name of the task (build, test, smoketest, releas)
+-- @param  in_event_type          type of the event (build, test, release, other)
+-- @param  in_build_host          name of the build host (FQDN)
+-- @return <none>
 
 DROP PROCEDURE IF EXISTS target_install_finished;
 DELIMITER //
@@ -417,6 +438,17 @@ DELIMITER ;
 
 -- }}}
 -- {{{ target_install_failed
+-- @fn     target_install_failed
+-- @brief  create a new build event for target install failed
+-- @param  in_build_name          name of the build
+-- @param  in_comment             a comment
+-- @param  in_job_name            name of the jenkins job
+-- @param  in_build_number        build number of the jenkins job
+-- @param  in_product_name        name of the product (LFS, UBOOT, ...)
+-- @param  in_task_name           name of the task (build, test, smoketest, releas)
+-- @param  in_event_type          type of the event (build, test, release, other)
+-- @param  in_build_host          name of the build host (FQDN)
+-- @return <none>
 
 DROP PROCEDURE IF EXISTS target_install_failed;
 DELIMITER //
@@ -436,7 +468,17 @@ DELIMITER ;
 
 -- }}}
 -- {{{ target_reserveration_started
-
+-- @fn     target_reserveration_started
+-- @brief  create a new build event for target reservation started
+-- @param  in_build_name          name of the build
+-- @param  in_comment             a comment
+-- @param  in_job_name            name of the jenkins job
+-- @param  in_build_number        build number of the jenkins job
+-- @param  in_product_name        name of the product (LFS, UBOOT, ...)
+-- @param  in_task_name           name of the task (build, test, smoketest, releas)
+-- @param  in_event_type          type of the event (build, test, release, other)
+-- @param  in_build_host          name of the build host (FQDN)
+-- @return <none>
 DROP PROCEDURE IF EXISTS target_reserveration_started;
 DELIMITER //
 CREATE PROCEDURE target_reserveration_started( IN in_build_name   VARCHAR(128),
@@ -455,6 +497,17 @@ DELIMITER ;
 
 -- }}}
 -- {{{ target_reserveration_finished
+-- @fn     target_reserveration_finished
+-- @brief  create a new build event for target reservation finished
+-- @param  in_build_name          name of the build
+-- @param  in_comment             a comment
+-- @param  in_job_name            name of the jenkins job
+-- @param  in_build_number        build number of the jenkins job
+-- @param  in_product_name        name of the product (LFS, UBOOT, ...)
+-- @param  in_task_name           name of the task (build, test, smoketest, releas)
+-- @param  in_event_type          type of the event (build, test, release, other)
+-- @param  in_build_host          name of the build host (FQDN)
+-- @return <none>
 
 DROP PROCEDURE IF EXISTS target_reserveration_finished;
 DELIMITER //
@@ -474,6 +527,17 @@ DELIMITER ;
 
 -- }}}
 -- {{{ target_reserveration_failed
+-- @fn     target_reserveration_failed
+-- @brief  create a new build event for target reservation failed
+-- @param  in_build_name          name of the build
+-- @param  in_comment             a comment
+-- @param  in_job_name            name of the jenkins job
+-- @param  in_build_number        build number of the jenkins job
+-- @param  in_product_name        name of the product (LFS, UBOOT, ...)
+-- @param  in_task_name           name of the task (build, test, smoketest, releas)
+-- @param  in_event_type          type of the event (build, test, release, other)
+-- @param  in_build_host          name of the build host (FQDN)
+-- @return <none>
 
 DROP PROCEDURE IF EXISTS target_reserveration_failed;
 DELIMITER //
