@@ -154,5 +154,6 @@ ci_job_test() {
 #  @return  <none>
 _exitHandlerDatabaseTestFailed() {
     [[ ${1} -gt 0 ]] && storeEvent test_failed
+    return
 }
 

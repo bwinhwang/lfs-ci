@@ -387,7 +387,7 @@ makingTest_install() {
     mustHaveValue "${targetName}" "target name"
 
     storeEvent target_install_started
-    exit_add _exitHandlerEventTestInstallFailed
+    exit_add storeEvent:test_failed
 
     local shouldHaveRunningTarget=$(getConfig LFS_CI_uc_test_should_target_be_running_before_make_install)
     if [[ ${shouldHaveRunningTarget} ]] ; then
@@ -438,7 +438,7 @@ makingTest_install() {
         makingTest_powercycle
         mustHaveMakingTestRunningTarget
 
-        exit_del storeEvent:target_reboot_failed
+        exit_remove storeEvent:target_reboot_failed
         storeEvent target_reboot_finished
 
         local doFirmwareupgrade="$(getConfig LFS_CI_uc_test_making_test_do_firmwareupgrade)"
@@ -458,17 +458,13 @@ makingTest_install() {
 
         info "install was successful."
         storeEvent target_install_finished
+        exit_remove storeEvent:test_failed
 
         return
     done
 
     fatal "installation failed after ${maxInstallTries} attempts."
 
-    return
-}
-
-_exitHandlerEventTestInstallFailed() {
-    storeEvent test_failed
     return
 }
 

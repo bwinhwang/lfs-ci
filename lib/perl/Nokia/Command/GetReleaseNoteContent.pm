@@ -151,7 +151,7 @@ sub execute {
             print "\n";
             printf "=== %s ===\n", $self->mapComponentName( $component );
             print         "   * ";
-            print join( "\n   * ", map { s/\n/\n     /g; $_ } @list );
+            print join( "\n   * ", map { s/\n/\n     /g; $_ } sort @list );
             print "\n";
         }
     }
@@ -200,6 +200,7 @@ sub mapComponentName {
         'src-psl'            => "FSMr2 Software Load",
         'src-rfs'            => "Common Root Filesystem",
         'src-test'           => "Testing",
+        'src-unittests'      => "Unittests",
         'src-tools'          => "Tools (LRC)",
     };
 

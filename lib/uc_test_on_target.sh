@@ -90,6 +90,7 @@ ci_job_test_on_target() {
 #  @return  <none>
 _exitHandlerDatabaseEventsSubTestFailed() {
     [[ ${1} -gt 0 ]] && eventSubTestFailed 
+    return
 }
 
 ## @fn      uc_job_test_on_target_archive_logs()
