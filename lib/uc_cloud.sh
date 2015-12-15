@@ -8,7 +8,7 @@
 #  @param   <none>
 #  @return  <none>
 usecase_ADMIN_CREATE_CLOUD_SLAVE_INSTANCE() {
-    requiredParameters CREATE_CLOUD_INSTANCES_AMOUNT CREATE_CLOUD_INSTANCES_TYPE
+    #requiredParameters CREATE_CLOUD_INSTANCES_AMOUNT CREATE_CLOUD_INSTANCES_TYPE
 
     info *****************************************************************************************************
     info * CREATE_CLOUD_INSTANCES_AMOUNT    = ${CREATE_CLOUD_INSTANCES_AMOUNT}

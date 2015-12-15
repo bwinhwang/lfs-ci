@@ -36,6 +36,8 @@ oneTimeTearDown() {
 
 setUp() {
     export LFS_CI_GLOBAL_PRODUCT_NAME=LFS
+    export CREATE_CLOUD_INSTANCES_AMOUNT=1
+    export CREATE_CLOUD_INSTANCES_TYPE=hs1.8xlarge
     export UT_TMPDIR=$(createTempDirectory)
     echo 0 > ${UT_TMPDIR}/.cnt
 
