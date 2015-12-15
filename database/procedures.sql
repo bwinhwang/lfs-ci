@@ -467,6 +467,95 @@ END //
 DELIMITER ;
 
 -- }}}
+-- {{{ target_reboot_started
+-- @fn     target_reboot_started
+-- @brief  create a new build event for target reboot started
+-- @param  in_build_name          name of the build
+-- @param  in_comment             a comment
+-- @param  in_job_name            name of the jenkins job
+-- @param  in_build_number        build number of the jenkins job
+-- @param  in_product_name        name of the product (LFS, UBOOT, ...)
+-- @param  in_task_name           name of the task (build, test, smoketest, releas)
+-- @param  in_event_type          type of the event (build, test, release, other)
+-- @param  in_build_host          name of the build host (FQDN)
+-- @return <none>
+DROP PROCEDURE IF EXISTS target_reboot_started;
+DELIMITER //
+CREATE PROCEDURE target_reboot_started( IN in_build_name   VARCHAR(128),
+                                        IN in_comment      TEXT,
+                                        IN in_job_name     VARCHAR(128),
+                                        IN in_build_number INT,
+                                        IN in_product_name VARCHAR(128),
+                                        IN in_task_name    VARCHAR(128),
+                                        IN in_build_host   VARCHAR(256)
+                                       )
+BEGIN
+    CALL new_build_event( in_build_name, in_comment, in_job_name, in_build_number,
+                          in_product_name, in_task_name, 'target_reboot', 'started', in_build_host );
+END //
+DELIMITER ;
+
+-- }}}
+-- {{{ target_reboot_finished
+-- @fn     target_reboot_finished
+-- @brief  create a new build event for target reboot finished
+-- @param  in_build_name          name of the build
+-- @param  in_comment             a comment
+-- @param  in_job_name            name of the jenkins job
+-- @param  in_build_number        build number of the jenkins job
+-- @param  in_product_name        name of the product (LFS, UBOOT, ...)
+-- @param  in_task_name           name of the task (build, test, smoketest, releas)
+-- @param  in_event_type          type of the event (build, test, release, other)
+-- @param  in_build_host          name of the build host (FQDN)
+-- @return <none>
+
+DROP PROCEDURE IF EXISTS target_reboot_finished;
+DELIMITER //
+CREATE PROCEDURE target_reboot_finished( IN in_build_name   VARCHAR(128),
+                                         IN in_comment      TEXT,
+                                         IN in_job_name     VARCHAR(128),
+                                         IN in_build_number INT,
+                                         IN in_product_name VARCHAR(128),
+                                         IN in_task_name    VARCHAR(128),
+                                         IN in_build_host   VARCHAR(256)
+                                       )
+BEGIN
+    CALL new_build_event( in_build_name, in_comment, in_job_name, in_build_number,
+                          in_product_name, in_task_name, 'target_reboot', 'finished', in_build_host );
+END //
+DELIMITER ;
+
+-- }}}
+-- {{{ target_reboot_failed
+-- @fn     target_reboot_failed
+-- @brief  create a new build event for target reboot failed
+-- @param  in_build_name          name of the build
+-- @param  in_comment             a comment
+-- @param  in_job_name            name of the jenkins job
+-- @param  in_build_number        build number of the jenkins job
+-- @param  in_product_name        name of the product (LFS, UBOOT, ...)
+-- @param  in_task_name           name of the task (build, test, smoketest, releas)
+-- @param  in_event_type          type of the event (build, test, release, other)
+-- @param  in_build_host          name of the build host (FQDN)
+-- @return <none>
+
+DROP PROCEDURE IF EXISTS target_reboot_failed;
+DELIMITER //
+CREATE PROCEDURE target_reboot_failed( IN in_build_name   VARCHAR(128),
+                                       IN in_comment      TEXT,
+                                       IN in_job_name     VARCHAR(128),
+                                       IN in_build_number INT,
+                                       IN in_product_name VARCHAR(128),
+                                       IN in_task_name    VARCHAR(128),
+                                       IN in_build_host   VARCHAR(256)
+                                     )
+BEGIN 
+    CALL new_build_event( in_build_name, in_comment, in_job_name, in_build_number,
+                          in_product_name, in_task_name, 'target_reboot', 'failed', in_build_host );
+END //
+DELIMITER ;
+
+-- }}}
 -- {{{ target_reserveration_started
 -- @fn     target_reserveration_started
 -- @brief  create a new build event for target reservation started
