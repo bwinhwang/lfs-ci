@@ -58,13 +58,19 @@ usecase_ADMIN_CREATE_CLOUD_SLAVE_INSTANCE() {
 
         info Started cloud instance ${cloudDnsName} [${instanceID}]
 
-        allcloudDnsName="${allcloudDnsName} <br>${cloudDnsName} [${instanceID}]"
+        if [[ ${counter} == 1 ]]
+        then
+            allcloudDnsName="${cloudDnsName} [${instanceID}]"
+        else
+            allcloudDnsName="${allcloudDnsName} <br>${cloudDnsName} [${instanceID}]"
+        fi
         debug allcloudDnsName=${allcloudDnsName}
+
+        [ ${CREATE_CLOUD_INSTANCES_NEWCINODE} ]] && addNewCloudInstanceToJenkins
     done
 
     setBuildDescription "${JOB_NAME}" "${BUILD_NUMBER}" "${allcloudDnsName}"
 
-    [[ ${CREATE_CLOUD_INSTANCES_NEWCINODE} ]] && addNewCloudInstanceToJenkins
     return 0
 }
 
