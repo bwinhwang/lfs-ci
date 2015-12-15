@@ -15,7 +15,8 @@ oneTimeSetUp() {
         cnt=$((cnt + 1 ))
         echo ${cnt} > ${UT_TMPDIR}/.cnt
         touch ${UT_TMPDIR}/tmp.${cnt}
-        echo "y15-m12-d14-12:52:07 Finish ( euca-10-157-43-246.eucalyptus.escloc20.eecloud.nsn-net.net successfully started )" > ${UT_TMPDIR}/tmp.${cnt}
+        echo "y15-m12-d15-11:08:59 Awaiting Instance 1 [i-c378248e] in running mode...                                      OK" > ${UT_TMPDIR}/tmp.${cnt}
+        echo "y15-m12-d14-12:52:07 Finish ( euca-10-157-43-246.eucalyptus.escloc20.eecloud.nsn-net.net successfully started )" >> ${UT_TMPDIR}/tmp.${cnt}
         echo ${UT_TMPDIR}/tmp.${cnt}
     }
     getConfig() {
@@ -38,6 +39,7 @@ setUp() {
     export LFS_CI_GLOBAL_PRODUCT_NAME=LFS
     export CREATE_CLOUD_INSTANCES_AMOUNT=1
     export CREATE_CLOUD_INSTANCES_TYPE=hs1.8xlarge
+    export CREATE_CLOUD_INSTANCES_NEWCINODE=true
     export UT_TMPDIR=$(createTempDirectory)
     echo 0 > ${UT_TMPDIR}/.cnt
 
@@ -60,7 +62,7 @@ test_ADMIN_CREATE_CLOUD_SLAVE_INSTANCE() {
     local expect=$(createTempFile)
     cat <<EOF > ${expect}
 execute source LFS_CI_CLOUD_USER_ROOT_DIR/LFS_CI_CLOUD_SLAVE_EUCARC
-execute -l ${UT_TMPDIR}/tmp.1 LFS_CI_CLOUD_LFS2CLOUD -cLFS_CI_CLOUD_SLAVE_ESLOC -iLFS_CI_CLOUD_SLAVE_EMI -mLFS_CI_CLOUD_SLAVE_INSTANCETYPE -sLFS_CI -fLFS_CI_CLOUD_SLAVE_INSTALL_SCRIPT
+execute -l ${UT_TMPDIR}/tmp.1 LFS_CI_CLOUD_LFS2CLOUD -cLFS_CI_CLOUD_SLAVE_ESLOC -iLFS_CI_CLOUD_SLAVE_EMI -m${CREATE_CLOUD_INSTANCES_TYPE} -sLFS_CI -fLFS_CI_CLOUD_SLAVE_INSTALL_SCRIPT
 setBuildDescription
 EOF
 

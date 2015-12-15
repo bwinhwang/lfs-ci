@@ -26,7 +26,7 @@ usecase_ADMIN_CREATE_CLOUD_SLAVE_INSTANCE() {
     mustHaveValue "${cloudEucarc}" "cloudEucarc"
     local cloudEmi=$(getConfig LFS_CI_CLOUD_SLAVE_EMI)
     mustHaveValue "${cloudEmi}" "cloudEmi"
-    local cloudInstanceType=$(getConfig LFS_CI_CLOUD_SLAVE_INSTANCETYPE)
+    local cloudInstanceType=${CREATE_CLOUD_INSTANCES_TYPE}
     mustHaveValue "${cloudInstanceType}" "cloudInstanceType"
     local cloudInstanceStartParams=$(getConfig LFS_CI_CLOUD_SLAVE_INST_START_PARAMS)
     mustHaveValue "${cloudInstanceStartParams}" "cloudInstanceStartParams"
@@ -37,17 +37,42 @@ usecase_ADMIN_CREATE_CLOUD_SLAVE_INSTANCE() {
     info Sourcing eucarc with: source ${cloudUserRootDir}/${cloudEucarc}
     execute source ${cloudUserRootDir}/${cloudEucarc}
 
-    info Starting cloud instance with: execute export INST_START_PARAMS="${cloudInstanceStartParams}" ';' export HVM=1';' ${cloudLfs2Cloud} -c${cloudEsloc} -i${cloudEmi} -m${cloudInstanceType} -sLFS_CI -f${cloudInstallScript}
+    local allcloudDnsName=""
     export INST_START_PARAMS="${cloudInstanceStartParams}"
     export HVM=1
-    local cloudStartLog=$(createTempFile)
-    execute -l ${cloudStartLog} ${cloudLfs2Cloud} -c${cloudEsloc} -i${cloudEmi} -m${cloudInstanceType} -sLFS_CI -f${cloudInstallScript}
 
-    local searchString='successfully started )'
-    local cloudDnsName=$(grep "${searchString}" ${cloudStartLog} | cut -d\( -f2 | sed "s/${searchString}//" | sed "s/ //g")
-    mustHaveValue "${cloudDnsName}" "cloudDnsName"
+    for counter in `seq ${CREATE_CLOUD_INSTANCES_AMOUNT}`
+    do
+        info Starting cloud instance ${counter} with: execute export INST_START_PARAMS="${INST_START_PARAMS}" ';' export HVM=${HVM} ';' ${cloudLfs2Cloud} -c${cloudEsloc} -i${cloudEmi} -m${cloudInstanceType} -sLFS_CI -f${cloudInstallScript}
+        local cloudStartLog=$(createTempFile)
+        execute -l ${cloudStartLog} ${cloudLfs2Cloud} -c${cloudEsloc} -i${cloudEmi} -m${cloudInstanceType} -sLFS_CI -f${cloudInstallScript}
 
-    setBuildDescription "${JOB_NAME}" "${BUILD_NUMBER}" "${cloudDnsName}"
+        local searchForDNSString='successfully started )'
+        local cloudDnsName=$(grep "${searchForDNSString}" ${cloudStartLog} | cut -d\( -f2 | sed "s/${searchForDNSString}//" | sed "s/ //g")
+        debug cloudDnsName=${cloudDnsName}
+        mustHaveValue "${cloudDnsName}" "cloudDnsName"
+        local searchForInstanceIDString='Awaiting Instance'
+        local instanceID=$(grep "${searchForInstanceIDString}" ${cloudStartLog} | sed "s/${searchForInstanceIDString}//" | cut -d\[ -f2 | cut -d\] -f1)
+        debug instanceID=${instanceID}
+        mustHaveValue "${instanceID}" instanceID""
+
+        info Started cloud instance ${cloudDnsName} [${instanceID}]
+
+        allcloudDnsName="${allcloudDnsName} <br>${cloudDnsName} [${instanceID}]"
+        debug allcloudDnsName=${allcloudDnsName}
+    done
+
+    setBuildDescription "${JOB_NAME}" "${BUILD_NUMBER}" "${allcloudDnsName}"
+
+    [[ ${CREATE_CLOUD_INSTANCES_NEWCINODE} ]] && addNewCloudInstanceToJenkins
     return 0
 }
 
+## @fn      addNewCloudInstanceToJenkins
+#  @brief   added new cloud instance as node for jenkins
+#  @param   <none>
+#  @return  <none>
+addNewCloudInstanceToJenkins() {
+    info New cloud instance will be added to Jenkins ...
+    info TODO
+}
