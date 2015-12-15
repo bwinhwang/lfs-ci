@@ -419,7 +419,6 @@ DELIMITER ;
 -- @param  in_event_type          type of the event (build, test, release, other)
 -- @param  in_build_host          name of the build host (FQDN)
 -- @return <none>
-
 DROP PROCEDURE IF EXISTS target_install_finished;
 DELIMITER //
 CREATE PROCEDURE target_install_finished( IN in_build_name   VARCHAR(128),
@@ -449,7 +448,6 @@ DELIMITER ;
 -- @param  in_event_type          type of the event (build, test, release, other)
 -- @param  in_build_host          name of the build host (FQDN)
 -- @return <none>
-
 DROP PROCEDURE IF EXISTS target_install_failed;
 DELIMITER //
 CREATE PROCEDURE target_install_failed( IN in_build_name   VARCHAR(128),
@@ -568,6 +566,10 @@ DELIMITER ;
 -- @param  in_event_type          type of the event (build, test, release, other)
 -- @param  in_build_host          name of the build host (FQDN)
 -- @return <none>
+=======
+-- {{{ target_reserveration_started
+
+>>>>>>> 0aa1407ced9b6b40f2cbed3cf861a7153f728197
 DROP PROCEDURE IF EXISTS target_reserveration_started;
 DELIMITER //
 CREATE PROCEDURE target_reserveration_started( IN in_build_name   VARCHAR(128),
@@ -586,6 +588,7 @@ DELIMITER ;
 
 -- }}}
 -- {{{ target_reserveration_finished
+<<<<<<< HEAD
 -- @fn     target_reserveration_finished
 -- @brief  create a new build event for target reservation finished
 -- @param  in_build_name          name of the build
@@ -597,6 +600,8 @@ DELIMITER ;
 -- @param  in_event_type          type of the event (build, test, release, other)
 -- @param  in_build_host          name of the build host (FQDN)
 -- @return <none>
+=======
+>>>>>>> 0aa1407ced9b6b40f2cbed3cf861a7153f728197
 
 DROP PROCEDURE IF EXISTS target_reserveration_finished;
 DELIMITER //
@@ -616,6 +621,7 @@ DELIMITER ;
 
 -- }}}
 -- {{{ target_reserveration_failed
+<<<<<<< HEAD
 -- @fn     target_reserveration_failed
 -- @brief  create a new build event for target reservation failed
 -- @param  in_build_name          name of the build
@@ -627,7 +633,6 @@ DELIMITER ;
 -- @param  in_event_type          type of the event (build, test, release, other)
 -- @param  in_build_host          name of the build host (FQDN)
 -- @return <none>
-
 DROP PROCEDURE IF EXISTS target_reserveration_failed;
 DELIMITER //
 CREATE PROCEDURE target_reserveration_failed( IN in_build_name   VARCHAR(128),

@@ -468,6 +468,11 @@ makingTest_install() {
     return
 }
 
+_exitHandlerDatabaseEventTestTargetFailed() {
+    databaseEventTestFailed
+    return
+}
+
 ## @fn      _reserveTarget()
 #  @brief   make a reserveration from TAToo/YSMv2 to get a target name
 #  @param   <none>
