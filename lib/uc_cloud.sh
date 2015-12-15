@@ -8,6 +8,13 @@
 #  @param   <none>
 #  @return  <none>
 usecase_ADMIN_CREATE_CLOUD_SLAVE_INSTANCE() {
+    requiredParameters CREATE_CLOUD_INSTANCES_AMOUNT CREATE_CLOUD_INSTANCES_TYPE
+
+    info *****************************************************************************************************
+    info * CREATE_CLOUD_INSTANCES_AMOUNT    = ${CREATE_CLOUD_INSTANCES_AMOUNT}
+    info * CREATE_CLOUD_INSTANCES_TYPE      = ${CREATE_CLOUD_INSTANCES_TYPE}
+    info * CREATE_CLOUD_INSTANCES_NEWCINODE = ${CREATE_CLOUD_INSTANCES_NEWCINODE}
+    info *****************************************************************************************************
 
     local cloudLfs2Cloud=$(getConfig LFS_CI_CLOUD_LFS2CLOUD)
     mustHaveValue "${cloudLfs2Cloud}" "cloudLfs2Cloud"
