@@ -267,7 +267,7 @@ _createLfsRelReleaseNoteXml() {
     execute -n ${LFS_CI_ROOT}/bin/getReleaseNoteXML                      \
                             -t ${LFS_PROD_RELEASE_CURRENT_TAG_NAME_REL}  \
                             -o ${LFS_PROD_RELEASE_PREVIOUS_TAG_NAME_REL} \
-                            -T OS                                        \
+                            -T REL                                       \
                             -P LFS                                       \
                             -f ${LFS_CI_CONFIG_FILE}                     \
                             -L $(getLocationName)                        \

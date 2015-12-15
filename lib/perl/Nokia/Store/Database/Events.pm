@@ -5,6 +5,7 @@ use warnings;
 use DBI;
 use Log::Log4perl qw( :easy);
 use Data::Dumper;
+use Sys::Hostname;
 
 use parent qw( Nokia::Store::Database );
 
@@ -120,11 +121,12 @@ sub newBuildEvent {
     my $productName  = $param->{productName}  || "";
     my $taskName     = $param->{taskName}     || "";
     my $action       = $param->{action};
+    my $hostname     = hostname();
     my $method       = "";
     my $data         = [];
 
-    my $dataListShort = [ $baselineName, $comment,                         $jobName, $buildNumber, $productName, $taskName ];
-    my $dataListLong  = [ $baselineName, $comment, $branchName, $revision, $jobName, $buildNumber, $productName, $taskName ];
+    my $dataListShort = [ $baselineName, $comment,                         $jobName, $buildNumber, $productName, $taskName, $hostname ];
+    my $dataListLong  = [ $baselineName, $comment, $branchName, $revision, $jobName, $buildNumber, $productName, $taskName, $hostname ];
     my $dataHash      = { 
             build_started       => $dataListLong,
             build_failed        => $dataListShort,

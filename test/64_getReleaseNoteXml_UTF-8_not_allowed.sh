@@ -10,6 +10,9 @@ setUp() {
     export productName=LFS
     cp ${LFS_CI_ROOT}/test/data/64_input_changelog.xml ${WORKSPACE}/changelog.xml
 
+    mkdir -p ${WORKSPACE}/workspace/
+    echo -e "File important 1\nLine 2\nA third line 3" > ${WORKSPACE}/workspace/importantNote.txt
+
     return
 }
 

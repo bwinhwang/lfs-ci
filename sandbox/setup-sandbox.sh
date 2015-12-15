@@ -109,7 +109,7 @@ cat << EOF
         -t HTTP_PORT for Jenkins. Defaults to ${HTTP_PORT}.
         -g <sysv> If -g is omitted, Jenkins is started via nohup in the background.
                   sysv: Start Jenkins via the script /etc/init.d/jenkins.
-        -e (flag) Disable all *_Build$ jobs in Sandbox. Default is to disable all *_Build$ jobs (missing -e).
+        -e (flag) Do not disable all *_Build$ jobs in Sandbox. Default is to disable all *_Build$ jobs (missing -e).
         -l (flag) Create LRC view in Sandbox. Default is don't create LRC in Sandbox.
         -p (flag) Keep Jenkins plugins from an existing Sandbox installation. Defaults is false (missing -p).
         -o (flag) Just start Jenkins (don't do anything else). Default is false (missing -o). Additionally you can also use -g.
@@ -469,9 +469,12 @@ jenkins_start_sandbox() {
         echo "    LFS_CI_ROOT=${LFS_CI_ROOT}"
         echo "    LFS_CI_CONFIG_FILE=${LFS_CI_CONFIG_FILE}"
         echo "    JENKINS_HOME=${JENKINS_HOME}"
+        echo "    JENKINS_ROOT=${JENKINS_ROOT}"
         export LFS_CI_ROOT=${LFS_CI_ROOT}
         export LFS_CI_CONFIG_FILE=${LFS_CI_CONFIG_FILE}
         export JENKINS_HOME=${JENKINS_HOME}
+        export JENKINS_ROOT=${JENKINS_ROOT}
+        cd ${JENKINS_HOME}
         nohup java ${JVM_OPTS} -jar ${JENKINS_WAR} ${JENKINS_OPTS} > ${LOG_FILE} 2>&1 &
         PID=$!
         echo ${PID} > ${PID_FILE}
@@ -753,6 +756,7 @@ get_args() {
     HTTP_ADDRESS="0.0.0.0"
     JENKINS_VERSION="1.532.3"
     JENKINS_HOME="${LOCAL_WORK_DIR}/${SANDBOX_USER}/${JENKINS_DIR}/home"
+    JENKINS_ROOT="${LOCAL_WORK_DIR}/${SANDBOX_USER}/${JENKINS_DIR}"
     JENKINS_PLUGINS="${JENKINS_HOME}/plugins"
     JVM_OPTS="-Djava.io.tmpdir=/var/tmp"
     JENKINS_OPTS="--httpListenAddress=${HTTP_ADDRESS} --httpPort=${HTTP_PORT}"

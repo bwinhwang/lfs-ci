@@ -15,7 +15,7 @@ info "# NEW_BRANCH:           ${NEW_BRANCH}"
 info "# PS_BRANCH:            ${PS_BRANCH}"
 info "# REVISION:             ${REVISION}"
 info "# SOURCE_RELEASE:       ${SOURCE_RELEASE}"
-info "# ECL_URLS:             ${ECL_URLS}"
+info "# ECL_URL:              ${ECL_URL}"
 info "# DESCRIPTION:          ${DESCRIPTION}"
 info "# COMMENT:              ${COMMENT}"
 info "# WFT_READY:            ${WFT_READY}"
@@ -53,12 +53,23 @@ fi
 
 
 __checkParams() {
+
+    info "Check for ECL in svn ..."
+    if [[ -z ${ECL_URL} ]]; then
+        ECL_DIR="ECL/${PS_BRANCH}/ECL_BASE/"
+        ECL_URL="\${BTS_SCM_PS_url}/${ECL_DIR}"
+        info "Set ECL_URL to ${ECL_URL}"
+        svn ls "$(getConfig BTS_SCM_ECL_url)/${ECL_DIR}" 2>/dev/null || { error "ECL URL $(getConfig BTS_SCM_ECL_url)/${ECL_DIR} does not exist."; exit 1; }
+    else
+        svn ls ${ECL_URL} 2>/dev/null || { error "ECL URL ${ECL_URL} does not exist."; exit 1; }
+    fi
+
     mustHaveValue "${SRC_BRANCH}" "SRC_BRANCH"
     mustHaveValue "${NEW_BRANCH}" "NEW_BRANCH"
     mustHaveValue "${PS_BRANCH}" "PS_BRANCH"
     mustHaveValue "${REVISION}" "REVISION"
     mustHaveValue "${SOURCE_RELEASE}" "SOURCE_RELEASE"
-    mustHaveValue "${ECL_URLS}" "ECL_URLS"
+    mustHaveValue "${ECL_URL}" "ECL_URL"
     mustHaveValue "${COMMENT}" "COMMENT"
 
     if [[ ${LRC} == true ]]; then
@@ -98,7 +109,7 @@ __preparation(){
 #  @brief  Create the insert statement for branches table
 __get_sql_string() {
     echo "CALL new_branch('${branch}', '${branch}', ${REVISION}, '${SOURCE_RELEASE}', '${regex}', now(), '${COMMENT}', \
-        '${DESCRIPTION}', '${PS_BRANCH}' ,'${PS_BRANCH_COMMENT}', '${ECL_URLS}')"
+        '${DESCRIPTION}', '${PS_BRANCH}' ,'${PS_BRANCH_COMMENT}', '${ECL_URL}')"
 }
 
 __get_sql_string_fsmr4() {

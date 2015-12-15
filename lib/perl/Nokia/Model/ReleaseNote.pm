@@ -58,7 +58,11 @@ sub importantNote {
     my $self = shift;
     $self->mustHaveFileData( "importantNote" );
     my %duplicates;
-    return join( "\n", grep { not $duplicates{$_}++ } 
+    return join( "\n", # use a schwarzian transform to efficiently sort a list, see https://en.wikipedia.org/wiki/Schwartzian_transform
+                       map  { $_->[0] }
+                       sort { $a->[1] cmp $b->[1] } 
+                       map  { [ $_, /^RB=\d+/ ? " $_" : $_ ] }
+                       grep { not $duplicates{$_}++ } 
                        @{ $self->{importantNote} || [] } );
 }
 
@@ -86,8 +90,9 @@ sub mustHaveFileData {
                              sprintf( "%s/workspace/%s.txt", $ENV{WORKSPACE}, $fileType ) ) ) {
             if( -f $file ) {
                 DEBUG "loading data from $file";
-                # read file into an array (each line) without new line at the end
-                push @{ $self->{ $fileType } }, map { chomp; $_ } read_file( $file );
+                my $fileContent = read_file( $file );
+                chomp( $fileContent );
+                push @{ $self->{ $fileType } }, $fileContent;
             }
         }
         $self->{mustHaveFileData}{ $fileType } = 1;
