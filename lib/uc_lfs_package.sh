@@ -27,9 +27,6 @@ ci_job_package() {
     mustHaveCleanWorkspace
     mustHaveWritableWorkspace
 
-    copyFileFromBuildDirectoryToWorkspace ${UPSTREAM_PROJECT} ${UPSTREAM_BUILD} fingerprint.txt
-    copyFileFromWorkspaceToBuildDirectory ${JOB_NAME} ${BUILD_NUMBER} fingerprint.txt
-
     debug "workspace is ${workspace}"
 
     local requiredArtifacts=$(getConfig LFS_CI_UC_package_required_artifacts)
