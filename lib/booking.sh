@@ -99,7 +99,7 @@ reserveTargetByFeature() {
                 return
             fi
         done
-        info "no free target, will try in ${sleepTime} s (total try ${counter})"
+        info "no free target (features: ${features}), will try in ${sleepTime} s (total try ${counter})"
         counter=$((counter + 1))
         sleep ${sleepTime}
     done
