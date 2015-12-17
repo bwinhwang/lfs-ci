@@ -1,4 +1,7 @@
 #!/bin/bash
+## @file    uc_cloud.sh
+#  @brief   usecase cloud
+#  @details the start cloud instance usecase for lfs.
 
 [[ -z ${LFS_CI_SOURCE_common}     ]] && source ${LFS_CI_ROOT}/lib/common.sh
 [[ -z ${LFS_CI_SOURCE_jenkins}    ]] && source ${LFS_CI_ROOT}/lib/jenkins.sh
@@ -8,12 +11,13 @@
 #  @param   <none>
 #  @return  <none>
 usecase_ADMIN_CREATE_CLOUD_SLAVE_INSTANCE() {
-    #requiredParameters CREATE_CLOUD_INSTANCES_AMOUNT CREATE_CLOUD_INSTANCES_TYPE
+    requiredParameters CREATE_CLOUD_INSTANCES_AMOUNT CREATE_CLOUD_INSTANCES_TYPE JOB_NAME BUILD_NUMBER
 
     info *****************************************************************************************************
-    info * CREATE_CLOUD_INSTANCES_AMOUNT    = ${CREATE_CLOUD_INSTANCES_AMOUNT}
-    info * CREATE_CLOUD_INSTANCES_TYPE      = ${CREATE_CLOUD_INSTANCES_TYPE}
-    info * CREATE_CLOUD_INSTANCES_NEWCINODE = ${CREATE_CLOUD_INSTANCES_NEWCINODE}
+    info * CREATE_CLOUD_INSTANCES_AMOUNT       = ${CREATE_CLOUD_INSTANCES_AMOUNT}
+    info * CREATE_CLOUD_INSTANCES_TYPE         = ${CREATE_CLOUD_INSTANCES_TYPE}
+    info * CREATE_CLOUD_INSTANCES_NEW_CI_SLAVE = ${CREATE_CLOUD_INSTANCES_NEW_CI_SLAVE}
+    info * CREATE_CLOUD_INSTANCES_USER_EMAIL   = ${CREATE_CLOUD_INSTANCES_USER_EMAIL}
     info *****************************************************************************************************
 
     local cloudLfs2Cloud=$(getConfig LFS_CI_CLOUD_LFS2CLOUD)
@@ -35,7 +39,8 @@ usecase_ADMIN_CREATE_CLOUD_SLAVE_INSTANCE() {
 
     # source seesetenv euca2ools=3.1.1. is already done via entry in linsee.cfg
     info Sourcing eucarc with: source ${cloudUserRootDir}/${cloudEucarc}
-    execute source ${cloudUserRootDir}/${cloudEucarc}
+    mustExistsFile ${cloudUserRootDir}/${cloudEucarc}
+    source ${cloudUserRootDir}/${cloudEucarc}
 
     local allcloudDnsName=""
     export INST_START_PARAMS="${cloudInstanceStartParams}"
@@ -58,6 +63,7 @@ usecase_ADMIN_CREATE_CLOUD_SLAVE_INSTANCE() {
 
         info Started cloud instance ${cloudDnsName} [${instanceID}]
 
+        # only a cosmetic that BuildDescription doesn't start wit a LF
         if [[ ${counter} == 1 ]]
         then
             allcloudDnsName="${cloudDnsName} [${instanceID}]"
@@ -66,7 +72,7 @@ usecase_ADMIN_CREATE_CLOUD_SLAVE_INSTANCE() {
         fi
         debug allcloudDnsName=${allcloudDnsName}
 
-        [ ${CREATE_CLOUD_INSTANCES_NEWCINODE} ]] && addNewCloudInstanceToJenkins
+        [[ ${CREATE_CLOUD_INSTANCES_NEW_CI_SLAVE} ]] && addNewCloudInstanceToJenkins
     done
 
     setBuildDescription "${JOB_NAME}" "${BUILD_NUMBER}" "${allcloudDnsName}"
