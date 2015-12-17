@@ -50,7 +50,17 @@ usecase_ADMIN_CREATE_CLOUD_SLAVE_INSTANCE() {
     do
         info Starting cloud instance ${counter} with: execute export INST_START_PARAMS="${INST_START_PARAMS}" ';' export HVM=${HVM} ';' ${cloudLfs2Cloud} -c${cloudEsloc} -i${cloudEmi} -m${cloudInstanceType} -sLFS_CI -f${cloudInstallScript}
         local cloudStartLog=$(createTempFile)
-        execute -l ${cloudStartLog} ${cloudLfs2Cloud} -c${cloudEsloc} -i${cloudEmi} -m${cloudInstanceType} -sLFS_CI -f${cloudInstallScript}
+        if ! $(execute -l ${cloudStartLog} ${cloudLfs2Cloud} -c${cloudEsloc} -i${cloudEmi} -m${cloudInstanceType} -sLFS_CI -f${cloudInstallScript})
+        then
+            if [[ $counter -gt 1 ]] 
+            then
+                info Already started cloud instances: ${allcloudDnsName}
+                error Error during starting a new cloud instance
+                setBuildResultUnstable
+            else
+                fatal Could not create a cloud instance
+            fi
+        fi
 
         local searchForDNSString='successfully started )'
         local cloudDnsName=$(grep "${searchForDNSString}" ${cloudStartLog} | cut -d\( -f2 | sed "s/${searchForDNSString}//" | sed "s/ //g")
