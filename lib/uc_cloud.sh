@@ -17,7 +17,6 @@ usecase_ADMIN_CREATE_CLOUD_SLAVE_INSTANCE() {
     info * CREATE_CLOUD_INSTANCES_AMOUNT       = ${CREATE_CLOUD_INSTANCES_AMOUNT}
     info * CREATE_CLOUD_INSTANCES_TYPE         = ${CREATE_CLOUD_INSTANCES_TYPE}
     info * CREATE_CLOUD_INSTANCES_NEW_CI_SLAVE = ${CREATE_CLOUD_INSTANCES_NEW_CI_SLAVE}
-    info * CREATE_CLOUD_INSTANCES_USER_EMAIL   = ${CREATE_CLOUD_INSTANCES_USER_EMAIL}
     info *****************************************************************************************************
 
     local cloudLfs2Cloud=$(getConfig LFS_CI_CLOUD_LFS2CLOUD)
