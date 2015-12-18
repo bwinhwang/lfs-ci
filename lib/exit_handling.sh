@@ -23,7 +23,7 @@ export CI_EXIT_HANDLER_METHODS=''
 #  @return  <none>
 exit_add() {
     local functionName=$1
-	CI_EXIT_HANDLER_METHODS="${functionName} ${CI_EXIT_HANDLER_METHODS}"
+	CI_EXIT_HANDLER_METHODS=" ${functionName} ${CI_EXIT_HANDLER_METHODS}"
     trace "exit handler: added ${functionName}: exit functions are now '${CI_EXIT_HANDLER_METHODS}'"
     return
 }
