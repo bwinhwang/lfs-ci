@@ -386,8 +386,6 @@ makingTest_install() {
     local targetName=$(_reserveTarget)
     mustHaveValue "${targetName}" "target name"
 
-    storeEvent target_install_started
-    exit_add storeEvent:test_failed
 
     local shouldHaveRunningTarget=$(getConfig LFS_CI_uc_test_should_target_be_running_before_make_install)
     if [[ ${shouldHaveRunningTarget} ]] ; then
@@ -414,6 +412,8 @@ makingTest_install() {
     local maxInstallTries=$(getConfig LFS_CI_uc_test_making_test_installation_tries -t "testTargetName:${targetName}")
     mustHaveValue "${maxInstallTries}" "max installation tries"
 
+    storeEvent target_install_started
+    exit_add storeEvent:test_failed
     for i in $(seq 1 ${maxInstallTries}) ; do
         trace "install loop ${i}"
 
