@@ -1,9 +1,23 @@
 #!/bin/bash
+# Author: Reiner Biefel
 
 source test/common.sh
 source lib/uc_cloud.sh
 
 oneTimeSetUp() {
+    # create a temp file.cfg
+    export UT_CFG_FILE=$(createTempFile)
+    echo "jenkinsRoot = /var/fpwork/xxx/lfs-jenkins"                                                              > ${UT_CFG_FILE}
+    #echo "LFS_CI_CLOUD_LFS2CLOUD = /admulm/cloud/tools/lfs2cloud"                                                >> ${UT_CFG_FILE}
+    echo "LFS_CI_CLOUD_LFS2CLOUD = echo LFS2CLOUD"                                                               >> ${UT_CFG_FILE}
+    echo "LFS_CI_CLOUD_USER_ROOT_DIR = /home/${USER}/tools/eecloud"                                              >> ${UT_CFG_FILE}
+    echo "LFS_CI_CLOUD_SLAVE_ESLOC = escloc20"                                                                   >> ${UT_CFG_FILE}
+    echo "LFS_CI_CLOUD_SLAVE_INST_START_PARAMS = -z escloc20_1"                                                  >> ${UT_CFG_FILE}
+    echo "LFS_CI_CLOUD_SLAVE_EUCARC = ec2_access_keys_etc/ec2keys_escloc20_user_psulm_OHN_Prod_Cloud/eucarc"     >> ${UT_CFG_FILE}
+    echo "LFS_CI_CLOUD_SLAVE_EMI = emi-1d6a6f19"                                                                 >> ${UT_CFG_FILE}
+    echo "LFS_CI_CLOUD_SLAVE_INSTALL_SCRIPT = ${LFS_CI_ROOT}/etc/cloud_ci-slaves_install_additional_packages.sh" >> ${UT_CFG_FILE}
+    export LFS_CI_CONFIG_FILE=${UT_CFG_FILE}
+
     mockedCommand() {
         echo "$@" >> ${UT_MOCKED_COMMANDS}
     }
@@ -56,6 +70,7 @@ tearDown() {
 }
 
 test_setup() {
+    cat ${LFS_CI_CONFIG_FILE}
     echo ""
 }
 

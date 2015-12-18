@@ -68,7 +68,7 @@ usecase_ADMIN_CREATE_CLOUD_SLAVE_INSTANCE() {
         local searchForInstanceIDString='Awaiting Instance'
         local instanceID=$(grep "${searchForInstanceIDString}" ${cloudStartLog} | sed "s/${searchForInstanceIDString}//" | cut -d\[ -f2 | cut -d\] -f1)
         debug instanceID=${instanceID}
-        mustHaveValue "${instanceID}" instanceID""
+        mustHaveValue "${instanceID}" "instanceID"
 
         info Started cloud instance ${cloudDnsName} [${instanceID}]
 
@@ -81,7 +81,7 @@ usecase_ADMIN_CREATE_CLOUD_SLAVE_INSTANCE() {
         fi
         debug allcloudDnsName=${allcloudDnsName}
 
-        [[ ${CREATE_CLOUD_INSTANCES_NEW_CI_SLAVE} ]] && addNewCloudInstanceToJenkins
+        [[ ${CREATE_CLOUD_INSTANCES_NEW_CI_SLAVE} ]] && addNewCloudInstanceToJenkins ${cloudDnsName} ${instanceID}
     done
 
     setBuildDescription "${JOB_NAME}" "${BUILD_NUMBER}" "${allcloudDnsName}"
@@ -95,5 +95,101 @@ usecase_ADMIN_CREATE_CLOUD_SLAVE_INSTANCE() {
 #  @return  <none>
 addNewCloudInstanceToJenkins() {
     info New cloud instance will be added to Jenkins ...
-    info TODO
+    local cloudDnsName=$1
+    mustHaveValue "${cloudDnsName}" "cloudDnsName"
+    local instanceID=$2
+    mustHaveValue "${instanceID}" "instanceID"
+
+    local newCloudNodeConfigXml=$(createTempFile)
+    createNewCloudNodeXMLConfig ${newCloudNodeConfigXml} ${cloudDnsName} ${instanceID}
+    createNewJenkinsNode ${newCloudNodeConfigXml}
+
+    createNewCloudNodeAdminCleanupXMLConfig
+    createNewJenkinsNodeAdminCleanupJob
 }
+
+## @fn      createNewCloudNodeXMLConfig
+#  @brief   create a new config.xml for this new cloud node
+#  @param   <none>
+#  @return  <none>
+createNewCloudNodeXMLConfig() {
+    local newCloudNodeConfigXml=$1
+    mustHaveValue "${newCloudNodeConfigXml}" "newCloudNodeConfigXml"
+    local cloudDnsName=$2
+    mustHaveValue "${cloudDnsName}" "cloudDnsName"
+    local instanceID=$3
+    mustHaveValue "${instanceID}" "instanceID"
+    local jenkinsRoot=$(getConfig jenkinsRoot)
+    mustHaveValue "${jenkinsRoot}" "jenkinsRoot"
+
+    cat >${newCloudNodeConfigXml} <<EOF
+<?xml version="1.0" encoding="UTF-8"?>
+<slave>
+EOF
+    echo " <name>${instanceID}</name>" >> ${newCloudNodeConfigXml}
+    echo " <description>${cloudDnsName}</description>" >> ${newCloudNodeConfigXml}
+    echo " <remoteFS>${jenkinsRoot}</remoteFS>" >> ${newCloudNodeConfigXml}
+    cat >>${newCloudNodeConfigXml} <<EOF
+ <numExecutors>2</numExecutors>
+ <mode>NORMAL</mode>
+ <retentionStrategy class="hudson.slaves.RetentionStrategy\$Always"/>
+ <launcher class="hudson.plugins.sshslaves.SSHLauncher" plugin="ssh-slaves@1.6">
+EOF
+    echo "  <host>${cloudDnsName}</host>" >> ${newCloudNodeConfigXml}
+    cat >>${newCloudNodeConfigXml} <<EOF
+  <port>22</port>
+  <credentialsId>ee8254a1-555d-465a-b43f-eb0856b0672c</credentialsId>
+ </launcher>
+ <label>cloud espoo knife testDummyHost</label>
+ <nodeProperties>
+  <hudson.slaves.EnvironmentVariablesNodeProperty>
+   <envVars serialization="custom">
+    <unserializable-parents/>
+    <tree-map>
+     <default>
+     <comparator class="hudson.util.CaseInsensitiveComparator"/>
+     </default>
+     <int>2</int>
+     <string>LFS_CI_ROOT</string>
+     <string>/ps/lfs/ci</string>
+     <string>LFS_CI_SHARE_MIRROR</string>
+    <string>/var/fpwork</string>
+    </tree-map>
+   </envVars>
+  </hudson.slaves.EnvironmentVariablesNodeProperty>
+ </nodeProperties>
+ <userId>anonymous</userId>
+</slave>
+EOF
+
+    info config.xml for cloud node ${cloudDnsName} [${instanceID}] written.
+    rawDebug ${newCloudNodeConfigXml}
+}
+
+## @fn      createNewJenkinsNode
+#  @brief   create a new node for jenkins
+#  @param   <none>
+#  @return  <none>
+createNewJenkinsNode() {
+    local newCloudNodeConfigXml=$1
+    mustExistsFile ${newCloudNodeConfigXml}
+    local jenkinsCli=$(getConfig JENKINS_CLI_JAR)
+    info java -jar ${jenkinsCli}  -s http://maxi:1280  create-node < ${newCloudNodeConfigXml}
+}
+
+## @fn      createNewCloudNodeAdminCleanupXMLConfig
+#  @brief   create a new config.xml for a new admin cleanup job of that node
+#  @param   <none>
+#  @return  <none>
+createNewCloudNodeAdminCleanupXMLConfig() {
+    info TODO createNewCloudNodeAdminCleanupXMLConfig ...
+}
+
+## @fn      createNewJenkinsNodeAdminCleanupJob
+#  @brief   create a new node for jenkins
+#  @param   <none>
+#  @return  <none>
+createNewJenkinsNodeAdminCleanupJob() {
+    info TODO createNewJenkinsNodeAdminCleanupJob ...
+}
+
