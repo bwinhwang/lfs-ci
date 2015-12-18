@@ -89,6 +89,7 @@ reserveTargetByFeature() {
     mustHaveValue "${maxTryToGetTarget}" "max tries to get target"
 
     storeEvent target_reservation_started
+    exit_add storeEvent:target_reservation_failed
 
     local counter=0
     while [[ ${counter} -lt ${maxTryToGetTarget} ]] ; do
@@ -99,6 +100,7 @@ reserveTargetByFeature() {
                 info "reservation for target ${targetName} was successful"
                 export LFS_CI_BOOKING_RESERVED_TARGET=${targetName}
                 storeEvent target_reservation_finished
+                exit_remove storeEvent:target_reservation_failed
                 return
             fi
         done
@@ -107,7 +109,6 @@ reserveTargetByFeature() {
         sleep ${sleepTime}
     done
 
-    storeEvent target_reservation_failed
     fatal "reservation for target with features ${features} was not successfully"
     return
 }
