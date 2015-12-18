@@ -104,8 +104,9 @@ addNewCloudInstanceToJenkins() {
     createNewCloudNodeXMLConfig ${newCloudNodeConfigXml} ${cloudDnsName} ${instanceID}
     createNewJenkinsNode ${newCloudNodeConfigXml}
 
-    createNewCloudNodeAdminCleanupXMLConfig
-    createNewJenkinsNodeAdminCleanupJob
+    local newCloudNodeCleanupJobConfigXml=$(createTempFile)
+    createNewCloudNodeAdminCleanupXMLConfig ${newCloudNodeCleanupJobConfigXml} ${instanceID}
+    createNewJenkinsNodeAdminCleanupJob ${newCloudNodeCleanupJobConfigXml} ${instanceID}
 }
 
 ## @fn      createNewCloudNodeXMLConfig
@@ -174,7 +175,9 @@ createNewJenkinsNode() {
     local newCloudNodeConfigXml=$1
     mustExistsFile ${newCloudNodeConfigXml}
     local jenkinsCli=$(getConfig JENKINS_CLI_JAR)
-    info java -jar ${jenkinsCli}  -s http://maxi:1280  create-node < ${newCloudNodeConfigXml}
+    mustExistsFile ${jenkinsCli}
+
+    info +++ TODO java -jar ${jenkinsCli}  -s http://maxi:1280  create-node < ${newCloudNodeConfigXml}
 }
 
 ## @fn      createNewCloudNodeAdminCleanupXMLConfig
@@ -182,7 +185,61 @@ createNewJenkinsNode() {
 #  @param   <none>
 #  @return  <none>
 createNewCloudNodeAdminCleanupXMLConfig() {
-    info TODO createNewCloudNodeAdminCleanupXMLConfig ...
+    local newCloudNodeCleanupJobConfigXml=$1
+    mustHaveValue "${newCloudNodeCleanupJobConfigXml}" "newCloudNodeCleanupJobConfigXml"
+    local instanceID=$2
+    mustHaveValue "${instanceID}" "instanceID"
+
+   cat >${newCloudNodeCleanupJobConfigXml} <<EOF
+<?xml version="1.0" encoding="UTF-8"?>
+<project>
+ <actions/>
+ <description/>
+ <logRotator class="hudson.tasks.LogRotator">
+  <daysToKeep>10</daysToKeep>
+  <numToKeep>-1</numToKeep>
+  <artifactDaysToKeep>-1</artifactDaysToKeep>
+  <artifactNumToKeep>-1</artifactNumToKeep>
+ </logRotator>
+ <keepDependencies>false</keepDependencies>
+ <properties>
+  <com.sonyericsson.jenkins.plugins.bfa.model.ScannerJobProperty plugin="build-failure-analyzer@1.12.1">
+   <doNotScan>false</doNotScan>
+  </com.sonyericsson.jenkins.plugins.bfa.model.ScannerJobProperty>
+  <jenkins.advancedqueue.AdvancedQueueSorterJobProperty plugin="PrioritySorter@2.8">
+   <useJobPriority>false</useJobPriority>
+   <priority>-1</priority>
+  </jenkins.advancedqueue.AdvancedQueueSorterJobProperty>
+  <com.sonyericsson.rebuild.RebuildSettings plugin="rebuild@1.22">
+   <autoRebuild>false</autoRebuild>
+  </com.sonyericsson.rebuild.RebuildSettings>
+ </properties>
+ <scm class="hudson.scm.NullSCM"/>
+EOF
+   echo " <assignedNode>${instanceID}</assignedNode>" >> ${newCloudNodeCleanupJobConfigXml}
+   cat >>${newCloudNodeCleanupJobConfigXml} <<EOF
+ <canRoam>false</canRoam>
+ <disabled>false</disabled>
+ <blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding>
+ <blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding>
+ <triggers>
+  <hudson.triggers.TimerTrigger>
+   <spec>9 6 * * *</spec>
+  </hudson.triggers.TimerTrigger>
+ </triggers>
+ <concurrentBuild>false</concurrentBuild>
+ <builders>
+  <hudson.tasks.Shell>
+   <command>${LFS_CI_ROOT}/bin/jenkins-ci-execute-job.sh "${JOB_NAME}"</command>
+  </hudson.tasks.Shell>
+ </builders>
+ <publishers/>
+ <buildWrappers/>
+</project>
+EOF
+
+    info config.xml for cloud node cleanup written.
+    rawDebug ${newCloudNodeCleanupJobConfigXml}
 }
 
 ## @fn      createNewJenkinsNodeAdminCleanupJob
@@ -190,6 +247,14 @@ createNewCloudNodeAdminCleanupXMLConfig() {
 #  @param   <none>
 #  @return  <none>
 createNewJenkinsNodeAdminCleanupJob() {
-    info TODO createNewJenkinsNodeAdminCleanupJob ...
+    local newCloudNodeCleanupJobConfigXml=$1
+    mustExistsFile ${newCloudNodeCleanupJobConfigXml}
+    local instanceID=$2
+    mustHaveValue "${instanceID}" "instanceID"
+    local jenkinsCli=$(getConfig JENKINS_CLI_JAR)
+    mustExistsFile ${jenkinsCli}
+
+    info +++ TODO cat ${newCloudNodeCleanupJobConfigXml} '|' java -jar ${jenkinsCli}  -s http://maxi:1280 create-job Admin_-_cleanupBaselineShares_-_${instanceID}
+    #cat ${newCloudNodeCleanupJobConfigXml} | java -jar ${jenkinsCli}  -s http://maxi:1280 create-job Admin_-_cleanupBaselineShares_-_${instanceID}
 }
 
