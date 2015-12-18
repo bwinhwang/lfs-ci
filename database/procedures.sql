@@ -554,8 +554,8 @@ END //
 DELIMITER ;
 
 -- }}}
--- {{{ target_reserveration_started
--- @fn     target_reserveration_started
+-- {{{ target_reservation_started
+-- @fn     target_reservation_started
 -- @brief  create a new build event for target reservation started
 -- @param  in_build_name          name of the build
 -- @param  in_comment             a comment
@@ -566,30 +566,25 @@ DELIMITER ;
 -- @param  in_event_type          type of the event (build, test, release, other)
 -- @param  in_build_host          name of the build host (FQDN)
 -- @return <none>
-=======
--- {{{ target_reserveration_started
-
->>>>>>> 0aa1407ced9b6b40f2cbed3cf861a7153f728197
-DROP PROCEDURE IF EXISTS target_reserveration_started;
+DROP PROCEDURE IF EXISTS target_reservation_started;
 DELIMITER //
-CREATE PROCEDURE target_reserveration_started( IN in_build_name   VARCHAR(128),
-                                               IN in_comment      TEXT,
-                                               IN in_job_name     VARCHAR(128),
-                                               IN in_build_number INT,
-                                               IN in_product_name VARCHAR(128),
-                                               IN in_task_name    VARCHAR(128),
-                                               IN in_build_host   VARCHAR(256)
-                                             )
+CREATE PROCEDURE target_reservation_started( IN in_build_name   VARCHAR(128),
+                                             IN in_comment      TEXT,
+                                             IN in_job_name     VARCHAR(128),
+                                             IN in_build_number INT,
+                                             IN in_product_name VARCHAR(128),
+                                             IN in_task_name    VARCHAR(128),
+                                             IN in_build_host   VARCHAR(256)
+                                           )
 BEGIN
     CALL new_build_event( in_build_name, in_comment, in_job_name, in_build_number,
-                          in_product_name, in_task_name, 'target_reserveration', 'started', in_build_host );
+                          in_product_name, in_task_name, 'target_reservation', 'started', in_build_host );
 END //
 DELIMITER ;
 
 -- }}}
--- {{{ target_reserveration_finished
-<<<<<<< HEAD
--- @fn     target_reserveration_finished
+-- {{{ target_reservation_finished
+-- @fn     target_reservation_finished
 -- @brief  create a new build event for target reservation finished
 -- @param  in_build_name          name of the build
 -- @param  in_comment             a comment
@@ -600,19 +595,17 @@ DELIMITER ;
 -- @param  in_event_type          type of the event (build, test, release, other)
 -- @param  in_build_host          name of the build host (FQDN)
 -- @return <none>
-=======
->>>>>>> 0aa1407ced9b6b40f2cbed3cf861a7153f728197
 
-DROP PROCEDURE IF EXISTS target_reserveration_finished;
+DROP PROCEDURE IF EXISTS target_reservation_finished;
 DELIMITER //
-CREATE PROCEDURE target_reserveration_finished( IN in_build_name   VARCHAR(128),
-                                                IN in_comment      TEXT,
-                                                IN in_job_name     VARCHAR(128),
-                                                IN in_build_number INT,
-                                                IN in_product_name VARCHAR(128),
-                                                IN in_task_name    VARCHAR(128),
-                                                IN in_build_host   VARCHAR(256)
-                                              )
+CREATE PROCEDURE target_reservation_finished( IN in_build_name   VARCHAR(128),
+                                              IN in_comment      TEXT,
+                                              IN in_job_name     VARCHAR(128),
+                                              IN in_build_number INT,
+                                              IN in_product_name VARCHAR(128),
+                                              IN in_task_name    VARCHAR(128),
+                                              IN in_build_host   VARCHAR(256)
+                                            )
 BEGIN
     CALL new_build_event( in_build_name, in_comment, in_job_name, in_build_number,
                           in_product_name, in_task_name, 'target_reservation', 'finished', in_build_host );
@@ -620,9 +613,8 @@ END //
 DELIMITER ;
 
 -- }}}
--- {{{ target_reserveration_failed
-<<<<<<< HEAD
--- @fn     target_reserveration_failed
+-- {{{ target_reservation_failed
+-- @fn     target_reservation_failed
 -- @brief  create a new build event for target reservation failed
 -- @param  in_build_name          name of the build
 -- @param  in_comment             a comment
@@ -633,16 +625,16 @@ DELIMITER ;
 -- @param  in_event_type          type of the event (build, test, release, other)
 -- @param  in_build_host          name of the build host (FQDN)
 -- @return <none>
-DROP PROCEDURE IF EXISTS target_reserveration_failed;
+DROP PROCEDURE IF EXISTS target_reservation_failed;
 DELIMITER //
-CREATE PROCEDURE target_reserveration_failed( IN in_build_name   VARCHAR(128),
-                                              IN in_comment      TEXT,
-                                              IN in_job_name     VARCHAR(128),
-                                              IN in_build_number INT,
-                                              IN in_product_name VARCHAR(128),
-                                              IN in_task_name    VARCHAR(128),
-                                              IN in_build_host   VARCHAR(256)
-                                            )
+CREATE PROCEDURE target_reservation_failed( IN in_build_name   VARCHAR(128),
+                                            IN in_comment      TEXT,
+                                            IN in_job_name     VARCHAR(128),
+                                            IN in_build_number INT,
+                                            IN in_product_name VARCHAR(128),
+                                            IN in_task_name    VARCHAR(128),
+                                            IN in_build_host   VARCHAR(256)
+                                          )
 BEGIN 
     CALL new_build_event( in_build_name, in_comment, in_job_name, in_build_number,
                           in_product_name, in_task_name, 'target_reservation', 'failed', in_build_host );

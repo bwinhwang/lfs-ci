@@ -24,7 +24,7 @@ export CI_EXIT_HANDLER_METHODS=''
 exit_add() {
     local functionName=$1
 	CI_EXIT_HANDLER_METHODS="${functionName} ${CI_EXIT_HANDLER_METHODS}"
-	trace "exit: methods now '${CI_EXIT_HANDLER_METHODS}'"
+    trace "exit handler: added ${functionName}: exit functions are now '${CI_EXIT_HANDLER_METHODS}'"
     return
 }
 
@@ -35,7 +35,7 @@ exit_add() {
 exit_remove() {
     local functionName=$1
     CI_EXIT_HANDLER_METHODS="${CI_EXIT_HANDLER_METHODS/ ${functionName}}"
-    trace "exit: methods now '${CI_EXIT_HANDLER_METHODS}'"
+    trace "exit handler: removed ${functionName}: exit functions are now '${CI_EXIT_HANDLER_METHODS}'"
     return
 }
 
