@@ -40,7 +40,9 @@ usecase_LFS_COPY_SONAR_SCT_DATA() {
 
     for targetType in FSMr3 FSMr4
     do
-        local sonarDataPath=$(getConfig LFS_CI_coverage_data_path)
+        #TODO: the following eval construct shouldn't be necessary, but it doesnt work in Jenkins otherwise
+        # further investigation needed
+        local sonarDataPath==$(getConfig LFS_CI_coverage_data_path -t targetType:${targetType})
         local userContentPath=sonar/SCT/${targetType}
 
         _copy_Sonar_Data_to_userContent ${workspace}/${sonarDataPath} ${userContentPath}
