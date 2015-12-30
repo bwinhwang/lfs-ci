@@ -13,7 +13,7 @@ usecase_LFS_COPY_SONAR_UT_DATA() {
 
     requiredParameters JOB_NAME
 
-    local sonarDataPath=$(getConfig LFS_CI_unittest_coverage_data_path)
+    local sonarDataPath=$(getConfig LFS_CI_coverage_data_path)
 
     local targetType=$(getSubTaskNameFromJobName)
     mustHaveValue ${targetType} "target type"
@@ -40,8 +40,7 @@ usecase_LFS_COPY_SONAR_SCT_DATA() {
 
     for targetType in FSMr3 FSMr4
     do
-
-        local sonarDataPath=$(eval echo $(getConfig LFS_CI_unittest_coverage_data_path))
+        local sonarDataPath=$(getConfig LFS_CI_coverage_data_path)
         local userContentPath=sonar/SCT/${targetType}
 
         _copy_Sonar_Data_to_userContent ${workspace}/${sonarDataPath} ${userContentPath}
@@ -60,7 +59,9 @@ _copy_Sonar_Data_to_userContent () {
     local sonarDataDir=$1
     local userContentDir=$2
 
-    for dataFile in $(getConfig LFS_CI_unittest_coverage_data_files)
+    local branchName = $(getBranchName)
+
+    for dataFile in $(getConfig LFS_CI_coverage_data_files -t branchName:${branchName})
     do
         if [[ -e ${sonarDataDir}/${dataFile} ]] ; then
             debug  now copying ${sonarDataDir}/${dataFile} to ${userContentDir} ...

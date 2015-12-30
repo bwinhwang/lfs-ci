@@ -14,8 +14,8 @@ oneTimeSetUp() {
         case ${1} in
             jenkinsMasterServerHostName)         echo localhost ;;
             jenkinsMasterServerPath)             echo ${JENKINS_ROOT}/home ;;
-            LFS_CI_unittest_coverage_data_path)  echo ${DATA_PATH} ;;
-            LFS_CI_unittest_coverage_data_files) echo ${DATA_FILES} ;;
+            LFS_CI_coverage_data_path)           echo $(eval echo ${DATA_PATH}) ;;
+            LFS_CI_coverage_data_files)          echo ${DATA_FILES} ;;
             LFS_CI_is_fatal_data_files_missing)  echo ${isFatalDataFilesMissing} ;;
             *)                                   echo $1
         esac
@@ -45,7 +45,7 @@ setUp() {
     for TARGET in fsmr3 fsmr4 
     do
         export DATA_PATH=bld/bld-unittests-${TARGET}_fsmddal/results/__artifact
-        export SONAR_DATA_PATH=$(getConfig LFS_CI_unittest_coverage_data_path)
+        export SONAR_DATA_PATH=$(getConfig LFS_CI_coverage_data_path)
         mkdir -p ${WORKSPACE}/${SONAR_DATA_PATH}
         touch ${WORKSPACE}/${SONAR_DATA_PATH}/coverage.xml.gz
         touch ${WORKSPACE}/${SONAR_DATA_PATH}/testcases.merged.xml.gz
@@ -54,7 +54,7 @@ setUp() {
     for TARGET in FSMr3 FSMr4 
     do
         export DATA_PATH=src-test/src/testsuites/continousintegration/coverage/summary/__html/LCOV_${TARGET}
-        export SONAR_DATA_PATH=$(getConfig LFS_CI_unittest_coverage_data_path)
+        export SONAR_DATA_PATH=$(getConfig LFS_CI_coverage_data_path)
         mkdir -p ${WORKSPACE}/${SONAR_DATA_PATH}
         touch ${WORKSPACE}/${SONAR_DATA_PATH}/coverage.xml.gz
     done
@@ -75,7 +75,7 @@ test_UT_FSMr3() {
     
     local targetType=$(getSubTaskNameFromJobName)
     local sonarPath=sonar/UT/${targetType}
-    check_FilesExist ${sonarPath}
+    check_files_exist ${sonarPath}
 
     return
 }
@@ -88,21 +88,22 @@ test_UT_FSMr4() {
 
     local targetType=$(getSubTaskNameFromJobName)
     local sonarPath=sonar/UT/${targetType}
-    check_FilesExist ${sonarPath}
+    check_files_exist ${sonarPath}
 
     return
 }
 
 test_SCT() {
+    info test_SCT
     export JOB_NAME=LFS_CI_-_trunk_-_RegularTest
     export DATA_PATH='src-test/src/testsuites/continousintegration/coverage/summary/__html/LCOV_${targetType}'
     export DATA_FILES="coverage.xml.gz"
     assertTrue "usecase_LFS_COPY_SONAR_SCT_DATA failed!" "usecase_LFS_COPY_SONAR_SCT_DATA"
     
     local sonarPath=sonar/SCT/FSMr3
-    check_FilesExist ${sonarPath}
+    check_files_exist ${sonarPath}
     local sonarPath=sonar/SCT/FSMr4
-    check_FilesExist ${sonarPath}
+    check_files_exist ${sonarPath}
 
     return
 }
@@ -127,11 +128,11 @@ test_no_files_fatal() {
     return
 }
 
-check_FilesExist() {
+check_files_exist() {
     # check that files exist
-    for dataFile in $(getConfig LFS_CI_unittest_coverage_data_files)
+    for dataFile in $(getConfig LFS_CI_coverage_data_files)
     do
-        assertTrue "${dataFile} not found!"         "[[ -e ${JENKINS_ROOT}/home/userContent/${1}/${dataFile} ]]"
+        assertTrue "${JENKINS_ROOT}/home/userContent/${1}/${dataFile} not found!"  "[[ -e ${JENKINS_ROOT}/home/userContent/${1}/${dataFile} ]]"
     done
 
     return 0
