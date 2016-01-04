@@ -65,7 +65,7 @@ _copy_Sonar_Data_to_userContent () {
 
     local branchName = $(getBranchName)
 
-    for dataFile in $(getConfig LFS_CI_coverage_data_files -t branchName:${branchName})
+    for dataFile in $(getConfig LFS_CI_coverage_data_files)
     do
         if [[ -e ${sonarDataDir}/${dataFile} ]] ; then
             debug  now copying ${sonarDataDir}/${dataFile} to ${userContentDir} ...
