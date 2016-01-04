@@ -44,7 +44,7 @@ usecase_LFS_COPY_SONAR_SCT_DATA() {
 
     for targetType in FSMr3 FSMr4
     do
-        local sonarDataPath==$(getConfig LFS_CI_coverage_data_path -t targetType:${targetType})
+        local sonarDataPath=$(getConfig LFS_CI_coverage_data_path -t targetType:${targetType})
         local userContentPath=$(getConfig LFS_CI_usercontent_data_path -t targetType:${targetType} -t subDir:${subDir})
 
         _copy_Sonar_Data_to_userContent ${workspace}/${sonarDataPath} ${userContentPath}
