@@ -55,26 +55,26 @@ usecase_LFS_COPY_SONAR_SCT_DATA() {
 
 ## @fn      _copy_Sonar_Data_to_userContent()
 #  @brief   copy the sonar data files coverage.xml.gz and testcases.merged.xml.gz 
-#  @param   {sonarDataDir}   directory where the files to be copied will be found
-#  @param   {userContentDir} directory (in Jenkins/userContent) where the files will be copied to
+#  @param   {sonarDataPath}   directory where the files to be copied will be found
+#  @param   {userContentPath} directory (in Jenkins/userContent) where the files will be copied to
 #  @return  <none>
 _copy_Sonar_Data_to_userContent () {
 
-    local sonarDataDir=$1
-    local userContentDir=$2
+    local sonarDataPath=$1
+    local userContentPath=$2
 
     local branchName = $(getBranchName)
 
     for dataFile in $(getConfig LFS_CI_coverage_data_files)
     do
-        if [[ -e ${sonarDataDir}/${dataFile} ]] ; then
-            debug  now copying ${sonarDataDir}/${dataFile} to ${userContentDir} ...
-            copyFileToUserContentDirectory ${sonarDataDir}/${dataFile} ${userContentDir}
+        if [[ -e ${sonarDataPath}/${dataFile} ]] ; then
+            debug  now copying ${sonarDataPath}/${dataFile} to ${userContentPath} ...
+            copyFileToUserContentDirectory ${sonarDataPath}/${dataFile} ${userContentPath}
         else
             local severity=info
             local isFatalDataFilesMissing=$(getConfig LFS_CI_is_fatal_data_files_missing)
             [[ -n "${isFatalDataFilesMissing}" ]] && severity=fatal
-            ${severity}  ${sonarDataDir}/${dataFile} not found!
+            ${severity}  ${sonarDataPath}/${dataFile} not found!
         fi
     done
     
