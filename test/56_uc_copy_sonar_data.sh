@@ -16,6 +16,7 @@ oneTimeSetUp() {
             jenkinsMasterServerPath)             echo ${JENKINS_ROOT}/home ;;
             LFS_CI_coverage_data_path)           echo $(eval echo ${DATA_PATH}) ;;
             LFS_CI_coverage_data_files)          echo ${DATA_FILES} ;;
+            LFS_CI_usercontent_data_path)        echo sonar/${subDir}/${targetType} ;;
             LFS_CI_is_fatal_data_files_missing)  echo ${isFatalDataFilesMissing} ;;
             *)                                   echo $1
         esac
@@ -94,7 +95,6 @@ test_UT_FSMr4() {
 }
 
 test_SCT() {
-    info test_SCT
     export JOB_NAME=LFS_CI_-_trunk_-_RegularTest
     export DATA_PATH='src-test/src/testsuites/continousintegration/coverage/summary/__html/LCOV_${targetType}'
     export DATA_FILES="coverage.xml.gz"
