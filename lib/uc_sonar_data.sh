@@ -18,9 +18,11 @@ usecase_LFS_COPY_SONAR_UT_DATA() {
     local targetType=$(getSubTaskNameFromJobName)
     mustHaveValue ${targetType} "target type"
 
+    local subDir=UT
+    local userContentPath=$(getConfig LFS_CI_usercontent_data_path -t targetType:${targetType} -t subDir:${subDir})
+
     local workspace=$(getWorkspaceName)
     mustHaveWorkspaceName
-    local userContentPath=sonar/UT/${targetType}
 
     _copy_Sonar_Data_to_userContent ${workspace}/${sonarDataPath} ${userContentPath}
     
@@ -38,12 +40,12 @@ usecase_LFS_COPY_SONAR_SCT_DATA() {
     local workspace=$(getWorkspaceName)
     mustHaveWorkspaceName
 
+    local subDir=SCT
+
     for targetType in FSMr3 FSMr4
     do
-        #TODO: the following eval construct shouldn't be necessary, but it doesnt work in Jenkins otherwise
-        # further investigation needed
         local sonarDataPath==$(getConfig LFS_CI_coverage_data_path -t targetType:${targetType})
-        local userContentPath=sonar/SCT/${targetType}
+        local userContentPath=$(getConfig LFS_CI_usercontent_data_path -t targetType:${targetType} -t subDir:${subDir})
 
         _copy_Sonar_Data_to_userContent ${workspace}/${sonarDataPath} ${userContentPath}
 
