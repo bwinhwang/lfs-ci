@@ -63,7 +63,7 @@ _copy_Sonar_Data_to_userContent () {
     local sonarDataPath=$1
     local userContentPath=$2
 
-    local branchName = $(getBranchName)
+    local branchName=$(getBranchName)
 
     for dataFile in $(getConfig LFS_CI_coverage_data_files)
     do
