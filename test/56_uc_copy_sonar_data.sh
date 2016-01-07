@@ -16,6 +16,7 @@ oneTimeSetUp() {
             jenkinsMasterServerPath)             echo ${JENKINS_ROOT}/home ;;
             LFS_CI_unittest_coverage_data_path)  echo ${DATA_PATH} ;;
             LFS_CI_unittest_coverage_data_files) echo ${DATA_FILES} ;;
+            LFS_CI_is_fatal_data_files_missing)  echo ${isFatalDataFilesMissing} ;;
             *)                                   echo $1
         esac
 
@@ -102,6 +103,26 @@ test_SCT() {
     check_FilesExist ${sonarPath}
     local sonarPath=sonar/SCT/FSMr4
     check_FilesExist ${sonarPath}
+
+    return
+}
+
+test_no_files_not_fatal() {
+    export JOB_NAME=LFS_CI_-_trunk_-_RegularTest
+    export DATA_PATH='this_path_does_not_exist'
+    export DATA_FILES="coverage.xml.gz"
+    export isFatalDataFilesMissing=
+    assertTrue "usecase_LFS_COPY_SONAR_SCT_DATA failed!" "usecase_LFS_COPY_SONAR_SCT_DATA"
+
+    return
+}
+
+test_no_files_fatal() {
+    export JOB_NAME=LFS_CI_-_trunk_-_RegularTest
+    export DATA_PATH='this_path_does_not_exist'
+    export DATA_FILES="coverage.xml.gz"
+    export isFatalDataFilesMissing=1
+    assertFalse "usecase_LFS_COPY_SONAR_SCT_DATA should have failed because of missing files!" "usecase_LFS_COPY_SONAR_SCT_DATA"
 
     return
 }
