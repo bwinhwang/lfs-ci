@@ -56,9 +56,6 @@ ci_job_test() {
     local requiredArtifacts=$(getConfig LFS_CI_UC_test_required_artifacts)
     copyAndExtractBuildArtifactsFromProject "${upstreamProject}" "${upstreamBuildNumber}" "${requiredArtifacts}"
 
-    copyFileFromBuildDirectoryToWorkspace ${UPSTREAM_PROJECT} ${UPSTREAM_BUILD} fingerprint.txt
-    copyFileFromWorkspaceToBuildDirectory ${JOB_NAME} ${BUILD_NUMBER} fingerprint.txt
-
     # structure of jobs
     # Test
     #  |--- FSM-r2 summary

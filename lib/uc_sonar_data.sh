@@ -66,7 +66,10 @@ _copy_Sonar_Data_to_userContent () {
             debug  now copying ${sonarDataDir}/${dataFile} to ${userContentDir} ...
             copyFileToUserContentDirectory ${sonarDataDir}/${dataFile} ${userContentDir}
         else
-            info  ${sonarDataDir}/${dataFile} not found!
+            local severity=info
+            local isFatalDataFilesMissing=$(getConfig LFS_CI_is_fatal_data_files_missing)
+            [[ -n "${isFatalDataFilesMissing}" ]] && severity=fatal
+            ${severity}  ${sonarDataDir}/${dataFile} not found!
         fi
     done
     

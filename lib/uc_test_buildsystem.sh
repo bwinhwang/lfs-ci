@@ -29,7 +29,7 @@ ci_job_test_buildsystem() {
 
     createWorkspace
 
-    local testSuiteDirectory=${workspace}/src-test/src/unittest/testsuites/buildsystem/dependencies
+    local testSuiteDirectory=${workspace}/src-test/src/testsuites/buildsystem/dependencies
 
 
     info "starting tests..."
