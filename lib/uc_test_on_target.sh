@@ -33,7 +33,6 @@ ci_job_test_on_target() {
 
     local workspace=$(getWorkspaceName)
     mustHaveWorkspaceName
-    mustHaveCleanWorkspace
 
     local locationName=$(getLocationName ${UPSTREAM_PROJECT})
     mustHaveValue "${locationName}" "location name from ${UPSTREAM_PROJECT}"
