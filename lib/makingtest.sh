@@ -413,7 +413,7 @@ makingTest_install() {
     mustHaveValue "${maxInstallTries}" "max installation tries"
 
     storeEvent target_install_started
-    exit_add storeEvent:test_failed
+    exit_add storeEvent:target_install_failed
     for i in $(seq 1 ${maxInstallTries}) ; do
         trace "install loop ${i}"
 

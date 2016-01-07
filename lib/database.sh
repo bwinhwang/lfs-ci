@@ -70,7 +70,7 @@ eventBuildStarted() {
 
 ## @fn      eventOtherStarted()
 #  @brief   create an entry in the database table build_events for a started "other" event
-#  @param   <none>
+#  @param   {eventName} name of the event
 #  @return  <none>
 eventOtherStarted() {
     storeEvent other_started $1
@@ -79,7 +79,7 @@ eventOtherStarted() {
 
 ## @fn      eventOtherFinished()
 #  @brief   create an entry in the database table build_events for a finished "other" event
-#  @param   <none>
+#  @param   {eventName} name of the event
 #  @return  <none>
 eventOtherFinished() {
     storeEvent other_finished $1
@@ -88,7 +88,7 @@ eventOtherFinished() {
 
 ## @fn      eventOtherFailed()
 #  @brief   create an entry in the database table build_events for a failed "other" event
-#  @param   <none>
+#  @param   {eventName} name of the event
 #  @return  <none>
 eventOtherFailed() {
     storeEvent other_failed $1
@@ -145,9 +145,10 @@ eventSubTestFailed() {
 
 ## @fn      storeEvent()
 #  @brief   internal function: store the event in the database table build_events  
-#  @param   {eventType}    type of the event
+#  @param   {eventName}    name of the event
 #  @param   {targetName}   name of the target
-#  @param   {targetType}   type of the target
+#  @param   {opts}         additional (optional) options for newEvent.
+#                          only use this option, if really required!
 #  @return  <none>
 storeEvent() {
     requiredParameters LFS_CI_ROOT JOB_NAME BUILD_NUMBER

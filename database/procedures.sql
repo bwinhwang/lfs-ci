@@ -387,7 +387,6 @@ DELIMITER ;
 -- @param  in_build_number        build number of the jenkins job
 -- @param  in_product_name        name of the product (LFS, UBOOT, ...)
 -- @param  in_task_name           name of the task (build, test, smoketest, releas)
--- @param  in_event_type          type of the event (build, test, release, other)
 -- @param  in_build_host          name of the build host (FQDN)
 -- @return <none>
 DROP PROCEDURE IF EXISTS target_install_started;
@@ -416,7 +415,6 @@ DELIMITER ;
 -- @param  in_build_number        build number of the jenkins job
 -- @param  in_product_name        name of the product (LFS, UBOOT, ...)
 -- @param  in_task_name           name of the task (build, test, smoketest, releas)
--- @param  in_event_type          type of the event (build, test, release, other)
 -- @param  in_build_host          name of the build host (FQDN)
 -- @return <none>
 DROP PROCEDURE IF EXISTS target_install_finished;
@@ -445,7 +443,6 @@ DELIMITER ;
 -- @param  in_build_number        build number of the jenkins job
 -- @param  in_product_name        name of the product (LFS, UBOOT, ...)
 -- @param  in_task_name           name of the task (build, test, smoketest, releas)
--- @param  in_event_type          type of the event (build, test, release, other)
 -- @param  in_build_host          name of the build host (FQDN)
 -- @return <none>
 DROP PROCEDURE IF EXISTS target_install_failed;
@@ -474,7 +471,6 @@ DELIMITER ;
 -- @param  in_build_number        build number of the jenkins job
 -- @param  in_product_name        name of the product (LFS, UBOOT, ...)
 -- @param  in_task_name           name of the task (build, test, smoketest, releas)
--- @param  in_event_type          type of the event (build, test, release, other)
 -- @param  in_build_host          name of the build host (FQDN)
 -- @return <none>
 DROP PROCEDURE IF EXISTS target_reboot_started;
@@ -503,7 +499,6 @@ DELIMITER ;
 -- @param  in_build_number        build number of the jenkins job
 -- @param  in_product_name        name of the product (LFS, UBOOT, ...)
 -- @param  in_task_name           name of the task (build, test, smoketest, releas)
--- @param  in_event_type          type of the event (build, test, release, other)
 -- @param  in_build_host          name of the build host (FQDN)
 -- @return <none>
 
@@ -533,7 +528,6 @@ DELIMITER ;
 -- @param  in_build_number        build number of the jenkins job
 -- @param  in_product_name        name of the product (LFS, UBOOT, ...)
 -- @param  in_task_name           name of the task (build, test, smoketest, releas)
--- @param  in_event_type          type of the event (build, test, release, other)
 -- @param  in_build_host          name of the build host (FQDN)
 -- @return <none>
 
@@ -563,7 +557,6 @@ DELIMITER ;
 -- @param  in_build_number        build number of the jenkins job
 -- @param  in_product_name        name of the product (LFS, UBOOT, ...)
 -- @param  in_task_name           name of the task (build, test, smoketest, releas)
--- @param  in_event_type          type of the event (build, test, release, other)
 -- @param  in_build_host          name of the build host (FQDN)
 -- @return <none>
 DROP PROCEDURE IF EXISTS target_reservation_started;
@@ -592,7 +585,6 @@ DELIMITER ;
 -- @param  in_build_number        build number of the jenkins job
 -- @param  in_product_name        name of the product (LFS, UBOOT, ...)
 -- @param  in_task_name           name of the task (build, test, smoketest, releas)
--- @param  in_event_type          type of the event (build, test, release, other)
 -- @param  in_build_host          name of the build host (FQDN)
 -- @return <none>
 
@@ -622,7 +614,6 @@ DELIMITER ;
 -- @param  in_build_number        build number of the jenkins job
 -- @param  in_product_name        name of the product (LFS, UBOOT, ...)
 -- @param  in_task_name           name of the task (build, test, smoketest, releas)
--- @param  in_event_type          type of the event (build, test, release, other)
 -- @param  in_build_host          name of the build host (FQDN)
 -- @return <none>
 DROP PROCEDURE IF EXISTS target_reservation_failed;
