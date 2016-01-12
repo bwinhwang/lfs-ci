@@ -17,7 +17,7 @@
   <repositoryUrl>/build/home/SC_LFS/pkgpool</repositoryUrl>
   <repositoryBranch/>
   <repositoryRevision>__TAGNAME__</repositoryRevision>
-  <repositoryType>svn</repositoryType>
+  <repositoryType>git</repositoryType>
   <correctedFaults>
     <module name="__TAGNAME__">
     </module>
