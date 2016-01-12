@@ -58,7 +58,11 @@ sub importantNote {
     my $self = shift;
     $self->mustHaveFileData( "importantNote" );
     my %duplicates;
-    return join( "\n", grep { not $duplicates{$_}++ } 
+    return join( "\n", # use a schwarzian transform to efficiently sort a list, see https://en.wikipedia.org/wiki/Schwartzian_transform
+                       map  { $_->[0] }
+                       sort { $a->[1] cmp $b->[1] } 
+                       map  { [ $_, /^RB=\d+/ ? " $_" : $_ ] }
+                       grep { not $duplicates{$_}++ } 
                        @{ $self->{importantNote} || [] } );
 }
 

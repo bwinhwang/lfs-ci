@@ -87,6 +87,7 @@ CREATE TABLE build_events (
     comment      TEXT,
     job_name     VARCHAR(128) NOT NULL,
     build_number INT NOT NULL,
+    build_host   VARCHAR(256),
 
     PRIMARY KEY (id),
     FOREIGN KEY (event_id)
