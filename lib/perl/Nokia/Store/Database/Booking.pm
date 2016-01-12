@@ -43,7 +43,7 @@ sub searchTarget {
     my $self  = shift;
     my $param = { @_ };
 
-    my @attributes = split( /\s+/, $param->{attributes} || not_a_valid_features );
+    my @attributes = split( /\s+/, $param->{attributes} || qw( not_a_valid_features ) );
     my $targetName = $param->{targetName}    || 'not_a_valid_target_name';
 
     # match with regex due to word bondary
