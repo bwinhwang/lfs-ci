@@ -147,6 +147,9 @@ unreserveTarget() {
 mustHaveReservedTarget() {
     requiredParameters JOB_NAME
 
+    local workspace=$(getWorkspaceName)
+    mustHaveWorkspaceName
+
     local isBookingEnabled=$(getConfig LFS_uc_test_is_booking_enabled)
     local targetName=""
     if [[ ${isBookingEnabled} ]] ; then
@@ -154,7 +157,16 @@ mustHaveReservedTarget() {
         local branchName=$(getBranchName ${UPSTREAM_PROJECT})
         mustHaveValue "${branchName}" "branch name from ${UPSTREAM_PROJECT}"
 
-        local targetFeatures="$(getConfig LFS_uc_test_booking_target_features -t branchName:${branchName})"
+        local targetFeatures=""
+        if [[ -e ${workspace}/src-project/src/TMF/targets.cfg ]] ; then
+            targetFeatures="$(getConfig target_features -t "branchName:${branchName}" \
+                                        -f ${workspace}/src-project/src/TMF/targets.cfg)"
+        fi
+        # if target features are empty, try to find target features in the old config file
+        if [[ -z ${targetFeatures} ]] ; then
+            targetFeatures="$(getConfig LFS_uc_test_booking_target_features \
+                                                -t "branchName:${branchName}" )"
+        fi
         debug "requesting target with features ${targetFeatures}"
 
         reserveTargetByFeature ${targetFeatures}

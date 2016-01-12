@@ -49,15 +49,15 @@ sub searchTarget {
     # match with regex due to word bondary
     # see http://stackoverflow.com/questions/656951/search-for-whole-word-match-in-mysql
     my $sqlString = join( " and ", map {
-                                         if( $_ eq '||' ) {
+                                         if( $_ eq 'or' ) {
                                              sprintf( " OR " ); 
-                                         } elsif ( $_ eq '&&' ) {
+                                         } elsif ( $_ eq 'and' ) {
                                              sprintf( " AND " );
                                          } elsif ( $_ eq ')' ) {
                                              sprintf( " ) " ); 
                                          } elsif ( $_ eq '(' ) {
                                              sprintf( " ( " ); 
-                                         } elsif ( $_ eq '!' ) {
+                                         } elsif ( $_ eq 'not' ) {
                                              sprintf( " NOT " );
                                          } else {
                                              sprintf( " ( target_features REGEXP '[[:<:]]%s[[:>:]]' or target_name = '%s' ) ", $_, $_ );
