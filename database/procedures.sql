@@ -759,7 +759,7 @@ BEGIN
 
     DROP TABLE IF EXISTS tmp_test_results;
     SET @sql =
-        CONCAT('CREATE TEMPORARY TABLE tmp_test_results
+        CONCAT('CREATE TABLE tmp_test_results
             SELECT test_execution_id, ', @sql, '
                      FROM v_test_results
                     GROUP BY test_execution_id');
@@ -838,7 +838,7 @@ CREATE PROCEDURE build_results()
 BEGIN
 
     DROP TABLE IF EXISTS tmp_build_results;
-    CREATE TEMPORARY TABLE tmp_build_results
+    CREATE TABLE tmp_build_results
     SELECT b.id,
            b.build_name,
            b.branch_name,
