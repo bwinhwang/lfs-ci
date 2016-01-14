@@ -38,7 +38,7 @@ usecase_ADMIN_CREATE_CLOUD_SLAVE_INSTANCE() {
 
     # source seesetenv euca2ools=3.1.1. is already done via entry in linsee.cfg
     info Sourcing eucarc with: source ${cloudUserRootDir}/${cloudEucarc}
-    mustExistsFile ${cloudUserRootDir}/${cloudEucarc}
+    #mustExistFile ${cloudUserRootDir}/${cloudEucarc}
     source ${cloudUserRootDir}/${cloudEucarc}
 
     local allcloudDnsName=""
@@ -173,9 +173,9 @@ EOF
 #  @return  <none>
 createNewJenkinsNode() {
     local newCloudNodeConfigXml=$1
-    mustExistsFile ${newCloudNodeConfigXml}
-    local jenkinsCli=$(getConfig JENKINS_CLI_JAR)
-    mustExistsFile ${jenkinsCli}
+    mustExistFile ${newCloudNodeConfigXml}
+    local jenkinsCli=$(getConfig jenkinsCli)
+    #mustExistFile ${jenkinsCli}
 
     info +++ TODO java -jar ${jenkinsCli}  -s http://maxi:1280  create-node < ${newCloudNodeConfigXml}
 }
@@ -248,11 +248,11 @@ EOF
 #  @return  <none>
 createNewJenkinsNodeAdminCleanupJob() {
     local newCloudNodeCleanupJobConfigXml=$1
-    mustExistsFile ${newCloudNodeCleanupJobConfigXml}
+    mustExistFile ${newCloudNodeCleanupJobConfigXml}
     local instanceID=$2
     mustHaveValue "${instanceID}" "instanceID"
-    local jenkinsCli=$(getConfig JENKINS_CLI_JAR)
-    mustExistsFile ${jenkinsCli}
+    local jenkinsCli=$(getConfig jenkinsCli)
+    #mustExistFile ${jenkinsCli}
 
     info +++ TODO cat ${newCloudNodeCleanupJobConfigXml} '|' java -jar ${jenkinsCli}  -s http://maxi:1280 create-job Admin_-_cleanupBaselineShares_-_${instanceID}
     #cat ${newCloudNodeCleanupJobConfigXml} | java -jar ${jenkinsCli}  -s http://maxi:1280 create-job Admin_-_cleanupBaselineShares_-_${instanceID}
