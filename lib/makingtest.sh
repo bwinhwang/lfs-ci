@@ -118,6 +118,7 @@ makingTest_testSuiteDirectory() {
 
     local relativeTestSuiteDirectory=
     if [[ -e ${workspace}/src-project/src/TMF/testsuites.cfg ]] ; then
+        debug "searching for testSuiteDir in src-project/src/TMF/testsuites.cfg"
         relativeTestSuiteDirectory=$(getConfig test_suite                                     \
                                             -t "targetName:${targetName}"                     \
                                             -t "branchName:${branchName}"                     \
@@ -126,6 +127,7 @@ makingTest_testSuiteDirectory() {
     fi
     # if test suite directory is empty, try to find in test suite in the old config file
     if [[ -z ${relativeTestSuiteDirectory} ]] ; then
+        debug "searching for testSuiteDir in etc/tmf.cfg"
         relativeTestSuiteDirectory=$(getConfig LFS_CI_uc_test_making_test_suite_dir \
                                             -t "targetName:${targetName}"           \
                                             -t "branchName:${branchName}"           )
