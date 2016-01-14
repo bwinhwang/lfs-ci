@@ -54,30 +54,30 @@ _checkReleaseForPronto() {
     local canCheckForPronto=$(getConfig CUSTOM_SCM_release_check_for_pronto)
     if [[ ! ${canCheckForPronto} ]] ; then
         warning "check for pronto in release is disabled"
-        return
+        return 1
     fi
-    if egrep -q -e '%FIN %PR=[0-9]+ESPE[09-]+' ${changelog} ; then
+    if egrep -q -e '%FIN %PR=PR[0-9]+' ${changelog} ; then
         info "found in comments '%FIN %PR=<pronto>', trigger build"
         exit 0
     fi
 
-    return
+    return 1
 }
 
 _checkReleaseForEmptyChangelog() {
     local changelog=$1
 
     local canCheckForEmptyChangelog=$(getConfig CUSTOM_SCM_release_check_for_empty_changelog)
-    if [[ ! ${canCheckForPronto} ]] ; then
+    if [[ ! ${canCheckForEmptyChangelog} ]] ; then
         warning "check for empty changelog in release is disabled"
-        return
+        return 1
     fi
     if ! grep -q -e 'logentry' ${changelog} ; then
         info "changelog is empty"
         exit 0
     fi
 
-    return
+    return 1
 }
 
 _checkReleaseForRelevantChanges() {
@@ -86,7 +86,7 @@ _checkReleaseForRelevantChanges() {
     local canCheckForRelevantChanges=$(getConfig CUSTOM_SCM_release_check_for_relevant_changes)
     if [[ ! ${canCheckForRelevantChanges} ]] ; then
         warning "check for empty changelog in release is disabled"
-        return
+        return 1
     fi
 
     local file=$(createTempFile)
@@ -94,7 +94,7 @@ _checkReleaseForRelevantChanges() {
 
     if [[ ! -f ${filterFile} ]] ; then
         info "no filter file for relevant changes found => no check"
-        return
+        return 1
     fi
 
     execute -l ${file} ${LFS_CI_ROOT}/bin/xpath -q -e '/log/logentry/paths/path/node()' ${changelog}
@@ -106,7 +106,7 @@ _checkReleaseForRelevantChanges() {
        exit 0
     fi
 
-    return
+    return 1
 }
 
 ## @fn      actionCheckout()
