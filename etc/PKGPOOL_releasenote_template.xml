@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<releasenote version="10">
+<releasenote version="11">
   <name>__TAGNAME__</name>
   <system>PS_LFS</system>
   <releaseDate>__DATE__</releaseDate>
@@ -17,6 +17,7 @@
   <repositoryUrl>/build/home/SC_LFS/pkgpool</repositoryUrl>
   <repositoryBranch/>
   <repositoryRevision>__TAGNAME__</repositoryRevision>
+  <repositoryType>git</repositoryType>
   <correctedFaults>
     <module name="__TAGNAME__">
     </module>

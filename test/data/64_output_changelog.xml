@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<releasenote version="10">
+<releasenote version="11">
   <name>TAG_NAME</name>
   <system>PS_LFS</system>
   <releaseDate>yyyy-mm-dd</releaseDate>
@@ -10,11 +10,15 @@
     <note name="TAG_NAME">RB=12345:  This is the first test to bring RB entries into the important note section -- https://psreviewboard.emea.nsn-net.net/r/12345
 RB=12346:  This is the second test to bring RB entries into the important note section -- https://psreviewboard.emea.nsn-net.net/r/12346
 A very important note
+File important 1
+Line 2
+A third line 3
 very important note</note>
   </importantNotes>
   <repositoryUrl>https://ulscmi.inside.nsn.com/isource/svnroot/${LFS_PROD_svn_delivery_repos_name}/os</repositoryUrl>
   <repositoryBranch>tags/TAG_NAME</repositoryBranch>
   <repositoryRevision></repositoryRevision>
+  <repositoryType>svn</repositoryType>
   <correctedFaults>
     <module name="PS_LFS_OS">
         <fault id="PR071990">PR PR071990</fault>

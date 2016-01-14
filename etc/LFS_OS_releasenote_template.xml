@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<releasenote version="10">
+<releasenote version="11">
   <name>__TAGNAME__</name>
   <system>PS_LFS</system>
   <releaseDate>__DATE__</releaseDate>
@@ -12,6 +12,7 @@
   <repositoryUrl>__SVN_OS_REPOS_URL__</repositoryUrl>
   <repositoryBranch>tags/__TAGNAME__</repositoryBranch>
   <repositoryRevision>__SVN_OS_REPOS_REVISION__</repositoryRevision>
+  <repositoryType>svn</repositoryType>
   <correctedFaults>
     <module name="PS_LFS_OS">
         __CORRECTED_FAULTS__

@@ -33,10 +33,12 @@ ci_job_test_on_target() {
 
     local workspace=$(getWorkspaceName)
     mustHaveWorkspaceName
-    mustHaveCleanWorkspace
 
     local locationName=$(getLocationName ${UPSTREAM_PROJECT})
     mustHaveValue "${locationName}" "location name from ${UPSTREAM_PROJECT}"
+
+    mustHaveNextLabelName
+    local buildName=$(getNextCiLabelName)
 
     if [[ ${JOB_NAME} =~ ^Test- ]] ; then
         # legacy: using the Test-<targetName> job. No detailed information about
@@ -47,8 +49,9 @@ ci_job_test_on_target() {
     else
         local requireCompleteWorkspace=$(getConfig LFS_CI_uc_test_require_complete_workspace)
         if [[ ${requireCompleteWorkspace} ]] ; then
-            copyFileFromBuildDirectoryToWorkspace ${UPSTREAM_PROJECT} ${UPSTREAM_BUILD} fingerprint.txt
-            mv ${WORKSPACE}/fingerprint.txt ${WORKSPACE}/revisions.txt
+            local upstreamProject=$(getBuildJobNameFromFingerprint ${buildName}) 
+            local upstreamBuild=$(getBuildBuildNumberFromFingerprint ${buildName})
+            copyRevisionStateFileToWorkspace ${upstreamProject} ${upstreamBuild}
             createWorkspace
         else
             # TODO: demx2fk3 2015-02-13 we are using the wrong revision to checkout src-test

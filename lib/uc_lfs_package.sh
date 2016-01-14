@@ -27,9 +27,6 @@ ci_job_package() {
     mustHaveCleanWorkspace
     mustHaveWritableWorkspace
 
-    copyFileFromBuildDirectoryToWorkspace ${UPSTREAM_PROJECT} ${UPSTREAM_BUILD} fingerprint.txt
-    copyFileFromWorkspaceToBuildDirectory ${JOB_NAME} ${BUILD_NUMBER} fingerprint.txt
-
     debug "workspace is ${workspace}"
 
     local requiredArtifacts=$(getConfig LFS_CI_UC_package_required_artifacts)
@@ -526,7 +523,7 @@ copyVersionFile() {
     local dstDirectory=${workspace}/upload/versions
     mkdir -p ${dstDirectory}
 
-    info "copy verson control file..."
+    info "copy version control file..."
     for file in ${workspace}/bld/bld-fsmpsl-fct/results/doc/versions/version_control.xml \
                 ${workspace}/bld/bld-fsmpsl-fct/results/doc/versions/ptsw_fsmr3_version_control.xml \
                 ${workspace}/bld/bld-fsmpsl-fct/results/doc/versions/ptsw_fsmr4_version_control.xml \
