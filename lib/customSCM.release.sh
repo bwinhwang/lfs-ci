@@ -48,6 +48,11 @@ actionCompare() {
     exit 1
 }
 
+## @fn      _checkReleaseForPronto()
+#  @brief   check the changelog for a change, which contains a pronto id
+#  @param   {changelog}    name of the changelog
+#  @return  <none>
+#  @return  1 if there is no pronto id in the changelog, 0 otherwise
 _checkReleaseForPronto() {
     local changelog=$1
 
@@ -64,6 +69,10 @@ _checkReleaseForPronto() {
     return 1
 }
 
+## @fn      _checkReleaseForEmptyChangelog()
+#  @brief   check the changelog for a empty changelog
+#  @param   {changelog}    name of the changelog
+#  @return  1 if the changelog is not empty, 0 otherwise
 _checkReleaseForEmptyChangelog() {
     local changelog=$1
 
@@ -80,6 +89,14 @@ _checkReleaseForEmptyChangelog() {
     return 1
 }
 
+## @fn      _checkReleaseForRelevantChanges()
+#  @brief   check the changelog for relevant changes.
+#  @details there is a filter file in etc/customSCM.release.filter.*.txt, which defines a list
+#           of components, which are not relevant for release. So you can list src-test or src-unittests
+#           in the filter file. If there is only changes in src-test in the changelog, the
+#           release candidate will be not released.
+#  @param   {changelog}    name of the changelog
+#  @return  1 if there are norelevant changes, 0 otherwise
 _checkReleaseForRelevantChanges() {
     local changelog=${1}
 
