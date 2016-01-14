@@ -48,7 +48,7 @@ sub searchTarget {
 
     # match with regex due to word bondary
     # see http://stackoverflow.com/questions/656951/search-for-whole-word-match-in-mysql
-    my $sqlString = join( " and ", map {
+    my $sqlString = join( " ", map {
                                          if( $_ eq 'or' ) {
                                              sprintf( " OR " ); 
                                          } elsif ( $_ eq 'and' ) {

@@ -74,7 +74,7 @@ test2() {
     cat <<EOF > ${expect}
 getConfig LFS_uc_test_booking_target_sleep_seconds
 getConfig LFS_uc_test_booking_target_max_tries
-execute -n ${LFS_CI_ROOT}/bin/searchTarget --attribute=feature1 --attribute=feature2
+execute -n ${LFS_CI_ROOT}/bin/searchTarget --attribute=feature1 feature2
 execute -i ${LFS_CI_ROOT}/bin/reserveTarget --targetName=target1 --comment=lfs-ci: jobName / 123
 EOF
     assertExecutedCommands ${expect}
@@ -95,9 +95,9 @@ test3() {
     cat <<EOF > ${expect}
 getConfig LFS_uc_test_booking_target_sleep_seconds
 getConfig LFS_uc_test_booking_target_max_tries
-execute -n ${LFS_CI_ROOT}/bin/searchTarget --attribute=feature1 --attribute=feature2
+execute -n ${LFS_CI_ROOT}/bin/searchTarget --attribute=feature1 feature2
 execute -i ${LFS_CI_ROOT}/bin/reserveTarget --targetName=target1 --comment=lfs-ci: jobName / 123
-execute -n ${LFS_CI_ROOT}/bin/searchTarget --attribute=feature1 --attribute=feature2
+execute -n ${LFS_CI_ROOT}/bin/searchTarget --attribute=feature1 feature2
 execute -i ${LFS_CI_ROOT}/bin/reserveTarget --targetName=target1 --comment=lfs-ci: jobName / 123
 EOF
     assertExecutedCommands ${expect}
@@ -120,11 +120,11 @@ test4() {
     cat <<EOF > ${expect}
 getConfig LFS_uc_test_booking_target_sleep_seconds
 getConfig LFS_uc_test_booking_target_max_tries
-execute -n ${LFS_CI_ROOT}/bin/searchTarget --attribute=feature1 --attribute=feature2
+execute -n ${LFS_CI_ROOT}/bin/searchTarget --attribute=feature1 feature2
 execute -i ${LFS_CI_ROOT}/bin/reserveTarget --targetName=target1 --comment=lfs-ci: jobName / 123
-execute -n ${LFS_CI_ROOT}/bin/searchTarget --attribute=feature1 --attribute=feature2
+execute -n ${LFS_CI_ROOT}/bin/searchTarget --attribute=feature1 feature2
 execute -i ${LFS_CI_ROOT}/bin/reserveTarget --targetName=target1 --comment=lfs-ci: jobName / 123
-execute -n ${LFS_CI_ROOT}/bin/searchTarget --attribute=feature1 --attribute=feature2
+execute -n ${LFS_CI_ROOT}/bin/searchTarget --attribute=feature1 feature2
 execute -i ${LFS_CI_ROOT}/bin/reserveTarget --targetName=target1 --comment=lfs-ci: jobName / 123
 EOF
     assertExecutedCommands ${expect}

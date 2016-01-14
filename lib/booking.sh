@@ -72,10 +72,7 @@ reserveTargetByFeature() {
 
     local features=${@}
     mustHaveValue "${features}" "list of features"
-
     debug "features ${features}"
-    local searchParameter=" --attribute=\'${features}\'"
-    debug "search parameter: ${searchParameter}"
 
     local sleepTime=$(getConfig LFS_uc_test_booking_target_sleep_seconds)
     mustHaveValue "${sleepTime}" "sleep time"
@@ -86,7 +83,7 @@ reserveTargetByFeature() {
     local counter=0
 
     while [[ ${counter} -lt ${maxTryToGetTarget} ]] ; do
-        for targetName in $(execute -n ${LFS_CI_ROOT}/bin/searchTarget ${searchParameter} ) ; do
+        for targetName in $(execute -n ${LFS_CI_ROOT}/bin/searchTarget --attribute="${features}" ) ; do
             info "try to reserve target ${targetName}"
 
             if execute -i ${LFS_CI_ROOT}/bin/reserveTarget --targetName=${targetName} --comment="lfs-ci: ${JOB_NAME} / ${BUILD_NUMBER}" ; then
