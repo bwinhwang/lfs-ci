@@ -7,7 +7,7 @@
 ##          Use -h to geht help.
 ##
 ## Some notes:
-## If you use the -h option after another option, the value/flag of
+## If you use the -h option after all other option, the value/flag of
 ## the option specified before the -h flag is used in the help text.
 ## setup-sandbox.sh -h gives the following output for -t HTTP_PORT.
 ##     -t HTTP_PORT for Jenkins. Defaults to 8090.
@@ -176,7 +176,7 @@ pre_actions() {
         exit 2
     fi
 
-    if [[ ${UPDATE_JENKINS} == false && $(ps aux | grep java | grep -v slave.jar | grep jenkins) ]]; then
+    if [[ ${UPDATE_JENKINS} == false && ${CHECK_RUNNING_JENKINS} == "true" && $(ps aux | grep java | grep -v slave.jar | grep jenkins) ]]; then
         echo "ERROR: Jenkins is still running."
         exit 3
     fi
@@ -804,10 +804,12 @@ main() {
         exit $?
     fi
 
-    git_stuff
-    cd ${HOME}
-    jenkins_stuff
-    post_actions
+    if [[ ${PURGE_SANDBOX} == false ]]; then
+        git_stuff
+        cd ${HOME}
+        jenkins_stuff
+        post_actions
+    fi
 }
 
 main $*
