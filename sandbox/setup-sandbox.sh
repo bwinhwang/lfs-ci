@@ -126,6 +126,7 @@ cat << EOF
         -a (flag) Copy the Admin_-_* jobs. Default is not coping the Admin_-_* jobs execpt the mandatroy
                   jobs ${DEFAULT_JOBS}.
         -k (flag) Copy the "Test-*" jobs. Default is not coping "Test-*" jobs.
+        -v JENKINS_VERSION. Default value is taken from jenkins.cfg file.
         -h Get help
 
     Examples:
@@ -140,6 +141,9 @@ cat << EOF
 
         Just start Jenkins(-o):
             ${ITSME} -o -f ~/lfs-ci/etc/development.cfg
+
+        Start Jenkins version 1.625.2:
+            ${ITSME} -o -v 1.625.2 -f ~/lfs-ci/etc/development.cfg
 
         Update trunk jobs and ${DEFAULT_JOBS} in Sandbox:
             ${ITSME} -j
@@ -200,6 +204,13 @@ pre_actions() {
         echo "ERROR: Jenkins version is needed."
         exit 7
     fi
+
+    if [[ ! -f ${JENKINS_WAR} ]]; then
+        echo "ERROR: Missing file ${JENKINS_WAR}"
+        exit 8
+    fi
+
+    exit 0
 }
 
 adjust_args() {
