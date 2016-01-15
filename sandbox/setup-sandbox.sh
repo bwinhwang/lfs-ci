@@ -66,6 +66,9 @@ Admin_-_svn_clone_sync_BTS_SC_LFS \
 Admin_-_updateLocationsTextFile"
 TRUNK_JOBS="LFS_CI_-_trunk_-_ LFS_Prod_-_trunk_-_ PKGPOOL_-_trunk_-_"
 
+source ${LFS_CI_ROOT}/lib/logging.sh
+source ${LFS_CI_ROOT}/lib/config.sh
+
 usage() {
 cat << EOF
 
@@ -191,6 +194,11 @@ pre_actions() {
     if [[ ! -r ${LFS_CI_CONFIG_FILE} && ${PURGE_SANDBOX} == false && ${UPDATE_JENKINS} == false ]]; then
         echo "ERROR: Can't read config file ${LFS_CI_CONFIG_FILE}."
         exit 6
+    fi
+
+    if [[ -z ${JENKINS_VERSION} ]]; then
+        echo "ERROR: Jenkins version is needed."
+        exit 7
     fi
 }
 
@@ -671,7 +679,7 @@ purge_sandbox() {
 }
 
 get_args() {
-    while getopts ":r:n:m:b:w:i:c:s:t:f:g:delpjohaxuk" OPT; do
+    while getopts ":v:r:n:m:b:w:i:c:s:t:f:g:delpjohaxuk" OPT; do
         case ${OPT} in
             b)
                 BRANCH_VIEWS=$OPTARG
@@ -705,6 +713,9 @@ get_args() {
             ;;
             g)
                 START_OPTION=${OPTARG}
+            ;;
+            v)
+                JENKINS_VERSION=${OPTARG}
             ;;
             d)
                 PURGE_SANDBOX="true"
@@ -754,7 +765,7 @@ get_args() {
     LRC_PROD_JENKINS_JOBS="${LRC_PROD_JENKINS_HOME}/jobs"
 
     HTTP_ADDRESS="0.0.0.0"
-    JENKINS_VERSION="1.532.3"
+    [[ -z ${JENKINS_VERSION} ]] && JENKINS_VERSION=$(getConfig jenkinsVersion)
     JENKINS_HOME="${LOCAL_WORK_DIR}/${SANDBOX_USER}/${JENKINS_DIR}/home"
     JENKINS_ROOT="${LOCAL_WORK_DIR}/${SANDBOX_USER}/${JENKINS_DIR}"
     JENKINS_PLUGINS="${JENKINS_HOME}/plugins"
