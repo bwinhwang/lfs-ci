@@ -28,15 +28,15 @@ actionCompare() {
     trace "new upstream project was ${upstreamProjectName} / ${upstreamBuildNumber}"
 
     # comparing to new state
-    if [[ "${upstreamProjectName}" != "${oldUpstreamProjectName}" ]] ; then
-        info "upstream project name changed, trigger build"
-        exit 0
-    fi
+#    if [[ "${upstreamProjectName}" != "${oldUpstreamProjectName}" ]] ; then
+#        info "upstream project name changed, trigger build"
+#        exit 0
+#    fi
 
-    if [[ "${upstreamBuildNumber}" != "${oldUpstreamBuildNumber}" ]] ; then
-        info "upstream build number has changed, trigger build"
-        exit 0
-    fi
+#    if [[ "${upstreamBuildNumber}" != "${oldUpstreamBuildNumber}" ]] ; then
+#        info "upstream build number has changed, trigger build"
+#        exit 0
+#    fi
 
     local changelog=$(createTempFile)
     _createChangelog ${oldUpstreamBuildNumber} ${upstreamBuildNumber} ${changelog}
