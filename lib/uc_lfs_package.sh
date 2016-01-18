@@ -32,7 +32,7 @@ ci_job_package() {
     local requiredArtifacts=$(getConfig LFS_CI_UC_package_required_artifacts)
     copyArtifactsToWorkspace "${UPSTREAM_PROJECT}" "${UPSTREAM_BUILD}" "${requiredArtifacts}"
 
-    databaseEventPackageStarted
+    storeEvent package_started
     exit_add _exitHandlerDatabaseEventPackageFinishedOrFailed
 
     mustHaveNextCiLabelName
@@ -72,9 +72,9 @@ ci_job_package() {
 #  @return  <none>
 _exitHandlerDatabaseEventPackageFinishedOrFailed() {
     if [[ ${1} -gt 0 ]] ; then
-        databaseEventPackageFailed
+        storeEvent package_failed
     else
-        databaseEventPackageFinished
+        storeEvent package_finished
     fi
 }
 

@@ -21,6 +21,10 @@ oneTimeSetUp() {
         return ${rc}
                 
     }
+    storeEvent() {
+        # mockedCommand "storeEvent $@"
+        return
+    }
     _reserveTarget(){
         mockedCommand "_reserveTarget $@"
         echo "TargetName"

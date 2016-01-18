@@ -23,8 +23,8 @@ oneTimeSetUp() {
     mustHaveNextCiLabelName() {
         mockedCommand "mustHaveNextCiLabelName $@"
     }
-    databaseEventSubBuildStarted() {
-        mockedCommand "databaseEventSubBuildStarted $@"
+    storeEvent() {
+        mockedCommand "storeEvent $@"
     }
     createWorkspace() {
         mockedCommand "createWorkspace $@"
@@ -74,7 +74,7 @@ test1() {
 mustHaveCleanWorkspace 
 copyAndExtractBuildArtifactsFromProject LFS_CI_-_trunk_-_Build 1234 fsmci
 mustHaveNextCiLabelName 
-databaseEventSubBuildStarted 
+storeEvent subbuild_started
 exit_add _recordSubBuildEndEvent
 getNextCiLabelName 
 setBuildDescription ${JOB_NAME} 1234 build_name
@@ -100,7 +100,7 @@ test2() {
 mustHaveCleanWorkspace 
 copyAndExtractBuildArtifactsFromProject LFS_CI_-_trunk_-_Build 1234 fsmci
 mustHaveNextCiLabelName 
-databaseEventSubBuildStarted 
+storeEvent subbuild_started
 exit_add _recordSubBuildEndEvent
 getNextCiLabelName 
 setBuildDescription ${JOB_NAME} 1234 build_name

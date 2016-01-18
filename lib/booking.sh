@@ -24,6 +24,7 @@ LFS_CI_SOURCE_booking='$Id$'
 [[ -z ${LFS_CI_SOURCE_config}   ]] && source ${LFS_CI_ROOT}/lib/config.sh
 [[ -z ${LFS_CI_SOURCE_logging}  ]] && source ${LFS_CI_ROOT}/lib/logging.sh
 [[ -z ${LFS_CI_SOURCE_commands} ]] && source ${LFS_CI_ROOT}/lib/commands.sh
+[[ -z ${LFS_CI_SOURCE_database} ]] && source ${LFS_CI_ROOT}/lib/database.sh
 
 ## @fn      reserveTargetByName()
 #  @brief   reserve target by a given name
@@ -72,14 +73,7 @@ reserveTargetByFeature() {
 
     local features=${@}
     mustHaveValue "${features}" "list of features"
-
     debug "features ${features}"
-    local searchParameter=""
-    for p in ${features} ; do
-        searchParameter="${searchParameter} --attribute=${p}"
-    done
-
-    debug "search parameter: ${searchParameter}"
 
     local sleepTime=$(getConfig LFS_uc_test_booking_target_sleep_seconds)
     mustHaveValue "${sleepTime}" "sleep time"
@@ -87,15 +81,19 @@ reserveTargetByFeature() {
     local maxTryToGetTarget=$(getConfig LFS_uc_test_booking_target_max_tries)
     mustHaveValue "${maxTryToGetTarget}" "max tries to get target"
 
-    local counter=0
+    storeEvent target_reservation_started
+    exit_add storeEvent:target_reservation_failed
 
+    local counter=0
     while [[ ${counter} -lt ${maxTryToGetTarget} ]] ; do
-        for targetName in $(execute -n ${LFS_CI_ROOT}/bin/searchTarget ${searchParameter} ) ; do
+        for targetName in $(execute -n ${LFS_CI_ROOT}/bin/searchTarget --attribute="${features}" ) ; do
             info "try to reserve target ${targetName}"
 
             if execute -i ${LFS_CI_ROOT}/bin/reserveTarget --targetName=${targetName} --comment="lfs-ci: ${JOB_NAME} / ${BUILD_NUMBER}" ; then
                 info "reservation for target ${targetName} was successful"
                 export LFS_CI_BOOKING_RESERVED_TARGET=${targetName}
+                storeEvent target_reservation_finished
+                exit_remove storeEvent:target_reservation_failed
                 return
             fi
         done
@@ -151,15 +149,26 @@ unreserveTarget() {
 mustHaveReservedTarget() {
     requiredParameters JOB_NAME
 
+    local workspace=$(getWorkspaceName)
+    mustHaveWorkspaceName
+
     local isBookingEnabled=$(getConfig LFS_uc_test_is_booking_enabled)
     local targetName=""
     if [[ ${isBookingEnabled} ]] ; then
         # new method via booking from database
-
         local branchName=$(getBranchName ${UPSTREAM_PROJECT})
         mustHaveValue "${branchName}" "branch name from ${UPSTREAM_PROJECT}"
 
-        local targetFeatures="$(getConfig LFS_uc_test_booking_target_features -t branchName:${branchName})"
+        local targetFeatures=""
+        if [[ -e ${workspace}/src-project/src/TMF/targets.cfg ]] ; then
+            targetFeatures="$(getConfig target_features -t "branchName:${branchName}" \
+                                        -f ${workspace}/src-project/src/TMF/targets.cfg)"
+        fi
+        # if target features are empty, try to find target features in the old config file
+        if [[ -z ${targetFeatures} ]] ; then
+            targetFeatures="$(getConfig LFS_uc_test_booking_target_features \
+                                                -t "branchName:${branchName}" )"
+        fi
         debug "requesting target with features ${targetFeatures}"
 
         reserveTargetByFeature ${targetFeatures}

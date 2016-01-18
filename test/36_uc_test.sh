@@ -55,8 +55,8 @@ oneTimeSetUp() {
     exit_add() {
         mockedCommand "exit_add $@"
     }
-    databaseEventTestStarted() {
-        mockedCommand "databaseEventTestStarted $@"
+    storeEvent() {
+        mockedCommand "storeEvent $@"
     }
     createArtifactArchive() {
         mockedCommand "createArtifactArchive $@"
@@ -114,7 +114,7 @@ test1() {
     cat <<EOF > ${expect}
 mustHaveCleanWorkspace
 copyArtifactsToWorkspace LFS_CI_-_trunk_-_Package_-_package 1234 fsmci
-databaseEventTestStarted 
+storeEvent test_started
 exit_add _exitHandlerDatabaseTestFailed
 copyFileFromWorkspaceToBuildDirectory LFS_CI_-_trunk_-_Test 1234 ${WORKSPACE}/workspace/upstream
 copyFileFromWorkspaceToBuildDirectory LFS_CI_-_trunk_-_Test 1234 ${WORKSPACE}/workspace/properties
@@ -146,7 +146,7 @@ test2() {
     cat <<EOF > ${expect}
 mustHaveCleanWorkspace
 copyArtifactsToWorkspace LFS_CI_-_trunk_-_Package_-_package 1234 fsmci
-databaseEventTestStarted 
+storeEvent test_started
 exit_add _exitHandlerDatabaseTestFailed
 copyFileFromWorkspaceToBuildDirectory LFS_CI_-_trunk_-_Test 1234 ${WORKSPACE}/workspace/upstream
 copyFileFromWorkspaceToBuildDirectory LFS_CI_-_trunk_-_Test 1234 ${WORKSPACE}/workspace/properties

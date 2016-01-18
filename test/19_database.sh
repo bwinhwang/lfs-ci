@@ -65,7 +65,7 @@ tearDown() {
 }
 
 testDatabaseEventBuildStarted_ok() {
-    assertTrue "databaseEventBuildStarted"
+    assertTrue "eventBuildStarted"
 
     local expect=$(createTempFile)
     cat <<EOF > ${expect}
@@ -81,7 +81,7 @@ EOF
 
 testDatabaseEventSubBuildFinished_ok() {
     export JOB_NAME=LFS_CI_-_trunk_-_Test_-_FSM-r3_-_FSMF
-    assertTrue "databaseEventSubBuildFinished"
+    assertTrue "storeEvent subbuild_finished"
 
     local expect=$(createTempFile)
     cat <<EOF > ${expect}
@@ -93,7 +93,7 @@ EOF
 
 testDatabaseEventSubBuildFailed_ok() {
     export JOB_NAME=LFS_CI_-_trunk_-_Test_-_FSM-r3_-_FSMF
-    assertTrue "databaseEventSubBuildFinished"
+    assertTrue "storeEvent subbuild_finished"
 
     local expect=$(createTempFile)
     cat <<EOF > ${expect}
@@ -106,7 +106,7 @@ EOF
 testdatabaseEventReleaseStarted() {
     export LFS_PROD_RELEASE_CURRENT_TAG_NAME=PS_LFS_OS_9999_88_7777
     export JOB_NAME=LFS_CI_-_trunk_-_Test_-_FSM-r3_-_FSMF
-    assertTrue "databaseEventReleaseStarted"
+    assertTrue "storeEvent release_started"
 
     local expect=$(createTempFile)
     cat <<EOF > ${expect}
@@ -119,7 +119,7 @@ EOF
 testdatabaseEventReleaseFinished() {
     export LFS_PROD_RELEASE_CURRENT_TAG_NAME=PS_LFS_OS_9999_88_7777
     export JOB_NAME=LFS_CI_-_trunk_-_Test_-_FSM-r3_-_FSMF
-    assertTrue "databaseEventReleaseFinished"
+    assertTrue "storeEvent release_finished"
 
     local expect=$(createTempFile)
     cat <<EOF > ${expect}

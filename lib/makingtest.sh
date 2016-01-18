@@ -4,6 +4,8 @@
 
 LFS_CI_SOURCE_makingtest='$Id$'
 
+[[ -z ${LFS_CI_SOURCE_database} ]] && source ${LFS_CI_ROOT}/lib/database.sh
+
 ## @fn      makingTest_testFSM()
 #  @brief   running a whole test suite on the target with making test
 #  @details the following making tests commands are executed (simplified)
@@ -386,6 +388,7 @@ makingTest_install() {
     local targetName=$(_reserveTarget)
     mustHaveValue "${targetName}" "target name"
 
+
     local shouldHaveRunningTarget=$(getConfig LFS_CI_uc_test_should_target_be_running_before_make_install)
     if [[ ${shouldHaveRunningTarget} ]] ; then
         mustHaveMakingTestRunningTarget
@@ -411,6 +414,8 @@ makingTest_install() {
     local maxInstallTries=$(getConfig LFS_CI_uc_test_making_test_installation_tries -t "testTargetName:${targetName}")
     mustHaveValue "${maxInstallTries}" "max installation tries"
 
+    storeEvent target_install_started
+    exit_add storeEvent:target_install_failed
     for i in $(seq 1 ${maxInstallTries}) ; do
         trace "install loop ${i}"
 
@@ -429,8 +434,14 @@ makingTest_install() {
             return
         fi
 
+        storeEvent target_reboot_started
+        exit_add storeEvent:target_reboot_failed
+
         makingTest_powercycle
         mustHaveMakingTestRunningTarget
+
+        exit_remove storeEvent:target_reboot_failed
+        storeEvent target_reboot_finished
 
         local doFirmwareupgrade="$(getConfig LFS_CI_uc_test_making_test_do_firmwareupgrade)"
         if [[ ${doFirmwareupgrade} ]] ; then
@@ -448,12 +459,19 @@ makingTest_install() {
         execute ${ignoreError} ${make} check || continue
 
         info "install was successful."
+        storeEvent target_install_finished
+        exit_remove storeEvent:test_failed
 
         return
     done
 
     fatal "installation failed after ${maxInstallTries} attempts."
 
+    return
+}
+
+_exitHandlerDatabaseEventTestTargetFailed() {
+    databaseEventTestFailed
     return
 }
 

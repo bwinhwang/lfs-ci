@@ -40,16 +40,91 @@ actionCompare() {
 
     local changelog=$(createTempFile)
     _createChangelog ${oldUpstreamBuildNumber} ${upstreamBuildNumber} ${changelog}
+    _checkReleaseForPronto          ${changelog}
+    _checkReleaseForRelevantChanges ${changelog}
+    _checkReleaseForEmptyChangelog  ${changelog}
 
-#    if egrep -q -e '%FIN %PR=[0-9]+ESPE[09-]+' ${changelog} ; then
-#        info "found in comments '%FIN %PR=<pronto>', trigger build"
-#        exit 0
-#    fi
-
-    info "no pronto found between ${oldUpstreamProjectName}#${oldUpstreamBuildNumber} and ${upstreamProjectName}#${upstreamBuildNumber} => No build."
+    info "no relevant changes found between ${oldUpstreamProjectName}#${oldUpstreamBuildNumber} and ${upstreamProjectName}#${upstreamBuildNumber} => No build/release."
     exit 1
 }
 
+## @fn      _checkReleaseForPronto()
+#  @brief   check the changelog for a change, which contains a pronto id
+#  @param   {changelog}    name of the changelog
+#  @return  <none>
+#  @return  1 if there is no pronto id in the changelog, 0 otherwise
+_checkReleaseForPronto() {
+    local changelog=$1
+
+    local canCheckForPronto=$(getConfig CUSTOM_SCM_release_check_for_pronto)
+    if [[ ! ${canCheckForPronto} ]] ; then
+        warning "check for pronto in release is disabled"
+        return 1
+    fi
+    if egrep -q -e '%FIN %PR=PR[0-9]+' ${changelog} ; then
+        info "found in comments '%FIN %PR=<pronto>', trigger build"
+        exit 0
+    fi
+
+    return 1
+}
+
+## @fn      _checkReleaseForEmptyChangelog()
+#  @brief   check the changelog for a empty changelog
+#  @param   {changelog}    name of the changelog
+#  @return  1 if the changelog is not empty, 0 otherwise
+_checkReleaseForEmptyChangelog() {
+    local changelog=$1
+
+    local canCheckForEmptyChangelog=$(getConfig CUSTOM_SCM_release_check_for_empty_changelog)
+    if [[ ! ${canCheckForEmptyChangelog} ]] ; then
+        warning "check for empty changelog in release is disabled"
+        return 1
+    fi
+    if ! grep -q -e 'logentry' ${changelog} ; then
+        info "changelog is empty"
+        exit 0
+    fi
+
+    return 1
+}
+
+## @fn      _checkReleaseForRelevantChanges()
+#  @brief   check the changelog for relevant changes.
+#  @details there is a filter file in etc/customSCM.release.filter.*.txt, which defines a list
+#           of components, which are not relevant for release. So you can list src-test or src-unittests
+#           in the filter file. If there is only changes in src-test in the changelog, the
+#           release candidate will be not released.
+#  @param   {changelog}    name of the changelog
+#  @return  1 if there are norelevant changes, 0 otherwise
+_checkReleaseForRelevantChanges() {
+    local changelog=${1}
+
+    local canCheckForRelevantChanges=$(getConfig CUSTOM_SCM_release_check_for_relevant_changes)
+    if [[ ! ${canCheckForRelevantChanges} ]] ; then
+        warning "check for empty changelog in release is disabled"
+        return 1
+    fi
+
+    local file=$(createTempFile)
+    local filterFile=$(getConfig CUSTOM_SCM_release_check_for_relevant_change_filter_file)
+
+    if [[ ! -f ${filterFile} ]] ; then
+        info "no filter file for relevant changes found => no check"
+        return 1
+    fi
+
+    execute -l ${file} ${LFS_CI_ROOT}/bin/xpath -q -e '/log/logentry/paths/path/node()' ${changelog}
+    local countAllChanges=$(wc -l ${file} | cut -d" " -f 1)
+    local countRelevantChanges=$(grep -v -f ${filterFile} ${file} | wc -l)
+
+    if [[ ${countRelevantChanges} == ${countAllChanges} ]] ; then
+       info "all changes are relevent for release"
+       exit 0
+    fi
+
+    return 1
+}
 
 ## @fn      actionCheckout()
 #  @brief   action which is called by custom scm jenkins plugin to create or update a workspace and create the changelog
