@@ -9,6 +9,12 @@ A third line 3
 very important note
 
 
+=== FSMr2 DDAL ===
+   * Merge from fsmr3.
+     Remark: A very important note
+     PR PR071990 (completed)
+     RB=12345 This is the first test to bring RB entries into the important note section
+
 === DDAL Library ===
    * Merge correction from trunk
      Remark: very important note
@@ -16,9 +22,3 @@ very important note
      PR PR071990 (completed)
      From: Zbigniew Chyla <zbigniew.chyla@nokia.com>
    * PR PR055917 DDAL API ?ddal_lx2_802_1q_set_config? taking long time in FL15A move back to IOCTL from SYSFS (completed)
-
-=== FSMr2 DDAL ===
-   * Merge from fsmr3.
-     Remark: A very important note
-     PR PR071990 (completed)
-     RB=12345 This is the first test to bring RB entries into the important note section

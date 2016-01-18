@@ -142,7 +142,7 @@ sub execute {
         printf "%s\n\n", $importantNote;
     }
 
-    foreach my $component ( keys %{ $self->{changeLog} } ) {
+    foreach my $component ( sort keys %{ $self->{changeLog} } ) {
 
         my @list = $self->{changeLog}->{$component};
         @list = map { @{ $_ } } @list;
