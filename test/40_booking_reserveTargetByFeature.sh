@@ -31,6 +31,15 @@ oneTimeSetUp() {
             LFS_uc_test_booking_target_max_tries)     echo 3 ;;
         esac
     }
+    storeEvent() {
+        mockedCommand "storeEvent $@"
+    }
+    exit_add() {
+        mockedCommand "exit_add $@"
+    }
+    exit_remove() {
+        mockedCommand "exit_remove $@"
+    }
 
     return
 }
@@ -57,8 +66,12 @@ test1() {
     cat <<EOF > ${expect}
 getConfig LFS_uc_test_booking_target_sleep_seconds
 getConfig LFS_uc_test_booking_target_max_tries
+storeEvent target_reservation_started
+exit_add storeEvent:target_reservation_failed
 execute -n ${LFS_CI_ROOT}/bin/searchTarget --attribute=feature1
 execute -i ${LFS_CI_ROOT}/bin/reserveTarget --targetName=target1 --comment=lfs-ci: jobName / 123
+storeEvent target_reservation_finished
+exit_remove storeEvent:target_reservation_failed
 EOF
     assertExecutedCommands ${expect}
 
@@ -74,8 +87,12 @@ test2() {
     cat <<EOF > ${expect}
 getConfig LFS_uc_test_booking_target_sleep_seconds
 getConfig LFS_uc_test_booking_target_max_tries
+storeEvent target_reservation_started
+exit_add storeEvent:target_reservation_failed
 execute -n ${LFS_CI_ROOT}/bin/searchTarget --attribute=feature1 feature2
 execute -i ${LFS_CI_ROOT}/bin/reserveTarget --targetName=target1 --comment=lfs-ci: jobName / 123
+storeEvent target_reservation_finished
+exit_remove storeEvent:target_reservation_failed
 EOF
     assertExecutedCommands ${expect}
 
@@ -95,10 +112,14 @@ test3() {
     cat <<EOF > ${expect}
 getConfig LFS_uc_test_booking_target_sleep_seconds
 getConfig LFS_uc_test_booking_target_max_tries
+storeEvent target_reservation_started
+exit_add storeEvent:target_reservation_failed
 execute -n ${LFS_CI_ROOT}/bin/searchTarget --attribute=feature1 feature2
 execute -i ${LFS_CI_ROOT}/bin/reserveTarget --targetName=target1 --comment=lfs-ci: jobName / 123
 execute -n ${LFS_CI_ROOT}/bin/searchTarget --attribute=feature1 feature2
 execute -i ${LFS_CI_ROOT}/bin/reserveTarget --targetName=target1 --comment=lfs-ci: jobName / 123
+storeEvent target_reservation_finished
+exit_remove storeEvent:target_reservation_failed
 EOF
     assertExecutedCommands ${expect}
 
@@ -120,12 +141,16 @@ test4() {
     cat <<EOF > ${expect}
 getConfig LFS_uc_test_booking_target_sleep_seconds
 getConfig LFS_uc_test_booking_target_max_tries
+storeEvent target_reservation_started
+exit_add storeEvent:target_reservation_failed
 execute -n ${LFS_CI_ROOT}/bin/searchTarget --attribute=feature1 feature2
 execute -i ${LFS_CI_ROOT}/bin/reserveTarget --targetName=target1 --comment=lfs-ci: jobName / 123
 execute -n ${LFS_CI_ROOT}/bin/searchTarget --attribute=feature1 feature2
 execute -i ${LFS_CI_ROOT}/bin/reserveTarget --targetName=target1 --comment=lfs-ci: jobName / 123
 execute -n ${LFS_CI_ROOT}/bin/searchTarget --attribute=feature1 feature2
 execute -i ${LFS_CI_ROOT}/bin/reserveTarget --targetName=target1 --comment=lfs-ci: jobName / 123
+storeEvent target_reservation_finished
+exit_remove storeEvent:target_reservation_failed
 EOF
     assertExecutedCommands ${expect}
 
