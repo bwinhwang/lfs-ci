@@ -42,6 +42,7 @@ UPDATE_JENKINS="false"
 PROD_JENKINS_SERVER="lfs-ci.emea.nsn-net.net"
 START_OPTION=""
 JUST_START="false"
+TZ="UTC+0"
 # Subdirectory within $WORK_DIR/$USER
 JENKINS_DIR="lfs-jenkins" # subdirectory within $WORK_DIR/$USER
 # Following jobs are copied always.
@@ -489,10 +490,12 @@ jenkins_start_sandbox() {
         echo "    LFS_CI_CONFIG_FILE=${LFS_CI_CONFIG_FILE}"
         echo "    JENKINS_HOME=${JENKINS_HOME}"
         echo "    JENKINS_ROOT=${JENKINS_ROOT}"
+        echo "    TZ=${TZ}"
         export LFS_CI_ROOT=${LFS_CI_ROOT}
         export LFS_CI_CONFIG_FILE=${LFS_CI_CONFIG_FILE}
         export JENKINS_HOME=${JENKINS_HOME}
         export JENKINS_ROOT=${JENKINS_ROOT}
+        export TZ=${TZ}
         cd ${JENKINS_HOME}
         nohup java ${JVM_OPTS} -jar ${JENKINS_WAR} ${JENKINS_OPTS} > ${LOG_FILE} 2>&1 &
         PID=$!
