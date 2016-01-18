@@ -83,17 +83,17 @@ _checkReleaseForEmptyChangelog() {
     fi
     if ! grep -q -e 'logentry' ${changelog} ; then
         info "changelog is empty"
-        exit 0
+        exit 1
     fi
 
-    return 1
+    return 0
 }
 
 ## @fn      _checkReleaseForRelevantChanges()
 #  @brief   check the changelog for relevant changes.
 #  @details there is a filter file in etc/customSCM.release.filter.*.txt, which defines a list
 #           of components, which are not relevant for release. So you can list src-test or src-unittests
-#           in the filter file. If there is only changes in src-test in the changelog, the
+#           in the filter file. If there are only changes in src-test in the changelog, the
 #           release candidate will be not released.
 #  @param   {changelog}    name of the changelog
 #  @return  1 if there are norelevant changes, 0 otherwise

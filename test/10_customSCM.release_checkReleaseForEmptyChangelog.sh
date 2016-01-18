@@ -36,10 +36,10 @@ test1_canCheck() {
     assertFalse "has no permission to check" "_checkReleaseForEmptyChangelog ${CHANGELOG}"
 }
 test2_noRelevantChange() {
-    assertTrue "has no relevant change" "_checkReleaseForEmptyChangelog ${CHANGELOG}"
+    assertFalse "has no relevant change" "_checkReleaseForEmptyChangelog ${CHANGELOG}"
 }
 test3_relevantChange() {
-    assertFalse "has relevant changes" "_checkReleaseForEmptyChangelog ${CHANGELOG}"
+    assertTrue "has relevant changes" "_checkReleaseForEmptyChangelog ${CHANGELOG}"
 }
 
 source lib/shunit2
