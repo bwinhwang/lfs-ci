@@ -7,7 +7,7 @@
 ##          Use -h to geht help.
 ##
 ## Some notes:
-## If you use the -h option after another option, the value/flag of
+## If you use the -h option after all other option, the value/flag of
 ## the option specified before the -h flag is used in the help text.
 ## setup-sandbox.sh -h gives the following output for -t HTTP_PORT.
 ##     -t HTTP_PORT for Jenkins. Defaults to 8090.
@@ -66,6 +66,9 @@ Admin_-_svn_clone_sync_BTS_SC_LFS \
 Admin_-_updateLocationsTextFile"
 TRUNK_JOBS="LFS_CI_-_trunk_-_ LFS_Prod_-_trunk_-_ PKGPOOL_-_trunk_-_"
 
+source ${LFS_CI_ROOT}/lib/logging.sh
+source ${LFS_CI_ROOT}/lib/config.sh
+
 usage() {
 cat << EOF
 
@@ -123,6 +126,7 @@ cat << EOF
         -a (flag) Copy the Admin_-_* jobs. Default is not coping the Admin_-_* jobs execpt the mandatroy
                   jobs ${DEFAULT_JOBS}.
         -k (flag) Copy the "Test-*" jobs. Default is not coping "Test-*" jobs.
+        -v JENKINS_VERSION. Default value is taken from jenkins.cfg file.
         -h Get help
 
     Examples:
@@ -137,6 +141,9 @@ cat << EOF
 
         Just start Jenkins(-o):
             ${ITSME} -o -f ~/lfs-ci/etc/development.cfg
+
+        Start Jenkins version 1.625.2:
+            ${ITSME} -o -v 1.625.2 -f ~/lfs-ci/etc/development.cfg
 
         Update trunk jobs and ${DEFAULT_JOBS} in Sandbox:
             ${ITSME} -j
@@ -173,7 +180,7 @@ pre_actions() {
         exit 2
     fi
 
-    if [[ ${UPDATE_JENKINS} == false && $(ps aux | grep java | grep -v slave.jar | grep jenkins) ]]; then
+    if [[ ${UPDATE_JENKINS} == false && ${CHECK_RUNNING_JENKINS} == "true" && $(ps aux | grep java | grep -v slave.jar | grep jenkins) ]]; then
         echo "ERROR: Jenkins is still running."
         exit 3
     fi
@@ -192,6 +199,18 @@ pre_actions() {
         echo "ERROR: Can't read config file ${LFS_CI_CONFIG_FILE}."
         exit 6
     fi
+
+    if [[ -z ${JENKINS_VERSION} ]]; then
+        echo "ERROR: Jenkins version is needed."
+        exit 7
+    fi
+
+    if [[ ! -f ${JENKINS_WAR} ]]; then
+        echo "ERROR: Missing file ${JENKINS_WAR}"
+        exit 8
+    fi
+
+    exit 0
 }
 
 adjust_args() {
@@ -671,7 +690,7 @@ purge_sandbox() {
 }
 
 get_args() {
-    while getopts ":r:n:m:b:w:i:c:s:t:f:g:delpjohaxuk" OPT; do
+    while getopts ":v:r:n:m:b:w:i:c:s:t:f:g:delpjohaxuk" OPT; do
         case ${OPT} in
             b)
                 BRANCH_VIEWS=$OPTARG
@@ -705,6 +724,9 @@ get_args() {
             ;;
             g)
                 START_OPTION=${OPTARG}
+            ;;
+            v)
+                JENKINS_VERSION=${OPTARG}
             ;;
             d)
                 PURGE_SANDBOX="true"
@@ -754,7 +776,7 @@ get_args() {
     LRC_PROD_JENKINS_JOBS="${LRC_PROD_JENKINS_HOME}/jobs"
 
     HTTP_ADDRESS="0.0.0.0"
-    JENKINS_VERSION="1.532.3"
+    [[ -z ${JENKINS_VERSION} ]] && JENKINS_VERSION=$(getConfig jenkinsVersion)
     JENKINS_HOME="${LOCAL_WORK_DIR}/${SANDBOX_USER}/${JENKINS_DIR}/home"
     JENKINS_ROOT="${LOCAL_WORK_DIR}/${SANDBOX_USER}/${JENKINS_DIR}"
     JENKINS_PLUGINS="${JENKINS_HOME}/plugins"
@@ -793,10 +815,12 @@ main() {
         exit $?
     fi
 
-    git_stuff
-    cd ${HOME}
-    jenkins_stuff
-    post_actions
+    if [[ ${PURGE_SANDBOX} == false ]]; then
+        git_stuff
+        cd ${HOME}
+        jenkins_stuff
+        post_actions
+    fi
 }
 
 main $*

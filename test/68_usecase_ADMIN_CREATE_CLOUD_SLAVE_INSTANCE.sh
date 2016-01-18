@@ -7,6 +7,8 @@ source lib/uc_cloud.sh
 oneTimeSetUp() {
     # create a temp file.cfg
     export UT_CFG_FILE=$(createTempFile)
+    export UT_JENKINS_CLI_JAR=/tmp/UT_JENKINS_CLI_JAR
+    touch ${UT_JENKINS_CLI_JAR}
     echo "jenkinsRoot = /var/fpwork/xxx/lfs-jenkins"                                                              > ${UT_CFG_FILE}
     #echo "LFS_CI_CLOUD_LFS2CLOUD = /admulm/cloud/tools/lfs2cloud"                                                >> ${UT_CFG_FILE}
     echo "LFS_CI_CLOUD_LFS2CLOUD = echo LFS2CLOUD"                                                               >> ${UT_CFG_FILE}
@@ -16,6 +18,7 @@ oneTimeSetUp() {
     echo "LFS_CI_CLOUD_SLAVE_EUCARC = ec2_access_keys_etc/ec2keys_escloc20_user_psulm_OHN_Prod_Cloud/eucarc"     >> ${UT_CFG_FILE}
     echo "LFS_CI_CLOUD_SLAVE_EMI = emi-1d6a6f19"                                                                 >> ${UT_CFG_FILE}
     echo "LFS_CI_CLOUD_SLAVE_INSTALL_SCRIPT = ${LFS_CI_ROOT}/etc/cloud_ci-slaves_install_additional_packages.sh" >> ${UT_CFG_FILE}
+    echo "JENKINS_CLI_JAR = ${UT_JENKINS_CLI_JAR}"                                                               >> ${UT_CFG_FILE}
     export LFS_CI_CONFIG_FILE=${UT_CFG_FILE}
 
     mockedCommand() {
