@@ -149,8 +149,6 @@ execute -n ${LFS_CI_ROOT}/bin/searchTarget --attribute=feature1 feature2
 execute -i ${LFS_CI_ROOT}/bin/reserveTarget --targetName=target1 --comment=lfs-ci: jobName / 123
 execute -n ${LFS_CI_ROOT}/bin/searchTarget --attribute=feature1 feature2
 execute -i ${LFS_CI_ROOT}/bin/reserveTarget --targetName=target1 --comment=lfs-ci: jobName / 123
-storeEvent target_reservation_finished
-exit_remove storeEvent:target_reservation_failed
 EOF
     assertExecutedCommands ${expect}
 
