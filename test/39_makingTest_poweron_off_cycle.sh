@@ -26,6 +26,9 @@ oneTimeSetUp() {
     makingTest_logConsole() {
         mockedCommand "makingTest_logConsole $@"
     }
+    mustHaveMakingTestRunningTarget() {
+        mockedCommand "mustHaveMakingTestRunningTarget $@"
+    }
     getConfig() {
         echo $1
     }
@@ -52,10 +55,7 @@ test1_poweron() {
     local expect=$(createTempFile)
     cat <<EOF > ${expect}
 makingTest_logConsole 
-mustHaveMakingTestTestConfig 
-makingTest_testSuiteDirectory 
-mustExistDirectory /path/to/test/suite
-execute make -C /path/to/test/suite powercycle LFS_CI_uc_test_making_test_powercycle_options
+mustHaveMakingTestRunningTarget 
 EOF
     assertExecutedCommands ${expect}
 

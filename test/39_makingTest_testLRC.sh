@@ -42,9 +42,6 @@ oneTimeSetUp() {
     sleep() {
         true
     }
-    makingTest_poweroff() {
-        mockedCommand "makingTest_poweroff $@"
-    }
     makingTest_powercycle() {
         mockedCommand "makingTest_powercycle $@"
     }
@@ -109,7 +106,6 @@ execute make -C ${WORKSPACE}/workspace/path/to/test/suite_ahp setup
 execute make -C ${WORKSPACE}/workspace/path/to/test/suite_ahp check
 makingTest_testLRC_subBoard ${WORKSPACE}/workspace/path/to/test/suite_ahp ${DELIVERY_DIRECTORY} TargetName_ahp ahp ${WORKSPACE}/workspace/xml-reports/ahp
 makingTest_testLRC_subBoard ${WORKSPACE}/workspace/path/to/test/suite ${DELIVERY_DIRECTORY} TargetName_ahp ahp-common ${WORKSPACE}/workspace/xml-reports/ahp-common
-makingTest_poweroff 
 EOF
     assertExecutedCommands ${expect}
 

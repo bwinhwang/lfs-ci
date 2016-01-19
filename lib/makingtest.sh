@@ -13,7 +13,6 @@ LFS_CI_SOURCE_makingtest='$Id$'
 #            $ make powercycle
 #            $ make install
 #            $ make test
-#            $ make poweroff
 #  @param   <none>
 #  @return  <none>
 makingTest_testFSM() {
@@ -22,7 +21,6 @@ makingTest_testFSM() {
     makingTest_install    
     makingTest_testXmloutput
     makingTest_copyResults 
-    makingTest_poweroff
 
     return
 }
@@ -153,7 +151,7 @@ makingTest_poweron() {
 
     # This should be a poweron, but we don't know the state of the target.
     # So we just powercycle the target
-    makingTest_powercycle
+    mustHaveMakingTestRunningTarget
 
     return
 }
@@ -293,8 +291,6 @@ makingTest_testLRC() {
     find ${xmlOutputDirectory} -name '*.xml' | while read file ; do
         cat -v ${file} > ${file}.tmp && mv ${file}.tmp ${file}
     done
-
-    makingTest_poweroff
 
     return
 }
