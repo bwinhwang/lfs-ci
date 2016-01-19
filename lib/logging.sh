@@ -240,7 +240,7 @@ message() {
 #  @return  1 if message should be logged, 0 otherwise
 shouldWriteLogMessageToFile() {
     local logType=$1
-    local sourceFile=${BASH_SOURCE[2]/${LFS_CI_ROOT}\//}
+    local sourceFile=${BASH_SOURCE[3]/${LFS_CI_ROOT}\//}
     local sourceFunction=${FUNCNAME[3]}
 
     # grep returns with 0 if grep finds the string.
