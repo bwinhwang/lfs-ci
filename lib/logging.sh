@@ -370,11 +370,11 @@ rawOutput() {
     return
 }
 
-## @fn      dumpAllEnvironmentVariablesAndSettingsIntoCompleteLogfile()
-#  @brief   writes all environment variables and settings from cfg files into the complete logfile
+## @fn      dumpAllEnvironmentVariablesAndSettingsIntoLogfile()
+#  @brief   writes all environment variables and settings from cfg files into the logfile
 #  @param   <none>
 #  @return  <none>
-dumpAllEnvironmentVariablesAndSettingsIntoCompleteLogfile() {
+dumpAllEnvironmentVariablesAndSettingsIntoLogfile() {
     requiredParameters LFS_CI_ROOT
 
     local logfileType=$(getConfig LFS_CI_logging_dump_vars_and_settings_logfile_type)
