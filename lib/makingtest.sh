@@ -460,7 +460,7 @@ makingTest_install() {
 
         info "install was successful."
         storeEvent target_install_finished
-        exit_remove storeEvent:test_failed
+        exit_remove storeEvent:target_install_failed
 
         return
     done
