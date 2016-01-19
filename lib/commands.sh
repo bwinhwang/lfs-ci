@@ -138,15 +138,4 @@ runOnMaster() {
     return $?
 }
 
-## @fn      showAllEnvironmentVariables()
-#  @brief   show all environment variables, which are available at the moment
-#  @param   <none>
-#  @return  <none>
-showAllEnvironmentVariables() {
-    requiredParameters LFS_CI_ROOT
-
-    execute printenv        
-    execute -i ${LFS_CI_ROOT}/bin/dumpConfig -f ${LFS_CI_CONFIG_FILE:-${LFS_CI_ROOT}/etc/global.cfg}
-    return
-}
 

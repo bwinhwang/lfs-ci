@@ -49,7 +49,7 @@ esac
 
 # start the logfile
 startLogfile
-showAllEnvironmentVariables
+dumpAllEnvironmentVariablesAndSettingsIntoCompleteLogfile
 # and end it, if the script exited in some way
 exit_add stopLogfile
 
