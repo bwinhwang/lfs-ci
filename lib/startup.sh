@@ -37,7 +37,7 @@ prepareStartup() {
 
     requiredParameters LFS_CI_ROOT JOB_NAME HOSTNAME USER 
 
-    showAllEnvironmentVariables
+    dumpAllEnvironmentVariablesAndSettingsIntoLogfile
     sanityCheck
 
     info "starting jenkins job \"${JOB_NAME}\" on ${HOSTNAME} as ${USER}"

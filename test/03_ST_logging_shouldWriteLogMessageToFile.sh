@@ -12,7 +12,7 @@ tearDown() {
 }
 
 test1() {
-    message FOOBAR TEST_MESSAGE
+    message UT_FOOBAR TEST_MESSAGE
     assertEquals "didn't find test message in complete log" \
         "1" \
         $(grep -c TEST_MESSAGE ${CI_LOGGING_LOGFILENAME_COMPLETE})
