@@ -169,6 +169,12 @@ storeEvent() {
         # strange behavour.....
         *)   [[ $1 ]] && taskName=$1 ; shift ;;
     esac
+
+    # TODO 2016-01-19 demx2fk3 workaround for LRC. This should be done differently
+    if [[ -z ${taskName} && ${JOB_NAME} =~ ^Test- ]] ; then
+        taskName=subtest
+    fi
+
     mustHaveValue "${taskName}" "task name"
 
     mustHaveNextCiLabelName

@@ -53,14 +53,13 @@ exit_handler() {
 
 	trap - ERR EXIT SIGTERM SIGINT
 
-	[[ $2    -ne 0 ]] && trace "$(_stackTrace)"
-	[[ ${rc} -ne 0 ]] && trace "$(_stackTrace)"
+	[[ ${2} -ne 0 || ${rc} -ne 0 ]] && trace "$(_stackTrace)"
 
 	for m in ${CI_EXIT_HANDLER_METHODS}; do
         # remark: it is possible to give parameters to the exit funktion
         # this parameters are separated via :
         # e.g.: exitFuntion:parameter1:parameter2
-		${m//:/} ${rc}
+		${m//:/ } ${rc}
 	done
 
 	exit ${rc:-3}

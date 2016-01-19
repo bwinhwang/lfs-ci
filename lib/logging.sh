@@ -240,7 +240,7 @@ message() {
 #  @return  1 if message should be logged, 0 otherwise
 shouldWriteLogMessageToFile() {
     local logType=$1
-    local sourceFile=${BASH_SOURCE[2]/${LFS_CI_ROOT}\//}
+    local sourceFile=${BASH_SOURCE[3]/${LFS_CI_ROOT}\//}
     local sourceFunction=${FUNCNAME[3]}
 
     # grep returns with 0 if grep finds the string.
@@ -366,6 +366,29 @@ rawOutput() {
     trace "    ----------------------------------------------"
     cat ${fileToLog} 
     trace "}}} ----------------------------------------------"
+
+    return
+}
+
+## @fn      dumpAllEnvironmentVariablesAndSettingsIntoLogfile()
+#  @brief   writes all environment variables and settings from cfg files into the logfile
+#  @param   <none>
+#  @return  <none>
+dumpAllEnvironmentVariablesAndSettingsIntoLogfile() {
+    requiredParameters LFS_CI_ROOT
+
+    local logfileType=$(getConfig LFS_CI_logging_dump_vars_and_settings_logfile_type)
+    local logfile=
+    case ${logfileType} in
+        short) logfile=${CI_LOGGING_LOGFILENAME} ;;
+        complete) logfile=${CI_LOGGING_LOGFILENAME_COMPLETE} ;;
+        *) error "unknown logfile type ${logfileType}" ;;
+    esac
+
+    if [[ -w ${logfile} ]] ; then
+        execute -n printenv >> ${logfile}
+        execute -n -i ${LFS_CI_ROOT}/bin/dumpConfig -f ${LFS_CI_CONFIG_FILE:-${LFS_CI_ROOT}/etc/global.cfg} >> ${logfile}
+    fi
 
     return
 }

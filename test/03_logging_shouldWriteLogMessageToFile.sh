@@ -4,8 +4,7 @@
 source lib/logging.sh
 
 test1() {
-    assertFalse "test with FOOBAR" "shouldWriteLogMessageToFile FOOBAR"
-    shouldWriteLogMessageToFile FOOBAR
+    assertFalse "test with UT_FOOBAR" "shouldWriteLogMessageToFile UT_FOOBAR"
 }
 
 test2() {
