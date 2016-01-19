@@ -377,9 +377,17 @@ rawOutput() {
 dumpAllEnvironmentVariablesAndSettingsIntoCompleteLogfile() {
     requiredParameters LFS_CI_ROOT
 
-    if [[ ${CI_LOGGING_LOGFILENAME_COMPLETE} && -w ${CI_LOGGING_LOGFILENAME_COMPLETE} ]] ; then
-        execute -n printenv >> ${CI_LOGGING_LOGFILENAME_COMPLETE}
-        execute -n -i ${LFS_CI_ROOT}/bin/dumpConfig -f ${LFS_CI_CONFIG_FILE:-${LFS_CI_ROOT}/etc/global.cfg} >> ${CI_LOGGING_LOGFILENAME_COMPLETE}
+    local logfileType=$(getConfig LFS_CI_logging_dump_vars_and_settings_logfile_type)
+    local logfile=
+    case ${logfileType} in
+        short) logfile=${CI_LOGGING_LOGFILENAME} ;;
+        complete) logfile=${CI_LOGGING_LOGFILENAME_COMPLETE} ;;
+        *) error "unknown logfile type ${logfileType}" ;;
+    esac
+
+    if [[ -w ${logfile} ]] ; then
+        execute -n printenv >> ${logfile}
+        execute -n -i ${LFS_CI_ROOT}/bin/dumpConfig -f ${LFS_CI_CONFIG_FILE:-${LFS_CI_ROOT}/etc/global.cfg} >> ${logfile}
     fi
 
     return
