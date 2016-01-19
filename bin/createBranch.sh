@@ -80,9 +80,7 @@ __checkParams() {
         fatal "WFT must be ready for this branch."
     fi
 
-    echo ${SOURCE_RELEASE} | grep -q _OS_ && {
-        SOURCE_RELEASE=$(echo "${SOURCE_RELEASE/_OS_/_REL_}");
-    }
+    SOURCE_RELEASE=$(echo "${SOURCE_RELEASE/_REL_/_OS_}");
 }
 
 ## @fn     __preparation()
