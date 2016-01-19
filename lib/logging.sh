@@ -369,3 +369,18 @@ rawOutput() {
 
     return
 }
+
+## @fn      dumpAllEnvironmentVariablesAndSettingsIntoCompleteLogfile()
+#  @brief   writes all environment variables and settings from cfg files into the complete logfile
+#  @param   <none>
+#  @return  <none>
+dumpAllEnvironmentVariablesAndSettingsIntoCompleteLogfile() {
+    requiredParameters LFS_CI_ROOT
+
+    if [[ ${CI_LOGGING_LOGFILENAME_COMPLETE} && -w ${CI_LOGGING_LOGFILENAME_COMPLETE} ]] ; then
+        execute -n printenv >> ${CI_LOGGING_LOGFILENAME_COMPLETE}
+        execute -n -i ${LFS_CI_ROOT}/bin/dumpConfig -f ${LFS_CI_CONFIG_FILE:-${LFS_CI_ROOT}/etc/global.cfg} >> ${CI_LOGGING_LOGFILENAME_COMPLETE}
+    fi
+
+    return
+}
