@@ -149,10 +149,11 @@ makingTest_testSuiteDirectory() {
 makingTest_poweron() {
     makingTest_logConsole
 
-    # This should be a poweron, but we don't know the state of the target.
-    # So we just powercycle the target
-    mustHaveMakingTestRunningTarget
+    local testSuiteDirectory=$(makingTest_testSuiteDirectory)
+    mustExistDirectory ${testSuiteDirectory}
 
+    execute -i make -C ${testSuiteDirectory} poweron
+    
     return
 }
 
@@ -384,7 +385,6 @@ makingTest_install() {
     local targetName=$(_reserveTarget)
     mustHaveValue "${targetName}" "target name"
 
-
     local shouldHaveRunningTarget=$(getConfig LFS_CI_uc_test_should_target_be_running_before_make_install)
     if [[ ${shouldHaveRunningTarget} ]] ; then
         mustHaveMakingTestRunningTarget
@@ -520,9 +520,6 @@ mustHaveMakingTestRunningTarget() {
 
     mustHaveMakingTestTestConfig
 
-    local workspace=$(getWorkspaceName)
-    mustHaveWorkspaceName
-
 	local testSuiteDirectory=$(makingTest_testSuiteDirectory)
 	mustExistFile ${testSuiteDirectory}/testsuite.mk
 
@@ -553,7 +550,6 @@ mustHaveMakingTestRunningTarget() {
     fatal "this code should not be reached."
     return
 }
-
 
 ## @fn      makingTest_logConsole()
 #  @brief   start to log all console output into an artifacts file
