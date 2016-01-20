@@ -63,6 +63,7 @@ execute() {
             exitCode=${?}
         else
             output=$(createTempFile)
+            trace "tmp log: ssh ${HOSTNAME} tail -f ${output}"
             "${@}" >${output} 2>&1
             exitCode=${?}
             rawDebug ${output}
