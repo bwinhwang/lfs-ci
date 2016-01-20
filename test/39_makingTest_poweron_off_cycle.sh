@@ -55,7 +55,9 @@ test1_poweron() {
     local expect=$(createTempFile)
     cat <<EOF > ${expect}
 makingTest_logConsole 
-mustHaveMakingTestRunningTarget 
+makingTest_testSuiteDirectory 
+mustExistDirectory /path/to/test/suite
+execute -i make -C /path/to/test/suite poweron
 EOF
     assertExecutedCommands ${expect}
 

@@ -16,11 +16,11 @@ LFS_CI_SOURCE_makingtest='$Id$'
 #  @param   <none>
 #  @return  <none>
 makingTest_testFSM() {
-    makingTest_testconfig 
+    makingTest_testconfig
     makingTest_poweron
-    makingTest_install    
+    makingTest_install
     makingTest_testXmloutput
-    makingTest_copyResults 
+    makingTest_copyResults
 
     return
 }

@@ -140,14 +140,13 @@ test_exit_handler_trap() {
     local expectBefore=$(createTempFile)
     cat <<EOF > ${expectBefore}
 trap -- 'exit_handler '\''normal exit 0'\'' 0 0' EXIT
-trap -- '' SIGHUP
 trap -- 'exit_handler '\''interrupted'\''    1 3' SIGINT
 trap -- 'exit_handler '\''terminated'\''     1 2' SIGTERM
 EOF
     local expectAfter=$(createTempFile)
     cat <<EOF > ${expectAfter}
-trap -- '' SIGHUP
 EOF
+
     
     local got=$(createTempFile)
     trap > ${got}
@@ -164,7 +163,7 @@ EOF
 
     local got=$(createTempFile)
     trap > ${got}
-    assertTrue "diff -rub ${expectAfter} ${got}"
+    assertTrue "diff traps after run" "diff -rub ${expectAfter} ${got}"
 
     return 0
 }
