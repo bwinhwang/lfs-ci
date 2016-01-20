@@ -394,6 +394,13 @@ class CreateBranch extends Common {
             }
         }
 
+        if(newJob.getName() == "PKGPOOL_-_"+this.newBranch+"_-_Build_-_build_from_scratch") {
+            this.inf("replace ${this.pkgPoolReplace} by */${this.newBranch} in jobs config.xml.")
+            processFileInplace(configFile) { text ->
+                text.replace(this.pkgPoolReplace, "*/"+this.newBranch)
+            }
+        }
+
         this.inf("updated job configuration for job \"$newJob.name\"")
         return configFile
     }

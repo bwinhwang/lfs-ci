@@ -80,7 +80,7 @@ execute() {
         # in the last loop, don't wait, just exist
         if [[ ${retryCount} -gt 0 && ${exitCode} -gt 0 ]] ; then
             local randomSeconds=$((RANDOM % 20))
-            trace "waiting ${randomSeconds} seconds for retry execution (try ${retryCount})"
+            debug "waiting ${randomSeconds} seconds for retry execution (try ${retryCount})"
             sleep ${randomSeconds}
         fi
     done
