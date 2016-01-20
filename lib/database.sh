@@ -166,6 +166,7 @@ storeEvent() {
     local taskName=$(getTaskNameFromJobName)
     case $1 in
         --*) true ;; 
+        [0-9]) true ;;
         # strange behavour.....
         *)   [[ $1 ]] && taskName=$1 ; shift ;;
     esac
