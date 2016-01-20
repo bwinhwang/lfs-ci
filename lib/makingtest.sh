@@ -21,6 +21,7 @@ makingTest_testFSM() {
     makingTest_install
     makingTest_testXmloutput
     makingTest_copyResults
+    makingTest_poweroff
 
     return
 }
@@ -151,8 +152,11 @@ makingTest_poweron() {
 
     local testSuiteDirectory=$(makingTest_testSuiteDirectory)
     mustExistDirectory ${testSuiteDirectory}
+    local action=$(getConfig LFS_CI_uc_test_TMF_poweron_action)
 
-    execute -i make -C ${testSuiteDirectory} poweron
+    if [[ -z ${action} ]] ; then
+        execute -i make -C ${testSuiteDirectory} poweron
+    fi
     
     return
 }
@@ -166,9 +170,12 @@ makingTest_poweroff() {
 
     local testSuiteDirectory=$(makingTest_testSuiteDirectory)
     mustExistDirectory ${testSuiteDirectory}
+    local canPowerOff=$(getConfig LFS_CI_uc_test_TMF_can_power_off_target)
 
     # not all branches have the poweroff implemented
-    execute -i make -C ${testSuiteDirectory} poweroff
+    if [[ ${canPowerOff} ]] ; then
+        execute -i make -C ${testSuiteDirectory} poweroff
+    fi
 
     return
 }
@@ -292,6 +299,8 @@ makingTest_testLRC() {
     find ${xmlOutputDirectory} -name '*.xml' | while read file ; do
         cat -v ${file} > ${file}.tmp && mv ${file}.tmp ${file}
     done
+
+    makingTest_poweroff
 
     return
 }
