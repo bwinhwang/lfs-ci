@@ -26,11 +26,12 @@ oneTimeSetUp() {
     makingTest_logConsole() {
         mockedCommand "makingTest_logConsole $@"
     }
-    mustHaveMakingTestRunningTarget() {
-        mockedCommand "mustHaveMakingTestRunningTarget $@"
-    }
     getConfig() {
-        echo $1
+        case $1 in
+            LFS_CI_uc_test_TMF_poweron_action) echo power_on_action ;;
+            LFS_CI_uc_test_TMF_can_power_off_target) echo ${UT_POWER_OFF} ;;
+            *) echo $1 ;;
+        esac
     }
     _reserveTarget() {
         echo "reservedTarget"
@@ -57,14 +58,15 @@ test1_poweron() {
 makingTest_logConsole 
 makingTest_testSuiteDirectory 
 mustExistDirectory /path/to/test/suite
-execute -i make -C /path/to/test/suite poweron
+execute -i make -C /path/to/test/suite power_on_action
 EOF
     assertExecutedCommands ${expect}
 
     return
 }
 
-test1_poweroff() {
+test1_poweroff_ok() {
+    export UT_POWER_OFF=1
     assertTrue "makingTest_poweroff"
 
     local expect=$(createTempFile)
@@ -73,6 +75,18 @@ mustHaveMakingTestTestConfig
 makingTest_testSuiteDirectory 
 mustExistDirectory /path/to/test/suite
 execute -i make -C /path/to/test/suite poweroff
+EOF
+    assertExecutedCommands ${expect}
+
+    return
+}
+
+test1_poweroff_notok() {
+    export UT_POWER_OFF=
+    assertTrue "makingTest_poweroff"
+
+    local expect=$(createTempFile)
+    cat <<EOF > ${expect}
 EOF
     assertExecutedCommands ${expect}
 

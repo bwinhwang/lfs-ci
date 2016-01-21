@@ -13,6 +13,7 @@ LFS_CI_SOURCE_makingtest='$Id$'
 #            $ make powercycle
 #            $ make install
 #            $ make test
+#            $ make poweroff
 #  @param   <none>
 #  @return  <none>
 makingTest_testFSM() {
@@ -154,8 +155,8 @@ makingTest_poweron() {
     mustExistDirectory ${testSuiteDirectory}
     local action=$(getConfig LFS_CI_uc_test_TMF_poweron_action)
 
-    if [[ -z ${action} ]] ; then
-        execute -i make -C ${testSuiteDirectory} poweron
+    if [[ ${action} ]] ; then
+        execute -i make -C ${testSuiteDirectory} ${action}
     fi
     
     return
@@ -166,17 +167,15 @@ makingTest_poweron() {
 #  @param   <none>
 #  @return  <none>
 makingTest_poweroff() {
-    mustHaveMakingTestTestConfig
-
-    local testSuiteDirectory=$(makingTest_testSuiteDirectory)
-    mustExistDirectory ${testSuiteDirectory}
     local canPowerOff=$(getConfig LFS_CI_uc_test_TMF_can_power_off_target)
-
-    # not all branches have the poweroff implemented
     if [[ ${canPowerOff} ]] ; then
-        execute -i make -C ${testSuiteDirectory} poweroff
-    fi
 
+        mustHaveMakingTestTestConfig
+        local testSuiteDirectory=$(makingTest_testSuiteDirectory)
+        mustExistDirectory ${testSuiteDirectory}
+        execute -i make -C ${testSuiteDirectory} poweroff
+
+    fi
     return
 }
 
