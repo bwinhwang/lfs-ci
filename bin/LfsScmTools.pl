@@ -62,6 +62,7 @@ my %commands = (
                  sendReleaseNote                => "Nokia::Command::SendReleaseNote",
                  sortBuildsFromDependencies     => "Nokia::Command::SortBuildsFromDependencies",
                  unreserveTarget                => "Nokia::Command::UnreserveTarget",
+                 unusedTargets                  => "Nokia::Command::UnusedTargets",
                  customScmDatabaseBranches      => "Nokia::Command::CustomScm::DatabaseBranches",
                );
 

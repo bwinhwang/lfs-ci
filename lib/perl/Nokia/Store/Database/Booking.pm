@@ -79,4 +79,32 @@ sub searchTarget {
     return @results;
 }
 
+sub unusedTargets {
+    my $self  = shift;
+    my $param = { @_ };
+
+    my $sth = $self->prepare( 
+        "SELECT 
+            target_name 
+        FROM bookings b 
+        RIGHT OUTER JOIN targets t 
+            ON b.target_id = t.id 
+            AND b.id in ( SELECT MAX(id) 
+                          FROM bookings 
+                          GROUP BY target_id) 
+        WHERE endTime IS NOT NULL 
+              AND status = 'free' 
+              AND TIME_TO_SEC( TIMEDIFF(now(), endTime) ) > 3600 
+              AND comment NOT LIKE 'Admin_-_target_poweroff'
+        ORDER BY target_name"
+    );
+    $sth->execute()
+        or LOGDIE "can not get unused targets";
+    my @results;
+    while ( my $row = $sth->fetchrow_hashref() ) {
+         push @results, $row->{target_name};
+    }
+    return @results;
+}
+
 1;
