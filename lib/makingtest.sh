@@ -17,11 +17,11 @@ LFS_CI_SOURCE_makingtest='$Id$'
 #  @param   <none>
 #  @return  <none>
 makingTest_testFSM() {
-    makingTest_testconfig 
+    makingTest_testconfig
     makingTest_poweron
-    makingTest_install    
+    makingTest_install
     makingTest_testXmloutput
-    makingTest_copyResults 
+    makingTest_copyResults
     makingTest_poweroff
 
     return
@@ -151,10 +151,14 @@ makingTest_testSuiteDirectory() {
 makingTest_poweron() {
     makingTest_logConsole
 
-    # This should be a poweron, but we don't know the state of the target.
-    # So we just powercycle the target
-    makingTest_powercycle
+    local testSuiteDirectory=$(makingTest_testSuiteDirectory)
+    mustExistDirectory ${testSuiteDirectory}
+    local action=$(getConfig LFS_CI_uc_test_TMF_poweron_action)
 
+    if [[ ${action} ]] ; then
+        execute -i make -C ${testSuiteDirectory} ${action}
+    fi
+    
     return
 }
 
@@ -163,14 +167,15 @@ makingTest_poweron() {
 #  @param   <none>
 #  @return  <none>
 makingTest_poweroff() {
-    mustHaveMakingTestTestConfig
+    local canPowerOff=$(getConfig LFS_CI_uc_test_TMF_can_power_off_target)
+    if [[ ${canPowerOff} ]] ; then
 
-    local testSuiteDirectory=$(makingTest_testSuiteDirectory)
-    mustExistDirectory ${testSuiteDirectory}
+        mustHaveMakingTestTestConfig
+        local testSuiteDirectory=$(makingTest_testSuiteDirectory)
+        mustExistDirectory ${testSuiteDirectory}
+        execute -i make -C ${testSuiteDirectory} poweroff
 
-    # not all branches have the poweroff implemented
-    execute -i make -C ${testSuiteDirectory} poweroff
-
+    fi
     return
 }
 
@@ -388,7 +393,6 @@ makingTest_install() {
     local targetName=$(_reserveTarget)
     mustHaveValue "${targetName}" "target name"
 
-
     local shouldHaveRunningTarget=$(getConfig LFS_CI_uc_test_should_target_be_running_before_make_install)
     if [[ ${shouldHaveRunningTarget} ]] ; then
         mustHaveMakingTestRunningTarget
@@ -524,9 +528,6 @@ mustHaveMakingTestRunningTarget() {
 
     mustHaveMakingTestTestConfig
 
-    local workspace=$(getWorkspaceName)
-    mustHaveWorkspaceName
-
 	local testSuiteDirectory=$(makingTest_testSuiteDirectory)
 	mustExistFile ${testSuiteDirectory}/testsuite.mk
 
@@ -557,7 +558,6 @@ mustHaveMakingTestRunningTarget() {
     fatal "this code should not be reached."
     return
 }
-
 
 ## @fn      makingTest_logConsole()
 #  @brief   start to log all console output into an artifacts file

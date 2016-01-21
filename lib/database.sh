@@ -111,7 +111,7 @@ eventOtherUnstable() {
 eventSubTestStarted() {
     local taskName=""
     if [[ ${JOB_NAME} =~ ^Test- ]] ; then
-        taskName=subtest
+        taskName=test
     fi
     storeEvent subtest_started ${taskName}
     return
@@ -124,7 +124,7 @@ eventSubTestStarted() {
 eventSubTestFinished() {
     local taskName=""
     if [[ ${JOB_NAME} =~ ^Test- ]] ; then
-        taskName=subtest
+        taskName=test
     fi
     storeEvent subtest_finished ${taskName}
     return
@@ -137,7 +137,7 @@ eventSubTestFinished() {
 eventSubTestFailed() {
     local taskName=""
     if [[ ${JOB_NAME} =~ ^Test- ]] ; then
-        taskName=subtest
+        taskName=test
     fi
     storeEvent subtest_failed ${taskName}
     return
@@ -173,7 +173,7 @@ storeEvent() {
 
     # TODO 2016-01-19 demx2fk3 workaround for LRC. This should be done differently
     if [[ -z ${taskName} && ${JOB_NAME} =~ ^Test- ]] ; then
-        taskName=subtest
+        taskName=test
     fi
 
     mustHaveValue "${taskName}" "task name"
