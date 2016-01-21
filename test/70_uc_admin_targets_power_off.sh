@@ -52,7 +52,7 @@ test1() {
 createBasicWorkspace -l pronb-developer src-test
 makingTest_testconfig 
 makingTest_testconfig 
-execute -n /home/bm/projekte/work/nsn/ci.git/bin/unusedTargets
+execute -n ${LFS_CI_ROOT}/bin/unusedTargets
 reserveTargetByName a
 makingTest_testconfig 
 makingTest_poweroff 
@@ -80,7 +80,7 @@ test2() {
 createBasicWorkspace -l pronb-developer src-test
 makingTest_testconfig 
 makingTest_testconfig 
-execute -n /home/bm/projekte/work/nsn/ci.git/bin/unusedTargets
+execute -n ${LFS_CI_ROOT}/bin/unusedTargets
 EOF
     assertExecutedCommands ${expect}
 
