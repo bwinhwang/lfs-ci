@@ -1,3 +1,7 @@
+#!/bin/bash
+## @file    uc_admin_targets_power_off
+#  @brief   power off all unused targets
+
 [[ -z ${LFS_CI_SOURCE_booking}         ]] && source ${LFS_CI_ROOT}/lib/database.sh
 [[ -z ${LFS_CI_SOURCE_makingtest}      ]] && source ${LFS_CI_ROOT}/lib/makingtest.sh
 [[ -z ${LFS_CI_SOURCE_common}          ]] && source ${LFS_CI_ROOT}/lib/common.sh

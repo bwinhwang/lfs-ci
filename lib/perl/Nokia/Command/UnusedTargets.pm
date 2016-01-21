@@ -11,6 +11,10 @@ use Nokia::Store::Database::Booking;
 
 use parent qw( Nokia::Object );
 
+## @fn      prepare()
+#  @brief   prepare the usecase / command
+#  @param   <none>
+#  @return  <none>
 sub prepare {
     my $self = shift;
 
@@ -21,6 +25,11 @@ sub prepare {
     return;
 }
 
+## @fn      execute()
+#  @brief   execute the usecase "unused targets"
+#  @details prints all unused targets from booking database
+#  @param   <none>
+#  @return  <none>
 sub execute {
     my $self = shift;
 

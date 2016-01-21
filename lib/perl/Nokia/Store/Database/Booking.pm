@@ -79,6 +79,11 @@ sub searchTarget {
     return @results;
 }
 
+## @fn      unusedTargets()
+#  @brief   return the list of all targets from the booking table, which are not used since
+#           more than 5 hours
+#  @param   <none>
+#  @return  list of target names
 sub unusedTargets {
     my $self  = shift;
     my $param = { @_ };
@@ -94,7 +99,7 @@ sub unusedTargets {
                           GROUP BY target_id) 
         WHERE endTime IS NOT NULL 
               AND status = 'free' 
-              AND TIME_TO_SEC( TIMEDIFF(now(), endTime) ) > 3600 
+              AND TIME_TO_SEC( TIMEDIFF(now(), endTime) ) > 18000 
               AND comment NOT LIKE 'Admin_-_target_poweroff'
         ORDER BY target_name"
     );
