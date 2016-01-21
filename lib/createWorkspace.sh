@@ -59,7 +59,7 @@ updateWorkspace() {
 
     # we need the revision to update to the requested (from upstream / revision state file) revision
     local revision=$(latestRevisionFromRevisionStateFile)
-    mustHaveValue ${revision} "revision from revision state file"
+    mustHaveValue "${revision}" "revision from revision state file"
 
     local build="build updateall -r ${revision}"
 
@@ -173,7 +173,7 @@ createWorkspace() {
 
     for src in ${buildTargets} ; do
         local revision=$(latestRevisionFromRevisionStateFile)
-        mustHaveValue ${revision} "revision from revision state file"
+        mustHaveValue "${revision}" "revision from revision state file"
 
         counter=$(expr ${counter} + 1)
         info "(${counter}/${amountOfTargets}) checking out sources for ${src} rev ${revision:-latest}"

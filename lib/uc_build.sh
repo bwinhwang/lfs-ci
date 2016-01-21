@@ -95,7 +95,7 @@ usecase_LFS_BUILD_PLATFORM() {
     exit_add _recordSubBuildEndEvent
 
     local label=$(getNextCiLabelName)
-    mustHaveValue ${label} "label name"
+    mustHaveValue "${label}" "build name"
     setBuildDescription "${JOB_NAME}" "${BUILD_NUMBER}" "${label}"
 
     execute rm -rf ${WORKSPACE}/revisions.txt
@@ -194,7 +194,7 @@ _build_fsmddal_pdf() {
 
     mustHaveNextCiLabelName
     local label=$(getNextCiLabelName)
-    mustHaveValue ${label} "label name"
+    mustHaveValue "${label}" "build name"
 
     setBuildDescription "${JOB_NAME}" "${BUILD_NUMBER}" "${label}"
 

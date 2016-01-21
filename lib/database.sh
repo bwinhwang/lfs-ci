@@ -180,7 +180,7 @@ storeEvent() {
 
     mustHaveNextCiLabelName
     local label=$(getNextCiLabelName)
-    mustHaveValue ${label} "label name"
+    mustHaveValue "${label}" "build name"
 
     execute -i ${LFS_CI_ROOT}/bin/newEvent    \
                 --buildName=${label}          \
@@ -203,7 +203,7 @@ databaseAddNewCommits() {
 
     mustHaveNextCiLabelName
     local label=$(getNextCiLabelName)
-    mustHaveValue ${label} "label name"
+    mustHaveValue "${label}" "build name"
 
     copyFileFromBuildDirectoryToWorkspace ${JOB_NAME} ${BUILD_NUMBER} changelog.xml
 

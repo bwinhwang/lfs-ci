@@ -757,7 +757,7 @@ _getJobInformationFromUpstreamProject() {
 
     _getUpstreamProjects ${jobName} ${buildNumber} ${upstreamsFile}
     local resultValue=$(grep ${jobNamePart} ${upstreamsFile} | cut -d: -f${fieldNumber} | sort -n | tail -n 1 )
-    mustHaveValue ${resultValue} "requested info / ${jobNamePart} / ${fieldNumber}"
+    mustHaveValue "${resultValue}" "requested info / ${jobNamePart} / ${fieldNumber}"
 
     echo ${resultValue}
     return
@@ -985,7 +985,7 @@ sanityCheck() {
 #  @return   $1 minus 1.
 branchMinusOne() {
     local branch=$1
-    mustHaveValue $branch "branch is needed"
+    mustHaveValue "${branch}" "branch is needed"
     local mm
     local tmp=$(getBranchPart ${branch} MM)
     local yy=$(getBranchPart ${branch} YY)

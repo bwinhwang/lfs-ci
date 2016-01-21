@@ -255,10 +255,10 @@ copyFileToUserContentDirectory() {
     local destFilePath=$2
 
     local serverName=$(getConfig jenkinsMasterServerHostName)
-    mustHaveValue ${serverName} "server name"
+    mustHaveValue "${serverName}" "server name"
 
     local jenkinsMasterServerPath=$(getConfig jenkinsMasterServerPath)
-    mustHaveValue ${jenkinsMasterServerPath} "jenkins master serverpath"
+    mustHaveValue "${jenkinsMasterServerPath}" "jenkins master serverpath"
     local pathOnServer=${jenkinsMasterServerPath}/userContent/${destFilePath}
     local fileName=$(basename ${srcFilePathAndName})
 

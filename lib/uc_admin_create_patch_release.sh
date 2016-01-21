@@ -53,7 +53,7 @@ usecase_ADMIN_CREATE_PATCH_RELEASE() {
 #  @return  0, if BASE_BUILD and each of the patch builds are found on the share
 mustHaveAllBuilds() {
     local releasesPath=$(getConfig LFS_CI_UC_package_copy_to_share_real_location)
-    mustHaveValue ${releasesPath} "share real location"
+    mustHaveValue "${releasesPath}" "share real location"
 
     for varBuild in BASE_BUILD FSMR2_PATCH_BUILD FSMR3_PATCH_BUILD FSMR4_PATCH_BUILD
     do
@@ -281,13 +281,13 @@ copyPatchBuildsIntoBaseBuild() {
         execute cp -rf ${releaseShareRootPath}/${!currPatchBuild}/os/doc/scripts ${baseDocPatchDir}/${hwPlatform}_scripts
 
         local osDirs=$(getConfig LFS_release_os_dirs -t "hw_platform:${hwPlatform}")
-        mustHaveValue ${osDirs} "osDirs"
+        mustHaveValue "${osDirs}" "osDirs"
         debug osDirs = ${osDirs}
         for  osDir in ${osDirs}
         do
             debug osDir=${osDir}
             local osSubdir=$(getConfig LFS_release_os_subdir -t "hw_platform:${hwPlatform}" -t "os_dir:${osDir}")
-            mustHaveValue ${osSubdir} "osSubdir"
+            mustHaveValue "${osSubdir}" "osSubdir"
             debug osSubdir=${osSubdir}
 
             # remove last dir of osSubdir to get dest_dir

@@ -231,7 +231,7 @@ specialBuildCreateWorkspaceAndBuild() {
 
     mustHaveNextCiLabelName
     local label=$(getNextCiLabelName)
-    mustHaveValue ${label} "label name"
+    mustHaveValue "${label}" "build name"
 
     setBuildDescription "${JOB_NAME}" "${BUILD_NUMBER}" "${label}"
 
@@ -323,7 +323,7 @@ specialBuildUploadAndNotifyUser() {
 
     mustHaveNextCiLabelName
     local label=$(getNextCiLabelName)
-    mustHaveValue ${label} "label name"
+    mustHaveValue "${label}" "build name"
 
     mustExistFile ${workspace}/bld/bld-${buildType,,}-input/requestor.txt
     rawDebug ${workspace}/bld/bld-${buildType,,}-input/requestor.txt

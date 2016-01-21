@@ -497,7 +497,7 @@ _reserveTarget() {
     else
         targetName=$(sed "s/^Test-//" <<< ${JOB_NAME})
     fi
-    mustHaveValue ${targetName} "target name"
+    mustHaveValue "${targetName}" "target name"
 
     echo ${targetName} 
    

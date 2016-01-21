@@ -14,14 +14,14 @@ usecase_LFS_COPY_SONAR_UT_DATA() {
     requiredParameters JOB_NAME
 
     local sonarDataPath=$(getConfig LFS_CI_coverage_data_path)
-    mustHaveValue ${sonarDataPath} "sonar data path"
+    mustHaveValue "${sonarDataPath}" "sonar data path"
 
     local targetType=$(getSubTaskNameFromJobName)
-    mustHaveValue ${targetType} "target type"
+    mustHaveValue "${targetType}" "target type"
 
     local subDir=UT
     local userContentPath=$(getConfig LFS_CI_usercontent_data_path -t targetType:${targetType} -t subDir:${subDir})
-    mustHaveValue ${userContentPath} "userContent path"
+    mustHaveValue "${userContentPath}" "userContent path"
 
     local workspace=$(getWorkspaceName)
     mustHaveWorkspaceName
@@ -47,9 +47,9 @@ usecase_LFS_COPY_SONAR_SCT_DATA() {
     for targetType in FSMr3 FSMr4
     do
         local sonarDataPath=$(getConfig LFS_CI_coverage_data_path -t targetType:${targetType})
-        mustHaveValue ${sonarDataPath} "sonar data path"
+        mustHaveValue "${sonarDataPath}" "sonar data path"
         local userContentPath=$(getConfig LFS_CI_usercontent_data_path -t targetType:${targetType} -t subDir:${subDir})
-        mustHaveValue ${userContentPath} "userContent path"
+        mustHaveValue "${userContentPath}" "userContent path"
 
         _copy_Sonar_Data_to_userContent ${workspace}/${sonarDataPath} ${userContentPath}
 

@@ -85,7 +85,7 @@ usecase_LFS_DEVELOPER_PACKAGE() {
 
     mustHaveNextCiLabelName
     local label=$(getNextCiLabelName)
-    mustHaveValue ${label} "label name"
+    mustHaveValue "${label}" "build name"
 
     linkFileToArtifactsDirectory /build/home/${USER}/privateBuilds/${label}.tar.gz
 

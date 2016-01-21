@@ -258,8 +258,8 @@ backupJenkinsMasterServerInstallation() {
     local backupPath=$(getConfig jenkinsMasterServerBackupPath)
     local serverPath=$(getConfig jenkinsMasterServerPath)
 
-    mustHaveValue ${backupPath}
-    mustHaveValue ${serverPath}
+    mustHaveValue "${backupPath}" "backup path"
+    mustHaveValue "${serverPath}" "server path"
 
     execute rm -rf ${backupPath}/backup.11
 

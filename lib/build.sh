@@ -35,7 +35,7 @@ buildLfs() {
 
     mustHaveNextCiLabelName
     local label=$(getNextCiLabelName)
-    mustHaveValue ${label}
+    mustHaveValue "${label}" "build name"
 
     execute cd ${workspace}
     storeExternalComponentBaselines
