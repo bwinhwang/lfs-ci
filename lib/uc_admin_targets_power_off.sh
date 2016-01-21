@@ -22,7 +22,7 @@ usecase_ADMIN_TARGETS_POWER_OFF() {
 
     echo "test_suite = src-test/src/testsuites/continousintegration/smoketest" > ${workspace}/src-project/src/TMF/testsuites.cfg
     
-    for target in $(${LFS_CI_ROOT}/bin/unusedTargets) ; do
+    for target in $(execute -n ${LFS_CI_ROOT}/bin/unusedTargets) ; do
 
         info "power off target ${target}"
         reserveTargetByName ${target,,}
