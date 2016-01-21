@@ -3,7 +3,11 @@
 [[ -z ${LFS_CI_SOURCE_common}          ]] && source ${LFS_CI_ROOT}/lib/common.sh
 [[ -z ${LFS_CI_SOURCE_createWorkspace} ]] && source ${LFS_CI_ROOT}/lib/createWorkspace.sh
 
-usecase_ADMIN_POWER_OFF_TARGETS() {
+## @fn      usecase_ADMIN_TARGETS_POWER_OFF()
+#  @brief   turn of the unused targets after x hours
+#  @param   <none>
+#  @return  <none>
+usecase_ADMIN_TARGETS_POWER_OFF() {
 
     export DELIVERY_DIRECTORY=/build/home/CI_LFS/Release_Candidates/FSMr3/latest_trunk/.
     export UPSTREAM_PROJECT=LFS_CI_-_trunk_-_Test
