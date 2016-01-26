@@ -169,12 +169,12 @@ makingTest_poweron() {
 makingTest_poweroff() {
     local canPowerOff=$(getConfig LFS_CI_uc_test_TMF_can_power_off_target)
     if [[ ${canPowerOff} ]] ; then
-
         mustHaveMakingTestTestConfig
         local testSuiteDirectory=$(makingTest_testSuiteDirectory)
         mustExistDirectory ${testSuiteDirectory}
         execute -i make -C ${testSuiteDirectory} poweroff
-
+    else
+        info poweroff disabled by config parameter LFS_CI_uc_test_TMF_can_power_off_target
     fi
     return
 }
