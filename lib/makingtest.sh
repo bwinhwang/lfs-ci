@@ -174,7 +174,7 @@ makingTest_poweroff() {
         mustExistDirectory ${testSuiteDirectory}
         execute -i make -C ${testSuiteDirectory} poweroff
     else
-        info poweroff disabled by config parameter LFS_CI_uc_test_TMF_can_power_off_target
+        info "make poweroff disabled by config parameter LFS_CI_uc_test_TMF_can_power_off_target"
     fi
     return
 }
