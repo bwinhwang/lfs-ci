@@ -100,7 +100,7 @@ sub unusedTargets {
         WHERE endTime IS NOT NULL 
               AND status = 'free' 
               AND TIME_TO_SEC( TIMEDIFF(now(), endTime) ) > 18000 
-              AND comment NOT LIKE 'Admin_-_targets_power_off'
+              AND comment NOT LIKE '%Admin_-_targets_power_off%'
         ORDER BY target_name"
     );
     $sth->execute()
