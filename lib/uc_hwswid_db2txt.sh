@@ -134,10 +134,7 @@ hwSwIdToSubVersion() {
         #svnDiff ${hwswidWorkdirSvn}
         info +++ svn diff ${hwswidWorkdirSvn}
         svn diff ${hwswidWorkdirSvn}
-        local msg=$(createTempFile)
-        echo "update HwSwId" > ${msg}
-        svnCommit -F ${msg} ${hwswidWorkdirSvn}
-
+        svn commit -m "update HwSwId" ${hwswidWorkdirSvn}
     done
 
     return 0
