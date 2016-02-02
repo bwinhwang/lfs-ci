@@ -43,6 +43,10 @@ sub execute {
     while( <FILE> ) {
         chomp;
         next if m/^#/;
+        if( not m/[a-z0-9-_\/.]+;[0-9]+/i ) {
+            LOGWARN "line '$_' does not match to regex => ignoring line";
+            next;
+        }
         my ( $resultName, $resultValue ) = split( ";", $_ );
         $handler->newTestResult( testExecutionId => $id,
                                  testResultName  => $resultName,
