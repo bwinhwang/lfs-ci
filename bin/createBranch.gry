@@ -103,6 +103,7 @@ env.put("TEMPLATE_DIR", build.getEnvironment(listener).get("CONFIGXML_TEMPLATE_D
 env.put("TEMPLATE_SUFFIX", build.getEnvironment(listener).get("CONFIGXML_TEMPLATE_SUFFIX"))
 env.put("WORKSPACE", build.getEnvironment(listener).get("WORKSPACE"))
 env.put("JOBS_EXCLUDE_LIST", build.getEnvironment(listener).get("JOBS_EXCLUDE_LIST"))
+env.put("JOBS_DISABLE_LIST", build.getEnvironment(listener).get("JOBS_DISABLE_LIST"))
 env.put("PROMOTIONS_EXCLUDE_LIST", build.getEnvironment(listener).get("PROMOTIONS_EXCLUDE_LIST"))
 env.put("MAIN_BUILD_JOB_NAME_LRC", build.getEnvironment(listener).get("MAIN_BUILD_JOB_NAME_LRC"))
 
@@ -215,6 +216,7 @@ class CreateBranch extends Common {
     def jobsToEnable
     def jobNameReplace
     def jobs2Exclude
+    def jobs2Disable
     def promotions2Exclude
     def srcBranchNumber
 
@@ -241,9 +243,11 @@ class CreateBranch extends Common {
         this.jobsToEnable = []
         this.jobNameReplace = srcBranch
 
-        // List of jobs to be excluded. Job names can also be a regex.
-        this.jobs2Exclude = this.env.get("JOBS_EXCLUDE_LIST").split(",")
+        // List of jobs to be excluded/disabled. Job names can also be a regex.
+        this.jobs2Exclude = this.env.get("JOBS_EXCLUDE_LIST").tokenize(",")
         this.inf("jobs to exclude: ${this.jobs2Exclude}")
+        this.jobs2Disable = this.env.get("JOBS_DISABLE_LIST").tokenize(",")
+        this.inf("jobs to disable: ${this.jobs2Disable}")
         this.promotions2Exclude = this.env.get("PROMOTIONS_EXCLUDE_LIST").split(",")
         this.inf("promotions to exclude: ${this.promotions2Exclude}")
         this.jobsList = []
@@ -473,6 +477,20 @@ class CreateBranch extends Common {
     }
 
     /**
+      * Return true if "job_name" matches an entry in this.jobs2Disable,
+      * false otherwise.
+      */
+    boolean job2disable(job_name) {
+        for(toDisable in this.jobs2Disable) {
+            toDisable = toDisable.trim()
+            if(job_name =~ /${toDisable}/) {
+                return true
+            }
+        }
+        return false
+    }
+
+    /**
      * Add "jobToAdd" to this.jobsList if it is not yet added.
      * Return true if job was added to the list, false otherwise.
      */
@@ -558,8 +576,17 @@ class CreateBranch extends Common {
                 this.inf("set description of new job: ${this.comment}")
                 // disable build jobs because not all jobs are created jet.
                 newJob.disable()
-                this.inf("disable new job: ${newName}")
+                this.inf("disabled new job: ${newName}")
                 this.jobsToEnable.add(newJob)
+            }
+        }
+
+        if(this.job2disable(job.getName())) {
+            if(this.debug) {
+                this.dbg("disabled new job: ${newName}")
+            } else {
+                newJob.disable()
+                this.inf("disabled new job: ${newName}")
             }
         }
 
