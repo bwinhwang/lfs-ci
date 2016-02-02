@@ -3,7 +3,6 @@
 ## @fn      usecase_DDAL_UPLOAD_TO_SVN()
 #  @brief   upload ddal from git to svn
 #  @warning this usecase can be disabled on 1st of March 2016
-#           => hardcoded path names, no config, also no ut
 #  @param   <none>
 #  @return  <none>
 usecase_DDAL_UPLOAD_TO_SVN() {
@@ -13,8 +12,8 @@ usecase_DDAL_UPLOAD_TO_SVN() {
     local workspace=$(getWorkspaceName)
     mustHaveWorkspaceName
 
-    local svnUrl=https://svne1.access.nsn.com/isource/svnroot/BTS_SC_LFS
-    local svnPath=/os/trunk/fsmr3/src-fsmifdd/src/include
+    local svnUrl=$(getConfig DDAL_svn_url)
+    local svnPath=$(getConfig DDAL_svn_path)
 
     execute rsync -a --exclude=.git ${WORKSPACE}/src ${workspace}
 
