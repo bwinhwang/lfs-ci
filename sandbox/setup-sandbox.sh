@@ -211,7 +211,7 @@ pre_actions() {
         exit 8
     fi
 
-    exit 0
+    return 0
 }
 
 adjust_args() {
