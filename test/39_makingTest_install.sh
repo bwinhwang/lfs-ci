@@ -13,15 +13,14 @@ oneTimeSetUp() {
     execute() {
         mockedCommand "execute $@"
         rc=0
-        set -x
-        echo "$@"
-        if [[ $4 = ${UT_FAIL_CAUSE} || $5 = ${UT_FAIL_CAUSE} || $8 = ${UT_FAIL_CAUSE} || $7 = ${UT_FAIL_CAUSE} ]] ; then
+        shift
+        shift
+        if [[ $2 = ${UT_FAIL_CAUSE} || $3 = ${UT_FAIL_CAUSE} || $7 = ${UT_FAIL_CAUSE} || $6 = ${UT_FAIL_CAUSE} ]] ; then
             UT_EXECUTE_INSTALL=$(( UT_EXECUTE_INSTALL - 1))
             rc=${UT_EXECUTE_INSTALL}
-        set +x
+            [[ ${rc} -lt 0 ]]  && rc=0
             info "rc for $@ is ${rc}"
         fi
-        set +x
         return ${rc}
                 
     }
@@ -98,8 +97,8 @@ tearDown() {
 test1() {
     # normal install, all ok
     export UT_EXECUTE_INSTALL=1
-    # assertTrue "makingTest_install"
-    makingTest_install
+    export UT_FAIL_CAUSE=install
+    assertTrue "makingTest_install"
 
     local expect=$(createTempFile)
     cat <<EOF > ${expect}
