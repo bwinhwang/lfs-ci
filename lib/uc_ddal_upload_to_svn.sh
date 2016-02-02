@@ -17,7 +17,7 @@ usecase_DDAL_UPLOAD_TO_SVN() {
 
     execute rsync -a --exclude=.git ${WORKSPACE}/src ${workspace}
 
-    uploadToSubversion ${workspace} ${svnUrl} ${svnPath} 
+    uploadToSubversion ${workspace} ${svnUrl} ${svnPath} "" "BTSPS-1657: Import DDAL headers from git"
 
     return 0
 }
