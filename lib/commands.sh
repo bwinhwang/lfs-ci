@@ -62,10 +62,23 @@ execute() {
             "${@}" 2>&1 
             exitCode=${?}
         else
+            # the output of the executed command will be written into a temp file, which will
+            # be added later to the global logfiles (rawDebug). Reason why this is not
+            # written directly into the global logfile is, that we also want to show the
+            # logfile to the user, in cause, that the command filed (see rawOutput).
             output=$(createTempFile)
             trace "tmp log: ssh ${HOSTNAME} tail -f ${output}"
+
+            # install exit header function in case, that the job will be killed during the
+            # execution of the command ($@). The exit handler function will be removed
+            # directly after the exeuction.
+            exit_add _exitHandler_dumpLogfile:${output}
+
             "${@}" >${output} 2>&1
             exitCode=${?}
+
+            exit_remove _exitHandler_dumpLogfile:${output}
+
             rawDebug ${output}
         fi
 
@@ -99,6 +112,11 @@ execute() {
     trace "normal return of execute method"
 
     return ${exitCode}
+}
+
+_exitHandler_dumpLogfile() {
+    debug "output of last executed command"
+    rawDebug $1 
 }
 
 ## @fn      lastExecuteLogFile()
