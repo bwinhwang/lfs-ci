@@ -33,10 +33,6 @@ oneTimeSetUp() {
     createArtifactArchive() {
         mockedCommand "createArtifactArchive $@"
     }  
-    createFingerprintFile() {
-        mockedCommand "createFingerprintFile $@"
-    }  
-
     return
 }
 
@@ -74,7 +70,6 @@ test1() {
     cat <<EOF > ${expect}
 execute mkdir -p ${WORKSPACE}/workspace
 execute mkdir -p ${WORKSPACE}/workspace/bld/bld-fsmci-summary/
-createFingerprintFile 
 copyFileFromWorkspaceToBuildDirectory LFS_DEV_-_DEVELOPER_-_Build 123 ${WORKSPACE}/revisionstate.xml
 execute mkdir -p ${WORKSPACE}/workspace/bld/bld-dev-input/
 execute -i cp -a ${WORKSPACE}/lfs.patch ${WORKSPACE}/workspace/bld/bld-dev-input/

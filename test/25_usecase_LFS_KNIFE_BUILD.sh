@@ -47,10 +47,6 @@ oneTimeSetUp() {
         mockedCommand "svnCat $@"
         echo "src-foo http://fake 12345"
     }
-    createFingerprintFile() {
-        mockedCommand "createFingerprintFile $@"
-    }
-
 }
 oneTimeTearDown() {
     true
@@ -88,7 +84,6 @@ svnCat LFS_PROD_svn_delivery_os_repos_url/tags/PS_LFS_OS_2015_03_0001/doc/script
 getConfig LFS_PROD_tag_to_branch -t tagName:PS_LFS_OS_2015_03_0001
 execute mkdir -p ${WORKSPACE}/workspace
 execute mkdir -p ${WORKSPACE}/workspace/bld/bld-fsmci-summary/
-createFingerprintFile 
 copyFileFromWorkspaceToBuildDirectory LFS_KNIFE_-_knife_-_Build 123 ${WORKSPACE}/revisionstate.xml
 execute mkdir -p ${WORKSPACE}/workspace/bld/bld-knife-input/
 execute -i cp -a ${WORKSPACE}/lfs.patch ${WORKSPACE}/workspace/bld/bld-knife-input/

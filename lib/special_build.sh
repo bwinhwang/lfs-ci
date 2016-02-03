@@ -68,8 +68,6 @@ specialBuildPreparation() {
     echo ${location} > ${workspace}/bld/bld-fsmci-summary/location
     echo ${revision} > ${workspace}/bld/bld-fsmci-summary/svnrevision
 
-    createFingerprintFile
-
     debug "create own revision control file"
     echo "src-fake http://fakeurl/ ${revision}" > ${WORKSPACE}/revisionstate.xml
     rawDebug ${WORKSPACE}/revisionstate.xml

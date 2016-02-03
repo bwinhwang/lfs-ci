@@ -159,8 +159,6 @@ usecase_LFS_BUILD_CREATE_VERSION() {
         echo "invalid_string_from_usecase_LFS_BUILD_CREATE_VERSION" > ${workspace}/bld/bld-fsmci-summary/oldLabel
     fi
     
-    createFingerprintFile
-
     # for the metrics database, we are installing a own exit handler to record the end of this job
     eventBuildStarted
     exit_add _recordBuildEndEvent
