@@ -33,16 +33,17 @@ actionCompare() {
 #        exit 0
 #    fi
 
-#    if [[ "${upstreamBuildNumber}" != "${oldUpstreamBuildNumber}" ]] ; then
-#        info "upstream build number has changed, trigger build"
-#        exit 0
-#    fi
 
     local changelog=$(createTempFile)
     _createChangelog ${oldUpstreamBuildNumber} ${upstreamBuildNumber} ${changelog}
     _checkReleaseForPronto          ${changelog}
     _checkReleaseForRelevantChanges ${changelog}
     _checkReleaseForEmptyChangelog  ${changelog}
+
+    if [[ "${upstreamBuildNumber}" != "${oldUpstreamBuildNumber}" ]] ; then
+        info "upstream build number has changed, trigger build"
+        exit 0
+    fi
 
     info "no relevant changes found between ${oldUpstreamProjectName}#${oldUpstreamBuildNumber} and ${upstreamProjectName}#${upstreamBuildNumber} => No build/release."
     exit 1
