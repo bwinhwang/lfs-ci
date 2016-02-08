@@ -26,6 +26,7 @@ usecase_LFS_COPY_SONAR_UT_DATA() {
     local workspace=$(getWorkspaceName)
     mustHaveWorkspaceName
 
+    _create_sonar_excludelist  ${workspace}/${sonarDataPath}/${targetType}_exclusions.txt
     _copy_Sonar_Data_to_userContent ${workspace}/${sonarDataPath} ${userContentPath}
     
     return 0
@@ -82,6 +83,65 @@ _copy_Sonar_Data_to_userContent () {
         fi
     done
     
+    return 0
+}
+
+
+## @fn      _create_sonar_excludelist()
+#  @brief   create the exclusion list for sonar based on libFSMDDAL and the sourcefiles found in the repository
+#  @param   {resfile} full path where to store the exclusion list
+#  @return  <none>
+_create_sonar_excludelist() {
+    info Now creating exclusion list for Sonar ...
+
+    local resfile=$1
+    mustExistDirectory $(dirname $resfile)
+    
+    local workspace=$(getWorkspaceName)
+    mustHaveWorkspaceName
+
+    # get path where to search for sourcefiles
+    local spath=$(getConfig LFS_CI_sonar_exclusions_src_path)
+    mustHaveValue "${spath}" "sonar exclusions source path"
+    local srcdir=${workspace}/${spath}
+    debug srcdir=${srcdir}
+
+    info searching C files in src
+    debug ignoring  tools DSDT fpa_test
+
+    # the dirs ignored here get a special treatment below
+    local temp1=$(createTempFile)
+    ( cd $(dirname "$srcdir") && find $(basename "$srcdir") -name '*.c' ) | egrep -v '/stubs/|/tools/|/DSDT/|/fpa_test/' | sort > $temp1
+
+
+    local targetType=$(getSubTaskNameFromJobName)
+    debug targetType=$targetType
+    mustHaveValue "${targetType}" "target type"
+
+    # get path where to search for libFSMDDAL.a
+    local lpath=$(getConfig LFS_CI_sonar_exclusions_lib_path -t targetType:${targetType})
+    mustHaveValue "${lpath}" "sonar exclusions library path"
+    local libpath=${workspace}/${lpath}
+    debug libpath=${libpath}
+
+    local temp2=$(createTempFile)
+    ar t ${libpath}  > $temp2
+
+    sed -i -e 's/\.o/\.c/' $temp2
+
+    # remove some files that should always be blacklisted
+    sed -i -e '/_stubs.c/d' -e '/^_version.c/d' -e '/fpa_test.c/d' -e '/ddal_auth_set_user_password_pam_pass_non_interractive.c/d' $temp2
+
+    grep -v -f $temp2 $temp1 | sort > ${resfile}
+
+    # add additional directories that should be left out completely
+    for dir in tools/** stubs/** lx2/DSDT/** **/*.h
+    do
+        echo "src/$dir" >> ${resfile}
+    done
+
+    sed -i -e '$!s/$/ ,\\/' -e 's/^/**\//' ${resfile}
+
     return 0
 }
 
