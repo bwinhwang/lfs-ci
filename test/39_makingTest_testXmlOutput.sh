@@ -30,7 +30,7 @@ oneTimeSetUp() {
     getConfig() {
         mockedCommand "getConfig $@"
         if [[ $1 == LFS_CI_uc_test_making_test_timeout_in_seconds_for_make_test ]] ; then
-            echo 7200
+            echo 10800
             return
         fi                
         echo ${UT_TMF_TEST_OPTIONS}
@@ -63,7 +63,7 @@ mustExistDirectory /path/to/test/suite
 getConfig LFS_CI_uc_test_making_test_test_options
 mustHaveMakingTestTestConfig 
 getConfig LFS_CI_uc_test_making_test_timeout_in_seconds_for_make_test
-execute timeout -s 9 7200 make -C /path/to/test/suite --ignore-errors test-xmloutput
+execute timeout -s 9 10800 make -C /path/to/test/suite --ignore-errors test-xmloutput
 EOF
     assertExecutedCommands ${expect}
 
@@ -84,7 +84,7 @@ mustExistDirectory /path/to/test/suite
 getConfig LFS_CI_uc_test_making_test_test_options
 mustHaveMakingTestTestConfig 
 getConfig LFS_CI_uc_test_making_test_timeout_in_seconds_for_make_test
-execute timeout -s 9 7200 make -C /path/to/test/suite --ignore-errors ${UT_TMF_TEST_OPTIONS} test-xmloutput
+execute timeout -s 9 10800 make -C /path/to/test/suite --ignore-errors ${UT_TMF_TEST_OPTIONS} test-xmloutput
 EOF
     assertExecutedCommands ${expect}
 
