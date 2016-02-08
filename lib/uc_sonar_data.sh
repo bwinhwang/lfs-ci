@@ -27,6 +27,7 @@ usecase_LFS_COPY_SONAR_UT_DATA() {
     mustHaveWorkspaceName
 
     _create_sonar_excludelist  ${workspace}/${sonarDataPath}/${targetType}_exclusions.txt
+    info now copy data to usercontent
     _copy_Sonar_Data_to_userContent ${workspace}/${sonarDataPath} ${userContentPath}
     
     return 0
@@ -141,6 +142,8 @@ _create_sonar_excludelist() {
     done
 
     sed -i -e '$!s/$/ ,\\/' -e 's/^/**\//' ${resfile}
+
+    debug creation of exclusion list finished successfully
 
     return 0
 }
