@@ -66,7 +66,6 @@ usecase_LFS_COPY_SONAR_SCT_DATA() {
 _copy_Sonar_Data_to_userContent () {
 
     local sonarDataPath=$1
-    mustExistDirectory ${sonarDataPath}
     local userContentPath=$2
 
     for dataFile in $(getConfig LFS_CI_coverage_data_files -t targetType:${targetType})
@@ -133,7 +132,7 @@ _create_sonar_excludelist() {
 
     debug adding additional directories that should be blacklisted
 
-    for dir in tools/** stubs/** lx2/DSDT/** **/*.h
+    for dir in $(getConfig LFS_CI_sonar_additional_exclusions -t targetType:${targetType})
     do
         echo "src/$dir" >> ${resfile}
     done
