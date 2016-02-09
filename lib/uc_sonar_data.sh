@@ -26,6 +26,7 @@ usecase_LFS_COPY_SONAR_UT_DATA() {
     local workspace=$(getWorkspaceName)
     mustHaveWorkspaceName
 
+    _create_sonar_excludelist  ${workspace}/${sonarDataPath}/${targetType}_exclusions.txt
     _copy_Sonar_Data_to_userContent ${workspace}/${sonarDataPath} ${userContentPath}
     
     return 0
@@ -65,11 +66,10 @@ usecase_LFS_COPY_SONAR_SCT_DATA() {
 _copy_Sonar_Data_to_userContent () {
 
     local sonarDataPath=$1
+    mustExistDirectory ${sonarDataPath}
     local userContentPath=$2
 
-    local branchName=$(getBranchName)
-
-    for dataFile in $(getConfig LFS_CI_coverage_data_files)
+    for dataFile in $(getConfig LFS_CI_coverage_data_files -t targetType:${targetType})
     do
         if [[ -e ${sonarDataPath}/${dataFile} ]] ; then
             debug  now copying ${sonarDataPath}/${dataFile} to ${userContentPath} ...
@@ -82,6 +82,66 @@ _copy_Sonar_Data_to_userContent () {
         fi
     done
     
+    return 0
+}
+
+
+## @fn      _create_sonar_excludelist()
+#  @brief   create the exclusion list for sonar based on libFSMDDAL and the sourcefiles found in the repository
+#  @param   {resfile} full path where to store the exclusion list
+#  @return  <none>
+_create_sonar_excludelist() {
+    info Now creating exclusion list for Sonar ...
+
+    local resfile=$1
+    mustExistDirectory $(dirname $resfile)
+    
+    local workspace=$(getWorkspaceName)
+    mustHaveWorkspaceName
+
+    # get path where to search for sourcefiles
+    local spath=$(getConfig LFS_CI_sonar_exclusions_src_path)
+    mustHaveValue "${spath}" "sonar exclusions source path"
+    local srcdir=${workspace}/${spath}
+
+    debug searching C files in srcdir=${srcdir}
+
+    # the dirs ignored here get a special treatment below
+    local temp1=$(createTempFile)
+    ( cd $(dirname "$srcdir") && find $(basename "$srcdir") -name '*.c' ) | egrep -v '/stubs/|/tools/|/DSDT/|/fpa_test/' | sort > $temp1
+
+
+    local targetType=$(getSubTaskNameFromJobName)
+    mustHaveValue "${targetType}" "target type"
+
+    # get path where to search for libFSMDDAL.a
+    local lpath=$(getConfig LFS_CI_sonar_exclusions_lib_path -t targetType:${targetType})
+    mustHaveValue "${lpath}" "sonar exclusions library path"
+    local libpath=${workspace}/${lpath}
+
+    debug retrieving used files from lib=${libpath}
+
+    local temp2=$(createTempFile)
+    ar t ${libpath}  > $temp2
+
+    sed -i -e 's/\.o/\.c/' $temp2
+
+    # remove some files that should always be blacklisted
+    sed -i -e '/_stubs.c/d' -e '/^_version.c/d' -e '/fpa_test.c/d' -e '/ddal_auth_set_user_password_pam_pass_non_interractive.c/d' $temp2
+
+    grep -v -f $temp2 $temp1 | sort > ${resfile}
+
+    debug adding additional directories that should be blacklisted
+
+    for dir in tools/** stubs/** lx2/DSDT/** **/*.h
+    do
+        echo "src/$dir" >> ${resfile}
+    done
+
+    sed -i -e '$!s/$/ ,\\/' -e 's/^/**\//' ${resfile}
+
+    debug creation of exclusion list finished successfully
+
     return 0
 }
 
