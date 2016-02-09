@@ -27,7 +27,6 @@ usecase_LFS_COPY_SONAR_UT_DATA() {
     mustHaveWorkspaceName
 
     _create_sonar_excludelist  ${workspace}/${sonarDataPath}/${targetType}_exclusions.txt
-    info now copy data to usercontent
     _copy_Sonar_Data_to_userContent ${workspace}/${sonarDataPath} ${userContentPath}
     
     return 0
@@ -69,7 +68,6 @@ _copy_Sonar_Data_to_userContent () {
     local sonarDataPath=$1
     mustExistDirectory ${sonarDataPath}
     local userContentPath=$2
-    debug now in _copy_Sonar_Data_to_userContent, branchName=${branchName}, taskName=${taskName}, targetType=${targetType}
 
     for dataFile in $(getConfig LFS_CI_coverage_data_files -t targetType:${targetType})
     do
@@ -105,10 +103,8 @@ _create_sonar_excludelist() {
     local spath=$(getConfig LFS_CI_sonar_exclusions_src_path)
     mustHaveValue "${spath}" "sonar exclusions source path"
     local srcdir=${workspace}/${spath}
-    debug srcdir=${srcdir}
 
-    info searching C files in src
-    debug ignoring  tools DSDT fpa_test
+    debug searching C files in srcdir=${srcdir}
 
     # the dirs ignored here get a special treatment below
     local temp1=$(createTempFile)
@@ -116,14 +112,14 @@ _create_sonar_excludelist() {
 
 
     local targetType=$(getSubTaskNameFromJobName)
-    debug targetType=$targetType
     mustHaveValue "${targetType}" "target type"
 
     # get path where to search for libFSMDDAL.a
     local lpath=$(getConfig LFS_CI_sonar_exclusions_lib_path -t targetType:${targetType})
     mustHaveValue "${lpath}" "sonar exclusions library path"
     local libpath=${workspace}/${lpath}
-    debug libpath=${libpath}
+
+    debug retrieving used files from lib=${libpath}
 
     local temp2=$(createTempFile)
     ar t ${libpath}  > $temp2
@@ -135,7 +131,8 @@ _create_sonar_excludelist() {
 
     grep -v -f $temp2 $temp1 | sort > ${resfile}
 
-    # add additional directories that should be left out completely
+    debug adding additional directories that should be blacklisted
+
     for dir in tools/** stubs/** lx2/DSDT/** **/*.h
     do
         echo "src/$dir" >> ${resfile}
