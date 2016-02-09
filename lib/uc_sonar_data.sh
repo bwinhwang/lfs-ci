@@ -69,13 +69,9 @@ _copy_Sonar_Data_to_userContent () {
     local sonarDataPath=$1
     mustExistDirectory ${sonarDataPath}
     local userContentPath=$2
-    local taskName=$(getTaskNameFromJobName)
-    mustHaveValue "${taskName}" "taskName"
-    local branchName=$(getBranchName)
-    mustHaveValue "${branchName}" "branchName"
     debug now in _copy_Sonar_Data_to_userContent, branchName=${branchName}, taskName=${taskName}, targetType=${targetType}
 
-    for dataFile in $(getConfig LFS_CI_coverage_data_files)
+    for dataFile in $(getConfig LFS_CI_coverage_data_files -t targetType:${targetType})
     do
         if [[ -e ${sonarDataPath}/${dataFile} ]] ; then
             debug  now copying ${sonarDataPath}/${dataFile} to ${userContentPath} ...
