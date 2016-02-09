@@ -171,7 +171,7 @@ copyArchs() {
         local dst=${workspace}/upload/archs/${destinationsArchitecture}
         execute mkdir -p ${dst}
 
-        local sdk=$(getConfig LFS_CI_UC_package_linking_component)
+        local sdk=$(getConfig LFS_CI_UC_package_linking_component | cut -d" " -f1)
         mustHaveValue "${sdk}" "sdk from configuration"
 
         debug "linked sdk in arch is ${sdk}"

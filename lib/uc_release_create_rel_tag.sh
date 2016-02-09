@@ -88,18 +88,21 @@ _createReleaseTag_setSvnExternals() {
     mustHaveValue "${svnRepoName}" "svn url"
 
     # get sdk label
-    componentsFile=${workspace}/bld/bld-externalComponents-summary/externalComponents   
+    local componentsFile=${workspace}/bld/bld-externalComponents-summary/externalComponents   
     mustExistFile ${componentsFile}
-
-    local sdk2=$(getConfig sdk2 -f ${componentsFile})
-    local sdk3=$(getConfig sdk3 -f ${componentsFile})
-    local sdk=$(getConfig  sdk  -f ${componentsFile})
-    local sdkExternalLine=$(getConfig LFS_uc_release_create_release_tag_sdk_external_line -t sdk:${sdk} -t sdk2:${sdk2} -t sdk3:${sdk3})
-    mustHaveValue "${sdkExternalLine}" "sdk external line"
 
     local svnExternalsFile=${workspace}/svnExternals
     echo "/isource/svnroot/${svnRepoName}/os/tags/${osLabelName} os " >> ${svnExternalsFile}
-    echo "${sdkExternalLine}" >> ${svnExternalsFile}
+
+    for sdk in $(getConfig LFS_CI_UC_package_linking_component) ; do
+        local sdkValue=$(getConfig ${sdk} -f ${componentsFile})
+        mustHaveValue "${sdkValue}" "value for sdk ${sdk}"
+
+        local sdkExternalLine=$(getConfig LFS_uc_release_create_release_tag_sdk_external_line -t sdk:${sdk} -t sdkValue:${sdkValue})
+        mustHaveValue "${sdkExternalLine}" "sdk external line"
+
+        echo "${sdkExternalLine}" >> ${svnExternalsFile}
+    done
 
     info "updating svn:externals"
     svnCheckout --ignore-externals ${svnUrl}/branches/${branchName} ${workspace}/svn
