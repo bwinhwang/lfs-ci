@@ -19,6 +19,7 @@ oneTimeSetUp() {
             LFS_CI_usercontent_data_path)        echo sonar/${subDir}/${targetType} ;;
             LFS_CI_is_fatal_data_files_missing)  echo ${isFatalDataFilesMissing} ;;
             LFS_CI_sonar_exclusions_src_path)    echo src-fsmddal/src ;;
+            LFS_CI_sonar_additional_exclusions)  echo tools/** stubs/** lx2/DSDT/** **/*.h ;;
             LFS_CI_sonar_exclusions_lib_path)    echo src-fsmddal/build/${targetDir}/src/libFSMDDAL.a ;;
             *)                                   echo $1
         esac
@@ -138,7 +139,6 @@ test_SCT() {
 }
 
 test_no_files_not_fatal() {
-    export JOB_NAME=LFS_CI_-_trunk_-_RegularTest
     export DATA_PATH='this_path_does_not_exist'
     export DATA_FILES="coverage.xml.gz"
     export isFatalDataFilesMissing=
@@ -148,7 +148,6 @@ test_no_files_not_fatal() {
 }
 
 test_no_files_fatal() {
-    export JOB_NAME=LFS_CI_-_trunk_-_RegularTest
     export DATA_PATH='this_path_does_not_exist'
     export DATA_FILES="coverage.xml.gz"
     export isFatalDataFilesMissing=1
