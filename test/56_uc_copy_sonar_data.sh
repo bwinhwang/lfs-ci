@@ -18,6 +18,9 @@ oneTimeSetUp() {
             LFS_CI_coverage_data_files)          echo ${DATA_FILES} ;;
             LFS_CI_usercontent_data_path)        echo sonar/${subDir}/${targetType} ;;
             LFS_CI_is_fatal_data_files_missing)  echo ${isFatalDataFilesMissing} ;;
+            LFS_CI_sonar_exclusions_src_path)    echo src-fsmddal/src ;;
+            LFS_CI_sonar_additional_exclusions)  echo tools/** stubs/** lx2/DSDT/** **/*.h ;;
+            LFS_CI_sonar_exclusions_lib_path)    echo src-fsmddal/build/${targetDir}/src/libFSMDDAL.a ;;
             *)                                   echo $1
         esac
 
@@ -59,6 +62,33 @@ setUp() {
         mkdir -p ${WORKSPACE}/${SONAR_DATA_PATH}
         touch ${WORKSPACE}/${SONAR_DATA_PATH}/coverage.xml.gz
     done
+
+    # prepare workspace with libFSMDDAL.a for generation of exclusion lists
+    mkdir -p ${WORKSPACE}/src-fsmddal/src
+    mkdir -p ${WORKSPACE}/src-fsmddal/build/fct/src
+    mkdir -p ${WORKSPACE}/src-fsmddal/build/fsm4_arm/src
+    
+    local n=0
+    while (($n < 10))
+    do 
+        ((++n))
+        touch ${WORKSPACE}/src-fsmddal/src/srcfile_${n}.c 
+    done
+
+    n=0
+    while (($n < 6))
+    do 
+        ((++n))
+        ar q ${WORKSPACE}/src-fsmddal/build/fct/src/libFSMDDAL.a ${WORKSPACE}/src-fsmddal/src/srcfile_${n}.c > /dev/null 2>&1
+    done
+
+    n=0
+    while (($n < 8))
+    do 
+        ((++n))
+        ar q ${WORKSPACE}/src-fsmddal/build/fsm4_arm/src/libFSMDDAL.a ${WORKSPACE}/src-fsmddal/src/srcfile_${n}.c > /dev/null 2>&1
+    done
+
 
     return
 }
@@ -109,7 +139,6 @@ test_SCT() {
 }
 
 test_no_files_not_fatal() {
-    export JOB_NAME=LFS_CI_-_trunk_-_RegularTest
     export DATA_PATH='this_path_does_not_exist'
     export DATA_FILES="coverage.xml.gz"
     export isFatalDataFilesMissing=
@@ -119,11 +148,52 @@ test_no_files_not_fatal() {
 }
 
 test_no_files_fatal() {
-    export JOB_NAME=LFS_CI_-_trunk_-_RegularTest
     export DATA_PATH='this_path_does_not_exist'
     export DATA_FILES="coverage.xml.gz"
     export isFatalDataFilesMissing=1
     assertFalse "usecase_LFS_COPY_SONAR_SCT_DATA should have failed because of missing files!" "usecase_LFS_COPY_SONAR_SCT_DATA"
+
+    return
+}
+
+test_generate_exclusionlist_fsmr3() {
+    export JOB_NAME=LFS_CI_-_trunk_-_Build_-_FSM-r3-UT_-_fsmr3_fsmddal
+    export targetDir=fct
+    assertTrue "_create_sonar_excludelist failed unexpectedly!" "_create_sonar_excludelist ${WORKSPACE}/FSM-r3-UT_exclusions.txt"
+
+    local expect=$(createTempFile)
+cat <<EOF > ${expect}
+**/src/srcfile_10.c ,\\
+**/src/srcfile_7.c ,\\
+**/src/srcfile_8.c ,\\
+**/src/srcfile_9.c ,\\
+**/src/tools/** ,\\
+**/src/stubs/** ,\\
+**/src/lx2/DSDT/** ,\\
+**/src/**/*.h
+EOF
+
+    assertEquals "$(cat ${expect})" "$(cat ${WORKSPACE}/FSM-r3-UT_exclusions.txt)"
+
+    return
+}
+
+test_generate_exclusionlist_fsmr4() {
+    export JOB_NAME=LFS_CI_-_trunk_-_Build_-_FSM-r4-UT_-_fsmr4_fsmddal
+    export targetDir=fsm4_arm
+    assertTrue "_create_sonar_excludelist failed unexpectedly!" "_create_sonar_excludelist ${WORKSPACE}/FSM-r4-UT_exclusions.txt"
+
+    local expect=$(createTempFile)
+cat <<EOF > ${expect}
+**/src/srcfile_10.c ,\\
+**/src/srcfile_9.c ,\\
+**/src/tools/** ,\\
+**/src/stubs/** ,\\
+**/src/lx2/DSDT/** ,\\
+**/src/**/*.h
+EOF
+
+    assertEquals "$(cat ${expect})" "$(cat ${WORKSPACE}/FSM-r4-UT_exclusions.txt)"
 
     return
 }
