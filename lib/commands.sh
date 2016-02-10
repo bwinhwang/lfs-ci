@@ -114,6 +114,11 @@ execute() {
     return ${exitCode}
 }
 
+## @fn      _exitHandler_dumpLogfile()
+#  @brief   internal helper function 
+#  @details will be called by exit handler in case, if the executed command fails
+#  @param   {logfile}    name of the logfile
+#  @return  <none>
 _exitHandler_dumpLogfile() {
     debug "output of last executed command"
     rawDebug $1 
