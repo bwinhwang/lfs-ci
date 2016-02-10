@@ -307,6 +307,7 @@ usecase_PKGPOOL_UPDATE_DEPS() {
 
         local workspace=$(getWorkspaceName)
         mustHaveWorkspaceName
+        mustHaveCleanWorkspace
 
         svnCheckout ${svnUrl} ${workspace}
 

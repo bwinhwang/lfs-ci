@@ -33,16 +33,17 @@ actionCompare() {
 #        exit 0
 #    fi
 
-#    if [[ "${upstreamBuildNumber}" != "${oldUpstreamBuildNumber}" ]] ; then
-#        info "upstream build number has changed, trigger build"
-#        exit 0
-#    fi
 
     local changelog=$(createTempFile)
     _createChangelog ${oldUpstreamBuildNumber} ${upstreamBuildNumber} ${changelog}
     _checkReleaseForPronto          ${changelog}
     _checkReleaseForRelevantChanges ${changelog}
     _checkReleaseForEmptyChangelog  ${changelog}
+
+    if [[ "${upstreamBuildNumber}" != "${oldUpstreamBuildNumber}" ]] ; then
+        info "upstream build number has changed, trigger build"
+        exit 0
+    fi
 
     info "no relevant changes found between ${oldUpstreamProjectName}#${oldUpstreamBuildNumber} and ${upstreamProjectName}#${upstreamBuildNumber} => No build/release."
     exit 1
@@ -115,10 +116,9 @@ _checkReleaseForRelevantChanges() {
     fi
 
     execute -l ${file} ${LFS_CI_ROOT}/bin/xpath -q -e '/log/logentry/paths/path/node()' ${changelog}
-    local countAllChanges=$(wc -l ${file} | cut -d" " -f 1)
     local countRelevantChanges=$(grep -v -f ${filterFile} ${file} | wc -l)
 
-    if [[ ${countRelevantChanges} == ${countAllChanges} ]] ; then
+    if [[ ${countRelevantChanges} -gt 0 ]] ; then
        info "all changes are relevent for release"
        exit 0
     fi

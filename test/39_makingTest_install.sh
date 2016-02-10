@@ -13,9 +13,12 @@ oneTimeSetUp() {
     execute() {
         mockedCommand "execute $@"
         rc=0
-        if [[ $5 = ${UT_FAIL_CAUSE} || $4 = ${UT_FAIL_CAUSE} ]] ; then
+        shift
+        shift
+        if [[ $2 = ${UT_FAIL_CAUSE} || $3 = ${UT_FAIL_CAUSE} || $7 = ${UT_FAIL_CAUSE} || $6 = ${UT_FAIL_CAUSE} ]] ; then
             UT_EXECUTE_INSTALL=$(( UT_EXECUTE_INSTALL - 1))
             rc=${UT_EXECUTE_INSTALL}
+            [[ ${rc} -lt 0 ]]  && rc=0
             info "rc for $@ is ${rc}"
         fi
         return ${rc}
@@ -56,6 +59,9 @@ oneTimeSetUp() {
             LFS_CI_uc_test_making_test_skip_steps_after_make_install)
                 echo ${UT_CONFIG_SKIP_NEXT_STEPS}
             ;;
+            LFS_CI_uc_test_making_test_timeout_in_seconds_for_make_install)
+                echo timeoutInS
+            ;;
             LFS_CI_uc_test_making_test_installation_tries)
                 echo ${UT_INSTALL_TRIED}
             ;;
@@ -91,6 +97,7 @@ tearDown() {
 test1() {
     # normal install, all ok
     export UT_EXECUTE_INSTALL=1
+    export UT_FAIL_CAUSE=install
     assertTrue "makingTest_install"
 
     local expect=$(createTempFile)
@@ -98,7 +105,7 @@ test1() {
 makingTest_testSuiteDirectory 
 _reserveTarget 
 mustHaveMakingTestRunningTarget 
-execute -i make -C ${WORKSPACE}/workspace/path/to/test/suite install FORCE=yes
+execute -i timeout -s 9 timeoutInS make -C ${WORKSPACE}/workspace/path/to/test/suite install FORCE=yes
 makingTest_powercycle 
 mustHaveMakingTestRunningTarget 
 execute -i make -C ${WORKSPACE}/workspace/path/to/test/suite setup
@@ -120,9 +127,9 @@ test2() {
 makingTest_testSuiteDirectory 
 _reserveTarget 
 mustHaveMakingTestRunningTarget 
-execute -i make -C ${WORKSPACE}/workspace/path/to/test/suite install FORCE=yes
-execute -i make -C ${WORKSPACE}/workspace/path/to/test/suite install FORCE=yes
-execute -i make -C ${WORKSPACE}/workspace/path/to/test/suite install FORCE=yes
+execute -i timeout -s 9 timeoutInS make -C ${WORKSPACE}/workspace/path/to/test/suite install FORCE=yes
+execute -i timeout -s 9 timeoutInS make -C ${WORKSPACE}/workspace/path/to/test/suite install FORCE=yes
+execute -i timeout -s 9 timeoutInS make -C ${WORKSPACE}/workspace/path/to/test/suite install FORCE=yes
 makingTest_powercycle 
 mustHaveMakingTestRunningTarget 
 execute -i make -C ${WORKSPACE}/workspace/path/to/test/suite setup
@@ -144,10 +151,10 @@ test3() {
 makingTest_testSuiteDirectory 
 _reserveTarget 
 mustHaveMakingTestRunningTarget 
-execute -i make -C ${WORKSPACE}/workspace/path/to/test/suite install FORCE=yes
-execute -i make -C ${WORKSPACE}/workspace/path/to/test/suite install FORCE=yes
-execute -i make -C ${WORKSPACE}/workspace/path/to/test/suite install FORCE=yes
-execute make -C ${WORKSPACE}/workspace/path/to/test/suite install FORCE=yes
+execute -i timeout -s 9 timeoutInS make -C ${WORKSPACE}/workspace/path/to/test/suite install FORCE=yes
+execute -i timeout -s 9 timeoutInS make -C ${WORKSPACE}/workspace/path/to/test/suite install FORCE=yes
+execute -i timeout -s 9 timeoutInS make -C ${WORKSPACE}/workspace/path/to/test/suite install FORCE=yes
+execute timeout -s 9 timeoutInS make -C ${WORKSPACE}/workspace/path/to/test/suite install FORCE=yes
 EOF
     assertExecutedCommands ${expect}
 
@@ -165,15 +172,15 @@ test4() {
 makingTest_testSuiteDirectory 
 _reserveTarget 
 mustHaveMakingTestRunningTarget 
-execute -i make -C ${WORKSPACE}/workspace/path/to/test/suite install FORCE=yes
+execute -i timeout -s 9 timeoutInS make -C ${WORKSPACE}/workspace/path/to/test/suite install FORCE=yes
 makingTest_powercycle 
 mustHaveMakingTestRunningTarget 
 execute -i make -C ${WORKSPACE}/workspace/path/to/test/suite setup
-execute -i make -C ${WORKSPACE}/workspace/path/to/test/suite install FORCE=yes
+execute -i timeout -s 9 timeoutInS make -C ${WORKSPACE}/workspace/path/to/test/suite install FORCE=yes
 makingTest_powercycle 
 mustHaveMakingTestRunningTarget 
 execute -i make -C ${WORKSPACE}/workspace/path/to/test/suite setup
-execute -i make -C ${WORKSPACE}/workspace/path/to/test/suite install FORCE=yes
+execute -i timeout -s 9 timeoutInS make -C ${WORKSPACE}/workspace/path/to/test/suite install FORCE=yes
 makingTest_powercycle 
 mustHaveMakingTestRunningTarget 
 execute -i make -C ${WORKSPACE}/workspace/path/to/test/suite setup
@@ -194,19 +201,19 @@ test5() {
 makingTest_testSuiteDirectory 
 _reserveTarget 
 mustHaveMakingTestRunningTarget 
-execute -i make -C ${WORKSPACE}/workspace/path/to/test/suite install FORCE=yes
+execute -i timeout -s 9 timeoutInS make -C ${WORKSPACE}/workspace/path/to/test/suite install FORCE=yes
 makingTest_powercycle 
 mustHaveMakingTestRunningTarget 
 execute -i make -C ${WORKSPACE}/workspace/path/to/test/suite setup
-execute -i make -C ${WORKSPACE}/workspace/path/to/test/suite install FORCE=yes
+execute -i timeout -s 9 timeoutInS make -C ${WORKSPACE}/workspace/path/to/test/suite install FORCE=yes
 makingTest_powercycle 
 mustHaveMakingTestRunningTarget 
 execute -i make -C ${WORKSPACE}/workspace/path/to/test/suite setup
-execute -i make -C ${WORKSPACE}/workspace/path/to/test/suite install FORCE=yes
+execute -i timeout -s 9 timeoutInS make -C ${WORKSPACE}/workspace/path/to/test/suite install FORCE=yes
 makingTest_powercycle 
 mustHaveMakingTestRunningTarget 
 execute -i make -C ${WORKSPACE}/workspace/path/to/test/suite setup
-execute make -C ${WORKSPACE}/workspace/path/to/test/suite install FORCE=yes
+execute timeout -s 9 timeoutInS make -C ${WORKSPACE}/workspace/path/to/test/suite install FORCE=yes
 makingTest_powercycle 
 mustHaveMakingTestRunningTarget 
 execute make -C ${WORKSPACE}/workspace/path/to/test/suite setup
@@ -227,12 +234,12 @@ test6() {
 makingTest_testSuiteDirectory 
 _reserveTarget 
 mustHaveMakingTestRunningTarget 
-execute -i make -C ${WORKSPACE}/workspace/path/to/test/suite install FORCE=yes
+execute -i timeout -s 9 timeoutInS make -C ${WORKSPACE}/workspace/path/to/test/suite install FORCE=yes
 makingTest_powercycle 
 mustHaveMakingTestRunningTarget 
 execute -i make -C ${WORKSPACE}/workspace/path/to/test/suite setup
 execute -i make -C ${WORKSPACE}/workspace/path/to/test/suite check
-execute -i make -C ${WORKSPACE}/workspace/path/to/test/suite install FORCE=yes
+execute -i timeout -s 9 timeoutInS make -C ${WORKSPACE}/workspace/path/to/test/suite install FORCE=yes
 makingTest_powercycle 
 mustHaveMakingTestRunningTarget 
 execute -i make -C ${WORKSPACE}/workspace/path/to/test/suite setup
@@ -254,22 +261,22 @@ test7() {
 makingTest_testSuiteDirectory 
 _reserveTarget 
 mustHaveMakingTestRunningTarget 
-execute -i make -C ${WORKSPACE}/workspace/path/to/test/suite install FORCE=yes
+execute -i timeout -s 9 timeoutInS make -C ${WORKSPACE}/workspace/path/to/test/suite install FORCE=yes
 makingTest_powercycle 
 mustHaveMakingTestRunningTarget 
 execute -i make -C ${WORKSPACE}/workspace/path/to/test/suite setup
 execute -i make -C ${WORKSPACE}/workspace/path/to/test/suite check
-execute -i make -C ${WORKSPACE}/workspace/path/to/test/suite install FORCE=yes
+execute -i timeout -s 9 timeoutInS make -C ${WORKSPACE}/workspace/path/to/test/suite install FORCE=yes
 makingTest_powercycle 
 mustHaveMakingTestRunningTarget 
 execute -i make -C ${WORKSPACE}/workspace/path/to/test/suite setup
 execute -i make -C ${WORKSPACE}/workspace/path/to/test/suite check
-execute -i make -C ${WORKSPACE}/workspace/path/to/test/suite install FORCE=yes
+execute -i timeout -s 9 timeoutInS make -C ${WORKSPACE}/workspace/path/to/test/suite install FORCE=yes
 makingTest_powercycle 
 mustHaveMakingTestRunningTarget 
 execute -i make -C ${WORKSPACE}/workspace/path/to/test/suite setup
 execute -i make -C ${WORKSPACE}/workspace/path/to/test/suite check
-execute make -C ${WORKSPACE}/workspace/path/to/test/suite install FORCE=yes
+execute timeout -s 9 timeoutInS make -C ${WORKSPACE}/workspace/path/to/test/suite install FORCE=yes
 makingTest_powercycle 
 mustHaveMakingTestRunningTarget 
 execute make -C ${WORKSPACE}/workspace/path/to/test/suite setup
@@ -291,7 +298,7 @@ test8() {
 makingTest_testSuiteDirectory 
 _reserveTarget 
 mustHaveMakingTestRunningTarget 
-execute -i make -C ${WORKSPACE}/workspace/path/to/test/suite install FORCE=yes
+execute -i timeout -s 9 timeoutInS make -C ${WORKSPACE}/workspace/path/to/test/suite install FORCE=yes
 makingTest_powercycle 
 mustHaveMakingTestRunningTarget 
 execute -i make -C ${WORKSPACE}/workspace/path/to/test/suite setup
@@ -335,7 +342,7 @@ makingTest_testSuiteDirectory
 _reserveTarget 
 mustHaveMakingTestRunningTarget 
 execute -i make -C ${WORKSPACE}/workspace/path/to/test/suite check
-execute -i make -C ${WORKSPACE}/workspace/path/to/test/suite install FORCE=yes
+execute -i timeout -s 9 timeoutInS make -C ${WORKSPACE}/workspace/path/to/test/suite install FORCE=yes
 makingTest_powercycle 
 mustHaveMakingTestRunningTarget 
 execute -i make -C ${WORKSPACE}/workspace/path/to/test/suite setup
@@ -356,7 +363,7 @@ test11() {
 makingTest_testSuiteDirectory 
 _reserveTarget 
 mustHaveMakingTestRunningTarget 
-execute -i make -C ${WORKSPACE}/workspace/path/to/test/suite install FORCE=yes
+execute -i timeout -s 9 timeoutInS make -C ${WORKSPACE}/workspace/path/to/test/suite install FORCE=yes
 EOF
     assertExecutedCommands ${expect}
 
@@ -375,7 +382,7 @@ test12() {
 makingTest_testSuiteDirectory 
 _reserveTarget 
 mustHaveMakingTestRunningTarget 
-execute make -C ${WORKSPACE}/workspace/path/to/test/suite install FORCE=yes
+execute timeout -s 9 timeoutInS make -C ${WORKSPACE}/workspace/path/to/test/suite install FORCE=yes
 EOF
     assertExecutedCommands ${expect}
 
