@@ -120,6 +120,7 @@ execute rm -rfv ${WORKSPACE}/src
 getConfig PKGPOOL_git_repos_url
 gitClone PKGPOOL_git_repos_url ${WORKSPACE}/src
 getConfig PKGPOOL_PROD_update_dependencies_svn_url
+mustHaveCleanWorkspace
 svnCheckout http://host/path ${WORKSPACE}/workspace
 gitLog --format=medium oldRevision..newRevision
 execute sed -i -e 
@@ -162,6 +163,7 @@ execute rm -rfv ${WORKSPACE}/src
 getConfig PKGPOOL_git_repos_url
 gitClone PKGPOOL_git_repos_url ${WORKSPACE}/src
 getConfig PKGPOOL_PROD_update_dependencies_svn_url
+mustHaveCleanWorkspace
 svnCheckout http://host/path ${WORKSPACE}/workspace
 gitLog --format=medium oldRevision..newRevision
 execute sed -i -e 
@@ -204,6 +206,7 @@ execute rm -rfv ${WORKSPACE}/src
 getConfig PKGPOOL_git_repos_url
 gitClone PKGPOOL_git_repos_url ${WORKSPACE}/src
 getConfig PKGPOOL_PROD_update_dependencies_svn_url
+mustHaveCleanWorkspace
 svnCheckout http://host/path ${WORKSPACE}/workspace
 gitLog --format=medium oldRevision..newRevision
 execute sed -i -e 
@@ -244,6 +247,7 @@ execute rm -rfv ${WORKSPACE}/src
 getConfig PKGPOOL_git_repos_url
 gitClone PKGPOOL_git_repos_url ${WORKSPACE}/src
 getConfig PKGPOOL_PROD_update_dependencies_svn_url
+mustHaveCleanWorkspace
 svnCheckout http://host/path ${WORKSPACE}/workspace
 gitLog --format=medium oldRevision..newRevision
 execute sed -i -e 
@@ -252,6 +256,7 @@ execute sed -i -e
             s|^hint *bld/pkgpool .*|hint bld/pkgpool LABEL|
          ${WORKSPACE}/workspace/file
 svnCommit -F ${WORKSPACE}/workspace/gitLog.txt ${WORKSPACE}/workspace/file ${WORKSPACE}/workspace/src/gitrevision
+mustHaveCleanWorkspace
 svnCheckout http://host/path2 ${WORKSPACE}/workspace
 gitLog --format=medium oldRevision..newRevision
 execute sed -i -e 
@@ -289,6 +294,7 @@ execute rm -rfv ${WORKSPACE}/src
 getConfig PKGPOOL_git_repos_url
 gitClone PKGPOOL_git_repos_url ${WORKSPACE}/src
 getConfig PKGPOOL_PROD_update_dependencies_svn_url
+mustHaveCleanWorkspace
 svnCheckout http://host/path ${WORKSPACE}/workspace
 gitLog --format=medium oldRevision..newRevision
 execute sed -i -e 
