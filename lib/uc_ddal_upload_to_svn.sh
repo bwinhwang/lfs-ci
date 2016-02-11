@@ -17,7 +17,10 @@ usecase_DDAL_UPLOAD_TO_SVN() {
 
     execute rsync -a --exclude=.git ${WORKSPACE}/src/. ${workspace}
 
-    uploadToSubversion ${workspace} ${svnUrl} ${svnPath} 
+    # in git, the changelog.xml is not a xml file. It's a text file.
+    copyFileFromBuildDirectoryToWorkspace ${JOB_NAME} ${BUILD_NUMBER} changelog.xml
+
+    uploadToSubversion ${workspace} ${svnUrl} ${svnPath} "" ${WORKSPACE}/changelog.xml
 
     return 0
 }
