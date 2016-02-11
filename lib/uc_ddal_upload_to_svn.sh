@@ -6,6 +6,7 @@
 #  @param   <none>
 #  @return  <none>
 usecase_DDAL_UPLOAD_TO_SVN() {
+    requiredParameters JOB_NAME BUILD_NUMBER WORKSPACE
 
     # git clone is done by jenkins, into $WORKSPACE/src/
 
