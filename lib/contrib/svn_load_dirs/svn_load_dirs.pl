@@ -501,7 +501,7 @@ my $native_eol = &determine_native_eol;
       $message = wrap('', '  ', $message);
 
       read_from_process($svn, 'mkdir', @svn_use_repos_cmd_opts,
-                        '-m', $message, @urls_to_create);
+                        -f $message ? '--file' : '-m', $message, @urls_to_create);
     }
   else
     {
@@ -1308,7 +1308,7 @@ while (defined (my $load_dir = &get_next_load_dir))
       }
     read_from_process($svn, 'commit',
                       @svn_use_repos_cmd_opts,
-                      '-m', $message);
+                      -f $message ? '--file' : '-m', $message);
 
     if ($opt_sleep) 
       {
@@ -1347,7 +1347,7 @@ while (defined (my $load_dir = &get_next_load_dir))
                             "Tag $repos_load_abs_path as " .
                             "$repos_tag_abs_path.\n");
         read_from_process($svn, 'cp', @svn_use_repos_cmd_opts,
-                          '-m', $message, $from_url, $to_url);
+                          -f $message ? '--file' : '-m', $message, $from_url, $to_url);
 
         # Now check out the tag and run a recursive diff between the
         # original source directory and the tag for a consistency
@@ -1760,7 +1760,7 @@ sub commit_renames
   my $cwd = cwd;
   chdir($wc_import_dir_cwd)
     or die "$0: cannot chdir '$wc_import_dir_cwd': $!\n";
-  read_from_process($svn, 'commit', @svn_use_repos_cmd_opts, '-m', $message);
+  read_from_process($svn, 'commit', @svn_use_repos_cmd_opts, -f $message ? '--file' : '-m', $message);
   read_from_process($svn, 'update', @svn_use_repos_cmd_opts);
   chdir($cwd)
     or die "$0: cannot chdir '$cwd': $!\n";
@@ -2116,7 +2116,7 @@ sub link_manager
       chdir($wc_import_dir_cwd)
         or die "$0: cannot chdir '$wc_import_dir_cwd': $!\n";
 
-      read_from_process($svn, 'commit', @svn_use_repos_cmd_opts, $dest_path, '-m', $message);
+      read_from_process($svn, 'commit', @svn_use_repos_cmd_opts, $dest_path, -f $message ? '--file' : '-m', $message);
       if ($opt_sleep) 
         {
             # add a sleep timer due to our f*cking infrastructure.
