@@ -52,8 +52,7 @@ else
 fi
 
 
-__checkParams() {
-
+__svnChecks() {
     info "Check for ECL in svn ..."
     if [[ -z ${ECL_URL} ]]; then
         ECL_DIR="ECL/${PS_BRANCH}/ECL_BASE/"
@@ -64,12 +63,16 @@ __checkParams() {
         svn ls ${ECL_URL} 2>/dev/null || { error "ECL URL ${ECL_URL} does not exist."; exit 1; }
     fi
 
+    mustHaveValue "${ECL_URL}" "ECL_URL"
+}
+
+__checkParams() {
+
     mustHaveValue "${SRC_BRANCH}" "SRC_BRANCH"
     mustHaveValue "${NEW_BRANCH}" "NEW_BRANCH"
     mustHaveValue "${PS_BRANCH}" "PS_BRANCH"
     mustHaveValue "${REVISION}" "REVISION"
     mustHaveValue "${SOURCE_RELEASE}" "SOURCE_RELEASE"
-    mustHaveValue "${ECL_URL}" "ECL_URL"
     mustHaveValue "${COMMENT}" "COMMENT"
 
     if [[ ${LRC} == true ]]; then
@@ -92,10 +95,12 @@ __preparation(){
     JOBS_DISABLE_LIST=$(getConfig branchingDisableJobs)
     PROMOTIONS_EXCLUDE_LIST=$(getConfig branchingExcludePromotions)
     MAIN_BUILD_JOB_NAME_LRC=$(getConfig jenkinsMainBuildJobName_LRC)
+    JENKINS_MASTER_SERVER_URL=$(getConfig jenkinsMasterServerHttpUrl)
 
     mustHaveValue "${MAIN_BUILD_JOB_NAME_LRC}" "MAIN_BUILD_JOB_NAME_LRC"
     mustHaveValue "${JENKINS_API_TOKEN}" "JENKINS_API_TOKEN"
     mustHaveValue "${JENKINS_API_USER}" "JENKINS_API_USER"
+    mustHaveValue "${JENKINS_MASTER_SERVER_URL}" "JENKINS_MASTER_SERVER_URL"
 
     echo JENKINS_API_TOKEN=${JENKINS_API_TOKEN} > ${WORKSPACE}/${VARS_FILE}
     echo JENKINS_API_USER=${JENKINS_API_USER} >> ${WORKSPACE}/${VARS_FILE}
@@ -103,6 +108,7 @@ __preparation(){
     echo JOBS_DISABLE_LIST=${JOBS_DISABLE_LIST} >> ${WORKSPACE}/${VARS_FILE}
     echo PROMOTIONS_EXCLUDE_LIST=${PROMOTIONS_EXCLUDE_LIST} >> ${WORKSPACE}/${VARS_FILE}
     echo MAIN_BUILD_JOB_NAME_LRC=${MAIN_BUILD_JOB_NAME_LRC} >> ${WORKSPACE}/${VARS_FILE}
+    echo JENKINS_MASTER_SERVER_URL=${JENKINS_MASTER_SERVER_URL} >> ${WORKSPACE}/${VARS_FILE}
 }
 
 ## @fn     __get_sql_insert()
@@ -448,6 +454,7 @@ main() {
     __preparation
 
     if [[ "${DO_SVN}" == "true" ]]; then
+        __svnChecks
         if [[ ! ${LRC} ]]; then
             svnCopyBranch ${SRC_BRANCH} ${NEW_BRANCH}
             svnCopyLocations ${LOCATIONS} ${SRC_BRANCH} ${NEW_BRANCH}
